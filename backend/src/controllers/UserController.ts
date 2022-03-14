@@ -67,11 +67,16 @@ export const update = async (
   req: Request,
   res: Response
 ): Promise<Response> => {
-  if (req.user.profile !== "admin") {
+  const { userId } = req.params;
+
+  const newUserId = userId.toString();
+  const sessionUserId = req.user.id.toString();
+
+  if (req.user.profile !== "admin" && sessionUserId !== newUserId) {  
     throw new AppError("ERR_NO_PERMISSION", 403);
   }
 
-  const { userId } = req.params;
+  //const { userId } = req.params;
   const userData = req.body;
 
   const user = await UpdateUserService({ userData, userId });
