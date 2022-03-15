@@ -372,6 +372,13 @@ const messages = {
           },
         },
       },
+      CheckMsgIsGroup: {
+        name: "Ignorar Mensajes Grupales",
+        options: {
+          enabled: "Habilitado",
+          disabled: "Deshabilitado",
+        },
+      },
       messagesList: {
         header: {
           assignedTo: "Asignado a:",

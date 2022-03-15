@@ -1,4 +1,5 @@
 import Settings from "../../models/Setting";
+import ListSettingsServiceOne from "../SettingServices/ListSettingsServiceOne";
 import { join } from "path";
 import { promisify } from "util";
 import { writeFile } from "fs";
@@ -182,7 +183,7 @@ const verifyQueue = async (
         });
 
         const body = formatBody(
-            `*${contact.name}*\n\n_${greetingMessage}_\n\n${options}`,
+            `*${contact.name}*\n\n${greetingMessage}\n\n${options}`,
             contact
         );
 
@@ -261,7 +262,10 @@ const handleMessage = async (
 
             msgContact = await wbot.getContactById(msg.to);
         } else {
-            msgContact = await msg.getContact();
+            const listSettingsService = await ListSettingsServiceOne({key: "call"});
+            var callSetting = listSettingsService?.value;
+
+     	    msgContact = await msg.getContact();
         }
 
         const chat = await msg.getChat();
@@ -401,6 +405,12 @@ const handleMessage = async (
                     console.log(error);
                   }
                 }*/
+
+if(msg.type==="call_log" && callSetting==="disabled"){
+      const sentMessage = await wbot.sendMessage(`${contact.number}@c.us`, "*Mensagem Automática:*\nAs chamadas de voz e vídeo estão desabilitas para esse WhatsApp, favor enviar uma mensagem de texto. Obrigado");
+      await verifyMessage(sentMessage, ticket, contact);
+    }
+
     } catch (err) {
         Sentry.captureException(err);
         logger.error(`Error handling whatsapp message: Err: ${err}`);

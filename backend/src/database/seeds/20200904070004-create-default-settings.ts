@@ -11,18 +11,18 @@ module.exports = {
           createdAt: new Date(),
           updatedAt: new Date()
         },
-	{
-          key: "call",
-          value: "disabled",
-          createdAt: new Date(),
-          updatedAt: new Date()
-        },
-	{
+        {
           key: "CheckMsgIsGroup",
           value: "enabled",
           createdAt: new Date(),
           updatedAt: new Date()
-	}
+        },
+        {
+          key: "call",
+          value: "disabled",
+          createdAt: new Date(),
+          updatedAt: new Date()
+        }
       ],
       {}
     );

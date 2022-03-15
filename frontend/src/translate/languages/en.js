@@ -367,6 +367,13 @@ const messages = {
           },
         },
       },
+      CheckMsgIsGroup: {
+        name: "Ignore Groups Msgs",
+        options: {
+          enabled: "Enabled",
+          disabled: "Disabled",
+        },
+      },
       messagesList: {
         header: {
           assignedTo: "Assigned to:",
