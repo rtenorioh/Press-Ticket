@@ -56,19 +56,19 @@ cp Press-Ticket/backend/.env.example Press-Ticket/backend/.env
 
 nano Press-Ticket/backend/.env
 
-NODE_ENV=
-BACKEND_URL=https://back.pypress.com.br
-FRONTEND_URL=https://ticket.pypress.com.br
-PORT=8080
-PROXY_PORT=443
-CHROME_BIN=/usr/bin/google-chrome-stable
-DB_DIALECT=mysql
-DB_HOST=localhost
-DB_USER=root
-DB_PASS=
-DB_NAME=pressticket
-JWT_SECRET=saKPKKOxzczxcnscndcssccdsddngfsacxcs@Ers21vhhghee
-JWT_REFRESH_SECRET=kldflhxvcxcxkkkjxhchghjgkdsdsccsd4234asdasdcxcc3
+NODE_ENV=  
+BACKEND_URL=https://back.pypress.com.br  
+FRONTEND_URL=https://ticket.pypress.com.br  
+PORT=8080  
+PROXY_PORT=443  
+CHROME_BIN=/usr/bin/google-chrome-stable  
+DB_DIALECT=mysql  
+DB_HOST=localhost  
+DB_USER=root  
+DB_PASS=  
+DB_NAME=pressticket  
+JWT_SECRET=saKPKKOxzczxcnscndcssccdsddngfsacxcs@Ers21vhhghee  
+JWT_REFRESH_SECRET=kldflhxvcxcxkkkjxhchghjgkdsdsccsd4234asdasdcxcc3  
 
 sudo apt-get install -y libgbm-dev wget unzip fontconfig locales gconf-service libasound2 libatk1.0-0 libc6 libcairo2 libcups2 libdbus-1-3 libexpat1 libfontconfig1 libgcc1 libgconf-2-4 libgdk-pixbuf2.0-0 libglib2.0-0 libgtk-3-0 libnspr4 libpango-1.0-0 libpangocairo-1.0-0 libstdc++6 libx11-6 libx11-xcb1 libxcb1 libxcomposite1 libxcursor1 libxdamage1 libxext6 libxfixes3 libxi6 libxrandr2 libxrender1 libxss1 libxtst6 ca-certificates fonts-liberation libappindicator1 libnss3 lsb-release xdg-utils
 
@@ -116,39 +116,39 @@ sudo rm /etc/nginx/sites-enabled/default
 
 sudo nano /etc/nginx/sites-available/Press-Ticket-frontend
 
-server {
-  server_name ticket.pypress.com.br;
-  location / {
-    proxy_pass http://127.0.0.1:3333;
-    proxy_http_version 1.1;
-    proxy_set_header Upgrade $http_upgrade;
-    proxy_set_header Connection 'upgrade';
-    proxy_set_header Host $host;
-    proxy_set_header X-Real-IP $remote_addr;
-    proxy_set_header X-Forwarded-Proto $scheme;
-    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-    proxy_cache_bypass $http_upgrade;
-  }
-}
+server {  
+  server_name ticket.pypress.com.br;  
+  location / {  
+    proxy_pass http://127.0.0.1:3333;  
+    proxy_http_version 1.1;  
+    proxy_set_header Upgrade $http_upgrade;  
+    proxy_set_header Connection 'upgrade';  
+    proxy_set_header Host $host;  
+    proxy_set_header X-Real-IP $remote_addr;  
+    proxy_set_header X-Forwarded-Proto $scheme;  
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;  
+    proxy_cache_bypass $http_upgrade;  
+  }  
+}  
 
 sudo cp /etc/nginx/sites-available/Press-Ticket-frontend /etc/nginx/sites-available/Press-Ticket-backend
 
 sudo nano /etc/nginx/sites-available/Press-Ticket-backend
 
-server {
-  server_name back.pypress.com.br;
-  location / {
-    proxy_pass http://127.0.0.1:8080;
-    proxy_http_version 1.1;
-    proxy_set_header Upgrade $http_upgrade;
-    proxy_set_header Connection 'upgrade';
-    proxy_set_header Host $host;
-    proxy_set_header X-Real-IP $remote_addr;
-    proxy_set_header X-Forwarded-Proto $scheme;
-    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-    proxy_cache_bypass $http_upgrade;
-  }
-}
+server {  
+  server_name back.pypress.com.br;  
+  location / {  
+    proxy_pass http://127.0.0.1:8080;  
+    proxy_http_version 1.1;  
+    proxy_set_header Upgrade $http_upgrade;  
+    proxy_set_header Connection 'upgrade';  
+    proxy_set_header Host $host;  
+    proxy_set_header X-Real-IP $remote_addr;  
+    proxy_set_header X-Forwarded-Proto $scheme;  
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;  
+    proxy_cache_bypass $http_upgrade;  
+  }  
+}  
   
 cd /etc/nginx/sites-available/
 
