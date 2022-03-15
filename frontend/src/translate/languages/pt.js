@@ -288,15 +288,15 @@ const messages = {
           administration: "Administração",
           users: "Usuários",
           settings: "Configurações",
-          ZDG: "Envio de Mensagens",
-          ZDGMedia: "Envio de Mídia",
-          ZDGGroups: "Grupos",
-          Direct: "Direct IG",
+          api: "Uso da API",
+          sendMsg: "Envio de Mensagens",
+          sendMedia: "Envio de Mídia",
+          Groups: "Grupos",
           SMS: "SMS",
           VoiceCall: "Chamada Telefônica",
           tfaq: "FAQ",
           tsuporte: "Suporte",
-          ZDGHistorico: "Histórico"
+          Historico: "Histórico"
 
         },
         appBar: {

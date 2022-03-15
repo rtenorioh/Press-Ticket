@@ -288,6 +288,7 @@ const messages = {
           administration: "Administración",
           users: "Usuarios",
           settings: "Configuración",
+          api: "uso de la API",
         },
         appBar: {
           user: {
