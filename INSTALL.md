@@ -1,5 +1,7 @@
 # CRIAR SUBDOMINIO E APONTAR PARA O IP DA SUA VPS
 
+Observação: antes de começar a instalação é necessário ter criado antecipadamente os subdomínios e apontados para o IP da VPS.
+
 ================================================
 
 sudo su root
