@@ -68,7 +68,9 @@ DB_DIALECT=mysql
 DB_HOST=localhost  
 DB_USER=root  
 DB_PASS=  
-DB_NAME=pressticket  
+DB_NAME=pressticket 
+USER_LIMIT=3  
+CONNECTIONS_LIMIT=1   
 JWT_SECRET=saKPKKOxzczxcnscndcssccdsddngfsacxcs@Ers21vhhghee  
 JWT_REFRESH_SECRET=kldflhxvcxcxkkkjxhchghjgkdsdsccsd4234asdasdcxcc3  
 

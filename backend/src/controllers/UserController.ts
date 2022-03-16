@@ -27,6 +27,13 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
 };
 
 export const store = async (req: Request, res: Response): Promise<Response> => {
+
+  const { users } = await ListUsersService({});
+
+  if (users.length >= Number(process.env.USER_LIMIT)) {
+    throw new AppError("ERR_USER_CREATION_COUNT", 403);
+  }
+	
   const { email, password, name, profile, queueIds } = req.body;
 
   if (
