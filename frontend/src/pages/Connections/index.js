@@ -344,13 +344,16 @@ const Connections = () => {
 					<TableHead>
 						<TableRow>
 							<TableCell align="center">
+								{i18n.t("connections.table.id")}
+							</TableCell>
+							<TableCell align="center">
 								{i18n.t("connections.table.name")}
 							</TableCell>
 							<TableCell align="center">
-								{i18n.t("connections.table.status")}
+								{i18n.t("connections.table.battery")}
 							</TableCell>
 							<TableCell align="center">
-								{i18n.t("connections.table.battery")}
+								{i18n.t("connections.table.status")}
 							</TableCell>
 							<TableCell align="center">
 								{i18n.t("connections.table.session")}
@@ -374,14 +377,12 @@ const Connections = () => {
 								{whatsApps?.length > 0 &&
 									whatsApps.map(whatsApp => (
 										<TableRow key={whatsApp.id}>
-											<TableCell align="center">{whatsApp.name}</TableCell>
 											<TableCell align="center">
-												{whatsApp.isDefault && (
-													<div className={classes.customTableCell}>
-														<CheckCircle style={{ color: green[500] }} />
-													</div>
-												)}
-											</TableCell>
+												{whatsApp.whatsAppId}
+												</TableCell>
+											<TableCell align="center">
+												{whatsApp.name}
+												</TableCell>
 											<TableCell align="center">
 												{renderStatusBattery(whatsApp)}
 											</TableCell>
