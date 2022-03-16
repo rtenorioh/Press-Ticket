@@ -1,0 +1,92 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Documentação da API do Press Ticket",
+        "description": "Documentação da API para envio de mensagens e mídia.",
+        "contact": {
+            "email": "robson.tenorio@gmail.com"
+        },
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "https://apisac.pypress.com.br",
+            "description": "API Press Ticket"
+        }
+    ],
+    "paths": {
+        "/api/messages/send": {
+            "post": {
+                "summary": "Envio de Mensagens",
+                "description": "Envio de Mensagens",
+                "tags": [
+                    "SEND"
+                ],
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#components/schemas/SEND"
+                            },
+                            "examples": {
+                                "SEND": {
+                                    "value": {
+                                        "number": "5522999999999",
+                                        "body": "Mensagem de Teste da API"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "$ref": "#components/schemas/SEND"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Acesso não autorizado!"
+                    },
+                    "500": {
+                        "description": "Erro interno!"
+                    }
+                }
+            }
+        }
+        
+    },
+    "components": {
+        "schemas": {
+            "SEND": {
+                "type": "object",
+                "properties": {
+                    "number": {
+                        "type": "number"
+                    },
+                    "body": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "scheme": "bearer",
+                "bearerFormat": "JWT"
+            }
+        }
+    }
+}
