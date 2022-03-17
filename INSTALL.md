@@ -68,7 +68,7 @@ DB_DIALECT=mysql
 DB_HOST=localhost  
 DB_USER=root  
 DB_PASS=  
-DB_NAME=pressticket 
+DB_NAME=pressticket  
 USER_LIMIT=3  
 CONNECTIONS_LIMIT=1   
 JWT_SECRET=saKPKKOxzczxcnscndcssccdsddngfsacxcs@Ers21vhhghee  
@@ -104,7 +104,8 @@ npm install
 
 nano .env
 
-REACT_APP_BACKEND_URL = https://back.pypress.com.br
+REACT_APP_BACKEND_URL = https://back.pypress.com.br  
+SERVER_PORT=3333  
 
 npm run build
 
@@ -183,3 +184,8 @@ sudo snap install --classic certbot
 sudo certbot --nginx
 
 ==============================================================
+
+### Usuário padrão para acesso
+
+* User: admin@pypress.com.br  
+* Password: admin

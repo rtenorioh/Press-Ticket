@@ -378,7 +378,7 @@ const Connections = () => {
 									whatsApps.map(whatsApp => (
 										<TableRow key={whatsApp.id}>
 											<TableCell align="center">
-												{whatsApp.whatsAppId}
+												{whatsApp.id}
 												</TableCell>
 											<TableCell align="center">
 												{whatsApp.name}

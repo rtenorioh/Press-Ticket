@@ -14,7 +14,7 @@ var options = {
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs, options));
 
 const server = app.listen(process.env.PORT, () => {
-  logger.info(`Server started on port: ${process.env.PORT}`);
+  logger.info(`Servidor iniciado na porta: ${process.env.PORT}`);
 });
 
 initIO(server);
