@@ -14,6 +14,7 @@ import Contacts from "../pages/Contacts/";
 import QuickAnswers from "../pages/QuickAnswers/";
 import Queues from "../pages/Queues/";
 import Api from "../pages/Api/";
+import ApiDocs from "../pages/ApiDocs/";
 
 import { AuthProvider } from "../context/Auth/AuthContext";
 import { WhatsAppsProvider } from "../context/WhatsApp/WhatsAppsContext";
@@ -51,6 +52,7 @@ const Routes = () => {
               />
               <Route exact path="/Settings" component={Settings} isPrivate />
               <Route exact path="/api" component={Api} isPrivate />
+              <Route exact path="/apidocs" component={ApiDocs} isPrivate />
               <Route exact path="/Queues" component={Queues} isPrivate />
             </LoggedInLayout>
           </WhatsAppsProvider>

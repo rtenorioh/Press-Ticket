@@ -289,6 +289,8 @@ const messages = {
           users: "Usuarios",
           settings: "Configuración",
           api: "uso de la API",
+          apidocs: "Documentación",
+          apititle: "API",
         },
         appBar: {
           user: {
