@@ -8,6 +8,7 @@ import ShowTicketService from "../services/TicketServices/ShowTicketService";
 import UpdateTicketService from "../services/TicketServices/UpdateTicketService";
 import SendWhatsAppMessage from "../services/WbotServices/SendWhatsAppMessage";
 import ShowWhatsAppService from "../services/WhatsappService/ShowWhatsAppService";
+import ShowQueueService from "../services/QueueService/ShowQueueService";
 import formatBody from "../helpers/Mustache";
 
 type IndexQuery = {
@@ -25,6 +26,7 @@ interface TicketData {
   status: string;
   queueId: number;
   userId: number;
+  transf: boolean;
 }
 
 export const index = async (req: Request, res: Response): Promise<Response> => {
@@ -35,7 +37,7 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
     searchParam,
     showAll,
     queueIds: queueIdsStringified,
-    withUnreadMessages
+    withUnreadMessages,
   } = req.query as IndexQuery;
 
   const userId = req.user.id;
@@ -54,7 +56,7 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
     showAll,
     userId,
     queueIds,
-    withUnreadMessages
+    withUnreadMessages,
   });
 
   return res.status(200).json({ tickets, count, hasMore });
@@ -68,7 +70,7 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
   const io = getIO();
   io.to(ticket.status).emit("ticket", {
     action: "update",
-    ticket
+    ticket,
   });
 
   return res.status(200).json(ticket);
@@ -91,8 +93,16 @@ export const update = async (
 
   const { ticket } = await UpdateTicketService({
     ticketData,
-    ticketId
+    ticketId,
   });
+
+  if (ticketData.transf) {
+    const { greetingMessage } = await ShowQueueService(ticketData.queueId);
+    if (greetingMessage) {
+      const msgtxt = "*Mensagem Automática:* \n" + greetingMessage;
+      await SendWhatsAppMessage({ body: msgtxt, ticket });
+    }
+  }
 
   if (ticket.status === "closed") {
     const whatsapp = await ShowWhatsAppService(ticket.whatsappId);
@@ -102,7 +112,7 @@ export const update = async (
     if (farewellMessage) {
       await SendWhatsAppMessage({
         body: formatBody(farewellMessage, ticket.contact),
-        ticket
+        ticket,
       });
     }
   }
@@ -124,7 +134,7 @@ export const remove = async (
     .to("notification")
     .emit("ticket", {
       action: "delete",
-      ticketId: +ticketId
+      ticketId: +ticketId,
     });
 
   return res.status(200).json({ message: "ticket deleted" });
