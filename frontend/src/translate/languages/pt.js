@@ -293,13 +293,14 @@ const messages = {
           api: "Uso da API",
           apidocs: "Documentação",
           apititle: "API",
+          apikey: "API Key",
+          token: "Token",
           Groups: "Grupos",
           SMS: "SMS",
           VoiceCall: "Chamada Telefônica",
           tfaq: "FAQ",
           tsuporte: "Suporte",
           Historico: "Histórico"
-
         },
         appBar: {
           site: {

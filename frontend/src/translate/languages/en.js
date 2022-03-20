@@ -287,6 +287,8 @@ const messages = {
           api: "API usage",
           apidocs: "Documentation",
           apititle: "API",
+          apikey: "API Key",
+          token: "Token"
         },
         appBar: {
           user: {
