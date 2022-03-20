@@ -112,7 +112,7 @@ export const update = async (
     if (farewellMessage) {
       await SendWhatsAppMessage({
         body: formatBody(farewellMessage, ticket.contact),
-        ticket,
+        ticket
       });
     }
   }
