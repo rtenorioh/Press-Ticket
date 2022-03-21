@@ -372,6 +372,21 @@ const messages = {
           },
         },
       },
+      timeCreateNewTicket: {
+        name: "Create new ticket after",
+        note: "Select the time it will take to open a new ticket if the customer contacts you again",
+        options: {
+          "10": "10 seconds",
+          "30": "30 seconds",
+          "60": "1 minute",
+          "300": "5 minutes",
+          "1800" : "30 minutes",
+          "3600" : "1 hour",
+          "7200" : "2 hours",
+          "21600" : "6 hours",
+          "43200" : "12 hours",
+        },
+      },
       CheckMsgIsGroup: {
         name: "Ignore Groups Msgs",
         options: {

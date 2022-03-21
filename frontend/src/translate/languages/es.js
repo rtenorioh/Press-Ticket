@@ -384,6 +384,21 @@ const messages = {
           disabled: "Deshabilitado",
         },
       },
+      timeCreateNewTicket: {
+        name: "Crear nuevo ticket después",
+        note: "Selecciona el tiempo que tardará en abrir un nuevo ticket si el cliente te vuelve a contactar",
+        options: {
+          "10": "10 Segundos",
+          "30": "30 Segundos",
+          "60": "1 minuto",
+          "300": "5 minutos",
+          "1800" : "30 minutos",
+          "3600" : "1 hora",
+          "7200" : "2 horas",
+          "21600" : "6 horas",
+          "43200" : "12 horas",
+        },
+      },
       messagesList: {
         header: {
           assignedTo: "Asignado a:",
