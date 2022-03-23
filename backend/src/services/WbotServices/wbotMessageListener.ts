@@ -183,7 +183,7 @@ const verifyQueue = async (
         });
 
         const body = formatBody(
-            `*${contact.name}*\n\n${greetingMessage}\n\n${options}`,
+            `${greetingMessage}\n\n${options}`,
             contact
         );
 
