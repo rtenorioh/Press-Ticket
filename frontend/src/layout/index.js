@@ -25,6 +25,8 @@ import { AuthContext } from "../context/Auth/AuthContext";
 import BackdropLoading from "../components/BackdropLoading";
 import { i18n } from "../translate/i18n";
 
+import logodash from "../assets/logo-dash.png";
+
 const drawerWidth = 240;
 
 const useStyles = makeStyles((theme) => ({
@@ -177,6 +179,7 @@ const LoggedInLayout = ({ children }) => {
         open={drawerOpen}
       >
         <div className={classes.toolbarIcon}>
+          <img src={logodash} alt="logo" />
           <IconButton onClick={() => setDrawerOpen(!drawerOpen)}>
             <ChevronLeftIcon />
           </IconButton>
