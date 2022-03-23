@@ -259,6 +259,7 @@ const messages = {
         pendingHeader: "Queue",
         assignedHeader: "Working on",
         noTicketsTitle: "Nothing here!",
+        connectionTitle: "Connection that is currently being used.",
         noTicketsMessage: "No tickets found with this status or search term.",
         buttons: {
           accept: "Accept",
