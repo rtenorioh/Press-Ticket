@@ -120,7 +120,7 @@ const LoggedInLayout = ({ children }) => {
   const { user } = useContext(AuthContext);
 
   useEffect(() => {
-    if (document.body.offsetWidth > 600) {
+    if (document.body.offsetWidth < 100) {
       setDrawerOpen(true);
     }
   }, []);
