@@ -124,7 +124,90 @@ const Settings = () => {
 						</option>
 					</Select>
 				</Paper>
-							
+
+				<Typography variant="body2" gutterBottom></Typography>
+				<Tooltip title={i18n.t("settings.settings.call.note")}>
+					<Paper className={classes.paper}>
+
+						<Typography variant="body1">
+							{i18n.t("settings.settings.call.name")}
+						</Typography>
+						<Select
+							margin="dense"
+							variant="outlined"
+							native
+							id="call-setting"
+							name="call"
+							value={
+								settings && settings.length > 0 && getSettingValue("call")
+							}
+							className={classes.settingOption}
+							onChange={handleChangeSetting}
+						>
+							<option value="enabled">
+								{i18n.t("settings.settings.call.options.enabled")}
+							</option>
+							<option value="disabled">
+								{i18n.t("settings.settings.call.options.disabled")}
+							</option>
+						</Select>
+					</Paper>
+				</Tooltip>
+
+				<Typography variant="body2" gutterBottom></Typography>
+				<Paper className={classes.paper}>
+					<Typography variant="body1">
+						{i18n.t("settings.settings.CheckMsgIsGroup.name")}
+					</Typography>
+					<Select
+						margin="dense"
+						variant="outlined"
+						native
+						id="CheckMsgIsGroup-setting"
+						name="CheckMsgIsGroup"
+						value={
+							settings && settings.length > 0 && getSettingValue("CheckMsgIsGroup")
+						}
+						className={classes.settingOption}
+						onChange={handleChangeSetting}
+					>
+						<option value="enabled">
+							{i18n.t("settings.settings.CheckMsgIsGroup.options.enabled")}
+						</option>
+						<option value="disabled">
+							{i18n.t("settings.settings.CheckMsgIsGroup.options.disabled")}
+						</option>
+					</Select>
+				</Paper>
+
+				<Typography variant="body2" gutterBottom></Typography>
+				<Tooltip title={i18n.t("settings.settings.sideMenu.note")}>
+					<Paper className={classes.paper} elevation={3}>
+						<Typography variant="body1">
+							{i18n.t("settings.settings.sideMenu.name")}
+						</Typography>
+						<Select
+							margin="dense"
+							variant="outlined"
+							native
+							id="sideMenu-setting"
+							name="sideMenu"
+							value={
+								settings && settings.length > 0 && getSettingValue("sideMenu")
+							}
+							className={classes.settingOption}
+							onChange={handleChangeSetting}
+						>
+							<option value="enabled">
+								{i18n.t("settings.settings.sideMenu.options.enabled")}
+							</option>
+							<option value="disabled">
+								{i18n.t("settings.settings.sideMenu.options.disabled")}
+							</option>
+						</Select>
+					</Paper>
+				</Tooltip>
+
 				<Typography variant="body2" gutterBottom></Typography>
 				<Tooltip title={i18n.t("settings.settings.timeCreateNewTicket.note")}>
 					<Paper className={classes.paper} elevation={3}>
@@ -173,58 +256,6 @@ const Settings = () => {
 						</Select>
 					</Paper>
 				</Tooltip>
-
-				<Typography variant="body2" gutterBottom></Typography>
-				<Paper className={classes.paper}>
-
-					<Typography variant="body1">
-						{i18n.t("settings.settings.call.name")}
-					</Typography>
-					<Select
-						margin="dense"
-						variant="outlined"
-						native
-						id="call-setting"
-						name="call"
-						value={
-							settings && settings.length > 0 && getSettingValue("call")
-						}
-						className={classes.settingOption}
-						onChange={handleChangeSetting}
-					>
-						<option value="enabled">
-							{i18n.t("settings.settings.call.options.enabled")}
-						</option>
-						<option value="disabled">
-							{i18n.t("settings.settings.call.options.disabled")}
-						</option>
-					</Select>
-				</Paper>
-
-				<Paper className={classes.paper}>
-					<Typography variant="body1">
-						{i18n.t("settings.settings.CheckMsgIsGroup.name")}
-					</Typography>
-					<Select
-						margin="dense"
-						variant="outlined"
-						native
-						id="CheckMsgIsGroup-setting"
-						name="CheckMsgIsGroup"
-						value={
-							settings && settings.length > 0 && getSettingValue("CheckMsgIsGroup")
-						}
-						className={classes.settingOption}
-						onChange={handleChangeSetting}
-					>
-						<option value="enabled">
-							{i18n.t("settings.settings.CheckMsgIsGroup.options.enabled")}
-						</option>
-						<option value="disabled">
-							{i18n.t("settings.settings.CheckMsgIsGroup.options.disabled")}
-						</option>
-					</Select>
-				</Paper>
 
 			</Container>
 		</div>

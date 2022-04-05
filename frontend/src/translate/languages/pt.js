@@ -401,6 +401,14 @@ const messages = {
               disabled: "Desativado",
             },
           },
+          sideMenu: {
+            name: "Menu Lateral Inicial",
+            note: "Se habilitado, o menu lateral irá iniciar fechado",
+            options: {
+              enabled: "Aberto",
+              disabled: "Fechado",
+            },
+          },
           timeCreateNewTicket: {
             name: "Cria novo ticket após",
             note: "Selecione o tempo que será necessário para abrir um novo ticket, caso o cliente entre em contatos novamente",

@@ -25,6 +25,8 @@ import { AuthContext } from "../context/Auth/AuthContext";
 import BackdropLoading from "../components/BackdropLoading";
 import { i18n } from "../translate/i18n";
 
+import api from "../services/api";
+import toastError from "../errors/toastError";
 import logodash from "../assets/logo-dash.png";
 
 const drawerWidth = 240;
@@ -122,8 +124,21 @@ const LoggedInLayout = ({ children }) => {
   const { user } = useContext(AuthContext);
 
   useEffect(() => {
-    if (document.body.offsetWidth < 100) {
-      setDrawerOpen(true);
+    if (document.body.offsetWidth > 600) {
+      const fetchDrawerState = async () => {
+        try {
+          const { data } = await api.get("/settings");
+
+          const settingIndex = data.filter(s => s.key === 'sideMenu');
+
+          setDrawerOpen(settingIndex[0].value === "disabled" ? false : true);
+
+        } catch (err) {
+          setDrawerOpen(true);
+          toastError(err);
+        }
+      };
+      fetchDrawerState();
     }
   }, []);
 

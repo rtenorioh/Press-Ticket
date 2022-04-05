@@ -395,6 +395,14 @@ const messages = {
           disabled: "Disabled",
         },
       },
+      sideMenu: {
+        name: "Home Side Menu",
+        note: "If enabled, the side menu will start closed",
+        options: {
+          enabled: "Open",
+          disabled: "Closed",
+        },
+      },
       messagesList: {
         header: {
           assignedTo: "Assigned to:",
