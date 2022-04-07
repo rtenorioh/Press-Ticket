@@ -25,9 +25,12 @@ import { AuthContext } from "../context/Auth/AuthContext";
 import BackdropLoading from "../components/BackdropLoading";
 import { i18n } from "../translate/i18n";
 
+import openSocket from "socket.io-client";
 import api from "../services/api";
 import toastError from "../errors/toastError";
+
 import logodash from "../assets/logo-dash.png";
+import { versionSystem } from "../../package.json";
 
 const drawerWidth = 240;
 
@@ -124,6 +127,7 @@ const LoggedInLayout = ({ children }) => {
   const { user } = useContext(AuthContext);
 
   useEffect(() => {
+
     if (document.body.offsetWidth > 600) {
       const fetchDrawerState = async () => {
         try {
@@ -235,7 +239,7 @@ const LoggedInLayout = ({ children }) => {
             noWrap
             className={classes.title}
           >
-            {i18n.t("mainDrawer.appBar.site.title")}
+            {i18n.t("mainDrawer.appBar.site.title")} - v { versionSystem }
           </Typography>
           {user.id && <NotificationsPopOver />}
 

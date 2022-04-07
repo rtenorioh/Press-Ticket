@@ -15,22 +15,20 @@ import {
 } from '@material-ui/core';
 
 import { Visibility, VisibilityOff } from '@material-ui/icons';
-
 import { makeStyles } from "@material-ui/core/styles";
-
 import { i18n } from "../../translate/i18n";
 
 import { AuthContext } from "../../context/Auth/AuthContext";
-
-import logo from '../../assets/logo.png'
+import { versionSystem } from "../../../package.json";
+import logo from '../../assets/logo.png';
 
 const Copyright = () => {
   return (
     <Typography variant="body2" color="textSecondary" align="center">
-      {new Date().getFullYear()}
+      © {new Date().getFullYear()}
       {" - "}
       <Link color="inherit" href="https://github.com/rtenorioh/Press-Ticket">
-        Press Ticket - v 1.0.2
+        Press Ticket - v {versionSystem}
       </Link>
       {"."}
     </Typography>
@@ -44,10 +42,6 @@ const useStyles = makeStyles((theme) => ({
     flexDirection: "column",
     alignItems: "center",
   },
-  // avatar: {
-  //   margin: theme.spacing(1),
-  //   backgroundColor: theme.palette.secondary.main,
-  // },
   form: {
     width: "100%", // Fix IE 11 issue.
     marginTop: theme.spacing(1),
@@ -78,10 +72,7 @@ const Login = () => {
     <Container component="main" maxWidth="xs">
       <CssBaseline />
       <div className={classes.paper}>
-        <img src={logo}></img>
-        {/* <Avatar className={classes.avatar}>
-          <LockOutlined />
-        </Avatar> */}
+        <img alt="logo" src={logo}></img>
         <Typography component="h1" variant="h5">
           {i18n.t("login.title")}
         </Typography>
