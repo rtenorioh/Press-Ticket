@@ -104,7 +104,7 @@ npm install
 
 nano .env
 
-REACT_APP_BACKEND_URL = https://back.pypress.com.br  
+REACT_APP_BACKEND_URL=https://back.pypress.com.br  
 SERVER_PORT=3333  
 
 npm run build
