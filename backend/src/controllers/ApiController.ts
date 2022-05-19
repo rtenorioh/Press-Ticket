@@ -13,6 +13,7 @@ import CheckContactNumber from "../services/WbotServices/CheckNumber";
 import GetProfilePicUrl from "../services/WbotServices/GetProfilePicUrl";
 import SendWhatsAppMedia from "../services/WbotServices/SendWhatsAppMedia";
 import SendWhatsAppMessage from "../services/WbotServices/SendWhatsAppMessage";
+import UpdateTicketService from "../services/TicketServices/UpdateTicketService";
 
 type WhatsappData = {
   whatsappId: number;
@@ -50,14 +51,14 @@ const createContact = async (
 
   const contact = await CreateOrUpdateContactService(contactData);
 
-  let whatsapp:Whatsapp | null;
+  let whatsapp: Whatsapp | null;
 
-  if(whatsappId === undefined) {
+  if (whatsappId === undefined) {
     whatsapp = await GetDefaultWhatsApp();
   } else {
     whatsapp = await Whatsapp.findByPk(whatsappId);
 
-    if(whatsapp === null) {
+    if (whatsapp === null) {
       throw new AppError(`whatsapp #${whatsappId} not found`);
     }
   }
@@ -107,5 +108,11 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
     await SendWhatsAppMessage({ body, ticket: contactAndTicket, quotedMsg });
   }
 
-  return res.send();
+  setTimeout(async () => {
+    await UpdateTicketService({
+      ticketId: contactAndTicket.id,
+      ticketData: { status: "closed" }
+    });
+  }, 1000);
+  return res.send({ error: "SUCCESS" });
 };
