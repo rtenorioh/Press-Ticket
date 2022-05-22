@@ -379,10 +379,10 @@ const Connections = () => {
 										<TableRow key={whatsApp.id}>
 											<TableCell align="center">
 												{whatsApp.id}
-												</TableCell>
+											</TableCell>
 											<TableCell align="center">
 												{whatsApp.name}
-												</TableCell>
+											</TableCell>
 											<TableCell align="center">
 												{renderStatusBattery(whatsApp)}
 											</TableCell>
@@ -407,7 +407,7 @@ const Connections = () => {
 													size="small"
 													onClick={() => handleEditWhatsApp(whatsApp)}
 												>
-													<Edit />
+													<Edit color="secondary" />
 												</IconButton>
 
 												<IconButton
@@ -416,7 +416,7 @@ const Connections = () => {
 														handleOpenConfirmationModal("delete", whatsApp.id);
 													}}
 												>
-													<DeleteOutline />
+													<DeleteOutline color="secondary" />
 												</IconButton>
 											</TableCell>
 										</TableRow>

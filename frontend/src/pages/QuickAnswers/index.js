@@ -217,7 +217,7 @@ const QuickAnswers = () => {
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
-                  <SearchIcon style={{ color: "gray" }} />
+                  <SearchIcon color="secondary" />
                 </InputAdornment>
               ),
             }}
@@ -261,7 +261,7 @@ const QuickAnswers = () => {
                       size="small"
                       onClick={() => handleEditQuickAnswers(quickAnswer)}
                     >
-                      <Edit />
+                      <Edit color="secondary" />
                     </IconButton>
 
                     <IconButton
@@ -271,7 +271,7 @@ const QuickAnswers = () => {
                         setDeletingQuickAnswers(quickAnswer);
                       }}
                     >
-                      <DeleteOutline />
+                      <DeleteOutline color="secondary" />
                     </IconButton>
                   </TableCell>
                 </TableRow>

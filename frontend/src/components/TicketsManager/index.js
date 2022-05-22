@@ -3,7 +3,6 @@ import React, { useContext, useEffect, useRef, useState } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import Paper from "@material-ui/core/Paper";
 import SearchIcon from "@material-ui/icons/Search";
-import InputBase from "@material-ui/core/InputBase";
 import Tabs from "@material-ui/core/Tabs";
 import Tab from "@material-ui/core/Tab";
 import Badge from "@material-ui/core/Badge";
@@ -37,7 +36,7 @@ const useStyles = makeStyles((theme) => ({
 
   tabsHeader: {
     flex: "none",
-    backgroundColor: "#eee",
+    backgroundColor: theme.palette.background.default,
   },
 
   settingsIcon: {
@@ -55,13 +54,13 @@ const useStyles = makeStyles((theme) => ({
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-    background: "#fafafa",
+    backgroundColor: theme.palette.background.paper,
     padding: theme.spacing(1),
   },
 
   serachInputWrapper: {
     flex: 1,
-    background: "#fff",
+    backgroundColor: theme.palette.background.default,
     display: "flex",
     borderRadius: 40,
     padding: 4,
@@ -69,17 +68,18 @@ const useStyles = makeStyles((theme) => ({
   },
 
   searchIcon: {
-    color: "grey",
+    color: theme.palette.primary.main,
     marginLeft: 6,
     marginRight: 6,
     alignSelf: "center",
   },
 
   searchInput: {
-    flex: 11,
-    outlineStyle: "none",
+    flex: 1,
     border: "none",
+    borderRadius: 25,
     padding: "10px",
+    outline: "none",
   },
 
   badge: {

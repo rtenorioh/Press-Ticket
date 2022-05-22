@@ -36,7 +36,7 @@ const useStyles = makeStyles(theme => ({
 	header: {
 		display: "flex",
 		borderBottom: "1px solid rgba(0, 0, 0, 0.12)",
-		backgroundColor: "#eee",
+		backgroundColor: theme.palette.background.default,
 		alignItems: "center",
 		padding: theme.spacing(0, 1),
 		minHeight: "73px",
@@ -44,7 +44,7 @@ const useStyles = makeStyles(theme => ({
 	},
 	content: {
 		display: "flex",
-		backgroundColor: "#eee",
+		backgroundColor: theme.palette.background.paper,
 		flexDirection: "column",
 		padding: "8px 0px 8px 8px",
 		height: "100%",

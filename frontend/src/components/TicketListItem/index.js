@@ -20,7 +20,6 @@ import VisibilityIcon from '@material-ui/icons/Visibility';
 import ReplayIcon from '@material-ui/icons/Replay';
 import StopIcon from '@material-ui/icons/Stop';
 import api from "../../services/api";
-//import ButtonWithSpinner from "../ButtonWithSpinner";
 import MarkdownWrapper from "../MarkdownWrapper";
 import { Tooltip } from "@material-ui/core";
 import { AuthContext } from "../../context/Auth/AuthContext";
@@ -112,8 +111,8 @@ const useStyles = makeStyles(theme => ({
 		marginRight: 5,
 		right: 20,
 		bottom: 30,
-		background: "#2576D2",
-		color: "#ffffff",
+		backgroundColor: theme.palette.background.default,
+		color: theme.palette.primary.main,
 		border: "1px solid #CCC",
 		padding: 1,
 		paddingLeft: 5,

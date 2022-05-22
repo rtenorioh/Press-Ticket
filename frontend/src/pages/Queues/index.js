@@ -241,7 +241,7 @@ const Queues = () => {
                       size="small"
                       onClick={() => handleEditQueue(queue)}
                     >
-                      <Edit />
+                      <Edit color="secondary" />
                     </IconButton>
 
                     <IconButton
@@ -251,7 +251,7 @@ const Queues = () => {
                         setConfirmModalOpen(true);
                       }}
                     >
-                      <DeleteOutline />
+                      <DeleteOutline color="secondary" />
                     </IconButton>
                   </TableCell>
                 </TableRow>

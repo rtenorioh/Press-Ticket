@@ -253,7 +253,7 @@ const Contacts = () => {
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
-                  <SearchIcon style={{ color: "gray" }} />
+                  <SearchIcon color="secondary" />
                 </InputAdornment>
               ),
             }}
@@ -318,13 +318,13 @@ const Contacts = () => {
                       size="small"
                       onClick={() => handleSaveTicket(contact.id)}
                     >
-                      <WhatsAppIcon />
+                      <WhatsAppIcon color="secondary" />
                     </IconButton>
                     <IconButton
                       size="small"
                       onClick={() => hadleEditContact(contact.id)}
                     >
-                      <EditIcon />
+                      <EditIcon color="secondary" />
                     </IconButton>
                     <Can
                       role={user.profile}
@@ -337,7 +337,7 @@ const Contacts = () => {
                             setDeletingContact(contact);
                           }}
                         >
-                          <DeleteOutlineIcon />
+                          <DeleteOutlineIcon color="secondary" />
                         </IconButton>
                       )}
                     />

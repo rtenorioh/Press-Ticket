@@ -35,6 +35,7 @@ import { Can } from "../Can";
 
 const useStyles = makeStyles(theme => ({
 	root: {
+		backgroundColor: theme.palette.background.paper,
 		display: "flex",
 		flexWrap: "wrap",
 	},
@@ -183,7 +184,7 @@ const UserModal = ({ open, onClose, userId }) => {
 												aria-label="toggle password visibility"
 												onClick={() => setShowPassword((e) => !e)}
 											>
-												{showPassword ? <VisibilityOff /> : <Visibility />}
+												{showPassword ? <VisibilityOff color="secondary" /> : <Visibility color="secondary" />}
 											</IconButton>
 											</InputAdornment>
 										)

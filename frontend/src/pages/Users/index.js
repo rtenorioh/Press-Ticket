@@ -214,7 +214,7 @@ const Users = () => {
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
-                  <SearchIcon style={{ color: "gray" }} />
+                  <SearchIcon color="secondary" />
                 </InputAdornment>
               ),
             }}
@@ -260,7 +260,7 @@ const Users = () => {
                       size="small"
                       onClick={() => handleEditUser(user)}
                     >
-                      <EditIcon />
+                      <EditIcon color="secondary" />
                     </IconButton>
 
                     <IconButton
@@ -270,7 +270,7 @@ const Users = () => {
                         setDeletingUser(user);
                       }}
                     >
-                      <DeleteOutlineIcon />
+                      <DeleteOutlineIcon color="secondary" />
                     </IconButton>
                   </TableCell>
                 </TableRow>

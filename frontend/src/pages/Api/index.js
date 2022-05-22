@@ -10,6 +10,7 @@ const useStyles = makeStyles(theme => ({
     },
 
     paper: {
+        backgroundColor: theme.palette.background.paper,
         padding: theme.spacing(2),
         display: "flex",
         alignItems: "center",
@@ -25,15 +26,17 @@ const useStyles = makeStyles(theme => ({
     },
 
     color: {
-        color: "#0241AD"
+        color: theme.palette.secondary.main,
     },
 
     text: {
         marginLeft: "42px",
+        color: theme.palette.text.secondary,
     },
 
     textP: {
         marginLeft: "42px",
+        color: theme.palette.text.secondary,
     },
 
 }));
@@ -54,26 +57,26 @@ const Api = () => {
                 <h2 className={classes.color}>Instruções</h2>
                 <p><b>Observações Importantes</b></p>
                 <ul>
-                    <li>Para pegar o token da API, vá em configurações que seu token estará la, sem ele não será possivel enviar mensagens.</li>
-                    <li>O número para envio não deve ter mascara ou caracteres especiais e deve ser composto por:</li>
+                    <li className={classes.text}>Para pegar o token da API, vá em configurações que seu token estará la, sem ele não será possivel enviar mensagens.</li>
+                    <li className={classes.text}>O número para envio não deve ter mascara ou caracteres especiais e deve ser composto por:</li>
                     <br />
                     <ol>
                         <ul>
-                            <li>Código do pais - Ex: 55 (Brasil)</li>
-                            <li>DDD</li>
-                            <li>Número</li>
+                            <li className={classes.text}>Código do pais - Ex: 55 (Brasil)</li>
+                            <li className={classes.text}>DDD</li>
+                            <li className={classes.text}>Número</li>
                         </ul>
                     </ol>
                 </ul>
                 <h2 className={classes.color}>1. Mensagens de Texto</h2>
-                <p>Seguem abaixo lista de informacoes necessárias para envio das mensagens de texto:</p>
+                <p>Seguem abaixo lista de informações necessárias para envio das mensagens de texto:</p>
                 <p className={classes.textP}><b>URL: </b>{process.env.REACT_APP_BACKEND_URL}/api/messages/send</p>
                 <p className={classes.textP}><b>Metódo: </b>POST</p>
                 <p className={classes.textP}><b>Headers: </b>Authorization: Bearer (token) e Content-Type application/json</p>
                 <p className={classes.textP}><b>Body: </b>"number": "5599999999999", "body": "Enviado via api"</p>
 
                 <h2 className={classes.color}>2. Mensagens de Mídia</h2>
-                <p>Seguem abaixo lista de informacoes necessárias para envio de midias:</p>
+                <p>Seguem abaixo lista de informações necessárias para envio de midias:</p>
                 <p className={classes.textP}><b>URL: </b>{process.env.REACT_APP_BACKEND_URL}/api/messages/send</p>
                 <p className={classes.textP}><b>Metódo: </b>POST</p>
                 <p className={classes.textP}><b>Headers: </b>Authorization: Bearer (token) e Content-Type multipart/form-data</p>

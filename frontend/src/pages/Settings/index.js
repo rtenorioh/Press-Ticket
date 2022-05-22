@@ -17,6 +17,7 @@ import toastError from "../../errors/toastError";
 
 const useStyles = makeStyles(theme => ({
 	root: {
+		backgroundColor: theme.palette.background.default,
 		display: "flex",
 		alignItems: "center",
 		padding: theme.spacing(8, 8, 3),
@@ -27,7 +28,7 @@ const useStyles = makeStyles(theme => ({
 		display: "flex",
 		alignItems: "center",
 		marginBottom: 12,
-
+		backgroundColor: theme.palette.background.paper,
 	},
 
 	settingOption: {

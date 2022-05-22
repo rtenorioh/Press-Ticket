@@ -199,7 +199,7 @@ const LoggedInLayout = ({ children }) => {
       >
         <div className={classes.toolbarIcon}>
           <img src={logodash} alt="logo" />
-          <IconButton onClick={() => setDrawerOpen(!drawerOpen)}>
+          <IconButton color="secondary" onClick={() => setDrawerOpen(!drawerOpen)}>
             <ChevronLeftIcon />
           </IconButton>
         </div>
