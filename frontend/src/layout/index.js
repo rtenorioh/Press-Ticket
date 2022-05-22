@@ -30,7 +30,7 @@ import api from "../services/api";
 import toastError from "../errors/toastError";
 
 import logodash from "../assets/logo-dash.png";
-import { versionSystem } from "../../package.json";
+import { system } from "../../package.json";
 
 const drawerWidth = 240;
 
@@ -114,6 +114,11 @@ const useStyles = makeStyles((theme) => ({
     overflow: "auto",
     flexDirection: "column",
   },
+  systemCss: {
+    opacity: "0.5",
+    fontSize: "12px",
+    marginLeft: "8px",
+  }
 }));
 
 const LoggedInLayout = ({ children }) => {
@@ -239,7 +244,10 @@ const LoggedInLayout = ({ children }) => {
             noWrap
             className={classes.title}
           >
-            {i18n.t("mainDrawer.appBar.site.title")} - v { versionSystem }
+            {system.name}
+            <span className={classes.systemCss}>
+              {"(v"}{system.version}{")"}
+            </span>
           </Typography>
           {user.id && <NotificationsPopOver />}
 

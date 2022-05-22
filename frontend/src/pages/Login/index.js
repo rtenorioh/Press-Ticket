@@ -19,7 +19,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import { i18n } from "../../translate/i18n";
 
 import { AuthContext } from "../../context/Auth/AuthContext";
-import { versionSystem } from "../../../package.json";
+import { system } from "../../../package.json";
 import logo from '../../assets/logo.png';
 
 const Copyright = () => {
@@ -28,7 +28,7 @@ const Copyright = () => {
       © {new Date().getFullYear()}
       {" - "}
       <Link color="inherit" href="https://github.com/rtenorioh/Press-Ticket">
-        Press Ticket - v {versionSystem}
+        Press Ticket - v{system.version}
       </Link>
       {"."}
     </Typography>
@@ -109,7 +109,7 @@ const Login = () => {
                     aria-label="toggle password visibility"
                     onClick={() => setShowPassword((e) => !e)}
                   >
-                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                    {showPassword ? <VisibilityOff color="secondary" /> : <Visibility color="secondary" />}
                   </IconButton>
                 </InputAdornment>
               )

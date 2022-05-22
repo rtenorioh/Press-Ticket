@@ -1,7 +1,10 @@
 {
   "name": "frontend",
   "version": "0.1.0",
-  "versionSystem": "1.0.3",
+  "system": {
+    "version": "1.0.4",
+    "name": "Press Ticket"
+  },
   "private": true,
   "dependencies": {
     "@material-ui/core": "^4.11.0",
