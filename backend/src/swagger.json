@@ -1,24 +1,21 @@
 {
     "openapi": "3.0.0",
     "info": {
-        "title": "Documentação da API do Press Ticket",
-        "description": "Documentação da API para envio de mensagens e mídia.",
-        "contact": {
-            "email": "robson.tenorio@gmail.com"
-        },
+        "title": "API DOC",
+        "description": "תיעוד API לשליחת הודעות ומדיה.",
         "version": "1.0.0"
     },
     "servers": [
         {
-            "url": "https://apisac.pypress.com.br",
-            "description": "API Press Ticket"
+            "url": "https://devwt.adpronet.com",
+            "description": "API"
         }
     ],
     "paths": {
         "/api/messages/send": {
             "post": {
-                "summary": "Envio de Mensagens",
-                "description": "Envio de Mensagens",
+                "summary": "Sending Messages",
+                "description": "Messaging",
                 "tags": [
                     "SEND"
                 ],
@@ -36,8 +33,8 @@
                             "examples": {
                                 "SEND": {
                                     "value": {
-                                        "number": "5522999999999",
-                                        "body": "Mensagem de Teste da API"
+                                        "number": "972540000000",
+                                        "body": "API Test Message"
                                     }
                                 }
                             }
@@ -57,10 +54,10 @@
                         }
                     },
                     "401": {
-                        "description": "Acesso não autorizado!"
+                        "description": "Unauthorized access!"
                     },
                     "500": {
-                        "description": "Erro interno!"
+                        "description": "Internal error!"
                     }
                 }
             }
