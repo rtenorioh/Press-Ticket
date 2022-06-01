@@ -29,7 +29,6 @@ import openSocket from "socket.io-client";
 import api from "../services/api";
 import toastError from "../errors/toastError";
 
-import logodash from "../assets/logo-dash.png";
 import { system } from "../../package.json";
 
 const drawerWidth = 240;
@@ -61,7 +60,7 @@ const useStyles = makeStyles((theme) => ({
     }),
   },
   appBarShift: {
-    marginLeft: drawerWidth,
+    marginRight: drawerWidth,
     width: `calc(100% - ${drawerWidth}px)`,
     transition: theme.transitions.create(["width", "margin"], {
       easing: theme.transitions.easing.sharp,
@@ -203,7 +202,7 @@ const LoggedInLayout = ({ children }) => {
         open={drawerOpen}
       >
         <div className={classes.toolbarIcon}>
-          <img src={logodash} alt="logo" />
+
           <IconButton color="secondary" onClick={() => setDrawerOpen(!drawerOpen)}>
             <ChevronLeftIcon />
           </IconButton>
@@ -244,10 +243,11 @@ const LoggedInLayout = ({ children }) => {
             noWrap
             className={classes.title}
           >
-            {system.name}
-            <span className={classes.systemCss}>
+                          <span className={classes.systemCss}>
               {"(v"}{system.version}{")"}
             </span>
+            {system.name}
+
           </Typography>
           {user.id && <NotificationsPopOver />}
 
