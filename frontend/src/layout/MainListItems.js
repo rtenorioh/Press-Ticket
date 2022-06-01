@@ -27,7 +27,7 @@ import { makeStyles } from "@material-ui/core/styles";
 
 const useStyles = makeStyles(theme => ({
 	icon: {
-		color: theme.palette.warning.dark
+		color: theme.palette.primary.dark
 	},
 }));
 
