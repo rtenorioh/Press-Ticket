@@ -46,7 +46,7 @@ const App = () => {
         },
       },
       palette: {
-        primary: { main: "#6B62FE" },
+        primary: { main: "#2576d2" },
       },
       backgroundImage: `url(${lightBackground})`,
     },
