@@ -36,8 +36,8 @@ const Copyright = () => {
 		<Typography variant="body2" color="textSecondary" align="center">
 			© {new Date().getFullYear()}
 			{" - "}
-			<Link color="inherit" href="https://github.com/rtenorioh/Press-Ticket">
-			Press Ticket - v{system.version}
+			<Link color="inherit" href="">
+			AdPro WMA - v{system.version}
 			</Link>
 			{"."}
 		</Typography>
