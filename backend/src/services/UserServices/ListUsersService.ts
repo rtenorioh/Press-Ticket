@@ -17,17 +17,11 @@ const ListUsersService = async ({
   searchParam = "",
   pageNumber = "1"
 }: Request): Promise<Response> => {
-  const whereCondition = {
+ const whereCondition = {
     [Op.or]: [
-      {
-        "$User.name$": Sequelize.where(
-          Sequelize.fn("LOWER", Sequelize.col("User.name")),
-          "LIKE",
-          `%${searchParam.toLowerCase()}%`
-        )
-      },
-      { email: { [Op.like]: `%${searchParam.toLowerCase()}%` } }
-    ]
+      {"$User.name$": Sequelize.where(Sequelize.fn("LOWER", Sequelize.col("User.name")),"LIKE",`%${searchParam.toLowerCase()}%`)},
+      { email: { [Op.like]: `%${searchParam.toLowerCase()}%` } },
+    ],id: {[Op.not]:1} 
   };
   const limit = 20;
   const offset = limit * (+pageNumber - 1);
