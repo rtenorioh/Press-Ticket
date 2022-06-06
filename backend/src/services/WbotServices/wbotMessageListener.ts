@@ -407,7 +407,7 @@ const handleMessage = async (
                 }*/
 
 if(msg.type==="call_log" && callSetting==="disabled"){
-      const sentMessage = await wbot.sendMessage(`${contact.number}@c.us`, "*Mensagem Automática:*\nAs chamadas de voz e vídeo estão desabilitas para esse WhatsApp, favor enviar uma mensagem de texto. Obrigado");
+      const sentMessage = await wbot.sendMessage(`${contact.number}@c.us`, "*הודעות אוטומטיות:*\nשיחות קוליות מושבתות עבור WhatsApp זה, אנא שלח הודעת טקסט. תודה");
       await verifyMessage(sentMessage, ticket, contact);
     }
 
