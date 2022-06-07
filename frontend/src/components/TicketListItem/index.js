@@ -18,8 +18,8 @@ import { i18n } from "../../translate/i18n";
 import DoneIcon from '@material-ui/icons/Done';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import ReplayIcon from '@material-ui/icons/Replay';
-import StopIcon from '@material-ui/icons/Stop';
 import api from "../../services/api";
+import ClearOutlinedIcon from '@material-ui/icons/ClearOutlined';
 import MarkdownWrapper from "../MarkdownWrapper";
 import { Tooltip } from "@material-ui/core";
 import { AuthContext } from "../../context/Auth/AuthContext";
@@ -175,7 +175,6 @@ const TicketListItem = ({ ticket }) => {
 		try {
 			await api.put(`/tickets/${id}`, {
 				status: "pending",
-				userId: user?.id,
 			});
 		} catch (err) {
 			setLoading(false);
@@ -185,7 +184,7 @@ const TicketListItem = ({ ticket }) => {
 			setLoading(false);
 		}
 		history.push(`/tickets/${id}`);
-	};	
+	};
 
 	const handleClosedTicket = async id => {
 		setLoading(true);
@@ -201,10 +200,10 @@ const TicketListItem = ({ ticket }) => {
 		if (isMounted.current) {
 			setLoading(false);
 		}
-		history.push(`/tickets/${id}`);
-	};		
+		// history.push(`/tickets/${id}`);
+	};
 
-	
+
 	const handleSelectTicket = id => {
 		history.push(`/tickets/${id}`);
 	};
@@ -294,51 +293,69 @@ const TicketListItem = ({ ticket }) => {
 					}
 				/>
 				{ticket.status === "pending" && (
-					<IconButton
-					className={classes.bottomButton}
-					color="primary"
-					onClick={e => handleAcepptTicket(ticket.id)} >
-					<DoneIcon />
-				  	</IconButton>	
+					<Tooltip title={i18n.t("Aceitar")}>
+						<IconButton
+							className={classes.bottomButton}
+							color="primary"
+							onClick={e => handleAcepptTicket(ticket.id)} >
+							<DoneIcon />
+						</IconButton>
+					</Tooltip>
 				)}
-				 {ticket.status === "pending" && (
-					<IconButton
-					className={classes.bottomButton}
-					color="primary"
-					onClick={e => handleViewTicket(ticket.id)} >
-					<VisibilityIcon />
-				  	</IconButton>								
-				)}	
+				{ticket.status === "pending" && (
+					<Tooltip title={i18n.t("Espiar")}>
+						<IconButton
+							className={classes.bottomButton}
+							color="primary"
+							onClick={e => handleViewTicket(ticket.id)} >
+							<VisibilityIcon />
+						</IconButton>
+					</Tooltip>
+				)}
+				{ticket.status === "pending" && (
+					<Tooltip title={i18n.t("Encerrar")}>
+						<IconButton
+							className={classes.bottomButton}
+							color="primary"
+							onClick={e => handleClosedTicket(ticket.id)} >
+							<ClearOutlinedIcon />
+						</IconButton>
+					</Tooltip>
+				)}
 				{ticket.status === "open" && (
-					<IconButton
-					className={classes.bottomButton}
-					color="primary" 
-					onClick={e => handleViewTicket(ticket.id)} >
-					<ReplayIcon />
-				  	</IconButton>	
+					<Tooltip title={i18n.t("Reabrir")}>
+						<IconButton
+							className={classes.bottomButton}
+							color="primary"
+							onClick={e => handleViewTicket(ticket.id)} >
+							<ReplayIcon />
+						</IconButton>
+					</Tooltip>
 				)}
-				 {ticket.status === "open" && (
-					<IconButton
-					className={classes.bottomButton}
-					color="primary"
-					onClick={e => handleClosedTicket(ticket.id)} >
-					<StopIcon />
-				  	</IconButton>								
-				)}		
+				{ticket.status === "open" && (
+					<Tooltip title={i18n.t("Encerrar")}>
+						<IconButton
+							className={classes.bottomButton}
+							color="primary"
+							onClick={e => handleClosedTicket(ticket.id)} >
+							<ClearOutlinedIcon />
+						</IconButton>
+					</Tooltip>
+				)}
 				{ticket.status === "closed" && (
 					<IconButton
-					className={classes.bottomButton}
-					color="primary" 
-					onClick={e => handleReopenTicket(ticket.id)} >
-					<ReplayIcon />
-				  	</IconButton>	
-				)}		
+						className={classes.bottomButton}
+						color="primary"
+						onClick={e => handleReopenTicket(ticket.id)} >
+						<ReplayIcon />
+					</IconButton>
+				)}
 				{ticket.status === "closed" && (
 					<IconButton
-					className={classes.bottomButton}
-					color="primary" >
-				  	</IconButton>	
-				)}				
+						className={classes.bottomButton}
+						color="primary" >
+					</IconButton>
+				)}
 			</ListItem>
 			<Divider variant="inset" component="li" />
 		</React.Fragment>

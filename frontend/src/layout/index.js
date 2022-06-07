@@ -25,7 +25,6 @@ import { AuthContext } from "../context/Auth/AuthContext";
 import BackdropLoading from "../components/BackdropLoading";
 import { i18n } from "../translate/i18n";
 
-import openSocket from "socket.io-client";
 import api from "../services/api";
 import toastError from "../errors/toastError";
 

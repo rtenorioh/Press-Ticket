@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 
 import { makeStyles } from "@material-ui/core/styles";
 import Paper from "@material-ui/core/Paper";
@@ -106,7 +106,6 @@ const TicketsManager = () => {
   const [tabOpen, setTabOpen] = useState("open");
   const [newTicketModalOpen, setNewTicketModalOpen] = useState(false);
   const [showAllTickets, setShowAllTickets] = useState(false);
-  const searchInputRef = useRef();
   const { user } = useContext(AuthContext);
 
   const [openCount, setOpenCount] = useState(0);
@@ -136,10 +135,6 @@ const TicketsManager = () => {
 
   const handleChangeTab = (e, newValue) => {
     setTab(newValue);
-  };
-
-  const handleChangeTabOpen = (e, newValue) => {
-    setTabOpen(newValue);
   };
 
   const applyPanelStyle = (status) => {
