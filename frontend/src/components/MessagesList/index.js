@@ -39,6 +39,11 @@ const useStyles = makeStyles((theme) => ({
     flexGrow: 1,
   },
 
+  ticketNumber: {
+    color: theme.palette.secondary.main,
+    padding: 8,
+  },
+
   messagesList: {
     backgroundImage: theme.backgroundImage,
     display: "flex",
@@ -576,6 +581,22 @@ const MessagesList = ({ ticketId, isGroup }) => {
     }
   };
 
+  const renderNumberTicket = (message, index) => {
+    if (index < messagesList.length && index > 0) {
+      let messageTicket = message.ticketId;
+      let previousMessageTicket = messagesList[index - 1].ticketId;
+
+      if (messageTicket !== previousMessageTicket) {
+        return (
+          <div key={`ticket-${message.id}`} className={classes.ticketNumber}>
+            #ticket: {messageTicket}
+            <hr />
+          </div>
+        );
+      }
+    }
+  };
+
   const renderMessageDivider = (message, index) => {
     if (index < messagesList.length && index > 0) {
       let messageUser = messagesList[index].fromMe;
@@ -621,6 +642,7 @@ const MessagesList = ({ ticketId, isGroup }) => {
             <React.Fragment key={message.id}>
               {renderDailyTimestamps(message, index)}
               {renderMessageDivider(message, index)}
+              {renderNumberTicket(message, index)}
               <div className={classes.messageCenter}>
                 <IconButton
                   variant="contained"
@@ -651,6 +673,7 @@ const MessagesList = ({ ticketId, isGroup }) => {
             <React.Fragment key={message.id}>
               {renderDailyTimestamps(message, index)}
               {renderMessageDivider(message, index)}
+              {renderNumberTicket(message, index)}
               <div className={classes.messageLeft}>
                 <IconButton
                   variant="contained"
@@ -685,6 +708,7 @@ const MessagesList = ({ ticketId, isGroup }) => {
             <React.Fragment key={message.id}>
               {renderDailyTimestamps(message, index)}
               {renderMessageDivider(message, index)}
+              {renderNumberTicket(message, index)}
               <div className={classes.messageRight}>
                 <IconButton
                   variant="contained"
