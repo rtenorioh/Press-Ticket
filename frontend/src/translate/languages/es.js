@@ -393,6 +393,14 @@ const messages = {
           disabled: "Cerrado",
         },
       },
+      closeTicketApi: {
+        name: "Cerrar ticket enviado API",
+        note: "Cierra automáticamente el ticket cuando se envía a través de API",
+        options: {
+          enabled: "Habilitado",
+          disabled: "Habilitado",
+        },
+      },
       timeCreateNewTicket: {
         name: "Crear nuevo ticket después",
         note: "Selecciona el tiempo que tardará en abrir un nuevo ticket si el cliente te vuelve a contactar",

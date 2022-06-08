@@ -409,6 +409,14 @@ const messages = {
               disabled: "Fechado",
             },
           },
+          closeTicketApi: {
+            name: "Encerrar Ticket enviado API",
+            note: "Fecha automaticamente o ticket quando enviado por API",
+            options: {
+              enabled: "Ativado",
+              disabled: "Desativado",
+            },
+          },
           timeCreateNewTicket: {
             name: "Cria novo ticket após",
             note: "Selecione o tempo que será necessário para abrir um novo ticket, caso o cliente entre em contatos novamente",

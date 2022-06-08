@@ -209,6 +209,35 @@ const Settings = () => {
 				</Tooltip>
 
 				<Typography variant="body2" gutterBottom></Typography>
+				<Tooltip title={i18n.t("settings.settings.closeTicketApi.note")}>
+					<Paper className={classes.paper}>
+
+						<Typography variant="body1">
+							{i18n.t("settings.settings.closeTicketApi.name")}
+						</Typography>
+						<Select
+							margin="dense"
+							variant="outlined"
+							native
+							id="closeTicketApi-setting"
+							name="closeTicketApi"
+							value={
+								settings && settings.length > 0 && getSettingValue("closeTicketApi")
+							}
+							className={classes.settingOption}
+							onChange={handleChangeSetting}
+						>
+							<option value="enabled">
+								{i18n.t("settings.settings.closeTicketApi.options.enabled")}
+							</option>
+							<option value="disabled">
+								{i18n.t("settings.settings.closeTicketApi.options.disabled")}
+							</option>
+						</Select>
+					</Paper>
+				</Tooltip>
+
+				<Typography variant="body2" gutterBottom></Typography>
 				<Tooltip title={i18n.t("settings.settings.timeCreateNewTicket.note")}>
 					<Paper className={classes.paper} elevation={3}>
 						<Typography variant="body1">

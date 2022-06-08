@@ -403,6 +403,14 @@ const messages = {
           disabled: "Closed",
         },
       },
+      closeTicketApi: {
+        name: "Close Ticket sent API",
+        note: "Automatically closes ticket when submitted via API",
+        options: {
+          enabled: "Enabled",
+          disabled: "Disabled",
+        },
+      },
       messagesList: {
         header: {
           assignedTo: "Assigned to:",
