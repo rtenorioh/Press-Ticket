@@ -365,7 +365,46 @@ const messages = {
               disabled: "לא מאופשר",
             },
           },
+
+            timeCreateNewTicket: {
+        name: "פרק זמן ליצירת כרטיס חדש",
+        note: "בחר את הזמן שיידרש לפתיחת כרטיס חדש אם הלקוח ייצור איתך קשר שוב",
+        options: {
+          "10": "10 שניות",
+          "30": "30 שניות",
+          "60": "1 דקה",
+          "300": "5 דקות",
+          "1800" : "30 דקות",
+          "3600" : "1 שעה",
+          "7200" : "2 שעות",
+          "21600" : "6 שעות",
+          "43200" : "12 שעות",
         },
+      },
+      CheckMsgIsGroup: {
+        name: "התעלם מהודעות קבוצתיות",
+        options: {
+          enabled: "מאופשר",
+          disabled: "לא מאופשר",
+        },
+      },
+	   call: {
+            name: "Aceitar chamadas",
+            note: "Se desabilitado, o cliente receberá uma mensagem informando que não aceita chamadas de voz/vídeo",
+            options: {
+              enabled: "Ativado",
+              disabled: "Desativado",
+            },
+          },
+      sideMenu: {
+        name: "תפריט צד",
+        note: "אם מופעל, תפריט הצד יתחיל לסגור",
+        options: {
+          enabled: "פתוח",
+          disabled: "סגור",
+        },
+      },
+	          },
       },
       messagesList: {
         header: {
