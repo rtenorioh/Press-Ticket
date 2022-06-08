@@ -14,10 +14,10 @@ export default (body: string, contact: Contact): string => {
   const min: string = ("0" + Hr.getMinutes()).slice(-2);
   const ss: string = ("0" + Hr.getSeconds()).slice(-2);
 
-  if (hh >= 6){ms = "Bom dia";}
-  if (hh > 11){ms = "Boa tarde";}
-  if (hh > 17){ms = "Boa noite";}
-  if (hh > 23 || hh < 6){ms = "Boa madrugada";}
+  if (hh >= 6){ms = "בוקר טוב";}
+  if (hh > 11){ms = "צהרים טובים";}
+  if (hh > 17){ms = "ערב טוב";}
+  if (hh > 23 || hh < 6){ms = "בוקר טוב";}
 
   let protocol = yy+mm+dd+String(hh)+min+ss;
   
