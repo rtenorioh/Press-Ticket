@@ -231,10 +231,15 @@ const handleMessage = async (
 
     //IGNORAR MENSAGENS DE GRUPO
     const Settingdb = await Settings.findOne({
-        where: { key: "CheckMsgIsGroup" },
+        where: { key: 'CheckMsgIsGroup' }
     });
-    if (Settingdb?.value == "enabled") {
-        if (msg.from === "status@broadcast" || msg.author != null) {
+    if (Settingdb?.value == 'enabled') {
+        const chat = await msg.getChat();
+        if (
+            msg.from === "status@broadcast" ||
+            msg.author != null ||
+            chat.isGroup
+        ) {
             return;
         }
     }
