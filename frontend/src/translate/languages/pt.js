@@ -210,6 +210,8 @@ const messages = {
           email: "E-mail",
           password: "Senha",
           profile: "Perfil",
+          admin: "Administrador",
+          user: "Usuário",
         },
         buttons: {
           okAdd: "Adicionar",
