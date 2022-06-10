@@ -421,7 +421,7 @@ const messages = {
           },
           darkMode: {
               name: "Ativa Modo Escuro",
-              note: "Se habilitado, modo escuro no sistema",
+              note: "Alternar entre o modo claro e o modo escuro",
               options: {
                 enabled: "Ativado",
                 disabled: "Desativado",

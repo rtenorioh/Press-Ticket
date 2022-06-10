@@ -398,9 +398,17 @@ const messages = {
         note: "Cierra automáticamente el ticket cuando se envía a través de API",
         options: {
           enabled: "Habilitado",
-          disabled: "Habilitado",
+          disabled: "Deshabilitado",
         },
       },
+      darkMode: {
+        name: "Habilitar modo oscuro",
+        note: "Cambiar entre el modo claro y el modo oscuro",
+        options: {
+          enabled: "Habilitado",
+          disabled: "Deshabilitado",
+        },
+    },
       timeCreateNewTicket: {
         name: "Crear nuevo ticket después",
         note: "Selecciona el tiempo que tardará en abrir un nuevo ticket si el cliente te vuelve a contactar",

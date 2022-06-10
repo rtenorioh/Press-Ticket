@@ -411,6 +411,14 @@ const messages = {
           disabled: "Disabled",
         },
       },
+      darkMode: {
+        name: "Enable Dark Mode",
+        note: "Switch between light mode and dark mode",
+        options: {
+          enabled: "Enabled",
+          disabled: "Disabled",
+        },
+    },
       messagesList: {
         header: {
           assignedTo: "Assigned to:",
