@@ -254,8 +254,8 @@ const Settings = () => {
 				</Paper>
 
 				<Typography variant="body2" gutterBottom></Typography>
-				<Paper className={classes.paper} elevation={3}>
 					<Tooltip title={i18n.t("settings.settings.timeCreateNewTicket.note")}>
+					     <Paper className={classes.paper} elevation={3}>
 						<Typography variant="body1">
 							{i18n.t("settings.settings.timeCreateNewTicket.name")}
 						</Typography>
@@ -299,9 +299,8 @@ const Settings = () => {
 								{i18n.t("settings.settings.timeCreateNewTicket.options.43200")}
 							</option>
 						</Select>
+				             </Paper>
 					</Tooltip>
-				</Paper>
-
 			</Container>
 		</div>
 	);
