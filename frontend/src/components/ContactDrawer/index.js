@@ -125,6 +125,11 @@ const ContactDrawer = ({ open, handleDrawerClose, contact, loading }) => {
 						<Typography>
 							<Link href={`tel:${contact.number}`}>{contact.number}</Link>
 						</Typography>
+						{contact.email && (
+							<Typography>
+								<Link href={`mailto:${contact.email}`}>{contact.email}</Link>
+							</Typography>	
+						)}
 						<Button
 							variant="outlined"
 							color="primary"
