@@ -271,7 +271,7 @@ const handleMessage = async (
             msgContact = await wbot.getContactById(msg.to);
         } else {
             const listSettingsService = await ListSettingsServiceOne({ key: "call" });
-            let callSetting = listSettingsService?.value;
+            var callSetting = listSettingsService?.value;
 
             msgContact = await msg.getContact();
         }
