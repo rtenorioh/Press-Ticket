@@ -419,6 +419,14 @@ const messages = {
               disabled: "Desativado",
             },
           },
+          darkMode: {
+              name: "Ativa Modo Escuro",
+              note: "Se habilitado, modo escuro no sistema",
+              options: {
+                enabled: "Ativado",
+                disabled: "Desativado",
+              },
+          },
           timeCreateNewTicket: {
             name: "Cria novo ticket após",
             note: "Selecione o tempo que será necessário para abrir um novo ticket, caso o cliente entre em contatos novamente",
