@@ -28,6 +28,9 @@ const messages = {
           register: "Não tem um conta? Cadastre-se!",
         },
       },
+      copyright: {
+        title: "Press Ticket",
+      },
       auth: {
         toasts: {
           success: "Login efetuado com sucesso!",
