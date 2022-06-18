@@ -84,5 +84,5 @@ OBS: Caso ao rodar o frontend der erro de ssl, usar o comando abaixo no terminal
 
 ### Usuário padrão para acesso
 
-* User: admin@pypress.com.br  
+* User: admin@pressticket.com.br  
 * Password: admin

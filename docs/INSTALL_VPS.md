@@ -80,7 +80,7 @@
 
 20. Instalação de libs
 
-```sudo apt install apt-transport-https ca-certificates curl software-properties-common```
+```sudo apt install apt-transport-https ca-certificates curl software-properties-common git```
 
 21. Atualizando
 
@@ -111,8 +111,8 @@
 28. Editar os dados abaixo e colar os valores gerados no item 27.
 
 NODE_ENV=  
-BACKEND_URL=https://back.pypress.com.br  
-FRONTEND_URL=https://ticket.pypress.com.br  
+BACKEND_URL=https://back.pressticket.com.br  
+FRONTEND_URL=https://ticket.pressticket.com.br  
 PORT=8080  
 PROXY_PORT=443  
 CHROME_BIN=/usr/bin/google-chrome-stable  
@@ -186,7 +186,7 @@ JWT_REFRESH_SECRET=
 
 ```nano .env```
 
-45. ```REACT_APP_BACKEND_URL=https://back.pypress.com.br```
+45. ```REACT_APP_BACKEND_URL=https://back.pressticket.com.br```
 
 46. Buildando o frontend
 
@@ -215,7 +215,7 @@ JWT_REFRESH_SECRET=
 52. Editar os dados abaixo com a URL que será usada para acessar o frontend.
 
 server {  
-  server_name ticket.pypress.com.br;  
+  server_name ticket.pressticket.com.br;  
   location / {  
     proxy_pass http://127.0.0.1:3333;  
     proxy_http_version 1.1;  
@@ -240,7 +240,7 @@ server {
 55. Editar os dados abaixo com a URL que será usada para acessar o backend.
 
 server {  
-  server_name back.pypress.com.br;  
+  server_name back.pressticket.com.br;  
   location / {  
     proxy_pass http://127.0.0.1:8080;  
     proxy_http_version 1.1;  
@@ -316,5 +316,5 @@ server {
 
 ### Usuário padrão para acesso
 
-* User: admin@pypress.com.br  
+* User: admin@pressticket.com.br  
 * Password: admin
