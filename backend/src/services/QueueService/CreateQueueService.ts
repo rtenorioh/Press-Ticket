@@ -6,6 +6,9 @@ interface QueueData {
   name: string;
   color: string;
   greetingMessage?: string;
+  startWork?: string;
+  endWork?: string;
+  absenceMessage?: string;
 }
 
 const CreateQueueService = async (queueData: QueueData): Promise<Queue> => {

@@ -185,10 +185,16 @@ const messages = {
           add: "Add queue",
           edit: "Edit queue",
         },
+        notification: {
+          title: "Sector saved successfully!",
+        },
         form: {
           name: "Name",
           color: "Color",
           greetingMessage: "Greeting Message",
+          startWork: "Opening",
+          endWork: "Close",
+          absenceMessage: "Absence message",
         },
         buttons: {
           okAdd: "Add",
@@ -303,11 +309,16 @@ const messages = {
       },
       queues: {
         title: "Queues",
+        notifications: {
+          queueDeleted: "The sector has been deleted.",
+        },
         table: {
           name: "Name",
           color: "Color",
           greeting: "Greeting message",
           actions: "Actions",
+          startWork: "Opening",
+          endWork: "Close",
         },
         buttons: {
           add: "Add queue",

@@ -31,11 +31,13 @@ const useStyles = makeStyles(theme => ({
 		marginRight: theme.spacing(1),
 		flex: 1,
 	},
-
+	container: {
+		display: 'flex',
+		flexWrap: 'wrap',
+	},
 	btnWrapper: {
 		position: "relative",
 	},
-
 	buttonProgress: {
 		color: green[500],
 		position: "absolute",
@@ -44,10 +46,12 @@ const useStyles = makeStyles(theme => ({
 		marginTop: -12,
 		marginLeft: -12,
 	},
+
 	formControl: {
 		margin: theme.spacing(1),
 		minWidth: 120,
 	},
+
 	colorAdorment: {
 		width: 20,
 		height: 20,
@@ -61,6 +65,9 @@ const QueueSchema = Yup.object().shape({
 		.required("Required"),
 	color: Yup.string().min(3, "Too Short!").max(9, "Too Long!").required(),
 	greetingMessage: Yup.string(),
+	startWork: Yup.string(),
+	endWork: Yup.string(),
+	absenceMessage: Yup.string()
 });
 
 const QueueModal = ({ open, onClose, queueId }) => {
@@ -70,11 +77,17 @@ const QueueModal = ({ open, onClose, queueId }) => {
 		name: "",
 		color: "",
 		greetingMessage: "",
+		startWork: "",
+		endWork: "",
+		absenceMessage: ""
 	};
 
 	const [colorPickerModalOpen, setColorPickerModalOpen] = useState(false);
 	const [queue, setQueue] = useState(initialState);
 	const greetingRef = useRef();
+	const absenceRef = useRef();
+	const startWorkRef = useRef();
+	const endWorkRef = useRef();
 
 	useEffect(() => {
 		(async () => {
@@ -94,6 +107,9 @@ const QueueModal = ({ open, onClose, queueId }) => {
 				name: "",
 				color: "",
 				greetingMessage: "",
+				startWork: "",
+				endWork: "",
+				absenceMessage: ""
 			});
 		};
 	}, [queueId, open]);
@@ -110,7 +126,7 @@ const QueueModal = ({ open, onClose, queueId }) => {
 			} else {
 				await api.post("/queue", values);
 			}
-			toast.success("Queue saved successfully");
+			toast.success(`${i18n.t("queueModal.notification.title")}`);
 			handleClose();
 		} catch (err) {
 			toastError(err);
@@ -200,7 +216,7 @@ const QueueModal = ({ open, onClose, queueId }) => {
 										type="greetingMessage"
 										multiline
 										inputRef={greetingRef}
-										rows={5}
+										rows={4}
 										fullWidth
 										name="greetingMessage"
 										error={
@@ -208,6 +224,78 @@ const QueueModal = ({ open, onClose, queueId }) => {
 										}
 										helperText={
 											touched.greetingMessage && errors.greetingMessage
+										}
+										variant="outlined"
+										margin="dense"
+									/>
+								</div>
+								<form className={classes.container} noValidate>
+									<Field
+										as={TextField}
+										label={i18n.t("queueModal.form.startWork")}
+										type="time"
+										ampm={false}
+										defaultValue="08:00"
+										inputRef={startWorkRef}
+										InputLabelProps={{
+											shrink: true,
+										}}
+										inputProps={{
+											step: 600, // 5 min
+										}}
+										fullWidth
+										name="startWork"
+										error={
+											touched.startWork && Boolean(errors.startWork)
+										}
+										helperText={
+											touched.startWork && errors.startWork
+										}
+										variant="outlined"
+										margin="dense"
+										className={classes.textField}
+									/>
+									<Field
+										as={TextField}
+										label={i18n.t("queueModal.form.endWork")}
+										type="time"
+										ampm={false}
+										defaultValue="18:00"
+										inputRef={endWorkRef}
+										InputLabelProps={{
+											shrink: true,
+										}}
+										inputProps={{
+											step: 600, // 5 min
+										}}
+										fullWidth
+										name="endWork"
+										error={
+											touched.endWork && Boolean(errors.endWork)
+										}
+										helperText={
+											touched.endWork && errors.endWork
+										}
+										variant="outlined"
+										margin="dense"
+										className={classes.textField}
+									/>
+								</form>
+								<div>
+									<Field
+										as={TextField}
+										label={i18n.t("queueModal.form.absenceMessage")}
+										type="absenceMessage"
+										multiline
+										inputRef={absenceRef}
+										rows={2}
+										fullWidth
+										name="absenceMessage"
+										error={
+											touched.absenceMessage && Boolean(errors.absenceMessage)
+										}
+										helperText={
+											touched.absenceMessage && errors.absenceMessage
 										}
 										variant="outlined"
 										margin="dense"

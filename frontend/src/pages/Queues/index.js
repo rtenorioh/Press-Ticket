@@ -151,7 +151,7 @@ const Queues = () => {
   const handleDeleteQueue = async (queueId) => {
     try {
       await api.delete(`/queue/${queueId}`);
-      toast.success(i18n.t("Queue deleted successfully!"));
+      toast.success(i18n.t("queues.notifications.queueDeleted"));
     } catch (err) {
       toastError(err);
     }
@@ -204,6 +204,12 @@ const Queues = () => {
                 {i18n.t("queues.table.greeting")}
               </TableCell>
               <TableCell align="center">
+                {i18n.t("queues.table.startWork")}
+              </TableCell>
+              <TableCell align="center">
+                {i18n.t("queues.table.endWork")}
+              </TableCell>
+              <TableCell align="center">
                 {i18n.t("queues.table.actions")}
               </TableCell>
             </TableRow>
@@ -236,6 +242,8 @@ const Queues = () => {
                       </Typography>
                     </div>
                   </TableCell>
+                  <TableCell align="center">{queue.startWork}</TableCell>
+                  <TableCell align="center">{queue.endWork}</TableCell>
                   <TableCell align="center">
                     <IconButton
                       size="small"

@@ -188,10 +188,16 @@ const messages = {
           add: "Agregar cola",
           edit: "Editar cola",
         },
+        notification: {
+          title: "¡Sector guardado con éxito!",
+        },
         form: {
           name: "Nombre",
           color: "Color",
           greetingMessage: "Mensaje de saludo",
+          startWork: "Apertura",
+          endWork: "Cierre",
+          absenceMessage: "Mensaje de ausencia",
         },
         buttons: {
           okAdd: "Añadir",
@@ -307,11 +313,16 @@ const messages = {
       },
       queues: {
         title: "Linhas",
+        notifications: {
+          queueDeleted: "El sector ha sido eliminado.",
+        },
         table: {
           name: "Nombre",
           color: "Color",
           greeting: "Mensaje de saludo",
           actions: "Comportamiento",
+          startWork: "Apertura",
+          endWork: "Cierre",
         },
         buttons: {
           add: "Agregar cola",
