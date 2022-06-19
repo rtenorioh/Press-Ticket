@@ -189,10 +189,16 @@ const messages = {
           add: "Adicionar Setor",
           edit: "Editar Setor",
         },
+        notification: {
+          title: "Setor salvo com sucesso!",
+        },
         form: {
           name: "Nome",
           color: "Cor",
           greetingMessage: "Mensagem de saudação",
+          startWork: "Abertura",
+          endWork: "Fechamento",
+          absenceMessage: "Mensagem de ausência",
         },
         buttons: {
           okAdd: "Adicionar",
@@ -210,6 +216,8 @@ const messages = {
           email: "E-mail",
           password: "Senha",
           profile: "Perfil",
+          admin: "Administrador",
+          user: "Usuário",
         },
         buttons: {
           okAdd: "Adicionar",
@@ -317,11 +325,16 @@ const messages = {
       },
       queues: {
         title: "Setores",
+        notifications: {
+          queueDeleted: "O setor foi deletado.",
+        },
         table: {
           name: "Nome",
           color: "Cor",
           greeting: "Mensagem de saudação",
           actions: "Ações",
+          startWork: "Abertura",
+          endWork: "Fechamento",
         },
         buttons: {
           add: "Adicionar setor",
@@ -408,6 +421,22 @@ const messages = {
               enabled: "Aberto",
               disabled: "Fechado",
             },
+          },
+          closeTicketApi: {
+            name: "Encerrar Ticket enviado API",
+            note: "Fecha automaticamente o ticket quando enviado por API",
+            options: {
+              enabled: "Ativado",
+              disabled: "Desativado",
+            },
+          },
+          darkMode: {
+              name: "Ativa Modo Escuro",
+              note: "Alternar entre o modo claro e o modo escuro",
+              options: {
+                enabled: "Ativado",
+                disabled: "Desativado",
+              },
           },
           timeCreateNewTicket: {
             name: "Cria novo ticket após",

@@ -185,10 +185,16 @@ const messages = {
           add: "Add queue",
           edit: "Edit queue",
         },
+        notification: {
+          title: "Sector saved successfully!",
+        },
         form: {
           name: "Name",
           color: "Color",
           greetingMessage: "Greeting Message",
+          startWork: "Opening",
+          endWork: "Close",
+          absenceMessage: "Absence message",
         },
         buttons: {
           okAdd: "Add",
@@ -303,11 +309,16 @@ const messages = {
       },
       queues: {
         title: "Queues",
+        notifications: {
+          queueDeleted: "The sector has been deleted.",
+        },
         table: {
           name: "Name",
           color: "Color",
           greeting: "Greeting message",
           actions: "Actions",
+          startWork: "Opening",
+          endWork: "Close",
         },
         buttons: {
           add: "Add queue",
@@ -403,6 +414,22 @@ const messages = {
           disabled: "Closed",
         },
       },
+      closeTicketApi: {
+        name: "Close Ticket sent API",
+        note: "Automatically closes ticket when submitted via API",
+        options: {
+          enabled: "Enabled",
+          disabled: "Disabled",
+        },
+      },
+      darkMode: {
+        name: "Enable Dark Mode",
+        note: "Switch between light mode and dark mode",
+        options: {
+          enabled: "Enabled",
+          disabled: "Disabled",
+        },
+    },
       messagesList: {
         header: {
           assignedTo: "Assigned to:",

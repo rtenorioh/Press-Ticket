@@ -5,33 +5,16 @@ import "react-toastify/dist/ReactToastify.css";
 import { createTheme, ThemeProvider } from "@material-ui/core/styles";
 import { ptBR } from "@material-ui/core/locale";
 
-import {
-  CssBaseline,
-  Switch,
-  FormGroup,
-  FormControlLabel,
-  makeStyles
-} from "@material-ui/core";
-import Brightness4Icon from '@material-ui/icons/Brightness4';
-import Brightness7Icon from '@material-ui/icons/Brightness7';
+import { CssBaseline } from "@material-ui/core";
+
+import api from "./services/api";
+import toastError from "./errors/toastError";
+
 import lightBackground from "../src/assets/wa-background-light.png";
 import darkBackground from "../src/assets/wa-background-dark.jpg";
 
-const useStyles = makeStyles(() => ({
-  switch: {
-    margin: "2px",
-    position: "absolute",
-    right: "0",
-  },
-  visible: {
-    display: "none",
-  },
-}));
-
 const App = () => {
   const [locale, setLocale] = useState();
-  const [checked, setChecked] = React.useState(false);
-  const classes = useStyles();
 
   const lightTheme = createTheme(
     {
@@ -46,7 +29,8 @@ const App = () => {
         },
       },
       palette: {
-        primary: { main: "#2576d2" },
+        primary: { main: "#6B62FE" },
+        secondary: { main: "#F50057" },
       },
       backgroundImage: `url(${lightBackground})`,
     },
@@ -93,18 +77,26 @@ const App = () => {
 
   const [theme, setTheme] = useState("light");
 
-  const themeToggle = () => {
-    theme === "light" ? setTheme("dark") : setTheme("light");
-  };
+  useEffect(() => {
 
-  const handleChange = (event) => {
-    setChecked(event.target.checked);
-    if (checked === false) {
-      themeToggle();
-    } else if (checked === true) {
-      themeToggle();
-    }
-  };
+    const fetchDarkMode = async () => {
+      try {
+        const { data } = await api.get("/settings");
+        const settingIndex = data.filter(s => s.key === 'darkMode');
+
+        if (settingIndex[0].value === "enabled") {
+          setTheme("dark")
+        }
+
+      } catch (err) {
+        setTheme("light")
+        toastError(err);
+      }
+    };
+
+    fetchDarkMode();
+
+  }, []);
 
   useEffect(() => {
     const i18nlocale = localStorage.getItem("i18nextLng");
@@ -119,20 +111,6 @@ const App = () => {
     <ThemeProvider theme={theme === "light" ? lightTheme : darkTheme}>
       <Routes />
       <CssBaseline />
-      <FormGroup row className={classes.switch}>
-        <FormControlLabel control={
-          <Switch
-            className={classes.visible}
-            checked={checked}
-            onChange={handleChange}
-            inputProps={{ 'aria-label': 'controlled' }}
-          />
-        } label={theme === "light" ?
-          <Brightness4Icon color="primary" /> :
-          <Brightness7Icon color="primary" />
-        }
-        />
-      </FormGroup>
     </ThemeProvider>
   );
 };
