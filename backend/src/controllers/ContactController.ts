@@ -22,7 +22,6 @@ type IndexQuery = {
 type IndexGetContactQuery = {
   name: string;
   number: string;
-  email: string;
 };
 
 interface ExtraInfo {
@@ -48,12 +47,11 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
 };
 
 export const getContact = async (req: Request, res: Response): Promise<Response> => {
-  const { name, number, email } = req.body as IndexGetContactQuery;
+  const { name, number } = req.body as IndexGetContactQuery;
 
   const contact = await GetContactService({
     name,
-    number,
-    email
+    number
   });
 
   return res.status(200).json(contact);
@@ -61,13 +59,7 @@ export const getContact = async (req: Request, res: Response): Promise<Response>
 
 export const store = async (req: Request, res: Response): Promise<Response> => {
   const newContact: ContactData = req.body;
-  newContact.number = newContact.number.replace("-", "")
-    .replace(" ", "")
-    .replace("(", "")
-    .replace(")", "")
-    .replace("+", "")
-    .replace(".", "")
-    .replace("_", "");;
+  newContact.number = newContact.number.replace("-", "").replace(" ", "");
 
   const schema = Yup.object().shape({
     name: Yup.string().required(),
@@ -83,8 +75,8 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
   }
 
   await CheckIsValidContact(newContact.number);
-  const validNumber: any = await CheckContactNumber(newContact.number)
-
+  const validNumber : any = await CheckContactNumber(newContact.number)
+  
   const profilePicUrl = await GetProfilePicUrl(validNumber);
 
   let name = newContact.name
