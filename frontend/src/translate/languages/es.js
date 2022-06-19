@@ -188,16 +188,10 @@ const messages = {
           add: "Agregar cola",
           edit: "Editar cola",
         },
-        notification: {
-          title: "¡Sector guardado con éxito!",
-        },
         form: {
           name: "Nombre",
           color: "Color",
           greetingMessage: "Mensaje de saludo",
-          startWork: "Apertura",
-          endWork: "Cierre",
-          absenceMessage: "Mensaje de ausencia",
         },
         buttons: {
           okAdd: "Añadir",
@@ -313,16 +307,11 @@ const messages = {
       },
       queues: {
         title: "Linhas",
-        notifications: {
-          queueDeleted: "El sector ha sido eliminado.",
-        },
         table: {
           name: "Nombre",
           color: "Color",
           greeting: "Mensaje de saludo",
           actions: "Comportamiento",
-          startWork: "Apertura",
-          endWork: "Cierre",
         },
         buttons: {
           add: "Agregar cola",
@@ -404,22 +393,6 @@ const messages = {
           disabled: "Cerrado",
         },
       },
-      closeTicketApi: {
-        name: "Cerrar ticket enviado API",
-        note: "Cierra automáticamente el ticket cuando se envía a través de API",
-        options: {
-          enabled: "Habilitado",
-          disabled: "Deshabilitado",
-        },
-      },
-      darkMode: {
-        name: "Habilitar modo oscuro",
-        note: "Cambiar entre el modo claro y el modo oscuro",
-        options: {
-          enabled: "Habilitado",
-          disabled: "Deshabilitado",
-        },
-    },
       timeCreateNewTicket: {
         name: "Crear nuevo ticket después",
         note: "Selecciona el tiempo que tardará en abrir un nuevo ticket si el cliente te vuelve a contactar",
