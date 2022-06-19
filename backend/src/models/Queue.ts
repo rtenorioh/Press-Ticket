@@ -36,6 +36,15 @@ class Queue extends Model<Queue> {
   @Column
   greetingMessage: string;
 
+  @Column
+  startWork: string;
+
+  @Column
+  endWork: string;
+
+  @Column
+  absenceMessage: string;
+
   @CreatedAt
   createdAt: Date;
 

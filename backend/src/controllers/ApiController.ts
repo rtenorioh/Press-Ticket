@@ -14,6 +14,7 @@ import GetProfilePicUrl from "../services/WbotServices/GetProfilePicUrl";
 import SendWhatsAppMedia from "../services/WbotServices/SendWhatsAppMedia";
 import SendWhatsAppMessage from "../services/WbotServices/SendWhatsAppMessage";
 import UpdateTicketService from "../services/TicketServices/UpdateTicketService";
+import ListSettingsServiceOne from "../services/SettingServices/ListSettingsServiceOne";
 
 type WhatsappData = {
   whatsappId: number;
@@ -98,21 +99,28 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
 
   const contactAndTicket = await createContact(whatsappId, newContact.number);
 
+  let resp: any;
+
   if (medias) {
     await Promise.all(
       medias.map(async (media: Express.Multer.File) => {
-        await SendWhatsAppMedia({ body, media, ticket: contactAndTicket });
+        resp = await SendWhatsAppMedia({ body, media, ticket: contactAndTicket });
       })
     );
   } else {
-    await SendWhatsAppMessage({ body, ticket: contactAndTicket, quotedMsg });
+    resp = await SendWhatsAppMessage({ body, ticket: contactAndTicket, quotedMsg });
   }
 
-  setTimeout(async () => {
-    await UpdateTicketService({
-      ticketId: contactAndTicket.id,
-      ticketData: { status: "closed" }
-    });
-  }, 1000);
-  return res.send({ error: "SUCCESS" });
+  const listSettingsService = await ListSettingsServiceOne({ key: "closeTicketApi" });
+  var closeTicketApi = listSettingsService?.value;
+
+  if (closeTicketApi === 'enabled') {
+    setTimeout(async () => {
+      await UpdateTicketService({
+        ticketId: contactAndTicket.id,
+        ticketData: { status: "closed" }
+      });
+    }, 1000);
+  }
+  return res.send({ error: resp });
 };

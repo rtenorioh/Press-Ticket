@@ -22,6 +22,15 @@ module.exports = {
       greetingMessage: {
         type: DataTypes.TEXT
       },
+      startWork: {
+        type: DataTypes.STRING
+      },
+      endWork: {
+        type: DataTypes.STRING
+      },
+      absenceMessage: {
+        type: DataTypes.TEXT
+      },
       createdAt: {
         type: DataTypes.DATE,
         allowNull: false

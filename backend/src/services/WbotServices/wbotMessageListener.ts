@@ -1,5 +1,3 @@
-import Settings from "../../models/Setting";
-import ListSettingsServiceOne from "../SettingServices/ListSettingsServiceOne";
 import { join } from "path";
 import { promisify } from "util";
 import { writeFile } from "fs";
@@ -15,18 +13,21 @@ import {
 import Contact from "../../models/Contact";
 import Ticket from "../../models/Ticket";
 import Message from "../../models/Message";
+import Settings from "../../models/Setting";
 
 import { getIO } from "../../libs/socket";
 import CreateMessageService from "../MessageServices/CreateMessageService";
 import { logger } from "../../utils/logger";
 import CreateOrUpdateContactService from "../ContactServices/CreateOrUpdateContactService";
+import ListSettingsServiceOne from "../SettingServices/ListSettingsServiceOne";
 import FindOrCreateTicketService from "../TicketServices/FindOrCreateTicketService";
 import ShowWhatsAppService from "../WhatsappService/ShowWhatsAppService";
 import { debounce } from "../../helpers/Debounce";
 import UpdateTicketService from "../TicketServices/UpdateTicketService";
 import CreateContactService from "../ContactServices/CreateContactService";
-import GetContactService from "../ContactServices/GetContactService";
+// import GetContactService from "../ContactServices/GetContactService";
 import formatBody from "../../helpers/Mustache";
+
 
 interface Session extends Client {
     id?: number;
@@ -156,22 +157,55 @@ const verifyQueue = async (
     const choosenQueue = queues[+selectedOption - 1];
 
     if (choosenQueue) {
-        await UpdateTicketService({
-            ticketData: { queueId: choosenQueue.id },
-            ticketId: ticket.id,
-        });
+        
+        const Hr = new Date();
 
-        const chat = await msg.getChat();
-        await chat.sendStateTyping();
+        const hh: number = Hr.getHours() * 60 * 60;
+        const mm: number = Hr.getMinutes() * 60;
+        const hora = hh + mm;
 
-        const body = formatBody(
-            `\u200e${choosenQueue.greetingMessage}`,
-            contact
-        );
+        const inicio: string = choosenQueue.startWork;
+        const hhinicio = Number(inicio.split(':')[0]) * 60 * 60;
+        const mminicio = Number(inicio.split(':')[1]) * 60;
+        const horainicio = hhinicio + mminicio;
 
-        const sentMessage = await wbot.sendMessage(`${contact.number}@c.us`, body);
+        const termino: string = choosenQueue.endWork;
+        const hhtermino = Number(termino.split(':')[0]) * 60 * 60;
+        const mmtermino = Number(termino.split(':')[1]) * 60;
+        const horatermino = hhtermino + mmtermino;
 
-        await verifyMessage(sentMessage, ticket, contact);
+        if ((hora < horainicio) || (hora > horatermino)) {
+
+            const body = formatBody(`\u200e${choosenQueue.absenceMessage}`, contact);
+            const debouncedSentMessage = debounce(
+                async () => {
+                    const sentMessage = await wbot.sendMessage(`${contact.number}@c.us`, body);
+                    verifyMessage(sentMessage, ticket, contact);
+                },
+                3000,
+                ticket.id
+            );
+
+            debouncedSentMessage();
+
+        } else {
+            await UpdateTicketService({
+                ticketData: { queueId: choosenQueue.id },
+                ticketId: ticket.id,
+            });
+
+            const chat = await msg.getChat();
+            await chat.sendStateTyping();
+
+            const body = formatBody(
+                `\u200e${choosenQueue.greetingMessage}`,
+                contact
+            );
+
+            const sentMessage = await wbot.sendMessage(`${contact.number}@c.us`, body);
+
+            await verifyMessage(sentMessage, ticket, contact);
+        }
     } else {
         let options = "";
 
@@ -179,7 +213,7 @@ const verifyQueue = async (
         await chat.sendStateTyping();
 
         queues.forEach((queue, index) => {
-            options += `*${index + 1}* - ${queue.name}\n`;
+            options += `*${index + 1}* - ${queue.name} das ${queue.startWork} as ${queue.endWork}\n`;
         });
 
         const body = formatBody(
@@ -214,7 +248,7 @@ const isValidMsg = (msg: WbotMessage): boolean => {
         msg.type === "document" ||
         msg.type === "vcard" ||
         msg.type === "call_log" ||
-        //msg.type === "multi_vcard" ||
+        // msg.type === "multi_vcard" ||
         msg.type === "sticker"
     )
         return true;
@@ -229,13 +263,16 @@ const handleMessage = async (
         return;
     }
 
-    //IGNORAR MENSAGENS DE GRUPO
+    // IGNORAR MENSAGENS DE GRUPO
     const Settingdb = await Settings.findOne({
         where: { key: 'CheckMsgIsGroup' }
     });
-    if (Settingdb?.value == 'enabled') {
+    if (Settingdb?.value === 'enabled') {
         const chat = await msg.getChat();
         if (
+            msg.type === "sticker" ||
+            msg.type === "e2e_notification" ||
+            msg.type === "notification_template" ||
             msg.from === "status@broadcast" ||
             msg.author != null ||
             chat.isGroup
@@ -243,7 +280,7 @@ const handleMessage = async (
             return;
         }
     }
-    //IGNORAR MENSAGENS DE GRUPO
+    // IGNORAR MENSAGENS DE GRUPO
 
     try {
         let msgContact: WbotContact;
@@ -261,16 +298,16 @@ const handleMessage = async (
                 !msg.hasMedia &&
                 msg.type !== "chat" &&
                 msg.type !== "vcard"
-                //&& msg.type !== "multi_vcard"
+                //  && msg.type !== "multi_vcard"
             )
                 return;
 
             msgContact = await wbot.getContactById(msg.to);
         } else {
-            const listSettingsService = await ListSettingsServiceOne({key: "call"});
+            const listSettingsService = await ListSettingsServiceOne({ key: "call" });
             var callSetting = listSettingsService?.value;
 
-     	    msgContact = await msg.getContact();
+            msgContact = await msg.getContact();
         }
 
         const chat = await msg.getChat();
@@ -350,7 +387,7 @@ const handleMessage = async (
             }
         }
 
-        /*if (msg.type === "multi_vcard") {
+        /* if (msg.type === "multi_vcard") {
                   try {
                     const array = msg.vCards.toString().split("\n");
                     let name = "";
@@ -409,12 +446,12 @@ const handleMessage = async (
                   } catch (error) {
                     console.log(error);
                   }
-                }*/
+                } */
 
-if(msg.type==="call_log" && callSetting==="disabled"){
-      const sentMessage = await wbot.sendMessage(`${contact.number}@c.us`, "*הודעות אוטומטיות:*\nשיחות קוליות מושבתות עבור WhatsApp זה, אנא שלח הודעת טקסט. תודה");
-      await verifyMessage(sentMessage, ticket, contact);
-    }
+        if (msg.type === "call_log" && callSetting === "disabled") {
+            const sentMessage = await wbot.sendMessage(`${contact.number}@c.us`, "*Mensagem Automática:*\nAs chamadas de voz e vídeo estão desabilitas para esse WhatsApp, favor enviar uma mensagem de texto. Obrigado");
+            await verifyMessage(sentMessage, ticket, contact);
+        }
 
     } catch (err) {
         Sentry.captureException(err);

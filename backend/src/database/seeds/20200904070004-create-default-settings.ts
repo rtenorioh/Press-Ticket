@@ -34,6 +34,18 @@ module.exports = {
           value: "10",
           createdAt: new Date(),
           updatedAt: new Date()
+        },
+        {
+          key: "closeTicketApi",
+          value: "disabled",
+          createdAt: new Date(),
+          updatedAt: new Date()
+        },
+        {
+          key: "darkMode",
+          value: "disabled",
+          createdAt: new Date(),
+          updatedAt: new Date()
         }
       ],
       {}
