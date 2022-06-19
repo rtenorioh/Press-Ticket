@@ -2,7 +2,7 @@
   "name": "frontend",
   "version": "0.1.0",
   "system": {
-    "version": "1.0.4",
+    "version": "1.0.6",
     "name": "AdPro WMA"
   },
   "private": true,
