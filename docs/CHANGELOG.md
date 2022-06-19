@@ -2,12 +2,15 @@
 
 ### 18/06/2022
 
-- [Horário de atendimento por setor](https://github.com/rtenorioh/Press-Ticket/commit/0a86350a3a6f7d9422c3826ca0eea7d807f864ba) Deverá inserir manualmente no BD as colunas ```startWork```, ```endWork``` e ```absenceMessage``` na tabela ```Queue```.;
-- [Atualização de domínio e organização de conteúdo](https://github.com/rtenorioh/Press-Ticket/commit/a17d03ac5144f23a4c3e4e098036c7b4d8d9c610)
+- [Horário de atendimento por setor](https://github.com/rtenorioh/Press-Ticket/commit/0a86350a3a6f7d9422c3826ca0eea7d807f864ba) 
+  - Deverá inserir manualmente no BD as colunas ```startWork```, ```endWork``` e ```absenceMessage``` na tabela ```Queue```;
+- [Atualização de domínio e organização de conteúdo](https://github.com/rtenorioh/Press-Ticket/commit/a17d03ac5144f23a4c3e4e098036c7b4d8d9c610); e
+- [Correção para o usuário não entrar em setor fora do horário de atendimento](https://github.com/rtenorioh/Press-Ticket/commit/32598d27e7684b1a729979f9560befc74cc2abea); e
+- [Atualização da versão do sistema](https://github.com/rtenorioh/Press-Ticket/commit/53c789a7ed503f156cbb944b295821c3e4985ab2).
 
 ### 10/06/2022
 
-- [Atualização da lib wwebjs de 1.16.6 para 1.16.7](https://github.com/rtenorioh/Press-Ticket/commit/5d7ab7b3321f16dac3d6425349f5b4ef855c0b84)
+- [Atualização da lib wwebjs de 1.16.6 para 1.16.7](https://github.com/rtenorioh/Press-Ticket/commit/5d7ab7b3321f16dac3d6425349f5b4ef855c0b84).
 
 ### 09/06/2022
 
