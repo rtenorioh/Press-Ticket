@@ -157,11 +157,7 @@ const verifyQueue = async (
     const choosenQueue = queues[+selectedOption - 1];
 
     if (choosenQueue) {
-        await UpdateTicketService({
-            ticketData: { queueId: choosenQueue.id },
-            ticketId: ticket.id,
-        });
-
+        
         const Hr = new Date();
 
         const hh: number = Hr.getHours() * 60 * 60;
@@ -193,6 +189,10 @@ const verifyQueue = async (
             debouncedSentMessage();
 
         } else {
+            await UpdateTicketService({
+                ticketData: { queueId: choosenQueue.id },
+                ticketId: ticket.id,
+            });
 
             const chat = await msg.getChat();
             await chat.sendStateTyping();
