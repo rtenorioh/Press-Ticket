@@ -143,7 +143,7 @@ const Settings = () => {
 		}
 	};
 	const handleChangeSetting = async e => {
-		const selectedValue = e.target.checked ? "enabled" : "disabled";
+		const selectedValue = e.target.value;
 		const settingKey = e.target.name;
 
 		try {
