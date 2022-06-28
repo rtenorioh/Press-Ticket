@@ -217,6 +217,7 @@ const messages = {
           password: "Senha",
           profile: "Perfil",
           admin: "Administrador",
+          whatsapp: "Conexão Padrão",
           user: "Usuário",
         },
         buttons: {
@@ -259,7 +260,9 @@ const messages = {
       transferTicketModal: {
         title: "Transferir Ticket",
         fieldLabel: "Digite para buscar usuários",
+        fieldConnectionLabel: "Transferir para conexão",
         fieldQueuePlaceholder: "Transferir para o Setor",
+        fieldConnectionPlaceholder: "Selecione uma conexão",
         noOptions: "Nenhum usuário encontrado com esse nome",
         buttons: {
           ok: "Transferir",
@@ -374,6 +377,7 @@ const messages = {
           name: "Nome",
           email: "E-mail",
           profile: "Perfil",
+          whatsapp: "Conexão Padrão",
           actions: "Ações",
         },
         buttons: {
