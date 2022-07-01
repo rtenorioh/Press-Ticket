@@ -200,7 +200,7 @@ const TicketListItem = ({ ticket }) => {
 		if (isMounted.current) {
 			setLoading(false);
 		}
-		// history.push(`/tickets/${id}`);
+		history.push(`/tickets/${id}`);
 	};
 
 
