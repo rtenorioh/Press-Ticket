@@ -82,10 +82,10 @@ const verifyMediaMessage = async (
     const ext = media.mimetype.split("/")[1].split(";")[0];
     media.filename = `${new Date().getTime()}.${ext}`;
     } else {
-let originalFilename = media.filename ? `-${media.filename}` : ''
-// Always write a random filename
-media.filename = `${new Date().getTime()}${originalFilename}`;
-}
+    const originalFilename = media.filename ? `-${media.filename}` : ''
+    // Always write a random filename
+    media.filename = `${new Date().getTime()}${originalFilename}`;
+ }
 
     try {
         await writeFileAsync(
@@ -116,6 +116,13 @@ media.filename = `${new Date().getTime()}${originalFilename}`;
     return newMessage;
 };
 
+const prepareLocation = (msg: WbotMessage): WbotMessage => {
+   const gmapsUrl = "https://maps.google.com/maps?q=" + msg.location.latitude + "%2C" + msg.location.longitude + "&z=17";
+   msg.body = "data:image/png;base64," + msg.body + "|" + gmapsUrl;
+   msg.body += "|" + (msg.location.description ? msg.location.description : (msg.location.latitude + ", " + msg.location.longitude))
+   return msg;
+};
+
 const verifyMessage = async (
     msg: WbotMessage,
     ticket: Ticket,
@@ -140,13 +147,6 @@ const verifyMessage = async (
     await ticket.update({ lastMessage: msg.type === "location" ? msg.location.description ? "Localization - " + msg.location.description.split('\\n')[0] : "Localization" : msg.body });
 
     await CreateMessageService({ messageData });
-};
-
-const prepareLocation = (msg: WbotMessage): WbotMessage => {
-   let gmapsUrl = "https://maps.google.com/maps?q=" + msg.location.latitude + "%2C" + msg.location.longitude + "&z=17";
-   msg.body = "data:image/png;base64," + msg.body + "|" + gmapsUrl;
-   msg.body += "|" + (msg.location.description ? msg.location.description : (msg.location.latitude + ", " + msg.location.longitude))
-   return msg;
 };
 
 const verifyQueue = async (
@@ -478,7 +478,6 @@ const handleMessage = async (
             const sentMessage = await wbot.sendMessage(`${contact.number}@c.us`, "*Mensagem Automática:*\nAs chamadas de voz e vídeo estão desabilitas para esse WhatsApp, favor enviar uma mensagem de texto. Obrigado");
             await verifyMessage(sentMessage, ticket, contact);
         }
-
     } catch (err) {
         Sentry.captureException(err);
         logger.error(`Error handling whatsapp message: Err: ${err}`);
