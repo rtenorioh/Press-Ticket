@@ -2,7 +2,7 @@ import AppError from "../../errors/AppError";
 import Message from "../../models/Message";
 import Ticket from "../../models/Ticket";
 import ShowTicketService from "../TicketServices/ShowTicketService";
-import { Op, fn, where, col, Filterable, Includeable } from "sequelize";
+import { Op } from "sequelize";
 
 interface Request {
   ticketId: string;
@@ -43,7 +43,7 @@ const ListMessagesService = async ({
       },
       {
         model: Ticket,
-        where: {contactId: ticket.contactId  },
+        where: { contactId: ticket.contactId },
         required: true
       },
       {
@@ -52,7 +52,6 @@ const ListMessagesService = async ({
           whatsappId: ticket.whatsappId,
           queueId: { [Op.or]: [ticket.queueId, null] }
         },
-        //where: { queueId: { [Op.or]: [ticket.queueId, null] } },
         required: true
       }
     ],
