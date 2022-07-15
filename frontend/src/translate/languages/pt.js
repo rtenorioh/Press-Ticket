@@ -277,7 +277,15 @@ const messages = {
         connectionTitle: "Conexão que está sendo utilizada atualmente.",
         buttons: {
           accept: "Responder",
+          acceptBeforeBot: "Aceitar ≫",
+          start: "iniciar",
+          cancel: "Cancelar"
         },
+        acceptModal: {
+          title: "Aceitar Chat",
+          queue: "Selecionar fila"
+        },
+
       },
       newTicketModal: {
         title: "Criar Ticket",
