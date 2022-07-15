@@ -1,3 +1,9 @@
 .docker/data/
 ssl/
 .env
+.ecosystem.config.js
+.wwebjs_auth
+node_modules
+package-lock.json
+.rar
+.zip
