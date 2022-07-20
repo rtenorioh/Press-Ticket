@@ -240,10 +240,10 @@ const TicketListItem = ({ ticket }) => {
 			<ListItem
 				dense
 				button
-				// onClick={e => {
-				// 	if (ticket.status === "pending") return;
-				// 	handleSelectTicket(ticket.id);
-				// }}
+				onClick={e => {
+					if (ticket.status === "pending") return;
+					handleSelectTicket(ticket.id);
+				}}
 				selected={ticketId && +ticketId === ticket.id}
 				className={clsx(classes.ticket, {
 					[classes.pendingTicket]: (ticket.status === "pending"),
@@ -330,6 +330,16 @@ const TicketListItem = ({ ticket }) => {
 						</IconButton>
 					</Tooltip>
 				)}
+				{(ticket.status === "pending" && (ticket.queue !== null || ticket.queue !== undefined)) && (
+					<Tooltip title={i18n.t("Aceitar")}>
+						<IconButton
+							className={classes.bottomButton}
+							color="primary"
+							onClick={e => handleAcepptTicket(ticket.id)} >
+							<DoneIcon />
+						</IconButton>
+					</Tooltip>
+				)}
 				{ticket.status === "pending" && (
 					<Tooltip title={i18n.t("Espiar")}>
 						<IconButton
@@ -340,7 +350,7 @@ const TicketListItem = ({ ticket }) => {
 						</IconButton>
 					</Tooltip>
 				)}
-				{ticket.status === "pending" && (
+				{/* {ticket.status === "pending" && (
 					<Tooltip title={i18n.t("Encerrar")}>
 						<IconButton
 							className={classes.bottomButton}
@@ -349,8 +359,18 @@ const TicketListItem = ({ ticket }) => {
 							<ClearOutlinedIcon />
 						</IconButton>
 					</Tooltip>
+				)} */}
+					{ticket.status === "open" && (
+					<Tooltip title={i18n.t("Espiar")}>
+						<IconButton
+							className={classes.bottomButton}
+							color="primary"
+							onClick={e => handleSelectTicket(ticket.id)} >
+							<VisibilityIcon />
+						</IconButton>
+					</Tooltip>
 				)}
-				{ticket.status === "open" && (
+				{/* {ticket.status === "open" && (
 					<Tooltip title={i18n.t("Reabrir")}>
 						<IconButton
 							className={classes.bottomButton}
@@ -359,7 +379,7 @@ const TicketListItem = ({ ticket }) => {
 							<ReplayIcon />
 						</IconButton>
 					</Tooltip>
-				)}
+				)} */}
 				{ticket.status === "open" && (
 					<Tooltip title={i18n.t("Encerrar")}>
 						<IconButton
