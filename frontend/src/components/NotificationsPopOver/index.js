@@ -110,11 +110,11 @@ const NotificationsPopOver = () => {
 		socket.on("appMessage", data => {
 			const UserQueues = user.queues.findIndex((users) => (users.id === data.ticket.queueId));
 			if (
-				(data.action === "create" &&
+				data.action === "create" &&
 				!data.message.read &&
 				(data.ticket.userId === user?.id || !data.ticket.userId)
-				&& (UserQueues !== -1 || !data.ticket.queueId))
-				 //||data.ticket.isGroup
+				&& (UserQueues !== -1 || !data.ticket.queueId)
+				|| (data.ticket.isGroup && (UserQueues !== -1 || !data.ticket.queueId))
 			) {
 				setNotifications(prevState => {
 					const ticketIndex = prevState.findIndex(t => t.id === data.ticket.id);
@@ -128,9 +128,9 @@ const NotificationsPopOver = () => {
 				const shouldNotNotificate =
 					(data.message.ticketId === ticketIdRef.current &&
 						document.visibilityState === "visible") ||
-					(data.ticket.userId && data.ticket.userId !== user?.id) ||
-					data.ticket.isGroup;
-
+					(data.ticket.userId && data.ticket.userId !== user?.id)
+					&& (UserQueues !== -1 || !data.ticket.queueId)
+					&& !data.ticket.isGroup
 				if (shouldNotNotificate) return;
 
 				handleNotifications(data);
@@ -173,7 +173,6 @@ const NotificationsPopOver = () => {
 			}
 			return [notification, ...prevState];
 		});
-
 		soundAlertRef.current();
 	};
 
