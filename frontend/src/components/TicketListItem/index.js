@@ -330,7 +330,7 @@ const TicketListItem = ({ ticket }) => {
 						</IconButton>
 					</Tooltip>
 				)}
-				{(ticket.status === "pending" && (ticket.queue !== null || ticket.queue !== undefined)) && (
+				{(ticket.status === "pending" && (ticket.queue !== null && ticket.queue !== undefined)) && (
 					<Tooltip title={i18n.t("Aceitar")}>
 						<IconButton
 							className={classes.bottomButton}
@@ -350,17 +350,7 @@ const TicketListItem = ({ ticket }) => {
 						</IconButton>
 					</Tooltip>
 				)}
-				{/* {ticket.status === "pending" && (
-					<Tooltip title={i18n.t("Encerrar")}>
-						<IconButton
-							className={classes.bottomButton}
-							color="primary"
-							onClick={e => handleClosedTicket(ticket.id)} >
-							<ClearOutlinedIcon />
-						</IconButton>
-					</Tooltip>
-				)} */}
-					{ticket.status === "open" && (
+				{ticket.status === "open" && (
 					<Tooltip title={i18n.t("Espiar")}>
 						<IconButton
 							className={classes.bottomButton}
@@ -370,16 +360,6 @@ const TicketListItem = ({ ticket }) => {
 						</IconButton>
 					</Tooltip>
 				)}
-				{/* {ticket.status === "open" && (
-					<Tooltip title={i18n.t("Reabrir")}>
-						<IconButton
-							className={classes.bottomButton}
-							color="primary"
-							onClick={e => handleViewTicket(ticket.id)} >
-							<ReplayIcon />
-						</IconButton>
-					</Tooltip>
-				)} */}
 				{ticket.status === "open" && (
 					<Tooltip title={i18n.t("Encerrar")}>
 						<IconButton
