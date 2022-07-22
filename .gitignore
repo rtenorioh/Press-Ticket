@@ -1,4 +1,4 @@
 .docker/data/
 ssl/
 .env
-.vscode
+.vscode/*

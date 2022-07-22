@@ -24,6 +24,7 @@ import MarkdownWrapper from "../MarkdownWrapper";
 import { Tooltip } from "@material-ui/core";
 import { AuthContext } from "../../context/Auth/AuthContext";
 import toastError from "../../errors/toastError";
+import AcceptTicketWithouSelectQueue from "../AcceptTicketWithoutQueueModal";
 
 const useStyles = makeStyles(theme => ({
 	ticket: {
@@ -130,6 +131,8 @@ const TicketListItem = ({ ticket }) => {
 	const isMounted = useRef(true);
 	const { user } = useContext(AuthContext);
 
+	const [acceptTicketWithouSelectQueueOpen, setAcceptTicketWithouSelectQueueOpen] = useState(false);
+
 	useEffect(() => {
 		return () => {
 			isMounted.current = false;
@@ -151,6 +154,25 @@ const TicketListItem = ({ ticket }) => {
 			setLoading(false);
 		}
 		history.push(`/tickets/${id}`);
+	};
+
+	const queueName = selectedTicket => {
+		let name = null;
+		let color = null;
+		user.queues.forEach(userQueue => {
+			if (userQueue.id === selectedTicket.queueId) {
+				name = userQueue.name;
+				color = userQueue.color;
+			}
+		});
+		return {
+			name,
+			color
+		};
+	}
+
+	const handleOpenAcceptTicketWithouSelectQueue = () => {
+		setAcceptTicketWithouSelectQueueOpen(true);
 	};
 
 	const handleReopenTicket = async id => {
@@ -210,6 +232,11 @@ const TicketListItem = ({ ticket }) => {
 
 	return (
 		<React.Fragment key={ticket.id}>
+			<AcceptTicketWithouSelectQueue
+				modalOpen={acceptTicketWithouSelectQueueOpen}
+				onClose={(e) => setAcceptTicketWithouSelectQueueOpen(false)}
+				ticketId={ticket.id}
+			/>
 			<ListItem
 				dense
 				button
@@ -219,16 +246,16 @@ const TicketListItem = ({ ticket }) => {
 				}}
 				selected={ticketId && +ticketId === ticket.id}
 				className={clsx(classes.ticket, {
-					[classes.pendingTicket]: ticket.status === "pending",
+					[classes.pendingTicket]: (ticket.status === "pending"),
 				})}
 			>
 				<Tooltip
 					arrow
 					placement="right"
-					title={ticket.queue?.name || "Sem fila"}
+					title={ticket.queue?.name || queueName(ticket)?.name || i18n.t("ticketsList.items.queueless")}
 				>
 					<span
-						style={{ backgroundColor: ticket.queue?.color || "#7C7C7C" }}
+						style={{ backgroundColor: ticket.queue?.color || queueName(ticket)?.color || "#7C7C7C" }}
 						className={classes.ticketQueueColor}
 					></span>
 				</Tooltip>
@@ -292,7 +319,18 @@ const TicketListItem = ({ ticket }) => {
 						</span>
 					}
 				/>
-				{ticket.status === "pending" && (
+				{(ticket.status === "pending" && (ticket.queue === null || ticket.queue === undefined)) && (
+					<Tooltip title={i18n.t("Aceitar")}>
+						<IconButton
+							className={classes.bottomButton}
+							color="primary"
+							onClick={e => handleOpenAcceptTicketWithouSelectQueue()}
+							loading={loading}>
+							<DoneIcon />
+						</IconButton>
+					</Tooltip>
+				)}
+				{(ticket.status === "pending" && (ticket.queue !== null && ticket.queue !== undefined)) && (
 					<Tooltip title={i18n.t("Aceitar")}>
 						<IconButton
 							className={classes.bottomButton}
@@ -312,23 +350,13 @@ const TicketListItem = ({ ticket }) => {
 						</IconButton>
 					</Tooltip>
 				)}
-				{ticket.status === "pending" && (
-					<Tooltip title={i18n.t("Encerrar")}>
-						<IconButton
-							className={classes.bottomButton}
-							color="primary"
-							onClick={e => handleClosedTicket(ticket.id)} >
-							<ClearOutlinedIcon />
-						</IconButton>
-					</Tooltip>
-				)}
 				{ticket.status === "open" && (
-					<Tooltip title={i18n.t("Reabrir")}>
+					<Tooltip title={i18n.t("Espiar")}>
 						<IconButton
 							className={classes.bottomButton}
 							color="primary"
-							onClick={e => handleViewTicket(ticket.id)} >
-							<ReplayIcon />
+							onClick={e => handleSelectTicket(ticket.id)} >
+							<VisibilityIcon />
 						</IconButton>
 					</Tooltip>
 				)}
