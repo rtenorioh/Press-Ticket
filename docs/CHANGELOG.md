@@ -1,5 +1,19 @@
 # Changelog
 
+### 28/07/2022
+
+- [Fila Obrigatórias na Abertura e Aceite de Tickets](https://github.com/rtenorioh/Press-Ticket/commit/f246ea24a30e2748397eb1e50f84b19cd9214a64).
+
+### 27/07/2022
+
+- [Atualização da lib wwebjs de 1.17.0 para 1.17.1](https://github.com/rtenorioh/Press-Ticket/commit/7c8c1aa936a17b7f5e939cbe6d9e69f8f3a39ed9);
+- [Location and timestamp for filenames](https://github.com/rtenorioh/Press-Ticket/pull/28); e
+- [Correção na tradução](https://github.com/rtenorioh/Press-Ticket/commit/025edbcf7870f09b5f7d09a63aee49a54ad7fc86).
+
+### 15/07/2022
+
+- [Atualização dos .gitignore](https://github.com/rtenorioh/Press-Ticket/commit/2e3f9f11edcb8f78b2148952e3406458eb4bf21f).
+
 ### 30/06/2022
 
 - [Correção no nome dos arquivos salvos na pasta public do backend](https://github.com/rtenorioh/Press-Ticket/commit/38ce3a6d2e0f75e523e006e1c465646e465ef80b);
