@@ -273,8 +273,22 @@ const messages = {
         noTicketsTitle: "¡Nada acá!",
         connectionTitle: "Conexión que se está utilizando actualmente.",
         noTicketsMessage: "No se encontraron tickets con este estado o término de búsqueda",
+        items: {
+          queueless: "Sin sector",
+          accept: "Aceptar",
+          spy: "Espía",
+          close: "cerca",
+          reopen: "Reabrir"
+        },
         buttons: {
-          accept: "Acceptar",
+          accept: "Responder",
+          acceptBeforeBot: "Aceptar",
+          start: "empezar",
+          cancel: "Cancelar"
+        },
+        acceptModal: {
+          title: "Aceptar chat",
+          queue: "Seleccionar sector"
         },
       },
       newTicketModal: {
@@ -331,8 +345,7 @@ const messages = {
         },
         confirmationModal: {
           deleteTitle: "Eliminar",
-          deleteMessage:
-            "¿Estás seguro? ¡Esta acción no se puede revertir! Los tickets en esa cola seguirán existiendo, pero ya no tendrán ninguna cola asignada.",
+          deleteMessage: "¿Estás seguro? ¡Esta acción no se puede revertir! Los tickets en esa cola seguirán existiendo, pero ya no tendrán ninguna cola asignada.",
         },
       },
       queueSelect: {
@@ -353,8 +366,7 @@ const messages = {
         },
         searchPlaceholder: "Buscar ...",
         confirmationModal: {
-          deleteTitle:
-            "¿Está seguro de que desea eliminar esta respuesta rápida?",
+          deleteTitle: "¿Está seguro de que desea eliminar esta respuesta rápida?",
           deleteMessage: "Esta acción no se puede deshacer.",
         },
       },
@@ -375,8 +387,7 @@ const messages = {
         },
         confirmationModal: {
           deleteTitle: "Borrar",
-          deleteMessage:
-            "Toda la información del usuario se perderá. Los tickets abiertos de los usuarios se moverán a la cola.",
+          deleteMessage: "Toda la información del usuario se perderá. Los tickets abiertos de los usuarios se moverán a la cola.",
         },
       },
       settings: {
@@ -422,7 +433,7 @@ const messages = {
           enabled: "Habilitado",
           disabled: "Deshabilitado",
         },
-    },
+      },
       timeCreateNewTicket: {
         name: "Crear nuevo ticket después",
         note: "Selecciona el tiempo que tardará en abrir un nuevo ticket si el cliente te vuelve a contactar",
@@ -431,11 +442,15 @@ const messages = {
           "30": "30 Segundos",
           "60": "1 minuto",
           "300": "5 minutos",
-          "1800" : "30 minutos",
-          "3600" : "1 hora",
-          "7200" : "2 horas",
-          "21600" : "6 horas",
-          "43200" : "12 horas",
+          "1800": "30 minutos",
+          "3600": "1 hora",
+          "7200": "2 horas",
+          "21600": "6 horas",
+          "43200": "12 horas",
+          "86400": "24 horas",
+          "604800": "7 días",
+          "1296000": "15 días",
+          "2592000": "30 días",
         },
       },
       messagesList: {

@@ -270,9 +270,22 @@ const messages = {
         noTicketsTitle: "Nothing here!",
         connectionTitle: "Connection that is currently being used.",
         noTicketsMessage: "No tickets found with this status or search term.",
-        connectionTitle: "Connection that is currently being used.",
-        buttons: {
+        items: {
+          queueless: "Without Sector",
           accept: "Accept",
+          spy: "Spy",
+          close: "Close",
+          reopen: "Reopen"
+        },
+        buttons: {
+          accept: "Reply",
+          acceptBeforeBot: "Accept",
+          start: "start",
+          cancel: "Cancel"
+        },
+        acceptModal: {
+          title: "Accept Chat",
+          queue: "Select sector"
         },
       },
       newTicketModal: {
@@ -397,11 +410,15 @@ const messages = {
           "30": "30 seconds",
           "60": "1 minute",
           "300": "5 minutes",
-          "1800" : "30 minutes",
-          "3600" : "1 hour",
-          "7200" : "2 hours",
-          "21600" : "6 hours",
-          "43200" : "12 hours",
+          "1800": "30 minutes",
+          "3600": "1 hour",
+          "7200": "2 hours",
+          "21600": "6 hours",
+          "43200": "12 hours",
+          "86400": "24 hours",
+          "604800": "7 days",
+          "1296000": "15 days",
+          "2592000": "30 days",
         },
       },
       CheckMsgIsGroup: {
@@ -434,7 +451,7 @@ const messages = {
           enabled: "Enabled",
           disabled: "Disabled",
         },
-    },
+      },
       messagesList: {
         header: {
           assignedTo: "Assigned to:",
