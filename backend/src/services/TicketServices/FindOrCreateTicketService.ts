@@ -1,5 +1,5 @@
 // import { subHours } from "date-fns";
-const add = require('date-fns/add')
+const add = require('date-fns/add');
 import { Op } from "sequelize";
 import Contact from "../../models/Contact";
 import Ticket from "../../models/Ticket";
@@ -17,7 +17,8 @@ const FindOrCreateTicketService = async (
       status: {
         [Op.or]: ["open", "pending"]
       },
-      contactId: groupContact ? groupContact.id : contact.id
+      contactId: groupContact ? groupContact.id : contact.id,
+      whatsappId: whatsappId
     }
   });
 
@@ -28,7 +29,8 @@ const FindOrCreateTicketService = async (
   if (!ticket && groupContact) {
     ticket = await Ticket.findOne({
       where: {
-        contactId: groupContact.id
+        contactId: groupContact.id,
+        whatsappId: whatsappId
       },
       order: [["updatedAt", "DESC"]]
     });
@@ -52,7 +54,8 @@ const FindOrCreateTicketService = async (
         updatedAt: {
           [Op.between]: [+add(new Date(), {seconds: timeCreateNewTicket}), +new Date()]
         },
-        contactId: contact.id
+        contactId: contact.id,
+        whatsappId: whatsappId
       },
       order: [["updatedAt", "DESC"]]
     });

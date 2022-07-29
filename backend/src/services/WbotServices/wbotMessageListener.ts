@@ -25,9 +25,7 @@ import ShowWhatsAppService from "../WhatsappService/ShowWhatsAppService";
 import { debounce } from "../../helpers/Debounce";
 import UpdateTicketService from "../TicketServices/UpdateTicketService";
 import CreateContactService from "../ContactServices/CreateContactService";
-// import GetContactService from "../ContactServices/GetContactService";
 import formatBody from "../../helpers/Mustache";
-
 
 interface Session extends Client {
     id?: number;
@@ -90,7 +88,7 @@ const verifyMediaMessage = async (
             media.data,
             "base64"
         );
-    } catch (err) {
+    } catch (err: any) {
         Sentry.captureException(err);
         logger.error(err);
     }
@@ -157,7 +155,7 @@ const verifyQueue = async (
     const choosenQueue = queues[+selectedOption - 1];
 
     if (choosenQueue) {
-        
+
         const Hr = new Date();
 
         const hh: number = Hr.getHours() * 60 * 60;
@@ -176,7 +174,7 @@ const verifyQueue = async (
 
         if ((hora < horainicio) || (hora > horatermino)) {
 
-            const body = formatBody(`\u200e${choosenQueue.absenceMessage}`, contact);
+            const body = formatBody(`\u200e${choosenQueue.absenceMessage}`, ticket);
             const debouncedSentMessage = debounce(
                 async () => {
                     const sentMessage = await wbot.sendMessage(`${contact.number}@c.us`, body);
@@ -199,7 +197,7 @@ const verifyQueue = async (
 
             const body = formatBody(
                 `\u200e${choosenQueue.greetingMessage}`,
-                contact
+                ticket
             );
 
             const sentMessage = await wbot.sendMessage(`${contact.number}@c.us`, body);
@@ -217,8 +215,8 @@ const verifyQueue = async (
         });
 
         const body = formatBody(
-            `${greetingMessage}\n\n${options}`,
-            contact
+            `\u200e${greetingMessage}\n\n${options}`,
+            ticket
         );
 
         const debouncedSentMessage = debounce(
@@ -329,14 +327,21 @@ const handleMessage = async (
 
         const contact = await verifyContact(msgContact);
 
+        let ticket = await FindOrCreateTicketService(
+            contact,
+            wbot.id!,
+            unreadMessages,
+            groupContact
+        );
+
         if (
             unreadMessages === 0 &&
             whatsapp.farewellMessage &&
-            whatsapp.farewellMessage === msg.body
+            formatBody(whatsapp.farewellMessage, ticket) === msg.body
         )
             return;
 
-        const ticket = await FindOrCreateTicketService(
+        ticket = await FindOrCreateTicketService(
             contact,
             wbot.id!,
             unreadMessages,

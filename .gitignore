@@ -2,3 +2,4 @@
 ssl/
 .env
 backend/.wwebjs_auth
+.vscode

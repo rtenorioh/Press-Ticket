@@ -63,9 +63,9 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
 };
 
 export const store = async (req: Request, res: Response): Promise<Response> => {
-  const { contactId, status, userId }: TicketData = req.body;
+  const { contactId, status, userId, queueId }: TicketData = req.body;
 
-  const ticket = await CreateTicketService({ contactId, status, userId });
+  const ticket = await CreateTicketService({ contactId, status, userId, queueId });
 
   const io = getIO();
   io.to(ticket.status).emit("ticket", {
@@ -99,7 +99,7 @@ export const update = async (
   if (ticketData.transf) {
     const { greetingMessage } = await ShowQueueService(ticketData.queueId);
     if (greetingMessage) {
-      const msgtxt = "*Mensagem Automática:* \n" + greetingMessage;
+      const msgtxt = formatBody(`\u200e${greetingMessage}`);
       await SendWhatsAppMessage({ body: msgtxt, ticket });
     }
   }
@@ -111,7 +111,7 @@ export const update = async (
 
     if (farewellMessage) {
       await SendWhatsAppMessage({
-        body: formatBody(farewellMessage, ticket.contact),
+        body: formatBody(`\u200e${farewellMessage}`, ticket),
         ticket
       });
     }

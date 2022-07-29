@@ -1,9 +1,37 @@
-## Changelog
+# Changelog
+
+### 28/07/2022
+
+- [Fila Obrigatórias na Abertura e Aceite de Tickets](https://github.com/rtenorioh/Press-Ticket/commit/f246ea24a30e2748397eb1e50f84b19cd9214a64).
+
+### 27/07/2022
+
+- [Atualização da lib wwebjs de 1.17.0 para 1.17.1](https://github.com/rtenorioh/Press-Ticket/commit/7c8c1aa936a17b7f5e939cbe6d9e69f8f3a39ed9);
+- [Location and timestamp for filenames](https://github.com/rtenorioh/Press-Ticket/pull/28); e
+- [Correção na tradução](https://github.com/rtenorioh/Press-Ticket/commit/025edbcf7870f09b5f7d09a63aee49a54ad7fc86).
+
+### 15/07/2022
+
+- [Atualização dos .gitignore](https://github.com/rtenorioh/Press-Ticket/commit/2e3f9f11edcb8f78b2148952e3406458eb4bf21f).
+
+### 30/06/2022
+
+- [Correção no nome dos arquivos salvos na pasta public do backend](https://github.com/rtenorioh/Press-Ticket/commit/38ce3a6d2e0f75e523e006e1c465646e465ef80b);
+- [Implementação da tag {{ticket_id}} e correções](https://github.com/rtenorioh/Press-Ticket/commit/9c922767b82252cd11adcd67e62558ae81f21d0f);
+- [Criado as migration para inserção na Tabela ```Queue``` dos campos ```startWork```, ```endWork``` e ```absenceMessage```](https://github.com/rtenorioh/Press-Ticket/commit/ad5fced30354ab06459e392b124c9581d74f8707);
+- [Atualização da versão do sistema](https://github.com/rtenorioh/Press-Ticket/commit/ab7f6cbdf1cd2589afc0c993759e4d7d369fa629); e
+- [Atualização do README](https://github.com/rtenorioh/Press-Ticket/commit/67f4625116d49680138c3747ca0f868a698a26a5).
+
+
+### 28/06/2022
+
+- [Correção na leitura do QR no tema Dark](https://github.com/rtenorioh/Press-Ticket/commit/583422d328299ba0e093871f2e1fcd64733fe59d);
+- [Whatsapp padrão do usuário e vários ticket por contato](https://github.com/rtenorioh/Press-Ticket/commit/930db4715a0895412e7deb7688c2c4b46c18a5cb); e
+- [Atualização do README](https://github.com/rtenorioh/Press-Ticket/commit/3fa28a5aba6f28395700230bb7384628e9b8ad8a).
 
 ### 18/06/2022
 
-- [Horário de atendimento por setor](https://github.com/rtenorioh/Press-Ticket/commit/0a86350a3a6f7d9422c3826ca0eea7d807f864ba) 
-  - Deverá inserir manualmente no BD as colunas ```startWork```, ```endWork``` e ```absenceMessage``` na tabela ```Queue```;
+- [Horário de atendimento por setor](https://github.com/rtenorioh/Press-Ticket/commit/0a86350a3a6f7d9422c3826ca0eea7d807f864ba);
 - [Atualização de domínio e organização de conteúdo](https://github.com/rtenorioh/Press-Ticket/commit/a17d03ac5144f23a4c3e4e098036c7b4d8d9c610); e
 - [Correção para o usuário não entrar em setor fora do horário de atendimento](https://github.com/rtenorioh/Press-Ticket/commit/32598d27e7684b1a729979f9560befc74cc2abea); e
 - [Atualização da versão do sistema](https://github.com/rtenorioh/Press-Ticket/commit/53c789a7ed503f156cbb944b295821c3e4985ab2).
