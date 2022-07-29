@@ -34,7 +34,7 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     throw new AppError("ERR_USER_CREATION_COUNT", 403);
   }
 	
-  const { email, password, name, profile, queueIds } = req.body;
+  const { email, password, name, profile, queueIds, whatsappId } = req.body;
 
   if (
     req.url === "/signup" &&
@@ -50,7 +50,8 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     password,
     name,
     profile,
-    queueIds
+    queueIds,
+    whatsappId
   });
 
   const io = getIO();
@@ -83,7 +84,6 @@ export const update = async (
     throw new AppError("ERR_NO_PERMISSION", 403);
   }
 
-  //const { userId } = req.params;
   const userData = req.body;
 
   const user = await UpdateUserService({ userData, userId });

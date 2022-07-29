@@ -30,7 +30,7 @@ const SendWhatsAppMessage = async ({
   try {
     const sentMessage = await wbot.sendMessage(
       `${ticket.contact.number}@${ticket.isGroup ? "g" : "c"}.us`,
-      formatBody(body, ticket.contact),
+      formatBody(body, ticket),
       {
         quotedMessageId: quotedMsgSerializedId,
         linkPreview: false

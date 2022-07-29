@@ -217,6 +217,7 @@ const messages = {
           password: "Senha",
           profile: "Perfil",
           admin: "Administrador",
+          whatsapp: "Conexão Padrão",
           user: "Usuário",
         },
         buttons: {
@@ -259,7 +260,9 @@ const messages = {
       transferTicketModal: {
         title: "Transferir Ticket",
         fieldLabel: "Digite para buscar usuários",
+        fieldConnectionLabel: "Transferir para conexão",
         fieldQueuePlaceholder: "Transferir para o Setor",
+        fieldConnectionPlaceholder: "Selecione uma conexão",
         noOptions: "Nenhum usuário encontrado com esse nome",
         buttons: {
           ok: "Transferir",
@@ -272,8 +275,22 @@ const messages = {
         noTicketsTitle: "Nada aqui!",
         noTicketsMessage: "Nenhum ticket encontrado com esse status ou termo pesquisado",
         connectionTitle: "Conexão que está sendo utilizada atualmente.",
+        items:{
+          queueless: "Sem Setor",
+          accept: "Aceitar",
+          spy: "Espiar",
+          close: "Encerrar",
+          reopen: "Reabrir"
+        },
         buttons: {
           accept: "Responder",
+          acceptBeforeBot: "Aceitar",
+          start: "iniciar",
+          cancel: "Cancelar"
+        },
+        acceptModal: {
+          title: "Aceitar Chat",
+          queue: "Selecionar setor"
         },
       },
       newTicketModal: {
@@ -302,13 +319,7 @@ const messages = {
           apidocs: "Documentação",
           apititle: "API",
           apikey: "API Key",
-          token: "Token",
-          Groups: "Grupos",
-          SMS: "SMS",
-          VoiceCall: "Chamada Telefônica",
-          tfaq: "FAQ",
-          tsuporte: "Suporte",
-          Historico: "Histórico"
+          token: "Token"
         },
         appBar: {
           site: {
@@ -341,8 +352,7 @@ const messages = {
         },
         confirmationModal: {
           deleteTitle: "Excluir",
-          deleteMessage:
-            "Você tem certeza? Essa ação não pode ser revertida! Os tickets desse setor continuarão existindo, mas não terão mais nenhuma setor atribuído.",
+          deleteMessage: "Você tem certeza? Essa ação não pode ser revertida! Os tickets desse setor continuarão existindo, mas não terão mais nenhuma setor atribuído.",
         },
       },
       queueSelect: {
@@ -363,8 +373,7 @@ const messages = {
         },
         searchPlaceholder: "Pesquisar...",
         confirmationModal: {
-          deleteTitle:
-            "Você tem certeza que quer excluir esta Resposta Rápida: ",
+          deleteTitle: "Você tem certeza que quer excluir esta Resposta Rápida: ",
           deleteMessage: "Esta ação não pode ser revertida.",
         },
       },
@@ -374,6 +383,7 @@ const messages = {
           name: "Nome",
           email: "E-mail",
           profile: "Perfil",
+          whatsapp: "Conexão Padrão",
           actions: "Ações",
         },
         buttons: {
@@ -451,6 +461,10 @@ const messages = {
               "7200" : "2 horas",
               "21600" : "6 horas",
               "43200" : "12 horas",
+              "86400" : "24 horas",
+              "604800" : "7 dias",
+              "1296000" : "15 dias",
+              "2592000" : "30 dias",
             },
           },
         },

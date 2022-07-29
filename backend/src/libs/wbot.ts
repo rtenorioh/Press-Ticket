@@ -35,6 +35,7 @@ const syncUnreadMessages = async (wbot: Session) => {
 export const initWbot = async (whatsapp: Whatsapp): Promise<Session> => {
   return new Promise((resolve, reject) => {
     try {
+      logger.level = "trace";
       const io = getIO();
       const sessionName = whatsapp.name;
       let sessionCfg;
@@ -42,14 +43,14 @@ export const initWbot = async (whatsapp: Whatsapp): Promise<Session> => {
       if (whatsapp && whatsapp.session) {
         sessionCfg = JSON.parse(whatsapp.session);
       }
-	  
-	  const wbot: Session = new Client({
+
+      const wbot: Session = new Client({
         session: sessionCfg,
-        authStrategy: new LocalAuth({clientId: 'bd_'+whatsapp.id}),
-        puppeteer: { 
-        args: ['--no-sandbox', '--disable-setuid-sandbox'],
+        authStrategy: new LocalAuth({ clientId: 'bd_' + whatsapp.id }),
+        puppeteer: {
+          args: ['--no-sandbox', '--disable-setuid-sandbox'],
           executablePath: process.env.CHROME_BIN || undefined
-      },
+        },
       });
 
       wbot.initialize();
@@ -73,9 +74,9 @@ export const initWbot = async (whatsapp: Whatsapp): Promise<Session> => {
 
       wbot.on("authenticated", async session => {
         logger.info(`Session: ${sessionName} AUTHENTICATED`);
-//        await whatsapp.update({
-//          session: JSON.stringify(session)
-//        });
+        //        await whatsapp.update({
+        //          session: JSON.stringify(session)
+        //        });
       });
 
       wbot.on("auth_failure", async msg => {
@@ -126,7 +127,7 @@ export const initWbot = async (whatsapp: Whatsapp): Promise<Session> => {
 
         resolve(wbot);
       });
-    } catch (err) {
+    } catch (err: any) {
       logger.error(err);
     }
   });
@@ -148,7 +149,7 @@ export const removeWbot = (whatsappId: number): void => {
       sessions[sessionIndex].destroy();
       sessions.splice(sessionIndex, 1);
     }
-  } catch (err) {
+  } catch (err: any) {
     logger.error(err);
   }
 };

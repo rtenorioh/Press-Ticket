@@ -45,8 +45,8 @@ const QrcodeModal = ({ open, onClose, whatsAppId }) => {
 
 	return (
 		<Dialog open={open} onClose={onClose} maxWidth="lg" scroll="paper">
-			<DialogContent>
-				<Paper elevation={0}>
+			<DialogContent style={{background: '#ffffff'}}>
+				<Paper elevation={0} style={{background: '#ffffff'}}>
 					<Typography color="primary" gutterBottom>
 						{i18n.t("qrCode.message")}
 					</Typography>
