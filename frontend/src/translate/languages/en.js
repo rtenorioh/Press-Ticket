@@ -275,7 +275,8 @@ const messages = {
           accept: "Accept",
           spy: "Spy",
           close: "Close",
-          reopen: "Reopen"
+          reopen: "Reopen",
+          return: "Move to waiting"
         },
         buttons: {
           accept: "Reply",
