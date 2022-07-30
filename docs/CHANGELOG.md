@@ -1,8 +1,15 @@
 # Changelog
 
+### 29/07/2022
+
+- [Filtrar Notificações pelo Setor do Usuário](https://github.com/rtenorioh/Press-Ticket/commit/8e66d6ab80d8fbe83c70f6af9633c4a4f9096c68);
+- [Correção para aceitar ticket](https://github.com/rtenorioh/Press-Ticket/commit/d61d67da2e64b400c47091346ed29edff7c3919b); e
+- [Correção na label e dias de inatividade](https://github.com/rtenorioh/Press-Ticket/commit/741ec0521dec2034b591da7bb010e28aaecc98d9).
+
 ### 28/07/2022
 
-- [Fila Obrigatórias na Abertura e Aceite de Tickets](https://github.com/rtenorioh/Press-Ticket/commit/f246ea24a30e2748397eb1e50f84b19cd9214a64).
+- [Fila Obrigatórias na Abertura e Aceite de Tickets](https://github.com/rtenorioh/Press-Ticket/commit/f246ea24a30e2748397eb1e50f84b19cd9214a64); e
+- [Filtrar Histórico de Tickets por Fila e Conexão](https://github.com/rtenorioh/Press-Ticket/commit/53bf789dcb7fc1d44f5ba78d3e05379f7deac124).
 
 ### 27/07/2022
 
