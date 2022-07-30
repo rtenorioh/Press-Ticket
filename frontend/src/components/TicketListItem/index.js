@@ -239,10 +239,10 @@ const TicketListItem = ({ ticket }) => {
 			<ListItem
 				dense
 				button
-				// onClick={e => {
-				// 	if (ticket.status === "pending") return;
-				// 	handleSelectTicket(ticket.id);
-				// }}
+				onClick={e => {
+					if (ticket.status === "pending") return;
+					handleSelectTicket(ticket.id);
+				}}
 				selected={ticketId && +ticketId === ticket.id}
 				className={clsx(classes.ticket, {
 					[classes.pendingTicket]: (ticket.status === "pending"),
