@@ -346,11 +346,12 @@ const TicketListItem = ({ ticket }) => {
 							color="primary"
 							onClick={e => handleClosedTicket(ticket.id)} >
 							<ClearOutlinedIcon />
+							3
 						</IconButton>
 					</Tooltip>
 				)}
 				{ticket.status === "open" && (
-					<Tooltip title={i18n.t("ticketsList.items.reopen")}>
+					<Tooltip title={i18n.t("ticketsList.items.return")}>
 						<IconButton
 							className={classes.bottomButton}
 							color="primary"

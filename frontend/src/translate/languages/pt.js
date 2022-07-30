@@ -280,7 +280,8 @@ const messages = {
           accept: "Aceitar",
           spy: "Espiar",
           close: "Encerrar",
-          reopen: "Reabrir"
+          reopen: "Reabrir",
+          return: "Mover para aguardando"
         },
         buttons: {
           accept: "Responder",
