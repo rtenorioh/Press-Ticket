@@ -1,8 +1,25 @@
 # Changelog
 
+### 04/08/2022
+
+- [Inclusão da logo na página de ticket](https://github.com/rtenorioh/Press-Ticket/commit/a0bc96a2c40d9b1875cc216b8981b92b7e6e15ed);
+- [Remoção do console.log](https://github.com/rtenorioh/Press-Ticket/commit/7712ef98a500d8ef72bf52c147b3fc4d6a211c63); e
+- [Inclusão das áreas Sobre e Referência](https://github.com/rtenorioh/Press-Ticket/commit/6c1c9d4fc6f98b01b74e5b4508e41fa60135569e).
+
+### 30/07/2022
+
+- [Correção para aceitar ticket com setor definidos](https://github.com/rtenorioh/Press-Ticket/commit/2af3ee6b51346087a8be3b7b943faab5aa7386cd).
+
+### 29/07/2022
+
+- [Filtrar Notificações pelo Setor do Usuário](https://github.com/rtenorioh/Press-Ticket/commit/8e66d6ab80d8fbe83c70f6af9633c4a4f9096c68);
+- [Correção para aceitar ticket](https://github.com/rtenorioh/Press-Ticket/commit/d61d67da2e64b400c47091346ed29edff7c3919b); e
+- [Correção na label e dias de inatividade](https://github.com/rtenorioh/Press-Ticket/commit/741ec0521dec2034b591da7bb010e28aaecc98d9).
+
 ### 28/07/2022
 
-- [Fila Obrigatórias na Abertura e Aceite de Tickets](https://github.com/rtenorioh/Press-Ticket/commit/f246ea24a30e2748397eb1e50f84b19cd9214a64).
+- [Fila Obrigatórias na Abertura e Aceite de Tickets](https://github.com/rtenorioh/Press-Ticket/commit/f246ea24a30e2748397eb1e50f84b19cd9214a64); e
+- [Filtrar Histórico de Tickets por Fila e Conexão](https://github.com/rtenorioh/Press-Ticket/commit/53bf789dcb7fc1d44f5ba78d3e05379f7deac124).
 
 ### 27/07/2022
 

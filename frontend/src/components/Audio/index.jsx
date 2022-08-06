@@ -11,8 +11,6 @@ export default function({url}) {
     const [showButtonRate, setShowButtonRate] = useState(false);
 
     useEffect(() => {
-        console.log('set-ar', audioRate);
-
         audioRef.current.playbackRate = audioRate;
         localStorage.setItem(LS_NAME, audioRate);
     }, [audioRate]);
@@ -50,8 +48,6 @@ export default function({url}) {
                 break;
         }
 
-        console.log('new-ar', newRate);
-
         setAudioRate(newRate);
     };
 
@@ -63,4 +59,4 @@ export default function({url}) {
             {showButtonRate && <Button style={{marginLeft: "5px", marginTop: "-45px"}} onClick={toogleRate}>{audioRate}x</Button>}
         </>
     );
-}  
+}
