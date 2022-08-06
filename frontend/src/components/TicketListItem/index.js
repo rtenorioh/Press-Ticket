@@ -329,6 +329,16 @@ const TicketListItem = ({ ticket }) => {
 						</IconButton>
 					</Tooltip>
 				)}
+				{ticket.status === "pending" && ticket.queue !== null && (
+					<Tooltip title={i18n.t("ticketsList.items.accept")}>
+						<IconButton
+							className={classes.bottomButton}
+							color="primary"
+							onClick={e => handleAcepptTicket(ticket.id)} >
+							<DoneIcon />
+						</IconButton>
+					</Tooltip>
+				)}
 				{ticket.status === "pending" && (
 					<Tooltip title={i18n.t("ticketsList.items.spy")}>
 						<IconButton
