@@ -1,5 +1,13 @@
 # Changelog
 
+### 07/08/2022
+
+-[Correções e script de atualização](https://github.com/rtenorioh/Press-Ticket/commit/d67a798dce0c4220f6d19028cb9e6f57669611b2).
+
+### 05/08/2022
+
+- [Atualização de versão](https://github.com/rtenorioh/Press-Ticket/commit/bcf255b0ded47a712b61f64f3698e6f0d76644f7).
+
 ### 04/08/2022
 
 - [Inclusão da logo na página de ticket](https://github.com/rtenorioh/Press-Ticket/commit/a0bc96a2c40d9b1875cc216b8981b92b7e6e15ed);
