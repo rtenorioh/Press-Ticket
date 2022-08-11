@@ -298,6 +298,18 @@ const Settings = () => {
 							<option value="43200">
 								{i18n.t("settings.settings.timeCreateNewTicket.options.43200")}
 							</option>
+							<option value="86400">
+								{i18n.t("settings.settings.timeCreateNewTicket.options.86400")}
+							</option>
+							<option value="604800">
+								{i18n.t("settings.settings.timeCreateNewTicket.options.604800")}
+							</option>
+							<option value="1296000">
+								{i18n.t("settings.settings.timeCreateNewTicket.options.1296000")}
+							</option>
+							<option value="2592000">
+								{i18n.t("settings.settings.timeCreateNewTicket.options.2592000")}
+							</option>
 						</Select>
 				             </Paper>
 					</Tooltip>
