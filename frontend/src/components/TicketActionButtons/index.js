@@ -91,7 +91,9 @@ const TicketActionButtons = ({ ticket }) => {
 					>
 						{i18n.t("messagesList.header.buttons.resolve")}
 					</ButtonWithSpinner>
-					<IconButton onClick={handleOpenTicketOptionsMenu}>
+					<IconButton 
+					color="primary"
+					onClick={handleOpenTicketOptionsMenu}>
 						<MoreVert />
 					</IconButton>
 					<TicketOptionsMenu

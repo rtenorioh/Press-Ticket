@@ -103,12 +103,12 @@ const TicketsManager = () => {
 
   const [searchParam, setSearchParam] = useState("");
   const [tab, setTab] = useState("open");
-  const [tabOpen, setTabOpen] = useState("open");
+  const [tabOpen] = useState("open");
   const [newTicketModalOpen, setNewTicketModalOpen] = useState(false);
   const [showAllTickets, setShowAllTickets] = useState(false);
   const { user } = useContext(AuthContext);
 
-  const [openCount, setOpenCount] = useState(0);
+  const [, setOpenCount] = useState(0);
   const [pendingCount, setPendingCount] = useState(0);
 
   const userQueueIds = user.queues.map((q) => q.id);
@@ -118,6 +118,7 @@ const TicketsManager = () => {
     if (user.profile.toUpperCase() === "ADMIN") {
       setShowAllTickets(true);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const handleSearch = (e) => {

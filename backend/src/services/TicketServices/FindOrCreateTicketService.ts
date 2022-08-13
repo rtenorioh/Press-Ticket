@@ -1,5 +1,4 @@
-// import { subHours } from "date-fns";
-const add = require('date-fns/add');
+import { subSeconds } from "date-fns";
 import { Op } from "sequelize";
 import Contact from "../../models/Contact";
 import Ticket from "../../models/Ticket";
@@ -52,7 +51,7 @@ const FindOrCreateTicketService = async (
     ticket = await Ticket.findOne({
       where: {
         updatedAt: {
-          [Op.between]: [+add(new Date(), {seconds: timeCreateNewTicket}), +new Date()]
+          [Op.between]: [+subSeconds(new Date(), Number(timeCreateNewTicket)), +new Date()] 
         },
         contactId: contact.id,
         whatsappId: whatsappId
