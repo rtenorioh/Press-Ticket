@@ -1,5 +1,6 @@
 import React, { useState, useContext, useEffect } from "react";
 import clsx from "clsx";
+import {getColorThemeDefault, getSysName} from '../config.js';
 
 import {
   makeStyles,
@@ -221,7 +222,8 @@ const LoggedInLayout = ({ children }) => {
       <AppBar
         position="absolute"
         className={clsx(classes.appBar, drawerOpen && classes.appBarShift)}
-        color={process.env.NODE_ENV === "development" ? "inherit" : "primary"}
+        //color={process.env.NODE_ENV === "development" ? "inherit" : (typeof process.env.COLOR_THEME != undefined && process.env.COLOR_THEME != '' ? process.env.COLOR_THEME : 'primary')}
+        color={getColorThemeDefault()}
       >
         <Toolbar variant="dense" className={classes.toolbar}>
           <IconButton
@@ -243,9 +245,10 @@ const LoggedInLayout = ({ children }) => {
             noWrap
             className={classes.title}
           >
-            {system.name}
+            {console.log(process,process.env)}
+            {getSysName()} t
             <span className={classes.systemCss}>
-              {"(v"}{system.version}{")"}
+              {typeof process.env.SHOW_SYS_VERSION !== 'undefined' || process.env.SHOW_SYS_VERSION === 0 ? '' : "(v" + system.version + ")"}
             </span>
           </Typography>
           {user.id && <NotificationsPopOver />}
