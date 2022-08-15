@@ -1,8 +1,13 @@
 # Changelog
 
+### 11/08/2022
+
+- [Time new create ticket update](https://github.com/rtenorioh/Press-Ticket/pull/41);
+- [Correções](https://github.com/rtenorioh/Press-Ticket/commit/fb208768bd2a5f1384b0fbb102dc800cca5ba778);
+
 ### 07/08/2022
 
--[Correções e script de atualização](https://github.com/rtenorioh/Press-Ticket/commit/d67a798dce0c4220f6d19028cb9e6f57669611b2).
+- [Correções e script de atualização](https://github.com/rtenorioh/Press-Ticket/commit/d67a798dce0c4220f6d19028cb9e6f57669611b2).
 
 ### 05/08/2022
 
