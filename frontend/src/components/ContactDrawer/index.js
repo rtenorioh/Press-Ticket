@@ -103,7 +103,9 @@ const ContactDrawer = ({ open, handleDrawerClose, contact, loading }) => {
 			}}
 		>
 			<div className={classes.header}>
-				<IconButton onClick={handleDrawerClose}>
+				<IconButton
+					color="primary"
+					onClick={handleDrawerClose}>
 					<CloseIcon />
 				</IconButton>
 				<Typography style={{ justifySelf: "center" }}>
@@ -128,7 +130,7 @@ const ContactDrawer = ({ open, handleDrawerClose, contact, loading }) => {
 						{contact.email && (
 							<Typography>
 								<Link href={`mailto:${contact.email}`}>{contact.email}</Link>
-							</Typography>	
+							</Typography>
 						)}
 						<Button
 							variant="outlined"
