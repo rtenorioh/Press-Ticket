@@ -2,15 +2,15 @@ import Mustache from "mustache";
 import Ticket from "../models/Ticket";
 
 export const msgsd = (): string => {
-  
+
   let ms = "";
 
   const hh = new Date().getHours();
 
-  if (hh >= 6){ms = "Bom dia";}
-  if (hh > 11){ms = "Boa tarde";}
-  if (hh > 17){ms = "Boa noite";}
-  if (hh > 23 || hh < 6){ms = "Boa madrugada";}
+  if (hh >= 6) { ms = "Bom dia"; }
+  if (hh > 11) { ms = "Boa tarde"; }
+  if (hh > 17) { ms = "Boa noite"; }
+  if (hh > 23 || hh < 6) { ms = "Boa madrugada"; }
 
   return ms;
 };
@@ -24,6 +24,17 @@ export const control = (): string => {
 
   const ctrl = yy + mm + dd + "T";
   return ctrl;
+};
+
+export const date = (): string => {
+  const Hr = new Date();
+
+  const dd: string = ("0" + Hr.getDate()).slice(-2);
+  const mm: string = ("0" + (Hr.getMonth() + 1)).slice(-2);
+  const yy: string = Hr.getFullYear().toString();
+
+  const dates = dd + "-" + mm + "-" + yy;
+  return dates;
 };
 
 export const hour = (): string => {
@@ -42,8 +53,14 @@ export default (body: string, ticket?: Ticket): string => {
     name: ticket ? ticket.contact.name : "",
     ticket_id: ticket ? ticket.id : "",
     ms: msgsd(),
-    protocol: control(),
     hour: hour(),
+    date: date(),
+    queue: ticket ? ticket?.queue?.name : "",
+    connection: ticket ? ticket.whatsapp.name : "",
+    protocol: new Array(
+      control(),
+      ticket ? ticket.id.toString() : ""
+    ).join(""),
   };
 
   return Mustache.render(body, view);
