@@ -1,9 +1,21 @@
 # Changelog
 
+### 18/08/2022
+
+- [Correção e implementação de novas tags](https://github.com/rtenorioh/Press-Ticket/commit/a64c08ed0a75f10decfa890074fcdf326b5d84da).
+
+### 16/08/2022
+
+- [Atualização do README](https://github.com/rtenorioh/Press-Ticket/commit/901bce089384c599b582a504d790e19447614fb1).
+
+### 15/08/2022
+
+- [Correção no Tema Dark (botão fechar Contato)](https://github.com/rtenorioh/Press-Ticket/commit/5ac28d0626dca4089fa9c593dd3e32c4278f57c5).
+
 ### 11/08/2022
 
-- [Time new create ticket update](https://github.com/rtenorioh/Press-Ticket/pull/41);
-- [Correções](https://github.com/rtenorioh/Press-Ticket/commit/fb208768bd2a5f1384b0fbb102dc800cca5ba778);
+- [Time new create ticket update](https://github.com/rtenorioh/Press-Ticket/pull/41); e
+- [Correções](https://github.com/rtenorioh/Press-Ticket/commit/fb208768bd2a5f1384b0fbb102dc800cca5ba778).
 
 ### 07/08/2022
 
