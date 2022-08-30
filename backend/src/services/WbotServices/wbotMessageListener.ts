@@ -80,6 +80,10 @@ const verifyMediaMessage = async (
     if (!media.filename) {
         const ext = media.mimetype.split("/")[1].split(";")[0];
         media.filename = `${new Date().getTime()}.${ext}`;
+    } else {
+        const originalFilename = media.filename ? `-${media.filename}` : ''
+        // Always write a random filename
+        media.filename = `${new Date().getTime()}${originalFilename}`;
     }
 
     try {
@@ -111,11 +115,22 @@ const verifyMediaMessage = async (
     return newMessage;
 };
 
+const prepareLocation = (msg: WbotMessage): WbotMessage => {
+    const gmapsUrl = "https://maps.google.com/maps?q=" + msg.location.latitude + "%2C" + msg.location.longitude + "&z=17";
+    msg.body = "data:image/png;base64," + msg.body + "|" + gmapsUrl;
+    msg.body += "|" + (msg.location.description ? msg.location.description : (msg.location.latitude + ", " + msg.location.longitude))
+    return msg;
+};
+
 const verifyMessage = async (
     msg: WbotMessage,
     ticket: Ticket,
     contact: Contact
 ) => {
+
+    if (msg.type === 'location')
+        msg = prepareLocation(msg);
+
     const quotedMsg = await verifyQuotedMessage(msg);
     const messageData = {
         id: msg.id.id,
@@ -128,7 +143,7 @@ const verifyMessage = async (
         quotedMsgId: quotedMsg?.id,
     };
 
-    await ticket.update({ lastMessage: msg.body });
+    await ticket.update({ lastMessage: msg.type === "location" ? msg.location.description ? "Localization - " + msg.location.description.split('\\n')[0] : "Localization" : msg.body });
 
     await CreateMessageService({ messageData });
 };
@@ -247,7 +262,11 @@ const isValidMsg = (msg: WbotMessage): boolean => {
         msg.type === "vcard" ||
         msg.type === "call_log" ||
         // msg.type === "multi_vcard" ||
-        msg.type === "sticker"
+        msg.type === "sticker" ||
+        msg.type === "e2e_notification" || // Ignore Empty Messages Generated When Someone Changes His Account from Personal to Business or vice-versa
+        msg.type === "notification_template" || // Ignore Empty Messages Generated When Someone Changes His Account from Personal to Business or vice-versa
+        msg.author !== null || // Ignore Group Messages
+        msg.type === "location"
     )
         return true;
     return false;
@@ -294,6 +313,7 @@ const handleMessage = async (
 
             if (
                 !msg.hasMedia &&
+                msg.type !== "location" &&
                 msg.type !== "chat" &&
                 msg.type !== "vcard"
                 //  && msg.type !== "multi_vcard"
