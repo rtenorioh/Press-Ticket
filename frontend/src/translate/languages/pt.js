@@ -60,8 +60,7 @@ const messages = {
           deleteTitle: "Deletar",
           deleteMessage: "Você tem certeza? Essa ação não pode ser revertida.",
           disconnectTitle: "Desconectar",
-          disconnectMessage:
-            "Tem certeza? Você precisará ler o QR Code novamente.",
+          disconnectMessage: "Tem certeza? Você precisará ler o QR Code novamente.",
         },
         buttons: {
           add: "Adicionar WhatsApp",
@@ -74,21 +73,18 @@ const messages = {
         toolTips: {
           disconnected: {
             title: "Falha ao iniciar sessão do WhatsApp",
-            content:
-              "Certifique-se de que seu celular esteja conectado à internet e tente novamente, ou solicite um novo QR Code",
+            content: "Certifique-se de que seu celular esteja conectado à internet e tente novamente, ou solicite um novo QR Code",
           },
           qrcode: {
             title: "Esperando leitura do QR Code",
-            content:
-              "Clique no botão 'QR CODE' e leia o QR Code com o seu celular para iniciar a sessão",
+            content: "Clique no botão 'QR CODE' e leia o QR Code com o seu celular para iniciar a sessão",
           },
           connected: {
             title: "Conexão estabelecida!",
           },
           timeout: {
             title: "A conexão com o celular foi perdida",
-            content:
-              "Certifique-se de que seu celular esteja conectado à internet e o WhatsApp esteja aberto, ou clique no botão 'Desconectar' para obter um novo QR Code",
+            content: "Certifique-se de que seu celular esteja conectado à internet e o WhatsApp esteja aberto, ou clique no botão 'Desconectar' para obter um novo QR Code",
           },
         },
         table: {
@@ -97,7 +93,6 @@ const messages = {
           status: "Status",
           lastUpdate: "Última atualização",
           default: "Padrão",
-          battery: "Bateria",
           actions: "Ações",
           session: "Sessão",
         },
@@ -126,18 +121,22 @@ const messages = {
         title: "Contatos",
         toasts: {
           deleted: "Contato excluído com sucesso!",
+          deletedAll: "Todos contatos excluídos com sucesso!",
         },
         searchPlaceholder: "Pesquisar...",
         confirmationModal: {
           deleteTitle: "Deletar ",
-          importTitlte: "Importar contatos",
-          deleteMessage:
-            "Tem certeza que deseja deletar este contato? Todos os tickets relacionados serão perdidos.",
-          importMessage: "Deseja importas todos os contatos do telefone?",
+          deleteAllTitle: "Deletar Todos",
+          importTitle: "Importar contatos",
+          deleteMessage: "Tem certeza que deseja deletar este contato? Todos os tickets relacionados serão perdidos.",
+          deleteAllMessage: "Tem certeza que deseja deletar todos os contatos? Todos os tickets relacionados serão perdidos.",
+          importMessage: "Deseja importar todos os contatos do telefone?",
         },
         buttons: {
           import: "Importar Contatos",
           add: "Adicionar Contato",
+          export: "Exportar Contatos",
+          delete: "Excluir Todos Contatos"
         },
         table: {
           name: "Nome",
@@ -322,9 +321,6 @@ const messages = {
           token: "Token"
         },
         appBar: {
-          site: {
-            title: "Press Ticket"
-          },
           user: {
             profile: "Perfil",
             logout: "Sair",
@@ -394,8 +390,7 @@ const messages = {
         },
         confirmationModal: {
           deleteTitle: "Excluir",
-          deleteMessage:
-            "Todos os dados do usuário serão perdidos. Os tickets abertos deste usuário serão movidos para a espera.",
+          deleteMessage: "Todos os dados do usuário serão perdidos. Os tickets abertos deste usuário serão movidos para a espera.",
         },
       },
       settings: {
@@ -404,13 +399,15 @@ const messages = {
         settings: {
           userCreation: {
             name: "Criação de usuário",
+            note: "Permitir a criação de usuário",
             options: {
               enabled: "Ativado",
               disabled: "Desativado",
             },
           },
           CheckMsgIsGroup: {
-            name: "Ignorar Mensagens de Grupos",
+            name: "Mensagens de Grupos",
+            note: "Receber mensagens de grupos",
             options: {
               enabled: "Ativado",
               disabled: "Desativado",
@@ -482,8 +479,7 @@ const messages = {
       },
       messagesInput: {
         placeholderOpen: "Digite uma mensagem",
-        placeholderClosed:
-          "Reabra ou aceite esse ticket para enviar uma mensagem.",
+        placeholderClosed: "Reabra ou aceite esse ticket para enviar uma mensagem.",
         signMessage: "Assinar",
       },
       contactDrawer: {
@@ -498,8 +494,7 @@ const messages = {
         transfer: "Transferir",
         confirmationModal: {
           title: "Deletar o ticket do contato",
-          message:
-            "Atenção! Todas as mensagens relacionadas ao ticket serão perdidas.",
+          message: "Atenção! Todas as mensagens relacionadas ao ticket serão perdidas.",
         },
         buttons: {
           delete: "Excluir",

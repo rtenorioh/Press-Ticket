@@ -2,146 +2,146 @@ const messages = {
   es: {
     translations: {
       signup: {
-        title: "Registro",
+        title: "Registrarse",
         toasts: {
-          success:
-            "¡El usuario ha sido creado satisfactoriamente! ¡Ahora inicia sesión!",
-          fail: "Error creando el usuario. Verifica la data reportada.",
+          success: "¡Usuario creado con éxito! ¡Inicia sesión!",
+          fail: "Error al crear el usuario. Verifique los datos ingresados.",
         },
         form: {
           name: "Nombre",
-          email: "Correo Electrónico",
+          email: "Correo electrónico",
           password: "Contraseña",
         },
         buttons: {
-          submit: "Regístrate",
+          submit: "Registrarse",
           login: "¿Ya tienes una cuenta? ¡Inicia sesión!",
         },
       },
-      login: {
-        title: "Inicio de Sesión",
+      Login: {
+        title: "Iniciar sesión ahora",
         form: {
-          email: "Correo Electrónico",
-          password: "Contraseña",
+          email: "Ingrese correo electrónico",
+          password: "Ingrese su contraseña",
         },
         buttons: {
-          submit: "Ingresa",
-          register: "¿No tienes cuenta? ¡Regístrate!",
+          submit: "Iniciar sesión",
+          register: "¿No tienes una cuenta? ¡Regístrate!",
         },
       },
       auth: {
         toasts: {
-          success: "¡Inicio de sesión exitoso!",
+          success: "¡El inicio de sesión fue exitoso!",
         },
       },
       dashboard: {
         charts: {
           perDay: {
-            title: "Tickets hoy: ",
+            title: "Boletos de hoy:",
           },
         },
         messages: {
           inAttendance: {
-            title: "En servicio"
+            title: "En asistencia"
           },
           waiting: {
             title: "Esperando"
           },
           closed: {
-            title: "Finalizado"
+            title: "Resuelto"
           }
         }
       },
       connections: {
         title: "Conexiones",
         toasts: {
-          deleted:
-            "¡La conexión de WhatsApp ha sido borrada satisfactoriamente!",
+          deleted: "¡La conexión de WhatsApp se eliminó correctamente!",
         },
         confirmationModal: {
-          deleteTitle: "Borrar",
-          deleteMessage: "¿Estás seguro? Este proceso no puede ser revertido.",
+          deleteTitle: "Eliminar",
+          deleteMessage: "¿Estás seguro? Esta acción no se puede revertir.",
           disconnectTitle: "Desconectar",
-          disconnectMessage: "Estás seguro? Deberá volver a leer el código QR",
+          disconnectMessage: "¿Estás seguro? Deberás escanear el código QR nuevamente.",
         },
         buttons: {
-          add: "Agrega WhatsApp",
-          disconnect: "Desconectar",
-          tryAgain: "Inténtalo de nuevo",
-          qrcode: "QR CODE",
-          newQr: "Nuevo QR CODE",
+          add: "Agregar WhatsApp",
+          disconnect: "desconectar",
+          tryAgain: "Intentar de nuevo",
+          qrcode: "CÓDIGO QR",
+          newQr: "Nuevo CÓDIGO QR",
           connecting: "Conectando",
         },
         toolTips: {
           disconnected: {
-            title: "No se pudo iniciar la sesión de WhatsApp",
-            content:
-              "Asegúrese de que su teléfono celular esté conectado a Internet y vuelva a intentarlo o solicite un nuevo código QR",
+            title: "Error al iniciar sesión en WhatsApp",
+            content: "Asegúrese de que su teléfono celular esté conectado a Internet y vuelva a intentarlo, o solicite un nuevo Código QR",
           },
           qrcode: {
-            title: "Esperando la lectura del código QR",
-            content:
-              "Haga clic en el botón 'CÓDIGO QR' y lea el Código QR con su teléfono celular para iniciar la sesión",
+            title: "Esperando para leer el código QR",
+            content: "Haga clic en el botón 'CÓDIGO QR' y escanee el código QR con su teléfono celular para iniciar sesión.",
           },
           connected: {
-            title: "Conexión establecida",
+            title: "¡Conexión establecida!",
           },
           timeout: {
-            title: "Se perdió la conexión con el teléfono celular",
-            content:
-              "Asegúrese de que su teléfono celular esté conectado a Internet y que WhatsApp esté abierto, o haga clic en el botón 'Desconectar' para obtener un nuevo código QR",
+            title: "Se perdió la conexión con el celular",
+            content: "Asegúrese de que su móvil esté conectado a Internet y WhatsApp esté abierto, o haga clic en el botón 'Desconectar' para obtener un nuevo código QR",
           },
         },
         table: {
+          id: "ID de instancia",
           name: "Nombre",
           status: "Estado",
-          lastUpdate: "Última Actualización",
-          default: "Por Defecto",
+          lastUpdate: "Última actualización",
+          default: "Predeterminado",
           actions: "Acciones",
           session: "Sesión",
         },
       },
       whatsappModal: {
         title: {
-          add: "Agrega WhatsApp",
-          edit: "Edita WhatsApp",
+          add: "Agregar WhatsApp",
+          edit: "Editar WhatsApp",
         },
         form: {
           name: "Nombre",
-          default: "Por Defecto",
+          default: "Predeterminado",
+          farewellMessage: "Mensaje de despedida"
         },
         buttons: {
           okAdd: "Agregar",
           okEdit: "Guardar",
           cancel: "Cancelar",
         },
-        success: "WhatsApp guardado satisfactoriamente.",
+        success: "WhatsApp se guardó correctamente.",
       },
       qrCode: {
-        message: "Lée el código QR para empezar la sesión.",
+        message: "Lee el QRCode para iniciar sesión",
       },
       contacts: {
         title: "Contactos",
         toasts: {
-          deleted: "¡Contacto borrado satisfactoriamente!",
+          deleted: "¡Contacto eliminado con éxito!",
+          deletedAll: "¡Todos los contactos se eliminaron con éxito!",
         },
         searchPlaceholder: "Buscar...",
         confirmationModal: {
-          deleteTitle: "Borrar",
-          importTitlte: "Importar contactos",
-          deleteMessage:
-            "¿Estás seguro que deseas borrar este contacto? Todos los tickets relacionados se perderán.",
-          importMessage:
-            "¿Quieres importar todos los contactos desde tu teléfono?",
+          deleteTitle: "Eliminar",
+          deleteAllTitle: "Borrar todo",
+          importTitle: "Importar contactos",
+          deleteMessage: "¿Está seguro de que desea eliminar este contacto? Se perderán todos los tickets relacionados.",
+          deleteAllMessage: "¿Está seguro de que desea eliminar todos los contactos? Se perderán todos los tickets relacionados.",
+          importMessage: "¿Quieres importar todos los contactos del teléfono?",
         },
         buttons: {
-          import: "Importar Contactos",
-          add: "Agregar Contacto",
+          import: "Importar contactos",
+          add: "Agregar contacto",
+          export: "Exportar contactos",
+          delete: "Eliminar todos los contactos"
         },
         table: {
           name: "Nombre",
           whatsapp: "WhatsApp",
-          email: "Correo Electrónico",
+          email: "Correo electrónico",
           actions: "Acciones",
         },
       },
@@ -151,21 +151,21 @@ const messages = {
           edit: "Editar contacto",
         },
         form: {
-          mainInfo: "Detalles del contacto",
+          mainInfo: "Datos de contacto",
           extraInfo: "Información adicional",
           name: "Nombre",
-          number: "Número de Whatsapp",
-          email: "Correo Electrónico",
-          extraName: "Nombre del Campo",
+          number: "Número de WhatsApp",
+          email: "Correo electrónico",
+          extraName: "Nombre de campo",
           extraValue: "Valor",
         },
         buttons: {
-          addExtraInfo: "Agregar información",
+          addExtraInfo: "Añadir información",
           okAdd: "Agregar",
           okEdit: "Guardar",
           cancel: "Cancelar",
         },
-        success: "Contacto guardado satisfactoriamente.",
+        success: "Contacto guardado con exito.",
       },
       quickAnswersModal: {
         title: {
@@ -181,51 +181,53 @@ const messages = {
           okEdit: "Guardar",
           cancel: "Cancelar",
         },
-        success: "Respuesta rápida guardada correctamente.",
+        success: "Respuesta rápida guardada con éxito.",
       },
       queueModal: {
         title: {
-          add: "Agregar cola",
-          edit: "Editar cola",
+          add: "Agregar Sector",
+          edit: "Editar Sector",
         },
         notification: {
           title: "¡Sector guardado con éxito!",
         },
         form: {
           name: "Nombre",
-          color: "Color",
-          greetingMessage: "Mensaje de saludo",
+          color: "Mensaje de saludo",
+          greetingMessage: "Apertura",
           startWork: "Apertura",
           endWork: "Cierre",
           absenceMessage: "Mensaje de ausencia",
-        },
-        buttons: {
-          okAdd: "Añadir",
-          okEdit: "Ahorrar",
-          cancel: "Cancelar",
-        },
-      },
-      userModal: {
-        title: {
-          add: "Agregar usuario",
-          edit: "Editar usuario",
-        },
-        form: {
-          name: "Nombre",
-          email: "Correo Electrónico",
-          password: "Contraseña",
-          whatsapp: "Conexión estándar",
-          profile: "Perfil",
         },
         buttons: {
           okAdd: "Agregar",
           okEdit: "Guardar",
           cancel: "Cancelar",
         },
-        success: "Usuario guardado satisfactoriamente.",
+      },
+      userModal: {
+        title: {
+          add: "Agregar Usuario",
+          edit: "Editar usuario",
+        },
+        form: {
+          name: "Nombre",
+          email: "Correo electrónico",
+          password: "Contraseña",
+          profile: "Perfil",
+          admin: "Administrador",
+          whatsapp: "Conexión estándar",
+          user: "Usuario",
+        },
+        buttons: {
+          okAdd: "Agregar",
+          okEdit: "Guardar",
+          cancel: "Cancelar",
+        },
+        success: "Usuario guardado con exito.",
       },
       chat: {
-        noTicketMessage: "Selecciona un ticket para empezar a chatear.",
+        noTicketMessage: "Seleccione un ticket para comenzar a chatear.",
       },
       ticketsManager: {
         buttons: {
@@ -233,51 +235,50 @@ const messages = {
         },
       },
       ticketsQueueSelect: {
-        placeholder: "Linhas",
+        placeholder: "Sectores",
       },
       tickets: {
         toasts: {
-          deleted: "El ticket en el que estabas ha sido borrado.",
+          deleted: "El ticket en el que estabas ha sido eliminado.",
         },
         notification: {
           message: "Mensaje de",
         },
         tabs: {
-          open: { title: "Bandeja" },
-          closed: { title: "Resueltos" },
+          open: { title: "Bandeja de entrada" },
+          closed: { title: "Resuelto" },
           search: { title: "Buscar" },
         },
         search: {
-          placeholder: "Buscar tickets y mensajes.",
+          placeholder: "Obtener tickets y mensajes",
         },
         buttons: {
           showAll: "Todos",
         },
       },
       transferTicketModal: {
-        title: "Transferir Ticket",
-        fieldLabel: "Escriba para buscar usuarios",
-        fieldQueueLabel: "Transferir a la cola",
-        fieldConnectionLabel: "Transferir to conexión",
-        fieldQueuePlaceholder: "Seleccione una cola",
+        title: "Boleto de transferencia",
+        fieldLabel: "Escriba para obtener usuarios",
+        fieldConnectionLabel: "Transferir a conexión",
+        fieldQueuePlaceholder: "Transferir a Sector",
         fieldConnectionPlaceholder: "Seleccione una conexión",
-        noOptions: "No se encontraron usuarios con ese nombre",
+        noOptions: "No se encontró ningún usuario con ese nombre",
         buttons: {
           ok: "Transferir",
           cancel: "Cancelar",
         },
       },
       ticketsList: {
-        pendingHeader: "Cola",
-        assignedHeader: "Trabajando en",
-        noTicketsTitle: "¡Nada acá!",
-        connectionTitle: "Conexión que se está utilizando actualmente.",
-        noTicketsMessage: "No se encontraron tickets con este estado o término de búsqueda",
+        pendingHeader: "Esperando",
+        assignedHeader: "Asignado",
+        noTicketsTitle: "¡Aquí no hay nada!",
+        noTicketsMessage: "No se encontraron boletos con este estado o término de búsqueda",
+        connectionTitle: "Conexión actualmente en uso.",
         items: {
           queueless: "Sin sector",
           accept: "Aceptar",
           spy: "Espía",
-          close: "cerca",
+          close: "Cerca",
           reopen: "Reabrir"
         },
         buttons: {
@@ -292,9 +293,9 @@ const messages = {
         },
       },
       newTicketModal: {
-        title: "Crear Ticket",
-        fieldLabel: "Escribe para buscar un contacto",
-        add: "Añadir",
+        title: "Crear ticket",
+        fieldLabel: "Entrar para buscar contacto",
+        add: "Agregar",
         buttons: {
           ok: "Guardar",
           cancel: "Cancelar",
@@ -302,25 +303,27 @@ const messages = {
       },
       mainDrawer: {
         listItems: {
-          dashboard: "Dashboard",
+          dashboard: "Tablero",
           connections: "Conexiones",
-          tickets: "Tickets",
+          tickets: "Boletos",
           contacts: "Contactos",
           quickAnswers: "Respuestas rápidas",
-          queues: "Linhas",
+          queues: "Sectores",
           administration: "Administración",
           users: "Usuarios",
           settings: "Configuración",
-          api: "uso de la API",
+          sendMsg: "Enviando Mensajes",
+          sendMedia: "Enviando medios",
+          api: "Uso de la API",
           apidocs: "Documentación",
           apititle: "API",
-          apikey: "API Key",
-          token: "Token"
+          apikey: "Clave API",
+          token: "Ficha"
         },
         appBar: {
           user: {
             profile: "Perfil",
-            logout: "Cerrar Sesión",
+            logout: "Cerrar sesión",
           },
         },
       },
@@ -328,7 +331,7 @@ const messages = {
         noTickets: "Sin notificaciones.",
       },
       queues: {
-        title: "Linhas",
+        title: "Sectores",
         notifications: {
           queueDeleted: "El sector ha sido eliminado.",
         },
@@ -336,205 +339,212 @@ const messages = {
           name: "Nombre",
           color: "Color",
           greeting: "Mensaje de saludo",
-          actions: "Comportamiento",
+          actions: "Acciones",
           startWork: "Apertura",
           endWork: "Cierre",
         },
-        buttons: {
-          add: "Agregar cola",
+          buttons: {
+            add: "Agregar sector",
+          },
+          confirmationModal: {
+            deleteTitle: "Eliminar",
+            deleteMessage: "¿Estás seguro? ¡Esta acción no se puede revertir! Los tickets de este sector seguirán existiendo, pero ya no tendrán ningún sector asignado.",
+          },
         },
-        confirmationModal: {
-          deleteTitle: "Eliminar",
-          deleteMessage: "¿Estás seguro? ¡Esta acción no se puede revertir! Los tickets en esa cola seguirán existiendo, pero ya no tendrán ninguna cola asignada.",
+        queueSelect: {
+          inputLabel: "Sectores",
         },
-      },
-      queueSelect: {
-        inputLabel: "Linhas",
-      },
-      quickAnswers: {
-        title: "Respuestas rápidas",
-        table: {
-          shortcut: "Atajo",
-          message: "Respuesta rápida",
-          actions: "Acciones",
+        quickAnswers: {
+          title: "Respuestas rápidas",
+          table: {
+            shortcut: "Atajo",
+            message: "Respuesta rápida",
+            actions: "Acciones",
+          },
+          buttons: {
+            add: "Agregar respuesta rápida",
+          },
+          toasts: {
+            deleted: "Respuesta rápida eliminada con éxito.",
+          },
+          searchPlaceholder: "Buscar...",
+          confirmationModal: {
+            deleteTitle: "¿Está seguro de que desea eliminar esta respuesta rápida: ",
+            deleteMessage: "Esta acción no se puede revertir.",
+          },
         },
-        buttons: {
-          add: "Agregar respuesta rápida",
+        users: {
+          title: "Usuarios",
+          table: {
+            name: "Nombre",
+            email: "Correo electrónico",
+            profile: "Perfil",
+            whatsapp: "Conexión estándar",
+            actions: "Acciones",
+          },
+          buttons: {
+            add: "Agregar Usuario",
+          },
+          toasts: {
+            deleted: "Usuario eliminado con éxito.",
+          },
+          confirmationModal: {
+            deleteTitle: "Eliminar",
+            deleteMessage: "Se perderán todos los datos del usuario. Los tickets abiertos para este usuario se moverán a espera.",
+          },
         },
-        toasts: {
-          deleted: "Respuesta rápida eliminada correctamente",
-        },
-        searchPlaceholder: "Buscar ...",
-        confirmationModal: {
-          deleteTitle: "¿Está seguro de que desea eliminar esta respuesta rápida?",
-          deleteMessage: "Esta acción no se puede deshacer.",
-        },
-      },
-      users: {
-        title: "Usuarios",
-        table: {
-          name: "Nombre",
-          email: "Correo Electrónico",
-          profile: "Perfil",
-          whatsapp: "Conexión estándar",
-          actions: "Acciones",
-        },
-        buttons: {
-          add: "Agregar usuario",
-        },
-        toasts: {
-          deleted: "Usuario borrado satisfactoriamente.",
-        },
-        confirmationModal: {
-          deleteTitle: "Borrar",
-          deleteMessage: "Toda la información del usuario se perderá. Los tickets abiertos de los usuarios se moverán a la cola.",
-        },
-      },
-      settings: {
-        success: "Configuración guardada satisfactoriamente.",
-        title: "Configuración",
         settings: {
-          userCreation: {
-            name: "Creación de usuarios",
-            options: {
-              enabled: "Habilitado",
-              disabled: "Deshabilitado",
+          success: "Configuración guardada con éxito.",
+          title: "Configuración",
+          settings: {
+            userCreation: {
+              name: "Creación de usuario",
+              note: "Permitir la creación de usuarios",
+              options: {
+                enabled: "Habilitado",
+                disabled: "Deshabilitado",
+              },
+            },
+            CheckMsgIsGroup: {
+              name: "Mensajes de grupo",
+              note: "Recibir mensajes de grupos",
+              options: {
+                enabled: "Habilitado",
+                disabled: "Deshabilitado",
+              },
+            },
+            call: {
+              name: "Aceptar llamadas",
+              note: "Si está deshabilitado, el cliente recibirá un mensaje de que no acepta llamadas de voz/video",
+              options: {
+                enabled: "Habilitado",
+                disabled: "Deshabilitado",
+              },
+            },
+            sideMenu: {
+              name: "Menú lateral de inicio",
+              note: "Si está habilitado, el menú lateral comenzará cerrado",
+              options: {
+                enabled: "Abrir",
+                disabled: "Cerrado",
+              },
+            },
+            closeTicketApi: {
+              name: "Cerrar ticket enviado API",
+              note: "Cierra automáticamente el ticket cuando se envía a través de API",
+              options: {
+                enabled: "Habilitado",
+                disabled: "Deshabilitado",
+              },
+            },
+            darkMode: {
+                name: "Habilitar modo oscuro",
+                note: "Cambiar entre el modo claro y el modo oscuro",
+                options: {
+                  enabled: "Habilitado",
+                  disabled: "Deshabilitado",
+                },
+            },
+            timeCreateNewTicket: {
+              name: "Crear nuevo ticket después",
+              note: "Seleccione el tiempo que tardará en abrir un nuevo ticket si el cliente lo contacta nuevamente",
+              options: {
+                "10": "10 segundos",
+                "30": "30 segundos",
+                "60": "1 minuto",
+                "300": "5 minutos",
+                "1800" : "30 minutos",
+                "3600" : "1 hora",
+                "7200" : "2 horas",
+                "21600" : "6 horas",
+                "43200" : "12 horas",
+                "86400" : "24 horas",
+                "604800" : "7 días",
+                "1296000" : "15 días",
+                "2592000" : "30 días",
+              },
             },
           },
         },
-      },
-      CheckMsgIsGroup: {
-        name: "Ignorar Mensajes Grupales",
-        options: {
-          enabled: "Habilitado",
-          disabled: "Deshabilitado",
-        },
-      },
-      sideMenu: {
-        name: "Menú lateral de inicio",
-        note: "Si está habilitado, el menú lateral comenzará cerrado",
-        options: {
-          enabled: "Abrir",
-          disabled: "Cerrado",
-        },
-      },
-      closeTicketApi: {
-        name: "Cerrar ticket enviado API",
-        note: "Cierra automáticamente el ticket cuando se envía a través de API",
-        options: {
-          enabled: "Habilitado",
-          disabled: "Deshabilitado",
-        },
-      },
-      darkMode: {
-        name: "Habilitar modo oscuro",
-        note: "Cambiar entre el modo claro y el modo oscuro",
-        options: {
-          enabled: "Habilitado",
-          disabled: "Deshabilitado",
-        },
-      },
-      timeCreateNewTicket: {
-        name: "Crear nuevo ticket después",
-        note: "Selecciona el tiempo que tardará en abrir un nuevo ticket si el cliente te vuelve a contactar",
-        options: {
-          "10": "10 Segundos",
-          "30": "30 Segundos",
-          "60": "1 minuto",
-          "300": "5 minutos",
-          "1800": "30 minutos",
-          "3600": "1 hora",
-          "7200": "2 horas",
-          "21600": "6 horas",
-          "43200": "12 horas",
-          "86400": "24 horas",
-          "604800": "7 días",
-          "1296000": "15 días",
-          "2592000": "30 días",
-        },
-      },
-      messagesList: {
-        header: {
-          assignedTo: "Asignado a:",
-          buttons: {
-            return: "Devolver",
-            resolve: "Resolver",
-            reopen: "Reabrir",
-            accept: "Aceptar",
+        messagesList: {
+          header: {
+            assignedTo: "Asignado:",
+            buttons: {
+              return: "Volver",
+              resolve: "Resolver",
+              reopen: "Reabrir",
+              accept: "Aceptar",
+            },
           },
         },
-      },
-      messagesInput: {
-        placeholderOpen: "Escriba un mensaje o presione '' / '' para usar las respuestas rápidas registradas",
-        placeholderClosed:
-          "Vuelva a abrir o acepte este ticket para enviar un mensaje.",
-        signMessage: "Firmar",
-      },
-      contactDrawer: {
-        header: "Detalles del contacto",
-        buttons: {
-          edit: "Editar contacto",
+        messagesInput: {
+          placeholderOpen: "Ingrese un mensaje",
+          placeholderClosed: "Reabrir o aceptar este ticket para enviar un mensaje.",
+          signMessage: "Suscribirse",
         },
-        extraInfo: "Otra información",
-      },
-      ticketOptionsMenu: {
-        delete: "Borrar",
-        transfer: "Transferir",
+        contactDrawer: {
+          header: "Datos de contacto",
+          buttons: {
+            edit: "Editar contacto",
+          },
+          extraInfo: "Otra información",
+        },
+        ticketOptionsMenu: {
+          delete: "Eliminar",
+          transfer: "Transferir",
+          confirmationModal: {
+            title: "Eliminar ticket de contacto",
+            message: "¡Atención! Todos los mensajes relacionados con el ticket se perderán.",
+          },
+          buttons: {
+            delete: "Eliminar",
+            cancel: "Cancelar",
+          },
+        },
         confirmationModal: {
-          title: "¿Borrar ticket #",
-          titleFrom: "del contacto ",
-          message:
-            "¡Atención! Todos los mensajes Todos los mensajes relacionados con el ticket se perderán.",
+          buttons: {
+            confirm: "Está bien",
+            cancel: "Cancelar",
+          },
         },
-        buttons: {
-          delete: "Borrar",
-          cancel: "Cancelar",
+        tablegeoOptionsMenu: {
+          delete: "Eliminar",
+          reply: "Responder",
+          confirmationModal: {
+            title: "¿Eliminar mensaje?",
+            message: "Esta acción no se puede revertir.",
+          },
         },
-      },
-      confirmationModal: {
-        buttons: {
-          confirm: "Ok",
-          cancel: "Cancelar",
+        backendErrors: {
+          ERR_NO_OTHER_WHATSAPP: "Debe haber al menos un WhatsApp predeterminado.",
+          ERR_NO_DEF_WAPP_FOUND: "No se encontró WhatsApp predeterminado. Verifique la página de conexiones.",
+          ERR_WAPP_NOT_INITIALIZED: "Esta sesión de WhatsApp no ​​fue inicializada. Por favor revisa la página de conexiones.",
+          ERR_WAPP_CHECK_CONTACT: "No se pudo verificar el contacto de WhatsApp. Verifique la página de conexiones.",
+          ERR_WAPP_INVALID_CONTACT: "Este no es un número de Whatsapp válido.",
+          ERR_WAPP_DOWNLOAD_MEDIA: "No se pueden descargar medios de WhatsApp. Verifique la página de conexiones",
+          ERR_INVALID_CREDENTIALS: "Error de autenticación. Vuelva a intentarlo",
+          ERR_SENDING_WAPP_MSG: "Error al enviar el mensaje de WhatsApp. Verificar página de conexiones.",
+          ERR_DELETE_WAPP_MSG: "No se pudo eliminar el mensaje de WhatsApp.",
+          ERR_OTHER_OPEN_TICKET: "Ya hay un ticket abierto para este contacto.",
+          ERR_SESSION_EXPIRED: "Sesión caducada. Inicie sesión.",
+          ERR_USER_CREATION_DISABLED: "La creación de usuarios ha sido deshabilitada por el administrador.",
+          ERR_NO_PERMISSION: "No tienes permiso para acceder a este recurso.",
+          ERR_DUPLICATED_CONTACT: "Ya existe un contacto con este número.",
+          ERR_NO_SETTING_FOUND: "No se encontraron configuraciones con esta ID.",
+          ERR_NO_CONTACT_FOUND: "No se encontró ningún contacto con esta ID.",
+          ERR_NO_TICKET_FOUND: "No se encontraron boletos con esta ID.",
+          ERR_NO_USER_FOUND: "No se encontró ningún usuario con esta ID.",
+          ERR_NO_WAPP_FOUND: "No se encontró WhatsApp con este ID.",
+          ERR_CREATING_MESSAGE: "Error al crear el mensaje en la base de datos.",
+          ERR_CREATING_TICKET: "Error al crear el ticket en la base de datos.",
+          ERR_FETCH_WAPP_MSG: "Error al obtener el mensaje en WhatsApp, puede ser demasiado antiguo.",
+          ERR_QUEUE_COLOR_ALREADY_EXISTS: "Este color ya está en uso, elige otro.",
+          ERR_WAPP_GREETING_REQUIRED: "El mensaje de saludo es obligatorio cuando hay más de un Sector.",
+          ERR_USER_CREATION_COUNT: "Límite de usuarios alcanzado, comuníquese con soporte para cambiar",
+          ERR_CONNECTION_CREATION_COUNT: "Límite de conexión alcanzado, comuníquese con soporte para cambiar.",
         },
-      },
-      messageOptionsMenu: {
-        delete: "Borrar",
-        reply: "Responder",
-        confirmationModal: {
-          title: "¿Borrar mensaje?",
-          message: "Esta acción no puede ser revertida.",
-        },
-      },
-      backendErrors: {
-        ERR_NO_OTHER_WHATSAPP: "Debe haber al menos una conexión de WhatsApp predeterminada.",
-        ERR_NO_DEF_WAPP_FOUND: "No se encontró WhatsApp predeterminado. Verifique la página de conexiones.",
-        ERR_WAPP_NOT_INITIALIZED: "Esta sesión de WhatsApp no ​​está inicializada. Verifique la página de conexiones.",
-        ERR_WAPP_CHECK_CONTACT: "No se pudo verificar el contacto de WhatsApp. Verifique la página de conexiones.",
-        ERR_WAPP_INVALID_CONTACT: "Este no es un número de whatsapp válido.",
-        ERR_WAPP_DOWNLOAD_MEDIA: "No se pudieron descargar los medios de WhatsApp. Verifique la página de conexiones.",
-        ERR_INVALID_CREDENTIALS: "Error de autenticación. Vuelva a intentarlo.",
-        ERR_SENDING_WAPP_MSG: "Error al enviar el mensaje de WhatsApp. Verifique la página de conexiones.",
-        ERR_DELETE_WAPP_MSG: "No se pudo borrar el mensaje de WhatsApp.",
-        ERR_OTHER_OPEN_TICKET: "Ya hay un ticket abierto para este contacto.",
-        ERR_SESSION_EXPIRED: "Sesión caducada. Inicie sesión.",
-        ERR_USER_CREATION_DISABLED: "La creación de usuarios fue deshabilitada por el administrador.",
-        ERR_NO_PERMISSION: "No tienes permiso para acceder a este recurso.",
-        ERR_DUPLICATED_CONTACT: "Ya existe un contacto con este número.",
-        ERR_NO_SETTING_FOUND: "No se encontró ninguna configuración con este ID.",
-        ERR_NO_CONTACT_FOUND: "No se encontró ningún contacto con este ID.",
-        ERR_NO_TICKET_FOUND: "No se encontró ningún ticket con este ID.",
-        ERR_NO_USER_FOUND: "No se encontró ningún usuario con este ID.",
-        ERR_NO_WAPP_FOUND: "No se encontró WhatsApp con este ID.",
-        ERR_CREATING_MESSAGE: "Error al crear el mensaje en la base de datos.",
-        ERR_CREATING_TICKET: "Error al crear el ticket en la base de datos.",
-        ERR_FETCH_WAPP_MSG: "Error al obtener el mensaje en WhtasApp, tal vez sea demasiado antiguo.",
-        ERR_QUEUE_COLOR_ALREADY_EXISTS: "Este color ya está en uso, elija otro.",
-        ERR_WAPP_GREETING_REQUIRED: "El mensaje de saludo es obligatorio cuando hay más de una cola.",
-        ERR_USER_CREATION_COUNT: "Se alcanzó el límite de usuarios; para cambiar, comuníquese con el soporte.",
-        ERR_CONNECTION_CREATION_COUNT: "Se alcanzó el límite de conexión, para cambiar, comuníquese con el soporte.",
       },
     },
-  },
-};
-
-export { messages };
+  };
+  
+  export { messages };

@@ -2,7 +2,7 @@
   "name": "frontend",
   "version": "0.1.0",
   "system": {
-    "version": "1.0.8",
+    "version": "1.1.0",
     "name": "Press Ticket",
     "url": "https://pressticket.com.br"
   },
@@ -25,6 +25,7 @@
     "qrcode.react": "^1.0.0",
     "react": "^16.13.1",
     "react-color": "^2.19.3",
+    "react-csv": "^2.2.2",
     "react-dom": "^16.13.1",
     "react-modal-image": "^2.5.0",
     "react-router-dom": "^5.2.0",
