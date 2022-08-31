@@ -1,5 +1,19 @@
 # Changelog
 
+### 31/08/2022
+
+- [Exportação e exclusão em massa de contatos](https://github.com/rtenorioh/Press-Ticket/commit/513f516c403a469125603feedf9a6bb095aee421).
+
+
+### 30/08/2022
+
+- [Minimizar consumo de recursos](https://github.com/rtenorioh/Press-Ticket/commit/6515138fe4e41f9686d9a6c90a4b7d406dc5dcce); e
+- [Localização e timestamp para nomes de arquivos](https://github.com/rtenorioh/Press-Ticket/commit/f1ad7bccc6169156cb135fe97154b4599e3a0cbd).
+
+### 26/08/2022
+
+- [Inclusão da variável DB_TIMEZONE](https://github.com/rtenorioh/Press-Ticket/commit/263097683042051a8c2e387dbfa519c734f2d004).
+
 ### 18/08/2022
 
 - [Correção e implementação de novas tags](https://github.com/rtenorioh/Press-Ticket/commit/a64c08ed0a75f10decfa890074fcdf326b5d84da).
