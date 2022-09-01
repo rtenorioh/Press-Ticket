@@ -59,14 +59,14 @@ const App = () => {
         },
       },
       palette: {
-        primary: { main: "#d500f9" },
+        primary: { main: "#52d869" },
         secondary: { main: "#ff9100" },
         background: {
           default: "#080d14",
           paper: "#181d22",
         },
         text: {
-          primary: "#d500f9",
+          primary: "#52d869",
           secondary: "#ffffff",
         },
       },
