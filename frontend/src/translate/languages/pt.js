@@ -363,14 +363,18 @@ const messages = {
         },
         buttons: {
           add: "Adicionar Resposta Rápida",
+          deleteAll: "Excluir Todas Respostas Rápidas",
         },
         toasts: {
           deleted: "Resposta Rápida excluída com sucesso.",
+          deletedAll: "Todas as Respostas Rápidas excluídas.",
         },
         searchPlaceholder: "Pesquisar...",
         confirmationModal: {
           deleteTitle: "Você tem certeza que quer excluir esta Resposta Rápida: ",
+          deleteAllTitle: "Você tem certeza que quer excluir todas Respostas Rápidas?",
           deleteMessage: "Esta ação não pode ser revertida.",
+          deleteAllMessage: "Esta ação não pode ser revertida.",
         },
       },
       users: {

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useReducer } from "react";
 import openSocket from "../../services/socket-io";
+import { useHistory } from "react-router-dom";
 
 import {
   Button,
@@ -13,20 +14,27 @@ import {
   TableRow,
   InputAdornment,
   TextField,
+  Tooltip
 } from "@material-ui/core";
-import { Edit, DeleteOutline } from "@material-ui/icons";
-import SearchIcon from "@material-ui/icons/Search";
+import {
+  AddCircleOutline,
+  DeleteForever,
+  DeleteOutline,
+  Edit,
+  Search
+} from "@material-ui/icons";
+
+import api from "../../services/api";
+import { i18n } from "../../translate/i18n";
 
 import MainContainer from "../../components/MainContainer";
 import MainHeader from "../../components/MainHeader";
 import MainHeaderButtonsWrapper from "../../components/MainHeaderButtonsWrapper";
 import Title from "../../components/Title";
-
-import api from "../../services/api";
-import { i18n } from "../../translate/i18n";
 import TableRowSkeleton from "../../components/TableRowSkeleton";
 import QuickAnswersModal from "../../components/QuickAnswersModal";
 import ConfirmationModal from "../../components/ConfirmationModal";
+
 import { toast } from "react-toastify";
 import toastError from "../../errors/toastError";
 
@@ -85,6 +93,7 @@ const useStyles = makeStyles((theme) => ({
 
 const QuickAnswers = () => {
   const classes = useStyles();
+  const history = useHistory();
 
   const [loading, setLoading] = useState(false);
   const [pageNumber, setPageNumber] = useState(1);
@@ -93,6 +102,7 @@ const QuickAnswers = () => {
   const [selectedQuickAnswers, setSelectedQuickAnswers] = useState(null);
   const [quickAnswersModalOpen, setQuickAnswersModalOpen] = useState(false);
   const [deletingQuickAnswers, setDeletingQuickAnswers] = useState(null);
+  const [deletingAllQuickAnswers, setDeletingAllQuickAnswers] = useState(null);
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
   const [hasMore, setHasMore] = useState(false);
 
@@ -173,6 +183,19 @@ const QuickAnswers = () => {
     setPageNumber(1);
   };
 
+  const handleDeleteAllQuickAnswers = async () => {
+    try {
+      await api.delete("/quickAnswers");
+      toast.success(i18n.t("quickAnswers.toasts.deletedAll"));
+      history.go(0);
+    } catch (err) {
+      toastError(err);
+    }
+    setDeletingAllQuickAnswers(null);
+    setSearchParam("");
+    setPageNumber();
+  };
+
   const loadMore = () => {
     setPageNumber((prevState) => prevState + 1);
   };
@@ -189,16 +212,20 @@ const QuickAnswers = () => {
     <MainContainer>
       <ConfirmationModal
         title={
-          deletingQuickAnswers &&
-          `${i18n.t("quickAnswers.confirmationModal.deleteTitle")} ${
-            deletingQuickAnswers.shortcut
-          }?`
+          deletingQuickAnswers ? `${i18n.t("quickAnswers.confirmationModal.deleteTitle")} ${deletingQuickAnswers.shortcut}?`
+          : `${i18n.t("quickAnswers.confirmationModal.deleteAllTitle")}`
         }
         open={confirmModalOpen}
         onClose={setConfirmModalOpen}
-        onConfirm={() => handleDeleteQuickAnswers(deletingQuickAnswers.id)}
+        onConfirm={() => 
+          deletingQuickAnswers ? handleDeleteQuickAnswers(deletingQuickAnswers.id)
+         : handleDeleteAllQuickAnswers(deletingAllQuickAnswers)
+        }
       >
-        {i18n.t("quickAnswers.confirmationModal.deleteMessage")}
+        {
+          deletingQuickAnswers ? `${i18n.t("quickAnswers.confirmationModal.deleteMessage")}`
+            : `${i18n.t("quickAnswers.confirmationModal.deleteAllMessage")}`
+        }
       </ConfirmationModal>
       <QuickAnswersModal
         open={quickAnswersModalOpen}
@@ -207,7 +234,7 @@ const QuickAnswers = () => {
         quickAnswerId={selectedQuickAnswers && selectedQuickAnswers.id}
       ></QuickAnswersModal>
       <MainHeader>
-        <Title>{i18n.t("quickAnswers.title")}</Title>
+        <Title>{i18n.t("quickAnswers.title")} ({quickAnswers.length})</Title>
         <MainHeaderButtonsWrapper>
           <TextField
             placeholder={i18n.t("quickAnswers.searchPlaceholder")}
@@ -217,18 +244,32 @@ const QuickAnswers = () => {
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
-                  <SearchIcon color="secondary" />
+                  <Search color="secondary" />
                 </InputAdornment>
               ),
             }}
           />
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={handleOpenQuickAnswersModal}
-          >
-            {i18n.t("quickAnswers.buttons.add")}
-          </Button>
+          <Tooltip title={i18n.t("quickAnswers.buttons.add")}>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleOpenQuickAnswersModal}
+            >
+              <AddCircleOutline />
+            </Button>
+          </Tooltip>
+          <Tooltip title={i18n.t("quickAnswers.buttons.deleteAll")}>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={(e) => {
+                setConfirmModalOpen(true);
+                setDeletingAllQuickAnswers(quickAnswers);
+              }}
+            >
+              <DeleteForever />
+            </Button>
+          </Tooltip>
         </MainHeaderButtonsWrapper>
       </MainHeader>
       <Paper
@@ -281,7 +322,7 @@ const QuickAnswers = () => {
           </TableBody>
         </Table>
       </Paper>
-    </MainContainer>
+    </MainContainer >
   );
 };
 

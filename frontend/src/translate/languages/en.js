@@ -363,14 +363,18 @@ const messages = {
           },
           buttons: {
             add: "Add Quick Reply",
+            deleteAll: "Delete All Quick Replies",
           },
           toasts: {
             deleted: "Quick Reply deleted successfully.",
+            deletedAll: "All Quick Replies deleted.",
           },
           searchPlaceholder: "Search...",
           confirmationModal: {
             deleteTitle: "Are you sure you want to delete this Quick Reply: ",
+            deleteAllTitle: "Are you sure you want to delete all Quick Replies?",
             deleteMessage: "This action cannot be reversed.",
+            deleteAllMessage: "This action cannot be reversed.",
           },
         },
         users: {
