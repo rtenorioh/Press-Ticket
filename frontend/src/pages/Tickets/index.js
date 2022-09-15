@@ -19,6 +19,7 @@ const useStyles = makeStyles((theme) => ({
     // padding: theme.spacing(4),
     height: `calc(100% - 48px)`,
     overflowY: "hidden",
+    margin: theme.spacing(1),
   },
 
   chatPapper: {
@@ -54,7 +55,6 @@ const useStyles = makeStyles((theme) => ({
     alignItems: "center",
     height: "100%",
     textAlign: "center",
-    borderRadius: 0,
   },
   ticketsManager: {},
   ticketsManagerClosed: {
