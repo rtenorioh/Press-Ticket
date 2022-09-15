@@ -1,5 +1,10 @@
 # Changelog
 
+### 01/09/2022
+
+- [Botão de exclusão e mudança nos botões do QuickAnswers](https://github.com/rtenorioh/Press-Ticket/commit/8bbc3dd99d75834b39695c67db50c5c62de286a8); e
+- [Mudança na cor do Dark Theme](https://github.com/rtenorioh/Press-Ticket/commit/e6bfe990e9255393efb534f04452cf2a03b56632).
+
 ### 31/08/2022
 
 - [Exportação e exclusão em massa de contatos](https://github.com/rtenorioh/Press-Ticket/commit/513f516c403a469125603feedf9a6bb095aee421).
