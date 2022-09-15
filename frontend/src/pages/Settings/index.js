@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import openSocket from "socket.io-client";
+import { useHistory } from "react-router-dom";
 
 import { makeStyles, withStyles } from "@material-ui/core/styles";
 import Paper from "@material-ui/core/Paper";
@@ -95,6 +96,7 @@ const IOSSwitch = withStyles((theme) => ({
 
 const Settings = () => {
 	const classes = useStyles();
+	const history = useHistory();
 
 	const [settings, setSettings] = useState([]);
 
@@ -138,6 +140,7 @@ const Settings = () => {
 				value: selectedValue,
 			});
 			toast.success(i18n.t("settings.success"));
+			history.go(0);
 		} catch (err) {
 			toastError(err);
 		}
