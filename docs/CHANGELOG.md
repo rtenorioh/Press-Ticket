@@ -1,5 +1,12 @@
 # Changelog
 
+### 15/09/2022
+
+- [Adcionado a função de refresh](https://github.com/rtenorioh/Press-Ticket/commit/199ba219c738a5534c323411361a95cb52dbd72d);
+- [Correção ao responder grupos](https://github.com/rtenorioh/Press-Ticket/commit/9721da147cd7916c1b2577f20bdd549a1bd91edc);
+- [Ajuste do layout](https://github.com/rtenorioh/Press-Ticket/commit/6a928309f76acacf18fea7498bc38da921fccc96);
+- [Inserção do Setor na informação do ticket](https://github.com/rtenorioh/Press-Ticket/commit/a0492064e3ea5420173781c9fd34928e5487a436)
+
 ### 01/09/2022
 
 - [Botão de exclusão e mudança nos botões do QuickAnswers](https://github.com/rtenorioh/Press-Ticket/commit/8bbc3dd99d75834b39695c67db50c5c62de286a8); e
