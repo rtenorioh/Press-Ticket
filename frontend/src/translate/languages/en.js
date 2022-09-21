@@ -515,7 +515,8 @@ const messages = {
           delete: "Delete",
           reply: "Reply",
           confirmationModal: {
-            title: "Delete message?",
+            title: "Delete message ",
+            titleFrom: "from contact ",
             message: "This action cannot be reversed.",
           },
         },
