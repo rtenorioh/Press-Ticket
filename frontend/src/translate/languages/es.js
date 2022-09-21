@@ -260,7 +260,7 @@ const messages = {
         title: "Boleto de transferencia",
         fieldLabel: "Escriba para obtener usuarios",
         fieldConnectionLabel: "Transferir a conexión",
-        fieldQueuePlaceholder: "Transferir a Sector",
+        fieldQueueLabel: "Transferir a Sector",
         fieldConnectionPlaceholder: "Seleccione una conexión",
         noOptions: "No se encontró ningún usuario con ese nombre",
         buttons: {

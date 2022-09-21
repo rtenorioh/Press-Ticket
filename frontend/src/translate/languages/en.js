@@ -260,7 +260,7 @@ const messages = {
         title: "Transfer Ticket",
         fieldLabel: "Type to fetch users",
         fieldConnectionLabel: "Transfer to connection",
-        fieldQueuePlaceholder: "Transfer to Sector",
+        fieldQueueLabel: "Transfer to Sector",
         fieldConnectionPlaceholder: "Select a connection",
         noOptions: "No user found with that name",
         buttons: {
