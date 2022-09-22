@@ -1,5 +1,10 @@
 # Changelog
 
+### 21/09/2022
+
+- [Correção na tradução do modal de tranferir usuário](https://github.com/rtenorioh/Press-Ticket/commit/aefec1cad68f7e71025be67639bbf3445d67c8a2); e
+- [Correção na tradução do modal de deletar ticket](https://github.com/rtenorioh/Press-Ticket/commit/2d549e7abaab0fae2f1b417a2f3bb2f2907fefff).
+
 ### 18/09/2022
 
 - [Atualização do typescript](https://github.com/rtenorioh/Press-Ticket/commit/94ee68250f44100050301bd79b39fc9d45ab985a).
