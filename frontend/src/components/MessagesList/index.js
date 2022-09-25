@@ -29,6 +29,7 @@ import MessageOptionsMenu from "../MessageOptionsMenu";
 
 import api from "../../services/api";
 import toastError from "../../errors/toastError";
+import { toast } from "react-toastify";
 import Audio from "../Audio";
 
 const useStyles = makeStyles((theme) => ({
@@ -316,9 +317,21 @@ const reducer = (state, action) => {
     return [...state];
   }
 
+  function ToastDisplay(props) {
+    return <><h4>Mensagem apagada:</h4><p>{props.body}</p></>;
+  }
+
   if (action.type === "UPDATE_MESSAGE") {
     const messageToUpdate = action.payload;
     const messageIndex = state.findIndex((m) => m.id === messageToUpdate.id);
+
+    if (messageToUpdate.isDeleted === true) {
+      //toast.info(`Mensagem apagada: ${messageToUpdate.body}  `,{autoClose: false});
+      toast.info(<ToastDisplay
+        body={messageToUpdate.body}
+      >
+      </ToastDisplay>, { autoClose: false });
+    }
 
     if (messageIndex !== -1) {
       state[messageIndex] = messageToUpdate;
@@ -454,8 +467,6 @@ const MessagesList = ({ ticketId, isGroup }) => {
       return <LocationPreview image={imageLocation} link={linkLocation} description={descriptionLocation} />
     }
     else if (message.mediaType === "vcard") {
-      //console.log("vcard")
-      //console.log(message)
       let array = message.body.split("\n");
       let obj = [];
       let contact = "";
@@ -523,16 +534,16 @@ const MessagesList = ({ ticketId, isGroup }) => {
   };
 
   const renderMessageAck = (message) => {
-    if (message.ack === 0) {
+    if (message.ack === 1) {
       return <AccessTime fontSize="small" className={classes.ackIcons} />;
     }
-    if (message.ack === 1) {
+    if (message.ack === 2) {
       return <Done fontSize="small" className={classes.ackIcons} />;
     }
-    if (message.ack === 2) {
+    if (message.ack === 3) {
       return <DoneAll fontSize="small" className={classes.ackIcons} />;
     }
-    if (message.ack === 3 || message.ack === 4) {
+    if (message.ack === 4 || message.ack === 5) {
       return <DoneAll fontSize="small" className={classes.ackDoneAllIcon} />;
     }
   };
@@ -625,7 +636,44 @@ const MessagesList = ({ ticketId, isGroup }) => {
               {message.quotedMsg?.contact?.name}
             </span>
           )}
-          {message.quotedMsg?.body}
+          {message.quotedMsg.mediaType === "audio"
+            && (
+              <div className={classes.downloadMedia}>
+                <audio controls>
+                  <source src={message.quotedMsg.mediaUrl} type="audio/ogg"></source>
+                </audio>
+              </div>
+            )
+          }
+          {message.quotedMsg.mediaType === "video"
+            && (
+              <video
+                className={classes.messageMedia}
+                src={message.quotedMsg.mediaUrl}
+                controls
+              />
+            )
+          }
+          {message.quotedMsg.mediaType === "application"
+            && (
+              <div className={classes.downloadMedia}>
+                <Button
+                  startIcon={<GetApp />}
+                  color="primary"
+                  variant="outlined"
+                  target="_blank"
+                  href={message.quotedMsg.mediaUrl}
+                >
+                  Download
+                </Button>
+              </div>
+            )
+          }
+
+
+          {message.quotedMsg.mediaType === "image"
+            ? (<ModalImageCors imageUrl={message.quotedMsg.mediaUrl} />)
+            : message.quotedMsg?.body}
         </div>
       </div>
     );
@@ -657,9 +705,9 @@ const MessagesList = ({ ticketId, isGroup }) => {
                   </span>
                 )}
                 <div>
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 17" width="20" height="17">
-                                <path fill="#df3333" d="M18.2 12.1c-1.5-1.8-5-2.7-8.2-2.7s-6.7 1-8.2 2.7c-.7.8-.3 2.3.2 2.8.2.2.3.3.5.3 1.4 0 3.6-.7 3.6-.7.5-.2.8-.5.8-1v-1.3c.7-1.2 5.4-1.2 6.4-.1l.1.1v1.3c0 .2.1.4.2.6.1.2.3.3.5.4 0 0 2.2.7 3.6.7.2 0 1.4-2 .5-3.1zM5.4 3.2l4.7 4.6 5.8-5.7-.9-.8L10.1 6 6.4 2.3h2.5V1H4.1v4.8h1.3V3.2z"></path>
-                            </svg> <span>Chamada de voz/vídeo perdida às {format(parseISO(message.createdAt), "HH:mm")}</span>
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 17" width="20" height="17">
+                    <path fill="#df3333" d="M18.2 12.1c-1.5-1.8-5-2.7-8.2-2.7s-6.7 1-8.2 2.7c-.7.8-.3 2.3.2 2.8.2.2.3.3.5.3 1.4 0 3.6-.7 3.6-.7.5-.2.8-.5.8-1v-1.3c.7-1.2 5.4-1.2 6.4-.1l.1.1v1.3c0 .2.1.4.2.6.1.2.3.3.5.4 0 0 2.2.7 3.6.7.2 0 1.4-2 .5-3.1zM5.4 3.2l4.7 4.6 5.8-5.7-.9-.8L10.1 6 6.4 2.3h2.5V1H4.1v4.8h1.3V3.2z"></path>
+                  </svg> <span>Chamada de voz/vídeo perdida às {format(parseISO(message.createdAt), "HH:mm")}</span>
                 </div>
               </div>
             </React.Fragment>
@@ -686,6 +734,34 @@ const MessagesList = ({ ticketId, isGroup }) => {
                   <span className={classes.messageContactName}>
                     {message.contact?.name}
                   </span>
+                )}
+                {message.isDeleted && (
+
+                  <div>
+                    <span className={"message-deleted"}
+
+
+                    >Mensagem apagada pelo contato
+
+
+                      <Block
+                        color=""
+                        fontSize="small"
+                        className={classes.deletedIcon}
+                      />
+                      <Block
+                        color=""
+                        fontSize="small"
+                        className={classes.deletedIcon}
+                      />
+                      <Block
+                        color=""
+                        fontSize="small"
+                        className={classes.deletedIcon}
+                      />
+                    </span>
+                  </div>
+
                 )}
                 {(message.mediaUrl || message.mediaType === "location" || message.mediaType === "vcard"
                   //|| message.mediaType === "multi_vcard" 
@@ -733,10 +809,7 @@ const MessagesList = ({ ticketId, isGroup }) => {
                     />
                   )}
                   {message.quotedMsg && renderQuotedMessage(message)}
-                  {(message.mediaType === "image"
-                    ? ''
-                    : <MarkdownWrapper>{message.body}</MarkdownWrapper>
-                  )}
+                  <MarkdownWrapper>{message.body}</MarkdownWrapper>
                   <span className={classes.timestamp}>
                     {format(parseISO(message.createdAt), "HH:mm")}
                     {renderMessageAck(message)}
