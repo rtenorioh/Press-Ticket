@@ -1,5 +1,12 @@
 # Changelog
 
+### 25/09/2022
+
+- [Correção da renderização ao responder uma mensagem](https://github.com/rtenorioh/Press-Ticket/commit/e2dbc79f43c1fc621b4d924a9c4c030360e891f0).
+
+### 22/09/2022
+
+- [Retirada do envio da despedida para grupos](https://github.com/rtenorioh/Press-Ticket/commit/7f5a5fa00d9f349a8bbfebdac9ab89778975279a).
 ### 21/09/2022
 
 - [Correção na tradução do modal de tranferir usuário](https://github.com/rtenorioh/Press-Ticket/commit/aefec1cad68f7e71025be67639bbf3445d67c8a2); e
