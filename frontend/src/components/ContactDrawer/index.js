@@ -16,6 +16,7 @@ import { i18n } from "../../translate/i18n";
 import ContactModal from "../ContactModal";
 import ContactDrawerSkeleton from "../ContactDrawerSkeleton";
 import MarkdownWrapper from "../MarkdownWrapper";
+import { TagsContainer } from "../TagsContainer";
 
 const drawerWidth = 320;
 
@@ -56,6 +57,7 @@ const useStyles = makeStyles(theme => ({
 		margin: 15,
 		width: 160,
 		height: 160,
+		borderRadius: 10,
 	},
 
 	contactHeader: {
@@ -121,8 +123,7 @@ const ContactDrawer = ({ open, handleDrawerClose, contact, loading }) => {
 							alt={contact.name}
 							src={contact.profilePicUrl}
 							className={classes.contactAvatar}
-						></Avatar>
-
+						></Avatar>						
 						<Typography>{contact.name}</Typography>
 						<Typography>
 							<Link href={`tel:${contact.number}`}>{contact.number}</Link>
@@ -140,6 +141,7 @@ const ContactDrawer = ({ open, handleDrawerClose, contact, loading }) => {
 							{i18n.t("contactDrawer.buttons.edit")}
 						</Button>
 					</Paper>
+					<TagsContainer contact={contact} className={classes.contactTags}/>
 					<Paper square variant="outlined" className={classes.contactDetails}>
 						<ContactModal
 							open={modalOpen}

@@ -183,6 +183,44 @@ const messages = {
         },
         success: "Respuesta rápida guardada con éxito.",
       },
+      tags: {
+        title: "Etiquetas",
+        table: {
+          name: "Etiquetas",
+          color: "Color",
+          actions: "Acción"
+        },
+        toasts: {
+          deleted: "¡Etiqueta eliminada con éxito!",
+          deletedAll: "¡Todas las etiquetas se eliminaron con éxito!",
+        },
+        buttons: {
+          add: "Agregar",
+          deleteAll: "Borrar todo",
+        },
+        confirmationModal: {
+          deleteTitle: "Eliminar ",
+          deleteAllTitle: "Borrar todo",
+          deleteMessage: "¿Está seguro de que desea eliminar esta etiqueta?",
+          deleteAllMessage: "¿Está seguro de que desea eliminar todas las etiquetas?",
+        },
+      },
+      tagModal: {
+        title: {
+          add: "Agregar etiqueta",
+          edit: "Editar etiqueta",
+        },
+        buttons: {
+          okAdd: "Guardar",
+          okEdit: "Editar",
+          cancel: "Cancelar",
+        },
+        form: {
+          name: "Nombre de la etiqueta",
+          color: "Color de la etiqueta"
+        },
+        success: "¡Etiqueta guardada con éxito!",
+      },
       queueModal: {
         title: {
           add: "Agregar Sector",
@@ -260,7 +298,7 @@ const messages = {
         title: "Boleto de transferencia",
         fieldLabel: "Escriba para obtener usuarios",
         fieldConnectionLabel: "Transferir a conexión",
-        fieldQueueLabel: "Transferir a Sector",
+        fieldQueuePlaceholder: "Transferir a Sector",
         fieldConnectionPlaceholder: "Seleccione una conexión",
         noOptions: "No se encontró ningún usuario con ese nombre",
         buttons: {
@@ -497,8 +535,7 @@ const messages = {
           delete: "Eliminar",
           transfer: "Transferir",
           confirmationModal: {
-            title: "Eliminar ticket de contacto ",
-            titleFrom: "del contacto ",
+            title: "Eliminar ticket de contacto",
             message: "¡Atención! Todos los mensajes relacionados con el ticket se perderán.",
           },
           buttons: {
@@ -547,6 +584,7 @@ const messages = {
           ERR_WAPP_GREETING_REQUIRED: "El mensaje de saludo es obligatorio cuando hay más de un Sector.",
           ERR_USER_CREATION_COUNT: "Límite de usuarios alcanzado, comuníquese con soporte para cambiar",
           ERR_CONNECTION_CREATION_COUNT: "Límite de conexión alcanzado, comuníquese con soporte para cambiar.",
+          ERR_NO_TAG_FOUND: "Etiqueta no encontrada.",
         },
       },
     },

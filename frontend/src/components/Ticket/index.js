@@ -92,7 +92,6 @@ const Ticket = () => {
       const fetchTicket = async () => {
         try {
           const { data } = await api.get("/tickets/" + ticketId);
-
           setContact(data.contact);
           setTicket(data);
           setLoading(false);

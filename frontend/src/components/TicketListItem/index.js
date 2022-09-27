@@ -360,7 +360,7 @@ const TicketListItem = ({ ticket }) => {
 					</Tooltip>
 				)}
 				{ticket.status === "open" && (
-					<Tooltip title={i18n.t("ticketsList.items.reopen")}>
+					<Tooltip title={i18n.t("ticketsList.items.return")}>
 						<IconButton
 							className={classes.bottomButton}
 							color="primary"

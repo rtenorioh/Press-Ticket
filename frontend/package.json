@@ -2,7 +2,7 @@
   "name": "frontend",
   "version": "0.1.0",
   "system": {
-    "version": "1.1.0",
+    "version": "1.2.0",
     "name": "Press Ticket",
     "url": "https://pressticket.com.br"
   },
@@ -21,6 +21,7 @@
     "i18next": "^19.8.2",
     "i18next-browser-languagedetector": "^6.0.1",
     "markdown-to-jsx": "^7.1.0",
+    "material-ui-color": "^1.2.0",
     "mic-recorder-to-mp3": "^2.2.2",
     "qrcode.react": "^1.0.0",
     "react": "^16.13.1",

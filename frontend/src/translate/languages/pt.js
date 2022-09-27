@@ -183,6 +183,44 @@ const messages = {
         },
         success: "Resposta Rápida salva com sucesso.",
       },
+      tags: {
+        title: "Tags",
+        table: {
+          name: "Tags",
+          color: "Cor",
+          actions: "Ação"
+        },
+        toasts: {
+          deleted: "Tag excluída com sucesso!",
+          deletedAll: "Todas Tags excluídas com sucesso!",
+        },
+        buttons: {
+          add: "Adicionar",
+          deleteAll: "Deletar Todos",
+        },
+        confirmationModal: {
+          deleteTitle: "Deletar ",
+          deleteAllTitle: "Deletar Todos",
+          deleteMessage: "Tem certeza que deseja deletar esta Tag?",
+          deleteAllMessage: "Tem certeza que deseja deletar todas as Tags?",
+        },
+      },
+      tagModal: {
+        title: {
+          add: "Adicionar Tag",
+          edit: "Editar Tag",
+        },
+        buttons: {
+          okAdd: "Salvar",
+          okEdit: "Editar",
+          cancel: "Cancelar",
+        },
+        form: {
+          name: "Nome da Tag",
+          color: "Cor da Tag"
+        },
+        success: "Tag salva com sucesso!",
+      },
       queueModal: {
         title: {
           add: "Adicionar Setor",
@@ -260,7 +298,7 @@ const messages = {
         title: "Transferir Ticket",
         fieldLabel: "Digite para buscar usuários",
         fieldConnectionLabel: "Transferir para conexão",
-        fieldQueueLabel: "Transferir para o Setor",
+        fieldQueuePlaceholder: "Transferir para o Setor",
         fieldConnectionPlaceholder: "Selecione uma conexão",
         noOptions: "Nenhum usuário encontrado com esse nome",
         buttons: {
@@ -274,12 +312,13 @@ const messages = {
         noTicketsTitle: "Nada aqui!",
         noTicketsMessage: "Nenhum ticket encontrado com esse status ou termo pesquisado",
         connectionTitle: "Conexão que está sendo utilizada atualmente.",
-        items:{
+        items: {
           queueless: "Sem Setor",
           accept: "Aceitar",
           spy: "Espiar",
           close: "Encerrar",
-          reopen: "Reabrir"
+          reopen: "Reabrir",
+          return: "Mover para aguardando"
         },
         buttons: {
           accept: "Responder",
@@ -308,6 +347,7 @@ const messages = {
           tickets: "Tickets",
           contacts: "Contatos",
           quickAnswers: "Respostas Rápidas",
+          tags: "Tags",
           queues: "Setores",
           administration: "Administração",
           users: "Usuários",
@@ -442,12 +482,12 @@ const messages = {
             },
           },
           darkMode: {
-              name: "Ativa Modo Escuro",
-              note: "Alternar entre o modo claro e o modo escuro",
-              options: {
-                enabled: "Ativado",
-                disabled: "Desativado",
-              },
+            name: "Ativa Modo Escuro",
+            note: "Alternar entre o modo claro e o modo escuro",
+            options: {
+              enabled: "Ativado",
+              disabled: "Desativado",
+            },
           },
           timeCreateNewTicket: {
             name: "Cria novo ticket após",
@@ -457,15 +497,15 @@ const messages = {
               "30": "30 Segundos",
               "60": "1 minuto",
               "300": "5 minutos",
-              "1800" : "30 minutos",
-              "3600" : "1 hora",
-              "7200" : "2 horas",
-              "21600" : "6 horas",
-              "43200" : "12 horas",
-              "86400" : "24 horas",
-              "604800" : "7 dias",
-              "1296000" : "15 dias",
-              "2592000" : "30 dias",
+              "1800": "30 minutos",
+              "3600": "1 hora",
+              "7200": "2 horas",
+              "21600": "6 horas",
+              "43200": "12 horas",
+              "86400": "24 horas",
+              "604800": "7 dias",
+              "1296000": "15 dias",
+              "2592000": "30 dias",
             },
           },
         },
@@ -497,8 +537,7 @@ const messages = {
         delete: "Deletar",
         transfer: "Transferir",
         confirmationModal: {
-          title: "Deletar o ticket ",
-          titleFrom: "do contato ",
+          title: "Deletar o ticket do contato",
           message: "Atenção! Todas as mensagens relacionadas ao ticket serão perdidas.",
         },
         buttons: {
@@ -547,6 +586,7 @@ const messages = {
         ERR_WAPP_GREETING_REQUIRED: "A mensagem de saudação é obrigatório quando há mais de um Setor.",
         ERR_USER_CREATION_COUNT: "Limite de usuários atingido, para alterar entre em contato com o suporte.",
         ERR_CONNECTION_CREATION_COUNT: "Limite de conexões atingido, para alterar entre em contato com o suporte.",
+        ERR_NO_TAG_FOUND: "Tag não encontrada.",
       },
     },
   },

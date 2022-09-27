@@ -183,6 +183,44 @@ const messages = {
         },
         success: "Quick Reply saved successfully.",
       },
+      tags: {
+        title: "Tags",
+        table: {
+          name: "Tags",
+          color: "Color",
+          actions: "Action"
+        },
+        toasts: {
+          deleted: "Tag deleted successfully!",
+          deletedAll: "All Tags deleted successfully!",
+        },
+        buttons: {
+          add: "Add",
+          deleteAll: "Delete All",
+        },
+        confirmationModal: {
+          deleteTitle: "Delete",
+          deleteAllTitle: "Delete All",
+          deleteMessage: "Are you sure you want to delete this Tag?",
+          deleteAllMessage: "Are you sure you want to delete all Tags?",
+        },
+      },
+      tagModal: {
+        title: {
+          add: "Add Tag",
+          edit: "Edit Tag",
+        },
+        buttons: {
+          okAdd: "Save",
+          okEdit: "Edit",
+          cancel: "Cancel",
+        },
+        form: {
+          name: "Tag Name",
+          color: "Tag Color"
+        },
+        success: "Tag saved successfully!",
+      },
       queueModal: {
         title: {
           add: "Add Sector",
@@ -260,7 +298,7 @@ const messages = {
         title: "Transfer Ticket",
         fieldLabel: "Type to fetch users",
         fieldConnectionLabel: "Transfer to connection",
-        fieldQueueLabel: "Transfer to Sector",
+        fieldQueuePlaceholder: "Transfer to Sector",
         fieldConnectionPlaceholder: "Select a connection",
         noOptions: "No user found with that name",
         buttons: {
@@ -515,8 +553,7 @@ const messages = {
           delete: "Delete",
           reply: "Reply",
           confirmationModal: {
-            title: "Delete message ",
-            titleFrom: "from contact ",
+            title: "Delete message?",
             message: "This action cannot be reversed.",
           },
         },
@@ -547,6 +584,7 @@ const messages = {
           ERR_WAPP_GREETING_REQUIRED: "The greeting message is required when there is more than one Sector.",
           ERR_USER_CREATION_COUNT: "User limit reached, contact support to change.",
           ERR_CONNECTION_CREATION_COUNT: "Connection limit reached, contact support to change.",
+          ERR_NO_TAG_FOUND: "Tag not found.",
         },
       },
     },
