@@ -1,5 +1,9 @@
 # Changelog
 
+### 27/09/2022
+
+- [Tags no Contato](https://github.com/rtenorioh/Press-Ticket/commit/7c3357a1cce91f1c38273a83347f733a6f832fa1).
+
 ### 25/09/2022
 
 - [Correção da renderização ao responder uma mensagem](https://github.com/rtenorioh/Press-Ticket/commit/e2dbc79f43c1fc621b4d924a9c4c030360e891f0).
