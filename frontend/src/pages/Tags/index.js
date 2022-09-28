@@ -292,6 +292,7 @@ const Tags = () => {
             <TableRow>
               <TableCell align="center">{i18n.t("tags.table.name")}</TableCell>
               <TableCell align="center">{i18n.t("tags.table.color")}</TableCell>
+              <TableCell align="center">{i18n.t("tags.table.contacts")}</TableCell>
               <TableCell align="center">{i18n.t("tags.table.actions")}</TableCell>
             </TableRow>
           </TableHead>
@@ -314,6 +315,7 @@ const Tags = () => {
                       />
                     </div>
                   </TableCell>
+                  <TableCell align="center">{tag.contacttag.length ? (<span>{tag.contacttag.length}</span>) : <span>0</span>}</TableCell>
                   <TableCell align="center">
                     <IconButton
                       size="small"
@@ -334,7 +336,7 @@ const Tags = () => {
                   </TableCell>
                 </TableRow>
               ))}
-              {loading && <TableRowSkeleton columns={3} />}
+              {loading && <TableRowSkeleton columns={4} />}
             </>
           </TableBody>
         </Table>

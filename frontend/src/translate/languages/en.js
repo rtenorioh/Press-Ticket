@@ -188,6 +188,7 @@ const messages = {
         table: {
           name: "Tags",
           color: "Color",
+          contacts: "Contacts",
           actions: "Action"
         },
         toasts: {

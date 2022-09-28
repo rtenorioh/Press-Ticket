@@ -6,7 +6,8 @@ import {
   Model,
   PrimaryKey,
   AutoIncrement,
-  BelongsToMany
+  BelongsToMany,
+  HasMany
 } from "sequelize-typescript";
 import Contact from "./Contact";
 import ContactTag from "./ContactTag";
@@ -24,14 +25,17 @@ class Tag extends Model<Tag> {
   @Column
   color: string;
 
-  @BelongsToMany(() => Contact, () => ContactTag)
-  contacts: Contact[];
-
   @CreatedAt
   createdAt: Date;
 
   @UpdatedAt
   updatedAt: Date;
+
+  @BelongsToMany(() => Contact, () => ContactTag)
+  contacts: Array<Contact & { ContactTag: ContactTag }>;
+
+  @HasMany(() => ContactTag)
+  contacttag: ContactTag[];
 }
 
 export default Tag;

@@ -1,6 +1,6 @@
-import { Op, Sequelize } from "sequelize";
+import { Op } from "sequelize";
 import Tag from "../../models/Tag";
-import Contact from "../../models/Contact";
+import ContactTag from "../../models/ContactTag";
 
 interface Request {
   searchParam?: string;
@@ -35,28 +35,9 @@ const ListService = async ({
     limit,
     offset,
     order: [["name", "ASC"]],
-    include: [
-      {
-        model: Contact,
-        as: "contacts",
-        attributes: [],
-        required: false
-      }
-    ],
-    attributes: {
-      include: [
-        [Sequelize.fn("COUNT", Sequelize.col("contacts.id")), "contactsCount"]
-      ]
-    },
-    group: [
-      "Tag.id",
-      "contacts.ContactTag.tagId",
-      "contacts.ContactTag.contactId",
-      "contacts.ContactTag.createdAt",
-      "contacts.ContactTag.updatedAt"
-    ],
-    subQuery: false
+    include: [{ model: ContactTag, attributes: ["tagId"] }]
   });
+
   const hasMore = count > offset + tags.length;
 
   return {

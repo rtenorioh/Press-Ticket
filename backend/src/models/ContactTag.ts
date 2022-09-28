@@ -4,8 +4,7 @@ import {
   CreatedAt,
   UpdatedAt,
   Model,
-  ForeignKey,
-  BelongsTo
+  ForeignKey
 } from "sequelize-typescript";
 import Tag from "./Tag";
 import Contact from "./Contact";
@@ -27,12 +26,6 @@ class ContactTag extends Model<ContactTag> {
 
   @UpdatedAt
   updatedAt: Date;
-
-  @BelongsTo(() => Contact)
-  contact: Contact;
-
-  @BelongsTo(() => Tag)
-  tag: Tag;
 }
 
 export default ContactTag;
