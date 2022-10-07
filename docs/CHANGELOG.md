@@ -1,5 +1,9 @@
 # Changelog
 
+### 28/09/2022
+
+- [Inclusão do contador de uso das Tags](https://github.com/rtenorioh/Press-Ticket/commit/1178a204cf75678cf689bd7ba7ea49dcf78c5bee)
+
 ### 27/09/2022
 
 - [Tags no Contato](https://github.com/rtenorioh/Press-Ticket/commit/7c3357a1cce91f1c38273a83347f733a6f832fa1).
