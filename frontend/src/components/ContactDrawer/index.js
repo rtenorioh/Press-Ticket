@@ -7,7 +7,7 @@ import CloseIcon from "@material-ui/icons/Close";
 import Drawer from "@material-ui/core/Drawer";
 import Link from "@material-ui/core/Link";
 import InputLabel from "@material-ui/core/InputLabel";
-import Avatar from "@material-ui/core/Avatar";
+//import Avatar from "@material-ui/core/Avatar";
 import Button from "@material-ui/core/Button";
 import Paper from "@material-ui/core/Paper";
 
@@ -17,6 +17,7 @@ import ContactModal from "../ContactModal";
 import ContactDrawerSkeleton from "../ContactDrawerSkeleton";
 import MarkdownWrapper from "../MarkdownWrapper";
 import { TagsContainer } from "../TagsContainer";
+import ModalImageContatc from "./ModalImage";
 
 const drawerWidth = 320;
 
@@ -119,11 +120,7 @@ const ContactDrawer = ({ open, handleDrawerClose, contact, loading }) => {
 			) : (
 				<div className={classes.content}>
 					<Paper square variant="outlined" className={classes.contactHeader}>
-						<Avatar
-							alt={contact.name}
-							src={contact.profilePicUrl}
-							className={classes.contactAvatar}
-						></Avatar>						
+						<ModalImageContatc imageUrl={contact.profilePicUrl}/>							
 						<Typography>{contact.name}</Typography>
 						<Typography>
 							<Link href={`tel:${contact.number}`}>{contact.number}</Link>
