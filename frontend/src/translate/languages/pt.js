@@ -268,6 +268,12 @@ const messages = {
       chat: {
         noTicketMessage: "Selecione um ticket para começar a conversar.",
       },
+      uploads: {
+        titles: {
+          titleUploadMsgDragDrop: "ARRASTE E SOLTE ARQUIVOS NO CAMPO ABAIXO",
+          titleFileList: "Lista de arquivo(s)"
+        },
+      },
       ticketsManager: {
         buttons: {
           newTicket: "Novo",
