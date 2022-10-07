@@ -1,8 +1,12 @@
 # Changelog
 
+### 07/10/2022
+
+- [Arrastar e soltar medias e enviar com ENTER](https://github.com/rtenorioh/Press-Ticket/commit/32d434801c85b1b1ca342a0362daf1bc8e57e5c1).
+
 ### 28/09/2022
 
-- [Inclusão do contador de uso das Tags](https://github.com/rtenorioh/Press-Ticket/commit/1178a204cf75678cf689bd7ba7ea49dcf78c5bee)
+- [Inclusão do contador de uso das Tags](https://github.com/rtenorioh/Press-Ticket/commit/1178a204cf75678cf689bd7ba7ea49dcf78c5bee).
 
 ### 27/09/2022
 
