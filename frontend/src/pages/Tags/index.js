@@ -308,9 +308,10 @@ const Tags = () => {
                       <span
                         style={{
                           backgroundColor: tag.color,
-                          width: 60,
+                          width: 20,
                           height: 20,
                           alignSelf: "center",
+                          borderRadius: 10
                         }}
                       />
                     </div>
