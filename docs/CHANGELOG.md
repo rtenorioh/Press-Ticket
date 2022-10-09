@@ -1,5 +1,17 @@
 # Changelog
 
+### 09/10/2022
+
+- [Correção](https://github.com/rtenorioh/Press-Ticket/commit/4db7f7aab35bff04d9b1b2475fdc3b0637ff7bfc);
+- [Ajustes no layout](https://github.com/rtenorioh/Press-Ticket/commit/e2d239b670080a90887afd8e00eb702fb578a9a3);
+- [Aumento no carregamento dos contatos para 5000](https://github.com/rtenorioh/Press-Ticket/commit/f97cc726104f5dfe58f68278ae4731d805090ec2); e
+- [Atualização da versão](https://github.com/rtenorioh/Press-Ticket/commit/2d235da25aa7f16dd94460e435e34a422622bee2).
+
+### 08/10/2022
+
+- [Create ModalImage.js](https://github.com/rtenorioh/Press-Ticket/commit/724e55c42448fc999f4b47b0fcdfd4655417f37d); e
+- [Visualização maior do contato](https://github.com/rtenorioh/Press-Ticket/commit/024f916fead89311683d9f567efdfec9a2b37914).
+
 ### 07/10/2022
 
 - [Arrastar e soltar medias e enviar com ENTER](https://github.com/rtenorioh/Press-Ticket/commit/32d434801c85b1b1ca342a0362daf1bc8e57e5c1).
