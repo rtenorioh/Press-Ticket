@@ -2,7 +2,7 @@
   "name": "frontend",
   "version": "0.1.0",
   "system": {
-    "version": "1.2.0",
+    "version": "1.2.1",
     "name": "Press Ticket",
     "url": "https://pressticket.com.br"
   },
