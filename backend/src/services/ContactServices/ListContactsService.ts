@@ -68,7 +68,7 @@ const ListContactsService = async ({
     };
   }
 
-  const limit = 20;
+  const limit = 5000;
   const offset = limit * (+pageNumber - 1);
 
   const { count, rows: contacts } = await Contact.findAndCountAll({
