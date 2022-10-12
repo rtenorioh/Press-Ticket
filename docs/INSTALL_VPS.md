@@ -118,7 +118,7 @@ PORT=8080
 PROXY_PORT=443  
 CHROME_BIN=/usr/bin/google-chrome-stable  
 DB_DIALECT=mysql  
-DB_HOST=localhost 
+DB_HOST=localhost  
 DB_TIMEZONE=-03:00   
 DB_USER=root  
 DB_PASS=  
@@ -325,13 +325,9 @@ server {
 
 ```cd Press-Ticket/```
 
-73. Preparar o arquivo de update
+73. Dentro da pasta do sistema rode o comando abaixo para executar a atualização
 
-```chmod +x UPDATE.sh```
-
-74. Para executar a atualização
-
-```./UPDATE.sh```
+```sh UPDATE.sh```
 
 ==============================================================
 
