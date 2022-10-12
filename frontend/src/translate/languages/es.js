@@ -542,7 +542,8 @@ const messages = {
           delete: "Eliminar",
           transfer: "Transferir",
           confirmationModal: {
-            title: "Eliminar ticket de contacto",
+            title: "Eliminar el ticket ",
+            titleFrom: "del contacto ",
             message: "¡Atención! Todos los mensajes relacionados con el ticket se perderán.",
           },
           buttons: {

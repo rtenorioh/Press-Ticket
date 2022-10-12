@@ -541,9 +541,10 @@ const messages = {
         ticketOptionsMenu: {
           delete: "Delete",
           transfer: "Transfer",
-          confirmationModal: {
-            title: "Delete contact ticket",
-            message: "Attention! All messages related to the ticket will be lost.",
+          confirmationModal: { 
+            title: "Delete the ticket ", 
+            titleFrom: "from the contact ",
+            message: "Attention! All messages related to the ticket will be lost.", 
           },
           buttons: {
             delete: "Delete",
