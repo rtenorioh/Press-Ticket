@@ -305,7 +305,7 @@ const messages = {
         title: "Transferir Ticket",
         fieldLabel: "Digite para buscar usuários",
         fieldConnectionLabel: "Transferir para conexão",
-        fieldQueuePlaceholder: "Transferir para o Setor",
+        fieldQueueLabel: "Transferir para o Setor",
         fieldConnectionPlaceholder: "Selecione uma conexão",
         noOptions: "Nenhum usuário encontrado com esse nome",
         buttons: {
