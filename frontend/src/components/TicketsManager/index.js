@@ -157,6 +157,7 @@ const TicketsManager = () => {
         modalOpen={newTicketModalOpen}
         onClose={(e) => setNewTicketModalOpen(false)}
       />
+/* RETIRADA A BUSCA DE TICKETS
       <Paper elevation={0} square className={classes.searchContainer}>
         <SearchIcon className={classes.searchIcon} />
         <input
@@ -167,6 +168,7 @@ const TicketsManager = () => {
           onChange={handleSearch}
         />
       </Paper>
+*/
       <Paper elevation={0} square className={classes.tabsHeader}>
         <Tabs
           value={tab}
