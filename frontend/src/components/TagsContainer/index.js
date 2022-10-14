@@ -35,7 +35,6 @@ export function TagsContainer ({ contact }) {
         try {
             const { data } = await api.get(`/tags/list`);
             setTags(data);
-            console.log("loagTags - Data", data);
         } catch (err) {
             toastError(err);
         }
