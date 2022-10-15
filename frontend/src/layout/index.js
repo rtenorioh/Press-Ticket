@@ -243,13 +243,12 @@ const LoggedInLayout = ({ children }) => {
             noWrap
             className={classes.title}
           >
-            {system.name}
+            SabeZap Ticket
             <span className={classes.systemCss}>
               {"(v"}{system.version}{")"}
             </span>
           </Typography>
-          {user.id && <NotificationsPopOver />}
-
+          
           <div>
             <IconButton
               aria-label="account of current user"
