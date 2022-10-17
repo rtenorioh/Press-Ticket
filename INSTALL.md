@@ -122,12 +122,16 @@ su deploy
 cd ~
 git clone https://github.com/LCarneiroAD/Press-Ticket PASTA_DA_INSTALACAO
 cd PASTA_DA_INSTALACAO
-node -e "console.log(require('crypto').randomBytes(32).toString('base64'));"
-node -e "console.log(require('crypto').randomBytes(32).toString('base64'));"
 cd backend
 cp .env.example .env
 nano .env
 ```
+Criando as variáveis JWT_SECRET e JWT_REFRESH_SECRET
+```shell 
+node -e "console.log(require('crypto').randomBytes(32).toString('base64'));"
+node -e "console.log(require('crypto').randomBytes(32).toString('base64'));"
+```
+
 Alterar o arquivo .env, substituindo as variáveis indicadas na tabela pelo valor apropriado
 | Variável | Valor |
 | -------- | ----- | 
