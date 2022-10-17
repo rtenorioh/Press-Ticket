@@ -115,7 +115,7 @@ mysql> FLUSH PRIVILEGES;
 mysql> exit;
 ```
 
-Baixando os arqivos de instalação, criando as duas chaves JWT e executando a instalação. 
+Baixando os arquivos de instalação e executando a instalação. 
 Copiar as chaves JWT
 ```shell
 su deploy
@@ -123,8 +123,6 @@ cd ~
 git clone https://github.com/LCarneiroAD/Press-Ticket PASTA_DA_INSTALACAO
 cd PASTA_DA_INSTALACAO
 cd backend
-cp .env.example .env
-nano .env
 ```
 Criando as variáveis JWT_SECRET e JWT_REFRESH_SECRET
 
@@ -133,7 +131,11 @@ Copie a resposta dos 2 comandos abaixo e adicione ao arquivo .env conforme orien
 node -e "console.log(require('crypto').randomBytes(32).toString('base64'));"
 node -e "console.log(require('crypto').randomBytes(32).toString('base64'));"
 ```
-
+Criando e editando o arquivo .env para ajustes
+```shell
+cp .env.example .env
+nano .env
+```
 Alterar o arquivo .env, substituindo as variáveis indicadas na tabela pelo valor apropriado
 | Variável | Valor |
 | -------- | ----- | 
