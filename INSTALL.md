@@ -127,6 +127,7 @@ cp .env.example .env
 nano .env
 ```
 Criando as variáveis JWT_SECRET e JWT_REFRESH_SECRET
+Copie a resposta dos 2 comandos abaixo e adicione ao arquivo .env conforme orientação na tabela
 ```shell 
 node -e "console.log(require('crypto').randomBytes(32).toString('base64'));"
 node -e "console.log(require('crypto').randomBytes(32).toString('base64'));"
