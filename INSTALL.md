@@ -220,8 +220,8 @@ server {
 Criando links simbólicos para os sites disponíveis em habilitados
 Obs.: Atenção ao comando `nginx -t`. Se der erro revise o conteúdo dos arquivos em sites-available
 ```shell
-sudo ln -s /etc/nginx/sites-available/whaticket-frontend /etc/nginx/sites-enabled
-sudo ln -s /etc/nginx/sites-available/whaticket-backend /etc/nginx/sites-enabled
+sudo ln -s /etc/nginx/sites-available/FRONTEND_URL /etc/nginx/sites-enabled
+sudo ln -s /etc/nginx/sites-available/BACKEND_URL /etc/nginx/sites-enabled
 sudo nginx -t
 sudo service nginx restart
 sudo apt update
