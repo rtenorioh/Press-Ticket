@@ -1,5 +1,21 @@
 # Changelog
 
+### 18/10/2022
+
+- [Correção](https://github.com/rtenorioh/Press-Ticket/commit/ba92c2fb4263f28bc329765128d4169f950a8e7f).
+
+### 13/10/2022
+
+- [Remoção do console.log](https://github.com/rtenorioh/Press-Ticket/commit/75d64af0b63b05ff753aa30226b8847ec8a3948a).
+
+### 12/10/2022
+
+- [Correção nos comandos](https://github.com/rtenorioh/Press-Ticket/commit/a580d599e92c6de19dcdd498378dc3187a973beb);
+- [Correção na tradução da transferência de setor](https://github.com/rtenorioh/Press-Ticket/commit/1291369d633a7ca1f0d0a5bb914371f1e2039655);
+- [Correção na tradução ao deletar ticket](https://github.com/rtenorioh/Press-Ticket/commit/7e8436fa11740d1f6271b3d321165ca763eb69c6); e
+- [Botão aceitar apenas para Admin ao espiar](https://github.com/rtenorioh/Press-Ticket/commit/4989417415efb0ba91c4e005a51d70b32a1f1f79).
+
+
 ### 09/10/2022
 
 - [Correção](https://github.com/rtenorioh/Press-Ticket/commit/4db7f7aab35bff04d9b1b2475fdc3b0637ff7bfc);
