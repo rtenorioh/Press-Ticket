@@ -272,6 +272,7 @@ const MessageInput = ({ ticketStatus }) => {
     setTimeout(() => {
       setOnDragEnter(false);
     }, 10000);
+    // eslint-disable-next-line
   }, [onDragEnter === true]);
 
   const handleChangeInput = (e) => {
@@ -502,7 +503,6 @@ const MessageInput = ({ ticketStatus }) => {
                     <ListItemText
                       primary={`${value.name}`}
                       secondary={`${parseInt(value.size / 1024)} kB`}
-                      // color="secondary"
                     />
                   </ListItem>
                 );
@@ -544,7 +544,7 @@ const MessageInput = ({ ticketStatus }) => {
         onDrop={(e) => handleInputDrop(e)}  
       >
         <div className={ onDragEnter ? classes.dropInfo : classes.dropInfoOut}>
-          ⬇️ {i18n.t("uploads.titles.titleUploadMsgDragDrop")} ⬇️
+          {i18n.t("uploads.titles.titleUploadMsgDragDrop")}
         </div>
         {replyingMessage && renderReplyingMessage(replyingMessage)}
         <div className={classes.newMessageBox}>
