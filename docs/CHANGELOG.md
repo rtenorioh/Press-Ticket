@@ -1,5 +1,10 @@
 # Changelog
 
+### 19/10/2022
+
+- [Horário de funcionamento do Atendente](https://github.com/rtenorioh/Press-Ticket/commit/404b61ae332d9b66b3d18bd9afa112378d9f8f3a); e
+- [Atualização da versão](https://github.com/rtenorioh/Press-Ticket/commit/aab58ad0b6beea430a381d94af47cfb3705d6809).
+
 ### 18/10/2022
 
 - [Correção](https://github.com/rtenorioh/Press-Ticket/commit/ba92c2fb4263f28bc329765128d4169f950a8e7f).
