@@ -4,8 +4,8 @@ const messages = {
       signup: {
         title: "Registrarse",
         toasts: {
-          success: "¡Usuario creado con éxito! ¡Inicia sesión!",
-          fail: "Error al crear el usuario. Verifique los datos ingresados.",
+          success: "¡El asistente se creó correctamente! ¡Inicia sesión!",
+          fail: "Error al crear el asistente. Verifique los datos ingresados.",
         },
         form: {
           name: "Nombre",
@@ -246,8 +246,8 @@ const messages = {
       },
       userModal: {
         title: {
-          add: "Agregar Usuario",
-          edit: "Editar usuario",
+          add: "Agregar asistente",
+          edit: "Editar asistente",
         },
         form: {
           name: "Nombre",
@@ -256,21 +256,23 @@ const messages = {
           profile: "Perfil",
           admin: "Administrador",
           whatsapp: "Conexión estándar",
-          user: "Usuario",
+          asistente: "Asistente",
+          startWork: "Inicio",
+          endWork: "Finalizar"
         },
         buttons: {
           okAdd: "Agregar",
           okEdit: "Guardar",
           cancel: "Cancelar",
         },
-        success: "Usuario guardado con exito.",
+        success: "El asistente guardó con éxito.",
       },
       chat: {
         noTicketMessage: "Seleccione un ticket para comenzar a chatear.",
       },
       uploads: {
         titles: {
-          titleUploadMsgDragDrop: "ARRASTRA Y SUELTA LOS ARCHIVOS EN EL CAMPO DE ABAJO",
+          titleUploadMsgDragDrop: "⬇️ ARRASTRA Y SOLTA LOS ARCHIVOS EN EL CAMPO DEBAJO ⬇️",
           titleFileList: "Lista de archivos"
         },
       },
@@ -303,11 +305,11 @@ const messages = {
       },
       transferTicketModal: {
         title: "Boleto de transferencia",
-        fieldLabel: "Escriba para obtener usuarios",
+        fieldLabel: "Escriba para obtener asistentes",
         fieldConnectionLabel: "Transferir a conexión",
         fieldQueueLabel: "Transferir a Sector",
         fieldConnectionPlaceholder: "Seleccione una conexión",
-        noOptions: "No se encontró ningún usuario con ese nombre",
+        noOptions: "No se encontró ningún asistente con ese nombre",
         buttons: {
           ok: "Transferir",
           cancel: "Cancelar",
@@ -324,7 +326,8 @@ const messages = {
           accept: "Aceptar",
           spy: "Espía",
           close: "Cerca",
-          reopen: "Reabrir"
+          reopen: "Reabrir",
+          return: "Mover a espera"
         },
         buttons: {
           accept: "Responder",
@@ -353,9 +356,10 @@ const messages = {
           tickets: "Boletos",
           contacts: "Contactos",
           quickAnswers: "Respuestas rápidas",
+          etiquetas: "Etiquetas",
           queues: "Sectores",
           administration: "Administración",
-          users: "Usuarios",
+          users: "Asistentes",
           settings: "Configuración",
           sendMsg: "Enviando Mensajes",
           sendMedia: "Enviando medios",
@@ -388,214 +392,216 @@ const messages = {
           startWork: "Apertura",
           endWork: "Cierre",
         },
-          buttons: {
-            add: "Agregar sector",
-          },
-          confirmationModal: {
-            deleteTitle: "Eliminar",
-            deleteMessage: "¿Estás seguro? ¡Esta acción no se puede revertir! Los tickets de este sector seguirán existiendo, pero ya no tendrán ningún sector asignado.",
-          },
-        },
-        queueSelect: {
-          inputLabel: "Sectores",
-        },
-        quickAnswers: {
-          title: "Respuestas rápidas",
-          table: {
-            shortcut: "Atajo",
-            message: "Respuesta rápida",
-            actions: "Acciones",
-          },
-          buttons: {
-            add: "Agregar respuesta rápida",
-            deletedAll: "Eliminar todas las respuestas rápidas",
-          },
-          toasts: {
-            deleted: "Respuesta rápida eliminada con éxito.",
-            deletedAll: "Todas las respuestas rápidas eliminadas.",
-          },
-          searchPlaceholder: "Buscar...",
-          confirmationModal: {
-            deleteTitle: "¿Está seguro de que desea eliminar esta respuesta rápida: ",
-            deletedAll: "¿Está seguro de que desea eliminar todas las respuestas rápidas?",
-            deleteMessage: "Esta acción no se puede revertir.",
-            deleteAllMessage: "Esta acción no se puede revertir.",
-          },
-        },
-        users: {
-          title: "Usuarios",
-          table: {
-            name: "Nombre",
-            email: "Correo electrónico",
-            profile: "Perfil",
-            whatsapp: "Conexión estándar",
-            actions: "Acciones",
-          },
-          buttons: {
-            add: "Agregar Usuario",
-          },
-          toasts: {
-            deleted: "Usuario eliminado con éxito.",
-          },
-          confirmationModal: {
-            deleteTitle: "Eliminar",
-            deleteMessage: "Se perderán todos los datos del usuario. Los tickets abiertos para este usuario se moverán a espera.",
-          },
-        },
-        settings: {
-          success: "Configuración guardada con éxito.",
-          title: "Configuración",
-          settings: {
-            userCreation: {
-              name: "Creación de usuario",
-              note: "Permitir la creación de usuarios",
-              options: {
-                enabled: "Habilitado",
-                disabled: "Deshabilitado",
-              },
-            },
-            CheckMsgIsGroup: {
-              name: "Mensajes de grupo",
-              note: "Recibir mensajes de grupos",
-              options: {
-                enabled: "Habilitado",
-                disabled: "Deshabilitado",
-              },
-            },
-            call: {
-              name: "Aceptar llamadas",
-              note: "Si está deshabilitado, el cliente recibirá un mensaje de que no acepta llamadas de voz/video",
-              options: {
-                enabled: "Habilitado",
-                disabled: "Deshabilitado",
-              },
-            },
-            sideMenu: {
-              name: "Menú lateral de inicio",
-              note: "Si está habilitado, el menú lateral comenzará cerrado",
-              options: {
-                enabled: "Abrir",
-                disabled: "Cerrado",
-              },
-            },
-            closeTicketApi: {
-              name: "Cerrar ticket enviado API",
-              note: "Cierra automáticamente el ticket cuando se envía a través de API",
-              options: {
-                enabled: "Habilitado",
-                disabled: "Deshabilitado",
-              },
-            },
-            darkMode: {
-                name: "Habilitar modo oscuro",
-                note: "Cambiar entre el modo claro y el modo oscuro",
-                options: {
-                  enabled: "Habilitado",
-                  disabled: "Deshabilitado",
-                },
-            },
-            timeCreateNewTicket: {
-              name: "Crear nuevo ticket después",
-              note: "Seleccione el tiempo que tardará en abrir un nuevo ticket si el cliente lo contacta nuevamente",
-              options: {
-                "10": "10 segundos",
-                "30": "30 segundos",
-                "60": "1 minuto",
-                "300": "5 minutos",
-                "1800" : "30 minutos",
-                "3600" : "1 hora",
-                "7200" : "2 horas",
-                "21600" : "6 horas",
-                "43200" : "12 horas",
-                "86400" : "24 horas",
-                "604800" : "7 días",
-                "1296000" : "15 días",
-                "2592000" : "30 días",
-              },
-            },
-          },
-        },
-        messagesList: {
-          header: {
-            assignedTo: "Asignado:",
-            buttons: {
-              return: "Volver",
-              resolve: "Resolver",
-              reopen: "Reabrir",
-              accept: "Aceptar",
-            },
-          },
-        },
-        messagesInput: {
-          placeholderOpen: "Ingrese un mensaje",
-          placeholderClosed: "Reabrir o aceptar este ticket para enviar un mensaje.",
-          signMessage: "Suscribirse",
-        },
-        contactDrawer: {
-          header: "Datos de contacto",
-          buttons: {
-            edit: "Editar contacto",
-          },
-          extraInfo: "Otra información",
-        },
-        ticketOptionsMenu: {
-          delete: "Eliminar",
-          transfer: "Transferir",
-          confirmationModal: {
-            title: "Eliminar el ticket ",
-            titleFrom: "del contacto ",
-            message: "¡Atención! Todos los mensajes relacionados con el ticket se perderán.",
-          },
-          buttons: {
-            delete: "Eliminar",
-            cancel: "Cancelar",
-          },
+        buttons: {
+          add: "Agregar sector",
         },
         confirmationModal: {
-          buttons: {
-            confirm: "Está bien",
-            cancel: "Cancelar",
-          },
-        },
-        tablegeoOptionsMenu: {
-          delete: "Eliminar",
-          reply: "Responder",
-          confirmationModal: {
-            title: "¿Eliminar mensaje?",
-            message: "Esta acción no se puede revertir.",
-          },
-        },
-        backendErrors: {
-          ERR_NO_OTHER_WHATSAPP: "Debe haber al menos un WhatsApp predeterminado.",
-          ERR_NO_DEF_WAPP_FOUND: "No se encontró WhatsApp predeterminado. Verifique la página de conexiones.",
-          ERR_WAPP_NOT_INITIALIZED: "Esta sesión de WhatsApp no ​​fue inicializada. Por favor revisa la página de conexiones.",
-          ERR_WAPP_CHECK_CONTACT: "No se pudo verificar el contacto de WhatsApp. Verifique la página de conexiones.",
-          ERR_WAPP_INVALID_CONTACT: "Este no es un número de Whatsapp válido.",
-          ERR_WAPP_DOWNLOAD_MEDIA: "No se pueden descargar medios de WhatsApp. Verifique la página de conexiones",
-          ERR_INVALID_CREDENTIALS: "Error de autenticación. Vuelva a intentarlo",
-          ERR_SENDING_WAPP_MSG: "Error al enviar el mensaje de WhatsApp. Verificar página de conexiones.",
-          ERR_DELETE_WAPP_MSG: "No se pudo eliminar el mensaje de WhatsApp.",
-          ERR_OTHER_OPEN_TICKET: "Ya hay un ticket abierto para este contacto.",
-          ERR_SESSION_EXPIRED: "Sesión caducada. Inicie sesión.",
-          ERR_USER_CREATION_DISABLED: "La creación de usuarios ha sido deshabilitada por el administrador.",
-          ERR_NO_PERMISSION: "No tienes permiso para acceder a este recurso.",
-          ERR_DUPLICATED_CONTACT: "Ya existe un contacto con este número.",
-          ERR_NO_SETTING_FOUND: "No se encontraron configuraciones con esta ID.",
-          ERR_NO_CONTACT_FOUND: "No se encontró ningún contacto con esta ID.",
-          ERR_NO_TICKET_FOUND: "No se encontraron boletos con esta ID.",
-          ERR_NO_USER_FOUND: "No se encontró ningún usuario con esta ID.",
-          ERR_NO_WAPP_FOUND: "No se encontró WhatsApp con este ID.",
-          ERR_CREATING_MESSAGE: "Error al crear el mensaje en la base de datos.",
-          ERR_CREATING_TICKET: "Error al crear el ticket en la base de datos.",
-          ERR_FETCH_WAPP_MSG: "Error al obtener el mensaje en WhatsApp, puede ser demasiado antiguo.",
-          ERR_QUEUE_COLOR_ALREADY_EXISTS: "Este color ya está en uso, elige otro.",
-          ERR_WAPP_GREETING_REQUIRED: "El mensaje de saludo es obligatorio cuando hay más de un Sector.",
-          ERR_USER_CREATION_COUNT: "Límite de usuarios alcanzado, comuníquese con soporte para cambiar",
-          ERR_CONNECTION_CREATION_COUNT: "Límite de conexión alcanzado, comuníquese con soporte para cambiar.",
-          ERR_NO_TAG_FOUND: "Etiqueta no encontrada.",
+          deleteTitle: "Eliminar",
+          deleteMessage: "¿Estás seguro? ¡Esta acción no se puede revertir! Los tickets de este sector seguirán existiendo, pero ya no tendrán ningún sector asignado.",
         },
       },
+      queueSelect: {
+        inputLabel: "Sectores",
+      },
+      quickAnswers: {
+        title: "Respuestas rápidas",
+        table: {
+          shortcut: "Atajo",
+          message: "Respuesta rápida",
+          actions: "Acciones",
+        },
+        buttons: {
+          add: "Agregar respuesta rápida",
+          deletedAll: "Eliminar todas las respuestas rápidas",
+        },
+        toasts: {
+          deleted: "Respuesta rápida eliminada con éxito.",
+          deletedAll: "Todas las respuestas rápidas eliminadas.",
+        },
+        searchPlaceholder: "Buscar...",
+        confirmationModal: {
+          deleteTitle: "¿Está seguro de que desea eliminar esta respuesta rápida: ",
+          deletedAll: "¿Está seguro de que desea eliminar todas las respuestas rápidas?",
+          deleteMessage: "Esta acción no se puede revertir.",
+          deleteAllMessage: "Esta acción no se puede revertir.",
+        },
+      },
+      users: {
+        title: "Asistentes",
+        table: {
+          name: "Nombre",
+          email: "Correo electrónico",
+          profile: "Perfil",
+          whatsapp: "Conexión estándar",
+          startWork: "Hora de inicio",
+          endWork: "Tiempo de finalización",
+          acciones: "Acciones",
+        },
+        buttons: {
+          add: "Agregar asistente",
+        },
+        toasts: {
+          deleted: "asistente eliminado con éxito.",
+        },
+        confirmationModal: {
+          deleteTitle: "Eliminar",
+          deleteMessage: "Se perderán todos los datos del asistente. Los tickets abiertos para este asistente se moverán a espera.",
+        },
+      },
+      settings: {
+        success: "Configuración guardada con éxito.",
+        title: "Configuración",
+        settings: {
+          userCreation: {
+            name: "Creación de asistente",
+            note: "Permitir la creación de asistentes",
+            options: {
+              enabled: "Habilitado",
+              disabled: "Deshabilitado",
+            },
+          },
+          CheckMsgIsGroup: {
+            name: "Mensajes de grupo",
+            note: "Recibir mensajes de grupos",
+            options: {
+              enabled: "Habilitado",
+              disabled: "Deshabilitado",
+            },
+          },
+          call: {
+            name: "Aceptar llamadas",
+            note: "Si está deshabilitado, el cliente recibirá un mensaje de que no acepta llamadas de voz/video",
+            options: {
+              enabled: "Habilitado",
+              disabled: "Deshabilitado",
+            },
+          },
+          sideMenu: {
+            name: "Menú lateral de inicio",
+            note: "Si está habilitado, el menú lateral comenzará cerrado",
+            options: {
+              enabled: "Abrir",
+              disabled: "Cerrado",
+            },
+          },
+          closeTicketApi: {
+            name: "Cerrar ticket enviado API",
+            note: "Cierra automáticamente el ticket cuando se envía a través de API",
+            options: {
+              enabled: "Habilitado",
+              disabled: "Deshabilitado",
+            },
+          },
+          darkMode: {
+            name: "Habilitar modo oscuro",
+            note: "Cambiar entre el modo claro y el modo oscuro",
+            options: {
+              enabled: "Habilitado",
+              disabled: "Deshabilitado",
+            },
+          },
+          timeCreateNewTicket: {
+            name: "Crear nuevo ticket después",
+            note: "Seleccione el tiempo que tardará en abrir un nuevo ticket si el cliente lo contacta nuevamente",
+            options: {
+              "10": "10 segundos",
+              "30": "30 segundos",
+              "60": "1 minuto",
+              "300": "5 minutos",
+              "1800": "30 minutos",
+              "3600": "1 hora",
+              "7200": "2 horas",
+              "21600": "6 horas",
+              "43200": "12 horas",
+              "86400": "24 horas",
+              "604800": "7 días",
+              "1296000": "15 días",
+              "2592000": "30 días",
+            },
+          },
+        },
+      },
+      messagesList: {
+        header: {
+          assignedTo: "Asignado:",
+          buttons: {
+            return: "Volver",
+            resolve: "Resolver",
+            reopen: "Reabrir",
+            accept: "Aceptar",
+          },
+        },
+      },
+      messagesInput: {
+        placeholderOpen: "Ingrese un mensaje",
+        placeholderClosed: "Reabrir o aceptar este ticket para enviar un mensaje.",
+        signMessage: "Suscribirse",
+      },
+      contactDrawer: {
+        header: "Datos de contacto",
+        buttons: {
+          edit: "Editar contacto",
+        },
+        extraInfo: "Otra información",
+      },
+      ticketOptionsMenu: {
+        delete: "Eliminar",
+        transfer: "Transferir",
+        confirmationModal: {
+          title: "Eliminar el ticket ",
+          titleFrom: "del contacto ",
+          message: "¡Atención! Todos los mensajes relacionados con el ticket se perderán.",
+        },
+        buttons: {
+          delete: "Eliminar",
+          cancel: "Cancelar",
+        },
+      },
+      confirmationModal: {
+        buttons: {
+          confirm: "Está bien",
+          cancel: "Cancelar",
+        },
+      },
+      tablegeoOptionsMenu: {
+        delete: "Eliminar",
+        reply: "Responder",
+        confirmationModal: {
+          title: "¿Eliminar mensaje?",
+          message: "Esta acción no se puede revertir.",
+        },
+      },
+      backendErrors: {
+        ERR_NO_OTHER_WHATSAPP: "Debe haber al menos un WhatsApp predeterminado.",
+        ERR_NO_DEF_WAPP_FOUND: "No se encontró WhatsApp predeterminado. Verifique la página de conexiones.",
+        ERR_WAPP_NOT_INITIALIZED: "Esta sesión de WhatsApp no ​​fue inicializada. Por favor revisa la página de conexiones.",
+        ERR_WAPP_CHECK_CONTACT: "No se pudo verificar el contacto de WhatsApp. Verifique la página de conexiones.",
+        ERR_WAPP_INVALID_CONTACT: "Este no es un número de Whatsapp válido.",
+        ERR_WAPP_DOWNLOAD_MEDIA: "No se pueden descargar medios de WhatsApp. Verifique la página de conexiones",
+        ERR_INVALID_CREDENTIALS: "Error de autenticación. Vuelva a intentarlo",
+        ERR_SENDING_WAPP_MSG: "Error al enviar el mensaje de WhatsApp. Verificar página de conexiones.",
+        ERR_DELETE_WAPP_MSG: "No se pudo eliminar el mensaje de WhatsApp.",
+        ERR_OTHER_OPEN_TICKET: "Ya hay un ticket abierto para este contacto.",
+        ERR_SESSION_EXPIRED: "Sesión caducada. Inicie sesión.",
+        ERR_USER_CREATION_DISABLED: "La creación de asistentes ha sido deshabilitada por el administrador.",
+        ERR_NO_PERMISSION: "No tienes permiso para acceder a este recurso.",
+        ERR_DUPLICATED_CONTACT: "Ya existe un contacto con este número.",
+        ERR_NO_SETTING_FOUND: "No se encontraron configuraciones con esta ID.",
+        ERR_NO_CONTACT_FOUND: "No se encontró ningún contacto con esta ID.",
+        ERR_NO_TICKET_FOUND: "No se encontraron boletos con esta ID.",
+        ERR_NO_USER_FOUND: "No se encontró ningún asistente con esta ID.",
+        ERR_NO_WAPP_FOUND: "No se encontró WhatsApp con este ID.",
+        ERR_CREATING_MESSAGE: "Error al crear el mensaje en la base de datos.",
+        ERR_CREATING_TICKET: "Error al crear el ticket en la base de datos.",
+        ERR_FETCH_WAPP_MSG: "Error al obtener el mensaje en WhatsApp, puede ser demasiado antiguo.",
+        ERR_QUEUE_COLOR_ALREADY_EXISTS: "Este color ya está en uso, elige otro.",
+        ERR_WAPP_GREETING_REQUIRED: "El mensaje de saludo es obligatorio cuando hay más de un Sector.",
+        ERR_USER_CREATION_COUNT: "Límite de asistentes alcanzado, comuníquese con soporte para cambiar",
+        ERR_CONNECTION_CREATION_COUNT: "Límite de conexión alcanzado, comuníquese con soporte para cambiar.",
+        ERR_NO_TAG_FOUND: "Etiqueta no encontrada.",
+      },
     },
-  };
-  
-  export { messages };
+  },
+};
+
+export { messages };
