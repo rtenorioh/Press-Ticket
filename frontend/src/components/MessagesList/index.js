@@ -1,6 +1,10 @@
 import React, { useState, useEffect, useReducer, useRef } from "react";
 
-import { isSameDay, parseISO, format } from "date-fns";
+import { 
+  isSameDay,
+  parseISO,
+  format 
+} from "date-fns";
 import openSocket from "../../services/socket-io";
 import clsx from "clsx";
 
@@ -26,11 +30,11 @@ import VcardPreview from "../VcardPreview";
 import LocationPreview from "../LocationPreview";
 import ModalImageCors from "../ModalImageCors";
 import MessageOptionsMenu from "../MessageOptionsMenu";
+import Audio from "../Audio";
 
 import api from "../../services/api";
 import toastError from "../../errors/toastError";
 import { toast } from "react-toastify";
-import Audio from "../Audio";
 
 const useStyles = makeStyles((theme) => ({
   messagesListWrapper: {
@@ -534,16 +538,16 @@ const MessagesList = ({ ticketId, isGroup }) => {
   };
 
   const renderMessageAck = (message) => {
-    if (message.ack === 1) {
+    if (message.ack === 0) {
       return <AccessTime fontSize="small" className={classes.ackIcons} />;
     }
-    if (message.ack === 2) {
+    if (message.ack === 1) {
       return <Done fontSize="small" className={classes.ackIcons} />;
     }
-    if (message.ack === 3) {
+    if (message.ack === 2) {
       return <DoneAll fontSize="small" className={classes.ackIcons} />;
     }
-    if (message.ack === 4 || message.ack === 5) {
+    if (message.ack === 3 || message.ack === 4) {
       return <DoneAll fontSize="small" className={classes.ackDoneAllIcon} />;
     }
   };
