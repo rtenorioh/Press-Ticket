@@ -74,7 +74,7 @@ Referência para as variáveis acima
 | tmp_table_size | Máximo de 80% do total de RAM da máquina. Mas limitar a 50% para dividir a RAM com demais aplicações |
 
 Aumentando o limite de upload do nginx
-```shell
+```shell 
 sudo nano /etc/nginx/nginx.conf
 ```
 Adicionar o parâmetro client_max_body_size dentro da seção http
