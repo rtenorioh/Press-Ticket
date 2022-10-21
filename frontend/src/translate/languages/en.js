@@ -1,11 +1,11 @@
 const messages = {
-  en: {
+  EN: {
     translations: {
       signup: {
         title: "Register",
         toasts: {
-          success: "User created successfully! Please login!!!.",
-          fail: "Error creating user. Please check the entered data.",
+          success: "Attendant created successfully! Please login!!!.",
+          fail: "Error creating attendant. Please check the entered data.",
         },
         form: {
           name: "Name",
@@ -161,7 +161,7 @@ const messages = {
         },
         buttons: {
           addExtraInfo: "Add information",
-          okAdd: "Add",
+          okAdd: "Addnar",
           okEdit: "Save",
           cancel: "Cancel",
         },
@@ -246,8 +246,8 @@ const messages = {
       },
       userModal: {
         title: {
-          add: "Add User",
-          edit: "Edit User",
+          add: "Add Attendant",
+          edit: "Edit Attendant",
         },
         form: {
           name: "Name",
@@ -256,21 +256,23 @@ const messages = {
           profile: "Profile",
           admin: "Administrator",
           whatsapp: "Standard Connection",
-          user: "User",
+          user: "Attendant",
+          startWork: "Start",
+          endWork: "Finish"
         },
         buttons: {
           okAdd: "Add",
           okEdit: "Save",
           cancel: "Cancel",
         },
-        success: "User saved successfully.",
+        success: "Attendant saved successfully.",
       },
       chat: {
         noTicketMessage: "Select a ticket to start chatting.",
       },
       uploads: {
         titles: {
-          titleUploadMsgDragDrop: "DRAG AND DROP FILES INTO THE FIELD BELOW",
+          titleUploadMsgDragDrop: "⬇️ DRAG AND DROP FILES INTO THE FIELD BELOW ⬇️",
           titleFileList: "List of file(s)"
         },
       },
@@ -303,11 +305,11 @@ const messages = {
       },
       transferTicketModal: {
         title: "Transfer Ticket",
-        fieldLabel: "Type to fetch users",
+        fieldLabel: "Enter to search for an attendant",
         fieldConnectionLabel: "Transfer to connection",
         fieldQueueLabel: "Transfer to Sector",
         fieldConnectionPlaceholder: "Select a connection",
-        noOptions: "No user found with that name",
+        noOptions: "No attendant found with that name",
         buttons: {
           ok: "Transfer",
           cancel: "Cancel",
@@ -324,7 +326,8 @@ const messages = {
           accept: "Accept",
           spy: "Spy",
           close: "Close",
-          reopen: "Reopen"
+          reopen: "Reopen",
+          return: "Move to waiting"
         },
         buttons: {
           accept: "Reply",
@@ -353,9 +356,10 @@ const messages = {
           tickets: "Tickets",
           contacts: "Contacts",
           quickAnswers: "Quick Answers",
+          tags: "Tags",
           queues: "Sectors",
           administration: "Administration",
-          users: "Users",
+          users: "Attendants",
           settings: "Settings",
           sendMsg: "Sending Messages",
           sendMedia: "Sending Media",
@@ -388,214 +392,217 @@ const messages = {
           startWork: "Opening",
           endWork: "Closing",
         },
-          buttons: {
-            add: "Add sector",
-          },
-          confirmationModal: {
-            deleteTitle: "Delete",
-            deleteMessage: "Are you sure? This action cannot be reversed! Tickets from this sector will still exist, but will no longer have any sectors assigned.",
-          },
-        },
-        queueSelect: {
-          inputLabel: "Sectors",
-        },
-        quickAnswers: {
-          title: "Quick Answers",
-          table: {
-            shortcut: "Shortcut",
-            message: "Quick Reply",
-            actions: "Actions",
-          },
-          buttons: {
-            add: "Add Quick Reply",
-            deleteAll: "Delete All Quick Replies",
-          },
-          toasts: {
-            deleted: "Quick Reply deleted successfully.",
-            deletedAll: "All Quick Replies deleted.",
-          },
-          searchPlaceholder: "Search...",
-          confirmationModal: {
-            deleteTitle: "Are you sure you want to delete this Quick Reply: ",
-            deleteAllTitle: "Are you sure you want to delete all Quick Replies?",
-            deleteMessage: "This action cannot be reversed.",
-            deleteAllMessage: "This action cannot be reversed.",
-          },
-        },
-        users: {
-          title: "Users",
-          table: {
-            name: "Name",
-            email: "Email",
-            profile: "Profile",
-            whatsapp: "Standard Connection",
-            actions: "Actions",
-          },
-          buttons: {
-            add: "Add User",
-          },
-          toasts: {
-            deleted: "User deleted successfully.",
-          },
-          confirmationModal: {
-            deleteTitle: "Delete",
-            deleteMessage: "All user data will be lost. Open tickets for this user will be moved to hold.",
-          },
-        },
-        settings: {
-          success: "Settings saved successfully.",
-          title: "Settings",
-          settings: {
-            userCreation: {
-              name: "User Creation",
-              note: "Allow user creation",
-              options: {
-                enabled: "Enabled",
-                disabled: "Disabled",
-              },
-            },
-            CheckMsgIsGroup: {
-              name: "Group Messages",
-              note: "Receive messages from groups",
-              options: {
-                enabled: "Enabled",
-                disabled: "Disabled",
-              },
-            },
-            call: {
-              name: "Accept calls",
-              note: "If disabled, the customer will receive a message that they do not accept voice/video calls",
-              options: {
-                enabled: "Enabled",
-                disabled: "Disabled",
-              },
-            },
-            sideMenu: {
-              name: "Home Side Menu",
-              note: "If enabled, the side menu will start closed",
-              options: {
-                enabled: "Open",
-                disabled: "Closed",
-              },
-            },
-            closeTicketApi: {
-              name: "Close Ticket sent API",
-              note: "Automatically closes ticket when submitted via API",
-              options: {
-                enabled: "Enabled",
-                disabled: "Disabled",
-              },
-            },
-            darkMode: {
-                name: "Enable Dark Mode",
-                note: "Switch between light mode and dark mode",
-                options: {
-                  enabled: "Enabled",
-                  disabled: "Disabled",
-                },
-            },
-            timeCreateNewTicket: {
-              name: "Create new ticket after",
-              note: "Select the time it will take to open a new ticket if the customer contacts you again",
-              options: {
-                "10": "10 Seconds",
-                "30": "30 Seconds",
-                "60": "1 minute",
-                "300": "5 minutes",
-                "1800" : "30 minutes",
-                "3600" : "1 hour",
-                "7200" : "2 hours",
-                "21600" : "6 hours",
-                "43200" : "12 hours",
-                "86400" : "24 hours",
-                "604800" : "7 days",
-                "1296000" : "15 days",
-                "2592000" : "30 days",
-              },
-            },
-          },
-        },
-        messagesList: {
-          header: {
-            assignedTo: "Assignee:",
-            buttons: {
-              return: "Return",
-              resolve: "Solve",
-              reopen: "Reopen",
-              accept: "Accept",
-            },
-          },
-        },
-        messagesInput: {
-          placeholderOpen: "Enter a message",
-          placeholderClosed: "Reopen or accept this ticket to send a message.",
-          signMessage: "Subscribe",
-        },
-        contactDrawer: {
-          header: "Contact Data",
-          buttons: {
-            edit: "Edit Contact",
-          },
-          extraInfo: "Other information",
-        },
-        ticketOptionsMenu: {
-          delete: "Delete",
-          transfer: "Transfer",
-          confirmationModal: { 
-            title: "Delete the ticket ", 
-            titleFrom: "from the contact ",
-            message: "Attention! All messages related to the ticket will be lost.", 
-          },
-          buttons: {
-            delete: "Delete",
-            cancel: "Cancel",
-          },
+        buttons: {
+          add: "Add sector",
         },
         confirmationModal: {
-          buttons: {
-            confirm: "Okay",
-            cancel: "Cancel",
-          },
-        },
-        tablegeoOptionsMenu: {
-          delete: "Delete",
-          reply: "Reply",
-          confirmationModal: {
-            title: "Delete message?",
-            message: "This action cannot be reversed.",
-          },
-        },
-        backendErrors: {
-          ERR_NO_OTHER_WHATSAPP: "There must be at least one default WhatsApp.",
-          ERR_NO_DEF_WAPP_FOUND: "No default WhatsApp found. Check connections page.",
-          ERR_WAPP_NOT_INITIALIZED: "This WhatsApp session was not initialized. Please check the connections page.",
-          ERR_WAPP_CHECK_CONTACT: "Could not verify WhatsApp contact. Please check connections page",
-          ERR_WAPP_INVALID_CONTACT: "This is not a valid Whatsapp number.",
-          ERR_WAPP_DOWNLOAD_MEDIA: "Unable to download media from WhatsApp. Please check connections page.",
-          ERR_INVALID_CREDENTIALS: "Authentication error. Please try again.",
-          ERR_SENDING_WAPP_MSG: "Error sending WhatsApp message. Check connections page.",
-          ERR_DELETE_WAPP_MSG: "Unable to delete WhatsApp message.",
-          ERR_OTHER_OPEN_TICKET: "There is already an open ticket for this contact.",
-          ERR_SESSION_EXPIRED: "Session expired. Please sign in.",
-          ERR_USER_CREATION_DISABLED: "User creation has been disabled by administrator.",
-          ERR_NO_PERMISSION: "You do not have permission to access this resource.",
-          ERR_DUPLICATED_CONTACT: "A contact with this number already exists.",
-          ERR_NO_SETTING_FOUND: "No settings found with this ID.",
-          ERR_NO_CONTACT_FOUND: "No contact found with this ID.",
-          ERR_NO_TICKET_FOUND: "No tickets found with this ID.",
-          ERR_NO_USER_FOUND: "No user found with this ID.",
-          ERR_NO_WAPP_FOUND: "No WhatsApp found with this ID.",
-          ERR_CREATING_MESSAGE: "Error creating message in database.",
-          ERR_CREATING_TICKET: "Error creating ticket in database.",
-          ERR_FETCH_WAPP_MSG: "Error fetching message on WhatsApp, it may be too old.",
-          ERR_QUEUE_COLOR_ALREADY_EXISTS: "This color is already in use, choose another one.",
-          ERR_WAPP_GREETING_REQUIRED: "The greeting message is required when there is more than one Sector.",
-          ERR_USER_CREATION_COUNT: "User limit reached, contact support to change.",
-          ERR_CONNECTION_CREATION_COUNT: "Connection limit reached, contact support to change.",
-          ERR_NO_TAG_FOUND: "Tag not found.",
+          deleteTitle: "Delete",
+          deleteMessage: "Are you sure? This action cannot be reversed! Tickets from this sector will still exist, but will no longer have any sectors assigned.",
         },
       },
+      queueSelect: {
+        inputLabel: "Sectors",
+      },
+      quickAnswers: {
+        title: "Quick Answers",
+        table: {
+          shortcut: "Shortcut",
+          message: "Quick Reply",
+          actions: "Actions",
+        },
+        buttons: {
+          add: "Add Quick Reply",
+          deleteAll: "Delete All Quick Replies",
+        },
+        toasts: {
+          deleted: "Quick Reply deleted successfully.",
+          deletedAll: "All Quick Replies deleted.",
+        },
+        searchPlaceholder: "Search...",
+        confirmationModal: {
+          deleteTitle: "Are you sure you want to delete this Quick Reply: ",
+          deleteAllTitle: "Are you sure you want to delete all Quick Replies?",
+          deleteMessage: "This action cannot be reversed.",
+          deleteAllMessage: "This action cannot be reversed.",
+        },
+      },
+      users: {
+        title: "Attendants",
+        table: {
+          name: "Name",
+          email: "Email",
+          profile: "Profile",
+          whatsapp: "Standard Connection",
+          startWork: "Start time",
+          endWork: "End Time",
+          actions: "Actions",
+        },
+        buttons: {
+          add: "Add Attendant",
+        },
+        toasts: {
+          deleted: "Attendant deleted successfully.",
+        },
+        confirmationModal: {
+          deleteTitle: "Delete",
+          deleteMessage: "All agent data will be lost. Open tickets for this agent will be moved to hold.",
+        },
+      },
+      settings: {
+        success: "Settings saved successfully.",
+        title: "Settings",
+        settings: {
+          userCreation: {
+            name: "Creating Attendant",
+            note: "Allow attendant creation",
+            options: {
+              enabled: "Enabled",
+              disabled: "Disabled",
+            },
+          },
+          CheckMsgIsGroup: {
+            name: "Group Messages",
+            note: "Receive messages from groups",
+            options: {
+              enabled: "Enabled",
+              disabled: "Disabled",
+            },
+          },
+          call: {
+            name: "Accept calls",
+            note: "If disabled, the customer will receive a message that they do not accept voice/video calls",
+            options: {
+              enabled: "Enabled",
+              disabled: "Disabled",
+            },
+          },
+          sideMenu: {
+            name: "Home Side Menu",
+            note: "If enabled, the side menu will start closed",
+            options: {
+              enabled: "Open",
+              disabled: "Closed",
+            },
+          },
+          closeTicketApi: {
+            name: "Close Ticket sent API",
+            note: "Automatically closes ticket when submitted via API",
+            options: {
+              enabled: "Enabled",
+              disabled: "Disabled",
+            },
+          },
+          darkMode: {
+            name: "Enable Dark Mode",
+            note: "Switch between light mode and dark mode",
+            options: {
+              enabled: "Enabled",
+              disabled: "Disabled",
+            },
+          },
+          timeCreateNewTicket: {
+            name: "Create new ticket after",
+            note: "Select the time it will take to openlaugh a new ticket, in case the customer gets in touch again",
+            options: {
+              "10": "10 Seconds",
+              "30": "30 Seconds",
+              "60": "1 minute",
+              "300": "5 minutes",
+              "1800": "30 minutes",
+              "3600": "1 hour",
+              "7200": "2 hours",
+              "21600": "6 hours",
+              "43200": "12 hours",
+              "86400": "24 hours",
+              "604800": "7 days",
+              "1296000": "15 days",
+              "2592000": "30 days",
+            },
+          },
+        },
+      },
+      messagesList: {
+        header: {
+          assignedTo: "Assignee:",
+          buttons: {
+            return: "Return",
+            resolve: "Solve",
+            reopen: "Reopen",
+            accept: "Accept",
+          },
+        },
+      },
+      messagesInput: {
+        placeholderOpen: "Enter a message",
+        placeholderClosed: "Reopen or accept this ticket to send a message.",
+        signMessage: "Subscribe",
+      },
+      contactDrawer: {
+        header: "Contact Data",
+        buttons: {
+          edit: "Edit Contact",
+        },
+        extraInfo: "Other information",
+      },
+      ticketOptionsMenu: {
+        delete: "Delete",
+        transfer: "Transfer",
+        confirmationModal: {
+          title: "Delete the ticket",
+          titleFrom: "from contact",
+          message: "Attention! All messages related to the ticket will be lost.",
+        },
+        buttons: {
+          delete: "Delete",
+          cancel: "Cancel",
+        },
+      },
+      confirmationModal: {
+        buttons: {
+          confirm: "Okay",
+          cancel: "Cancel",
+        },
+      },
+      messageOptionsMenu: {
+        delete: "Delete",
+        reply: "Reply",
+        confirmationModal: {
+          title: "Delete message?",
+          message: "This action cannot be reversed.",
+        },
+      },
+      backendErrors: {
+        ERR_NO_OTHER_WHATSAPP: "There must be at least one default WhatsApp.",
+        ERR_NO_DEF_WAPP_FOUND: "No default WhatsApp found. Check connections page.",
+        ERR_WAPP_NOT_INITIALIZED: "This WhatsApp session was not initialized. Please check the connections page.",
+        ERR_WAPP_CHECK_CONTACT: "Could not verify WhatsApp contact. Please check connections page",
+        ERR_WAPP_INVALID_CONTACT: "This is not a valid Whatsapp number.",
+        ERR_WAPP_DOWNLOAD_MEDIA: "Unable to download media from WhatsApp. Please check connections page.",
+        ERR_INVALID_CREDENTIALS: "Authentication error. Please try again.",
+        ERR_SENDING_WAPP_MSG: "Error sending WhatsApp message. Check connections page.",
+        ERR_DELETE_WAPP_MSG: "Unable to delete WhatsApp message.",
+        ERR_OTHER_OPEN_TICKET: "There is already an open ticket for this contact.",
+        ERR_SESSION_EXPIRED: "Session expired. Please sign in.",
+        ERR_USER_CREATION_DISABLED: "Creation of the attendant has been disabled by the administrator.",
+        ERR_NO_PERMISSION: "You do not have permission to access this resource.",
+        ERR_DUPLICATED_CONTACT: "A contact with this number already exists.",
+        ERR_NO_SETTING_FOUND: "No settings found with this ID.",
+        ERR_NO_CONTACT_FOUND: "No contact found with this ID.",
+        ERR_NO_TICKET_FOUND: "No tickets found with this ID.",
+        ERR_NO_USER_FOUND: "No attendant found with this ID.",
+        ERR_NO_WAPP_FOUND: "No WhatsApp found with this ID.",
+        ERR_CREATING_MESSAGE: "Error creating message in database.",
+        ERR_CREATING_TICKET: "Error creating ticket in database.",
+        ERR_FETCH_WAPP_MSG: "Error fetching message on WhatsApp, it may be too old.",
+        ERR_QUEUE_COLOR_ALREADY_EXISTS: "This color is already in use, choose another one.",
+        ERR_WAPP_GREETING_REQUIRED: "The greeting message is required when there is more than one Sector.",
+        ERR_USER_CREATION_COUNT: "Attendant limit reached, contact support to change.",
+        ERR_CONNECTION_CREATION_COUNT: "Connection limit reached, contact support to change.",
+        ERR_NO_TAG_FOUND: "Tag not found.",
+        ERR_OUT_OF_HOURS: "Out of Office Hours!",
+      },
     },
-  };
-  
-  export { messages };
+  },
+};
+
+export { messages };

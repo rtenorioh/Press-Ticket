@@ -55,6 +55,14 @@ class User extends Model<User> {
   @BelongsTo(() => Whatsapp)
   whatsapp: Whatsapp;
 
+  @Default("00:00")
+  @Column
+  startWork: string;
+
+  @Default("23:59")
+  @Column
+  endWork: string;
+
   @CreatedAt
   createdAt: Date;
 

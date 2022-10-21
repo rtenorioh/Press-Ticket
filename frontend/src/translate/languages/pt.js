@@ -4,8 +4,8 @@ const messages = {
       signup: {
         title: "Cadastre-se",
         toasts: {
-          success: "Usuário criado com sucesso! Faça seu login!!!.",
-          fail: "Erro ao criar usuário. Verifique os dados informados.",
+          success: "Atendente criado com sucesso! Faça seu login!!!.",
+          fail: "Erro ao criar atendente. Verifique os dados informados.",
         },
         form: {
           name: "Nome",
@@ -246,8 +246,8 @@ const messages = {
       },
       userModal: {
         title: {
-          add: "Adicionar usuário",
-          edit: "Editar usuário",
+          add: "Adicionar atendente",
+          edit: "Editar atendente",
         },
         form: {
           name: "Nome",
@@ -256,21 +256,23 @@ const messages = {
           profile: "Perfil",
           admin: "Administrador",
           whatsapp: "Conexão Padrão",
-          user: "Usuário",
+          user: "Atendente",
+          startWork: "Inicio",
+          endWork: "Termino"
         },
         buttons: {
           okAdd: "Adicionar",
           okEdit: "Salvar",
           cancel: "Cancelar",
         },
-        success: "Usuário salvo com sucesso.",
+        success: "Atendente salvo com sucesso.",
       },
       chat: {
         noTicketMessage: "Selecione um ticket para começar a conversar.",
       },
       uploads: {
         titles: {
-          titleUploadMsgDragDrop: "ARRASTE E SOLTE ARQUIVOS NO CAMPO ABAIXO",
+          titleUploadMsgDragDrop: "⬇️ ARRASTE E SOLTE ARQUIVOS NO CAMPO ABAIXO ⬇️",
           titleFileList: "Lista de arquivo(s)"
         },
       },
@@ -303,11 +305,11 @@ const messages = {
       },
       transferTicketModal: {
         title: "Transferir Ticket",
-        fieldLabel: "Digite para buscar usuários",
+        fieldLabel: "Digite para buscar um atendente",
         fieldConnectionLabel: "Transferir para conexão",
         fieldQueueLabel: "Transferir para o Setor",
         fieldConnectionPlaceholder: "Selecione uma conexão",
-        noOptions: "Nenhum usuário encontrado com esse nome",
+        noOptions: "Nenhum atendente encontrado com esse nome",
         buttons: {
           ok: "Transferir",
           cancel: "Cancelar",
@@ -357,7 +359,7 @@ const messages = {
           tags: "Tags",
           queues: "Setores",
           administration: "Administração",
-          users: "Usuários",
+          users: "Atendentes",
           settings: "Configurações",
           sendMsg: "Envio de Mensagens",
           sendMedia: "Envio de Mídia",
@@ -425,23 +427,25 @@ const messages = {
         },
       },
       users: {
-        title: "Usuários",
+        title: "Atendentes",
         table: {
           name: "Nome",
           email: "E-mail",
           profile: "Perfil",
           whatsapp: "Conexão Padrão",
+          startWork: "Horário inicial",
+          endWork: "Horário final",
           actions: "Ações",
         },
         buttons: {
-          add: "Adicionar usuário",
+          add: "Adicionar atendente",
         },
         toasts: {
-          deleted: "Usuário excluído com sucesso.",
+          deleted: "Atendente excluído com sucesso.",
         },
         confirmationModal: {
           deleteTitle: "Excluir",
-          deleteMessage: "Todos os dados do usuário serão perdidos. Os tickets abertos deste usuário serão movidos para a espera.",
+          deleteMessage: "Todos os dados do atendente serão perdidos. Os tickets abertos deste atendente serão movidos para a espera.",
         },
       },
       settings: {
@@ -449,8 +453,8 @@ const messages = {
         title: "Configurações",
         settings: {
           userCreation: {
-            name: "Criação de usuário",
-            note: "Permitir a criação de usuário",
+            name: "Criação de atendente",
+            note: "Permitir a criação de atendente",
             options: {
               enabled: "Ativado",
               disabled: "Desativado",
@@ -579,22 +583,23 @@ const messages = {
         ERR_DELETE_WAPP_MSG: "Não foi possível excluir a mensagem do WhatsApp.",
         ERR_OTHER_OPEN_TICKET: "Já existe um ticket aberto para este contato.",
         ERR_SESSION_EXPIRED: "Sessão expirada. Por favor entre.",
-        ERR_USER_CREATION_DISABLED: "A criação do usuário foi desabilitada pelo administrador.",
+        ERR_USER_CREATION_DISABLED: "A criação do atendente foi desabilitada pelo administrador.",
         ERR_NO_PERMISSION: "Você não tem permissão para acessar este recurso.",
         ERR_DUPLICATED_CONTACT: "Já existe um contato com este número.",
         ERR_NO_SETTING_FOUND: "Nenhuma configuração encontrada com este ID.",
         ERR_NO_CONTACT_FOUND: "Nenhum contato encontrado com este ID.",
         ERR_NO_TICKET_FOUND: "Nenhum ticket encontrado com este ID.",
-        ERR_NO_USER_FOUND: "Nenhum usuário encontrado com este ID.",
+        ERR_NO_USER_FOUND: "Nenhum atendente encontrado com este ID.",
         ERR_NO_WAPP_FOUND: "Nenhum WhatsApp encontrado com este ID.",
         ERR_CREATING_MESSAGE: "Erro ao criar mensagem no banco de dados.",
         ERR_CREATING_TICKET: "Erro ao criar ticket no banco de dados.",
         ERR_FETCH_WAPP_MSG: "Erro ao buscar a mensagem no WhatsApp, talvez ela seja muito antiga.",
         ERR_QUEUE_COLOR_ALREADY_EXISTS: "Esta cor já está em uso, escolha outra.",
         ERR_WAPP_GREETING_REQUIRED: "A mensagem de saudação é obrigatório quando há mais de um Setor.",
-        ERR_USER_CREATION_COUNT: "Limite de usuários atingido, para alterar entre em contato com o suporte.",
+        ERR_USER_CREATION_COUNT: "Limite de atendentes atingido, para alterar entre em contato com o suporte.",
         ERR_CONNECTION_CREATION_COUNT: "Limite de conexões atingido, para alterar entre em contato com o suporte.",
         ERR_NO_TAG_FOUND: "Tag não encontrada.",
+        ERR_OUT_OF_HOURS: "Fora do Horário de Expediente!",
       },
     },
   },

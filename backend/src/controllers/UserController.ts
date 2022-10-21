@@ -27,14 +27,22 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
 };
 
 export const store = async (req: Request, res: Response): Promise<Response> => {
-
   const { users } = await ListUsersService({});
 
   if (users.length >= Number(process.env.USER_LIMIT)) {
     throw new AppError("ERR_USER_CREATION_COUNT", 403);
   }
-	
-  const { email, password, name, profile, queueIds, whatsappId } = req.body;
+
+  const {
+    email,
+    password,
+    name,
+    profile,
+    queueIds,
+    whatsappId,
+    startWork,
+    endWork
+  } = req.body;
 
   if (
     req.url === "/signup" &&
@@ -51,7 +59,9 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     name,
     profile,
     queueIds,
-    whatsappId
+    whatsappId,
+    startWork,
+    endWork
   });
 
   const io = getIO();
@@ -80,7 +90,7 @@ export const update = async (
   const newUserId = userId.toString();
   const sessionUserId = req.user.id.toString();
 
-  if (req.user.profile !== "admin" && sessionUserId !== newUserId) {  
+  if (req.user.profile !== "admin" && sessionUserId !== newUserId) {
     throw new AppError("ERR_NO_PERMISSION", 403);
   }
 
