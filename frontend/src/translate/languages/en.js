@@ -105,6 +105,7 @@ const messages = {
         form: {
           name: "Name",
           default: "Default",
+          display: "Display sector time",
           farewellMessage: "Farewell Message"
         },
         buttons: {

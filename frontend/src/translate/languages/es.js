@@ -105,6 +105,7 @@ const messages = {
         form: {
           name: "Nombre",
           default: "Predeterminado",
+          display: "Mostrar hora del sector",
           farewellMessage: "Mensaje de despedida"
         },
         buttons: {
