@@ -1,5 +1,15 @@
 # Changelog
 
+### 23/10/2022
+
+- [Configuração da exibição dos horários dos setores](https://github.com/rtenorioh/Press-Ticket/commit/5bc69b6832aada42f39aadfec0b8c171f7b3445a); 
+- [Função copiar dados do contato](https://github.com/rtenorioh/Press-Ticket/commit/a4f72cfff0df33696bd9a1bcf795cd77fa802d93); e
+- [Atualização da versão](https://github.com/rtenorioh/Press-Ticket/commit/7ce64f1333c520d672266633a46eb1f6ae24e5bf).
+
+### 20/10/2022
+
+- [Correção da marca de leitura da mensagem](https://github.com/rtenorioh/Press-Ticket/commit/6e68ec866104a11f90f52ae9d635899f186a1bab).
+
 ### 19/10/2022
 
 - [Horário de funcionamento do Atendente](https://github.com/rtenorioh/Press-Ticket/commit/404b61ae332d9b66b3d18bd9afa112378d9f8f3a); e
