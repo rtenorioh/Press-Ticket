@@ -528,7 +528,7 @@ const messages = {
           buttons: {
             return: "Retornar",
             resolve: "Resolver",
-            reopen: "Reabrir",
+            reopen: "Reabrir", 
             accept: "Aceitar",
           },
         },
@@ -544,6 +544,10 @@ const messages = {
           edit: "Editar contato",
         },
         extraInfo: "Outras informações",
+      },
+      copyToClipboard: {
+        copy:"Copiar",
+        copied: "Copiado"
       },
       ticketOptionsMenu: {
         delete: "Deletar",

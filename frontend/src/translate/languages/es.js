@@ -545,6 +545,10 @@ const messages = {
         },
         extraInfo: "Otra información",
       },
+      copyToClipboard: {
+        copy:"Copiar",
+        copied: "Copiado"
+      },
       ticketOptionsMenu: {
         delete: "Eliminar",
         transfer: "Transferir",
