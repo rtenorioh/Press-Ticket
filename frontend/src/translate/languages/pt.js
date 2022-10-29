@@ -105,6 +105,7 @@ const messages = {
         form: {
           name: "Nome",
           default: "Padrão",
+          display: "Exibir horário dos setores",
           farewellMessage: "Mensagem de despedida"
         },
         buttons: {
@@ -527,7 +528,7 @@ const messages = {
           buttons: {
             return: "Retornar",
             resolve: "Resolver",
-            reopen: "Reabrir",
+            reopen: "Reabrir", 
             accept: "Aceitar",
           },
         },
@@ -543,6 +544,10 @@ const messages = {
           edit: "Editar contato",
         },
         extraInfo: "Outras informações",
+      },
+      copyToClipboard: {
+        copy:"Copiar",
+        copied: "Copiado"
       },
       ticketOptionsMenu: {
         delete: "Deletar",

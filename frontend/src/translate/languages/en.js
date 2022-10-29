@@ -1,5 +1,5 @@
 const messages = {
-  EN: {
+  en: {
     translations: {
       signup: {
         title: "Register",
@@ -105,6 +105,7 @@ const messages = {
         form: {
           name: "Name",
           default: "Default",
+          display: "Display sector time",
           farewellMessage: "Farewell Message"
         },
         buttons: {
@@ -543,6 +544,10 @@ const messages = {
           edit: "Edit Contact",
         },
         extraInfo: "Other information",
+      },
+      copyToClipboard: {
+        copy:"Copy",
+        copied: "Copied"
       },
       ticketOptionsMenu: {
         delete: "Delete",

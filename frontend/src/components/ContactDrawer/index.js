@@ -18,6 +18,7 @@ import ContactDrawerSkeleton from "../ContactDrawerSkeleton";
 import MarkdownWrapper from "../MarkdownWrapper";
 import { TagsContainer } from "../TagsContainer";
 import ModalImageContatc from "./ModalImage";
+import CopyToClipboard from "../CopyToClipboard";
 
 const drawerWidth = 320;
 
@@ -120,14 +121,19 @@ const ContactDrawer = ({ open, handleDrawerClose, contact, loading }) => {
 			) : (
 				<div className={classes.content}>
 					<Paper square variant="outlined" className={classes.contactHeader}>
-						<ModalImageContatc imageUrl={contact.profilePicUrl}/>							
-						<Typography>{contact.name}</Typography>
+						<ModalImageContatc imageUrl={contact.profilePicUrl} />
+						<Typography>
+							{contact.name}
+							<CopyToClipboard content={contact.name} color="secondary" />
+							</Typography>
 						<Typography>
 							<Link href={`tel:${contact.number}`}>{contact.number}</Link>
+							<CopyToClipboard content={contact.number} color="secondary" />
 						</Typography>
 						{contact.email && (
 							<Typography>
 								<Link href={`mailto:${contact.email}`}>{contact.email}</Link>
+								<CopyToClipboard content={contact.email} color="secondary" />
 							</Typography>
 						)}
 						<Button
@@ -138,7 +144,7 @@ const ContactDrawer = ({ open, handleDrawerClose, contact, loading }) => {
 							{i18n.t("contactDrawer.buttons.edit")}
 						</Button>
 					</Paper>
-					<TagsContainer contact={contact} className={classes.contactTags}/>
+					<TagsContainer contact={contact} className={classes.contactTags} />
 					<Paper square variant="outlined" className={classes.contactDetails}>
 						<ContactModal
 							open={modalOpen}
@@ -155,7 +161,10 @@ const ContactDrawer = ({ open, handleDrawerClose, contact, loading }) => {
 								variant="outlined"
 								className={classes.contactExtraInfo}
 							>
-								<InputLabel>{info.name}</InputLabel>
+								<InputLabel>
+									{info.name}
+									<CopyToClipboard content={info.value} color="secondary" />
+								</InputLabel>
 								<Typography component="div" noWrap style={{ paddingTop: 2 }}>
 									<MarkdownWrapper>{info.value}</MarkdownWrapper>
 								</Typography>

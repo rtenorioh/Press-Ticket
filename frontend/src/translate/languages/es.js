@@ -105,6 +105,7 @@ const messages = {
         form: {
           name: "Nombre",
           default: "Predeterminado",
+          display: "Mostrar hora del sector",
           farewellMessage: "Mensaje de despedida"
         },
         buttons: {
@@ -543,6 +544,10 @@ const messages = {
           edit: "Editar contacto",
         },
         extraInfo: "Otra información",
+      },
+      copyToClipboard: {
+        copy:"Copiar",
+        copied: "Copiado"
       },
       ticketOptionsMenu: {
         delete: "Eliminar",

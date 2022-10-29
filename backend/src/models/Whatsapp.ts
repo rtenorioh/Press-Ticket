@@ -58,6 +58,11 @@ class Whatsapp extends Model<Whatsapp> {
   @Column
   isDefault: boolean;
 
+  @Default(false)
+  @AllowNull
+  @Column
+  isDisplay: boolean;
+
   @CreatedAt
   createdAt: Date;
 
