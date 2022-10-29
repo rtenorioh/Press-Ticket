@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useReducer, useContext } from "react";
+import React, { useState, useEffect, useReducer, useContext, useMemo } from "react";
 import openSocket from "../../services/socket-io";
 
 import { makeStyles } from "@material-ui/core/styles";
@@ -164,7 +164,7 @@ const TicketsList = (props) => {
 	} = props;
 	const classes = useStyles();
 	const [pageNumber, setPageNumber] = useState(1);
-	const [ticketsList, dispatch] = useReducer(reducer, []);
+	const [originalTicketsList, dispatch] = useReducer(reducer, []);
 	const { user } = useContext(AuthContext);
 	const { profile, queues } = user;
 
@@ -181,6 +181,16 @@ const TicketsList = (props) => {
 		tags: JSON.stringify(tags),
 		queueIds: JSON.stringify(selectedQueueIds),
 	});
+
+	const ticketsList = useMemo(() => {
+		if (status !== 'pending') {
+			return originalTicketsList
+		}
+
+		return originalTicketsList.sort((bf, af) => bf.createdAt < af.createdAt ? -1 : 1)
+	}, [status, originalTicketsList])
+
+	console.log('>>> ticketsList', ticketsList)
 
 	useEffect(() => {
 		const queueIds = queues.map((q) => q.id);

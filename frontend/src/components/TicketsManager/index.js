@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState } from "react";
 
 import { makeStyles } from "@material-ui/core/styles";
 import Paper from "@material-ui/core/Paper";
-import SearchIcon from "@material-ui/icons/Search";
+// import SearchIcon from "@material-ui/icons/Search";
 import Tabs from "@material-ui/core/Tabs";
 import Tab from "@material-ui/core/Tab";
 import Badge from "@material-ui/core/Badge";
@@ -102,7 +102,8 @@ const useStyles = makeStyles((theme) => ({
 const TicketsManager = () => {
   const classes = useStyles();
 
-  const [searchParam, setSearchParam] = useState("");
+  const [searchParam] = useState("");
+  // const [searchParam, setSearchParam] = useState("");
   const [tab, setTab] = useState("open");
   const [tabOpen] = useState("open");
   const [newTicketModalOpen, setNewTicketModalOpen] = useState(false);
@@ -123,6 +124,7 @@ const TicketsManager = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  /*
   const handleSearch = (e) => {
     const searchedTerm = e.target.value.toLowerCase();
 
@@ -135,6 +137,7 @@ const TicketsManager = () => {
     }
 
   };
+  */
 
   const handleSelectedTags = (selecteds) => {
     const tags = selecteds.map(t => t.id);

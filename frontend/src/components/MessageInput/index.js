@@ -21,11 +21,11 @@ import MicIcon from "@material-ui/icons/Mic";
 import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
 import HighlightOffIcon from "@material-ui/icons/HighlightOff";
 import {
-  FormControlLabel,
+  // FormControlLabel,
   Hidden,
   Menu,
   MenuItem,
-  Switch,
+  // Switch,
   Grid,
   Typography,
   List,
@@ -252,7 +252,8 @@ const MessageInput = ({ ticketStatus }) => {
   const { setReplyingMessage, replyingMessage } = useContext(ReplyMessageContext);
   const { user } = useContext(AuthContext);
 
-  const [signMessage, setSignMessage] = useLocalStorage("signOption", true);
+  const [signMessage] = useLocalStorage("signOption", true);
+  // const [signMessage, setSignMessage] = useLocalStorage("signOption", true);
 
   useEffect(() => {
     inputRef.current.focus();
