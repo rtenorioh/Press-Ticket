@@ -1,9 +1,13 @@
-import { Sequelize, Op } from "sequelize";
+import { Sequelize, Op, Filterable, Includeable } from "sequelize";
+import { intersection } from "lodash";
 import Contact from "../../models/Contact";
+import Tag from "../../models/Tag";
+import ContactTag from "../../models/ContactTag";
 
 interface Request {
   searchParam?: string;
   pageNumber?: string;
+  tags?: number[];
 }
 
 interface Response {
@@ -14,9 +18,10 @@ interface Response {
 
 const ListContactsService = async ({
   searchParam = "",
-  pageNumber = "1"
+  pageNumber = "1",
+  tags
 }: Request): Promise<Response> => {
-  const whereCondition = {
+  let whereCondition: Filterable["where"] = {
     [Op.or]: [
       {
         name: Sequelize.where(
@@ -32,10 +37,38 @@ const ListContactsService = async ({
           "LIKE",
           `%${searchParam.toLowerCase().trim()}%`
         )
-      },
+      }
     ]
   };
-  const limit = 20;
+
+  let includeCondition: Includeable[];
+  includeCondition = [
+    {
+      model: Tag,
+      as: "tags",
+      attributes: ["id", "name", "color"]
+    }
+  ];
+
+  if (Array.isArray(tags) && tags.length > 0) {
+    const contactsTagFilter = [];
+    for (const tag of tags) {
+      const contactTags = await ContactTag.findAll({ where: { tagId: tag } });
+      if (contactTags) {
+        contactsTagFilter.push(contactTags.map(t => t.contactId));
+      }
+    }
+
+    const contactsIntersection: number[] = intersection(...contactsTagFilter);
+
+    whereCondition = {
+      id: {
+        [Op.in]: contactsIntersection
+      }
+    };
+  }
+
+  const limit = 200;
   const offset = limit * (+pageNumber - 1);
 
   const { count, rows: contacts } = await Contact.findAndCountAll({

@@ -7,6 +7,7 @@ import CreateQuickAnswerService from "../services/QuickAnswerService/CreateQuick
 import ShowQuickAnswerService from "../services/QuickAnswerService/ShowQuickAnswerService";
 import UpdateQuickAnswerService from "../services/QuickAnswerService/UpdateQuickAnswerService";
 import DeleteQuickAnswerService from "../services/QuickAnswerService/DeleteQuickAnswerService";
+import DeleteAllQuickAnswerService from "../services/QuickAnswerService/DeleteAllQuickAnswerService";
 
 import AppError from "../errors/AppError";
 
@@ -114,4 +115,15 @@ export const remove = async (
   });
 
   return res.status(200).json({ message: "Quick Answer deleted" });
+};
+
+export const removeAll = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  const { quickAnswerId } = req.params;
+
+  await DeleteAllQuickAnswerService();
+
+  return res.status(200).json({ message: "All Quick Answer deleted" });
 };

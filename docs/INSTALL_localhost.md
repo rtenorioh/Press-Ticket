@@ -29,6 +29,7 @@ CHROME_BIN=C:\Program Files\Google\Chrome\Application\chrome.exe
 
 DB_DIALECT=mysql  
 DB_HOST=localhost  
+DB_TIMEZONE=-03:00  
 DB_USER=root  
 DB_PASS=  
 DB_NAME=pressticket 
