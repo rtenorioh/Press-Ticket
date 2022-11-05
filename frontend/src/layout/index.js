@@ -1,5 +1,6 @@
 import React, { useState, useContext, useEffect } from "react";
 import clsx from "clsx";
+import {getColorThemeDefault, getSysName} from '../config.js';
 
 import {
   makeStyles,
@@ -31,7 +32,13 @@ import toastError from "../errors/toastError";
 import logodash from "../assets/logo-dash.png";
 import { system } from "../../package.json";
 
+import { getClientLogoDash } from "../config";
+
 const drawerWidth = 240;
+
+const getLogoDash = () => {
+  return getClientLogoDash(logodash);
+}
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -202,7 +209,7 @@ const LoggedInLayout = ({ children }) => {
         open={drawerOpen}
       >
         <div className={classes.toolbarIcon}>
-          <img src={logodash} alt="logo" />
+          <img src={getLogoDash()} alt="logo" />
           <IconButton color="secondary" onClick={() => setDrawerOpen(!drawerOpen)}>
             <ChevronLeftIcon />
           </IconButton>
@@ -221,7 +228,8 @@ const LoggedInLayout = ({ children }) => {
       <AppBar
         position="absolute"
         className={clsx(classes.appBar, drawerOpen && classes.appBarShift)}
-        color={process.env.NODE_ENV === "development" ? "inherit" : "primary"}
+        //color={process.env.NODE_ENV === "development" ? "inherit" : (typeof process.env.COLOR_THEME != undefined && process.env.COLOR_THEME != '' ? process.env.COLOR_THEME : 'primary')}
+        color={getColorThemeDefault()}
       >
         <Toolbar variant="dense" className={classes.toolbar}>
           <IconButton
@@ -243,9 +251,10 @@ const LoggedInLayout = ({ children }) => {
             noWrap
             className={classes.title}
           >
-            {system.name}
+            {console.log(process,process.env)}
+            {getSysName()} t
             <span className={classes.systemCss}>
-              {"(v"}{system.version}{")"}
+              {typeof process.env.SHOW_SYS_VERSION !== 'undefined' || process.env.SHOW_SYS_VERSION === 0 ? '' : "(v" + (system.versionSystem ? system.versionSystem : system.version) + ")"}
             </span>
           </Typography>
           {user.id && <NotificationsPopOver />}

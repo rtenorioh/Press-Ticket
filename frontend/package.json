@@ -2,8 +2,11 @@
   "name": "frontend",
   "version": "0.1.0",
   "system": {
+    "versionSystem": "1.3.1",
     "version": "1.3.1",
     "name": "Press Ticket",
+    "product": "FaleON zaap",
+    "productUrl": "https://zaap.faleon.com.br",
     "url": "https://pressticket.com.br"
   },
   "private": true,
