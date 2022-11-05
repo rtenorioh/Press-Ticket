@@ -6,6 +6,8 @@ import { Link as RouterLink } from "react-router-dom";
 import { toast } from "react-toastify";
 import { Formik, Form, Field } from "formik";
 
+import { getClientLogo } from "../../config";
+
 import {
 	Button,
 	CssBaseline,
@@ -31,13 +33,17 @@ import toastError from "../../errors/toastError";
 import { system } from "../../../package.json";
 import logo from '../../assets/logo.png';
 
+const getLogo = () => {
+  return getClientLogo(logo);
+}
+
 const Copyright = () => {
 	return (
 		<Typography variant="body2" color="textSecondary" align="center">
 			© {new Date().getFullYear()}
 			{" - "}
-			<Link color="inherit" href="https://github.com/rtenorioh/Press-Ticket">
-				{system.name} - v{system.version}
+			<Link color="inherit" href="{system.productUrl}">
+				{(system.product ? system.product : system.name)} - v{system.versionSystem ? system.versionSystem : system.version}
 			</Link>
 			{"."}
 		</Typography>
@@ -91,7 +97,7 @@ const SignUp = () => {
 		<Container component="main" maxWidth="xs">
 			<CssBaseline />
 			<div className={classes.paper}>
-				<img alt="logo" src={logo}></img>
+				<img alt="logo" src={getLogo()}></img>
 				<Typography component="h1" variant="h5">
 					{i18n.t("signup.title")}
 				</Typography>

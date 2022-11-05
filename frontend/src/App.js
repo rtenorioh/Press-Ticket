@@ -13,6 +13,15 @@ import toastError from "./errors/toastError";
 import lightBackground from "../src/assets/wa-background-light.png";
 import darkBackground from "../src/assets/wa-background-dark.jpg";
 
+import { getThemePrimaryColor, getThemeSecondaryColor } from "./config";
+
+const getPrimaryColorTheme = () => {
+  return getThemePrimaryColor();
+}
+const getSecondaryColorTheme = () => {
+  return getThemeSecondaryColor();
+}
+
 const App = () => {
   const [locale, setLocale] = useState();
 
@@ -29,8 +38,8 @@ const App = () => {
         },
       },
       palette: {
-        primary: { main: "#6B62FE" },
-        secondary: { main: "#F50057" },
+        primary: { main: `${getPrimaryColorTheme()}` },
+        secondary: { main: `${getSecondaryColorTheme()}` },
       },
       backgroundImage: `url(${lightBackground})`,
     },

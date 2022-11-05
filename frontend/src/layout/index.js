@@ -32,7 +32,13 @@ import toastError from "../errors/toastError";
 import logodash from "../assets/logo-dash.png";
 import { system } from "../../package.json";
 
+import { getClientLogoDash } from "../config";
+
 const drawerWidth = 240;
+
+const getLogoDash = () => {
+  return getClientLogoDash(logodash);
+}
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -203,7 +209,7 @@ const LoggedInLayout = ({ children }) => {
         open={drawerOpen}
       >
         <div className={classes.toolbarIcon}>
-          <img src={logodash} alt="logo" />
+          <img src={getLogoDash()} alt="logo" />
           <IconButton color="secondary" onClick={() => setDrawerOpen(!drawerOpen)}>
             <ChevronLeftIcon />
           </IconButton>
@@ -248,7 +254,7 @@ const LoggedInLayout = ({ children }) => {
             {console.log(process,process.env)}
             {getSysName()} t
             <span className={classes.systemCss}>
-              {typeof process.env.SHOW_SYS_VERSION !== 'undefined' || process.env.SHOW_SYS_VERSION === 0 ? '' : "(v" + system.version + ")"}
+              {typeof process.env.SHOW_SYS_VERSION !== 'undefined' || process.env.SHOW_SYS_VERSION === 0 ? '' : "(v" + (system.versionSystem ? system.versionSystem : system.version) + ")"}
             </span>
           </Typography>
           {user.id && <NotificationsPopOver />}
