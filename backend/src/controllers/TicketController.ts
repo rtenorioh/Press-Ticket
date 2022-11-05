@@ -37,7 +37,7 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
     searchParam,
     showAll,
     queueIds: queueIdsStringified,
-    withUnreadMessages,
+    withUnreadMessages
   } = req.query as IndexQuery;
 
   const userId = req.user.id;
@@ -56,7 +56,7 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
     showAll,
     userId,
     queueIds,
-    withUnreadMessages,
+    withUnreadMessages
   });
 
   return res.status(200).json({ tickets, count, hasMore });
@@ -65,12 +65,17 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
 export const store = async (req: Request, res: Response): Promise<Response> => {
   const { contactId, status, userId, queueId }: TicketData = req.body;
 
-  const ticket = await CreateTicketService({ contactId, status, userId, queueId });
+  const ticket = await CreateTicketService({
+    contactId,
+    status,
+    userId,
+    queueId
+  });
 
   const io = getIO();
   io.to(ticket.status).emit("ticket", {
     action: "update",
-    ticket,
+    ticket
   });
 
   return res.status(200).json(ticket);
@@ -93,7 +98,7 @@ export const update = async (
 
   const { ticket } = await UpdateTicketService({
     ticketData,
-    ticketId,
+    ticketId
   });
 
   if (ticketData.transf) {
@@ -104,7 +109,7 @@ export const update = async (
     }
   }
 
-  if (ticket.status === "closed") {
+  if (ticket.status === "closed" && ticket.isGroup === false) {
     const whatsapp = await ShowWhatsAppService(ticket.whatsappId);
 
     const { farewellMessage } = whatsapp;
@@ -134,7 +139,7 @@ export const remove = async (
     .to("notification")
     .emit("ticket", {
       action: "delete",
-      ticketId: +ticketId,
+      ticketId: +ticketId
     });
 
   return res.status(200).json({ message: "ticket deleted" });

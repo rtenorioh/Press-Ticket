@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import openSocket from "socket.io-client";
+import { useHistory } from "react-router-dom";
 
 import { makeStyles, withStyles } from "@material-ui/core/styles";
 import Paper from "@material-ui/core/Paper";
@@ -95,6 +96,7 @@ const IOSSwitch = withStyles((theme) => ({
 
 const Settings = () => {
 	const classes = useStyles();
+	const history = useHistory();
 
 	const [settings, setSettings] = useState([]);
 
@@ -138,6 +140,7 @@ const Settings = () => {
 				value: selectedValue,
 			});
 			toast.success(i18n.t("settings.success"));
+			history.go(0);
 		} catch (err) {
 			toastError(err);
 		}
@@ -297,6 +300,18 @@ const Settings = () => {
 							</option>
 							<option value="43200">
 								{i18n.t("settings.settings.timeCreateNewTicket.options.43200")}
+							</option>
+							<option value="86400">
+								{i18n.t("settings.settings.timeCreateNewTicket.options.86400")}
+							</option>
+							<option value="604800">
+								{i18n.t("settings.settings.timeCreateNewTicket.options.604800")}
+							</option>
+							<option value="1296000">
+								{i18n.t("settings.settings.timeCreateNewTicket.options.1296000")}
+							</option>
+							<option value="2592000">
+								{i18n.t("settings.settings.timeCreateNewTicket.options.2592000")}
 							</option>
 						</Select>
 				             </Paper>

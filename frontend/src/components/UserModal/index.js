@@ -1,7 +1,11 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
 
 import * as Yup from "yup";
-import { Formik, Form, Field } from "formik";
+import {
+	Formik,
+	Form,
+	Field
+} from "formik";
 import { toast } from "react-toastify";
 
 import {
@@ -13,16 +17,19 @@ import {
 	CircularProgress,
 	Select,
 	InputLabel,
+	makeStyles,
 	MenuItem,
 	FormControl,
 	TextField,
 	InputAdornment,
 	IconButton
-  } from '@material-ui/core';
+} from '@material-ui/core';
 
-import { Visibility, VisibilityOff } from '@material-ui/icons';
+import { 
+	Visibility, 
+	VisibilityOff 
+} from '@material-ui/icons';
 
-import { makeStyles } from "@material-ui/core/styles";
 import { green } from "@material-ui/core/colors";
 
 import { i18n } from "../../translate/i18n";
@@ -46,11 +53,9 @@ const useStyles = makeStyles(theme => ({
 			marginRight: theme.spacing(1),
 		},
 	},
-
 	btnWrapper: {
 		position: "relative",
 	},
-
 	buttonProgress: {
 		color: green[500],
 		position: "absolute",
@@ -62,6 +67,14 @@ const useStyles = makeStyles(theme => ({
 	formControl: {
 		margin: theme.spacing(1),
 		minWidth: 120,
+	},
+	textField: {
+		marginRight: theme.spacing(1),
+		flex: 1,
+	},
+	container: {
+		display: 'flex',
+		flexWrap: 'wrap',
 	},
 }));
 
@@ -82,6 +95,8 @@ const UserModal = ({ open, onClose, userId }) => {
 		email: "",
 		password: "",
 		profile: "user",
+		startWork: "",
+		endWork: "",
 	};
 
 	const { user: loggedInUser } = useContext(AuthContext);
@@ -90,7 +105,9 @@ const UserModal = ({ open, onClose, userId }) => {
 	const [selectedQueueIds, setSelectedQueueIds] = useState([]);
 	const [showPassword, setShowPassword] = useState(false);
 	const [whatsappId, setWhatsappId] = useState(false);
-	const {loading, whatsApps} = useWhatsApps();
+	const { loading, whatsApps } = useWhatsApps();
+	const startWorkRef = useRef();
+	const endWorkRef = useRef();
 
 	useEffect(() => {
 		const fetchUser = async () => {
@@ -181,16 +198,16 @@ const UserModal = ({ open, onClose, userId }) => {
 										helperText={touched.password && errors.password}
 										type={showPassword ? 'text' : 'password'}
 										InputProps={{
-										endAdornment: (
-											<InputAdornment position="end">
-											<IconButton
-												aria-label="toggle password visibility"
-												onClick={() => setShowPassword((e) => !e)}
-											>
-												{showPassword ? <VisibilityOff color="secondary" /> : <Visibility color="secondary" />}
-											</IconButton>
-											</InputAdornment>
-										)
+											endAdornment: (
+												<InputAdornment position="end">
+													<IconButton
+														aria-label="toggle password visibility"
+														onClick={() => setShowPassword((e) => !e)}
+													>
+														{showPassword ? <VisibilityOff color="secondary" /> : <Visibility color="secondary" />}
+													</IconButton>
+												</InputAdornment>
+											)
 										}}
 										fullWidth
 									/>
@@ -264,6 +281,64 @@ const UserModal = ({ open, onClose, userId }) => {
 												))}
 											</Field>
 										</FormControl>
+									)}
+								/>
+								<Can
+									role={loggedInUser.profile}
+									perform="user-modal:editProfile"
+									yes={() => (!loading &&
+										<form className={classes.container} noValidate>
+											<Field
+												as={TextField}
+												label={i18n.t("userModal.form.startWork")}
+												type="time"
+												ampm={false}
+												defaultValue="00:00"
+												inputRef={startWorkRef}
+												InputLabelProps={{
+													shrink: true,
+												}}
+												inputProps={{
+													step: 600, // 5 min
+												}}
+												fullWidth
+												name="startWork"
+												error={
+													touched.startWork && Boolean(errors.startWork)
+												}
+												helperText={
+													touched.startWork && errors.startWork
+												}
+												variant="outlined"
+												margin="dense"
+												className={classes.textField}
+											/>
+											<Field
+												as={TextField}
+												label={i18n.t("userModal.form.endWork")}
+												type="time"
+												ampm={false}
+												defaultValue="23:59"
+												inputRef={endWorkRef}
+												InputLabelProps={{
+													shrink: true,
+												}}
+												inputProps={{
+													step: 600, // 5 min
+												}}
+												fullWidth
+												name="endWork"
+												error={
+													touched.endWork && Boolean(errors.endWork)
+												}
+												helperText={
+													touched.endWork && errors.endWork
+												}
+												variant="outlined"
+												margin="dense"
+												className={classes.textField}
+											/>
+										</form>
 									)}
 								/>
 							</DialogContent>

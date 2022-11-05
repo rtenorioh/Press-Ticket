@@ -1,5 +1,127 @@
 # Changelog
 
+### 23/10/2022
+
+- [Configuração da exibição dos horários dos setores](https://github.com/rtenorioh/Press-Ticket/commit/5bc69b6832aada42f39aadfec0b8c171f7b3445a); 
+- [Função copiar dados do contato](https://github.com/rtenorioh/Press-Ticket/commit/a4f72cfff0df33696bd9a1bcf795cd77fa802d93); e
+- [Atualização da versão](https://github.com/rtenorioh/Press-Ticket/commit/7ce64f1333c520d672266633a46eb1f6ae24e5bf).
+
+### 20/10/2022
+
+- [Correção da marca de leitura da mensagem](https://github.com/rtenorioh/Press-Ticket/commit/6e68ec866104a11f90f52ae9d635899f186a1bab).
+
+### 19/10/2022
+
+- [Horário de funcionamento do Atendente](https://github.com/rtenorioh/Press-Ticket/commit/404b61ae332d9b66b3d18bd9afa112378d9f8f3a); e
+- [Atualização da versão](https://github.com/rtenorioh/Press-Ticket/commit/aab58ad0b6beea430a381d94af47cfb3705d6809).
+
+### 18/10/2022
+
+- [Correção](https://github.com/rtenorioh/Press-Ticket/commit/ba92c2fb4263f28bc329765128d4169f950a8e7f).
+
+### 13/10/2022
+
+- [Remoção do console.log](https://github.com/rtenorioh/Press-Ticket/commit/75d64af0b63b05ff753aa30226b8847ec8a3948a).
+
+### 12/10/2022
+
+- [Correção nos comandos](https://github.com/rtenorioh/Press-Ticket/commit/a580d599e92c6de19dcdd498378dc3187a973beb);
+- [Correção na tradução da transferência de setor](https://github.com/rtenorioh/Press-Ticket/commit/1291369d633a7ca1f0d0a5bb914371f1e2039655);
+- [Correção na tradução ao deletar ticket](https://github.com/rtenorioh/Press-Ticket/commit/7e8436fa11740d1f6271b3d321165ca763eb69c6); e
+- [Botão aceitar apenas para Admin ao espiar](https://github.com/rtenorioh/Press-Ticket/commit/4989417415efb0ba91c4e005a51d70b32a1f1f79).
+
+
+### 09/10/2022
+
+- [Correção](https://github.com/rtenorioh/Press-Ticket/commit/4db7f7aab35bff04d9b1b2475fdc3b0637ff7bfc);
+- [Ajustes no layout](https://github.com/rtenorioh/Press-Ticket/commit/e2d239b670080a90887afd8e00eb702fb578a9a3);
+- [Aumento no carregamento dos contatos para 5000](https://github.com/rtenorioh/Press-Ticket/commit/f97cc726104f5dfe58f68278ae4731d805090ec2); e
+- [Atualização da versão](https://github.com/rtenorioh/Press-Ticket/commit/2d235da25aa7f16dd94460e435e34a422622bee2).
+
+### 08/10/2022
+
+- [Create ModalImage.js](https://github.com/rtenorioh/Press-Ticket/commit/724e55c42448fc999f4b47b0fcdfd4655417f37d); e
+- [Visualização maior do contato](https://github.com/rtenorioh/Press-Ticket/commit/024f916fead89311683d9f567efdfec9a2b37914).
+
+### 07/10/2022
+
+- [Arrastar e soltar medias e enviar com ENTER](https://github.com/rtenorioh/Press-Ticket/commit/32d434801c85b1b1ca342a0362daf1bc8e57e5c1).
+
+### 28/09/2022
+
+- [Inclusão do contador de uso das Tags](https://github.com/rtenorioh/Press-Ticket/commit/1178a204cf75678cf689bd7ba7ea49dcf78c5bee).
+
+### 27/09/2022
+
+- [Tags no Contato](https://github.com/rtenorioh/Press-Ticket/commit/7c3357a1cce91f1c38273a83347f733a6f832fa1).
+
+### 25/09/2022
+
+- [Correção da renderização ao responder uma mensagem](https://github.com/rtenorioh/Press-Ticket/commit/e2dbc79f43c1fc621b4d924a9c4c030360e891f0).
+
+### 22/09/2022
+
+- [Retirada do envio da despedida para grupos](https://github.com/rtenorioh/Press-Ticket/commit/7f5a5fa00d9f349a8bbfebdac9ab89778975279a).
+### 21/09/2022
+
+- [Correção na tradução do modal de tranferir usuário](https://github.com/rtenorioh/Press-Ticket/commit/aefec1cad68f7e71025be67639bbf3445d67c8a2); e
+- [Correção na tradução do modal de deletar ticket](https://github.com/rtenorioh/Press-Ticket/commit/2d549e7abaab0fae2f1b417a2f3bb2f2907fefff).
+
+### 18/09/2022
+
+- [Atualização do typescript](https://github.com/rtenorioh/Press-Ticket/commit/94ee68250f44100050301bd79b39fc9d45ab985a).
+
+### 15/09/2022
+
+- [Adcionado a função de refresh](https://github.com/rtenorioh/Press-Ticket/commit/199ba219c738a5534c323411361a95cb52dbd72d);
+- [Correção ao responder grupos](https://github.com/rtenorioh/Press-Ticket/commit/9721da147cd7916c1b2577f20bdd549a1bd91edc);
+- [Ajuste do layout](https://github.com/rtenorioh/Press-Ticket/commit/6a928309f76acacf18fea7498bc38da921fccc96); e
+- [Inserção do Setor na informação do ticket](https://github.com/rtenorioh/Press-Ticket/commit/a0492064e3ea5420173781c9fd34928e5487a436).
+
+### 01/09/2022
+
+- [Botão de exclusão e mudança nos botões do QuickAnswers](https://github.com/rtenorioh/Press-Ticket/commit/8bbc3dd99d75834b39695c67db50c5c62de286a8); e
+- [Mudança na cor do Dark Theme](https://github.com/rtenorioh/Press-Ticket/commit/e6bfe990e9255393efb534f04452cf2a03b56632).
+
+### 31/08/2022
+
+- [Exportação e exclusão em massa de contatos](https://github.com/rtenorioh/Press-Ticket/commit/513f516c403a469125603feedf9a6bb095aee421).
+
+
+### 30/08/2022
+
+- [Minimizar consumo de recursos](https://github.com/rtenorioh/Press-Ticket/commit/6515138fe4e41f9686d9a6c90a4b7d406dc5dcce); e
+- [Localização e timestamp para nomes de arquivos](https://github.com/rtenorioh/Press-Ticket/commit/f1ad7bccc6169156cb135fe97154b4599e3a0cbd).
+
+### 26/08/2022
+
+- [Inclusão da variável DB_TIMEZONE](https://github.com/rtenorioh/Press-Ticket/commit/263097683042051a8c2e387dbfa519c734f2d004).
+
+### 18/08/2022
+
+- [Correção e implementação de novas tags](https://github.com/rtenorioh/Press-Ticket/commit/a64c08ed0a75f10decfa890074fcdf326b5d84da).
+
+### 16/08/2022
+
+- [Atualização do README](https://github.com/rtenorioh/Press-Ticket/commit/901bce089384c599b582a504d790e19447614fb1).
+
+### 15/08/2022
+
+- [Correção no Tema Dark (botão fechar Contato)](https://github.com/rtenorioh/Press-Ticket/commit/5ac28d0626dca4089fa9c593dd3e32c4278f57c5).
+
+### 11/08/2022
+
+- [Time new create ticket update](https://github.com/rtenorioh/Press-Ticket/pull/41); e
+- [Correções](https://github.com/rtenorioh/Press-Ticket/commit/fb208768bd2a5f1384b0fbb102dc800cca5ba778).
+
+### 07/08/2022
+
+- [Correções e script de atualização](https://github.com/rtenorioh/Press-Ticket/commit/d67a798dce0c4220f6d19028cb9e6f57669611b2).
+
+### 05/08/2022
+
+- [Atualização de versão](https://github.com/rtenorioh/Press-Ticket/commit/bcf255b0ded47a712b61f64f3698e6f0d76644f7).
+
 ### 04/08/2022
 
 - [Inclusão da logo na página de ticket](https://github.com/rtenorioh/Press-Ticket/commit/a0bc96a2c40d9b1875cc216b8981b92b7e6e15ed);

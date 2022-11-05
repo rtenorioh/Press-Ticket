@@ -34,6 +34,7 @@
 ```CREATE DATABASE pressticket CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;```
 
 8. Acessar o BD do mysql
+
 ```USE mysql;```
 
 9. Trocar plugin de autenticação no mysql
@@ -118,6 +119,7 @@ PROXY_PORT=443
 CHROME_BIN=/usr/bin/google-chrome-stable  
 DB_DIALECT=mysql  
 DB_HOST=localhost  
+DB_TIMEZONE=-03:00   
 DB_USER=root  
 DB_PASS=  
 DB_NAME=pressticket  
@@ -186,7 +188,10 @@ JWT_REFRESH_SECRET=
 
 ```nano .env```
 
-45. ```REACT_APP_BACKEND_URL=https://back.pressticket.com.br```
+45. 
+```REACT_APP_BACKEND_URL=https://back.pressticket.com.br```  
+```REACT_APP_HOURS_CLOSE_TICKETS_AUTO=```  
+```SERVER_PORT=3333```  
 
 46. Buildando o frontend
 
@@ -311,6 +316,18 @@ server {
 70. Rodar esse comando 2 vezes para gerar o certificado do backend e frontend
 
 ```sudo certbot --nginx```
+
+71. Acessando diretório raiz
+
+```cd ~```
+
+72. Acessando a pasta do sistema
+
+```cd Press-Ticket/```
+
+73. Dentro da pasta do sistema rode o comando abaixo para executar a atualização
+
+```sh UPDATE.sh```
 
 ==============================================================
 

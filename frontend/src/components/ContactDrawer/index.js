@@ -7,7 +7,7 @@ import CloseIcon from "@material-ui/icons/Close";
 import Drawer from "@material-ui/core/Drawer";
 import Link from "@material-ui/core/Link";
 import InputLabel from "@material-ui/core/InputLabel";
-import Avatar from "@material-ui/core/Avatar";
+//import Avatar from "@material-ui/core/Avatar";
 import Button from "@material-ui/core/Button";
 import Paper from "@material-ui/core/Paper";
 
@@ -16,6 +16,9 @@ import { i18n } from "../../translate/i18n";
 import ContactModal from "../ContactModal";
 import ContactDrawerSkeleton from "../ContactDrawerSkeleton";
 import MarkdownWrapper from "../MarkdownWrapper";
+import { TagsContainer } from "../TagsContainer";
+import ModalImageContatc from "./ModalImage";
+import CopyToClipboard from "../CopyToClipboard";
 
 const drawerWidth = 320;
 
@@ -56,6 +59,7 @@ const useStyles = makeStyles(theme => ({
 		margin: 15,
 		width: 160,
 		height: 160,
+		borderRadius: 10,
 	},
 
 	contactHeader: {
@@ -103,7 +107,9 @@ const ContactDrawer = ({ open, handleDrawerClose, contact, loading }) => {
 			}}
 		>
 			<div className={classes.header}>
-				<IconButton onClick={handleDrawerClose}>
+				<IconButton
+					color="primary"
+					onClick={handleDrawerClose}>
 					<CloseIcon />
 				</IconButton>
 				<Typography style={{ justifySelf: "center" }}>
@@ -115,20 +121,20 @@ const ContactDrawer = ({ open, handleDrawerClose, contact, loading }) => {
 			) : (
 				<div className={classes.content}>
 					<Paper square variant="outlined" className={classes.contactHeader}>
-						<Avatar
-							alt={contact.name}
-							src={contact.profilePicUrl}
-							className={classes.contactAvatar}
-						></Avatar>
-
-						<Typography>{contact.name}</Typography>
+						<ModalImageContatc imageUrl={contact.profilePicUrl} />
+						<Typography>
+							{contact.name}
+							<CopyToClipboard content={contact.name} color="secondary" />
+							</Typography>
 						<Typography>
 							<Link href={`tel:${contact.number}`}>{contact.number}</Link>
+							<CopyToClipboard content={contact.number} color="secondary" />
 						</Typography>
 						{contact.email && (
 							<Typography>
 								<Link href={`mailto:${contact.email}`}>{contact.email}</Link>
-							</Typography>	
+								<CopyToClipboard content={contact.email} color="secondary" />
+							</Typography>
 						)}
 						<Button
 							variant="outlined"
@@ -138,6 +144,7 @@ const ContactDrawer = ({ open, handleDrawerClose, contact, loading }) => {
 							{i18n.t("contactDrawer.buttons.edit")}
 						</Button>
 					</Paper>
+					<TagsContainer contact={contact} className={classes.contactTags} />
 					<Paper square variant="outlined" className={classes.contactDetails}>
 						<ContactModal
 							open={modalOpen}
@@ -154,7 +161,10 @@ const ContactDrawer = ({ open, handleDrawerClose, contact, loading }) => {
 								variant="outlined"
 								className={classes.contactExtraInfo}
 							>
-								<InputLabel>{info.name}</InputLabel>
+								<InputLabel>
+									{info.name}
+									<CopyToClipboard content={info.value} color="secondary" />
+								</InputLabel>
 								<Typography component="div" noWrap style={{ paddingTop: 2 }}>
 									<MarkdownWrapper>{info.value}</MarkdownWrapper>
 								</Typography>
