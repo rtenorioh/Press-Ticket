@@ -10,8 +10,9 @@ import { CssBaseline } from "@material-ui/core";
 import api from "./services/api";
 import toastError from "./errors/toastError";
 
-import lightBackground from "../src/assets/wa-background-light.png";
-import darkBackground from "../src/assets/wa-background-dark.jpg";
+import lightBackground from "./assets/wa-background-light.png";
+import darkBackground from "./assets/wa-background-dark.jpg";
+import { system } from "./config.json";
 
 const App = () => {
   const [locale, setLocale] = useState();
@@ -29,8 +30,13 @@ const App = () => {
         },
       },
       palette: {
-        primary: { main: "#6B62FE" },
-        secondary: { main: "#F50057" },
+        primary: { main: system.color.lightTheme.palette.primary || "#6B62FE" },
+        secondary: { main: system.color.lightTheme.palette.secondary || "#F50057" },
+        toolbar: { main: system.color.lightTheme.toolbar.background || "#6B62FE" },
+        menuItens: { main: system.color.lightTheme.menuItens || "#ffffff" },
+        sub: { main: system.color.lightTheme.sub || "#ffffff" },
+        toolbarIcon: { main: system.color.lightTheme.toolbarIcon || "#ffffff"},
+        divide: { main: system.color.lightTheme.divide || "#E0E0E0" },
       },
       backgroundImage: `url(${lightBackground})`,
     },
@@ -59,15 +65,20 @@ const App = () => {
         },
       },
       palette: {
-        primary: { main: "#52d869" },
-        secondary: { main: "#ff9100" },
+        primary: { main: system.color.darkTheme.palette.primary || "#52d869" },
+        secondary: { main: system.color.darkTheme.palette.secondary || "#ff9100" },
+        toolbar: { main: system.color.darkTheme.toolbar.background || "#52d869" },
+        menuItens: { main: system.color.darkTheme.menuItens || "#181d22" },
+        sub: { main: system.color.darkTheme.sub || "#181d22" },
+        toolbarIcon: { main: system.color.darkTheme.toolbarIcon || "#181d22"},
+        divide: { main: system.color.darkTheme.divide || "#080d14" },
         background: {
-          default: "#080d14",
-          paper: "#181d22",
+          default: system.color.darkTheme.palette.background.default || "#080d14",
+          paper: system.color.darkTheme.palette.background.paper || "#181d22",
         },
         text: {
-          primary: "#52d869",
-          secondary: "#ffffff",
+          primary: system.color.darkTheme.palette.text.primary || "#52d869",
+          secondary: system.color.darkTheme.palette.text.secondary || "#ffffff",
         },
       },
       backgroundImage: `url(${darkBackground})`,

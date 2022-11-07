@@ -19,7 +19,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import { i18n } from "../../translate/i18n";
 
 import { AuthContext } from "../../context/Auth/AuthContext";
-import { system } from "../../../package.json";
+import { system } from "../../config.json";
 import logo from '../../assets/logo.png';
 
 const Copyright = () => {
@@ -27,8 +27,8 @@ const Copyright = () => {
     <Typography variant="body2" color="textSecondary" align="center">
       © {new Date().getFullYear()}
       {" - "}
-      <Link color="inherit" href="https://github.com/rtenorioh/Press-Ticket">
-        {system.name} - v{system.version}
+      <Link color="inherit" href={system.url || "https://github.com/rtenorioh/Press-Ticket"}>
+        {system.name}
       </Link>
       {"."}
     </Typography>

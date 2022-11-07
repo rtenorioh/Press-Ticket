@@ -27,9 +27,8 @@ import { i18n } from "../translate/i18n";
 
 import api from "../services/api";
 import toastError from "../errors/toastError";
-
+import { system } from "../config.json";
 import logodash from "../assets/logo-dash.png";
-import { system } from "../../package.json";
 
 const drawerWidth = 240;
 
@@ -44,6 +43,8 @@ const useStyles = makeStyles((theme) => ({
 
   toolbar: {
     paddingRight: 24, // keep right padding when drawer closed
+    color: "#ffffff",
+    background: theme.palette.toolbar.main
   },
   toolbarIcon: {
     display: "flex",
@@ -51,6 +52,7 @@ const useStyles = makeStyles((theme) => ({
     justifyContent: "flex-end",
     padding: "0 8px",
     minHeight: "48px",
+    backgroundColor: theme.palette.toolbarIcon.main
   },
   appBar: {
     zIndex: theme.zIndex.drawer + 1,
@@ -112,11 +114,6 @@ const useStyles = makeStyles((theme) => ({
     display: "flex",
     overflow: "auto",
     flexDirection: "column",
-  },
-  systemCss: {
-    opacity: "0.5",
-    fontSize: "12px",
-    marginLeft: "8px",
   }
 }));
 
@@ -243,10 +240,7 @@ const LoggedInLayout = ({ children }) => {
             noWrap
             className={classes.title}
           >
-            {system.name}
-            <span className={classes.systemCss}>
-              {"(v"}{system.version}{")"}
-            </span>
+            {system.name || "Press Ticket"}
           </Typography>
           {user.id && <NotificationsPopOver />}
 

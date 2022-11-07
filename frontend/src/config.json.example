@@ -1,0 +1,42 @@
+{
+    "system": {
+        "name": "Press Ticket",
+        "url": "https://pressticket.com.br",
+        "color": {
+            "lightTheme": {
+                "palette": {
+                    "primary": "#6B62FE",
+                    "secondary": "#F50057"
+                },
+                "toolbar": {
+                    "background": "linear-gradient(to right, #6B62FE, #f50057)"
+                },
+                "menuItens": "#ffffff",
+                "sub": "#ffffff",
+                "toolbarIcon": "#ffffff",
+                "divide": "#E0E0E0"
+            },
+            "darkTheme": {
+                "palette": {
+                    "primary": "#52d869",
+                    "secondary": "#ff9100",
+                    "background": {
+                        "default": "#080d14",
+                        "paper": "#181d22"
+                    },
+                    "text": {
+                        "primary": "#52d869",
+                        "secondary": "#ffffff"
+                    }
+                },
+                "toolbar": {
+                    "background": "linear-gradient(to right, #52d869, #ff9100)"
+                },
+                "menuItens": "#181d22",
+                "sub": "#181d22",
+                "toolbarIcon": "#181d22",
+                "divide": "#080d14"
+            }
+        }
+    }
+}
