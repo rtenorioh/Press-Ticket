@@ -32,6 +32,7 @@ import { WhatsAppsContext } from "../context/WhatsApp/WhatsAppsContext";
 import { AuthContext } from "../context/Auth/AuthContext";
 import { Can } from "../components/Can";
 import { systemVersion } from "../../package.json";
+import { system } from "../config.json";
 
 const useStyles = makeStyles(theme => ({
   icon: {
