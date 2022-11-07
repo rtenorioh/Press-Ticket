@@ -1,28 +1,32 @@
 import React, { useContext, useEffect, useState } from "react";
 
-import { makeStyles } from "@material-ui/core/styles";
-import Paper from "@material-ui/core/Paper";
-import SearchIcon from "@material-ui/icons/Search";
-import Tabs from "@material-ui/core/Tabs";
-import Tab from "@material-ui/core/Tab";
-import Badge from "@material-ui/core/Badge";
-import MoveToInboxIcon from "@material-ui/icons/MoveToInbox";
-import HourglassEmptyRoundedIcon from "@material-ui/icons/HourglassEmptyRounded";
-import AllInboxRoundedIcon from "@material-ui/icons/AllInboxRounded";
+import { 
+  Badge,
+  Button,
+  FormControlLabel,
+  makeStyles,
+  Paper,
+  Tab,
+  Tabs,
+  Switch
+} from "@material-ui/core";
 
-import FormControlLabel from "@material-ui/core/FormControlLabel";
-import Switch from "@material-ui/core/Switch";
+import {
+  AllInboxRounded,
+  HourglassEmptyRounded,
+  MoveToInbox,
+  Search
+} from "@material-ui/icons";
 
 import NewTicketModal from "../NewTicketModal";
 import TicketsList from "../TicketsList";
 import TabPanel from "../TabPanel";
 import { TagsFilter } from "../TagsFilter";
+import { Can } from "../Can";
+import TicketsQueueSelect from "../TicketsQueueSelect";
 
 import { i18n } from "../../translate/i18n";
 import { AuthContext } from "../../context/Auth/AuthContext";
-import { Can } from "../Can";
-import TicketsQueueSelect from "../TicketsQueueSelect";
-import { Button } from "@material-ui/core";
 
 const useStyles = makeStyles((theme) => ({
   ticketsWrapper: {
@@ -84,7 +88,7 @@ const useStyles = makeStyles((theme) => ({
   },
 
   badge: {
-    right: "-10px",
+    right: 0,
   },
   show: {
     display: "block",
@@ -158,7 +162,7 @@ const TicketsManager = () => {
         onClose={(e) => setNewTicketModalOpen(false)}
       />
       <Paper elevation={0} square className={classes.searchContainer}>
-        <SearchIcon className={classes.searchIcon} />
+        <Search className={classes.searchIcon} />
         <input
           type="text"
           placeholder={i18n.t("tickets.search.placeholder")}
@@ -178,13 +182,13 @@ const TicketsManager = () => {
         >
           <Tab
             value={"open"}
-            icon={<MoveToInboxIcon />}
+            icon={<MoveToInbox />}
             label={i18n.t("tickets.tabs.open.title")}
             classes={{ root: classes.tab }}
           />
           <Tab
             value={"pending"}
-            icon={<HourglassEmptyRoundedIcon />}
+            icon={<HourglassEmptyRounded />}
             label={
               <Badge
                 className={classes.badge}
@@ -198,7 +202,7 @@ const TicketsManager = () => {
           />
           <Tab
             value={"closed"}
-            icon={<AllInboxRoundedIcon />}
+            icon={<AllInboxRounded />}
             label={i18n.t("tickets.tabs.closed.title")}
             classes={{ root: classes.tab }}
           />
@@ -241,6 +245,7 @@ const TicketsManager = () => {
         />
       </Paper>
       <TabPanel value={tab} name="open" className={classes.ticketsWrapper}>
+      <TagsFilter onFiltered={handleSelectedTags} />
         <Paper className={classes.ticketsWrapper}>
           <TicketsList
             status="open"
@@ -258,6 +263,7 @@ const TicketsManager = () => {
       </TabPanel>
 
       <TabPanel value={tab} name="pending" className={classes.ticketsWrapper}>
+      <TagsFilter onFiltered={handleSelectedTags} />
         <TicketsList
           status="pending"
           showAll={true}
@@ -268,6 +274,7 @@ const TicketsManager = () => {
 
 
       <TabPanel value={tab} name="closed" className={classes.ticketsWrapper}>
+      <TagsFilter onFiltered={handleSelectedTags} />
         <TicketsList
           status="closed"
           showAll={true}
