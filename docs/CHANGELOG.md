@@ -1,5 +1,15 @@
 # Changelog
 
+### 07/11/2022
+
+- [Alteração na estrutura de cores](https://github.com/rtenorioh/Press-Ticket/commit/4e4a8930b340cf02ef522ddb817760b7bc7f7fe4);
+- [Inclusão do import](https://github.com/rtenorioh/Press-Ticket/commit/d05086e4f8af2560bb1bbe38044cf4348bf41c3b); e
+- [Atualização da versão](https://github.com/rtenorioh/Press-Ticket/commit/98f7fd33e0c1d1e4a228dda891fa84777c617bee).
+
+### 06/11/2022
+
+- [Inclusão do Filtro de Tags](https://github.com/rtenorioh/Press-Ticket/commit/5e6a8747db614879ba68aea00c831fd653998899).
+
 ### 23/10/2022
 
 - [Configuração da exibição dos horários dos setores](https://github.com/rtenorioh/Press-Ticket/commit/5bc69b6832aada42f39aadfec0b8c171f7b3445a); 
