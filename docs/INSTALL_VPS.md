@@ -132,7 +132,8 @@ sudo apt update
 
 22. 
 ```bash 
-sudo usermod -aG mysql ${USER}```
+sudo usermod -aG mysql ${USER}
+```
 
 23. Inserir a senha do deploy
 
@@ -289,7 +290,7 @@ SERVER_PORT=3333
 46. Criar o arquivo config.json com base no config.json.example
 
 ```bash
-cp Press-Ticket/frontend/config.json.example Press-Ticket/frontend/src/config.json
+cp src/config.json.example src/config.json
 ```
 
 47. Buildando o frontend
