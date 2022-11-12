@@ -1,7 +1,15 @@
 #!/bin/bash
+echo ""
+echo "██████╗ ██████╗ ███████╗███████╗███████╗    ████████╗██╗ ██████╗██╗  ██╗███████╗████████╗"
+echo "██╔══██╗██╔══██╗██╔════╝██╔════╝██╔════╝    ╚══██╔══╝██║██╔════╝██║ ██╔╝██╔════╝╚══██╔══╝"
+echo "██████╔╝██████╔╝█████╗  ███████╗███████╗       ██║   ██║██║     █████╔╝ █████╗     ██║   "
+echo "██╔═══╝ ██╔══██╗██╔══╝  ╚════██║╚════██║       ██║   ██║██║     ██╔═██╗ ██╔══╝     ██║   "
+echo "██║     ██║  ██║███████╗███████║███████║       ██║   ██║╚██████╗██║  ██╗███████╗   ██║   "
+echo "╚═╝     ╚═╝  ╚═╝╚══════╝╚══════╝╚══════╝       ╚═╝   ╚═╝ ╚═════╝╚═╝  ╚═╝╚══════╝   ╚═╝   "
 echo " "
 echo "ATUALIZANDO PARA A VERSÃO MAIS RECENTE DO PRESS TICKET!"
 echo " "
+
 sleep 2
 
 echo " "
@@ -48,6 +56,24 @@ echo " "
 sleep 2
 
 cd ../frontend
+
+sleep 2
+
+echo " "
+echo "VERIFICANDO O CONFIG.JSON"
+echo " "
+
+sleep 2
+
+if [ ! -e src/config.json ]; then
+  echo "Criando o arquivo config.json"
+  cp src/config.json.example src/config.json
+  else
+  echo "O arquivo config.json já existe"
+fi
+
+
+sleep 2
 
 echo " "
 echo "ATUALIZANDO OS ARQUIVOS DO FRONTEND"
