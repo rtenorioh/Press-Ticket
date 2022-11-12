@@ -462,8 +462,8 @@ const messages = {
             },
           },
           CheckMsgIsGroup: {
-            name: "Group Messages",
-            note: "Receive messages from groups",
+            name: "Ignore Group Messages",
+            note: "If you disable it, you will receive messages from groups.",
             options: {
               enabled: "Enabled",
               disabled: "Disabled",
@@ -546,7 +546,7 @@ const messages = {
         extraInfo: "Other information",
       },
       copyToClipboard: {
-        copy:"Copy",
+        copy: "Copy",
         copied: "Copied"
       },
       ticketOptionsMenu: {

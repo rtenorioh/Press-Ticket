@@ -462,8 +462,8 @@ const messages = {
             },
           },
           CheckMsgIsGroup: {
-            name: "Mensagens de Grupos",
-            note: "Receber mensagens de grupos",
+            name: "Ignorar Mensagens de Grupos",
+            note: "Se desabilitar, irá receber mensage dos grupos.",
             options: {
               enabled: "Ativado",
               disabled: "Desativado",
