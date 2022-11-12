@@ -1,5 +1,10 @@
 # Changelog
 
+### 11/11/2022
+
+- [Ajuste para verificação do config.json](https://github.com/rtenorioh/Press-Ticket/commit/95ba26e1fbdccc68bf1d36815b1c88becacf5d7e); e
+- [Correção na tradução](https://github.com/rtenorioh/Press-Ticket/commit/e0f9a6324a9006b8484463cf82838467f347ce81)
+
 ### 07/11/2022
 
 - [Alteração na estrutura de cores](https://github.com/rtenorioh/Press-Ticket/commit/4e4a8930b340cf02ef522ddb817760b7bc7f7fe4);
