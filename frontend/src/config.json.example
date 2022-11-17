@@ -1,15 +1,15 @@
 {
     "system": {
-        "name": "Press Ticket",
-        "url": "https://pressticket.com.br",
+        "name": "mkthub",
+        "url": "https://mkthub.com.br",
         "color": {
             "lightTheme": {
                 "palette": {
-                    "primary": "#6B62FE",
-                    "secondary": "#F50057"
+                    "primary": "#F04405",
+                    "secondary": "#0D0D0D"
                 },
                 "toolbar": {
-                    "background": "linear-gradient(to right, #6B62FE, #f50057)"
+                    "background": "linear-gradient(to right, #F04405, #F04405)"
                 },
                 "menuItens": "#ffffff",
                 "sub": "#ffffff",
@@ -18,23 +18,23 @@
             },
             "darkTheme": {
                 "palette": {
-                    "primary": "#52d869",
+                    "primary": "#F04405",
                     "secondary": "#ff9100",
                     "background": {
                         "default": "#080d14",
                         "paper": "#181d22"
                     },
                     "text": {
-                        "primary": "#52d869",
-                        "secondary": "#ffffff"
+                        "primary": "#F2F0E4",
+                        "secondary": "#F2F0E4"
                     }
                 },
                 "toolbar": {
-                    "background": "linear-gradient(to right, #52d869, #ff9100)"
+                    "background": "linear-gradient(to right, #F04405, #F04405)"
                 },
                 "menuItens": "#181d22",
                 "sub": "#181d22",
-                "toolbarIcon": "#181d22",
+                "toolbarIcon": "#F04405",
                 "divide": "#080d14"
             }
         }
