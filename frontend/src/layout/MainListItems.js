@@ -177,13 +177,13 @@ const MainListItems = (props) => {
                 <Code />
               }
             />
-            <ListItemLink
+            {/* <ListItemLink
               to="/apidocs"
               primary={i18n.t("mainDrawer.listItems.apidocs")}
               icon={
                 <MenuBook />
               }
-            />
+            /> */}
             <ListItemLink
               to="/apikey"
               primary={i18n.t("mainDrawer.listItems.apikey")}
