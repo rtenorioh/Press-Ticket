@@ -1,7 +1,7 @@
 {
     "openapi": "3.0.0",
     "info": {
-        "title": "Documentação da API do Press Ticket",
+        "title": "Documentação da API da mkthub envios",
         "description": "Documentação da API para envio de mensagens e mídia.",
         "contact": {
             "email": "robson.tenorio@gmail.com"
@@ -11,7 +11,7 @@
     "servers": [
         {
             "url": "https://apisac.pypress.com.br",
-            "description": "API Press Ticket"
+            "description": "API mkthub atendimento"
         }
     ],
     "paths": {
