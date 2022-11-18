@@ -395,12 +395,12 @@ const Contacts = () => {
                   <TableCell align="center">{contact.number}</TableCell>
                   <TableCell align="center">{contact.email}</TableCell>
                   <TableCell align="center">
-                    <IconButton
+                    {/* <IconButton
                       size="small"
                       onClick={() => handleSaveTicket(contact.id)}
                     >
                       <WhatsApp color="secondary" />
-                    </IconButton>
+                    </IconButton> */}
                     <IconButton
                       size="small"
                       onClick={() => hadleEditContact(contact.id)}
