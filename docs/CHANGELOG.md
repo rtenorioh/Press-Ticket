@@ -1,9 +1,17 @@
 # Changelog
 
+### 15/11/2022
+
+- [Atualização das informações](https://github.com/rtenorioh/Press-Ticket/commit/e62551c256bd0a66f1bc2a773415a80623a1f7e5).
+
+### 14/11/2022
+
+- [Atualiação das libs: wwebjs e pino-pretty](https://github.com/rtenorioh/Press-Ticket/commit/0351089f1911253e515aaea712ebe236c5c26a11).
+
 ### 11/11/2022
 
 - [Ajuste para verificação do config.json](https://github.com/rtenorioh/Press-Ticket/commit/95ba26e1fbdccc68bf1d36815b1c88becacf5d7e); e
-- [Correção na tradução](https://github.com/rtenorioh/Press-Ticket/commit/e0f9a6324a9006b8484463cf82838467f347ce81)
+- [Correção na tradução](https://github.com/rtenorioh/Press-Ticket/commit/e0f9a6324a9006b8484463cf82838467f347ce81).
 
 ### 07/11/2022
 
