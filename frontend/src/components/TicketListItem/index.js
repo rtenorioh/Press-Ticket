@@ -349,7 +349,7 @@ const TicketListItem = ({ ticket }) => {
 						</IconButton>
 					</Tooltip>
 				)}
-				{ticket.status === "pending" && (
+				{/* {ticket.status === "pending" && (
 					<Tooltip title={i18n.t("ticketsList.items.close")}>
 						<IconButton
 							className={classes.bottomButton}
@@ -358,7 +358,7 @@ const TicketListItem = ({ ticket }) => {
 							<ClearOutlinedIcon />
 						</IconButton>
 					</Tooltip>
-				)}
+				)} */}
 				{ticket.status === "open" && (
 					<Tooltip title={i18n.t("ticketsList.items.return")}>
 						<IconButton
