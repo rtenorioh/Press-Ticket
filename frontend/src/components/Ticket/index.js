@@ -162,9 +162,9 @@ const Ticket = () => {
               onClick={handleDrawerOpen}
             />
           </div>
-          {/* <div className={classes.ticketActionButtons}>
+          <div className={classes.ticketActionButtons}>
             <TicketActionButtons ticket={ticket} />
-          </div> */}
+          </div>
         </TicketHeader>
         <ReplyMessageProvider>
           <MessagesList
