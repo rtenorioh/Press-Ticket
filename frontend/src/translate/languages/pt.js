@@ -530,6 +530,7 @@ const messages = {
             resolve: "Resolver",
             reopen: "Reabrir", 
             accept: "Aceitar",
+            finish: "Finalizar",
           },
         },
       },
