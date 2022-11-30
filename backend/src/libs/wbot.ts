@@ -46,41 +46,41 @@ export const initWbot = async (whatsapp: Whatsapp): Promise<Session> => {
 
       const wbot: Session = new Client({
         session: sessionCfg,
-        authStrategy: new LocalAuth({ clientId: 'bd_' + whatsapp.id }),
+        authStrategy: new LocalAuth({ clientId: `bd_${whatsapp.id}` }),
         puppeteer: {
           args: [
-            '--no-sandbox',
-            '--disable-setuid-sandbox',
-            '--log-level=3',
-            '--no-default-browser-check',
-            '--disable-site-isolation-trials',
-            '--no-experiments',
-            '--ignore-gpu-blacklist',
-            '--ignore-certificate-errors',
-            '--ignore-certificate-errors-spki-list',
-            '--disable-gpu',
-            '--disable-extensions',
-            '--disable-default-apps',
-            '--enable-features=NetworkService',
-            '--disable-setuid-sandbox',
-            '--no-sandbox',
-            '--disable-webgl',
-            '--disable-threaded-animation',
-            '--disable-threaded-scrolling',
-            '--disable-in-process-stack-traces',
-            '--disable-histogram-customizer',
-            '--disable-gl-extensions',
-            '--disable-composited-antialiasing',
-            '--disable-canvas-aa',
-            '--disable-3d-apis',
-            '--disable-accelerated-2d-canvas',
-            '--disable-accelerated-jpeg-decoding',
-            '--disable-accelerated-mjpeg-decode',
-            '--disable-app-list-dismiss-on-blur',
-            '--disable-accelerated-video-decode'
+            "--no-sandbox",
+            "--disable-setuid-sandbox",
+            "--log-level=3",
+            "--no-default-browser-check",
+            "--disable-site-isolation-trials",
+            "--no-experiments",
+            "--ignore-gpu-blacklist",
+            "--ignore-certificate-errors",
+            "--ignore-certificate-errors-spki-list",
+            "--disable-gpu",
+            "--disable-extensions",
+            "--disable-default-apps",
+            "--enable-features=NetworkService",
+            "--disable-setuid-sandbox",
+            "--no-sandbox",
+            "--disable-webgl",
+            "--disable-threaded-animation",
+            "--disable-threaded-scrolling",
+            "--disable-in-process-stack-traces",
+            "--disable-histogram-customizer",
+            "--disable-gl-extensions",
+            "--disable-composited-antialiasing",
+            "--disable-canvas-aa",
+            "--disable-3d-apis",
+            "--disable-accelerated-2d-canvas",
+            "--disable-accelerated-jpeg-decoding",
+            "--disable-accelerated-mjpeg-decode",
+            "--disable-app-list-dismiss-on-blur",
+            "--disable-accelerated-video-decode"
           ],
           executablePath: process.env.CHROME_BIN || undefined
-        },
+        }
       });
 
       wbot.initialize();
@@ -135,10 +135,13 @@ export const initWbot = async (whatsapp: Whatsapp): Promise<Session> => {
       wbot.on("ready", async () => {
         logger.info(`Session: ${sessionName} READY`);
 
+        console.log("WbotON", wbot.info.wid._serialized.split("@")[0]);
+
         await whatsapp.update({
           status: "CONNECTED",
           qrcode: "",
-          retries: 0
+          retries: 0,
+          number: wbot.info.wid._serialized.split("@")[0]
         });
 
         io.emit("whatsappSession", {

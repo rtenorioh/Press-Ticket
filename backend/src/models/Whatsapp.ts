@@ -39,6 +39,9 @@ class Whatsapp extends Model<Whatsapp> {
   status: string;
 
   @Column
+  number: string;
+
+  @Column
   battery: string;
 
   @Column

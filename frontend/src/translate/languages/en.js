@@ -90,6 +90,7 @@ const messages = {
         table: {
           id: "Instance ID",
           name: "Name",
+          number: "Number",
           status: "Status",
           lastUpdate: "Last update",
           default: "Default",
