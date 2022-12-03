@@ -240,7 +240,7 @@ const LoggedInLayout = ({ children }) => {
             noWrap
             className={classes.title}
           >
-            {system.name || "Abbla"}
+            {system.name || "abbla"}
           </Typography>
           {user.id && <NotificationsPopOver />}
 
