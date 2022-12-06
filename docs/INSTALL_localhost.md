@@ -116,7 +116,7 @@ set NODE_OPTIONS=--openssl-legancy-provider
 
 * User: 
 ```bash
-admin@pressticket.com.br  
+admin@mkthub.tech
 ```
 * Password: 
 ```bash
