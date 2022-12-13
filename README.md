@@ -83,7 +83,7 @@ demo@mkthub.tech
 ```
 * Password: 
 ```bash
-demo
+admin
 ```
    
 ## Atividades Recentes [![Time period](https://images.repography.com/26937047/rtenorioh/Press-Ticket/recent-activity/21bd728a8e3625b547c91617b3f0fc2a_badge.svg)](https://github.com/rtenorioh/Press-Ticket)
