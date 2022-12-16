@@ -208,6 +208,23 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
 										margin="dense"
 									/>
 								</div>
+								<div>
+									<Field
+										as={TextField}
+										label={i18n.t("whatsappModal.form.ratingMessage")}
+										type="ratingMessage"
+										multiline
+										rows={5}
+										fullWidth
+										name="ratingMessage"
+										helperText={i18n.t("whatsappModal.form.instructionRatingMessage")}
+										error={
+											touched.ratingMessage && Boolean(errors.ratingMessage)
+										}
+										variant="outlined"
+										margin="dense"
+									/>
+								</div>
 								<QueueSelect
 									selectedQueueIds={selectedQueueIds}
 									onChange={selectedIds => setSelectedQueueIds(selectedIds)}

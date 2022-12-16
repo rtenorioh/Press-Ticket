@@ -37,6 +37,7 @@ const messages = {
         charts: {
           perDay: {
             title: "Chamados de hoje: ",
+            titleAll: "Todos os Chamados: ",
           },
         },
         messages: {
@@ -107,7 +108,9 @@ const messages = {
           name: "Nome",
           default: "Padrão",
           display: "Exibir horário dos setores",
-          farewellMessage: "Mensagem de despedida"
+          farewellMessage: "Mensagem de despedida",
+          ratingMessage: "Mensagem de avaliação",
+          instructionRatingMessage: "Para habilitar as avaliações, basta preencher este campo"
         },
         buttons: {
           okAdd: "Adicionar",

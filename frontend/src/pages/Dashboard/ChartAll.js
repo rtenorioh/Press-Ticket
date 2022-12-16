@@ -16,7 +16,7 @@ import { i18n } from "../../translate/i18n";
 import Title from "./Title";
 import useTickets from "../../hooks/useTickets";
 
-const Chart = () => {
+const ChartAll = () => {
 	const theme = useTheme();
 
 	const date = useRef(new Date().toISOString());
@@ -66,7 +66,7 @@ const Chart = () => {
 
 	return (
 		<React.Fragment>
-			<Title>{`${i18n.t("dashboard.charts.perDay.title")}${
+			<Title>{`${i18n.t("dashboard.charts.perDay.titleAll")}${
 				tickets.length
 			}`}</Title>
 			<ResponsiveContainer>
@@ -104,4 +104,4 @@ const Chart = () => {
 	);
 };
 
-export default Chart;
+export default ChartAll;
