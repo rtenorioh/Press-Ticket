@@ -118,11 +118,10 @@ const verifyMediaMessage = async (
 const prepareLocation = (msg: WbotMessage): WbotMessage => {
   const gmapsUrl = `https://maps.google.com/maps?q=${msg.location.latitude}%2C${msg.location.longitude}&z=17`;
   msg.body = `data:image/png;base64,${msg.body}|${gmapsUrl}`;
-  msg.body += `|${
-    msg.location.description
+  msg.body += `|${msg.location.description
       ? msg.location.description
       : `${msg.location.latitude}, ${msg.location.longitude}`
-  }`;
+    }`;
   return msg;
 };
 
@@ -168,6 +167,62 @@ const verifyQueue = async (
   );
 
   if (queues.length === 1) {
+    const selectedOption = '1';
+
+    const choosenQueue = queues[+selectedOption - 1];
+
+    if (choosenQueue) {
+      const Hr = new Date();
+
+      const hh: number = Hr.getHours() * 60 * 60;
+      const mm: number = Hr.getMinutes() * 60;
+      const hora = hh + mm;
+
+      const inicio: string = choosenQueue.startWork;
+      const hhinicio = Number(inicio.split(":")[0]) * 60 * 60;
+      const mminicio = Number(inicio.split(":")[1]) * 60;
+      const horainicio = hhinicio + mminicio;
+
+      const termino: string = choosenQueue.endWork;
+      const hhtermino = Number(termino.split(":")[0]) * 60 * 60;
+      const mmtermino = Number(termino.split(":")[1]) * 60;
+      const horatermino = hhtermino + mmtermino;
+
+      if (hora < horainicio || hora > horatermino) {
+        const body = formatBody(`\u200e${choosenQueue.absenceMessage}`, ticket);
+        const debouncedSentMessage = debounce(
+          async () => {
+            const sentMessage = await wbot.sendMessage(
+              `${contact.number}@c.us`,
+              body
+            );
+            verifyMessage(sentMessage, ticket, contact);
+          },
+          3000,
+          ticket.id
+        );
+
+        debouncedSentMessage();
+      } else {
+        await UpdateTicketService({
+          ticketData: { queueId: choosenQueue.id },
+          ticketId: ticket.id
+        });
+
+        const chat = await msg.getChat();
+        await chat.sendStateTyping();
+
+        const body = formatBody(`\u200e${choosenQueue.greetingMessage}`, ticket);
+
+        const sentMessage = await wbot.sendMessage(
+          `${contact.number}@c.us`,
+          body
+        );
+
+        await verifyMessage(sentMessage, ticket, contact);
+      }
+    }
+
     await UpdateTicketService({
       ticketData: { queueId: queues[0].id },
       ticketId: ticket.id
@@ -239,9 +294,8 @@ const verifyQueue = async (
     queues.forEach((queue, index) => {
       if (queue.startWork && queue.endWork) {
         if (isDisplay) {
-          options += `*${index + 1}* - ${queue.name} das ${
-            queue.startWork
-          } as ${queue.endWork}\n`;
+          options += `*${index + 1}* - ${queue.name} das ${queue.startWork
+            } as ${queue.endWork}\n`;
         } else {
           options += `*${index + 1}* - ${queue.name}\n`;
         }
