@@ -505,6 +505,14 @@ const messages = {
               disabled: "Desativado",
             },
           },
+          allTicket: {
+            name: "Todos podem ver o chamado sem departamento",
+            note: "Ative essa função para deixar todos os usuarios verem os chamados sem setor",
+            options: {
+              enabled: "Ativado",
+              disabled: "Desativado",
+            },
+          },
           timeCreateNewTicket: {
             name: "Cria novo chamado após",
             note: "Selecione o tempo que será necessário para abrir um novo chamado, caso o cliente entre em contatos novamente",

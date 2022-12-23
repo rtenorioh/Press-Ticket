@@ -46,6 +46,12 @@ module.exports = {
           value: "disabled",
           createdAt: new Date(),
           updatedAt: new Date()
+        },
+        {
+          key: "allTicket",
+          value: "disabled",
+          createdAt: new Date(),
+          updatedAt: new Date()
         }
       ],
       {}
