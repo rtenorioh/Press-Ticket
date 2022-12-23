@@ -1,5 +1,9 @@
 # Changelog
 
+### 23/12/2022
+
+- [Update in view of all ticket for all users](https://github.com/FilipeCamillo/Press-Ticket/commit/708977b71d0a6d430e522910cd4e836519e1a70a)
+
 ### 15/11/2022
 
 - [Atualização das informações](https://github.com/rtenorioh/Press-Ticket/commit/e62551c256bd0a66f1bc2a773415a80623a1f7e5).
