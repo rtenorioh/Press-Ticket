@@ -370,7 +370,12 @@ const Connections = () => {
 												{renderStatusToolTips(whatsApp)}
 											</TableCell>
 											<TableCell align="center">
+												{whatsApp.number ? (
+												<>
 												+{whatsApp.number}
+												</>
+												) : "-"}
+												
 											</TableCell>
 											<TableCell align="center">
 												{renderActionButtons(whatsApp)}
