@@ -1,4 +1,4 @@
-﻿# mkthub
+# mkthub
 
 <p align="center">
   <a href="https://www.codefactor.io/repository/github/rtenorioh/press-ticket"><img src="https://www.codefactor.io/repository/github/rtenorioh/press-ticket/badge" alt="CodeFactor" /></a>
@@ -41,10 +41,10 @@ Um sistema de tickets muito simples baseado em mensagens do WhatsApp, que permit
 - O Sistema mkthub foi desenvolvido com base no [Sistema Whaticket](https://github.com/canove/whaticket) desenvolvido por [Cassio Santos](https://github.com/canove) e [Press ticket](https://github.com/rtenorioh/Press-Ticket) desenvolvido por [Robson Tenorio](https://github.com/rtenorioh)
 
 
-## Grupo no Telegram
+## WhatsApp
 
-<a href="https://t.me/+akuzB2BzXitlMDkx">
-    <img alt="Telegram" src="https://img.shields.io/badge/telegram-online-blue.svg?style=for-the-badge&logo=telegram">
+<a href="http://wa.me/5517991565280">
+    <img alt="Telegram" src="https://img.shields.io/badge/WhatsApp-25D366?style=for-the-badge&logo=whatsapp&logoColor=white">
 </a>
 
 ## Instalação
@@ -57,13 +57,17 @@ Um sistema de tickets muito simples baseado em mensagens do WhatsApp, que permit
 
 
 ## Caso queira ajudar a manter o projeto, pode contribuir com uma das opções abaixo: 
-- Mensais:
-  - Brasil:
-    - Chave PIX:
-      - E-mail: filipecamillo@mkthub.tech
-    - Contribuir via NuBank
-      - [R$ 25,00](https://nubank.com.br/cobranca/uxBFXsJRdp1n13jg)
-      - [R$ 50,00](https://nubank.com.br/cobranca/SJt7FTe3gd1n13jg)
+
+  - Chave PIX:
+    - E-mail: filipecamillo@mkthub.tech
+  - Contribuir via NuBank
+
+
+
+    - ### Para contribuir com qualquer valor leia o QRcode - valores maiores clique no valor que deseja
+    ![Qualquer valor](https://user-images.githubusercontent.com/64233640/209562388-95380a85-1a55-4fc0-8719-9a3aa3ef7711.png)
+    - [R$ 25,00](https://nubank.com.br/cobranca/uxBFXsJRdp1n13jg)
+    - [R$ 50,00](https://nubank.com.br/cobranca/SJt7FTe3gd1n13jg)
 
 ## Registro de todas as alterações:
 
@@ -84,9 +88,11 @@ admin@mkthub.tech
 admin
 ```
    
-## Atividades Recentes [![Time period](https://images.repography.com/26937047/rtenorioh/Press-Ticket/recent-activity/21bd728a8e3625b547c91617b3f0fc2a_badge.svg)](https://github.com/rtenorioh/Press-Ticket)
-[![Timeline graph](https://images.repography.com/26937047/rtenorioh/Press-Ticket/recent-activity/21bd728a8e3625b547c91617b3f0fc2a_timeline.svg)](https://github.com/rtenorioh/Press-Ticket/commits)
-[![Pull request status graph](https://images.repography.com/26937047/rtenorioh/Press-Ticket/recent-activity/21bd728a8e3625b547c91617b3f0fc2a_prs.svg)](https://github.com/rtenorioh/Press-Ticket/pulls)
+## [![Repography logo](https://images.repography.com/logo.svg)](https://repography.com) / Atividades Recentes [![Time period](https://images.repography.com/32561461/FilipeCamillo/Press-Ticket/recent-activity/ATkOL6iM_WY6Z1VhvBHiPrFvct6k-f9JCUcll_NHmdc_badge.svg)](https://repography.com)
+[![Timeline graph](https://images.repography.com/32561461/FilipeCamillo/Press-Ticket/recent-activity/ATkOL6iM_WY6Z1VhvBHiPrFvct6k-f9JCUcll_NHmdc_timeline.svg)](https://github.com/FilipeCamillo/Press-Ticket/commits)
+[![Top contributors](https://images.repography.com/32561461/FilipeCamillo/Press-Ticket/recent-activity/ATkOL6iM_WY6Z1VhvBHiPrFvct6k-f9JCUcll_NHmdc_users.svg)](https://github.com/FilipeCamillo/Press-Ticket/graphs/contributors)
 
-## Top contribuidores
-[![Top contributors](https://images.repography.com/26937047/rtenorioh/Press-Ticket/top-contributors/21bd728a8e3625b547c91617b3f0fc2a_table.svg)](https://github.com/rtenorioh/Press-Ticket/graphs/contributors)
+
+
+## [![Repography logo](https://images.repography.com/logo.svg)](https://repography.com) / Top contribuidores
+[![Top contributors](https://images.repography.com/32561461/FilipeCamillo/Press-Ticket/top-contributors/ATkOL6iM_WY6Z1VhvBHiPrFvct6k-f9JCUcll_NHmdc_table.svg)](https://github.com/FilipeCamillo/Press-Ticket/graphs/contributors)
