@@ -1,4 +1,4 @@
-﻿# Press-Ticket
+﻿# mkthub
 
 <p align="center">
   <a href="https://www.codefactor.io/repository/github/rtenorioh/press-ticket"><img src="https://www.codefactor.io/repository/github/rtenorioh/press-ticket/badge" alt="CodeFactor" /></a>
@@ -38,7 +38,7 @@ Um sistema de tickets muito simples baseado em mensagens do WhatsApp, que permit
 | Ubuntu 18.04 | Ubuntu 20.04 |
 ## Referência
 
-- O Sistema Press Ticket foi desenvolvido com base no [Sistema Whaticket](https://github.com/canove/whaticket), desenvolvido por [Cassio Santos](https://github.com/canove).
+- O Sistema mkthub foi desenvolvido com base no [Sistema Whaticket](https://github.com/canove/whaticket) desenvolvido por [Cassio Santos](https://github.com/canove) e [Press ticket](https://github.com/rtenorioh/Press-Ticket) desenvolvido por [Robson Tenorio](https://github.com/rtenorioh)
 
 
 ## Grupo no Telegram
@@ -49,37 +49,35 @@ Um sistema de tickets muito simples baseado em mensagens do WhatsApp, que permit
 
 ## Instalação
 
-- [Localhost](https://github.com/rtenorioh/Press-Ticket/blob/main/docs/INSTALL_localhost.md);
-- [VPS](https://github.com/rtenorioh/Press-Ticket/blob/main/docs/INSTALL_VPS.md);
-- [Instalador Automático](https://github.com/tonnybarros/install_pressticket-phpmyadmin);
-- [phpmyadmin](https://github.com/rtenorioh/Press-Ticket/blob/main/docs/INSTALL_phpmyadmin.md); e
-- [Fuso Horário](https://github.com/rtenorioh/Press-Ticket/blob/main/docs/INSTALL_horarioVPS.md).
+- [Localhost](https://github.com/FilipeCamillo/Press-Ticket/blob/main/docs/INSTALL_localhost.md);
+- [VPS](https://github.com/FilipeCamillo/Press-Ticket/blob/main/docs/INSTALL_VPS.md);
+- [Instalador Automático](https://github.com/FilipeCamillo/automatico_press);
+- [phpmyadmin](https://github.com/FilipeCamillo/Press-Ticket/blob/main/docs/INSTALL_phpmyadmin.md); e
+- [Fuso Horário](https://github.com/FilipeCamillo/Press-Ticket/blob/main/docs/INSTALL_horarioVPS.mdd).
 
 
 ## Caso queira ajudar a manter o projeto, pode contribuir com uma das opções abaixo: 
 - Mensais:
   - Brasil:
     - Chave PIX:
-      - E-mail: pix@pressticket.com.br
-    - Contribuir via PagSeguro
-      - [Qualquer valor](https://pag.ae/7Xuhtu6HK)
-      - [R$ 50,00](http://pag.ae/7YySudfus)
-  - Demais Países:
-    - [Contribuir via Paypal](https://www.paypal.com/donate/?hosted_button_id=TY7GF22DBYZSA)
+      - E-mail: filipecamillo@mkthub.tech
+    - Contribuir via NuBank
+      - [R$ 25,00](https://nubank.com.br/cobranca/uxBFXsJRdp1n13jg)
+      - [R$ 50,00](https://nubank.com.br/cobranca/SJt7FTe3gd1n13jg)
 
 ## Registro de todas as alterações:
 
-- [Changelog](https://github.com/rtenorioh/Press-Ticket/blob/main/docs/CHANGELOG.md)
+- [Changelog](https://github.com/FilipeCamillo/Press-Ticket/blob/main/docs/CHANGELOG.md)
 
 ## Demo:
 
 ```bash
-https://atendimento.teste.mkthub.tech/login
+https://demo.mkthub.tech/login
 ```  
 
 * User: 
 ```bash
-demo@mkthub.tech
+admin@mkthub.tech
 ```
 * Password: 
 ```bash
