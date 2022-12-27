@@ -284,7 +284,7 @@ nano .env
 ```bash
 REACT_APP_BACKEND_URL=https://back.pressticket.com.br 
 REACT_APP_HOURS_CLOSE_TICKETS_AUTO=
-SERVER_PORT=3333
+PORT=3333
 ```
 
 46. Criar o arquivo config.json com base no config.json.example
