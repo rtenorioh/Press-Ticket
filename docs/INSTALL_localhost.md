@@ -29,7 +29,7 @@ cd Press-Ticket/backend
 ```bash
 NODE_ENV=  
 BACKEND_URL=http://localhost  
-FRONTEND_URL=http://localhost:3333  
+FRONTEND_URL=http://localhost:3333
 PORT=8080  
 PROXY_PORT=8080  
 CHROME_BIN=C:\Program Files\Google\Chrome\Application\chrome.exe  
@@ -92,7 +92,7 @@ cd Press-Ticket/frontend
 REACT_APP_BACKEND_URL=http://localhost:8080
 REACT_APP_HOURS_CLOSE_TICKETS_AUTO=
 PORT=3333
-```  
+``` 
 
 14. Instalar as dependências
 
