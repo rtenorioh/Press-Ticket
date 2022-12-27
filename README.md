@@ -1,4 +1,4 @@
-﻿# Press-Ticket
+# mkthub
 
 <p align="center">
   <a href="https://www.codefactor.io/repository/github/rtenorioh/press-ticket"><img src="https://www.codefactor.io/repository/github/rtenorioh/press-ticket/badge" alt="CodeFactor" /></a>
@@ -38,57 +38,66 @@ Um sistema de tickets muito simples baseado em mensagens do WhatsApp, que permit
 | Ubuntu 18.04 | Ubuntu 20.04 |
 ## Referência
 
-- O Sistema Press Ticket foi desenvolvido com base no [Sistema Whaticket](https://github.com/canove/whaticket), desenvolvido por [Cassio Santos](https://github.com/canove).
+- O Sistema mkthub foi desenvolvido com base no [Sistema Whaticket](https://github.com/canove/whaticket) desenvolvido por [Cassio Santos](https://github.com/canove) e [Press ticket](https://github.com/rtenorioh/Press-Ticket) desenvolvido por [Robson Tenorio](https://github.com/rtenorioh)
 
 
-## Grupo no Telegram
+## WhatsApp
 
-<a href="https://t.me/+akuzB2BzXitlMDkx">
-    <img alt="Telegram" src="https://img.shields.io/badge/telegram-online-blue.svg?style=for-the-badge&logo=telegram">
+<a href="http://wa.me/5517991565280">
+    <img alt="WhatsApp" src="https://img.shields.io/badge/WhatsApp-25D366?style=for-the-badge&logo=whatsapp&logoColor=white">
 </a>
 
 ## Instalação
 
-- [Localhost](https://github.com/rtenorioh/Press-Ticket/blob/main/docs/INSTALL_localhost.md);
-- [VPS](https://github.com/rtenorioh/Press-Ticket/blob/main/docs/INSTALL_VPS.md);
-- [Instalador Automático](https://github.com/tonnybarros/install_pressticket-phpmyadmin);
-- [phpmyadmin](https://github.com/rtenorioh/Press-Ticket/blob/main/docs/INSTALL_phpmyadmin.md); e
-- [Fuso Horário](https://github.com/rtenorioh/Press-Ticket/blob/main/docs/INSTALL_horarioVPS.md).
+- [Localhost](https://github.com/FilipeCamillo/Press-Ticket/blob/main/docs/INSTALL_localhost.md);
+- [VPS](https://github.com/FilipeCamillo/Press-Ticket/blob/main/docs/INSTALL_VPS.md);
+- [Instalador Automático](https://github.com/FilipeCamillo/automatico_press);
+- [phpmyadmin](https://github.com/FilipeCamillo/Press-Ticket/blob/main/docs/INSTALL_phpmyadmin.md); e
+- [Fuso Horário](https://github.com/FilipeCamillo/Press-Ticket/blob/main/docs/INSTALL_horarioVPS.mdd).
 
 
 ## Caso queira ajudar a manter o projeto, pode contribuir com uma das opções abaixo: 
-- Mensais:
-  - Brasil:
+- Brasil
     - Chave PIX:
-      - E-mail: pix@pressticket.com.br
-    - Contribuir via PagSeguro
-      - [Qualquer valor](https://pag.ae/7Xuhtu6HK)
-      - [R$ 50,00](http://pag.ae/7YySudfus)
-  - Demais Países:
-    - [Contribuir via Paypal](https://www.paypal.com/donate/?hosted_button_id=TY7GF22DBYZSA)
+     - E-mail: filipecamillo@mkthub.tech
+    - Contribuir via NuBank
+     - ### Para contribuir com qualquer valor leia o QRcode - valores maiores clique no valor que deseja
+    ![Qualquer valor](https://user-images.githubusercontent.com/64233640/209562388-95380a85-1a55-4fc0-8719-9a3aa3ef7711.png)
+     - [R$ 25,00](https://nubank.com.br/cobranca/uxBFXsJRdp1n13jg)
+     - [R$ 50,00](https://nubank.com.br/cobranca/SJt7FTe3gd1n13jg)
+- Exterior
 
+  - <a href="https://www.paypal.com/donate/?hosted_button_id=3UQXNJ72WHEN4">
+    <img alt="Paypal" src="https://img.shields.io/badge/PayPal-00457C?style=for-the-badge&logo=paypal&logoColor=white">
+</a>
+  
+  
+  
+  
 ## Registro de todas as alterações:
 
-- [Changelog](https://github.com/rtenorioh/Press-Ticket/blob/main/docs/CHANGELOG.md)
+- [Changelog](https://github.com/FilipeCamillo/Press-Ticket/blob/main/docs/CHANGELOG.md)
 
 ## Demo:
 
 ```bash
-https://atendimento.teste.mkthub.tech/login
+https://demo.mkthub.tech/login
 ```  
 
 * User: 
 ```bash
-demo@mkthub.tech
+admin@mkthub.tech
 ```
 * Password: 
 ```bash
 admin
 ```
    
-## Atividades Recentes [![Time period](https://images.repography.com/26937047/rtenorioh/Press-Ticket/recent-activity/21bd728a8e3625b547c91617b3f0fc2a_badge.svg)](https://github.com/rtenorioh/Press-Ticket)
-[![Timeline graph](https://images.repography.com/26937047/rtenorioh/Press-Ticket/recent-activity/21bd728a8e3625b547c91617b3f0fc2a_timeline.svg)](https://github.com/rtenorioh/Press-Ticket/commits)
-[![Pull request status graph](https://images.repography.com/26937047/rtenorioh/Press-Ticket/recent-activity/21bd728a8e3625b547c91617b3f0fc2a_prs.svg)](https://github.com/rtenorioh/Press-Ticket/pulls)
+## [![Repography logo](https://images.repography.com/logo.svg)](https://repography.com) / Atividades Recentes [![Time period](https://images.repography.com/32561461/FilipeCamillo/Press-Ticket/recent-activity/ATkOL6iM_WY6Z1VhvBHiPrFvct6k-f9JCUcll_NHmdc_badge.svg)](https://repography.com)
+[![Timeline graph](https://images.repography.com/32561461/FilipeCamillo/Press-Ticket/recent-activity/ATkOL6iM_WY6Z1VhvBHiPrFvct6k-f9JCUcll_NHmdc_timeline.svg)](https://github.com/FilipeCamillo/Press-Ticket/commits)
+[![Top contributors](https://images.repography.com/32561461/FilipeCamillo/Press-Ticket/recent-activity/ATkOL6iM_WY6Z1VhvBHiPrFvct6k-f9JCUcll_NHmdc_users.svg)](https://github.com/FilipeCamillo/Press-Ticket/graphs/contributors)
 
-## Top contribuidores
-[![Top contributors](https://images.repography.com/26937047/rtenorioh/Press-Ticket/top-contributors/21bd728a8e3625b547c91617b3f0fc2a_table.svg)](https://github.com/rtenorioh/Press-Ticket/graphs/contributors)
+
+
+## [![Repography logo](https://images.repography.com/logo.svg)](https://repography.com) / Top contribuidores
+[![Top contributors](https://images.repography.com/32561461/FilipeCamillo/Press-Ticket/top-contributors/ATkOL6iM_WY6Z1VhvBHiPrFvct6k-f9JCUcll_NHmdc_table.svg)](https://github.com/FilipeCamillo/Press-Ticket/graphs/contributors)
