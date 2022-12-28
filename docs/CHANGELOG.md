@@ -1,8 +1,24 @@
 # Changelog
 
+<<<<<<< HEAD
 ### 23/12/2022
 
 - [Update in view of all ticket for all users](https://github.com/FilipeCamillo/Press-Ticket/commit/708977b71d0a6d430e522910cd4e836519e1a70a)
+=======
+### 24/12/2022
+
+- [Atualização do ListTicketService](https://github.com/rtenorioh/Press-Ticket/commit/6bbd2f071a4a8af9c2c6e132f1379538e7ecf3f7);
+- [Inclusão de validação no código para exibir o número conectado](https://github.com/rtenorioh/Press-Ticket/commit/911865958ffe9b0ce3eed7fe2085779706ebaefd); e
+- [Correção da variável da porta do Frontend](https://github.com/rtenorioh/Press-Ticket/commit/0bcc18ca1c1364ffde34660eea7dc8c014a56a86).
+
+### 29/11/2022
+
+- [Inclusão do Número da Conexão](https://github.com/rtenorioh/Press-Ticket/commit/5827a45362f9824a1d1ee5dceb030dac7509f305).
+
+### 27/11/2022
+
+- [Atualização da lib whatsapp-web.js](https://github.com/rtenorioh/Press-Ticket/commit/75fd718dea270df43b59249ee291470d4220648a).
+>>>>>>> 0e65719eec11637c851495e6065a70e38bc927f3
 
 ### 15/11/2022
 
