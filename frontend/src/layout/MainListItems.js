@@ -18,7 +18,6 @@ import {
   ContactPhoneOutlined,
   DashboardOutlined,
   LocalOffer,
-  MenuBook,
   PeopleAltOutlined,
   QuestionAnswerOutlined,
   SettingsOutlined,
@@ -118,11 +117,7 @@ const MainListItems = (props) => {
         primary={i18n.t("mainDrawer.listItems.tickets")}
         icon={<WhatsApp />}
       />
-      <ListItemLink
-        to="/contacts"
-        primary={i18n.t("mainDrawer.listItems.contacts")}
-        icon={<ContactPhoneOutlined />}
-      />
+
       <ListItemLink
         to="/quickAnswers"
         primary={i18n.t("mainDrawer.listItems.quickAnswers")}
@@ -138,7 +133,7 @@ const MainListItems = (props) => {
         perform="drawer-admin-items:view"
         yes={() => (
           <>
-            <Divider className={classes.divider}/>
+            <Divider className={classes.divider} />
             <ListSubheader inset className={classes.sub}>
               {i18n.t("mainDrawer.listItems.administration")}
             </ListSubheader>
@@ -150,6 +145,11 @@ const MainListItems = (props) => {
                   <SyncAlt />
                 </Badge>
               }
+            />
+            <ListItemLink
+              to="/contacts"
+              primary={i18n.t("mainDrawer.listItems.contacts")}
+              icon={<ContactPhoneOutlined />}
             />
             <ListItemLink
               to="/users"
