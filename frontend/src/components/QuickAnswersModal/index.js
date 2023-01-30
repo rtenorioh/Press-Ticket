@@ -1,55 +1,40 @@
 import React, { useState, useEffect, useRef } from "react";
 
 import * as Yup from "yup";
-import { Formik, Form, Field } from "formik";
+import { Formik, Form } from "formik";
 import { toast } from "react-toastify";
+import WithSkeleton from "../WithSkeleton";
+import MessageVariablesPicker from "../MessageVariablesPicker";
+import ButtonWithSpinner from "../ButtonWithSpinner";
+import FormikTextField from "../FormikTextField";
 
 import {
   makeStyles,
   Button,
-  TextField,
   Dialog,
   DialogActions,
   DialogContent,
-  DialogTitle,
-  CircularProgress,
+  DialogTitle
 } from "@material-ui/core";
-import { green } from "@material-ui/core/colors";
 import { i18n } from "../../translate/i18n";
 
 import api from "../../services/api";
 import toastError from "../../errors/toastError";
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   root: {
+    display: "flex",
     flexWrap: "wrap",
-  },
-  textField: {
-    marginRight: theme.spacing(1),
-    width: "100%",
-  },
-
-  btnWrapper: {
-    position: "relative",
-  },
-
-  buttonProgress: {
-    color: green[500],
-    position: "absolute",
-    top: "50%",
-    left: "50%",
-    marginTop: -12,
-    marginLeft: -12,
-  },
-  textQuickAnswerContainer: {
-    width: "100%",
-  },
+    "& > *:not(:last-child)": {
+      marginRight: theme.spacing(1)
+    }
+  }
 }));
 
 const QuickAnswerSchema = Yup.object().shape({
   shortcut: Yup.string()
     .min(2, "Too Short!")
-    .max(15, "Too Long!")
+    .max(50, "Too Long!")
     .required("Required"),
   message: Yup.string()
     .min(8, "Too Short!")
@@ -60,18 +45,20 @@ const QuickAnswerSchema = Yup.object().shape({
 const QuickAnswersModal = ({
   open,
   onClose,
-  quickAnswerId,
-  initialValues,
   onSave,
+  quickAnswerId,
+  initialValues
 }) => {
   const classes = useStyles();
-  const isMounted = useRef(true);
 
   const initialState = {
     shortcut: "",
-    message: "",
+    message: ""
   };
 
+  const isMounted = useRef(true);
+  const messageInputRef = useRef();
+  const [loading, setLoading] = useState(false);
   const [quickAnswer, setQuickAnswer] = useState(initialState);
 
   useEffect(() => {
@@ -81,44 +68,41 @@ const QuickAnswersModal = ({
   }, []);
 
   useEffect(() => {
-    const fetchQuickAnswer = async () => {
-      if (initialValues) {
-        setQuickAnswer((prevState) => {
-          return { ...prevState, ...initialValues };
-        });
-      }
+    if (initialValues && isMounted.current) {
+      setQuickAnswer(prevState => {
+        return { ...prevState, ...initialValues };
+      });
+    }
 
+(async () => {
       if (!quickAnswerId) return;
 
+      setLoading(true);
       try {
         const { data } = await api.get(`/quickAnswers/${quickAnswerId}`);
-        if (isMounted.current) {
-          setQuickAnswer(data);
-        }
+                if (!isMounted.current) return;
+
+        setQuickAnswer(prevState => {
+          return { ...prevState, ...data };
+        });
+
+        setLoading(false);
       } catch (err) {
+        setLoading(false);
         toastError(err);
       }
-    };
-
-    fetchQuickAnswer();
+    })();
   }, [quickAnswerId, open, initialValues]);
 
-  const handleClose = () => {
-    onClose();
-    setQuickAnswer(initialState);
-  };
-
-  const handleSaveQuickAnswer = async (values) => {
+  const handleSaveQuickAnswer = async values => {
     try {
       if (quickAnswerId) {
         await api.put(`/quickAnswers/${quickAnswerId}`, values);
-        handleClose();
       } else {
         const { data } = await api.post("/quickAnswers", values);
         if (onSave) {
           onSave(data);
         }
-        handleClose();
       }
       toast.success(i18n.t("quickAnswersModal.success"));
     } catch (err) {
@@ -126,90 +110,93 @@ const QuickAnswersModal = ({
     }
   };
 
+  const handleClickMsgVar = async (msgVar, setValueFunc) => {
+    const el = messageInputRef.current;
+    const firstHalfText = el.value.substring(0, el.selectionStart);
+    const secondHalfText = el.value.substring(el.selectionEnd);
+    const newCursorPos = el.selectionStart + msgVar.length;
+
+    setValueFunc("message", `${firstHalfText}${msgVar}${secondHalfText}`);
+
+    await new Promise(r => setTimeout(r, 100));
+    messageInputRef.current.setSelectionRange(newCursorPos, newCursorPos);
+  };
+
   return (
     <div className={classes.root}>
       <Dialog
-        open={open}
-        onClose={handleClose}
         maxWidth="sm"
         fullWidth
+        open={open}
+        onClose={onClose}
         scroll="paper"
       >
-        <DialogTitle id="form-dialog-title">
+        <DialogTitle>
           {quickAnswerId
-            ? `${i18n.t("quickAnswersModal.title.edit")}`
-            : `${i18n.t("quickAnswersModal.title.add")}`}
+            ? i18n.t("quickAnswersModal.title.edit")
+            : i18n.t("quickAnswersModal.title.add")}
         </DialogTitle>
         <Formik
           initialValues={quickAnswer}
           enableReinitialize={true}
           validationSchema={QuickAnswerSchema}
-          onSubmit={(values, actions) => {
-            setTimeout(() => {
-              handleSaveQuickAnswer(values);
-              actions.setSubmitting(false);
-            }, 400);
-          }}
+          onSubmit={handleSaveQuickAnswer}
         >
-          {({ values, errors, touched, isSubmitting }) => (
+          {({ touched, errors, isSubmitting, setFieldValue }) => (
             <Form>
               <DialogContent dividers>
-                <div className={classes.textQuickAnswerContainer}>
-                  <Field
-                    as={TextField}
+                <WithSkeleton loading={loading}>
+                  <FormikTextField
                     label={i18n.t("quickAnswersModal.form.shortcut")}
-                    name="shortcut"
                     autoFocus
-                    error={touched.shortcut && Boolean(errors.shortcut)}
-                    helperText={touched.shortcut && errors.shortcut}
+                    name="shortcut"
+                    touched={touched}
+                    errors={errors}
                     variant="outlined"
                     margin="dense"
-                    className={classes.textField}
-                    fullWidth
+                    disabled={isSubmitting}
                   />
-                </div>
-                <div className={classes.textQuickAnswerContainer}>
-                  <Field
-                    as={TextField}
+                </WithSkeleton>
+                <WithSkeleton fullWidth loading={loading}>
+                  <FormikTextField
                     label={i18n.t("quickAnswersModal.form.message")}
+                    multiline
+                    inputRef={messageInputRef}
+                    minRows={5}
+                    fullWidth
                     name="message"
-                    error={touched.message && Boolean(errors.message)}
-                    helperText={touched.message && errors.message}
+                    touched={touched}
+                    errors={errors}
                     variant="outlined"
                     margin="dense"
-                    className={classes.textField}
-                    multiline
-                    rows={5}
-                    fullWidth
+                    disabled={isSubmitting}
                   />
-                </div>
+                </WithSkeleton>
+                <WithSkeleton loading={loading}>
+                  <MessageVariablesPicker
+                    disabled={isSubmitting}
+                    onClick={value => handleClickMsgVar(value, setFieldValue)}
+                  />
+                </WithSkeleton>
               </DialogContent>
               <DialogActions>
                 <Button
-                  onClick={handleClose}
-                  color="secondary"
-                  disabled={isSubmitting}
-                  variant="outlined"
+                onClick={onClose}
+                disabled={isSubmitting}
                 >
                   {i18n.t("quickAnswersModal.buttons.cancel")}
                 </Button>
-                <Button
+                <ButtonWithSpinner
                   type="submit"
                   color="primary"
-                  disabled={isSubmitting}
+                  disabled={loading || isSubmitting}
+                  loading={isSubmitting}
                   variant="contained"
-                  className={classes.btnWrapper}
                 >
                   {quickAnswerId
-                    ? `${i18n.t("quickAnswersModal.buttons.okEdit")}`
-                    : `${i18n.t("quickAnswersModal.buttons.okAdd")}`}
-                  {isSubmitting && (
-                    <CircularProgress
-                      size={24}
-                      className={classes.buttonProgress}
-                    />
-                  )}
-                </Button>
+                    ? i18n.t("quickAnswersModal.buttons.okEdit")
+                    : i18n.t("quickAnswersModal.buttons.okAdd")}
+                </ButtonWithSpinner>
               </DialogActions>
             </Form>
           )}

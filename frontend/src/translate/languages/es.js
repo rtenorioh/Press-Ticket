@@ -33,6 +33,21 @@ const messages = {
           success: "¡El inicio de sesión fue exitoso!",
         },
       },
+      messageVariablesPicker: {
+        label: "Variables disponibles",
+        vars: {
+          contactName: "Nombre",
+          user: "Asistente",
+          greeting: "Saludo",
+          protocolNumber: "Protocolo",
+          date: "Data",
+          hour: "Hora",
+          date_hour: "Data y Hora",
+          ticket_id: "Ticked ID",
+          queue: "Sector",
+          connection: "Conexión"
+        }
+      },
       dashboard: {
         charts: {
           perDay: {

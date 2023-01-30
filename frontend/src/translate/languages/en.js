@@ -33,6 +33,21 @@ const messages = {
           success: "Login was successful!",
         },
       },
+      messageVariablesPicker: {
+        label: "Available variables",
+        vars: {
+          contactName: "Name",
+          user: "Attendant",
+          greeting: "Greeting",
+          protocolNumber: "Protocol",
+          date: "Date",
+          hour: "Hour",
+          date_hour: "Date and Time",
+          ticket_id: "Ticked ID",
+          queue: "Sector",
+          connection: "Connection"
+        }
+      },
       dashboard: {
         charts: {
           perDay: {
