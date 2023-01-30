@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useReducer, useContext } from "react";
 import openSocket from "../../services/socket-io";
 
-import { makeStyles } from "@material-ui/core/styles";
-import List from "@material-ui/core/List";
-import Paper from "@material-ui/core/Paper";
+import {
+	List,
+	makeStyles,
+	Paper
+} from "@material-ui/core";
 
 import TicketListItem from "../TicketListItem";
 import TicketsListSkeleton from "../TicketsListSkeleton";
@@ -11,6 +13,9 @@ import TicketsListSkeleton from "../TicketsListSkeleton";
 import useTickets from "../../hooks/useTickets";
 import { i18n } from "../../translate/i18n";
 import { AuthContext } from "../../context/Auth/AuthContext";
+
+import api from "../../services/api";
+import toastError from "../../errors/toastError";
 
 const useStyles = makeStyles((theme) => ({
 	ticketsListWrapper: {
@@ -167,6 +172,7 @@ const TicketsList = (props) => {
 	const [ticketsList, dispatch] = useReducer(reducer, []);
 	const { user } = useContext(AuthContext);
 	const { profile, queues } = user;
+	const [settings, setSettings] = useState([]);
 
 	useEffect(() => {
 		dispatch({ type: "RESET" });
@@ -183,14 +189,45 @@ const TicketsList = (props) => {
 	});
 
 	useEffect(() => {
+		const fetchSession = async () => {
+			try {
+				const { data } = await api.get("/settings");
+				setSettings(data);
+			} catch (err) {
+				toastError(err);
+			}
+		};
+		fetchSession();
+	}, []);
+
+	useEffect(() => {
 		const queueIds = queues.map((q) => q.id);
 		const filteredTickets = tickets.filter((t) => queueIds.indexOf(t.queueId) > -1);
 
-		if (profile === "user") {
-			dispatch({ type: "LOAD_TICKETS", payload: filteredTickets });
+		const getSettingValue = key => {
+			const { value } = settings.find(s => s.key === key);
+			return value;
+		};
+		const allticket = settings && settings.length > 0 && getSettingValue("allTicket") === "enabled";
+
+		if (allticket === true) {
+			
+			if (profile === "") {
+				dispatch({ type: "LOAD_TICKETS", payload: filteredTickets });
+
+			} else {
+				dispatch({ type: "LOAD_TICKETS", payload: tickets });
+			}
 		} else {
-			dispatch({ type: "LOAD_TICKETS", payload: tickets });
+			
+			if (profile === "user") {
+				dispatch({ type: "LOAD_TICKETS", payload: filteredTickets });
+
+			} else {
+				dispatch({ type: "LOAD_TICKETS", payload: tickets });
+			}
 		}
+		// eslint-disable-next-line
 	}, [tickets, status, searchParam, queues, profile]);
 
 	useEffect(() => {

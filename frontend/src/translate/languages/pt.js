@@ -477,6 +477,14 @@ const messages = {
               disabled: "Desativado",
             },
           },
+          allTicket: {
+            name: "Todos podem ver o chamado sem departamento",
+            note: "Ative essa função para deixar todos os usuarios verem os chamados sem setor",
+            options: {
+              enabled: "Ativado",
+              disabled: "Desativado",
+            },
+          },
           CheckMsgIsGroup: {
             name: "Ignorar Mensagens de Grupos",
             note: "Se desabilitar, irá receber mensage dos grupos.",

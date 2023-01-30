@@ -477,6 +477,14 @@ const messages = {
               disabled: "Disabled",
             },
           },
+          allTicket: {
+            name: "Everyone can see the ticket without department",
+            note: "Activate this function to let all users see tickets without sector",
+            options: {
+              enabled: "Enabled",
+              disabled: "Disabled",
+            },
+          },
           CheckMsgIsGroup: {
             name: "Ignore Group Messages",
             note: "If you disable it, you will receive messages from groups.",

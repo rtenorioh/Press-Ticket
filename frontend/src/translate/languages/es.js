@@ -477,6 +477,14 @@ const messages = {
               disabled: "Deshabilitado",
             },
           },
+          allTicket: {
+            name: "Todo el mundo puede ver el ticket sin departamento",
+            note: "Active esta función para que todos los usuarios vean los boletos sin sector",
+            options: {
+              enabled: "Habilitado",
+              disabled: "Deshabilitado",
+            },
+          },
           CheckMsgIsGroup: {
             name: "Ignorar mensajes de grupo",
             note: "Si lo desactivas, recibirás mensajes de grupos.",

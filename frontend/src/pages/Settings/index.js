@@ -186,6 +186,21 @@ const Settings = () => {
 				</Paper>
 
 				<Typography variant="body2" gutterBottom></Typography>
+				
+				<Paper className={classes.paper}>
+					<Tooltip title={i18n.t("settings.settings.allTicket.note")}>
+						<FormControlLabel
+							control={
+								<IOSSwitch
+									checked={settings && settings.length > 0 && getSettingValue("allTicket") === "enabled"}
+									onChange={handleChangeBooleanSetting} name="allTicket"
+								/>}
+							label={i18n.t("settings.settings.allTicket.name")}
+						/>
+					</Tooltip>
+				</Paper>
+
+				<Typography variant="body2" gutterBottom></Typography>
 
 				<Paper className={classes.paper}>
 					<Tooltip title={i18n.t("settings.settings.CheckMsgIsGroup.note")}>
