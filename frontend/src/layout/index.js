@@ -2,16 +2,17 @@ import React, { useState, useContext, useEffect } from "react";
 import clsx from "clsx";
 
 import {
-  makeStyles,
-  Drawer,
   AppBar,
-  Toolbar,
-  List,
-  Typography,
   Divider,
-  MenuItem,
+  Drawer,
   IconButton,
+  Link,
+  List,
+  makeStyles,
   Menu,
+  MenuItem,
+  Toolbar,
+  Typography
 } from "@material-ui/core";
 
 import MenuIcon from "@material-ui/icons/Menu";
@@ -28,6 +29,7 @@ import { i18n } from "../translate/i18n";
 import api from "../services/api";
 import toastError from "../errors/toastError";
 import { system } from "../config.json";
+import { systemVersion } from "../../package.json";
 import logodash from "../assets/logo-dash.png";
 
 const drawerWidth = 240;
@@ -40,7 +42,6 @@ const useStyles = makeStyles((theme) => ({
       height: "calc(100vh - 56px)",
     },
   },
-
   toolbar: {
     paddingRight: 24, // keep right padding when drawer closed
     color: "#ffffff",
@@ -114,6 +115,12 @@ const useStyles = makeStyles((theme) => ({
     display: "flex",
     overflow: "auto",
     flexDirection: "column",
+  },
+  systemCss: {
+    display: "flex",
+    justifyContent: "center",
+    opacity: 0.2,
+    fontSize: 12
   }
 }));
 
@@ -275,6 +282,12 @@ const LoggedInLayout = ({ children }) => {
               <MenuItem onClick={handleClickLogout}>
                 {i18n.t("mainDrawer.appBar.user.logout")}
               </MenuItem>
+              <Divider />
+              <span className={classes.systemCss}>
+                <Link color="inherit" href={system.url || "https://github.com/rtenorioh/Press-Ticket"}>
+                  v{systemVersion}
+                </Link>
+              </span>
             </Menu>
           </div>
         </Toolbar>

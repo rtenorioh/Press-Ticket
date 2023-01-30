@@ -4,7 +4,6 @@ import { Link as RouterLink } from "react-router-dom";
 import {
   Badge,
   Divider,
-  Link,
   ListItem,
   ListItemIcon,
   ListItemText,
@@ -31,8 +30,6 @@ import { i18n } from "../translate/i18n";
 import { WhatsAppsContext } from "../context/WhatsApp/WhatsAppsContext";
 import { AuthContext } from "../context/Auth/AuthContext";
 import { Can } from "../components/Can";
-import { systemVersion } from "../../package.json";
-import { system } from "../config.json";
 
 const useStyles = makeStyles(theme => ({
   icon: {
@@ -46,12 +43,6 @@ const useStyles = makeStyles(theme => ({
   },
   divider: {
     backgroundColor: theme.palette.divide.main
-  },
-  systemCss: {
-    display: "flex",
-    justifyContent: "center",
-    opacity: 0.5,
-    fontSize: 12
   }
 }));
 
@@ -194,11 +185,6 @@ const MainListItems = (props) => {
           </>
         )}
       />
-      <span className={classes.systemCss}>
-        <Link color="inherit" href={system.url || "https://github.com/rtenorioh/Press-Ticket"}>
-          v{systemVersion}
-        </Link>
-      </span>
     </div>
   );
 };
