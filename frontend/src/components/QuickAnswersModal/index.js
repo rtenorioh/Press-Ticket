@@ -53,7 +53,7 @@ const QuickAnswersModal = ({
 
   const initialState = {
     shortcut: "",
-    message: ""
+    message: "",
   };
 
   const isMounted = useRef(true);
@@ -63,46 +63,50 @@ const QuickAnswersModal = ({
 
   useEffect(() => {
     return () => {
-      isMounted.current = false;
+      isMounted.current = false; 
     };
   }, []);
 
   useEffect(() => {
     if (initialValues && isMounted.current) {
       setQuickAnswer(prevState => {
-        return { ...prevState, ...initialValues };
+        return { ...prevState, ...initialValues  };
       });
     }
 
 (async () => {
-      if (!quickAnswerId) return;
-
+      if (!quickAnswerId) return ;
+      
       setLoading(true);
       try {
         const { data } = await api.get(`/quickAnswers/${quickAnswerId}`);
-                if (!isMounted.current) return;
+                if (!isMounted.current) return; 
 
         setQuickAnswer(prevState => {
           return { ...prevState, ...data };
         });
-
+        
         setLoading(false);
       } catch (err) {
         setLoading(false);
         toastError(err);
-      }
-    })();
+      }       
+    })();    
+    setQuickAnswer(initialState);
+    // eslint-disable-next-line
   }, [quickAnswerId, open, initialValues]);
 
   const handleSaveQuickAnswer = async values => {
     try {
       if (quickAnswerId) {
         await api.put(`/quickAnswers/${quickAnswerId}`, values);
+        onClose();
       } else {
         const { data } = await api.post("/quickAnswers", values);
         if (onSave) {
           onSave(data);
         }
+        onClose();
       }
       toast.success(i18n.t("quickAnswersModal.success"));
     } catch (err) {
@@ -195,7 +199,7 @@ const QuickAnswersModal = ({
                 >
                   {quickAnswerId
                     ? i18n.t("quickAnswersModal.buttons.okEdit")
-                    : i18n.t("quickAnswersModal.buttons.okAdd")}
+                    : i18n.t("quickAnswersModal.buttons.okAdd")}                  
                 </ButtonWithSpinner>
               </DialogActions>
             </Form>
