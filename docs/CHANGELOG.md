@@ -1,5 +1,11 @@
 # Changelog
 
+### 08/02/2023
+
+- [Correção do não envio dos Setores no primeiro contato](https://github.com/rtenorioh/Press-Ticket/commit/e2eb18ff7788c4c625d410bf158e1086007144b1);
+- [Remoção do console.log](https://github.com/rtenorioh/Press-Ticket/commit/61c94e3776afefe56780ae900ad52e828449bcbc); e
+- [Atualização de versão](https://github.com/rtenorioh/Press-Ticket/commit/cb5edbcb6213d861dd6debc06bb8772626ec1e57).
+
 ### 30/01/2023
 
 - [Alteração do indicador de versão](https://github.com/rtenorioh/Press-Ticket/commit/f300f4fbdeb2d020ec2df0d34d8bc93e5c7dcfab);
