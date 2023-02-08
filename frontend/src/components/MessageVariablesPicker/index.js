@@ -26,7 +26,7 @@ const MessageVariablesPicker = ({ onClick, disabled }) => {
         },
         {
             name: i18n.t("messageVariablesPicker.vars.user"),
-            value: "{{user}} "
+            value: "{{user.name}} "
         },
         {
             name: i18n.t("messageVariablesPicker.vars.greeting"),
@@ -43,10 +43,6 @@ const MessageVariablesPicker = ({ onClick, disabled }) => {
         {
             name: i18n.t("messageVariablesPicker.vars.hour"),
             value: "{{hour}} "
-        },
-        {
-            name: i18n.t("messageVariablesPicker.vars.date_hour"),
-            value: "{{date_hour}} "
         },
         {
             name: i18n.t("messageVariablesPicker.vars.ticket_id"),

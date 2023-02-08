@@ -42,7 +42,6 @@ const messages = {
           protocolNumber: "Protocolo",
           date: "Data",
           hour: "Hora",
-          date_hour: "Data e Hora",
           ticket_id: "Ticked ID",
           queue: "Setor",
           connection: "Conexão"
