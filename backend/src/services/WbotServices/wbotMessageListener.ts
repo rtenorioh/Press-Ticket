@@ -2,6 +2,7 @@ import { join } from "path";
 import { promisify } from "util";
 import { writeFile } from "fs";
 import * as Sentry from "@sentry/node";
+import { head, isNull, isNil } from "lodash";
 
 import {
   Contact as WbotContact,
@@ -26,6 +27,8 @@ import { debounce } from "../../helpers/Debounce";
 import UpdateTicketService from "../TicketServices/UpdateTicketService";
 import CreateContactService from "../ContactServices/CreateContactService";
 import formatBody from "../../helpers/Mustache";
+import UserRating from "../../models/UserRating";
+import SendWhatsAppMessage from "./SendWhatsAppMessage";
 
 interface Session extends Client {
   id?: number;
@@ -119,13 +122,13 @@ const prepareLocation = (msg: WbotMessage): WbotMessage => {
   const gmapsUrl = `https://maps.google.com/maps?q=${msg.location.latitude}%2C${msg.location.longitude}&z=17`;
   msg.body = `data:image/png;base64,${msg.body}|${gmapsUrl}`;
   msg.body += `|${msg.location.description
-      ? msg.location.description
-      : `${msg.location.latitude}, ${msg.location.longitude}`
+    ? msg.location.description
+    : `${msg.location.latitude}, ${msg.location.longitude}`
     }`;
   return msg;
 };
 
-const verifyMessage = async (
+export const verifyMessage = async (
   msg: WbotMessage,
   ticket: Ticket,
   contact: Contact
@@ -363,7 +366,7 @@ const handleMessage = async (
       msg.type === "e2e_notification" ||
       msg.type === "notification_template" ||
       msg.from === "status@broadcast" ||
-      msg.author != null ||
+      // msg.author === null ||
       chat.isGroup
     ) {
       return;
@@ -374,7 +377,7 @@ const handleMessage = async (
   try {
     let msgContact: WbotContact;
     let groupContact: Contact | undefined;
-
+    // console.log(msg)
     if (msg.fromMe) {
       // messages sent automatically by wbot have a special character in front of it
       // if so, this message was already been stored in database;
@@ -425,6 +428,22 @@ const handleMessage = async (
       unreadMessages,
       groupContact
     );
+
+    try {
+      if (!msg.fromMe) {
+        const ratePending = await verifyRating(ticket);
+        /**
+         * Tratamento para avaliação do atendente
+         */
+        if (ratePending) {
+          handleRating(msg, ticket);
+          return;
+        }
+      }
+    } catch (e) {
+      Sentry.captureException(e);
+      console.log(e);
+    }
 
     if (
       unreadMessages === 0 &&
@@ -555,6 +574,70 @@ const handleMessage = async (
   } catch (err) {
     Sentry.captureException(err);
     logger.error(`Error handling whatsapp message: Err: ${err}`);
+  }
+};
+
+const verifyRating = async (ticket: Ticket) => {
+  const record = await UserRating.findOne({
+    where: { ticketId: ticket.id, rate: null }
+  });
+  if (record) {
+    return true;
+  }
+  return false;
+};
+
+const handleRating = async (msg: WbotMessage, ticket: Ticket) => {
+  const io = getIO();
+  let rate: number | null = null;
+
+  const bodyMessage = msg.body;
+
+  if (bodyMessage) {
+    rate = +bodyMessage;
+  }
+
+  if (!Number.isNaN(rate) && Number.isInteger(rate) && !isNull(rate)) {
+    const { farewellMessage } = await ShowWhatsAppService(ticket.whatsappId);
+
+    let finalRate = rate;
+
+    if (rate < 1) {
+      finalRate = 1;
+    }
+    if (rate > 3) {
+      finalRate = 3;
+    }
+
+    const record = await UserRating.findOne({
+      where: {
+        ticketId: ticket.id,
+        rate: null
+      }
+    });
+
+    await record?.update({ rate: finalRate });
+
+    const body = `\u200c${farewellMessage}`;
+    await SendWhatsAppMessage({ body, ticket });
+
+    await ticket.update({
+      queueId: null,
+      userId: null,
+      status: "closed"
+    });
+
+    io.to("open").emit(`ticket`, {
+      action: "delete",
+      ticket,
+      ticketId: ticket.id
+    });
+
+    io.to(ticket.status).to(ticket.id.toString()).emit(`ticket`, {
+      action: "update",
+      ticket,
+      ticketId: ticket.id
+    });
   }
 };
 

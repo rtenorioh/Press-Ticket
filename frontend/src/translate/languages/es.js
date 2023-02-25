@@ -33,6 +33,20 @@ const messages = {
           success: "¡El inicio de sesión fue exitoso!",
         },
       },
+      messageVariablesPicker: {
+        label: "Variables disponibles",
+        vars: {
+          contactName: "Nombre",
+          user: "Asistente",
+          greeting: "Saludo",
+          protocolNumber: "Protocolo",
+          date: "Data",
+          hour: "Hora",
+          ticket_id: "Ticked ID",
+          queue: "Sector",
+          connection: "Conexión"
+        }
+      },
       dashboard: {
         charts: {
           perDay: {
@@ -457,6 +471,14 @@ const messages = {
           userCreation: {
             name: "Creación de asistente",
             note: "Permitir la creación de asistentes",
+            options: {
+              enabled: "Habilitado",
+              disabled: "Deshabilitado",
+            },
+          },
+          allTicket: {
+            name: "Todo el mundo puede ver el ticket sin departamento",
+            note: "Active esta función para que todos los usuarios vean los boletos sin sector",
             options: {
               enabled: "Habilitado",
               disabled: "Deshabilitado",

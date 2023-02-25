@@ -1,3 +1,6 @@
+/* eslint-disable prefer-template */
+/* eslint-disable prettier/prettier */
+/* eslint-disable @typescript-eslint/no-array-constructor */
 import Mustache from "mustache";
 import Ticket from "../models/Ticket";
 
@@ -7,10 +10,10 @@ export const msgsd = (): string => {
 
   const hh = new Date().getHours();
 
-  if (hh >= 6) { ms = "Bom dia"; }
-  if (hh > 11) { ms = "Boa tarde"; }
-  if (hh > 17) { ms = "Boa noite"; }
-  if (hh > 23 || hh < 6) { ms = "Boa madrugada"; }
+  if (hh >= 6) { ms = "Bom Dia"; }
+  if (hh > 11) { ms = "Boa Tarde"; }
+  if (hh > 17) { ms = "Boa Noite"; }
+  if (hh > 23 || hh < 6) { ms = "Boa Madrugada"; }
 
   return ms;
 };
@@ -51,6 +54,7 @@ export const hour = (): string => {
 export default (body: string, ticket?: Ticket): string => {
   const view = {
     name: ticket ? ticket.contact.name : "",
+    user: ticket ? ticket?.user : "",
     ticket_id: ticket ? ticket.id : "",
     ms: msgsd(),
     hour: hour(),

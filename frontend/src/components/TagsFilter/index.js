@@ -32,7 +32,7 @@ export function TagsFilter ({ onFiltered }) {
 
     return (
         <Paper style={{padding: 10}}>
-            <Autocomplete
+            {/* <Autocomplete
                 multiple
                 size="small"
                 options={tags}
@@ -53,7 +53,7 @@ export function TagsFilter ({ onFiltered }) {
                 renderInput={(params) => (
                     <TextField {...params} variant="outlined" placeholder="Filtro por Tags" />
                 )}
-            />
+            /> */}
         </Paper>
     )
 }

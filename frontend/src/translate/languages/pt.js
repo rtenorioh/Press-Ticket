@@ -33,6 +33,20 @@ const messages = {
           success: "Login efetuado com sucesso!",
         },
       },
+      messageVariablesPicker: {
+        label: "Variavéis disponíveis",
+        vars: {
+          contactName: "Nome",
+          user: "Atendente",
+          greeting: "Saudação",
+          protocolNumber: "Protocolo",
+          date: "Data",
+          hour: "Hora",
+          ticket_id: "Ticked ID",
+          queue: "Setor",
+          connection: "Conexão"
+        }
+      },
       dashboard: {
         charts: {
           perDay: {
@@ -460,6 +474,14 @@ const messages = {
           userCreation: {
             name: "Criação de atendente",
             note: "Permitir a criação de atendente",
+            options: {
+              enabled: "Ativado",
+              disabled: "Desativado",
+            },
+          },
+          allTicket: {
+            name: "Todos podem ver o chamado sem departamento",
+            note: "Ative essa função para deixar todos os usuarios verem os chamados sem setor",
             options: {
               enabled: "Ativado",
               disabled: "Desativado",

@@ -1,5 +1,31 @@
 # Changelog
 
+### 08/02/2023
+
+- [Correção do não envio dos Setores no primeiro contato](https://github.com/rtenorioh/Press-Ticket/commit/e2eb18ff7788c4c625d410bf158e1086007144b1);
+- [Remoção do console.log](https://github.com/rtenorioh/Press-Ticket/commit/61c94e3776afefe56780ae900ad52e828449bcbc); e
+- [Atualização de versão](https://github.com/rtenorioh/Press-Ticket/commit/cb5edbcb6213d861dd6debc06bb8772626ec1e57).
+
+### 30/01/2023
+
+- [Alteração do indicador de versão](https://github.com/rtenorioh/Press-Ticket/commit/f300f4fbdeb2d020ec2df0d34d8bc93e5c7dcfab);
+- [Visualização dos tickets para todos os usuários](https://github.com/rtenorioh/Press-Ticket/commit/3ac4519e53951c2b03d43ee61d0d768a5c7fac69); e
+- [Atualização de versão](https://github.com/rtenorioh/Press-Ticket/commit/ae0f7ea36fa03808a3c4e170fcfa597b70a68f6b).
+
+### 29/01/2023
+
+- [Atualização da lib wwebjs de 1.19.2 para 1.19.3](https://github.com/rtenorioh/Press-Ticket/commit/836cd5632c67d7754b9e21ff9fdadd33bf587854);
+- [Correção e implementação de novas tags](https://github.com/rtenorioh/Press-Ticket/commit/6f212182771ef490ab71a9c38eafe29220b551ec); e
+- [Variáveis disponíveis](https://github.com/rtenorioh/Press-Ticket/commit/426f02be537dc8d8096a1f4b7a3412a55d30d2fb).
+
+### 27/01/2023
+
+- [Melhoria no player de áudio](https://github.com/rtenorioh/Press-Ticket/commit/7453215811d130012248d6b3b8c6a7cc842588a5).
+
+### 15/01/2023
+
+- [Atualização da lib wwebjs de 1.18.4 para 1.19.2](https://github.com/rtenorioh/Press-Ticket/commit/8fbdd3ce8873fe6113c25f76ed8fa4465b17df67).
+
 <<<<<<< HEAD
 ### 23/12/2022
 

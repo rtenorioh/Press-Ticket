@@ -9,6 +9,7 @@ interface Request {
   queueIds?: number[];
   greetingMessage?: string;
   farewellMessage?: string;
+  ratingMessage?: string;
   status?: string;
   isDefault?: boolean;
   isDisplay?: boolean;
@@ -25,6 +26,7 @@ const CreateWhatsAppService = async ({
   queueIds = [],
   greetingMessage,
   farewellMessage,
+  ratingMessage,
   isDefault = false,
   isDisplay = false
 }: Request): Promise<Response> => {
@@ -77,6 +79,7 @@ const CreateWhatsAppService = async ({
       status,
       greetingMessage,
       farewellMessage,
+      ratingMessage,
       isDefault,
       isDisplay
     },

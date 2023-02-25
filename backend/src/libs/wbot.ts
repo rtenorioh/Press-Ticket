@@ -135,8 +135,6 @@ export const initWbot = async (whatsapp: Whatsapp): Promise<Session> => {
       wbot.on("ready", async () => {
         logger.info(`Session: ${sessionName} READY`);
 
-        console.log("WbotON", wbot.info.wid._serialized.split("@")[0]);
-
         await whatsapp.update({
           status: "CONNECTED",
           qrcode: "",
