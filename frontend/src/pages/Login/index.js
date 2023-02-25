@@ -20,18 +20,22 @@ import { i18n } from "../../translate/i18n";
 
 import { AuthContext } from "../../context/Auth/AuthContext";
 import { system } from "../../config.json";
+import { systemVersion } from "../../../package.json";
 import logo from '../../assets/logo.png';
 
 const Copyright = () => {
   return (
     <Typography variant="body2" color="textSecondary" align="center">
-      © {new Date().getFullYear()}
-      {" - "}
       <Link color="inherit" href={system.url}>
-        {system.name}
+        {system.name} - CNPJ: 34.211.165/0001-24
+        <br></br>
+        Todos os direitos reservados - <b>v{systemVersion}</b>
+        <br></br>
+        © 2022 - {new Date().getFullYear()}
       </Link>
       {"."}
     </Typography>
+    
   );
 };
 
