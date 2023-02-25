@@ -133,7 +133,7 @@ const ListTicketsService = async ({
     };
   }
 
-  const limit = 999;
+  const limit = 50;
   const offset = limit * (+pageNumber - 1);
 
   const { count, rows: tickets } = await Ticket.findAndCountAll({
