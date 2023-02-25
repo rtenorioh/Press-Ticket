@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from "react";
 import { Link as RouterLink } from "react-router-dom";
-
+import { systemVersion } from "../../package.json";
 import {
   Badge,
   Divider,
@@ -12,6 +12,7 @@ import {
 } from "@material-ui/core";
 
 import {
+  Link,
   AccountTreeOutlined,
   Code,
   ContactPhoneOutlined,
@@ -182,9 +183,12 @@ const MainListItems = (props) => {
                 <VpnKeyRounded />
               }
             />
+
           </>
         )}
       />
+      <Divider className={classes.divider} />
+      <ListSubheader inset className={classes.sub}>v{systemVersion}</ListSubheader>
     </div>
   );
 };
