@@ -280,6 +280,10 @@ const MessageInput = ({ ticketStatus }) => {
     handleLoadQuickAnswer(e.target.value);
   };
 
+  const capitalizeFirstLetter = (string) => {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+  }
+
   const handleQuickAnswersClick = (value) => {
     setInputMessage(value);
     setTypeBar(false);
@@ -683,7 +687,8 @@ const MessageInput = ({ ticketStatus }) => {
               }
               multiline
               maxRows={5}
-              value={inputMessage}
+              // value={inputMessage}
+              value={capitalizeFirstLetter(inputMessage)}
               onChange={handleChangeInput}
               disabled={recording || loading || ticketStatus !== "open"}
               onPaste={(e) => {
