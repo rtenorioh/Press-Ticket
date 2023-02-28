@@ -477,8 +477,16 @@ const messages = {
             },
           },
           allTicket: {
-            name: "Everyone can see the ticket without department",
+            name: "Everyone can see the ticket without department.",
             note: "Activate this function to let all users see tickets without sector",
+            options: {
+              enabled: "Enabled",
+              disabled: "Disabled",
+            },
+          },
+          allHistoric: {
+            name: "Everyone can see the customer's message history.",
+            note: "Activate this function to let all users see the client's history, if deactivated it is only possible to see within the sectors.",
             options: {
               enabled: "Enabled",
               disabled: "Disabled",

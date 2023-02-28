@@ -186,6 +186,21 @@ const Settings = () => {
 				</Paper>
 
 				<Typography variant="body2" gutterBottom></Typography>
+				<Paper className={classes.paper}>
+					<Tooltip title={i18n.t("settings.settings.allHistoric.note")}>
+						<FormControlLabel
+							control={
+								<IOSSwitch
+									checked={settings && settings.length > 0 && getSettingValue("allHistoric") === "enabled"}
+									onChange={handleChangeBooleanSetting} name="allHistoric"
+								/>}
+							label={i18n.t("settings.settings.allHistoric.name")}
+						/>
+					</Tooltip>
+				</Paper>
+
+
+				<Typography variant="body2" gutterBottom></Typography>
 
 				<Paper className={classes.paper}>
 					<Tooltip title={i18n.t("settings.settings.CheckMsgIsGroup.note")}>
@@ -213,6 +228,7 @@ const Settings = () => {
 						/>
 					</Tooltip>
 				</Paper>
+				
 
 				<Typography variant="body2" gutterBottom></Typography>
 				<Paper className={classes.paper}>
@@ -269,6 +285,8 @@ const Settings = () => {
 						/>
 					</Tooltip>
 				</Paper>
+
+				
 
 				<Typography variant="body2" gutterBottom></Typography>
 					<Tooltip title={i18n.t("settings.settings.timeCreateNewTicket.note")}>

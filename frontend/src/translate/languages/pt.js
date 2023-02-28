@@ -487,6 +487,14 @@ const messages = {
               disabled: "Desativado",
             },
           },
+          allHistoric: {
+            name: "Todos podem ver o histórico de mensagem do cliente",
+            note: "Ative essa função para deixar todos os usuarios verem o histórico do cliente, caso desative só é possivel ver dentro dos setores.",
+            options: {
+              enabled: "Ativado",
+              disabled: "Desativado",
+            },
+          },
           CheckMsgIsGroup: {
             name: "Ignorar Mensagens de Grupos",
             note: "Se desabilitar, irá receber mensage dos grupos.",
@@ -537,6 +545,27 @@ const messages = {
           },
           timeCreateNewTicket: {
             name: "Cria novo chamado após",
+            note: "Selecione o tempo que será necessário para abrir um novo chamado, caso o cliente entre em contatos novamente",
+            options: {
+              "10": "10 Segundos",
+              "30": "30 Segundos",
+              "60": "1 minuto",
+              "300": "5 minutos",
+              "1800": "30 minutos",
+              "3600": "1 hora",
+              "7200": "2 horas",
+              "21600": "6 horas",
+              "43200": "12 horas",
+              "86400": "24 horas",
+              "604800": "7 dias",
+              "1296000": "15 dias",
+              "2592000": "30 dias",
+            },
+          },
+
+
+          timeDirectNewTicket: {
+            name: "Direcionar chamado sem setor após",
             note: "Selecione o tempo que será necessário para abrir um novo chamado, caso o cliente entre em contatos novamente",
             options: {
               "10": "10 Segundos",
