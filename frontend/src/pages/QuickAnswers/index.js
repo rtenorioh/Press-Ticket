@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useReducer } from "react";
+import React, { useContext, useState, useEffect, useReducer } from "react";
 import openSocket from "../../services/socket-io";
 import { useHistory } from "react-router-dom";
 
@@ -34,6 +34,8 @@ import Title from "../../components/Title";
 import TableRowSkeleton from "../../components/TableRowSkeleton";
 import QuickAnswersModal from "../../components/QuickAnswersModal";
 import ConfirmationModal from "../../components/ConfirmationModal";
+import { Can } from "../../components/Can"
+import { AuthContext } from "../../context/Auth/AuthContext";
 
 import { toast } from "react-toastify";
 import toastError from "../../errors/toastError";
@@ -106,6 +108,7 @@ const QuickAnswers = () => {
   const [deletingAllQuickAnswers, setDeletingAllQuickAnswers] = useState(null);
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
   const [hasMore, setHasMore] = useState(false);
+  const { user } = useContext(AuthContext);
 
   useEffect(() => {
     dispatch({ type: "RESET" });
@@ -214,13 +217,13 @@ const QuickAnswers = () => {
       <ConfirmationModal
         title={
           deletingQuickAnswers ? `${i18n.t("quickAnswers.confirmationModal.deleteTitle")} ${deletingQuickAnswers.shortcut}?`
-          : `${i18n.t("quickAnswers.confirmationModal.deleteAllTitle")}`
+            : `${i18n.t("quickAnswers.confirmationModal.deleteAllTitle")}`
         }
         open={confirmModalOpen}
         onClose={setConfirmModalOpen}
-        onConfirm={() => 
+        onConfirm={() =>
           deletingQuickAnswers ? handleDeleteQuickAnswers(deletingQuickAnswers.id)
-         : handleDeleteAllQuickAnswers(deletingAllQuickAnswers)
+            : handleDeleteAllQuickAnswers(deletingAllQuickAnswers)
         }
       >
         {
@@ -259,18 +262,27 @@ const QuickAnswers = () => {
               <AddCircleOutline />
             </Button>
           </Tooltip>
-          <Tooltip title={i18n.t("quickAnswers.buttons.deleteAll")}>
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={(e) => {
-                setConfirmModalOpen(true);
-                setDeletingAllQuickAnswers(quickAnswers);
-              }}
-            >
-              <DeleteForever />
-            </Button>
-          </Tooltip>
+
+          <Can
+            role={user.profile}
+            perform="drawer-admin-items:view"
+            yes={() => (//Função que identifica o usuario e bloqueia a visão caso não seja admin
+
+              <Tooltip title={i18n.t("quickAnswers.buttons.deleteAll")}>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={(e) => {
+                    setConfirmModalOpen(true);
+                    setDeletingAllQuickAnswers(quickAnswers);
+                  }}
+                >
+                  <DeleteForever />
+                </Button>
+              </Tooltip>
+            )}
+          />
+
         </MainHeaderButtonsWrapper>
       </MainHeader>
       <Paper
@@ -306,15 +318,23 @@ const QuickAnswers = () => {
                       <Edit color="secondary" />
                     </IconButton>
 
-                    <IconButton
-                      size="small"
-                      onClick={(e) => {
-                        setConfirmModalOpen(true);
-                        setDeletingQuickAnswers(quickAnswer);
-                      }}
-                    >
-                      <DeleteOutline color="secondary" />
-                    </IconButton>
+                    <Can
+                      role={user.profile}
+                      perform="drawer-admin-items:view"
+                      yes={() => ( //Função que identifica o usuario e bloqueia a visão caso não seja admin
+                        <IconButton
+                          size="small"
+                          onClick={(e) => {
+                            setConfirmModalOpen(true);
+                            setDeletingQuickAnswers(quickAnswer);
+                          }}
+                        >
+                          <DeleteOutline color="secondary" />
+                        </IconButton>
+                      )}
+                    />
+
+
                   </TableCell>
                 </TableRow>
               ))}

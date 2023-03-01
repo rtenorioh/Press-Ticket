@@ -124,7 +124,21 @@ const messages = {
           display: "Exibir horário dos setores",
           farewellMessage: "Mensagem de despedida",
           ratingMessage: "Mensagem de avaliação",
-          instructionRatingMessage: "Para habilitar as avaliações, basta preencher este campo"
+          instructionRatingMessage: "Para habilitar as avaliações, basta preencher este campo",
+          outOfWorkMessage: "Personalize a mensagem quando estiver fora do horário de expediente",
+          startWorkHour: "Expediente: Abertura",
+          endWorkHour: "Expediente: Fechamento",
+          monday: "Segunda",
+          tuesday: "Terça",
+          wednesday: "Quarta",
+          thursday: "Quinta",
+          friday: "Sexta",
+          saturday: "Sábado",
+          sunday: "Domingo",
+          holiday: "Feriado",
+          defineHourExpedient: "Definir horário de expediente",
+          token: "Token",
+          checkHourExpedient: "Checar Horário de Expediente"
         },
         buttons: {
           okAdd: "Adicionar",
@@ -215,6 +229,7 @@ const messages = {
           deletedAll: "Todas Tags excluídas com sucesso!",
         },
         buttons: {
+          download: "Download",
           add: "Adicionar",
           deleteAll: "Deletar Todos",
         },

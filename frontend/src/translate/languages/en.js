@@ -212,6 +212,7 @@ const messages = {
           deletedAll: "All Tags deleted successfully!",
         },
         buttons: {
+          download: "Download",
           add: "Add",
           deleteAll: "Delete All",
         },

@@ -208,6 +208,7 @@ const messages = {
           actions: "Acción"
         },
         toasts: {
+          download: "Descargar",
           deleted: "¡Etiqueta eliminada con éxito!",
           deletedAll: "¡Todas las etiquetas se eliminaron con éxito!",
         },
