@@ -36,6 +36,7 @@ const messages = {
       messageVariablesPicker: {
         label: "Variables disponibles",
         vars: {
+          contactFirstName: "Primer nombre",
           contactName: "Nombre",
           user: "Asistente",
           greeting: "Saludo",
