@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useReducer, useContext, useRef } from "react";
 
 import {
@@ -357,10 +358,10 @@ const reducer = (state, action) => {
 
   if (action.type === "UPDATE_MESSAGE") {
     const messageToUpdate = action.payload;
+
     const messageIndex = state.findIndex((m) => m.id === messageToUpdate.id);
 
     if (messageToUpdate.isDeleted === true) {
-      //toast.info(`Mensagem apagada: ${messageToUpdate.body}  `,{autoClose: false});
       toast.info(<ToastDisplay
         body={messageToUpdate.body}
       >

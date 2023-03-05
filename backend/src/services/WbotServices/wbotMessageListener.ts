@@ -1,3 +1,5 @@
+/* eslint-disable no-plusplus */
+/* eslint-disable no-nested-ternary */
 import { join } from "path";
 import { promisify } from "util";
 import { writeFile } from "fs";
@@ -70,7 +72,8 @@ const verifyQuotedMessage = async (
   return quotedMsg;
 };
 
-const verifyRevoked = async (msgBody?: string): Promise<void> => {
+
+const verifyRevoked = async (msgBody: string | undefined): Promise<void> => {
   await new Promise(r => setTimeout(r, 500));
 
   const io = getIO();
@@ -2159,6 +2162,7 @@ const handleMessage = async (
       try {
         const array = msg.body.split("\n");
         const obj = [];
+        // eslint-disable-next-line no-shadow
         let contact = "";
         for (let index = 0; index < array.length; index++) {
           const v = array[index];
@@ -2172,7 +2176,9 @@ const handleMessage = async (
             }
           }
         }
+        // eslint-disable-next-line no-restricted-syntax
         for await (const ob of obj) {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
           const cont = await CreateContactService({
             name: contact,
             number: ob.number.replace(/\D/g, "")
@@ -2244,6 +2250,7 @@ const handleMessage = async (
                   }
                 } */
 
+    // eslint-disable-next-line block-scoped-var
     if (msg.type === "call_log" && callSetting === "disabled") {
       const sentMessage = await wbot.sendMessage(
         `${contact.number}@c.us`,
@@ -2337,6 +2344,7 @@ const handleMsgAck = async (msg: WbotMessage, ack: MessageAck) => {
         }
       ]
     });
+
     if (!messageToUpdate) {
       return;
     }
@@ -2366,10 +2374,9 @@ const wbotMessageListener = async (wbot: Session): Promise<void> => {
   });
 
   wbot.on("message_revoke_everyone", async (after, before) => {
-    const msgBody: string | undefined = before?.body;
-    if (msgBody !== undefined) {
-      verifyRevoked(msgBody || "");
-    }
+
+    const msgBody = before?.body;
+    verifyRevoked(msgBody);
   });
 };
 
