@@ -22,7 +22,7 @@ const MessageVariablesPicker = ({ onClick, disabled }) => {
     const msgVars = [
         {
             name: i18n.t("messageVariablesPicker.vars.contactFirstName"),
-            value: "{{firstName}} "
+            value: "{{firstName}}"
         },
         {
             name: i18n.t("messageVariablesPicker.vars.contactName"),

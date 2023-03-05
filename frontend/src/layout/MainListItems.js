@@ -109,7 +109,11 @@ const MainListItems = (props) => {
         primary={i18n.t("mainDrawer.listItems.tickets")}
         icon={<WhatsApp />}
       />
-
+      <ListItemLink
+        to="/contacts"
+        primary={i18n.t("mainDrawer.listItems.contacts")}
+        icon={<ContactPhoneOutlined />}
+      />
       <ListItemLink
         to="/quickAnswers"
         primary={i18n.t("mainDrawer.listItems.quickAnswers")}
@@ -138,11 +142,7 @@ const MainListItems = (props) => {
                 </Badge>
               }
             />
-            <ListItemLink
-              to="/contacts"
-              primary={i18n.t("mainDrawer.listItems.contacts")}
-              icon={<ContactPhoneOutlined />}
-            />
+
             <ListItemLink
               to="/users"
               primary={i18n.t("mainDrawer.listItems.users")}

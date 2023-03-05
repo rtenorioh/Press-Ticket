@@ -97,7 +97,7 @@ const Chat = () => {
                     <center>
                       <img src={logo} width="50%" alt=""/>
                     </center>
-                    {i18n.t("chat.noTicketMessage")}
+                    {/* {i18n.t("chat.noTicketMessage")} */}
                     </span>
                 </Paper>
               </Hidden>

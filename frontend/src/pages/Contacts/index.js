@@ -105,7 +105,7 @@ const useStyles = makeStyles((theme) => ({
   avatar: {
     width: "50px",
     height: "50px",
-    borderRadius:"25%"
+    borderRadius: "25%"
   }
 }));
 
@@ -320,30 +320,33 @@ const Contacts = () => {
               <AddCircleOutline />
             </Button>
           </Tooltip>
-          <Tooltip title={i18n.t("contacts.buttons.export")}>
-            <CSVLink
-              className={classes.csvbtn}
-              separator=";"
-              filename={'pressticket-contacts.csv'}
-              data={
-                contacts.map((contact) => ({
-                  name: contact.name,
-                  number: contact.number,
-                  email: contact.email
-                }))
-              }>
-              <Button
-                variant="contained"
-                color="primary">
-                <Archive />
-              </Button>
-            </CSVLink>
-          </Tooltip>
           <Can
             role={user.profile}
             perform="drawer-admin-items:view"
             yes={() => (
               <>
+                <Tooltip title={i18n.t("contacts.buttons.export")}>
+                  <CSVLink
+
+                    className={classes.csvbtn}
+                    separator=";"
+                    filename={'contacts.csv'}
+                    data={
+                      contacts.map((contact) => ({
+                        name: contact.name,
+                        number: contact.number,
+                        email: contact.email
+                      }))
+                    }>
+                    <Button
+                      variant="contained"
+                      color="primary">
+                      <Archive />
+                    </Button>
+                  </CSVLink>
+                </Tooltip>
+
+
                 <Tooltip title={i18n.t("contacts.buttons.delete")}>
                   <Button
                     variant="contained"
@@ -359,6 +362,8 @@ const Contacts = () => {
               </>
             )}
           />
+
+
         </MainHeaderButtonsWrapper>
       </MainHeader>
       <Paper
