@@ -1,3 +1,5 @@
+/* eslint-disable no-plusplus */
+/* eslint-disable no-nested-ternary */
 import { join } from "path";
 import { promisify } from "util";
 import { writeFile } from "fs";
@@ -62,6 +64,52 @@ const verifyQuotedMessage = async (
   if (!quotedMsg) return null;
 
   return quotedMsg;
+};
+
+const verifyRevoked = async (msgBody: string | undefined): Promise<void> => {
+  await new Promise(r => setTimeout(r, 500));
+
+  const io = getIO();
+
+  try {
+    const message = await Message.findOne({
+      where: {
+        body: msgBody
+      }
+    });
+
+    if (!message) {
+      return;
+    }
+
+    if (message) {
+      // console.log(message);
+      await Message.update(
+        { isDeleted: true },
+        {
+          where: { id: message.id }
+        }
+      );
+
+      const msgIsDeleted = await Message.findOne({
+        where: {
+          body: msgBody
+        }
+      });
+
+      if (!msgIsDeleted) {
+        return;
+      }
+
+      io.to(msgIsDeleted.ticketId.toString()).emit("appMessage", {
+        action: "update",
+        message: msgIsDeleted
+      });
+    }
+  } catch (err) {
+    Sentry.captureException(err);
+    logger.error(`Error Message Revoke. Err: ${err}`);
+  }
 };
 
 const verifyMediaMessage = async (
@@ -406,6 +454,7 @@ const handleMessage = async (
       try {
         const array = msg.body.split("\n");
         const obj = [];
+        // eslint-disable-next-line no-shadow
         let contact = "";
         for (let index = 0; index < array.length; index++) {
           const v = array[index];
@@ -419,7 +468,9 @@ const handleMessage = async (
             }
           }
         }
+        // eslint-disable-next-line no-restricted-syntax
         for await (const ob of obj) {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
           const cont = await CreateContactService({
             name: contact,
             number: ob.number.replace(/\D/g, "")
@@ -491,6 +542,7 @@ const handleMessage = async (
                   }
                 } */
 
+    // eslint-disable-next-line block-scoped-var
     if (msg.type === "call_log" && callSetting === "disabled") {
       const sentMessage = await wbot.sendMessage(
         `${contact.number}@c.us`,
@@ -504,6 +556,7 @@ const handleMessage = async (
   }
 };
 
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 const handleMsgAck = async (msg: WbotMessage, ack: MessageAck) => {
   await new Promise(r => setTimeout(r, 500));
 
@@ -520,6 +573,7 @@ const handleMsgAck = async (msg: WbotMessage, ack: MessageAck) => {
         }
       ]
     });
+
     if (!messageToUpdate) {
       return;
     }
@@ -535,7 +589,7 @@ const handleMsgAck = async (msg: WbotMessage, ack: MessageAck) => {
   }
 };
 
-const wbotMessageListener = (wbot: Session): void => {
+const wbotMessageListener = async (wbot: Session): Promise<void> => {
   wbot.on("message_create", async msg => {
     handleMessage(msg, wbot);
   });
@@ -546,6 +600,11 @@ const wbotMessageListener = (wbot: Session): void => {
 
   wbot.on("message_ack", async (msg, ack) => {
     handleMsgAck(msg, ack);
+  });
+
+  wbot.on("message_revoke_everyone", async (after, before) => {
+    const msgBody = before?.body;
+    verifyRevoked(msgBody);
   });
 };
 
