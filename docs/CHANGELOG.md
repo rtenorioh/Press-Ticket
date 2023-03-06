@@ -1,10 +1,25 @@
 # Changelog
 
+### 05/03/2023
+
+- [Exibição da Msg Apaga pelo cliente](https://github.com/rtenorioh/Press-Ticket/commit/491c42f1d581775d2c7c42c51dc0b586ecc9dbc7),
+- [Correção exibição msg apagada](https://github.com/rtenorioh/Press-Ticket/commit/ccd3c49ff6c213782a00ee40e64decb7cc2e63d2),
+- [Atualização da versão](https://github.com/rtenorioh/Press-Ticket/commit/7cf601c45065e915a99ccbd12e6c31b6a9180789).
+
+### 25/02/2023
+
+- [Inclusão do campo number](https://github.com/rtenorioh/Press-Ticket/commit/bfc403fb3cfa51bc542d3f3bf48b424d104b7a43).
+
+### 12/02/2023
+
+- [Atualização da lib wwebjs de 1.19.3 para 1.19.4](https://github.com/rtenorioh/Press-Ticket/commit/9373ba6bba4be8edbd912ad5cd5a1f3ce25d886e).
+
 ### 08/02/2023
 
 - [Correção do não envio dos Setores no primeiro contato](https://github.com/rtenorioh/Press-Ticket/commit/e2eb18ff7788c4c625d410bf158e1086007144b1);
-- [Remoção do console.log](https://github.com/rtenorioh/Press-Ticket/commit/61c94e3776afefe56780ae900ad52e828449bcbc); e
-- [Atualização de versão](https://github.com/rtenorioh/Press-Ticket/commit/cb5edbcb6213d861dd6debc06bb8772626ec1e57).
+- [Remoção do console.log](https://github.com/rtenorioh/Press-Ticket/commit/61c94e3776afefe56780ae900ad52e828449bcbc);
+- [Atualização de versão](https://github.com/rtenorioh/Press-Ticket/commit/cb5edbcb6213d861dd6debc06bb8772626ec1e57); e
+- [Correção](https://github.com/rtenorioh/Press-Ticket/commit/e8c9bc49490417be81955a211dd07bb8a5ea969c)
 
 ### 30/01/2023
 
