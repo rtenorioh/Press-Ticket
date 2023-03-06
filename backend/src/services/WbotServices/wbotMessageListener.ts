@@ -71,9 +71,7 @@ const verifyQuotedMessage = async (
 
   return quotedMsg;
 };
-
-
-const verifyRevoked = async (msgBody: string | undefined): Promise<void> => {
+const verifyRevoked = async (msgBody?: string): Promise<void> => {
   await new Promise(r => setTimeout(r, 500));
 
   const io = getIO();
@@ -2375,8 +2373,10 @@ const wbotMessageListener = async (wbot: Session): Promise<void> => {
 
   wbot.on("message_revoke_everyone", async (after, before) => {
 
-    const msgBody = before?.body;
-    verifyRevoked(msgBody);
+    const msgBody: string | undefined = before?.body;
+    if (msgBody !== undefined) {
+      verifyRevoked(msgBody || "");
+    }
   });
 };
 
