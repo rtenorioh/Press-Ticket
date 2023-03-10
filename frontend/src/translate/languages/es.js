@@ -276,7 +276,10 @@ const messages = {
           whatsapp: "Conexión estándar",
           asistente: "Asistente",
           startWork: "Inicio",
-          endWork: "Finalizar"
+          endWork: "Finalizar",
+          allHistoric: "Ver Historiales",
+          allHistoricEnabled: "Activado",
+          allHistoricDesabled: "Desactivado"
         },
         buttons: {
           okAdd: "Agregar",

@@ -1,10 +1,21 @@
-import Setting from "../../models/Setting";
 import User from "../../models/User";
+import AppError from "../../errors/AppError";
 
-const isQueueIdHistoryBlocked = async (): Promise<boolean> => {
-  const setting = await Setting.findOne({ where: { key: "allHistoric" } });
-  return setting?.value === "enabled";
+interface Request {
+  userRequest?: string;
+}
+
+const isQueueIdHistoryBlocked = async ({
+  userRequest
+}: Request): Promise<boolean> => {
+  if (!userRequest) {
+    throw new AppError("ERR_NO_USER_FOUND", 404);
+  }
+  const user = await User.findByPk(userRequest);
+  if (!user) {
+    throw new AppError("ERR_NO_USER_FOUND", 404);
+  }
+  return user.allHistoric === "enabled";
 };
 
-// console.log(isQueueIdHistoryBlocked)
 export default isQueueIdHistoryBlocked;

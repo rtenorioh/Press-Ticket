@@ -8,6 +8,7 @@ import { Op } from "sequelize";
 interface Request {
   ticketId: string;
   pageNumber?: string;
+  userRequest?:string;
 }
 
 interface Response {
@@ -19,20 +20,23 @@ interface Response {
 
 const ListMessagesService = async ({
   pageNumber = "1",
-  ticketId
+  ticketId,
+  userRequest
 }: Request): Promise<Response> => {
   const ticket = await ShowTicketService(ticketId);
 
   if (!ticket) {
     throw new AppError("ERR_NO_TICKET_FOUND", 404);
   }
-
+  
   // await setMessagesAsRead(ticket);
   const limit = 20;
   const offset = limit * (+pageNumber - 1);
 
-  const isBlocked = await isQueueIdHistoryBlocked();
+  console.log(userRequest)
+  const isBlocked = await isQueueIdHistoryBlocked({userRequest});
 
+  console.log(isBlocked)
   if (isBlocked === false) {
 
     const { count, rows: messages } = await Message.findAndCountAll({
@@ -69,7 +73,8 @@ const ListMessagesService = async ({
       count,
       hasMore
     };
-  } else {
+  } 
+  else {
 
 
     const { count, rows: messages } = await Message.findAndCountAll({
@@ -105,11 +110,6 @@ const ListMessagesService = async ({
     };
 
   }
-
-
-
-
-
 
 };
 

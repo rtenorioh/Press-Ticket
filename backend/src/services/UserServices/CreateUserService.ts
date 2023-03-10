@@ -10,6 +10,7 @@ interface Request {
   name: string;
   queueIds?: number[];
   profile?: string;
+  allHistoric?: string;
   whatsappId?: number;
   startWork?: string;
   endWork?: string;
@@ -28,6 +29,7 @@ const CreateUserService = async ({
   name,
   queueIds = [],
   profile = "admin",
+  allHistoric,
   whatsappId,
   startWork,
   endWork
@@ -52,7 +54,7 @@ const CreateUserService = async ({
   });
 
   try {
-    await schema.validate({ email, password, name });
+    await schema.validate({ email, password, name, allHistoric });
   } catch (err) {
     throw new AppError(err.message);
   }
@@ -63,6 +65,7 @@ const CreateUserService = async ({
       password,
       name,
       profile,
+      allHistoric,
       whatsappId: whatsappId || null,
       startWork,
       endWork

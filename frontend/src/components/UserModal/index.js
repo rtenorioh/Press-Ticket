@@ -25,9 +25,9 @@ import {
 	IconButton
 } from '@material-ui/core';
 
-import { 
-	Visibility, 
-	VisibilityOff 
+import {
+	Visibility,
+	VisibilityOff
 } from '@material-ui/icons';
 
 import { green } from "@material-ui/core/colors";
@@ -95,6 +95,7 @@ const UserModal = ({ open, onClose, userId }) => {
 		email: "",
 		password: "",
 		profile: "user",
+		allHistoric: "desabled",
 		startWork: "",
 		endWork: "",
 	};
@@ -106,6 +107,7 @@ const UserModal = ({ open, onClose, userId }) => {
 	const [showPassword, setShowPassword] = useState(false);
 	const [whatsappId, setWhatsappId] = useState(false);
 	const { loading, whatsApps } = useWhatsApps();
+	const allHistoric = useRef();
 	const startWorkRef = useRef();
 	const endWorkRef = useRef();
 
@@ -281,6 +283,38 @@ const UserModal = ({ open, onClose, userId }) => {
 												))}
 											</Field>
 										</FormControl>
+									)}
+								/>
+								<Can
+									role={loggedInUser.profile}
+									perform="user-modal:editProfile"
+									yes={() => (
+										<FormControl
+											variant="outlined"
+											className={classes.maxWidth}
+											margin="dense"
+											fullWidth>
+											<>
+												<InputLabel id="userModal-selection-input-label">
+													{i18n.t("userModal.form.allHistoric")}
+												</InputLabel>
+
+												<Field
+													as={Select}
+													label={i18n.t("userModal.form.allHistoric")}
+													name="allHistoric"
+													labelId="allHistoric-selection-label"
+													id="allHistoric-selection"
+													required
+												>
+													<MenuItem value="enabled">{i18n.t("userModal.form.allHistoricEnabled")}</MenuItem>
+													<MenuItem value="desabled">{i18n.t("userModal.form.allHistoricDesabled")}</MenuItem>
+												</Field>
+											</>
+										</FormControl>
+
+
+
 									)}
 								/>
 								<Can

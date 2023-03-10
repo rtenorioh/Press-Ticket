@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useReducer, useRef } from "react";
+import React, { useState, useEffect, useReducer, useContext, useRef } from "react";
 
 import { 
   isSameDay,
@@ -9,6 +9,7 @@ import openSocket from "../../services/socket-io";
 import clsx from "clsx";
 
 import { blue } from "@material-ui/core/colors";
+import { AuthContext } from "../../context/Auth/AuthContext";
 import {
   Button,
   CircularProgress,
@@ -357,6 +358,7 @@ const MessagesList = ({ ticketId, isGroup }) => {
   const [hasMore, setHasMore] = useState(false);
   const [loading, setLoading] = useState(false);
   const lastMessageRef = useRef();
+  const { user } = useContext(AuthContext);
 
   const [selectedMessage, setSelectedMessage] = useState({});
   const [anchorEl, setAnchorEl] = useState(null);
