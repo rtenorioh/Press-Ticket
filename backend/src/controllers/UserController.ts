@@ -94,6 +94,10 @@ export const update = async (
     throw new AppError("ERR_NO_PERMISSION", 403);
   }
 
+  if (process.env.DEMO === "ON") {
+    throw new AppError("ERR_NO_PERMISSION", 403);
+  }
+
   const userData = req.body;
 
   const user = await UpdateUserService({ userData, userId });
@@ -114,6 +118,10 @@ export const remove = async (
   const { userId } = req.params;
 
   if (req.user.profile !== "admin") {
+    throw new AppError("ERR_NO_PERMISSION", 403);
+  }
+
+  if (process.env.DEMO === "ON") {
     throw new AppError("ERR_NO_PERMISSION", 403);
   }
 
