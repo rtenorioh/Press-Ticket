@@ -13,6 +13,53 @@ interface WhatsappData {
   isDefault?: boolean;
   greetingMessage?: string;
   farewellMessage?: string;
+  //Difinindo horario comercial
+  defineWorkHours?: boolean;
+  outOfWorkMessage?: string;
+  //Dias da semana.
+  monday?: boolean;
+  tuesday?: boolean;
+  wednesday?: boolean;
+  thursday?: boolean;
+  friday?: boolean;
+  saturday?: boolean;
+  sunday?: boolean;
+  // horario de cada dia da semana.
+  StartDefineWorkHoursMonday?: string;
+  EndDefineWorkHoursMonday?: string;
+  StartDefineWorkHoursMondayLunch?: string;
+  EndDefineWorkHoursMondayLunch?: string;
+
+  StartDefineWorkHoursTuesday?: string;
+  EndDefineWorkHoursTuesday?: string;
+  StartDefineWorkHoursTuesdayLunch?: string;
+  EndDefineWorkHoursTuesdayLunch?: string;
+
+  StartDefineWorkHoursWednesday?: string;
+  EndDefineWorkHoursWednesday?: string;
+  StartDefineWorkHoursWednesdayLunch?: string;
+  EndDefineWorkHoursWednesdayLunch?: string;
+
+  StartDefineWorkHoursThursday?: string;
+  EndDefineWorkHoursThursday?: string;
+  StartDefineWorkHoursThursdayLunch?: string;
+  EndDefineWorkHoursThursdayLunch?: string;
+
+  StartDefineWorkHoursFriday?: string;
+  EndDefineWorkHoursFriday?: string;
+  StartDefineWorkHoursFridayLunch?: string;
+  EndDefineWorkHoursFridayLunch?: string;
+
+  StartDefineWorkHoursSaturday?: string;
+  EndDefineWorkHoursSaturday?: string;
+  StartDefineWorkHoursSaturdayLunch?: string;
+  EndDefineWorkHoursSaturdayLunch?: string;
+
+  StartDefineWorkHoursSunday?: string;
+  EndDefineWorkHoursSunday?: string;
+  StartDefineWorkHoursSundayLunch?: string;
+  EndDefineWorkHoursSundayLunch?: string;
+
   ratingMessage?: string;
   queueIds?: number[];
   isDisplay?: boolean;
@@ -45,6 +92,53 @@ const UpdateWhatsAppService = async ({
     session,
     greetingMessage,
     farewellMessage,
+
+    defineWorkHours,
+    outOfWorkMessage,
+
+    monday,
+    tuesday,
+    wednesday,
+    thursday,
+    friday,
+    saturday,
+    sunday,
+
+    StartDefineWorkHoursMonday,
+    EndDefineWorkHoursMonday,
+    StartDefineWorkHoursMondayLunch,
+    EndDefineWorkHoursMondayLunch,
+
+    StartDefineWorkHoursTuesday,
+    EndDefineWorkHoursTuesday,
+    StartDefineWorkHoursTuesdayLunch,
+    EndDefineWorkHoursTuesdayLunch,
+
+    StartDefineWorkHoursWednesday,
+    EndDefineWorkHoursWednesday,
+    StartDefineWorkHoursWednesdayLunch,
+    EndDefineWorkHoursWednesdayLunch,
+
+    StartDefineWorkHoursThursday,
+    EndDefineWorkHoursThursday,
+    StartDefineWorkHoursThursdayLunch,
+    EndDefineWorkHoursThursdayLunch,
+
+    StartDefineWorkHoursFriday,
+    EndDefineWorkHoursFriday,
+    StartDefineWorkHoursFridayLunch,
+    EndDefineWorkHoursFridayLunch,
+
+    StartDefineWorkHoursSaturday,
+    EndDefineWorkHoursSaturday,
+    StartDefineWorkHoursSaturdayLunch,
+    EndDefineWorkHoursSaturdayLunch,
+
+    StartDefineWorkHoursSunday,
+    EndDefineWorkHoursSunday,
+    StartDefineWorkHoursSundayLunch,
+    EndDefineWorkHoursSundayLunch,
+
     ratingMessage,
     isDisplay,
     queueIds = []
@@ -79,6 +173,53 @@ const UpdateWhatsAppService = async ({
     session,
     greetingMessage,
     farewellMessage,
+
+    defineWorkHours,
+    outOfWorkMessage,
+
+    monday,
+    tuesday,
+    wednesday,
+    thursday,
+    friday,
+    saturday,
+    sunday,
+
+    StartDefineWorkHoursMonday,
+    EndDefineWorkHoursMonday,
+    StartDefineWorkHoursMondayLunch,
+    EndDefineWorkHoursMondayLunch,
+
+    StartDefineWorkHoursTuesday,
+    EndDefineWorkHoursTuesday,
+    StartDefineWorkHoursTuesdayLunch,
+    EndDefineWorkHoursTuesdayLunch,
+
+    StartDefineWorkHoursWednesday,
+    EndDefineWorkHoursWednesday,
+    StartDefineWorkHoursWednesdayLunch,
+    EndDefineWorkHoursWednesdayLunch,
+
+    StartDefineWorkHoursThursday,
+    EndDefineWorkHoursThursday,
+    StartDefineWorkHoursThursdayLunch,
+    EndDefineWorkHoursThursdayLunch,
+
+    StartDefineWorkHoursFriday,
+    EndDefineWorkHoursFriday,
+    StartDefineWorkHoursFridayLunch,
+    EndDefineWorkHoursFridayLunch,
+
+    StartDefineWorkHoursSaturday,
+    EndDefineWorkHoursSaturday,
+    StartDefineWorkHoursSaturdayLunch,
+    EndDefineWorkHoursSaturdayLunch,
+
+    StartDefineWorkHoursSunday,
+    EndDefineWorkHoursSunday,
+    StartDefineWorkHoursSundayLunch,
+    EndDefineWorkHoursSundayLunch,
+    
     ratingMessage,
     isDefault,
     isDisplay

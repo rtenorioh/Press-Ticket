@@ -23,6 +23,8 @@ import CreateOrUpdateContactService from "../ContactServices/CreateOrUpdateConta
 import ListSettingsServiceOne from "../SettingServices/ListSettingsServiceOne";
 import FindOrCreateTicketService from "../TicketServices/FindOrCreateTicketService";
 import ShowWhatsAppService from "../WhatsappService/ShowWhatsAppService";
+
+import ShowWhatsaAppHours from "../WhatsappService/ShowWhatsaAppHours";
 import { debounce } from "../../helpers/Debounce";
 import UpdateTicketService from "../TicketServices/UpdateTicketService";
 import CreateContactService from "../ContactServices/CreateContactService";
@@ -167,8 +169,1608 @@ const verifyQueue = async (
 ) => {
   const { queues, greetingMessage, isDisplay } = await ShowWhatsAppService(
     wbot.id!
+
+
   );
 
+  const {
+    defineWorkHours,
+    outOfWorkMessage,
+    id,
+    sunday,
+    StartDefineWorkHoursSunday,
+    EndDefineWorkHoursSunday,
+    StartDefineWorkHoursSundayLunch,
+    EndDefineWorkHoursSundayLunch,
+    monday,
+    StartDefineWorkHoursMonday,
+    EndDefineWorkHoursMonday,
+    StartDefineWorkHoursMondayLunch,
+    EndDefineWorkHoursMondayLunch,
+    tuesday,
+    StartDefineWorkHoursTuesday,
+    EndDefineWorkHoursTuesday,
+    StartDefineWorkHoursTuesdayLunch,
+    EndDefineWorkHoursTuesdayLunch,
+    wednesday,
+    StartDefineWorkHoursWednesday,
+    EndDefineWorkHoursWednesday,
+    StartDefineWorkHoursWednesdayLunch,
+    EndDefineWorkHoursWednesdayLunch,
+    thursday,
+    StartDefineWorkHoursThursday,
+    EndDefineWorkHoursThursday,
+    StartDefineWorkHoursThursdayLunch,
+    EndDefineWorkHoursThursdayLunch,
+    friday,
+    StartDefineWorkHoursFriday,
+    EndDefineWorkHoursFriday,
+    StartDefineWorkHoursFridayLunch,
+    EndDefineWorkHoursFridayLunch,
+    saturday,
+    StartDefineWorkHoursSaturday,
+    EndDefineWorkHoursSaturday,
+    StartDefineWorkHoursSaturdayLunch,
+    EndDefineWorkHoursSaturdayLunch
+
+
+
+  } = await ShowWhatsaAppHours(
+    wbot.id!
+
+
+  );
+
+  //Verificando se está habilitado dias de expediente
+  if (defineWorkHours === true) {
+    const now = new Date();
+    const diaSemana = now.getDay();
+    let diaSemanaStr;
+    //Verificando os dias da semana se estão hbailitador, se não envie a mensagem de indisponivel
+
+    // Domingo_____________________________________________________________________________________________________________________
+    if (diaSemana === 0) {
+      diaSemanaStr = "sunday"
+      //if que identifica o dia da semana
+      if (sunday === true) {
+        //if que identifica se o dia da semana está ativo
+        const hh: number = now.getHours() * 60 * 60;
+        const mm: number = now.getMinutes() * 60;
+        const hora = hh + mm;
+
+        const start: string = StartDefineWorkHoursSunday;
+        const hhStart = Number(start.split(":")[0]) * 60 * 60;
+        const mmStart = Number(start.split(":")[1]) * 60;
+        const hoursStart = hhStart + mmStart;
+
+        const startLunch: string = StartDefineWorkHoursSundayLunch;
+        const hhStartLunch = Number(startLunch.split(":")[0]) * 60 * 60;
+        const mmStartLunch = Number(startLunch.split(":")[1]) * 60;
+        const hoursStartLunch = hhStartLunch + mmStartLunch;
+
+        const endLunch: string = EndDefineWorkHoursSundayLunch;
+        const hhEndLunch = Number(endLunch.split(":")[0]) * 60 * 60;
+        const mmEndLunch = Number(endLunch.split(":")[1]) * 60;
+        const hoursEndLunch = hhEndLunch + mmEndLunch;
+
+        const end: string = EndDefineWorkHoursSunday;
+        const hhEnd = Number(end.split(":")[0]) * 60 * 60;
+        const mmEnd = Number(end.split(":")[1]) * 60;
+        const hoursEnd = hhEnd + mmEnd;
+
+        if ((hora >= hoursStart && hora < hoursStartLunch) || (hora >= hoursEndLunch && hora < hoursEnd)) {
+          //if que identifica se está dentro do horario comerical desse dia em especifico
+          if (queues.length === 1) {
+            //if que identifica se a conexão tem só 1 setor, se tiver só um envia mensagem de saudação e transfere o chamado para o setor.
+            const selectedOption = '1';
+
+            const choosenQueue = queues[+selectedOption - 1];
+            if (choosenQueue) {
+              const Hr = new Date();
+
+              const hh: number = Hr.getHours() * 60 * 60;
+              const mm: number = Hr.getMinutes() * 60;
+              const hora = hh + mm;
+
+              const inicio: string = choosenQueue.startWork;
+              const hhinicio = Number(inicio.split(":")[0]) * 60 * 60;
+              const mminicio = Number(inicio.split(":")[1]) * 60;
+              const horainicio = hhinicio + mminicio;
+
+              const termino: string = choosenQueue.endWork;
+              const hhtermino = Number(termino.split(":")[0]) * 60 * 60;
+              const mmtermino = Number(termino.split(":")[1]) * 60;
+              const horatermino = hhtermino + mmtermino;
+
+              if (hora < horainicio || hora > horatermino) {
+                const body = formatBody(`\u200e${choosenQueue.absenceMessage}`, ticket);
+                const debouncedSentMessage = debounce(
+                  async () => {
+                    const sentMessage = await wbot.sendMessage(
+                      `${contact.number}@c.us`,
+                      body
+                    );
+                    verifyMessage(sentMessage, ticket, contact);
+                  },
+                  3000,
+                  ticket.id
+                );
+
+                debouncedSentMessage();
+              } else {
+                await UpdateTicketService({
+                  ticketData: { queueId: choosenQueue.id },
+                  ticketId: ticket.id
+                });
+
+                const chat = await msg.getChat();
+                await chat.sendStateTyping();
+
+                const body = formatBody(`\u200e${choosenQueue.greetingMessage}`, ticket);
+
+                const sentMessage = await wbot.sendMessage(
+                  `${contact.number}@c.us`,
+                  body
+                );
+
+                await verifyMessage(sentMessage, ticket, contact);
+              }
+            }
+            await UpdateTicketService({
+              ticketData: { queueId: queues[0].id },
+              ticketId: ticket.id
+            });
+            return;
+          }
+          const selectedOption = msg.body;
+          const choosenQueue = queues[+selectedOption - 1];
+          if (choosenQueue) {
+            //if que identifica todos os setores selecionados na conexão
+            const Hr = new Date();
+
+            const hh: number = Hr.getHours() * 60 * 60;
+            const mm: number = Hr.getMinutes() * 60;
+            const hora = hh + mm;
+
+            const inicio: string = choosenQueue.startWork;
+            const hhinicio = Number(inicio.split(":")[0]) * 60 * 60;
+            const mminicio = Number(inicio.split(":")[1]) * 60;
+            const horainicio = hhinicio + mminicio;
+
+            const termino: string = choosenQueue.endWork;
+            const hhtermino = Number(termino.split(":")[0]) * 60 * 60;
+            const mmtermino = Number(termino.split(":")[1]) * 60;
+            const horatermino = hhtermino + mmtermino;
+
+            if (hora < horainicio || hora > horatermino) {
+              //If que identifica se o setor tem hora definida de atendimento
+              const body = formatBody(`\u200e${choosenQueue.absenceMessage}`, ticket);
+              const debouncedSentMessage = debounce(
+                async () => {
+                  const sentMessage = await wbot.sendMessage(
+                    `${contact.number}@c.us`,
+                    body
+                  );
+                  verifyMessage(sentMessage, ticket, contact);
+                },
+                3000,
+                ticket.id
+              );
+
+              debouncedSentMessage();
+            } else {
+              //else que retorna a mensagem de fora de expediente do setor
+              await UpdateTicketService({
+                ticketData: { queueId: choosenQueue.id },
+                ticketId: ticket.id
+              });
+
+              const chat = await msg.getChat();
+              await chat.sendStateTyping();
+
+              const body = formatBody(`\u200e${choosenQueue.greetingMessage}`, ticket);
+
+              const sentMessage = await wbot.sendMessage(
+                `${contact.number}@c.us`,
+                body
+              );
+
+              await verifyMessage(sentMessage, ticket, contact);
+            }
+          } else {
+            //Envia mensagem com setores
+            let options = "";
+
+            const chat = await msg.getChat();
+            await chat.sendStateTyping();
+
+            queues.forEach((queue, index) => {
+              if (queue.startWork && queue.endWork) {
+                if (isDisplay) {
+                  options += `*${index + 1}* - ${queue.name} das ${queue.startWork
+                    } as ${queue.endWork}\n`;
+                } else {
+                  options += `*${index + 1}* - ${queue.name}\n`;
+                }
+              } else {
+                options += `*${index + 1}* - ${queue.name}\n`;
+              }
+            });
+
+            const body = formatBody(`\u200e${greetingMessage}\n\n${options}`, ticket);
+
+            const debouncedSentMessage = debounce(
+              async () => {
+                const sentMessage = await wbot.sendMessage(
+                  `${contact.number}@c.us`,
+                  body
+                );
+                verifyMessage(sentMessage, ticket, contact);
+              },
+              3000,
+              ticket.id
+            );
+
+            debouncedSentMessage();
+          }
+        } else {
+          //envia mensagem de fora do expediente, horario fora
+          const body = formatBody(`\u200e${outOfWorkMessage}`, ticket);
+          const debouncedSentMessage = debounce(
+            async () => {
+              const sentMessage = await wbot.sendMessage(
+                `${contact.number}@c.us`,
+                body
+              );
+              verifyMessage(sentMessage, ticket, contact);
+            },
+            3000,
+            ticket.id
+          );
+          debouncedSentMessage();
+        }
+      } else {
+        //envia mensagem de fora do expediente, dia desativado
+        const body = formatBody(`\u200e${outOfWorkMessage}`, ticket);
+        const debouncedSentMessage = debounce(
+          async () => {
+            const sentMessage = await wbot.sendMessage(
+              `${contact.number}@c.us`,
+              body
+            );
+            verifyMessage(sentMessage, ticket, contact);
+          },
+          3000,
+          ticket.id
+        );
+        debouncedSentMessage();
+      }
+    }
+    // Fim Domingo_________________________________________________________________________________________________________________
+
+    // Segunda_____________________________________________________________________________________________________________________
+    if (diaSemana === 1) {
+      diaSemanaStr = "monday"
+      //Verifica dia ativo ou não
+      if (monday === true) {
+        //if que identifica se o dia da semana está ativo
+        const hh: number = now.getHours() * 60 * 60;
+        const mm: number = now.getMinutes() * 60;
+        const hora = hh + mm;
+
+        const start: string = StartDefineWorkHoursMonday;
+        const hhStart = Number(start.split(":")[0]) * 60 * 60;
+        const mmStart = Number(start.split(":")[1]) * 60;
+        const hoursStart = hhStart + mmStart;
+
+        const startLunch: string = StartDefineWorkHoursMondayLunch;
+        const hhStartLunch = Number(startLunch.split(":")[0]) * 60 * 60;
+        const mmStartLunch = Number(startLunch.split(":")[1]) * 60;
+        const hoursStartLunch = hhStartLunch + mmStartLunch;
+
+        const endLunch: string = EndDefineWorkHoursMondayLunch;
+        const hhEndLunch = Number(endLunch.split(":")[0]) * 60 * 60;
+        const mmEndLunch = Number(endLunch.split(":")[1]) * 60;
+        const hoursEndLunch = hhEndLunch + mmEndLunch;
+
+        const end: string = EndDefineWorkHoursMonday;
+        const hhEnd = Number(end.split(":")[0]) * 60 * 60;
+        const mmEnd = Number(end.split(":")[1]) * 60;
+        const hoursEnd = hhEnd + mmEnd;
+
+        if ((hora >= hoursStart && hora < hoursStartLunch) || (hora >= hoursEndLunch && hora < hoursEnd)) {
+          //if que identifica se está dentro do horario comerical desse dia em especifico
+          if (queues.length === 1) {
+            //if que identifica se a conexão tem só 1 setor, se tiver só um envia mensagem de saudação e transfere o chamado para o setor.
+            const selectedOption = '1';
+
+            const choosenQueue = queues[+selectedOption - 1];
+            if (choosenQueue) {
+              const Hr = new Date();
+
+              const hh: number = Hr.getHours() * 60 * 60;
+              const mm: number = Hr.getMinutes() * 60;
+              const hora = hh + mm;
+
+              const inicio: string = choosenQueue.startWork;
+              const hhinicio = Number(inicio.split(":")[0]) * 60 * 60;
+              const mminicio = Number(inicio.split(":")[1]) * 60;
+              const horainicio = hhinicio + mminicio;
+
+              const termino: string = choosenQueue.endWork;
+              const hhtermino = Number(termino.split(":")[0]) * 60 * 60;
+              const mmtermino = Number(termino.split(":")[1]) * 60;
+              const horatermino = hhtermino + mmtermino;
+
+              if (hora < horainicio || hora > horatermino) {
+                const body = formatBody(`\u200e${choosenQueue.absenceMessage}`, ticket);
+                const debouncedSentMessage = debounce(
+                  async () => {
+                    const sentMessage = await wbot.sendMessage(
+                      `${contact.number}@c.us`,
+                      body
+                    );
+                    verifyMessage(sentMessage, ticket, contact);
+                  },
+                  3000,
+                  ticket.id
+                );
+
+                debouncedSentMessage();
+              } else {
+                await UpdateTicketService({
+                  ticketData: { queueId: choosenQueue.id },
+                  ticketId: ticket.id
+                });
+
+                const chat = await msg.getChat();
+                await chat.sendStateTyping();
+
+                const body = formatBody(`\u200e${choosenQueue.greetingMessage}`, ticket);
+
+                const sentMessage = await wbot.sendMessage(
+                  `${contact.number}@c.us`,
+                  body
+                );
+
+                await verifyMessage(sentMessage, ticket, contact);
+              }
+            }
+            await UpdateTicketService({
+              ticketData: { queueId: queues[0].id },
+              ticketId: ticket.id
+            });
+            return;
+          }
+          const selectedOption = msg.body;
+          const choosenQueue = queues[+selectedOption - 1];
+          if (choosenQueue) {
+            //if que identifica todos os setores selecionados na conexão
+            const Hr = new Date();
+
+            const hh: number = Hr.getHours() * 60 * 60;
+            const mm: number = Hr.getMinutes() * 60;
+            const hora = hh + mm;
+
+            const inicio: string = choosenQueue.startWork;
+            const hhinicio = Number(inicio.split(":")[0]) * 60 * 60;
+            const mminicio = Number(inicio.split(":")[1]) * 60;
+            const horainicio = hhinicio + mminicio;
+
+            const termino: string = choosenQueue.endWork;
+            const hhtermino = Number(termino.split(":")[0]) * 60 * 60;
+            const mmtermino = Number(termino.split(":")[1]) * 60;
+            const horatermino = hhtermino + mmtermino;
+
+            if (hora < horainicio || hora > horatermino) {
+              //If que identifica se o setor tem hora definida de atendimento
+              const body = formatBody(`\u200e${choosenQueue.absenceMessage}`, ticket);
+              const debouncedSentMessage = debounce(
+                async () => {
+                  const sentMessage = await wbot.sendMessage(
+                    `${contact.number}@c.us`,
+                    body
+                  );
+                  verifyMessage(sentMessage, ticket, contact);
+                },
+                3000,
+                ticket.id
+              );
+
+              debouncedSentMessage();
+            } else {
+              //else que retorna a mensagem de fora de expediente do setor
+              await UpdateTicketService({
+                ticketData: { queueId: choosenQueue.id },
+                ticketId: ticket.id
+              });
+
+              const chat = await msg.getChat();
+              await chat.sendStateTyping();
+
+              const body = formatBody(`\u200e${choosenQueue.greetingMessage}`, ticket);
+
+              const sentMessage = await wbot.sendMessage(
+                `${contact.number}@c.us`,
+                body
+              );
+
+              await verifyMessage(sentMessage, ticket, contact);
+            }
+          } else {
+            //Envia mensagem com setores
+            let options = "";
+
+            const chat = await msg.getChat();
+            await chat.sendStateTyping();
+
+            queues.forEach((queue, index) => {
+              if (queue.startWork && queue.endWork) {
+                if (isDisplay) {
+                  options += `*${index + 1}* - ${queue.name} das ${queue.startWork
+                    } as ${queue.endWork}\n`;
+                } else {
+                  options += `*${index + 1}* - ${queue.name}\n`;
+                }
+              } else {
+                options += `*${index + 1}* - ${queue.name}\n`;
+              }
+            });
+
+            const body = formatBody(`\u200e${greetingMessage}\n\n${options}`, ticket);
+
+            const debouncedSentMessage = debounce(
+              async () => {
+                const sentMessage = await wbot.sendMessage(
+                  `${contact.number}@c.us`,
+                  body
+                );
+                verifyMessage(sentMessage, ticket, contact);
+              },
+              3000,
+              ticket.id
+            );
+
+            debouncedSentMessage();
+          }
+        } else {
+          //envia mensagem de fora do expediente, horario fora
+          const body = formatBody(`\u200e${outOfWorkMessage}`, ticket);
+          const debouncedSentMessage = debounce(
+            async () => {
+              const sentMessage = await wbot.sendMessage(
+                `${contact.number}@c.us`,
+                body
+              );
+              verifyMessage(sentMessage, ticket, contact);
+            },
+            3000,
+            ticket.id
+          );
+          debouncedSentMessage();
+        }
+      } else {
+        //envia mensagem de fora do expediente, dia desativado
+        const body = formatBody(`\u200e${outOfWorkMessage}`, ticket);
+        const debouncedSentMessage = debounce(
+          async () => {
+            const sentMessage = await wbot.sendMessage(
+              `${contact.number}@c.us`,
+              body
+            );
+            verifyMessage(sentMessage, ticket, contact);
+          },
+          3000,
+          ticket.id
+        );
+        debouncedSentMessage();
+      }
+    }
+    // Fim Segunda_________________________________________________________________________________________________________________
+
+    // Terça_____________________________________________________________________________________________________________________
+    if (diaSemana === 2) {
+      diaSemanaStr = "tuesday"
+      //if que identifica o dia da semana
+      if (tuesday === true) {
+        //if que identifica se o dia da semana está ativo
+        const hh: number = now.getHours() * 60 * 60;
+        const mm: number = now.getMinutes() * 60;
+        const hora = hh + mm;
+
+        const start: string = StartDefineWorkHoursTuesday;
+        const hhStart = Number(start.split(":")[0]) * 60 * 60;
+        const mmStart = Number(start.split(":")[1]) * 60;
+        const hoursStart = hhStart + mmStart;
+
+        const startLunch: string = StartDefineWorkHoursTuesdayLunch;
+        const hhStartLunch = Number(startLunch.split(":")[0]) * 60 * 60;
+        const mmStartLunch = Number(startLunch.split(":")[1]) * 60;
+        const hoursStartLunch = hhStartLunch + mmStartLunch;
+
+        const endLunch: string = EndDefineWorkHoursTuesdayLunch;
+        const hhEndLunch = Number(endLunch.split(":")[0]) * 60 * 60;
+        const mmEndLunch = Number(endLunch.split(":")[1]) * 60;
+        const hoursEndLunch = hhEndLunch + mmEndLunch;
+
+        const end: string = EndDefineWorkHoursTuesday;
+        const hhEnd = Number(end.split(":")[0]) * 60 * 60;
+        const mmEnd = Number(end.split(":")[1]) * 60;
+        const hoursEnd = hhEnd + mmEnd;
+
+        if ((hora >= hoursStart && hora < hoursStartLunch) || (hora >= hoursEndLunch && hora < hoursEnd)) {
+          //if que identifica se está dentro do horario comerical desse dia em especifico
+          if (queues.length === 1) {
+            //if que identifica se a conexão tem só 1 setor, se tiver só um envia mensagem de saudação e transfere o chamado para o setor.
+            const selectedOption = '1';
+
+            const choosenQueue = queues[+selectedOption - 1];
+            if (choosenQueue) {
+              const Hr = new Date();
+
+              const hh: number = Hr.getHours() * 60 * 60;
+              const mm: number = Hr.getMinutes() * 60;
+              const hora = hh + mm;
+
+              const inicio: string = choosenQueue.startWork;
+              const hhinicio = Number(inicio.split(":")[0]) * 60 * 60;
+              const mminicio = Number(inicio.split(":")[1]) * 60;
+              const horainicio = hhinicio + mminicio;
+
+              const termino: string = choosenQueue.endWork;
+              const hhtermino = Number(termino.split(":")[0]) * 60 * 60;
+              const mmtermino = Number(termino.split(":")[1]) * 60;
+              const horatermino = hhtermino + mmtermino;
+
+              if (hora < horainicio || hora > horatermino) {
+                const body = formatBody(`\u200e${choosenQueue.absenceMessage}`, ticket);
+                const debouncedSentMessage = debounce(
+                  async () => {
+                    const sentMessage = await wbot.sendMessage(
+                      `${contact.number}@c.us`,
+                      body
+                    );
+                    verifyMessage(sentMessage, ticket, contact);
+                  },
+                  3000,
+                  ticket.id
+                );
+
+                debouncedSentMessage();
+              } else {
+                await UpdateTicketService({
+                  ticketData: { queueId: choosenQueue.id },
+                  ticketId: ticket.id
+                });
+
+                const chat = await msg.getChat();
+                await chat.sendStateTyping();
+
+                const body = formatBody(`\u200e${choosenQueue.greetingMessage}`, ticket);
+
+                const sentMessage = await wbot.sendMessage(
+                  `${contact.number}@c.us`,
+                  body
+                );
+
+                await verifyMessage(sentMessage, ticket, contact);
+              }
+            }
+            await UpdateTicketService({
+              ticketData: { queueId: queues[0].id },
+              ticketId: ticket.id
+            });
+            return;
+          }
+          const selectedOption = msg.body;
+          const choosenQueue = queues[+selectedOption - 1];
+          if (choosenQueue) {
+            //if que identifica todos os setores selecionados na conexão
+            const Hr = new Date();
+
+            const hh: number = Hr.getHours() * 60 * 60;
+            const mm: number = Hr.getMinutes() * 60;
+            const hora = hh + mm;
+
+            const inicio: string = choosenQueue.startWork;
+            const hhinicio = Number(inicio.split(":")[0]) * 60 * 60;
+            const mminicio = Number(inicio.split(":")[1]) * 60;
+            const horainicio = hhinicio + mminicio;
+
+            const termino: string = choosenQueue.endWork;
+            const hhtermino = Number(termino.split(":")[0]) * 60 * 60;
+            const mmtermino = Number(termino.split(":")[1]) * 60;
+            const horatermino = hhtermino + mmtermino;
+
+            if (hora < horainicio || hora > horatermino) {
+              //If que identifica se o setor tem hora definida de atendimento
+              const body = formatBody(`\u200e${choosenQueue.absenceMessage}`, ticket);
+              const debouncedSentMessage = debounce(
+                async () => {
+                  const sentMessage = await wbot.sendMessage(
+                    `${contact.number}@c.us`,
+                    body
+                  );
+                  verifyMessage(sentMessage, ticket, contact);
+                },
+                3000,
+                ticket.id
+              );
+
+              debouncedSentMessage();
+            } else {
+              //else que retorna a mensagem de fora de expediente do setor
+              await UpdateTicketService({
+                ticketData: { queueId: choosenQueue.id },
+                ticketId: ticket.id
+              });
+
+              const chat = await msg.getChat();
+              await chat.sendStateTyping();
+
+              const body = formatBody(`\u200e${choosenQueue.greetingMessage}`, ticket);
+
+              const sentMessage = await wbot.sendMessage(
+                `${contact.number}@c.us`,
+                body
+              );
+
+              await verifyMessage(sentMessage, ticket, contact);
+            }
+          } else {
+            //Envia mensagem com setores
+            let options = "";
+
+            const chat = await msg.getChat();
+            await chat.sendStateTyping();
+
+            queues.forEach((queue, index) => {
+              if (queue.startWork && queue.endWork) {
+                if (isDisplay) {
+                  options += `*${index + 1}* - ${queue.name} das ${queue.startWork
+                    } as ${queue.endWork}\n`;
+                } else {
+                  options += `*${index + 1}* - ${queue.name}\n`;
+                }
+              } else {
+                options += `*${index + 1}* - ${queue.name}\n`;
+              }
+            });
+
+            const body = formatBody(`\u200e${greetingMessage}\n\n${options}`, ticket);
+
+            const debouncedSentMessage = debounce(
+              async () => {
+                const sentMessage = await wbot.sendMessage(
+                  `${contact.number}@c.us`,
+                  body
+                );
+                verifyMessage(sentMessage, ticket, contact);
+              },
+              3000,
+              ticket.id
+            );
+
+            debouncedSentMessage();
+          }
+        } else {
+          //envia mensagem de fora do expediente, horario fora
+          const body = formatBody(`\u200e${outOfWorkMessage}`, ticket);
+          const debouncedSentMessage = debounce(
+            async () => {
+              const sentMessage = await wbot.sendMessage(
+                `${contact.number}@c.us`,
+                body
+              );
+              verifyMessage(sentMessage, ticket, contact);
+            },
+            3000,
+            ticket.id
+          );
+          debouncedSentMessage();
+        }
+      } else {
+        //envia mensagem de fora do expediente, dia desativado
+        const body = formatBody(`\u200e${outOfWorkMessage}`, ticket);
+        const debouncedSentMessage = debounce(
+          async () => {
+            const sentMessage = await wbot.sendMessage(
+              `${contact.number}@c.us`,
+              body
+            );
+            verifyMessage(sentMessage, ticket, contact);
+          },
+          3000,
+          ticket.id
+        );
+        debouncedSentMessage();
+      }
+    }
+    // Fim Terça_________________________________________________________________________________________________________________
+
+    // Quarta_____________________________________________________________________________________________________________________
+    if (diaSemana === 3) {
+      diaSemanaStr = "wednesday"
+      //if que identifica o dia da semana
+      if (wednesday === true) {
+        //if que identifica se o dia da semana está ativo
+        const hh: number = now.getHours() * 60 * 60;
+        const mm: number = now.getMinutes() * 60;
+        const hora = hh + mm;
+
+        const start: string = StartDefineWorkHoursWednesday;
+        const hhStart = Number(start.split(":")[0]) * 60 * 60;
+        const mmStart = Number(start.split(":")[1]) * 60;
+        const hoursStart = hhStart + mmStart;
+
+        const startLunch: string = StartDefineWorkHoursWednesdayLunch;
+        const hhStartLunch = Number(startLunch.split(":")[0]) * 60 * 60;
+        const mmStartLunch = Number(startLunch.split(":")[1]) * 60;
+        const hoursStartLunch = hhStartLunch + mmStartLunch;
+
+        const endLunch: string = EndDefineWorkHoursWednesdayLunch;
+        const hhEndLunch = Number(endLunch.split(":")[0]) * 60 * 60;
+        const mmEndLunch = Number(endLunch.split(":")[1]) * 60;
+        const hoursEndLunch = hhEndLunch + mmEndLunch;
+
+        const end: string = EndDefineWorkHoursWednesday;
+        const hhEnd = Number(end.split(":")[0]) * 60 * 60;
+        const mmEnd = Number(end.split(":")[1]) * 60;
+        const hoursEnd = hhEnd + mmEnd;
+
+        if ((hora >= hoursStart && hora < hoursStartLunch) || (hora >= hoursEndLunch && hora < hoursEnd)) {
+          //if que identifica se está dentro do horario comerical desse dia em especifico
+          if (queues.length === 1) {
+            //if que identifica se a conexão tem só 1 setor, se tiver só um envia mensagem de saudação e transfere o chamado para o setor.
+            const selectedOption = '1';
+
+            const choosenQueue = queues[+selectedOption - 1];
+            if (choosenQueue) {
+              const Hr = new Date();
+
+              const hh: number = Hr.getHours() * 60 * 60;
+              const mm: number = Hr.getMinutes() * 60;
+              const hora = hh + mm;
+
+              const inicio: string = choosenQueue.startWork;
+              const hhinicio = Number(inicio.split(":")[0]) * 60 * 60;
+              const mminicio = Number(inicio.split(":")[1]) * 60;
+              const horainicio = hhinicio + mminicio;
+
+              const termino: string = choosenQueue.endWork;
+              const hhtermino = Number(termino.split(":")[0]) * 60 * 60;
+              const mmtermino = Number(termino.split(":")[1]) * 60;
+              const horatermino = hhtermino + mmtermino;
+
+              if (hora < horainicio || hora > horatermino) {
+                const body = formatBody(`\u200e${choosenQueue.absenceMessage}`, ticket);
+                const debouncedSentMessage = debounce(
+                  async () => {
+                    const sentMessage = await wbot.sendMessage(
+                      `${contact.number}@c.us`,
+                      body
+                    );
+                    verifyMessage(sentMessage, ticket, contact);
+                  },
+                  3000,
+                  ticket.id
+                );
+
+                debouncedSentMessage();
+              } else {
+                await UpdateTicketService({
+                  ticketData: { queueId: choosenQueue.id },
+                  ticketId: ticket.id
+                });
+
+                const chat = await msg.getChat();
+                await chat.sendStateTyping();
+
+                const body = formatBody(`\u200e${choosenQueue.greetingMessage}`, ticket);
+
+                const sentMessage = await wbot.sendMessage(
+                  `${contact.number}@c.us`,
+                  body
+                );
+
+                await verifyMessage(sentMessage, ticket, contact);
+              }
+            }
+            await UpdateTicketService({
+              ticketData: { queueId: queues[0].id },
+              ticketId: ticket.id
+            });
+            return;
+          }
+          const selectedOption = msg.body;
+          const choosenQueue = queues[+selectedOption - 1];
+          if (choosenQueue) {
+            //if que identifica todos os setores selecionados na conexão
+            const Hr = new Date();
+
+            const hh: number = Hr.getHours() * 60 * 60;
+            const mm: number = Hr.getMinutes() * 60;
+            const hora = hh + mm;
+
+            const inicio: string = choosenQueue.startWork;
+            const hhinicio = Number(inicio.split(":")[0]) * 60 * 60;
+            const mminicio = Number(inicio.split(":")[1]) * 60;
+            const horainicio = hhinicio + mminicio;
+
+            const termino: string = choosenQueue.endWork;
+            const hhtermino = Number(termino.split(":")[0]) * 60 * 60;
+            const mmtermino = Number(termino.split(":")[1]) * 60;
+            const horatermino = hhtermino + mmtermino;
+
+            if (hora < horainicio || hora > horatermino) {
+              //If que identifica se o setor tem hora definida de atendimento
+              const body = formatBody(`\u200e${choosenQueue.absenceMessage}`, ticket);
+              const debouncedSentMessage = debounce(
+                async () => {
+                  const sentMessage = await wbot.sendMessage(
+                    `${contact.number}@c.us`,
+                    body
+                  );
+                  verifyMessage(sentMessage, ticket, contact);
+                },
+                3000,
+                ticket.id
+              );
+
+              debouncedSentMessage();
+            } else {
+              //else que retorna a mensagem de fora de expediente do setor
+              await UpdateTicketService({
+                ticketData: { queueId: choosenQueue.id },
+                ticketId: ticket.id
+              });
+
+              const chat = await msg.getChat();
+              await chat.sendStateTyping();
+
+              const body = formatBody(`\u200e${choosenQueue.greetingMessage}`, ticket);
+
+              const sentMessage = await wbot.sendMessage(
+                `${contact.number}@c.us`,
+                body
+              );
+
+              await verifyMessage(sentMessage, ticket, contact);
+            }
+          } else {
+            //Envia mensagem com setores
+            let options = "";
+
+            const chat = await msg.getChat();
+            await chat.sendStateTyping();
+
+            queues.forEach((queue, index) => {
+              if (queue.startWork && queue.endWork) {
+                if (isDisplay) {
+                  options += `*${index + 1}* - ${queue.name} das ${queue.startWork
+                    } as ${queue.endWork}\n`;
+                } else {
+                  options += `*${index + 1}* - ${queue.name}\n`;
+                }
+              } else {
+                options += `*${index + 1}* - ${queue.name}\n`;
+              }
+            });
+
+            const body = formatBody(`\u200e${greetingMessage}\n\n${options}`, ticket);
+
+            const debouncedSentMessage = debounce(
+              async () => {
+                const sentMessage = await wbot.sendMessage(
+                  `${contact.number}@c.us`,
+                  body
+                );
+                verifyMessage(sentMessage, ticket, contact);
+              },
+              3000,
+              ticket.id
+            );
+
+            debouncedSentMessage();
+          }
+        } else {
+          //envia mensagem de fora do expediente, horario fora
+          const body = formatBody(`\u200e${outOfWorkMessage}`, ticket);
+          const debouncedSentMessage = debounce(
+            async () => {
+              const sentMessage = await wbot.sendMessage(
+                `${contact.number}@c.us`,
+                body
+              );
+              verifyMessage(sentMessage, ticket, contact);
+            },
+            3000,
+            ticket.id
+          );
+          debouncedSentMessage();
+        }
+      } else {
+        //envia mensagem de fora do expediente, dia desativado
+        const body = formatBody(`\u200e${outOfWorkMessage}`, ticket);
+        const debouncedSentMessage = debounce(
+          async () => {
+            const sentMessage = await wbot.sendMessage(
+              `${contact.number}@c.us`,
+              body
+            );
+            verifyMessage(sentMessage, ticket, contact);
+          },
+          3000,
+          ticket.id
+        );
+        debouncedSentMessage();
+      }
+    }
+    // Fim Quarta_________________________________________________________________________________________________________________
+
+    // Quinta_____________________________________________________________________________________________________________________
+    if (diaSemana === 4) {
+      diaSemanaStr = "thursday"
+      //if que identifica o dia da semana
+      if (thursday === true) {
+        //if que identifica se o dia da semana está ativo
+        const hh: number = now.getHours() * 60 * 60;
+        const mm: number = now.getMinutes() * 60;
+        const hora = hh + mm;
+
+        const start: string = StartDefineWorkHoursThursday;
+        const hhStart = Number(start.split(":")[0]) * 60 * 60;
+        const mmStart = Number(start.split(":")[1]) * 60;
+        const hoursStart = hhStart + mmStart;
+
+        const startLunch: string = StartDefineWorkHoursThursdayLunch;
+        const hhStartLunch = Number(startLunch.split(":")[0]) * 60 * 60;
+        const mmStartLunch = Number(startLunch.split(":")[1]) * 60;
+        const hoursStartLunch = hhStartLunch + mmStartLunch;
+
+        const endLunch: string = EndDefineWorkHoursThursdayLunch;
+        const hhEndLunch = Number(endLunch.split(":")[0]) * 60 * 60;
+        const mmEndLunch = Number(endLunch.split(":")[1]) * 60;
+        const hoursEndLunch = hhEndLunch + mmEndLunch;
+
+        const end: string = EndDefineWorkHoursThursday;
+        const hhEnd = Number(end.split(":")[0]) * 60 * 60;
+        const mmEnd = Number(end.split(":")[1]) * 60;
+        const hoursEnd = hhEnd + mmEnd;
+
+        if ((hora >= hoursStart && hora < hoursStartLunch) || (hora >= hoursEndLunch && hora < hoursEnd)) {
+          //if que identifica se está dentro do horario comerical desse dia em especifico
+          if (queues.length === 1) {
+            //if que identifica se a conexão tem só 1 setor, se tiver só um envia mensagem de saudação e transfere o chamado para o setor.
+            const selectedOption = '1';
+
+            const choosenQueue = queues[+selectedOption - 1];
+            if (choosenQueue) {
+              const Hr = new Date();
+
+              const hh: number = Hr.getHours() * 60 * 60;
+              const mm: number = Hr.getMinutes() * 60;
+              const hora = hh + mm;
+
+              const inicio: string = choosenQueue.startWork;
+              const hhinicio = Number(inicio.split(":")[0]) * 60 * 60;
+              const mminicio = Number(inicio.split(":")[1]) * 60;
+              const horainicio = hhinicio + mminicio;
+
+              const termino: string = choosenQueue.endWork;
+              const hhtermino = Number(termino.split(":")[0]) * 60 * 60;
+              const mmtermino = Number(termino.split(":")[1]) * 60;
+              const horatermino = hhtermino + mmtermino;
+
+              if (hora < horainicio || hora > horatermino) {
+                const body = formatBody(`\u200e${choosenQueue.absenceMessage}`, ticket);
+                const debouncedSentMessage = debounce(
+                  async () => {
+                    const sentMessage = await wbot.sendMessage(
+                      `${contact.number}@c.us`,
+                      body
+                    );
+                    verifyMessage(sentMessage, ticket, contact);
+                  },
+                  3000,
+                  ticket.id
+                );
+
+                debouncedSentMessage();
+              } else {
+                await UpdateTicketService({
+                  ticketData: { queueId: choosenQueue.id },
+                  ticketId: ticket.id
+                });
+
+                const chat = await msg.getChat();
+                await chat.sendStateTyping();
+
+                const body = formatBody(`\u200e${choosenQueue.greetingMessage}`, ticket);
+
+                const sentMessage = await wbot.sendMessage(
+                  `${contact.number}@c.us`,
+                  body
+                );
+
+                await verifyMessage(sentMessage, ticket, contact);
+              }
+            }
+            await UpdateTicketService({
+              ticketData: { queueId: queues[0].id },
+              ticketId: ticket.id
+            });
+            return;
+          }
+          const selectedOption = msg.body;
+          const choosenQueue = queues[+selectedOption - 1];
+          if (choosenQueue) {
+            //if que identifica todos os setores selecionados na conexão
+            const Hr = new Date();
+
+            const hh: number = Hr.getHours() * 60 * 60;
+            const mm: number = Hr.getMinutes() * 60;
+            const hora = hh + mm;
+
+            const inicio: string = choosenQueue.startWork;
+            const hhinicio = Number(inicio.split(":")[0]) * 60 * 60;
+            const mminicio = Number(inicio.split(":")[1]) * 60;
+            const horainicio = hhinicio + mminicio;
+
+            const termino: string = choosenQueue.endWork;
+            const hhtermino = Number(termino.split(":")[0]) * 60 * 60;
+            const mmtermino = Number(termino.split(":")[1]) * 60;
+            const horatermino = hhtermino + mmtermino;
+
+            if (hora < horainicio || hora > horatermino) {
+              //If que identifica se o setor tem hora definida de atendimento
+              const body = formatBody(`\u200e${choosenQueue.absenceMessage}`, ticket);
+              const debouncedSentMessage = debounce(
+                async () => {
+                  const sentMessage = await wbot.sendMessage(
+                    `${contact.number}@c.us`,
+                    body
+                  );
+                  verifyMessage(sentMessage, ticket, contact);
+                },
+                3000,
+                ticket.id
+              );
+
+              debouncedSentMessage();
+            } else {
+              //else que retorna a mensagem de fora de expediente do setor
+              await UpdateTicketService({
+                ticketData: { queueId: choosenQueue.id },
+                ticketId: ticket.id
+              });
+
+              const chat = await msg.getChat();
+              await chat.sendStateTyping();
+
+              const body = formatBody(`\u200e${choosenQueue.greetingMessage}`, ticket);
+
+              const sentMessage = await wbot.sendMessage(
+                `${contact.number}@c.us`,
+                body
+              );
+
+              await verifyMessage(sentMessage, ticket, contact);
+            }
+          } else {
+            //Envia mensagem com setores
+            let options = "";
+
+            const chat = await msg.getChat();
+            await chat.sendStateTyping();
+
+            queues.forEach((queue, index) => {
+              if (queue.startWork && queue.endWork) {
+                if (isDisplay) {
+                  options += `*${index + 1}* - ${queue.name} das ${queue.startWork
+                    } as ${queue.endWork}\n`;
+                } else {
+                  options += `*${index + 1}* - ${queue.name}\n`;
+                }
+              } else {
+                options += `*${index + 1}* - ${queue.name}\n`;
+              }
+            });
+
+            const body = formatBody(`\u200e${greetingMessage}\n\n${options}`, ticket);
+
+            const debouncedSentMessage = debounce(
+              async () => {
+                const sentMessage = await wbot.sendMessage(
+                  `${contact.number}@c.us`,
+                  body
+                );
+                verifyMessage(sentMessage, ticket, contact);
+              },
+              3000,
+              ticket.id
+            );
+
+            debouncedSentMessage();
+          }
+        } else {
+          //envia mensagem de fora do expediente, horario fora
+          const body = formatBody(`\u200e${outOfWorkMessage}`, ticket);
+          const debouncedSentMessage = debounce(
+            async () => {
+              const sentMessage = await wbot.sendMessage(
+                `${contact.number}@c.us`,
+                body
+              );
+              verifyMessage(sentMessage, ticket, contact);
+            },
+            3000,
+            ticket.id
+          );
+          debouncedSentMessage();
+        }
+      } else {
+        //envia mensagem de fora do expediente, dia desativado
+        const body = formatBody(`\u200e${outOfWorkMessage}`, ticket);
+        const debouncedSentMessage = debounce(
+          async () => {
+            const sentMessage = await wbot.sendMessage(
+              `${contact.number}@c.us`,
+              body
+            );
+            verifyMessage(sentMessage, ticket, contact);
+          },
+          3000,
+          ticket.id
+        );
+        debouncedSentMessage();
+      }
+    }
+    // Fim Quinta_________________________________________________________________________________________________________________
+
+    // Sexta_________________________________________________________________________________________________________________
+    if (diaSemana === 5) {
+      diaSemanaStr = "friday"
+      //if que identifica o dia da semana
+      if (friday === true) {
+        //if que identifica se o dia da semana está ativo
+        const hh: number = now.getHours() * 60 * 60;
+        const mm: number = now.getMinutes() * 60;
+        const hora = hh + mm;
+
+        const start: string = StartDefineWorkHoursFriday;
+        const hhStart = Number(start.split(":")[0]) * 60 * 60;
+        const mmStart = Number(start.split(":")[1]) * 60;
+        const hoursStart = hhStart + mmStart;
+
+        const startLunch: string = StartDefineWorkHoursFridayLunch;
+        const hhStartLunch = Number(startLunch.split(":")[0]) * 60 * 60;
+        const mmStartLunch = Number(startLunch.split(":")[1]) * 60;
+        const hoursStartLunch = hhStartLunch + mmStartLunch;
+
+        const endLunch: string = EndDefineWorkHoursFridayLunch;
+        const hhEndLunch = Number(endLunch.split(":")[0]) * 60 * 60;
+        const mmEndLunch = Number(endLunch.split(":")[1]) * 60;
+        const hoursEndLunch = hhEndLunch + mmEndLunch;
+
+        const end: string = EndDefineWorkHoursFriday;
+        const hhEnd = Number(end.split(":")[0]) * 60 * 60;
+        const mmEnd = Number(end.split(":")[1]) * 60;
+        const hoursEnd = hhEnd + mmEnd;
+
+        if ((hora >= hoursStart && hora < hoursStartLunch) || (hora >= hoursEndLunch && hora < hoursEnd)) {
+          //if que identifica se está dentro do horario comerical desse dia em especifico
+          if (queues.length === 1) {
+            //if que identifica se a conexão tem só 1 setor, se tiver só um envia mensagem de saudação e transfere o chamado para o setor.
+            const selectedOption = '1';
+
+            const choosenQueue = queues[+selectedOption - 1];
+            if (choosenQueue) {
+              const Hr = new Date();
+
+              const hh: number = Hr.getHours() * 60 * 60;
+              const mm: number = Hr.getMinutes() * 60;
+              const hora = hh + mm;
+
+              const inicio: string = choosenQueue.startWork;
+              const hhinicio = Number(inicio.split(":")[0]) * 60 * 60;
+              const mminicio = Number(inicio.split(":")[1]) * 60;
+              const horainicio = hhinicio + mminicio;
+
+              const termino: string = choosenQueue.endWork;
+              const hhtermino = Number(termino.split(":")[0]) * 60 * 60;
+              const mmtermino = Number(termino.split(":")[1]) * 60;
+              const horatermino = hhtermino + mmtermino;
+
+              if (hora < horainicio || hora > horatermino) {
+                const body = formatBody(`\u200e${choosenQueue.absenceMessage}`, ticket);
+                const debouncedSentMessage = debounce(
+                  async () => {
+                    const sentMessage = await wbot.sendMessage(
+                      `${contact.number}@c.us`,
+                      body
+                    );
+                    verifyMessage(sentMessage, ticket, contact);
+                  },
+                  3000,
+                  ticket.id
+                );
+
+                debouncedSentMessage();
+              } else {
+                await UpdateTicketService({
+                  ticketData: { queueId: choosenQueue.id },
+                  ticketId: ticket.id
+                });
+
+                const chat = await msg.getChat();
+                await chat.sendStateTyping();
+
+                const body = formatBody(`\u200e${choosenQueue.greetingMessage}`, ticket);
+
+                const sentMessage = await wbot.sendMessage(
+                  `${contact.number}@c.us`,
+                  body
+                );
+
+                await verifyMessage(sentMessage, ticket, contact);
+              }
+            }
+            await UpdateTicketService({
+              ticketData: { queueId: queues[0].id },
+              ticketId: ticket.id
+            });
+            return;
+          }
+          const selectedOption = msg.body;
+          const choosenQueue = queues[+selectedOption - 1];
+          if (choosenQueue) {
+            //if que identifica todos os setores selecionados na conexão
+            const Hr = new Date();
+
+            const hh: number = Hr.getHours() * 60 * 60;
+            const mm: number = Hr.getMinutes() * 60;
+            const hora = hh + mm;
+
+            const inicio: string = choosenQueue.startWork;
+            const hhinicio = Number(inicio.split(":")[0]) * 60 * 60;
+            const mminicio = Number(inicio.split(":")[1]) * 60;
+            const horainicio = hhinicio + mminicio;
+
+            const termino: string = choosenQueue.endWork;
+            const hhtermino = Number(termino.split(":")[0]) * 60 * 60;
+            const mmtermino = Number(termino.split(":")[1]) * 60;
+            const horatermino = hhtermino + mmtermino;
+
+            if (hora < horainicio || hora > horatermino) {
+              //If que identifica se o setor tem hora definida de atendimento
+              const body = formatBody(`\u200e${choosenQueue.absenceMessage}`, ticket);
+              const debouncedSentMessage = debounce(
+                async () => {
+                  const sentMessage = await wbot.sendMessage(
+                    `${contact.number}@c.us`,
+                    body
+                  );
+                  verifyMessage(sentMessage, ticket, contact);
+                },
+                3000,
+                ticket.id
+              );
+
+              debouncedSentMessage();
+            } else {
+              //else que retorna a mensagem de fora de expediente do setor
+              await UpdateTicketService({
+                ticketData: { queueId: choosenQueue.id },
+                ticketId: ticket.id
+              });
+
+              const chat = await msg.getChat();
+              await chat.sendStateTyping();
+
+              const body = formatBody(`\u200e${choosenQueue.greetingMessage}`, ticket);
+
+              const sentMessage = await wbot.sendMessage(
+                `${contact.number}@c.us`,
+                body
+              );
+
+              await verifyMessage(sentMessage, ticket, contact);
+            }
+          } else {
+            //Envia mensagem com setores
+            let options = "";
+
+            const chat = await msg.getChat();
+            await chat.sendStateTyping();
+
+            queues.forEach((queue, index) => {
+              if (queue.startWork && queue.endWork) {
+                if (isDisplay) {
+                  options += `*${index + 1}* - ${queue.name} das ${queue.startWork
+                    } as ${queue.endWork}\n`;
+                } else {
+                  options += `*${index + 1}* - ${queue.name}\n`;
+                }
+              } else {
+                options += `*${index + 1}* - ${queue.name}\n`;
+              }
+            });
+
+            const body = formatBody(`\u200e${greetingMessage}\n\n${options}`, ticket);
+
+            const debouncedSentMessage = debounce(
+              async () => {
+                const sentMessage = await wbot.sendMessage(
+                  `${contact.number}@c.us`,
+                  body
+                );
+                verifyMessage(sentMessage, ticket, contact);
+              },
+              3000,
+              ticket.id
+            );
+
+            debouncedSentMessage();
+          }
+        } else {
+          //envia mensagem de fora do expediente, horario fora
+          const body = formatBody(`\u200e${outOfWorkMessage}`, ticket);
+          const debouncedSentMessage = debounce(
+            async () => {
+              const sentMessage = await wbot.sendMessage(
+                `${contact.number}@c.us`,
+                body
+              );
+              verifyMessage(sentMessage, ticket, contact);
+            },
+            3000,
+            ticket.id
+          );
+          debouncedSentMessage();
+        }
+      } else {
+        //envia mensagem de fora do expediente, dia desativado
+        const body = formatBody(`\u200e${outOfWorkMessage}`, ticket);
+        const debouncedSentMessage = debounce(
+          async () => {
+            const sentMessage = await wbot.sendMessage(
+              `${contact.number}@c.us`,
+              body
+            );
+            verifyMessage(sentMessage, ticket, contact);
+          },
+          3000,
+          ticket.id
+        );
+        debouncedSentMessage();
+      }
+    }
+    // Fim Sexta_________________________________________________________________________________________________________________
+
+    // Sabado_________________________________________________________________________________________________________________
+    if (diaSemana === 6) {
+      diaSemanaStr = "saturday"
+      //if que identifica o dia da semana
+      if (saturday === true) {
+        //if que identifica se o dia da semana está ativo
+        const hh: number = now.getHours() * 60 * 60;
+        const mm: number = now.getMinutes() * 60;
+        const hora = hh + mm;
+
+        const start: string = StartDefineWorkHoursSaturday;
+        const hhStart = Number(start.split(":")[0]) * 60 * 60;
+        const mmStart = Number(start.split(":")[1]) * 60;
+        const hoursStart = hhStart + mmStart;
+
+        const startLunch: string = StartDefineWorkHoursSaturdayLunch;
+        const hhStartLunch = Number(startLunch.split(":")[0]) * 60 * 60;
+        const mmStartLunch = Number(startLunch.split(":")[1]) * 60;
+        const hoursStartLunch = hhStartLunch + mmStartLunch;
+
+        const endLunch: string = EndDefineWorkHoursSaturdayLunch;
+        const hhEndLunch = Number(endLunch.split(":")[0]) * 60 * 60;
+        const mmEndLunch = Number(endLunch.split(":")[1]) * 60;
+        const hoursEndLunch = hhEndLunch + mmEndLunch;
+
+        const end: string = EndDefineWorkHoursSaturday;
+        const hhEnd = Number(end.split(":")[0]) * 60 * 60;
+        const mmEnd = Number(end.split(":")[1]) * 60;
+        const hoursEnd = hhEnd + mmEnd;
+
+        if ((hora >= hoursStart && hora < hoursStartLunch) || (hora >= hoursEndLunch && hora < hoursEnd)) {
+          //if que identifica se está dentro do horario comerical desse dia em especifico
+          if (queues.length === 1) {
+            //if que identifica se a conexão tem só 1 setor, se tiver só um envia mensagem de saudação e transfere o chamado para o setor.
+            const selectedOption = '1';
+
+            const choosenQueue = queues[+selectedOption - 1];
+            if (choosenQueue) {
+              const Hr = new Date();
+
+              const hh: number = Hr.getHours() * 60 * 60;
+              const mm: number = Hr.getMinutes() * 60;
+              const hora = hh + mm;
+
+              const inicio: string = choosenQueue.startWork;
+              const hhinicio = Number(inicio.split(":")[0]) * 60 * 60;
+              const mminicio = Number(inicio.split(":")[1]) * 60;
+              const horainicio = hhinicio + mminicio;
+
+              const termino: string = choosenQueue.endWork;
+              const hhtermino = Number(termino.split(":")[0]) * 60 * 60;
+              const mmtermino = Number(termino.split(":")[1]) * 60;
+              const horatermino = hhtermino + mmtermino;
+
+              if (hora < horainicio || hora > horatermino) {
+                const body = formatBody(`\u200e${choosenQueue.absenceMessage}`, ticket);
+                const debouncedSentMessage = debounce(
+                  async () => {
+                    const sentMessage = await wbot.sendMessage(
+                      `${contact.number}@c.us`,
+                      body
+                    );
+                    verifyMessage(sentMessage, ticket, contact);
+                  },
+                  3000,
+                  ticket.id
+                );
+
+                debouncedSentMessage();
+              } else {
+                await UpdateTicketService({
+                  ticketData: { queueId: choosenQueue.id },
+                  ticketId: ticket.id
+                });
+
+                const chat = await msg.getChat();
+                await chat.sendStateTyping();
+
+                const body = formatBody(`\u200e${choosenQueue.greetingMessage}`, ticket);
+
+                const sentMessage = await wbot.sendMessage(
+                  `${contact.number}@c.us`,
+                  body
+                );
+
+                await verifyMessage(sentMessage, ticket, contact);
+              }
+            }
+            await UpdateTicketService({
+              ticketData: { queueId: queues[0].id },
+              ticketId: ticket.id
+            });
+            return;
+          }
+          const selectedOption = msg.body;
+          const choosenQueue = queues[+selectedOption - 1];
+          if (choosenQueue) {
+            //if que identifica todos os setores selecionados na conexão
+            const Hr = new Date();
+
+            const hh: number = Hr.getHours() * 60 * 60;
+            const mm: number = Hr.getMinutes() * 60;
+            const hora = hh + mm;
+
+            const inicio: string = choosenQueue.startWork;
+            const hhinicio = Number(inicio.split(":")[0]) * 60 * 60;
+            const mminicio = Number(inicio.split(":")[1]) * 60;
+            const horainicio = hhinicio + mminicio;
+
+            const termino: string = choosenQueue.endWork;
+            const hhtermino = Number(termino.split(":")[0]) * 60 * 60;
+            const mmtermino = Number(termino.split(":")[1]) * 60;
+            const horatermino = hhtermino + mmtermino;
+
+            if (hora < horainicio || hora > horatermino) {
+              //If que identifica se o setor tem hora definida de atendimento
+              const body = formatBody(`\u200e${choosenQueue.absenceMessage}`, ticket);
+              const debouncedSentMessage = debounce(
+                async () => {
+                  const sentMessage = await wbot.sendMessage(
+                    `${contact.number}@c.us`,
+                    body
+                  );
+                  verifyMessage(sentMessage, ticket, contact);
+                },
+                3000,
+                ticket.id
+              );
+
+              debouncedSentMessage();
+            } else {
+              //else que retorna a mensagem de fora de expediente do setor
+              await UpdateTicketService({
+                ticketData: { queueId: choosenQueue.id },
+                ticketId: ticket.id
+              });
+
+              const chat = await msg.getChat();
+              await chat.sendStateTyping();
+
+              const body = formatBody(`\u200e${choosenQueue.greetingMessage}`, ticket);
+
+              const sentMessage = await wbot.sendMessage(
+                `${contact.number}@c.us`,
+                body
+              );
+
+              await verifyMessage(sentMessage, ticket, contact);
+            }
+          } else {
+            //Envia mensagem com setores
+            let options = "";
+
+            const chat = await msg.getChat();
+            await chat.sendStateTyping();
+
+            queues.forEach((queue, index) => {
+              if (queue.startWork && queue.endWork) {
+                if (isDisplay) {
+                  options += `*${index + 1}* - ${queue.name} das ${queue.startWork
+                    } as ${queue.endWork}\n`;
+                } else {
+                  options += `*${index + 1}* - ${queue.name}\n`;
+                }
+              } else {
+                options += `*${index + 1}* - ${queue.name}\n`;
+              }
+            });
+
+            const body = formatBody(`\u200e${greetingMessage}\n\n${options}`, ticket);
+
+            const debouncedSentMessage = debounce(
+              async () => {
+                const sentMessage = await wbot.sendMessage(
+                  `${contact.number}@c.us`,
+                  body
+                );
+                verifyMessage(sentMessage, ticket, contact);
+              },
+              3000,
+              ticket.id
+            );
+
+            debouncedSentMessage();
+          }
+        } else {
+          //envia mensagem de fora do expediente, horario fora
+          const body = formatBody(`\u200e${outOfWorkMessage}`, ticket);
+          const debouncedSentMessage = debounce(
+            async () => {
+              const sentMessage = await wbot.sendMessage(
+                `${contact.number}@c.us`,
+                body
+              );
+              verifyMessage(sentMessage, ticket, contact);
+            },
+            3000,
+            ticket.id
+          );
+          debouncedSentMessage();
+        }
+      } else {
+        //envia mensagem de fora do expediente, dia desativado
+        const body = formatBody(`\u200e${outOfWorkMessage}`, ticket);
+        const debouncedSentMessage = debounce(
+          async () => {
+            const sentMessage = await wbot.sendMessage(
+              `${contact.number}@c.us`,
+              body
+            );
+            verifyMessage(sentMessage, ticket, contact);
+          },
+          3000,
+          ticket.id
+        );
+        debouncedSentMessage();
+      }
+    }
+    // Fim sabado_________________________________________________________________________________________________________________
+
+    // console.log(diaSemanaStr);
+    return;
+  }
   if (queues.length === 1) {
     const selectedOption = '1';
 
@@ -233,11 +1835,8 @@ const verifyQueue = async (
 
     return;
   }
-
   const selectedOption = msg.body;
-
   const choosenQueue = queues[+selectedOption - 1];
-
   if (choosenQueue) {
     const Hr = new Date();
 
