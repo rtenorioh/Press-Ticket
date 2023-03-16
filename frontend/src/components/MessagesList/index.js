@@ -36,6 +36,7 @@ import Audio from "../Audio";
 import api from "../../services/api";
 import toastError from "../../errors/toastError";
 import { toast } from "react-toastify";
+import { system } from "../../config.json";
 
 const useStyles = makeStyles((theme) => ({
   messagesListWrapper: {
@@ -296,7 +297,7 @@ const useStyles = makeStyles((theme) => ({
     textAlign: "center",
     alignSelf: "center",
     width: "95%",
-    backgroundColor: "transparent",
+    backgroundColor: system.color.lightTheme.palette.primary,
     margin: "10px",
     borderRadius: "10px",
     boxShadow: "1px 5px 10px #b3b3b3",
@@ -306,7 +307,7 @@ const useStyles = makeStyles((theme) => ({
 
 
   currentTicktText: {
-    color: "#808888",
+    color: system.color.lightTheme.palette.secondary,
     fontWeight: 'bold',
     padding: 8,
     alignSelf: "center",
