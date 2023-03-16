@@ -1,5 +1,14 @@
 # Changelog
 
+### 16/03/2023
+[Adicionando cor na divisão do historico para os chamado.](https://github.com/FilipeCamillo/Press-Ticket/commit/c9d634a7f18b2e1c205407a61fd1334a0beb50e4)
+
+[Correção no horario comercial com dias da semana por conexão.](https://github.com/FilipeCamillo/Press-Ticket/commit/e5df8d615ddbcf6db40b662250d24422bdc58cc0)
+
+[Atualização - hoario comercial com dias da semana para conexões.](https://github.com/FilipeCamillo/Press-Ticket/commit/b762238b161fc87acaa2d5f7f3da551e0698cf6e#diff-4192be3f2b53ac75a8cac1e87e1e70a8d55e7d99e085dbd84d53a6ab1535e83d)
+
+[Atualização - Retirada do botão visualizar, ao clicar no chamado pendente é possivel já visualizar a conversa.](https://github.com/FilipeCamillo/Press-Ticket/commit/b762238b161fc87acaa2d5f7f3da551e0698cf6e#diff-4192be3f2b53ac75a8cac1e87e1e70a8d55e7d99e085dbd84d53a6ab1535e83d)
+
 ### 08/02/2023
 
 - [Correção do não envio dos Setores no primeiro contato](https://github.com/rtenorioh/Press-Ticket/commit/e2eb18ff7788c4c625d410bf158e1086007144b1);
