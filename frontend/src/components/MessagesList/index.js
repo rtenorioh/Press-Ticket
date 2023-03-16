@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useReducer, useContext, useRef } from "react";
 
-import { 
+import {
   isSameDay,
   parseISO,
-  format 
+  format
 } from "date-fns";
 import openSocket from "../../services/socket-io";
 import clsx from "clsx";
@@ -290,6 +290,29 @@ const useStyles = makeStyles((theme) => ({
     paddingBottom: 0,
     boxShadow: "0 1px 1px #b3b3b3",
   },
+
+  currentTick: {
+    alignItems: "center",
+    textAlign: "center",
+    alignSelf: "center",
+    width: "95%",
+    backgroundColor: "transparent",
+    margin: "10px",
+    borderRadius: "10px",
+    boxShadow: "1px 5px 10px #b3b3b3",
+  },
+
+
+
+
+  currentTicktText: {
+    color: "#808888",
+    fontWeight: 'bold',
+    padding: 8,
+    alignSelf: "center",
+    marginLeft: "0px",
+  },
+
 }));
 
 const reducer = (state, action) => {
@@ -611,6 +634,33 @@ const MessagesList = ({ ticketId, isGroup }) => {
     }
   };
 
+  const renderTicketsSeparator = (message, index) => {
+    let lastTicket = messagesList[index - 1]?.ticketId;
+    let currentTicket = message.ticketId;
+
+    if (lastTicket !== currentTicket && lastTicket !== undefined) {
+      return (
+
+
+        <span
+
+          className={classes.currentTick}
+          key={`timestamp-${message.id}`}
+        >
+          <div
+
+            className={classes.currentTicktText}
+          >
+            #Chamado {message.ticketId}
+          </div>
+
+        </span>
+
+      );
+    }
+  }
+
+
   const renderMessageDivider = (message, index) => {
     if (index < messagesList.length && index > 0) {
       let messageUser = messagesList[index].fromMe;
@@ -693,7 +743,8 @@ const MessagesList = ({ ticketId, isGroup }) => {
             <React.Fragment key={message.id}>
               {renderDailyTimestamps(message, index)}
               {renderMessageDivider(message, index)}
-              {renderNumberTicket(message, index)}
+              {/* {renderNumberTicket(message, index)} */}
+              {renderTicketsSeparator(message, index)}
               <div className={classes.messageCenter}>
                 <IconButton
                   variant="contained"
@@ -724,7 +775,8 @@ const MessagesList = ({ ticketId, isGroup }) => {
             <React.Fragment key={message.id}>
               {renderDailyTimestamps(message, index)}
               {renderMessageDivider(message, index)}
-              {renderNumberTicket(message, index)}
+              {/* {renderNumberTicket(message, index)} */}
+              {renderTicketsSeparator(message, index)}
               <div className={classes.messageLeft}>
                 <IconButton
                   variant="contained"
@@ -787,7 +839,8 @@ const MessagesList = ({ ticketId, isGroup }) => {
             <React.Fragment key={message.id}>
               {renderDailyTimestamps(message, index)}
               {renderMessageDivider(message, index)}
-              {renderNumberTicket(message, index)}
+              {renderTicketsSeparator(message, index)}
+              {/* {renderNumberTicket(message, index)} */}
               <div className={classes.messageRight}>
                 <IconButton
                   variant="contained"
