@@ -1111,12 +1111,16 @@ const verifyQueue = async (
     // Quinta_____________________________________________________________________________________________________________________
     if (diaSemana === 4) {
       diaSemanaStr = "thursday"
+
+      console.log(thursday)
       //if que identifica o dia da semana
       if (thursday === true) {
         //if que identifica se o dia da semana está ativo
         const hh: number = now.getHours() * 60 * 60;
         const mm: number = now.getMinutes() * 60;
         const hora = hh + mm;
+
+        console.log(StartDefineWorkHoursThursday)
 
         const start: string = StartDefineWorkHoursThursday;
         const hhStart = Number(start.split(":")[0]) * 60 * 60;
@@ -1138,6 +1142,7 @@ const verifyQueue = async (
         const mmEnd = Number(end.split(":")[1]) * 60;
         const hoursEnd = hhEnd + mmEnd;
 
+        // console.log(StartDefineWorkHoursThursday)
         if ((hora >= hoursStart && hora < hoursStartLunch) || (hora >= hoursEndLunch && hora < hoursEnd)) {
           //if que identifica se está dentro do horario comerical desse dia em especifico
           if (queues.length === 1) {

@@ -25,40 +25,40 @@ interface WhatsappData {
   saturday?: boolean;
   sunday?: boolean;
   // horario de cada dia da semana.
-  StartDefineWorkHoursMonday?: string;
-  EndDefineWorkHoursMonday?: string;
-  StartDefineWorkHoursMondayLunch?: string;
-  EndDefineWorkHoursMondayLunch?: string;
+  StartDefineWorkHoursMonday?: Date;
+  EndDefineWorkHoursMonday?: Date;
+  StartDefineWorkHoursMondayLunch?: Date;
+  EndDefineWorkHoursMondayLunch?: Date;
 
-  StartDefineWorkHoursTuesday?: string;
-  EndDefineWorkHoursTuesday?: string;
-  StartDefineWorkHoursTuesdayLunch?: string;
-  EndDefineWorkHoursTuesdayLunch?: string;
+  StartDefineWorkHoursTuesday?: Date;
+  EndDefineWorkHoursTuesday?: Date;
+  StartDefineWorkHoursTuesdayLunch?: Date;
+  EndDefineWorkHoursTuesdayLunch?: Date;
 
-  StartDefineWorkHoursWednesday?: string;
-  EndDefineWorkHoursWednesday?: string;
-  StartDefineWorkHoursWednesdayLunch?: string;
-  EndDefineWorkHoursWednesdayLunch?: string;
+  StartDefineWorkHoursWednesday?: Date;
+  EndDefineWorkHoursWednesday?: Date;
+  StartDefineWorkHoursWednesdayLunch?: Date;
+  EndDefineWorkHoursWednesdayLunch?: Date;
 
-  StartDefineWorkHoursThursday?: string;
-  EndDefineWorkHoursThursday?: string;
-  StartDefineWorkHoursThursdayLunch?: string;
-  EndDefineWorkHoursThursdayLunch?: string;
+  StartDefineWorkHoursThursday?: Date;
+  EndDefineWorkHoursThursday?: Date;
+  StartDefineWorkHoursThursdayLunch?: Date;
+  EndDefineWorkHoursThursdayLunch?: Date;
 
-  StartDefineWorkHoursFriday?: string;
-  EndDefineWorkHoursFriday?: string;
-  StartDefineWorkHoursFridayLunch?: string;
-  EndDefineWorkHoursFridayLunch?: string;
+  StartDefineWorkHoursFriday?: Date;
+  EndDefineWorkHoursFriday?: Date;
+  StartDefineWorkHoursFridayLunch?: Date;
+  EndDefineWorkHoursFridayLunch?: Date;
 
-  StartDefineWorkHoursSaturday?: string;
-  EndDefineWorkHoursSaturday?: string;
-  StartDefineWorkHoursSaturdayLunch?: string;
-  EndDefineWorkHoursSaturdayLunch?: string;
+  StartDefineWorkHoursSaturday?: Date;
+  EndDefineWorkHoursSaturday?: Date;
+  StartDefineWorkHoursSaturdayLunch?: Date;
+  EndDefineWorkHoursSaturdayLunch?: Date;
 
-  StartDefineWorkHoursSunday?: string;
-  EndDefineWorkHoursSunday?: string;
-  StartDefineWorkHoursSundayLunch?: string;
-  EndDefineWorkHoursSundayLunch?: string;
+  StartDefineWorkHoursSunday?: Date;
+  EndDefineWorkHoursSunday?: Date;
+  StartDefineWorkHoursSundayLunch?: Date;
+  EndDefineWorkHoursSundayLunch?: Date;
 
   ratingMessage?: string;
   queueIds?: number[];
