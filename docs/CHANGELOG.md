@@ -1,5 +1,10 @@
 # Changelog
 
+
+### 18/03/2023
+[Adicionando opção de enviar o ID do setor pela API](https://github.com/FilipeCamillo/Press-Ticket/commit/aba49e56f4e9bb34a0cdd55f5e8074fb3080663a)
+[Melhorando e a pagina da API, e adicionando opções de traduções](https://github.com/FilipeCamillo/Press-Ticket/commit/aba49e56f4e9bb34a0cdd55f5e8074fb3080663a)
+[Melhorando função de envio de mensagem fora do horário comerical com dias da semana](https://github.com/FilipeCamillo/Press-Ticket/commit/aba49e56f4e9bb34a0cdd55f5e8074fb3080663a)
 ### 16/03/2023
 [Adicionando cor na divisão do historico para os chamado.](https://github.com/FilipeCamillo/Press-Ticket/commit/c9d634a7f18b2e1c205407a61fd1334a0beb50e4)
 
