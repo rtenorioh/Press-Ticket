@@ -139,7 +139,7 @@ const messages = {
           sunday: "Sunday",
           holiday: "Holiday",
           defineHourExpedient: "Set office hours",
-          longText:"Check this option to set office hours for appointments.",
+          longText: "Check this option to set office hours for appointments.",
           token: "Token",
           checkHourExpedient: "Check Office Hours"
         },
@@ -416,6 +416,33 @@ const messages = {
           },
         },
       },
+      api: {
+        title: "Documentation for sending messages",
+        shippingMethods: {
+          title: "Shipping Methods",
+          text: "Text message",
+          file: "Media message",
+        },
+        instructions: {
+          title: "Instructions",
+          observations: "Important notes",
+          token: "To get the API token, go to settings and your token will be there, without it it will not be possible to send messages.",
+          helpNumber: {
+            title: "The sending number must not have a mask or special characters and must consist of:",
+            DDI: "DDI Country code - Ex: 1 (EUA)",
+            DDD: "DDD - Area code",
+            number: "Number",
+            queueId: "Sector ID",
+            whatsappId: "WhatsApp ID",
+            body: "Here goes your text",
+            medias : "Here goes your media",
+            fullNumber: "14089999999"
+          },
+          exempleText: "Below is a list of information needed to send text messages:",
+          exempleFile: "Below is a list of information needed to send media:"
+        },
+
+      },
       notifications: {
         noTickets: "No notifications.",
       },
@@ -425,6 +452,7 @@ const messages = {
           queueDeleted: "The sector has been deleted.",
         },
         table: {
+          id: "ID",
           name: "Name",
           color: "Color",
           greeting: "Greeting message",

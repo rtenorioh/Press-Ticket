@@ -139,7 +139,7 @@ const messages = {
           sunday: "Domingo",
           holiday: "Día festivo",
           defineHourExpedient: "Establecer horario de oficina",
-          longText:"Marque esta opción para establecer el horario de oficina para las citas.",
+          longText: "Marque esta opción para establecer el horario de oficina para las citas.",
           token: "Token",
           checkHourExpedient: "Consultar Horario de Oficina"
         },
@@ -416,6 +416,33 @@ const messages = {
           },
         },
       },
+      api: {
+        title: "Documentación para envío de mensajes",
+        shippingMethods: {
+          title: "Métodos de envío",
+          text: "Mensaje de texto",
+          file: "mensaje de los medios",
+        },
+        instructions: {
+          title: "Instrucciones",
+          observations: "Notas importantes ",
+          token: "Para obtener el token API, vaya a la configuración y su token estará allí, sin él no será posible enviar mensajes.",
+          helpNumber: {
+            title: "El número de envío no debe tener máscara ni caracteres especiales y debe constar de:",
+            DDI: "DDI - Código de paí - Ex: 34 (Espanha)",
+            DDD: "DDD - Codigo de AREA",
+            number: "Número",
+            queueId: "ID del sector",
+            whatsappId: "ID del WhatsApp",
+            body: "Aquí va tu texto",
+            medias : "Aquí van tus medios",
+            fullNumber: "34654999999."
+          },
+          exempleText: "A continuación se muestra una lista de la información necesaria para enviar mensajes de texto:",
+          exempleFile: "A continuación se muestra una lista de la información necesaria para enviar medios:"
+        },
+
+      },
       notifications: {
         noTickets: "Sin notificaciones.",
       },
@@ -425,6 +452,7 @@ const messages = {
           queueDeleted: "El sector ha sido eliminado.",
         },
         table: {
+          id: "ID",
           name: "Nombre",
           color: "Color",
           greeting: "Mensaje de saludo",
@@ -601,7 +629,7 @@ const messages = {
         extraInfo: "Otra información",
       },
       copyToClipboard: {
-        copy:"Copiar",
+        copy: "Copiar",
         copied: "Copiado"
       },
       ticketOptionsMenu: {

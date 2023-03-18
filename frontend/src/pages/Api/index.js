@@ -1,6 +1,7 @@
 import React from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import Container from "@material-ui/core/Container";
+import { i18n } from "../../translate/i18n";
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -47,40 +48,51 @@ const Api = () => {
     return (
         <div className={classes.root}>
             <Container>
-                <h2>Documentação para envio de mensagens</h2>
+                <h2>{i18n.t("api.title")}</h2>
 
-                <h2 className={classes.color}>Métodos de Envio</h2>
+                <h2 className={classes.color}>{i18n.t("api.shippingMethods.title")}</h2>
 
-                <p className={classes.text}>1. Mensagens de Texto</p>
-                <p className={classes.text}>2. Mensagens de Mídia</p>
+                <p className={classes.text}>1. {i18n.t("api.shippingMethods.text")}</p>
+                <p className={classes.text}>2. {i18n.t("api.shippingMethods.file")}</p>
 
-                <h2 className={classes.color}>Instruções</h2>
-                <p><b>Observações Importantes</b></p>
+                <h2 className={classes.color}>{i18n.t("api.instructions.title")}</h2>
+                <p><b>{i18n.t("api.instructions.observations")}</b></p>
                 <ul>
-                    <li className={classes.text}>Para pegar o token da API, vá em configurações que seu token estará la, sem ele não será possivel enviar mensagens.</li>
-                    <li className={classes.text}>O número para envio não deve ter mascara ou caracteres especiais e deve ser composto por:</li>
+                    <li className={classes.text}>{i18n.t("api.instructions.token")}</li>
+                    <li className={classes.text}>{i18n.t("api.instructions.helpNumber.title")}</li>
                     <br />
                     <ol>
                         <ul>
-                            <li className={classes.text}>Código do pais - Ex: 55 (Brasil)</li>
-                            <li className={classes.text}>DDD</li>
-                            <li className={classes.text}>Número</li>
+                            <li className={classes.text}>{i18n.t("api.instructions.helpNumber.DDI")}</li>
+                            <li className={classes.text}>{i18n.t("api.instructions.helpNumber.DDD")}</li>
+                            <li className={classes.text}>{i18n.t("api.instructions.helpNumber.number")}</li>
                         </ul>
                     </ol>
                 </ul>
-                <h2 className={classes.color}>1. Mensagens de Texto</h2>
-                <p>Seguem abaixo lista de informações necessárias para envio das mensagens de texto:</p>
+                <h2 className={classes.color}>1. {i18n.t("api.shippingMethods.text")}</h2>
+                <p>{i18n.t("api.instructions.exempleText")}</p>
                 <p className={classes.textP}><b>URL: </b>{process.env.REACT_APP_BACKEND_URL}/api/messages/send</p>
                 <p className={classes.textP}><b>Metódo: </b>POST</p>
                 <p className={classes.textP}><b>Headers: </b>Authorization: Bearer (token) e Content-Type application/json</p>
-                <p className={classes.textP}><b>Body: </b>"number": "5599999999999", "body": "Enviado via api"</p>
+                <p className={classes.textP}><b>Body: </b><br></br><br></br>
+                "number": "{i18n.t("api.instructions.helpNumber.fullNumber")}", <br></br>
+                "body": "{i18n.t("api.instructions.helpNumber.body")}",<br></br>
+                "whatsappId": "{i18n.t("api.instructions.helpNumber.queueId")}", <br></br>
+                "queueId": "{i18n.t("api.instructions.helpNumber.queueId")}" <br></br>
+                </p><br></br>
+                
+                
 
-                <h2 className={classes.color}>2. Mensagens de Mídia</h2>
-                <p>Seguem abaixo lista de informações necessárias para envio de midias:</p>
+
+                <h2 className={classes.color}>2. {i18n.t("api.shippingMethods.file")}</h2>
+                <p>{i18n.t("api.instructions.exempleFile")}</p>
                 <p className={classes.textP}><b>URL: </b>{process.env.REACT_APP_BACKEND_URL}/api/messages/send</p>
                 <p className={classes.textP}><b>Metódo: </b>POST</p>
                 <p className={classes.textP}><b>Headers: </b>Authorization: Bearer (token) e Content-Type multipart/form-data</p>
-                <p className={classes.textP}><b>Body: </b>"number": "5599999999999", "medias": "aqui vai sua midia", "body": "Enviado via api"</p>
+                <p className={classes.textP}><b>Body: </b><br></br><br></br>
+                "number": "{i18n.t("api.instructions.helpNumber.fullNumber")}", <br></br>
+                "medias": "{i18n.t("api.instructions.helpNumber.medias")}", <br></br>
+                "body": "{i18n.t("api.instructions.helpNumber.body")}"</p>
             </Container>
         </div>
     );

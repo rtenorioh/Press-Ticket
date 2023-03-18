@@ -140,7 +140,7 @@ const messages = {
           sunday: "Domingo",
           holiday: "Feriado",
           defineHourExpedient: "Definir horário de expediente",
-          longText:"Marque esta opção para definir um horário de expediente para os atendimentos.",
+          longText: "Marque esta opção para definir um horário de expediente para os atendimentos.",
           token: "Token",
           checkHourExpedient: "Checar Horário de Expediente"
         },
@@ -417,6 +417,33 @@ const messages = {
           },
         },
       },
+      api: {
+        title: "Documentação para envio de mensagens",
+        shippingMethods: {
+          title: "Métodos de Envio",
+          text: "Mensagem de texto",
+          file: "Mensagem de mídia",
+        },
+        instructions: {
+          title: "Instruções",
+          observations: "Observações Importantes",
+          token: "Para pegar o token da API, vá em configurações que seu token estará la, sem ele não será possivel enviar mensagens.",
+          helpNumber: {
+            title: "O número para envio não deve ter mascara ou caracteres especiais e deve ser composto por:",
+            DDI: "DDI Código do pais - Ex: 55 (Brasil)",
+            DDD: "DDD",
+            number: "Número",
+            queueId: "ID do Setor",
+            whatsappId: "ID do WhatsApp",
+            body: "Aqui vai seu texto",
+            medias : "Aqui vai sua midia",
+            fullNumber: "5599999999999"
+          },
+          exempleText:"Segue abaixo lista de informações necessárias para envio das mensagens de texto:",
+          exempleFile:"Segue abaixo lista de informações necessárias para envio de midias:"
+        },
+
+      },
       notifications: {
         noTickets: "Nenhuma notificação.",
       },
@@ -426,6 +453,7 @@ const messages = {
           queueDeleted: "O setor foi deletado.",
         },
         table: {
+          id: "ID",
           name: "Nome",
           color: "Cor",
           greeting: "Mensagem de saudação",
@@ -613,7 +641,7 @@ const messages = {
           buttons: {
             return: "Retornar",
             resolve: "Resolver",
-            reopen: "Reabrir", 
+            reopen: "Reabrir",
             accept: "Aceitar",
             finish: "Finalizar",
           },
@@ -632,7 +660,7 @@ const messages = {
         extraInfo: "Outras informações",
       },
       copyToClipboard: {
-        copy:"Copiar",
+        copy: "Copiar",
         copied: "Copiado"
       },
       ticketOptionsMenu: {

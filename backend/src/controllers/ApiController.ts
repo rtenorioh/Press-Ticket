@@ -16,6 +16,10 @@ import SendWhatsAppMessage from "../services/WbotServices/SendWhatsAppMessage";
 import UpdateTicketService from "../services/TicketServices/UpdateTicketService";
 import ListSettingsServiceOne from "../services/SettingServices/ListSettingsServiceOne";
 
+type QueueData = {
+  queueId: number;
+}
+
 type WhatsappData = {
   whatsappId: number;
 }
@@ -32,6 +36,7 @@ interface ContactData {
 }
 
 const createContact = async (
+  queueId: number | 0,
   whatsappId: number | undefined,
   newContact: string
 ) => {
@@ -67,7 +72,8 @@ const createContact = async (
   const createTicket = await FindOrCreateTicketService(
     contact,
     whatsapp.id,
-    1
+    1,
+    queueId
   );
 
   const ticket = await ShowTicketService(createTicket.id);
@@ -80,6 +86,7 @@ const createContact = async (
 export const index = async (req: Request, res: Response): Promise<Response> => {
   const newContact: ContactData = req.body;
   const { whatsappId }: WhatsappData = req.body;
+  const { queueId }: QueueData = req.body;
   const { body, quotedMsg }: MessageData = req.body;
   const medias = req.files as Express.Multer.File[];
 
@@ -97,7 +104,7 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
     throw new AppError(err.message);
   }
 
-  const contactAndTicket = await createContact(whatsappId, newContact.number);
+  const contactAndTicket = await createContact(queueId, whatsappId, newContact.number);
 
   let resp: any;
 

@@ -31,6 +31,7 @@ import CreateContactService from "../ContactServices/CreateContactService";
 import formatBody from "../../helpers/Mustache";
 import UserRating from "../../models/UserRating";
 import SendWhatsAppMessage from "./SendWhatsAppMessage";
+import Queue from "../../models/Queue";
 
 interface Session extends Client {
   id?: number;
@@ -431,19 +432,21 @@ const verifyQueue = async (
         }
       } else {
         //envia mensagem de fora do expediente, dia desativado
-        const body = formatBody(`\u200e${outOfWorkMessage}`, ticket);
-        const debouncedSentMessage = debounce(
-          async () => {
-            const sentMessage = await wbot.sendMessage(
-              `${contact.number}@c.us`,
-              body
-            );
-            verifyMessage(sentMessage, ticket, contact);
-          },
-          3000,
-          ticket.id
-        );
-        debouncedSentMessage();
+        if (outOfWorkMessage && outOfWorkMessage !== "") {
+          const body = formatBody(`\u200e${outOfWorkMessage}`, ticket);
+          const debouncedSentMessage = debounce(
+            async () => {
+              const sentMessage = await wbot.sendMessage(
+                `${contact.number}@c.us`,
+                body
+              );
+              verifyMessage(sentMessage, ticket, contact);
+            },
+            3000,
+            ticket.id
+          );
+          debouncedSentMessage();
+        }
       }
     }
     // Fim Domingo_________________________________________________________________________________________________________________
@@ -651,19 +654,21 @@ const verifyQueue = async (
         }
       } else {
         //envia mensagem de fora do expediente, dia desativado
-        const body = formatBody(`\u200e${outOfWorkMessage}`, ticket);
-        const debouncedSentMessage = debounce(
-          async () => {
-            const sentMessage = await wbot.sendMessage(
-              `${contact.number}@c.us`,
-              body
-            );
-            verifyMessage(sentMessage, ticket, contact);
-          },
-          3000,
-          ticket.id
-        );
-        debouncedSentMessage();
+        if (outOfWorkMessage && outOfWorkMessage !== "") {
+          const body = formatBody(`\u200e${outOfWorkMessage}`, ticket);
+          const debouncedSentMessage = debounce(
+            async () => {
+              const sentMessage = await wbot.sendMessage(
+                `${contact.number}@c.us`,
+                body
+              );
+              verifyMessage(sentMessage, ticket, contact);
+            },
+            3000,
+            ticket.id
+          );
+          debouncedSentMessage();
+        }
       }
     }
     // Fim Segunda_________________________________________________________________________________________________________________
@@ -871,19 +876,21 @@ const verifyQueue = async (
         }
       } else {
         //envia mensagem de fora do expediente, dia desativado
-        const body = formatBody(`\u200e${outOfWorkMessage}`, ticket);
-        const debouncedSentMessage = debounce(
-          async () => {
-            const sentMessage = await wbot.sendMessage(
-              `${contact.number}@c.us`,
-              body
-            );
-            verifyMessage(sentMessage, ticket, contact);
-          },
-          3000,
-          ticket.id
-        );
-        debouncedSentMessage();
+        if (outOfWorkMessage && outOfWorkMessage !== "") {
+          const body = formatBody(`\u200e${outOfWorkMessage}`, ticket);
+          const debouncedSentMessage = debounce(
+            async () => {
+              const sentMessage = await wbot.sendMessage(
+                `${contact.number}@c.us`,
+                body
+              );
+              verifyMessage(sentMessage, ticket, contact);
+            },
+            3000,
+            ticket.id
+          );
+          debouncedSentMessage();
+        }
       }
     }
     // Fim Terça_________________________________________________________________________________________________________________
@@ -1091,19 +1098,21 @@ const verifyQueue = async (
         }
       } else {
         //envia mensagem de fora do expediente, dia desativado
-        const body = formatBody(`\u200e${outOfWorkMessage}`, ticket);
-        const debouncedSentMessage = debounce(
-          async () => {
-            const sentMessage = await wbot.sendMessage(
-              `${contact.number}@c.us`,
-              body
-            );
-            verifyMessage(sentMessage, ticket, contact);
-          },
-          3000,
-          ticket.id
-        );
-        debouncedSentMessage();
+        if (outOfWorkMessage && outOfWorkMessage !== "") {
+          const body = formatBody(`\u200e${outOfWorkMessage}`, ticket);
+          const debouncedSentMessage = debounce(
+            async () => {
+              const sentMessage = await wbot.sendMessage(
+                `${contact.number}@c.us`,
+                body
+              );
+              verifyMessage(sentMessage, ticket, contact);
+            },
+            3000,
+            ticket.id
+          );
+          debouncedSentMessage();
+        }
       }
     }
     // Fim Quarta_________________________________________________________________________________________________________________
@@ -1316,19 +1325,21 @@ const verifyQueue = async (
         }
       } else {
         //envia mensagem de fora do expediente, dia desativado
-        const body = formatBody(`\u200e${outOfWorkMessage}`, ticket);
-        const debouncedSentMessage = debounce(
-          async () => {
-            const sentMessage = await wbot.sendMessage(
-              `${contact.number}@c.us`,
-              body
-            );
-            verifyMessage(sentMessage, ticket, contact);
-          },
-          3000,
-          ticket.id
-        );
-        debouncedSentMessage();
+        if (outOfWorkMessage && outOfWorkMessage !== "") {
+          const body = formatBody(`\u200e${outOfWorkMessage}`, ticket);
+          const debouncedSentMessage = debounce(
+            async () => {
+              const sentMessage = await wbot.sendMessage(
+                `${contact.number}@c.us`,
+                body
+              );
+              verifyMessage(sentMessage, ticket, contact);
+            },
+            3000,
+            ticket.id
+          );
+          debouncedSentMessage();
+        }
       }
     }
     // Fim Quinta_________________________________________________________________________________________________________________
@@ -1536,19 +1547,21 @@ const verifyQueue = async (
         }
       } else {
         //envia mensagem de fora do expediente, dia desativado
-        const body = formatBody(`\u200e${outOfWorkMessage}`, ticket);
-        const debouncedSentMessage = debounce(
-          async () => {
-            const sentMessage = await wbot.sendMessage(
-              `${contact.number}@c.us`,
-              body
-            );
-            verifyMessage(sentMessage, ticket, contact);
-          },
-          3000,
-          ticket.id
-        );
-        debouncedSentMessage();
+        if (outOfWorkMessage && outOfWorkMessage !== "") {
+          const body = formatBody(`\u200e${outOfWorkMessage}`, ticket);
+          const debouncedSentMessage = debounce(
+            async () => {
+              const sentMessage = await wbot.sendMessage(
+                `${contact.number}@c.us`,
+                body
+              );
+              verifyMessage(sentMessage, ticket, contact);
+            },
+            3000,
+            ticket.id
+          );
+          debouncedSentMessage();
+        }
       }
     }
     // Fim Sexta_________________________________________________________________________________________________________________
@@ -1756,19 +1769,21 @@ const verifyQueue = async (
         }
       } else {
         //envia mensagem de fora do expediente, dia desativado
-        const body = formatBody(`\u200e${outOfWorkMessage}`, ticket);
-        const debouncedSentMessage = debounce(
-          async () => {
-            const sentMessage = await wbot.sendMessage(
-              `${contact.number}@c.us`,
-              body
-            );
-            verifyMessage(sentMessage, ticket, contact);
-          },
-          3000,
-          ticket.id
-        );
-        debouncedSentMessage();
+        if (outOfWorkMessage && outOfWorkMessage !== "") {
+          const body = formatBody(`\u200e${outOfWorkMessage}`, ticket);
+          const debouncedSentMessage = debounce(
+            async () => {
+              const sentMessage = await wbot.sendMessage(
+                `${contact.number}@c.us`,
+                body
+              );
+              verifyMessage(sentMessage, ticket, contact);
+            },
+            3000,
+            ticket.id
+          );
+          debouncedSentMessage();
+        }
       }
     }
     // Fim sabado_________________________________________________________________________________________________________________
@@ -1981,6 +1996,7 @@ const handleMessage = async (
   try {
     let msgContact: WbotContact;
     let groupContact: Contact | undefined;
+    let queueId:number = 0;
     // console.log(msg)
     if (msg.fromMe) {
       // messages sent automatically by wbot have a special character in front of it
@@ -2026,10 +2042,12 @@ const handleMessage = async (
 
     const contact = await verifyContact(msgContact);
 
+    
     let ticket = await FindOrCreateTicketService(
       contact,
       wbot.id!,
       unreadMessages,
+      queueId,
       groupContact
     );
 
@@ -2060,6 +2078,7 @@ const handleMessage = async (
       contact,
       wbot.id!,
       unreadMessages,
+      queueId,
       groupContact
     );
 
