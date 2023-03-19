@@ -195,8 +195,7 @@ const Users = () => {
       <ConfirmationModal
         title={
           deletingUser &&
-          `${i18n.t("users.confirmationModal.deleteTitle")} ${
-            deletingUser.name
+          `${i18n.t("users.confirmationModal.deleteTitle")} ${deletingUser.name
           }?`
         }
         open={confirmModalOpen}
@@ -246,8 +245,10 @@ const Users = () => {
         <Table size="small">
           <TableHead>
             <TableRow>
+
             <TableCell align="center">{i18n.t("users.table.id")}</TableCell>
               <TableCell align="center">{i18n.t("users.table.name")}</TableCell>
+
               <TableCell align="center">
                 {i18n.t("users.table.email")}
               </TableCell>
@@ -256,13 +257,13 @@ const Users = () => {
               </TableCell>
               <TableCell align="center">
                 {i18n.t("users.table.whatsapp")}
-              </TableCell>    
+              </TableCell>
               <TableCell align="center">
                 {i18n.t("users.table.startWork")}
-              </TableCell>     
+              </TableCell>
               <TableCell align="center">
                 {i18n.t("users.table.endWork")}
-              </TableCell>  
+              </TableCell>
               <TableCell align="center">
                 {i18n.t("users.table.actions")}
               </TableCell>
