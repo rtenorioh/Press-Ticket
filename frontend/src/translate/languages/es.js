@@ -446,6 +446,7 @@ const messages = {
       users: {
         title: "Asistentes",
         table: {
+          id: "ID",
           name: "Nombre",
           email: "Correo electrónico",
           profile: "Perfil",
