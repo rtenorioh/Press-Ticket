@@ -401,6 +401,7 @@ const messages = {
           queueDeleted: "The sector has been deleted.",
         },
         table: {
+          id: "ID",
           name: "Name",
           color: "Color",
           greeting: "Greeting message",
