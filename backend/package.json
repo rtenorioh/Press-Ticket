@@ -41,7 +41,7 @@
     "socket.io": "^3.0.5",
     "swagger-ui-express": "^4.3.0",
     "uuid": "^8.3.2",
-    "whatsapp-web.js": "^1.19.4",
+    "whatsapp-web.js": "^1.19.5",
     "yup": "^0.32.8"
   },
   "devDependencies": {
