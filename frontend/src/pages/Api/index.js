@@ -78,7 +78,9 @@ const Api = () => {
                 "number": "{i18n.t("api.instructions.helpNumber.fullNumber")}", <br></br>
                 "body": "{i18n.t("api.instructions.helpNumber.body")}",<br></br>
                 "whatsappId": "{i18n.t("api.instructions.helpNumber.queueId")}", <br></br>
-                "queueId": "{i18n.t("api.instructions.helpNumber.queueId")}" <br></br>
+                "queueId": "{i18n.t("api.instructions.helpNumber.queueId")}", <br></br>
+                "tagsId": "{i18n.t("api.instructions.helpNumber.tagsId")}", <br></br>
+                "userId": "{i18n.t("api.instructions.helpNumber.userId")}" <br></br>
                 </p><br></br>
                 
                 

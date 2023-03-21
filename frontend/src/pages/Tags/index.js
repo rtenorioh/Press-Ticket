@@ -340,6 +340,7 @@ const Tags = () => {
         <Table size="small">
           <TableHead>
             <TableRow>
+            <TableCell align="center">{i18n.t("tags.table.id")}</TableCell>
               <TableCell align="center">{i18n.t("tags.table.name")}</TableCell>
               <TableCell align="center">{i18n.t("tags.table.color")}</TableCell>
               <TableCell align="center">{i18n.t("tags.table.contacts")}</TableCell>
@@ -350,6 +351,9 @@ const Tags = () => {
             <>
               {tags.map((tag) => (
                 <TableRow key={tag.id}>
+                  <TableCell align="center">
+                    {tag.id}
+                  </TableCell>
                   <TableCell align="center">
                     {tag.name}
                   </TableCell>

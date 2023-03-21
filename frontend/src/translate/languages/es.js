@@ -222,6 +222,7 @@ const messages = {
       tags: {
         title: "Etiquetas",
         table: {
+          id:"ID",
           name: "Etiquetas",
           color: "Color",
           contacts: "Contactos",
@@ -433,6 +434,8 @@ const messages = {
             DDD: "DDD - Codigo de AREA",
             number: "Número",
             queueId: "ID del sector",
+            tagsId: "ID de la etiqueta",
+            userId: "ID del asistente",
             whatsappId: "ID del WhatsApp",
             body: "Aquí va tu texto",
             medias : "Aquí van tus medios",
@@ -497,6 +500,7 @@ const messages = {
       users: {
         title: "Asistentes",
         table: {
+          id: "ID",
           name: "Nombre",
           email: "Correo electrónico",
           profile: "Perfil",

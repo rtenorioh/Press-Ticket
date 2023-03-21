@@ -16,6 +16,14 @@ import SendWhatsAppMessage from "../services/WbotServices/SendWhatsAppMessage";
 import UpdateTicketService from "../services/TicketServices/UpdateTicketService";
 import ListSettingsServiceOne from "../services/SettingServices/ListSettingsServiceOne";
 
+type UserData = {
+  userId: number;
+}
+
+type TagData = {
+  tagsId: number;
+}
+
 type QueueData = {
   queueId: number;
 }
@@ -36,6 +44,8 @@ interface ContactData {
 }
 
 const createContact = async (
+  userId: number | 0,
+  tagsId: number | 0,
   queueId: number | 0,
   whatsappId: number | undefined,
   newContact: string
@@ -73,7 +83,9 @@ const createContact = async (
     contact,
     whatsapp.id,
     1,
-    queueId
+    queueId,
+    tagsId,
+    userId,
   );
 
   const ticket = await ShowTicketService(createTicket.id);
@@ -87,6 +99,8 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
   const newContact: ContactData = req.body;
   const { whatsappId }: WhatsappData = req.body;
   const { queueId }: QueueData = req.body;
+  const { tagsId }: TagData = req.body;
+  const { userId }: UserData = req.body;
   const { body, quotedMsg }: MessageData = req.body;
   const medias = req.files as Express.Multer.File[];
 
@@ -104,7 +118,7 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
     throw new AppError(err.message);
   }
 
-  const contactAndTicket = await createContact(queueId, whatsappId, newContact.number);
+  const contactAndTicket = await createContact(userId, tagsId, queueId, whatsappId, newContact.number);
 
   let resp: any;
 

@@ -8,7 +8,7 @@ import {
 import openSocket from "../../services/socket-io";
 import clsx from "clsx";
 
-import { blue } from "@material-ui/core/colors";
+import { blue, red } from "@material-ui/core/colors";
 import { AuthContext } from "../../context/Auth/AuthContext";
 import {
   Button,
@@ -254,6 +254,11 @@ const useStyles = makeStyles((theme) => ({
     fontSize: 18,
     verticalAlign: "middle",
     marginRight: 4,
+    color: red[200]
+  },
+
+  deletedMsg: {
+    color: red[200]
   },
 
   ackDoneAllIcon: {
@@ -359,7 +364,7 @@ const reducer = (state, action) => {
       toast.info(<ToastDisplay
         body={messageToUpdate.body}
       >
-      </ToastDisplay>, { autoClose: false });
+      </ToastDisplay>);
     }
 
     if (messageIndex !== -1) {
@@ -797,27 +802,13 @@ const MessagesList = ({ ticketId, isGroup }) => {
                 {message.isDeleted && (
 
                   <div>
-                    <span className={"message-deleted"}
-
-
-                    >Mensagem apagada pelo contato
-
-
+                    <span className={classes.deletedMsg}>
                       <Block
                         color=""
                         fontSize="small"
                         className={classes.deletedIcon}
                       />
-                      <Block
-                        color=""
-                        fontSize="small"
-                        className={classes.deletedIcon}
-                      />
-                      <Block
-                        color=""
-                        fontSize="small"
-                        className={classes.deletedIcon}
-                      />
+                      Mensagem apagada pelo cliente
                     </span>
                   </div>
 

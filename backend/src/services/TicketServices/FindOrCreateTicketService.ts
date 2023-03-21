@@ -2,7 +2,6 @@ import { subSeconds } from "date-fns";
 import { Op } from "sequelize";
 import Contact from "../../models/Contact";
 import Ticket from "../../models/Ticket";
-import Queue from "../../models/Queue";
 import ShowTicketService from "./ShowTicketService";
 import ListSettingsServiceOne from "../SettingServices/ListSettingsServiceOne";
 
@@ -11,6 +10,8 @@ const FindOrCreateTicketService = async (
   whatsappId: number,
   unreadMessages: number,
   queueId?: number,
+  tagsId?: number,
+  userId?: number,
   groupContact?: Contact
 ): Promise<Ticket> => {
   let ticket = await Ticket.findOne({
@@ -83,6 +84,16 @@ const FindOrCreateTicketService = async (
   if (queueId != 0 && queueId != undefined) {
     //Determina qual a fila esse ticket pertence.
     await ticket.update({ queueId: queueId });
+  }
+
+  if (tagsId != 0 && tagsId != undefined) {
+    //Determina qual a fila esse ticket pertence.
+    await ticket.update({ tagsId: tagsId });
+  }
+
+  if (userId != 0 && userId != undefined) {
+    //Determina qual a fila esse ticket pertence.
+    await ticket.update({ userId: userId });
   }
 
   ticket = await ShowTicketService(ticket.id);
