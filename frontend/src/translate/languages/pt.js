@@ -412,6 +412,10 @@ const messages = {
           token: "Token"
         },
         appBar: {
+          message: {
+            hi: "Olá",
+            text: "seja bem vindo ao Sistema"
+          },
           user: {
             profile: "Perfil",
             logout: "Sair",

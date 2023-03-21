@@ -411,6 +411,10 @@ const messages = {
           token: "Ficha"
         },
         appBar: {
+          message: {
+            hi: "Hola",
+            text: "bienvenido al Sistema"
+          },
           user: {
             profile: "Perfil",
             logout: "Cerrar sesión",
