@@ -1,6 +1,21 @@
 # Changelog
 
+### 20/03/2023
+[Atualização de versão 1.4.3](https://github.com/FilipeCamillo/Press-Ticket/commit/efe167007075c56df695e0c567d4287ea2d7a70a)
 
+[Reconhecimento de mensagem apagada pelo cliente](https://github.com/FilipeCamillo/Press-Ticket/commit/56b5dc905f6dc03be6cd5878100a7a63e80077d3)
+
+[Adição de envio de ID de tags pela API](https://github.com/FilipeCamillo/Press-Ticket/commit/56b5dc905f6dc03be6cd5878100a7a63e80077d3)
+
+[Adição de envio de ID do usuário pela API](https://github.com/FilipeCamillo/Press-Ticket/commit/56b5dc905f6dc03be6cd5878100a7a63e80077d3)
+
+[Atualização de layout da pagina de login](https://github.com/FilipeCamillo/Press-Ticket/commit/56b5dc905f6dc03be6cd5878100a7a63e80077d3)
+
+[Atualização de "pino": "^7.8.0", para "pino": "^8.11.0",](https://github.com/FilipeCamillo/Press-Ticket/commit/56b5dc905f6dc03be6cd5878100a7a63e80077d3)
+
+[Atualização de "pino-pretty": "^9.1.1", para "pino-pretty": "^10.0.0",](https://github.com/FilipeCamillo/Press-Ticket/commit/56b5dc905f6dc03be6cd5878100a7a63e80077d3)
+
+[Atualização de logger.ts](https://github.com/FilipeCamillo/Press-Ticket/commit/56b5dc905f6dc03be6cd5878100a7a63e80077d3)
 ### 18/03/2023
 [Adicionando opção de enviar o ID do setor pela API](https://github.com/FilipeCamillo/Press-Ticket/commit/aba49e56f4e9bb34a0cdd55f5e8074fb3080663a)
 
