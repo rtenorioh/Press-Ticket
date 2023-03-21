@@ -386,6 +386,10 @@ const messages = {
           token: "Token"
         },
         appBar: {
+          message: {
+            hi: "Olá",
+            text: "seja bem vindo ao Sistema"
+          },
           user: {
             profile: "Perfil",
             logout: "Sair",
@@ -553,7 +557,7 @@ const messages = {
           buttons: {
             return: "Retornar",
             resolve: "Resolver",
-            reopen: "Reabrir", 
+            reopen: "Reabrir",
             accept: "Aceitar",
           },
         },
@@ -571,7 +575,7 @@ const messages = {
         extraInfo: "Outras informações",
       },
       copyToClipboard: {
-        copy:"Copiar",
+        copy: "Copiar",
         copied: "Copiado"
       },
       ticketOptionsMenu: {
