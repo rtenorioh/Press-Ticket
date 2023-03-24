@@ -284,6 +284,7 @@ nano .env
 ```bash
 REACT_APP_BACKEND_URL=https://back.pressticket.com.br 
 REACT_APP_HOURS_CLOSE_TICKETS_AUTO=
+REACT_APP_PAGE_TITLE=PressTicket
 PORT=3333
 ```
 
@@ -333,7 +334,7 @@ sudo rm -rf /etc/nginx/sites-enabled/default
 
 ```bash
 server {  
-  server_name ticket.pressticket.com.br;  
+  server_name front.pressticket.com.br;  
   location / {  
     proxy_pass http://127.0.0.1:3333;  
     proxy_http_version 1.1;  
