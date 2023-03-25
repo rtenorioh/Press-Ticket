@@ -1,6 +1,12 @@
 # Changelog
 
 ### 20/03/2023
+
+[Liberação de API para busca de setores](https://github.com/FilipeCamillo/Press-Ticket/commit/69b1ecd5af03f790397a650f48bedcf56c0e8d98)
+
+[Liberação de pagina do Swagger](https://github.com/FilipeCamillo/Press-Ticket/commit/69b1ecd5af03f790397a650f48bedcf56c0e8d98)
+
+### 20/03/2023
 [Atualização de versão 1.4.3](https://github.com/FilipeCamillo/Press-Ticket/commit/efe167007075c56df695e0c567d4287ea2d7a70a)
 
 [Reconhecimento de mensagem apagada pelo cliente](https://github.com/FilipeCamillo/Press-Ticket/commit/56b5dc905f6dc03be6cd5878100a7a63e80077d3)
