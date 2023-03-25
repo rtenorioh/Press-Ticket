@@ -10,5 +10,6 @@ const upload = multer(uploadConfig);
 const ApiRoutes = express.Router();
 
 ApiRoutes.post("/send", isAuthApi, upload.array("medias"), ApiController.index);
+ApiRoutes.get("/queue/list", isAuthApi, ApiController.list);
 
 export default ApiRoutes;

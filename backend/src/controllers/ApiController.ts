@@ -15,6 +15,7 @@ import SendWhatsAppMedia from "../services/WbotServices/SendWhatsAppMedia";
 import SendWhatsAppMessage from "../services/WbotServices/SendWhatsAppMessage";
 import UpdateTicketService from "../services/TicketServices/UpdateTicketService";
 import ListSettingsServiceOne from "../services/SettingServices/ListSettingsServiceOne";
+import ListQueuesService from "../services/QueueService/ListQueuesService";
 
 type UserData = {
   userId: number;
@@ -144,4 +145,9 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
     }, 1000);
   }
   return res.send({ error: resp });
+};
+
+export const list = async (req: Request, res: Response): Promise<Response> => {
+  const queues = await ListQueuesService();
+  return res.status(200).json(queues);
 };

@@ -1,21 +1,21 @@
 {
     "openapi": "3.0.0",
     "info": {
-        "title": "Documentação da API da mkthub envios",
-        "description": "Documentação da API para envio de mensagens e mídia.",
+        "title": "Documentação da API mktsend",
+        "description": "Documentação da API mktsend",
         "contact": {
-            "email": "robson.tenorio@gmail.com"
+            "whatsapp": "https://wa.me/5517991565280"
         },
-        "version": "1.0.0"
+        "version": "1.1.0"
     },
     "servers": [
         {
-            "url": "https://apisac.pypress.com.br",
-            "description": "API mkthub atendimento"
+            "url": "https://localhost/8080",
+            "description": "API mktsend"
         }
     ],
     "paths": {
-        "/api/messages/send": {
+        "/api/send": {
             "post": {
                 "summary": "Envio de Mensagens",
                 "description": "Envio de Mensagens",
@@ -34,10 +34,20 @@
                                 "$ref": "#components/schemas/SEND"
                             },
                             "examples": {
-                                "SEND": {
+                                "SEND1": {
                                     "value": {
                                         "number": "5522999999999",
                                         "body": "Mensagem de Teste da API"
+                                    }
+                                },
+                                "SEND2": {
+                                    "value": {
+                                        "number": "5522999999999",
+                                        "body": "Mensagem de Teste da API",
+                                        "whatsappId": "ID do Setor",
+                                        "queueId": "ID do Setor",
+                                        "tagsId": "ID da Tag",
+                                        "userId": "ID do atendente"
                                     }
                                 }
                             }
@@ -64,8 +74,29 @@
                     }
                 }
             }
+        },
+        "/api/queue/list": {
+            "get": {
+                "summary": "Busca lista de Setores",
+                "tags": [
+                    "Queue"
+                ],
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#components/schemas/Queue"
+                            }
+                        }
+                    }
+                }
+            }
         }
-        
     },
     "components": {
         "schemas": {
@@ -73,10 +104,74 @@
                 "type": "object",
                 "properties": {
                     "number": {
+                        "name": "number",
+                        "description": "Número de telefone para enviar a mensagem. Deve incluir o código do país (sem sinal de adição ou zero à esquerda).",
+                        "required": true,
                         "type": "number"
                     },
                     "body": {
+                        "name": "body",
+                        "description": "Corpo da mensagem a ser enviada.",
+                        "required": true,
                         "type": "string"
+                    },
+                    "whatsappId": {
+                        "name": "whatsappId",
+                        "description": "Corpo da mensagem a ser enviada.",
+                        "required": false,
+                        "type": "number"
+                    },
+                    "queueId": {
+                        "name": "queueId",
+                        "description": "Corpo da mensagem a ser enviada.",
+                        "required": false,
+                        "type": "number"
+                    },
+                    "tagsId": {
+                        "name": "tagsId",
+                        "description": "Corpo da mensagem a ser enviada.",
+                        "required": false,
+                        "type": "number"
+                    },
+                    "userId": {
+                        "name": "userId",
+                        "description": "Corpo da mensagem a ser enviada.",
+                        "required": false,
+                        "type": "number"
+                    }
+                }
+            },
+            "Queue": {
+                "type": "object",
+                "properties": {
+                    "number": {
+                        "type": "number"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "color": {
+                        "type": "string"
+                    },
+                    "greetingMessage": {
+                        "type": "string"
+                    },
+                    "startWork": {
+                        "type": "string"
+                    },
+                    "endWork": {
+                        "type": "string"
+                    },
+                    "absenceMessage": {
+                        "type": "string"
+                    },
+                    "createdAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updatedAt": {
+                        "type": "string",
+                        "format": "date-time"
                     }
                 }
             }

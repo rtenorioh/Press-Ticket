@@ -25,7 +25,7 @@ routes.use(messageRoutes);
 routes.use(whatsappSessionRoutes);
 routes.use(queueRoutes);
 routes.use(quickAnswerRoutes);
-routes.use("/api/messages", apiRoutes);
+routes.use("/api", apiRoutes);
 routes.use(tagRoutes);
 
 export default routes;
