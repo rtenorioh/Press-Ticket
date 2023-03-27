@@ -4,8 +4,6 @@ dist
 !public/.gitkeep
 .env
 .env.test
-.wwebjs_auth
-sequelizeData.json
 
 package-lock.json
 yarn.lock
