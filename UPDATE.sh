@@ -77,9 +77,7 @@ if [ ! -e src/config.json ]; then
   echo "Criando o arquivo config.json"
   cp src/config.json.example src/config.json
   else
-  echo "Atualizando o arquivo config.json"
-  rm src/config.json
-  cp src/config.json.example src/config.json
+  echo "Aruivo config.json já criado"
 fi
 
 
