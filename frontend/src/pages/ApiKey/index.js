@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from "react";
 import openSocket from "../../services/socket-io";
 
-import { makeStyles } from "@material-ui/core/styles";
-import Paper from "@material-ui/core/Paper";
-import Typography from "@material-ui/core/Typography";
-import Container from "@material-ui/core/Container";
-import TextField from "@material-ui/core/TextField";
+import { 
+    Container,
+    makeStyles,
+    Paper,
+    TextField,
+    Typography
+} from "@material-ui/core";
+
+import CopyToClipboard from "../../components/CopyToClipboard";
 
 import api from "../../services/api";
 import { i18n } from "../../translate/i18n.js";
@@ -99,6 +103,7 @@ const Settings = () => {
 						fullWidth
 						value={settings && settings.length > 0 && getSettingValue("userApiToken")}
 					/>
+                    <CopyToClipboard content={settings && settings.length > 0 && getSettingValue("userApiToken")} color="secondary" />
 				</Paper>
 
             </Container>

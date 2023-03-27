@@ -386,6 +386,10 @@ const messages = {
           token: "Token"
         },
         appBar: {
+          message: {
+            hi: "Hello",
+            text: "welcome to the System"
+          },
           user: {
             profile: "Profile",
             logout: "Logout",
@@ -401,6 +405,7 @@ const messages = {
           queueDeleted: "The sector has been deleted.",
         },
         table: {
+          id: "ID",
           name: "Name",
           color: "Color",
           greeting: "Greeting message",
@@ -445,6 +450,7 @@ const messages = {
       users: {
         title: "Attendants",
         table: {
+          id: "ID",
           name: "Name",
           email: "Email",
           profile: "Profile",
@@ -519,6 +525,22 @@ const messages = {
           darkMode: {
             name: "Enable Dark Mode",
             note: "Switch between light mode and dark mode",
+            options: {
+              enabled: "Enabled",
+              disabled: "Disabled",
+            },
+          },
+          ASC: {
+            name: "Order of Tickets",
+            note: "When enabled, it will sort ascending (ASC), disabling it will sort descending (DESC)",
+            options: {
+              enabled: "Enabled",
+              disabled: "Disabled",
+            },
+          },
+          created: {
+            name: "Order of Tickets (createdAt or updateAt)",
+            note: "When activated, it will order by creation date (createdAt), deactivating will order by update date (updateAt)",
             options: {
               enabled: "Enabled",
               disabled: "Disabled",

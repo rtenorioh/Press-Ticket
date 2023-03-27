@@ -284,6 +284,7 @@ nano .env
 ```bash
 REACT_APP_BACKEND_URL=https://back.pressticket.com.br 
 REACT_APP_HOURS_CLOSE_TICKETS_AUTO=
+REACT_APP_PAGE_TITLE=PressTicket
 PORT=3333
 ```
 
@@ -323,17 +324,11 @@ pm2 list
 sudo apt install nginx
 ```
 
-52. Excluir o arquivo default do nginx
-
-```bash
-sudo rm -rf /etc/nginx/sites-enabled/default
-```
-
-53. Editar os dados abaixo com a URL que será usada para acessar o frontend.
+52. Editar os dados abaixo com a URL que será usada para acessar o frontend.
 
 ```bash
 server {  
-  server_name ticket.pressticket.com.br;  
+  server_name front.pressticket.com.br;  
   location / {  
     proxy_pass http://127.0.0.1:3333;  
     proxy_http_version 1.1;  
@@ -348,19 +343,19 @@ server {
 }  
 ```
 
-54. Criar e editar o arquivo Press-Ticket-frontend com o comando abaixo e prencher com os dados do item 52.
+53. Criar e editar o arquivo Press-Ticket-frontend com o comando abaixo e prencher com os dados do item 52.
 
 ```bash
 sudo nano /etc/nginx/sites-available/Press-Ticket-frontend
 ```
 
-55. Criar uma cópia do arquivo Press-Ticket-frontend com o comando abaixo para criar o arquivo para o backend.
+54. Criar uma cópia do arquivo Press-Ticket-frontend com o comando abaixo para criar o arquivo para o backend.
 
 ```bash
 sudo cp /etc/nginx/sites-available/Press-Ticket-frontend /etc/nginx/sites-available/Press-Ticket-backend
 ```
 
-56. Editar os dados abaixo com a URL que será usada para acessar o backend.
+55. Editar os dados abaixo com a URL que será usada para acessar o backend.
 
 ```bash
 server {  
@@ -379,16 +374,22 @@ server {
 }
 ```
 
-57. editar o arquivo Press-Ticket-backend com o comando abaixo e prencher com os dados do item 55.
+56. editar o arquivo Press-Ticket-backend com o comando abaixo e prencher com os dados do item 55.
 
 ```bash
 sudo nano /etc/nginx/sites-available/Press-Ticket-backend
 ```
   
-58. Acessar a pasta onde os arquivos foram criados
+57. Acessar a pasta onde os arquivos foram criados
 
 ```bash
 cd /etc/nginx/sites-available/
+```
+
+58. Excluir o arquivo default do nginx
+
+```bash
+sudo rm -rf default
 ```
 
 59. Listar para conferir se foram criados os arquivos

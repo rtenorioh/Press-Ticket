@@ -1,9 +1,57 @@
 # Changelog
 
+### 27/03/2023
+
+- [Função Copiar Token](https://github.com/rtenorioh/Press-Ticket/commit/40e9aa01ccec667bac1e63f03ba90c8b32287f92); e
+- [Atualização de versão](https://github.com/rtenorioh/Press-Ticket/commit/cb94ebf25e29ce8c2bab204d44033e3c89ebc85f).
+
+### 26/03/2023
+
+- [Correção na ordem dos comandos](https://github.com/rtenorioh/Press-Ticket/commit/d32c171d007596a667e9255c2d02d419015671a0);
+- [Ajustes e Correção](https://github.com/rtenorioh/Press-Ticket/commit/833cdeb9054b536ef9ae7895c7e13cb6c5379769);
+- [Ordenação dos Tickets](https://github.com/rtenorioh/Press-Ticket/commit/2c64899a4451aeaf23863a1d74abc9a5390387ae);
+- [Ordenação dos Tickets - Seed](https://github.com/rtenorioh/Press-Ticket/commit/a9f1acb4fe6d01e1ed0e5bb2243902d6fa3f96a1);
+- [Atualização do layout - Conexão](https://github.com/rtenorioh/Press-Ticket/commit/3005c56dcd2e7c6cd6e4355ed789f1638718598b);
+- [Salvando as SEED's](https://github.com/rtenorioh/Press-Ticket/commit/64c64107d1b4d81f2cc8c397ae508b52f4df7532); e
+- [Atualização do layout - Setores](https://github.com/rtenorioh/Press-Ticket/commit/9ccf3de9610aa112fabd52433da93cff3d8887b6).
+
+### 23/03/2023
+
+- [Atualização da documentação do repositório](https://github.com/rtenorioh/Press-Ticket/commit/e7b374a537fc915e68a97fc35037aaa5f912069a).
+
+### 21/03/2023
+
+- [Atualização de Libs e correção no logger](https://github.com/rtenorioh/Press-Ticket/commit/ea127c2356011eb5f3a2aa2b1045275e87323563); e
+- [Atualização de versão](https://github.com/rtenorioh/Press-Ticket/commit/bff892a475a5b59d26bbd1dbf79bb098b72cede8).
+
+### 20/03/2023
+
+- [Titulo da página no .env](https://github.com/rtenorioh/Press-Ticket/commit/20621e2cb89bc6e3ff32e57c1e5d86a6661e8df5); e
+- [Atendente no appBar](https://github.com/rtenorioh/Press-Ticket/commit/d29363e2b60bbcddddb7b810cc578d01018fe73d).
+
+### 19/03/2023
+
+- [Exibindo ID dos Setores](https://github.com/rtenorioh/Press-Ticket/commit/b3bd589d4307a5d477e80859f15404308e87f5e7);
+- [Exibindo ID dos Setores - Pages](https://github.com/rtenorioh/Press-Ticket/commit/33792527e1f27b4d7ec3886f485d4290a303a59a); e
+- [Exibindo ID dos Atendentes](https://github.com/rtenorioh/Press-Ticket/commit/19ee73354655deb6674716866da967ddb341b806).
+- 
+
+### 15/03/2023
+
+- [Voltando para o player nativo](https://github.com/rtenorioh/Press-Ticket/commit/7cd10ff15fb8548453665c46f986697f0b67f7e6).
+
+### 10/03/2023
+
+- [Verificação de DEMOVERSION](https://github.com/rtenorioh/Press-Ticket/commit/edf9b371f819af210150c2ae0e854b885cbad4ed).
+
+### 06/03/2023
+
+- [Atualização das informações](https://github.com/rtenorioh/Press-Ticket/commit/5146c2a1bbf417ff1b53ae2e8a0359d203eb7cad).
+
 ### 05/03/2023
 
-- [Exibição da Msg Apaga pelo cliente](https://github.com/rtenorioh/Press-Ticket/commit/491c42f1d581775d2c7c42c51dc0b586ecc9dbc7),
-- [Correção exibição msg apagada](https://github.com/rtenorioh/Press-Ticket/commit/ccd3c49ff6c213782a00ee40e64decb7cc2e63d2),
+- [Exibição da Msg Apaga pelo cliente](https://github.com/rtenorioh/Press-Ticket/commit/491c42f1d581775d2c7c42c51dc0b586ecc9dbc7);
+- [Correção exibição msg apagada](https://github.com/rtenorioh/Press-Ticket/commit/ccd3c49ff6c213782a00ee40e64decb7cc2e63d2); e
 - [Atualização da versão](https://github.com/rtenorioh/Press-Ticket/commit/7cf601c45065e915a99ccbd12e6c31b6a9180789).
 
 ### 25/02/2023

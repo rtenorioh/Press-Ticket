@@ -1,18 +1,17 @@
+import { Button } from "@material-ui/core";
 import React, { useRef, useEffect, useState } from "react";
-import { AudioPlayer } from 'mui-audio-player';
 
 const LS_NAME = 'audioMessageRate';
 
-export default function ({ url }) {
+export default function({url}) {
     const audioRef = useRef(null);
-    const [audioRate] = useState(parseFloat(localStorage.getItem(LS_NAME) || "1"));
-    const [,setShowButtonRate] = useState(false);
+    const [audioRate, setAudioRate] = useState( parseFloat(localStorage.getItem(LS_NAME) || "1") );
+    const [showButtonRate, setShowButtonRate] = useState(false);
 
     useEffect(() => {
         audioRef.current.playbackRate = audioRate;
         localStorage.setItem(LS_NAME, audioRate);
     }, [audioRate]);
-
     useEffect(() => {
         audioRef.current.onplaying = () => {
             setShowButtonRate(true);
@@ -25,18 +24,36 @@ export default function ({ url }) {
         };
     }, []);
 
+    const toogleRate = () => {
+        let newRate = null;
+
+        switch(audioRate) {
+            case 0.5:
+                newRate = 1;
+                break;
+            case 1:
+                newRate = 1.5;
+                break;
+            case 1.5:
+                newRate = 2;
+                break;
+            case 2:
+                newRate = 0.5;
+                break;
+            default:
+                newRate = 1;
+                break;
+        }
+
+        setAudioRate(newRate);
+    };
+
     return (
         <>
-            <AudioPlayer
-                debug={false}
-                width="450px"
-                download={true}
-                ref={audioRef} controls
-                src={url} type="audio/ogg"
-                autoPlay={false}
-                rounded={true}
-                elevation={4}
-            />
+            <audio ref={audioRef} controls>
+                <source src={url} type="audio/ogg"></source>
+            </audio>
+            {showButtonRate && <Button style={{marginLeft: "5px", marginTop: "-45px"}} onClick={toogleRate}>{audioRate}x</Button>}
         </>
     );
-}  
+}
