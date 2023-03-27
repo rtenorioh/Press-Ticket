@@ -1,5 +1,24 @@
 # Changelog
 
+### 27/03/2023
+
+- [Função Copiar Token](https://github.com/rtenorioh/Press-Ticket/commit/40e9aa01ccec667bac1e63f03ba90c8b32287f92); e
+- [Atualização de versão](https://github.com/rtenorioh/Press-Ticket/commit/cb94ebf25e29ce8c2bab204d44033e3c89ebc85f).
+
+### 26/03/2023
+
+- [Correção na ordem dos comandos](https://github.com/rtenorioh/Press-Ticket/commit/d32c171d007596a667e9255c2d02d419015671a0);
+- [Ajustes e Correção](https://github.com/rtenorioh/Press-Ticket/commit/833cdeb9054b536ef9ae7895c7e13cb6c5379769);
+- [Ordenação dos Tickets](https://github.com/rtenorioh/Press-Ticket/commit/2c64899a4451aeaf23863a1d74abc9a5390387ae);
+- [Ordenação dos Tickets - Seed](https://github.com/rtenorioh/Press-Ticket/commit/a9f1acb4fe6d01e1ed0e5bb2243902d6fa3f96a1);
+- [Atualização do layout - Conexão](https://github.com/rtenorioh/Press-Ticket/commit/3005c56dcd2e7c6cd6e4355ed789f1638718598b);
+- [Salvando as SEED's](https://github.com/rtenorioh/Press-Ticket/commit/64c64107d1b4d81f2cc8c397ae508b52f4df7532); e
+- [Atualização do layout - Setores](https://github.com/rtenorioh/Press-Ticket/commit/9ccf3de9610aa112fabd52433da93cff3d8887b6).
+
+### 23/03/2023
+
+- [Atualização da documentação do repositório](https://github.com/rtenorioh/Press-Ticket/commit/e7b374a537fc915e68a97fc35037aaa5f912069a).
+
 ### 21/03/2023
 
 - [Atualização de Libs e correção no logger](https://github.com/rtenorioh/Press-Ticket/commit/ea127c2356011eb5f3a2aa2b1045275e87323563); e
