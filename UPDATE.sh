@@ -7,7 +7,7 @@ echo "██╔═══╝ ██╔══██╗██╔══╝  ╚═�
 echo "██║     ██║  ██║███████╗███████║███████║       ██║   ██║╚██████╗██║  ██╗███████╗   ██║   "
 echo "╚═╝     ╚═╝  ╚═╝╚══════╝╚══════╝╚══════╝       ╚═╝   ╚═╝ ╚═════╝╚═╝  ╚═╝╚══════╝   ╚═╝   "
 echo " "
-echo "ATUALIZANDO PARA A VERSÃO MAIS RECENTE DO PRESS TICKET!"
+echo "ATUALIZANDO PARA A VERSÃO MAIS RECENTE..."
 echo " "
 
 sleep 2
@@ -41,13 +41,20 @@ sudo rm -rf dist
 npm run build
 
 echo " "
-echo "EXECUTANDO O MIGRATE E SEED"
+echo "EXECUTANDO O DB:MIGRATE"
 echo " "
 
 sleep 2
 
 npx sequelize db:migrate
-npx sequelize db:seed
+
+echo " "
+echo "EXECUTANDO O DB:SEED:ALL"
+echo " "
+
+sleep 2
+
+npx sequelize db:seed:all
 
 echo " "
 echo "ACESSANDO O FRONTEND"
