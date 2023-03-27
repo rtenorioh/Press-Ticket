@@ -400,12 +400,20 @@ const Contacts = () => {
                   <TableCell align="center">{contact.number}</TableCell>
                   <TableCell align="center">{contact.email}</TableCell>
                   <TableCell align="center">
-                    {/* <IconButton
-                      size="small"
-                      onClick={() => handleSaveTicket(contact.id)}
-                    >
-                      <WhatsApp color="secondary" />
-                    </IconButton> */}
+                    <Can
+                      role={user.profile}
+                      perform="drawer-admin-items:view"
+                      yes={() => (
+                        <>
+                          <IconButton
+                            size="small"
+                            onClick={() => handleSaveTicket(contact.id)}
+                          >
+                            <WhatsApp color="secondary" />
+                          </IconButton>
+                        </>
+                      )}
+                    />
                     <IconButton
                       size="small"
                       onClick={() => hadleEditContact(contact.id)}
@@ -430,7 +438,7 @@ const Contacts = () => {
                   </TableCell>
                 </TableRow>
               ))}
-              {loading && <TableRowSkeleton avatar columns={4} />}
+              {loading && <TableRowSkeleton avatar columns={3} />}
             </>
           </TableBody>
         </Table>
