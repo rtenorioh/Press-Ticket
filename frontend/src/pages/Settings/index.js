@@ -166,7 +166,7 @@ const Settings = () => {
 
 	return (
 		<div className={classes.root}>
-			<Container className={classes.container} maxWidth="sm">
+			<Container className={classes.container} maxWidth="xs">
 				<Typography variant="body2" gutterBottom>
 					{i18n.t("settings.title")}
 				</Typography>
@@ -186,6 +186,20 @@ const Settings = () => {
 				</Paper>
 
 
+				<Typography variant="body2" gutterBottom></Typography>
+
+				<Paper className={classes.paper}>
+					<Tooltip title={i18n.t("settings.settings.allTicket.note")}>
+						<FormControlLabel
+							control={
+								<IOSSwitch
+									checked={settings && settings.length > 0 && getSettingValue("allTicket") === "enabled"}
+									onChange={handleChangeBooleanSetting} name="allTicket"
+								/>}
+							label={i18n.t("settings.settings.allTicket.name")}
+						/>
+					</Tooltip>
+				</Paper>
 
 				<Typography variant="body2" gutterBottom></Typography>
 
@@ -231,6 +245,10 @@ const Settings = () => {
 					</Tooltip>
 				</Paper>
 
+
+			</Container>
+			<Container className={classes.container} maxWidth="xs">
+
 				<Typography variant="body2" gutterBottom></Typography>
 				<Paper className={classes.paper}>
 					<Tooltip title={i18n.t("settings.settings.closeTicketApi.note")}>
@@ -261,23 +279,37 @@ const Settings = () => {
 
 				<Typography variant="body2" gutterBottom></Typography>
 				<Paper className={classes.paper}>
-					<Tooltip title={i18n.t("settings.settings.allTicket.note")}>
+
+					<Tooltip title={i18n.t("settings.settings.ASC.note")}>
 						<FormControlLabel
 							control={
 								<IOSSwitch
-									checked={settings && settings.length > 0 && getSettingValue("allTicket") === "enabled"}
-									onChange={handleChangeBooleanSetting} name="allTicket"
+									checked={settings && settings.length > 0 && getSettingValue("ASC") === "enabled"}
+									onChange={handleChangeBooleanSetting} name="ASC"
 								/>}
-							label={i18n.t("settings.settings.allTicket.name")}
+							label={i18n.t("settings.settings.ASC.name")}
 						/>
 					</Tooltip>
 				</Paper>
 
-				
 
 				<Typography variant="body2" gutterBottom></Typography>
-					<Tooltip title={i18n.t("settings.settings.timeCreateNewTicket.note")}>
-					     <Paper className={classes.paper} elevation={3}>
+				<Paper className={classes.paper}>
+					<Tooltip title={i18n.t("settings.settings.created.note")}>
+						<FormControlLabel
+							control={
+								<IOSSwitch
+									checked={settings && settings.length > 0 && getSettingValue("created") === "enabled"}
+									onChange={handleChangeBooleanSetting} name="created"
+								/>}
+							label={i18n.t("settings.settings.created.name")}
+						/>
+					</Tooltip>
+				</Paper>
+
+				<Typography variant="body2" gutterBottom></Typography>
+				<Tooltip title={i18n.t("settings.settings.timeCreateNewTicket.note")}>
+					<Paper className={classes.paper} elevation={3}>
 						<Typography variant="body1">
 							{i18n.t("settings.settings.timeCreateNewTicket.name")}
 						</Typography>
@@ -333,8 +365,8 @@ const Settings = () => {
 								{i18n.t("settings.settings.timeCreateNewTicket.options.2592000")}
 							</option>
 						</Select>
-				             </Paper>
-					</Tooltip>
+					</Paper>
+				</Tooltip>
 			</Container>
 		</div>
 	);

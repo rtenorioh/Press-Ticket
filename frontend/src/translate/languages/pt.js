@@ -593,9 +593,18 @@ const messages = {
               disabled: "Desativado",
             },
           },
-          allTicket: {
-            name: "Todos podem ver o chamado sem departamento",
-            note: "Ative essa função para deixar todos os usuarios verem os chamados sem setor",
+          ASC: {
+            name: "Ordenação dos Tickets (ASC ou DESC)",
+            note: "Ao ativar irá ordenar ascendente (ASC), desativando ordenará decrescente (DESC)",
+            options: {
+              enabled: "Ativado",
+              disabled: "Desativado",
+            },
+          },
+          created: {
+            name: "Ordenação dos Tickets (createdAt ou updateAt)",
+            note: "Ao ativar irá ordenar pela data de criação (createdAt), desativando ordenará pela data de atualização (updateAt)",
+
             options: {
               enabled: "Ativado",
               disabled: "Desativado",
