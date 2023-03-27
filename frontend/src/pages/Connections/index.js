@@ -25,6 +25,7 @@ import {
 	SignalCellular4Bar,
 	CropFree,
 	DeleteOutline,
+	WhatsApp
 } from "@material-ui/icons";
 
 import MainContainer from "../../components/MainContainer";
@@ -311,15 +312,17 @@ const Connections = () => {
 				whatsAppId={!qrModalOpen && selectedWhatsApp?.id}
 			/>
 			<MainHeader>
-				<Title>{i18n.t("connections.title")}</Title>
+				<Title>{i18n.t("connections.title")} ({whatsApps.length})</Title>
 				<MainHeaderButtonsWrapper>
-					<Button
-						variant="contained"
-						color="primary"
-						onClick={handleOpenWhatsAppModal}
-					>
-						{i18n.t("connections.buttons.add")}
-					</Button>
+					<Tooltip title={i18n.t("connections.buttons.add")}>
+						<Button
+							variant="contained"
+							color="primary"
+							onClick={handleOpenWhatsAppModal}
+						>
+							<WhatsApp />
+						</Button>
+					</Tooltip>
 				</MainHeaderButtonsWrapper>
 			</MainHeader>
 			<Paper className={classes.mainPaper} variant="outlined">
@@ -371,11 +374,11 @@ const Connections = () => {
 											</TableCell>
 											<TableCell align="center">
 												{whatsApp.number ? (
-												<>
-												+{whatsApp.number}
-												</>
+													<>
+														+{whatsApp.number}
+													</>
 												) : "-"}
-												
+
 											</TableCell>
 											<TableCell align="center">
 												{renderActionButtons(whatsApp)}
