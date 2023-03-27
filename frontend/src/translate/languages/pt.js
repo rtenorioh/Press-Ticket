@@ -530,6 +530,22 @@ const messages = {
               disabled: "Desativado",
             },
           },
+          ASC: {
+            name: "Ordenação dos Tickets (ASC ou DESC)",
+            note: "Ao ativar irá ordenar ascendente (ASC), desativando ordenará decrescente (DESC)",
+            options: {
+              enabled: "Ativado",
+              disabled: "Desativado",
+            },
+          },
+          created: {
+            name: "Ordenação dos Tickets (createdAt ou updateAt)",
+            note: "Ao ativar irá ordenar pela data de criação (createdAt), desativando ordenará pela data de atualização (updateAt)",
+            options: {
+              enabled: "Ativado",
+              disabled: "Desativado",
+            },
+          },
           timeCreateNewTicket: {
             name: "Cria novo ticket após",
             note: "Selecione o tempo que será necessário para abrir um novo ticket, caso o cliente entre em contatos novamente",

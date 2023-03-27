@@ -530,6 +530,22 @@ const messages = {
               disabled: "Disabled",
             },
           },
+          ASC: {
+            name: "Order of Tickets",
+            note: "When enabled, it will sort ascending (ASC), disabling it will sort descending (DESC)",
+            options: {
+              enabled: "Enabled",
+              disabled: "Disabled",
+            },
+          },
+          created: {
+            name: "Order of Tickets (createdAt or updateAt)",
+            note: "When activated, it will order by creation date (createdAt), deactivating will order by update date (updateAt)",
+            options: {
+              enabled: "Enabled",
+              disabled: "Disabled",
+            },
+          },
           timeCreateNewTicket: {
             name: "Create new ticket after",
             note: "Select the time it will take to openlaugh a new ticket, in case the customer gets in touch again",
