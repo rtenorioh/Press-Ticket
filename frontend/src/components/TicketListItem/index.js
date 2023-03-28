@@ -311,6 +311,7 @@ const TicketListItem = ({ ticket }) => {
 							<Badge
 								className={classes.newMessagesCount}
 								badgeContent={ticket.unreadMessages}
+								overlap="rectangular" 
 								classes={{
 									badge: classes.badgeStyle,
 								}}
