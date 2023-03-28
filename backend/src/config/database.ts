@@ -6,12 +6,11 @@ module.exports = {
     collate: "utf8mb4_bin"
   },
   dialect: process.env.DB_DIALECT || "mysql",
-  timezone: process.env.DB_TIMEZONE || "-03:00",
+  timezone: "-03:00",
   host: process.env.DB_HOST,
   database: process.env.DB_NAME,
   username: process.env.DB_USER,
   password: process.env.DB_PASS,
-  logging: false,
-  seederStorage: "json",
-  seederStoragePath: "sequelizeData.json"
+  port: process.env.DB_PORT || 3306,
+  logging: false
 };
