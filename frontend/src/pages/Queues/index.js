@@ -208,9 +208,6 @@ const Queues = () => {
                 {i18n.t("queues.table.id")}
               </TableCell>
               <TableCell align="center">
-                {i18n.t("queues.table.id")}
-              </TableCell>
-              <TableCell align="center">
                 {i18n.t("queues.table.name")}
               </TableCell>
               <TableCell align="center">
