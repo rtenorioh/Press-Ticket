@@ -148,6 +148,7 @@ const ListTicketsService = async ({
   settingCreated = settingCreated === "enabled" ? "createdAt" : "updatedAt";
 
   const { count, rows: tickets } = await Ticket.findAndCountAll({
+    subQuery: false, // THIS FIXES THE SEARCH but 'limit' may not work properly
     where: whereCondition,
     include: includeCondition,
     distinct: true,
