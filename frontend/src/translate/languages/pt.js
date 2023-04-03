@@ -594,8 +594,8 @@ const messages = {
             },
           },
           ASC: {
-            name: "Ordenação dos Tickets (ASC ou DESC)",
-            note: "Ao ativar irá ordenar ascendente (ASC), desativando ordenará decrescente (DESC)",
+            name: "Ordenação dos chamados (ASC ou DESC)",
+            note: "Ao ativar irá ordenar de forma crescente (ASC), desativando ordenará de forma decrescente (DESC)",
             options: {
               enabled: "Ativado",
               disabled: "Desativado",

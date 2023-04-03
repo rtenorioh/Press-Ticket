@@ -71,7 +71,7 @@ const Api = () => {
                 </ul>
                 <h2 className={classes.color}>1. {i18n.t("api.shippingMethods.text")}</h2>
                 <p>{i18n.t("api.instructions.exempleText")}</p>
-                <p className={classes.textP}><b>URL: </b>{process.env.REACT_APP_BACKEND_URL}/api/messages/send</p>
+                <p className={classes.textP}><b>URL: </b>{process.env.REACT_APP_BACKEND_URL}/api/send</p>
                 <p className={classes.textP}><b>Metódo: </b>POST</p>
                 <p className={classes.textP}><b>Headers: </b>Authorization: Bearer (token) e Content-Type application/json</p>
                 <p className={classes.textP}><b>Body: </b><br></br><br></br>
@@ -88,7 +88,7 @@ const Api = () => {
 
                 <h2 className={classes.color}>2. {i18n.t("api.shippingMethods.file")}</h2>
                 <p>{i18n.t("api.instructions.exempleFile")}</p>
-                <p className={classes.textP}><b>URL: </b>{process.env.REACT_APP_BACKEND_URL}/api/messages/send</p>
+                <p className={classes.textP}><b>URL: </b>{process.env.REACT_APP_BACKEND_URL}/api/send</p>
                 <p className={classes.textP}><b>Metódo: </b>POST</p>
                 <p className={classes.textP}><b>Headers: </b>Authorization: Bearer (token) e Content-Type multipart/form-data</p>
                 <p className={classes.textP}><b>Body: </b><br></br><br></br>

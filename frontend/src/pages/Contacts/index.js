@@ -46,6 +46,8 @@ import { Can } from "../../components/Can";
 
 import toastError from "../../errors/toastError";
 import { AuthContext } from "../../context/Auth/AuthContext";
+import NewTicketModalPageContact from "../../components/NewTicketModalPageContact";
+
 
 const reducer = (state, action) => {
   if (action.type === "LOAD_CONTACTS") {
@@ -123,6 +125,8 @@ const Contacts = () => {
   const [contactModalOpen, setContactModalOpen] = useState(false);
   const [deletingContact, setDeletingContact] = useState(null);
   const [deletingAllContact, setDeletingAllContact] = useState(null);
+  const [newTicketModalOpen, setNewTicketModalOpen] = useState(false);
+  const [contactTicket, setContactTicket] = useState({});
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [hasMore, setHasMore] = useState(false);
 
@@ -183,22 +187,12 @@ const Contacts = () => {
     setContactModalOpen(false);
   };
 
-  const handleSaveTicket = async (contactId) => {
-    if (!contactId) return;
-    setLoading(true);
-    try {
-      const { data: ticket } = await api.post("/tickets", {
-        contactId: contactId,
-        userId: user?.id,
-        status: "open",
-      });
+  const handleCloseOrOpenTicket = (ticket) => {
+    setNewTicketModalOpen(false);
+    if (ticket !== undefined && ticket.id !== undefined) {
       history.push(`/tickets/${ticket.id}`);
-    } catch (err) {
-      toastError(err);
     }
-    setLoading(false);
   };
-
   const hadleEditContact = (contactId) => {
     setSelectedContactId(contactId);
     setContactModalOpen(true);
@@ -250,8 +244,19 @@ const Contacts = () => {
     }
   };
 
+
+
+
+
   return (
     <MainContainer className={classes.mainContainer}>
+      <NewTicketModalPageContact
+        modalOpen={newTicketModalOpen}
+        initialContact={contactTicket}
+        onClose={(ticket) => {
+          handleCloseOrOpenTicket(ticket);
+        }}
+      />
       <ContactModal
         open={contactModalOpen}
         onClose={handleCloseContactModal}
@@ -400,20 +405,17 @@ const Contacts = () => {
                   <TableCell align="center">{contact.number}</TableCell>
                   <TableCell align="center">{contact.email}</TableCell>
                   <TableCell align="center">
-                    <Can
-                      role={user.profile}
-                      perform="drawer-admin-items:view"
-                      yes={() => (
-                        <>
-                          <IconButton
-                            size="small"
-                            onClick={() => handleSaveTicket(contact.id)}
-                          >
-                            <WhatsApp color="secondary" />
-                          </IconButton>
-                        </>
-                      )}
-                    />
+
+
+                      <IconButton
+                        size="small"
+                        onClick={() => {
+                          setContactTicket(contact);
+                          setNewTicketModalOpen(true);
+                        }}
+                      >
+                        <WhatsApp color="secondary" />
+                      </IconButton>
                     <IconButton
                       size="small"
                       onClick={() => hadleEditContact(contact.id)}
