@@ -1,17 +1,17 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useTheme } from "@material-ui/core/styles";
 import {
-	BarChart,
+	// BarChart,
 	CartesianGrid,
-	Bar,
+	// Bar,
 	XAxis,
 	Tooltip,
   AreaChart,
   Area,
-  Line,
+  // Line,
   LineChart,
 	YAxis,
-	Label,
+	// Label,
 	ResponsiveContainer,
 } from "recharts";
 import CheckBoxIcon from "@material-ui/icons/CheckBox";
@@ -21,7 +21,7 @@ import { i18n } from "../../translate/i18n";
 import Title from "./Title";
 import useTickets from "../../hooks/useTickets";
 import { Divider } from "@material-ui/core";
-import { blue } from "@material-ui/core/colors";
+// import { blue } from "@material-ui/core/colors";
 
 
 

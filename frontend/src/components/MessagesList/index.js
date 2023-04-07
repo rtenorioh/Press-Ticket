@@ -1,5 +1,9 @@
 
-import React, { useState, useEffect, useReducer, useContext, useRef } from "react";
+import React, { useState, 
+  useEffect, 
+  useReducer, 
+  // useContext, 
+  useRef } from "react";
 
 import {
   isSameDay,
@@ -10,7 +14,7 @@ import openSocket from "../../services/socket-io";
 import clsx from "clsx";
 
 import { blue, red } from "@material-ui/core/colors";
-import { AuthContext } from "../../context/Auth/AuthContext";
+// import { AuthContext } from "../../context/Auth/AuthContext";
 import {
   Button,
   CircularProgress,
@@ -388,7 +392,7 @@ const MessagesList = ({ ticketId, isGroup }) => {
   const [hasMore, setHasMore] = useState(false);
   const [loading, setLoading] = useState(false);
   const lastMessageRef = useRef();
-  const { user } = useContext(AuthContext);
+  // const { user } = useContext(AuthContext);
 
   const [selectedMessage, setSelectedMessage] = useState({});
   const [anchorEl, setAnchorEl] = useState(null);
@@ -625,21 +629,21 @@ const MessagesList = ({ ticketId, isGroup }) => {
     }
   };
 
-  const renderNumberTicket = (message, index) => {
-    if (index < messagesList.length && index > 0) {
-      let messageTicket = message.ticketId;
-      let previousMessageTicket = messagesList[index - 1].ticketId;
+  // const renderNumberTicket = (message, index) => {
+  //   if (index < messagesList.length && index > 0) {
+  //     let messageTicket = message.ticketId;
+  //     let previousMessageTicket = messagesList[index - 1].ticketId;
 
-      if (messageTicket !== previousMessageTicket) {
-        return (
-          <div key={`ticket-${message.id}`} className={classes.ticketNumber}>
-            #Chamado: {messageTicket}
-            <hr />
-          </div>
-        );
-      }
-    }
-  };
+  //     if (messageTicket !== previousMessageTicket) {
+  //       return (
+  //         <div key={`ticket-${message.id}`} className={classes.ticketNumber}>
+  //           #Chamado: {messageTicket}
+  //           <hr />
+  //         </div>
+  //       );
+  //     }
+  //   }
+  // };
 
   const renderTicketsSeparator = (message, index) => {
     let lastTicket = messagesList[index - 1]?.ticketId;

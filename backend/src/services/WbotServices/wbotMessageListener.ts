@@ -92,7 +92,7 @@ const verifyRevoked = async (msgBody?: string): Promise<void> => {
     }
 
     if (message) {
-      // console.log(message);
+      
       await Message.update(
         { isDeleted: true },
         {
@@ -109,7 +109,7 @@ const verifyRevoked = async (msgBody?: string): Promise<void> => {
       if (!msgIsDeleted) {
         return;
       }
-
+      
       io.to(msgIsDeleted.ticketId.toString()).emit("appMessage", {
         action: "update",
         message: msgIsDeleted
@@ -119,6 +119,7 @@ const verifyRevoked = async (msgBody?: string): Promise<void> => {
     Sentry.captureException(err);
     logger.error(`Error Message Revoke. Err: ${err}`);
   }
+  
 };
 
 const verifyMediaMessage = async (
@@ -154,11 +155,63 @@ const verifyMediaMessage = async (
     logger.error(err);
   }
 
+  let $tipoArquivo: string;
+
+  switch (media.mimetype.split("/")[0]) {
+    case 'audio':
+      $tipoArquivo = '🔉 Mensagem de audio';
+      break;
+
+    case 'image':
+      $tipoArquivo = '🖼️ Arquivo de imagem';
+      break;
+
+    case 'video':
+      $tipoArquivo = '🎬 Arquivo de vídeo';
+      break;
+
+    case 'document':
+      $tipoArquivo = '📘 Documento';
+      break;
+
+    case 'application':
+      $tipoArquivo = '📎 Documento';
+      break;
+
+    case 'ciphertext':
+      $tipoArquivo = '⚠️ Notificação';
+      break;
+
+    case 'e2e_notification':
+      $tipoArquivo = '⛔ Notificação';
+      break;
+
+    case 'revoked':
+      $tipoArquivo = '❌ Apagado';
+      break;
+    default:
+      $tipoArquivo = '📎 Arquivo';
+      break;
+  }
+
+  let $strBody: string;
+
+  if (msg.fromMe === true) {
+
+    $strBody = msg.body;
+
+  } else {
+
+    $strBody = msg.body;
+
+  }
+
+
   const messageData = {
     id: msg.id.id,
     ticketId: ticket.id,
     contactId: msg.fromMe ? undefined : contact.id,
-    body: msg.body || media.filename,
+    body: $strBody,
     fromMe: msg.fromMe,
     read: msg.fromMe,
     mediaUrl: media.filename,
@@ -166,7 +219,13 @@ const verifyMediaMessage = async (
     quotedMsgId: quotedMsg?.id
   };
 
-  await ticket.update({ lastMessage: msg.body || media.filename });
+
+
+  if (msg.fromMe == true) {
+    await ticket.update({ lastMessage: "🢅" + "⠀" + $tipoArquivo || "🢅" + "⠀" + $tipoArquivo });
+  } else {
+    await ticket.update({ lastMessage: "🢇" + "⠀" + $tipoArquivo || "🢇" + "⠀" + $tipoArquivo });
+  }
   const newMessage = await CreateMessageService({ messageData });
 
   return newMessage;
@@ -201,14 +260,25 @@ export const verifyMessage = async (
     quotedMsgId: quotedMsg?.id
   };
 
-  await ticket.update({
-    lastMessage:
-      msg.type === "location"
-        ? msg.location.description
-          ? `Localization - ${msg.location.description.split("\\n")[0]}`
-          : "Localization"
-        : msg.body
-  });
+  if (msg.fromMe == true) {
+    await ticket.update({//texto que sai do chat tb,
+      lastMessage:
+        msg.type === "location"
+          ? msg.location.description
+            ? `Localization - ${msg.location.description.split("\\n")[0]} + " " +  "🢅"`
+            : "🗺️:" + "Localization" + " " + "🢅"
+          : msg.body + " " + "🢅"
+    });
+  } else {
+    await ticket.update({//aqui mapei texto que chega do chat
+      lastMessage:
+        msg.type === "location"
+          ? msg.location.description
+            ? "🢇" + " - 🗺️:" + `Localization - ${msg.location.description.split("\\n")[0]}`
+            : "🢇" + " - 🗺️:" + "Localization"
+          : "🢇" + " " + msg.body
+    });
+  }
 
   await CreateMessageService({ messageData });
 };
@@ -2050,7 +2120,7 @@ const handleMessage = async (
     let queueId: number = 0;
     let tagsId: number = 0;
     let userId: number = 0;
-    
+
     // console.log(msg)
     if (msg.fromMe) {
       // messages sent automatically by wbot have a special character in front of it

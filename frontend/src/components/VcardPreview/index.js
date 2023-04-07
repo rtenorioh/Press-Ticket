@@ -47,18 +47,18 @@ const VcardPreview = ({ contact, numbers }) => {
         return () => clearTimeout(delayDebounceFn);
     }, [contact, numbers]);
 
-    const handleNewChat = async () => {
-        try {
-            const { data: ticket } = await api.post("/tickets", {
-                contactId: selectedContact.id,
-                userId: user.id,
-                status: "open",
-            });
-            history.push(`/tickets/${ticket.id}`);
-        } catch (err) {
-            toastError(err);
-        }
-    }
+    // const handleNewChat = async () => {
+    //     try {
+    //         const { data: ticket } = await api.post("/tickets", {
+    //             contactId: selectedContact.id,
+    //             userId: user.id,
+    //             status: "open",
+    //         });
+    //         history.push(`/tickets/${ticket.id}`);
+    //     } catch (err) {
+    //         toastError(err);
+    //     }
+    // }
 
     const handleCloseOrOpenTicket = (ticket) => {
         setNewTicketModalOpen(false);

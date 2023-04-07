@@ -328,7 +328,7 @@ const messages = {
       },
       tickets: {
         toasts: {
-          deleted: "O ticket que você estava foi deletado.",
+          deleted: "O chamado que você estava foi deletado.",
         },
         notification: {
           message: "Mensagem de",
@@ -414,7 +414,7 @@ const messages = {
         appBar: {
           message: {
             hi: "Olá",
-            text: "seja bem vindo ao Sistema"
+            text: "seja bem vindo ao sistema"
           },
           user: {
             profile: "Perfil",
@@ -578,7 +578,7 @@ const messages = {
             },
           },
           closeTicketApi: {
-            name: "Encerrar Ticket enviado API",
+            name: "Encerrar chamado enviado API",
             note: "Fecha automaticamente o chamado quando enviado por API",
             options: {
               enabled: "Ativado",
@@ -594,16 +594,16 @@ const messages = {
             },
           },
           ASC: {
-            name: "Ordenação dos chamados (ASC ou DESC)",
-            note: "Ao ativar irá ordenar de forma crescente (ASC), desativando ordenará de forma decrescente (DESC)",
+            name: "Ordenação dos chamados (Crescente ou Decrescente)",
+            note: "Ao ativar irá ordenar de forma crescente, desativando ordenará de forma decrescente",
             options: {
               enabled: "Ativado",
               disabled: "Desativado",
             },
           },
           created: {
-            name: "Ordenação dos Tickets (createdAt ou updateAt)",
-            note: "Ao ativar irá ordenar pela data de criação (createdAt), desativando ordenará pela data de atualização (updateAt)",
+            name: "Ordenação dos chamados (Criação ou Atualização)",
+            note: "Ao ativar irá ordenar pela data de criação, desativando ordenará pela data de atualização",
 
             options: {
               enabled: "Ativado",

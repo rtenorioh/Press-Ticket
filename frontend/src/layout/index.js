@@ -240,7 +240,7 @@ const LoggedInLayout = ({ children }) => {
           >
             <MenuIcon />
           </IconButton>
-          <Typography
+          <span
             component="h1"
             variant="h6"
             color="inherit"
@@ -248,8 +248,8 @@ const LoggedInLayout = ({ children }) => {
             className={classes.title}
           >
 
-            {i18n.t("mainDrawer.appBar.message.hi")} {user.name}, {i18n.t("mainDrawer.appBar.message.text")} {system.name || "Mktsend"}
-          </Typography>
+            {i18n.t("mainDrawer.appBar.message.hi")} <b>{user.name}</b>, {i18n.t("mainDrawer.appBar.message.text")} <b>{system.name || "Mktsend"}</b>
+          </span>
           {user.id && <NotificationsPopOver />}
 
           <div>

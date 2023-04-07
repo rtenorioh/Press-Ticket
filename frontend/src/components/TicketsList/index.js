@@ -25,6 +25,7 @@ const useStyles = makeStyles((theme) => ({
 		flexDirection: "column",
 		overflow: "hidden",
 		borderTopRightRadius: 0,
+		marginRight: -8,
 		borderBottomRightRadius: 0,
 	},
 
