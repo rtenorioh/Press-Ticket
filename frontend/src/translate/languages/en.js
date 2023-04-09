@@ -343,7 +343,11 @@ const messages = {
           spy: "Spy",
           close: "Close",
           reopen: "Reopen",
-          return: "Move to waiting"
+          return: "Move to waiting",
+          connection: "Connection",
+          user: "Attendant",
+          queue: "Sector",
+          tags: "Tags"
         },
         buttons: {
           accept: "Reply",
@@ -359,6 +363,16 @@ const messages = {
       newTicketModal: {
         title: "Create Ticket",
         fieldLabel: "Enter to search for contact",
+        add: "Add",
+        buttons: {
+          ok: "Save",
+          cancel: "Cancel",
+        },
+      },
+      newTicketModalContactPage: {
+        title: "Create Ticket",
+        queue: "Select a Sector",
+        fieldLabel: "Type to search the contact",
         add: "Add",
         buttons: {
           ok: "Save",
@@ -650,6 +664,8 @@ const messages = {
         ERR_CONNECTION_CREATION_COUNT: "Connection limit reached, contact support to change.",
         ERR_NO_TAG_FOUND: "Tag not found.",
         ERR_OUT_OF_HOURS: "Out of Office Hours!",
+        ERR_OPEN_USER_TICKET: "A ticket already exists for this contact with ",
+        ERR_NONE_USER_TICKET: "A ticket already exists for this contact."
       },
     },
   },
