@@ -389,7 +389,7 @@ const TicketListItem = ({ ticket, userId }) => {
 								color="textSecondary"
 							>
 								{ticket.lastMessage ? (
-									<MarkdownWrapper>{ticket.lastMessage}</MarkdownWrapper>
+									<MarkdownWrapper>{ticket.lastMessage.slice(0, 20) + (ticket.lastMessage.length > 20 ? " ..." : "")}</MarkdownWrapper>
 								) : (
 									<br />
 								)}
