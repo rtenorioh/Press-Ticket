@@ -113,9 +113,7 @@ const useStyles = makeStyles((theme) => ({
 const Contacts = () => {
   const classes = useStyles();
   const history = useHistory();
-
   const { user } = useContext(AuthContext);
-
   const [loading, setLoading] = useState(false);
   const [pageNumber, setPageNumber] = useState(1);
   const [searchParam, setSearchParam] = useState("");
@@ -244,6 +242,8 @@ const Contacts = () => {
       loadMore();
     }
   };
+
+  console.log("USER", user.profile)
 
   return (
     <MainContainer className={classes.mainContainer}>
@@ -394,7 +394,7 @@ const Contacts = () => {
                     {<Avatar src={contact.profilePicUrl} className={classes.avatar} />}
                   </TableCell>
                   <TableCell>{contact.name}</TableCell>
-                  <TableCell align="center">{contact.number}</TableCell>
+                  <TableCell align="center">{user.profile === "admin" ? contact.number : contact.number.slice(0,-4) + "****"}</TableCell>
                   <TableCell align="center">{contact.email}</TableCell>
                   <TableCell align="center">
                     <IconButton
