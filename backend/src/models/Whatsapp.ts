@@ -199,6 +199,10 @@ class Whatsapp extends Model<Whatsapp> {
   @UpdatedAt
   updatedAt: Date;
 
+  @Default(false)
+  @Column
+  isGroup: boolean;
+
   @HasMany(() => Ticket)
   tickets: Ticket[];
 

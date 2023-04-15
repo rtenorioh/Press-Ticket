@@ -29,7 +29,7 @@ const CreateUserService = async ({
   name,
   queueIds = [],
   profile = "admin",
-  allHistoric,
+  allHistoric = "enabled",
   whatsappId,
   startWork,
   endWork

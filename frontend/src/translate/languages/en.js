@@ -122,6 +122,7 @@ const messages = {
           name: "Name",
           default: "Default",
           display: "Display sector time",
+          group: "Permit group messages",
           farewellMessage: "Farewell Message",
           ratingMessage: "Evaluation Message",
           instructionRatingMessage: "To enable assessments, simply fill in this field",

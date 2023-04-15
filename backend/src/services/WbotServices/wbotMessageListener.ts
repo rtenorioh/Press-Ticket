@@ -17,6 +17,7 @@ import Contact from "../../models/Contact";
 import Ticket from "../../models/Ticket";
 import Message from "../../models/Message";
 import Settings from "../../models/Setting";
+import Whatsapp from "../../models/Whatsapp";
 
 import { getIO } from "../../libs/socket";
 import CreateMessageService from "../MessageServices/CreateMessageService";
@@ -34,6 +35,7 @@ import formatBody from "../../helpers/Mustache";
 import UserRating from "../../models/UserRating";
 import SendWhatsAppMessage from "./SendWhatsAppMessage";
 import Queue from "../../models/Queue";
+import { boolean } from "yup";
 
 interface Session extends Client {
   id?: number;
@@ -92,7 +94,7 @@ const verifyRevoked = async (msgBody?: string): Promise<void> => {
     }
 
     if (message) {
-      
+      // console.log(message);
       await Message.update(
         { isDeleted: true },
         {
@@ -109,7 +111,7 @@ const verifyRevoked = async (msgBody?: string): Promise<void> => {
       if (!msgIsDeleted) {
         return;
       }
-      
+
       io.to(msgIsDeleted.ticketId.toString()).emit("appMessage", {
         action: "update",
         message: msgIsDeleted
@@ -119,7 +121,6 @@ const verifyRevoked = async (msgBody?: string): Promise<void> => {
     Sentry.captureException(err);
     logger.error(`Error Message Revoke. Err: ${err}`);
   }
-  
 };
 
 const verifyMediaMessage = async (
@@ -206,7 +207,6 @@ const verifyMediaMessage = async (
 
   }
 
-
   const messageData = {
     id: msg.id.id,
     ticketId: ticket.id,
@@ -219,13 +219,12 @@ const verifyMediaMessage = async (
     quotedMsgId: quotedMsg?.id
   };
 
-
-
   if (msg.fromMe == true) {
     await ticket.update({ lastMessage: "🢅" + "⠀" + $tipoArquivo || "🢅" + "⠀" + $tipoArquivo });
   } else {
     await ticket.update({ lastMessage: "🢇" + "⠀" + $tipoArquivo || "🢇" + "⠀" + $tipoArquivo });
   }
+
   const newMessage = await CreateMessageService({ messageData });
 
   return newMessage;
@@ -241,7 +240,7 @@ const prepareLocation = (msg: WbotMessage): WbotMessage => {
   return msg;
 };
 
-export const verifyMessage = async (
+const verifyMessage = async (
   msg: WbotMessage,
   ticket: Ticket,
   contact: Contact
@@ -265,21 +264,20 @@ export const verifyMessage = async (
       lastMessage:
         msg.type === "location"
           ? msg.location.description
-            ? `Localization - ${msg.location.description.split("\\n")[0]} + " " +  "🢅"`
-            : "🗺️:" + "Localization" + " " + "🢅"
-          : msg.body + " " + "🢅"
+            ? "🢅" + "⠀" + `Localization - ${msg.location.description.split("\\n")[0]}`
+            : "🢅" + "⠀" + "🗺️:" + "Localization"
+          : "🢅" + "⠀" + msg.body
     });
   } else {
     await ticket.update({//aqui mapei texto que chega do chat
       lastMessage:
         msg.type === "location"
           ? msg.location.description
-            ? "🢇" + " - 🗺️:" + `Localization - ${msg.location.description.split("\\n")[0]}`
-            : "🢇" + " - 🗺️:" + "Localization"
-          : "🢇" + " " + msg.body
+            ? "🢇" + "⠀" + "🗺️:" + `Localization - ${msg.location.description.split("\\n")[0]}`
+            : "🢇" + "⠀" + "🗺️:" + "Localization"
+          : "🢇" + "⠀" + msg.body
     });
   }
-
   await CreateMessageService({ messageData });
 };
 
@@ -334,13 +332,8 @@ const verifyQueue = async (
     EndDefineWorkHoursSaturday,
     StartDefineWorkHoursSaturdayLunch,
     EndDefineWorkHoursSaturdayLunch
-
-
-
   } = await ShowWhatsaAppHours(
     wbot.id!
-
-
   );
 
   //Verificando se está habilitado dias de expediente
@@ -1242,7 +1235,7 @@ const verifyQueue = async (
     if (diaSemana === 4) {
       diaSemanaStr = "thursday"
 
-      console.log(thursday)
+      // console.log(thursday)
       //if que identifica o dia da semana
       if (thursday === true) {
         //if que identifica se o dia da semana está ativo
@@ -1250,7 +1243,7 @@ const verifyQueue = async (
         const mm: number = now.getMinutes() * 60;
         const hora = hh + mm;
 
-        console.log(StartDefineWorkHoursThursday)
+        // console.log(StartDefineWorkHoursThursday)
 
         const start: string = StartDefineWorkHoursThursday;
         const hhStart = Number(start.split(":")[0]) * 60 * 60;
@@ -2094,12 +2087,15 @@ const handleMessage = async (
   if (!isValidMsg(msg)) {
     return;
   }
+  const showMessageGroupConnection = await ShowWhatsAppService(wbot.id!);
 
   // IGNORAR MENSAGENS DE GRUPO
   const Settingdb = await Settings.findOne({
     where: { key: "CheckMsgIsGroup" }
   });
-  if (Settingdb?.value === "enabled") {
+  if (showMessageGroupConnection.isGroup) {
+  }
+  else if (Settingdb?.value === "enabled" || !showMessageGroupConnection.isGroup) {
     const chat = await msg.getChat();
     if (
       msg.type === "sticker" ||

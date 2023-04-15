@@ -8,15 +8,14 @@ const TicketInfo = ({ contact, ticket, onClick }) => {
 	return (
 		<CardHeader
 			onClick={onClick}
-			style={{ cursor: "pointer" }}
+			style={{ cursor: "pointer", height: "55px" }}
 			titleTypographyProps={{ noWrap: true }}
 			subheaderTypographyProps={{ noWrap: true }}
-			avatar={<Avatar src={contact.profilePicUrl} alt="contact_image" />}
-			title={`${contact.name} #${ticket.id}`}
+			avatar={<Avatar style={{height: 40, width: 40, borderRadius: 4,}}src={contact.profilePicUrl} alt="contact_image" />}
+			title={`${contact.name}`}
 			subheader={
 				ticket.user &&
-				`${i18n.t("messagesList.header.assignedTo")} ${ticket.user.name} 
-				${ticket.queue ? ' | Setor: ' + ticket.queue.name : ' | Setor: Nenhum'}`
+				`Chamado Nº ${ticket.id}`
 			}
 		/>
 	);

@@ -105,9 +105,9 @@ const useStyles = makeStyles((theme) => ({
     textDecoration: 'none'
   },
   avatar: {
-    width: "50px",
-    height: "50px",
-    borderRadius: "25%"
+    width: "40px",
+    height: "40px",
+    borderRadius: 4
   }
 }));
 

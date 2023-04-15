@@ -13,12 +13,13 @@ import Typography from "@material-ui/core/Typography";
 import Avatar from "@material-ui/core/Avatar";
 import Divider from "@material-ui/core/Divider";
 import Badge from "@material-ui/core/Badge";
-import IconButton from '@material-ui/core/IconButton';
+import UndoRoundedIcon from '@material-ui/icons/UndoRounded';
 import { i18n } from "../../translate/i18n";
 import DoneIcon from '@material-ui/icons/Done';
 import ReplayIcon from '@material-ui/icons/Replay';
+import { IconButton } from "@material-ui/core";
 import api from "../../services/api";
-import ClearOutlinedIcon from '@material-ui/icons/ClearOutlined';
+import CancelIcon from '@material-ui/icons/Cancel';
 import MarkdownWrapper from "../MarkdownWrapper";
 import { Tooltip } from "@material-ui/core";
 import { AuthContext } from "../../context/Auth/AuthContext";
@@ -350,7 +351,10 @@ const TicketListItem = ({ ticket }) => {
 								noWrap
 								component="span"
 								variant="body2"
-								color="textPrimary"
+								color="textSecondary"
+								style={{
+									fontWeight: "bold",
+								}}
 							>
 								{ticket.contact.name}
 							</Typography>
@@ -398,13 +402,14 @@ const TicketListItem = ({ ticket }) => {
 										.replace("🢇", "")
 										.replace("🢅", "")}</MarkdownWrapper>
 								) : (
-									<br />
+								<p></p>	// <MarkdownWrapper>{ticket.lastMessage.slice(0, 20) + (ticket.lastMessage.length > 20 ? " ..." : "")}</MarkdownWrapper>
 								)}
 							</Typography>
 
 							<Badge
 								className={classes.newMessagesCount}
 								badgeContent={ticket.unreadMessages}
+								overlap="rectangular"
 								classes={{
 									badge: classes.badgeStyle,
 								}} />
@@ -537,7 +542,7 @@ const TicketListItem = ({ ticket }) => {
 							className={classes.bottomButton}
 							color="primary"
 							onClick={e => handleClosedTicket(ticket.id)} >
-							<ClearOutlinedIcon />
+							<CancelIcon />
 						</IconButton>
 					</Tooltip>
 				)} */}
@@ -547,7 +552,7 @@ const TicketListItem = ({ ticket }) => {
 							className={classes.bottomButton}
 							color="primary"
 							onClick={e => handleViewTicket(ticket.id)} >
-							<ReplayIcon />
+							<UndoRoundedIcon />
 						</IconButton>
 					</Tooltip>
 				)}
@@ -557,7 +562,7 @@ const TicketListItem = ({ ticket }) => {
 							className={classes.bottomButton}
 							color="primary"
 							onClick={e => handleClosedTicket(ticket.id)} >
-							<ClearOutlinedIcon />
+							<CancelIcon />
 						</IconButton>
 					</Tooltip>
 				)}
@@ -566,7 +571,7 @@ const TicketListItem = ({ ticket }) => {
 						className={classes.bottomButton}
 						color="primary"
 						onClick={e => handleReopenTicket(ticket.id)} >
-						<ReplayIcon />
+						<UndoRoundedIcon />
 					</IconButton>
 				)}
 			</ListItem>

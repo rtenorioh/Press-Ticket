@@ -23,45 +23,46 @@ interface Request {
   saturday?: boolean;
   sunday?: boolean;
   // horario de cada dia da semana.
-  StartDefineWorkHoursMonday?: Date;
-  EndDefineWorkHoursMonday?: Date;
-  StartDefineWorkHoursMondayLunch?: Date;
-  EndDefineWorkHoursMondayLunch?: Date;
+  StartDefineWorkHoursMonday?: string;
+  EndDefineWorkHoursMonday?: string;
+  StartDefineWorkHoursMondayLunch?: string;
+  EndDefineWorkHoursMondayLunch?: string;
 
-  StartDefineWorkHoursTuesday?: Date;
-  EndDefineWorkHoursTuesday?: Date;
-  StartDefineWorkHoursTuesdayLunch?: Date;
-  EndDefineWorkHoursTuesdayLunch?: Date;
+  StartDefineWorkHoursTuesday?: string;
+  EndDefineWorkHoursTuesday?: string;
+  StartDefineWorkHoursTuesdayLunch?: string;
+  EndDefineWorkHoursTuesdayLunch?: string;
 
-  StartDefineWorkHoursWednesday?: Date;
-  EndDefineWorkHoursWednesday?: Date;
-  StartDefineWorkHoursWednesdayLunch?: Date;
-  EndDefineWorkHoursWednesdayLunch?: Date;
+  StartDefineWorkHoursWednesday?: string;
+  EndDefineWorkHoursWednesday?: string;
+  StartDefineWorkHoursWednesdayLunch?: string;
+  EndDefineWorkHoursWednesdayLunch?: string;
 
-  StartDefineWorkHoursThursday?: Date;
-  EndDefineWorkHoursThursday?: Date;
-  StartDefineWorkHoursThursdayLunch?: Date;
-  EndDefineWorkHoursThursdayLunch?: Date;
+  StartDefineWorkHoursThursday?: string;
+  EndDefineWorkHoursThursday?: string;
+  StartDefineWorkHoursThursdayLunch?: string;
+  EndDefineWorkHoursThursdayLunch?: string;
 
-  StartDefineWorkHoursFriday?: Date;
-  EndDefineWorkHoursFriday?: Date;
-  StartDefineWorkHoursFridayLunch?: Date;
-  EndDefineWorkHoursFridayLunch?: Date;
+  StartDefineWorkHoursFriday?: string;
+  EndDefineWorkHoursFriday?: string;
+  StartDefineWorkHoursFridayLunch?: string;
+  EndDefineWorkHoursFridayLunch?: string;
 
-  StartDefineWorkHoursSaturday?: Date;
-  EndDefineWorkHoursSaturday?: Date;
-  StartDefineWorkHoursSaturdayLunch?: Date;
-  EndDefineWorkHoursSaturdayLunch?: Date;
+  StartDefineWorkHoursSaturday?: string;
+  EndDefineWorkHoursSaturday?: string;
+  StartDefineWorkHoursSaturdayLunch?: string;
+  EndDefineWorkHoursSaturdayLunch?: string;
 
-  StartDefineWorkHoursSunday?: Date;
-  EndDefineWorkHoursSunday?: Date;
-  StartDefineWorkHoursSundayLunch?: Date;
-  EndDefineWorkHoursSundayLunch?: Date;
+  StartDefineWorkHoursSunday?: string;
+  EndDefineWorkHoursSunday?: string;
+  StartDefineWorkHoursSundayLunch?: string;
+  EndDefineWorkHoursSundayLunch?: string;
 
   ratingMessage?: string;
   status?: string;
   isDefault?: boolean;
   isDisplay?: boolean;
+  isGroup?: boolean;
 }
 
 interface Response {
@@ -125,7 +126,9 @@ const CreateWhatsAppService = async ({
 
   ratingMessage,
   isDefault = false,
-  isDisplay = false
+  isDisplay = false,
+  isGroup = false,
+
 }: Request): Promise<Response> => {
   const schema = Yup.object().shape({
     name: Yup.string()
@@ -146,7 +149,7 @@ const CreateWhatsAppService = async ({
   });
 
   try {
-    await schema.validate({ name, status, isDefault });
+    await schema.validate({ name, status, isDefault, isGroup });
   } catch (err) {
     throw new AppError(err.message);
   }
@@ -154,6 +157,8 @@ const CreateWhatsAppService = async ({
   const whatsappFound = await Whatsapp.findOne();
 
   isDefault = !whatsappFound;
+
+  isGroup = !whatsappFound;
 
   let oldDefaultWhatsapp: Whatsapp | null = null;
 
@@ -163,6 +168,14 @@ const CreateWhatsAppService = async ({
     });
     if (oldDefaultWhatsapp) {
       await oldDefaultWhatsapp.update({ isDefault: false });
+    }
+  }
+  if (isGroup) {
+    oldDefaultWhatsapp = await Whatsapp.findOne({
+      where: { isGroup: true }
+    });
+    if (oldDefaultWhatsapp) {
+      await oldDefaultWhatsapp.update({ isGroup: false });
     }
   }
 
@@ -225,7 +238,8 @@ const CreateWhatsAppService = async ({
 
       ratingMessage,
       isDefault,
-      isDisplay
+      isDisplay,
+      isGroup
     },
     { include: ["queues"] }
   );

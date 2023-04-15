@@ -11,6 +11,7 @@ const useTickets = ({
     date,
     showAll,
     queueIds,
+    userId,
     withUnreadMessages,
 }) => {
     const [loading, setLoading] = useState(true);
@@ -31,6 +32,7 @@ const useTickets = ({
                             date,
                             showAll,
                             queueIds,
+                            userId,
                             withUnreadMessages,
                         },
                     })
@@ -79,6 +81,7 @@ const useTickets = ({
         date,
         showAll,
         queueIds,
+        userId,
         withUnreadMessages,
     ])
 

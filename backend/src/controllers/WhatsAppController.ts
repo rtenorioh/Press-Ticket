@@ -18,6 +18,7 @@ interface WhatsappData {
   ratingMessage?: string;
   status?: string;
   isDefault?: boolean;
+  isGroup?: boolean;
 }
 
 export const index = async (req: Request, res: Response): Promise<Response> => {
@@ -40,7 +41,8 @@ const WhatsApps = await ListWhatsAppsService();
     isDefault,
     greetingMessage,
     farewellMessage,
-    queueIds
+    queueIds,
+    isGroup
   }: WhatsappData = req.body;
 
   const { whatsapp, oldDefaultWhatsapp } = await CreateWhatsAppService({
@@ -49,7 +51,8 @@ const WhatsApps = await ListWhatsAppsService();
     isDefault,
     greetingMessage,
     farewellMessage,
-    queueIds
+    queueIds,
+    isGroup
   });
 
   StartWhatsAppSession(whatsapp);

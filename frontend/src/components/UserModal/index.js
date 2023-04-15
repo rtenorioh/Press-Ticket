@@ -95,7 +95,7 @@ const UserModal = ({ open, onClose, userId }) => {
 		email: "",
 		password: "",
 		profile: "user",
-		allHistoric: "desabled",
+		allHistoric: "enabled",
 		startWork: "",
 		endWork: "",
 	};
@@ -107,7 +107,8 @@ const UserModal = ({ open, onClose, userId }) => {
 	const [showPassword, setShowPassword] = useState(false);
 	const [whatsappId, setWhatsappId] = useState(false);
 	const { loading, whatsApps } = useWhatsApps();
-	const allHistoric = useRef();
+	// const allHistoric = useRef();
+	const [allHistoric, setallHistoric] = useState(false);
 	const startWorkRef = useRef();
 	const endWorkRef = useRef();
 
@@ -136,7 +137,7 @@ const UserModal = ({ open, onClose, userId }) => {
 	};
 
 	const handleSaveUser = async values => {
-		const userData = { ...values, whatsappId, queueIds: selectedQueueIds };
+		const userData = { ...values, whatsappId, queueIds: selectedQueueIds, allHistoric };
 		try {
 			if (userId) {
 				await api.put(`/users/${userId}`, userData);
@@ -304,6 +305,7 @@ const UserModal = ({ open, onClose, userId }) => {
 													label={i18n.t("userModal.form.allHistoric")}
 													name="allHistoric"
 													labelId="allHistoric-selection-label"
+													onChange={(e) => setallHistoric(e.target.value)}
 													id="allHistoric-selection"
 													required
 												>

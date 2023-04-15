@@ -40,7 +40,6 @@ const useStyles = makeStyles(theme => ({
 		margin: theme.spacing(1),
 	}
 
-
 }));
 
 const IOSSwitch = withStyles((theme) => ({
@@ -198,8 +197,7 @@ const Settings = () => {
 								</Tooltip>
 							</Paper>
 
-
-							<Typography variant="body2" gutterBottom></Typography>
+							{/* <Typography variant="body2" gutterBottom></Typography>
 
 							<Paper className={classes.paper}>
 								<Tooltip title={i18n.t("settings.settings.allTicket.note")}>
@@ -212,7 +210,7 @@ const Settings = () => {
 										label={i18n.t("settings.settings.allTicket.name")}
 									/>
 								</Tooltip>
-							</Paper>
+							</Paper> */}
 
 							<Typography variant="body2" gutterBottom></Typography>
 
@@ -243,7 +241,6 @@ const Settings = () => {
 								</Tooltip>
 							</Paper>
 
-
 							<Typography variant="body2" gutterBottom></Typography>
 							<Paper className={classes.paper}>
 								<Tooltip title={i18n.t("settings.settings.sideMenu.note")}>
@@ -257,7 +254,6 @@ const Settings = () => {
 									/>
 								</Tooltip>
 							</Paper>
-
 
 						</Container>
 					</div>
@@ -306,7 +302,6 @@ const Settings = () => {
 									/>
 								</Tooltip>
 							</Paper>
-
 
 							<Typography variant="body2" gutterBottom></Typography>
 							<Paper className={classes.paper}>
@@ -386,9 +381,6 @@ const Settings = () => {
 					</div>
 				</div>
 			</div>
-
-
-
 		</div>
 	);
 };
