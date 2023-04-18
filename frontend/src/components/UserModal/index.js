@@ -398,11 +398,46 @@ const UserModal = ({ open, onClose, userId }) => {
 									<span className={classes.dividerText}>Liberações</span>
 								</div>
 
-
 								<Can
 									role={loggedInUser.profile}
 									perform="user-modal:editProfile"
 									yes={() => (!loading &&
+										<div className={classes.textField}>
+											<FormControl
+												variant="outlined"
+												className={classes.maxWidth}
+												margin="dense"
+												fullWidth
+											>
+												<>
+													<InputLabel id="profile-selection-input-label">
+														{i18n.t("userModal.form.allTicket")}
+													</InputLabel>
+
+													<Field
+														as={Select}
+														label={i18n.t("allTicket.form.viewTags")}
+														name="allTicket"
+														labelId="allTicket-selection-label"
+														id="allTicket-selection"
+														required
+													>
+														<MenuItem value="enabled">{i18n.t("userModal.form.allTicketEnabled")}</MenuItem>
+														<MenuItem value="desabled">{i18n.t("userModal.form.allTicketDesabled")}</MenuItem>
+													</Field>
+												</>
+											</FormControl>
+										</div>
+
+									)}
+								/>
+								<Can
+									role={loggedInUser.profile}
+									perform="user-modal:editProfile"
+									yes={() => (!loading &&
+
+
+
 										<div className={classes.formWrapper}>
 											<div className={classes.textField}>
 												<FormControl
@@ -457,6 +492,8 @@ const UserModal = ({ open, onClose, userId }) => {
 												</FormControl>
 											</div>
 										</div>
+
+
 									)}
 								/>
 
@@ -570,32 +607,6 @@ const UserModal = ({ open, onClose, userId }) => {
 									</div>
 								</div>
 
-								<div className={classes.textField}>
-									<FormControl
-										variant="outlined"
-										className={classes.maxWidth}
-										margin="dense"
-										fullWidth
-									>
-										<>
-											<InputLabel id="profile-selection-input-label">
-												{i18n.t("userModal.form.allTicket")}
-											</InputLabel>
-
-											<Field
-												as={Select}
-												label={i18n.t("allTicket.form.viewTags")}
-												name="allTicket"
-												labelId="allTicket-selection-label"
-												id="allTicket-selection"
-												required
-											>
-												<MenuItem value="enabled">{i18n.t("userModal.form.allTicketEnabled")}</MenuItem>
-												<MenuItem value="desabled">{i18n.t("userModal.form.allTicketDesabled")}</MenuItem>
-											</Field>
-										</>
-									</FormControl>
-								</div>
 							</DialogContent>
 							<DialogActions>
 								<Button
