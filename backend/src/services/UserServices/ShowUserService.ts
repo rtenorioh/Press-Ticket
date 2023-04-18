@@ -13,6 +13,12 @@ const ShowUserService = async (id: string | number): Promise<User> => {
       "tokenVersion",
       "whatsappId",
       "allHistoric",
+      "isRemoveTags",
+      "viewConection",
+      "viewSector",
+      "viewName",
+      "viewTags",
+      "allTicket",
       "startWork",
       "endWork"
     ],

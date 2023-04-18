@@ -22,7 +22,8 @@ import {
 	FormControl,
 	TextField,
 	InputAdornment,
-	IconButton
+	IconButton,
+	Typography
 } from '@material-ui/core';
 
 import {
@@ -76,9 +77,32 @@ const useStyles = makeStyles(theme => ({
 		display: 'flex',
 		flexWrap: 'wrap',
 	},
+	formWrapper: {
+		display: 'flex',
+	},
+	formWrapperChild: {
+		width: '50%',
+		marginRight: '16px',
+	},
+	divider: {
+		borderBottom: `1px solid ${theme.palette.divider}`,
+		display: "flex",
+		justifyContent: "center",
+		alignItems: "center",
+		marginBottom: theme.spacing(2),
+		marginTop: '20px'
+	},
+	dividerText: {
+		backgroundColor: theme.palette.background.paper,
+		color: theme.palette.text.secondary,
+		padding: theme.spacing(0, 1),
+		zIndex: 1,
+	},
 }));
 
 const UserSchema = Yup.object().shape({
+	allHistoric: Yup.string().nullable(),
+	isRemoveTags: Yup.string().nullable(),
 	name: Yup.string()
 		.min(2, "Too Short!")
 		.max(50, "Too Long!")
@@ -96,6 +120,12 @@ const UserModal = ({ open, onClose, userId }) => {
 		password: "",
 		profile: "user",
 		allHistoric: "enabled",
+		isRemoveTags: "enabled",
+		viewConection: "enabled",
+		viewSector: "enabled",
+		viewName: "enabled",
+		viewTags: "enabled",
+		allTicket: "desabled",
 		startWork: "",
 		endWork: "",
 	};
@@ -103,12 +133,12 @@ const UserModal = ({ open, onClose, userId }) => {
 	const { user: loggedInUser } = useContext(AuthContext);
 
 	const [user, setUser] = useState(initialState);
+	// const [allHistoric, setAllHistoric] = useState(initialState);
+	// const [isRemoveTags, setIsRemoveTags] = useState(initialState);
 	const [selectedQueueIds, setSelectedQueueIds] = useState([]);
 	const [showPassword, setShowPassword] = useState(false);
 	const [whatsappId, setWhatsappId] = useState(false);
 	const { loading, whatsApps } = useWhatsApps();
-	// const allHistoric = useRef();
-	const [allHistoric, setallHistoric] = useState(false);
 	const startWorkRef = useRef();
 	const endWorkRef = useRef();
 
@@ -137,7 +167,19 @@ const UserModal = ({ open, onClose, userId }) => {
 	};
 
 	const handleSaveUser = async values => {
-		const userData = { ...values, whatsappId, queueIds: selectedQueueIds, allHistoric };
+		const userData = {
+			...values,
+			whatsappId,
+			queueIds: selectedQueueIds,
+			allHistoric: values.allHistoric,
+			isRemoveTags: values.isRemoveTags,
+			viewConection: values.viewConection,
+			viewSector: values.viewSector,
+			viewName: values.viewName,
+			viewTags: values.viewTags,
+			allTicket: values.allTicket,
+		};
+		console.log(values.allHistoric)
 		try {
 			if (userId) {
 				await api.put(`/users/${userId}`, userData);
@@ -286,39 +328,9 @@ const UserModal = ({ open, onClose, userId }) => {
 										</FormControl>
 									)}
 								/>
-								<Can
-									role={loggedInUser.profile}
-									perform="user-modal:editProfile"
-									yes={() => (
-										<FormControl
-											variant="outlined"
-											className={classes.maxWidth}
-											margin="dense"
-											fullWidth>
-											<>
-												<InputLabel id="userModal-selection-input-label">
-													{i18n.t("userModal.form.allHistoric")}
-												</InputLabel>
-
-												<Field
-													as={Select}
-													label={i18n.t("userModal.form.allHistoric")}
-													name="allHistoric"
-													labelId="allHistoric-selection-label"
-													onChange={(e) => setallHistoric(e.target.value)}
-													id="allHistoric-selection"
-													required
-												>
-													<MenuItem value="enabled">{i18n.t("userModal.form.allHistoricEnabled")}</MenuItem>
-													<MenuItem value="desabled">{i18n.t("userModal.form.allHistoricDesabled")}</MenuItem>
-												</Field>
-											</>
-										</FormControl>
 
 
 
-									)}
-								/>
 								<Can
 									role={loggedInUser.profile}
 									perform="user-modal:editProfile"
@@ -377,6 +389,213 @@ const UserModal = ({ open, onClose, userId }) => {
 										</form>
 									)}
 								/>
+
+
+
+
+
+								<div className={classes.divider}>
+									<span className={classes.dividerText}>Liberações</span>
+								</div>
+
+
+								<Can
+									role={loggedInUser.profile}
+									perform="user-modal:editProfile"
+									yes={() => (!loading &&
+										<div className={classes.formWrapper}>
+											<div className={classes.textField}>
+												<FormControl
+													variant="outlined"
+													className={classes.maxWidth}
+													margin="dense"
+													fullWidth
+												>
+													<>
+														<InputLabel id="profile-selection-input-label">
+															{i18n.t("userModal.form.allHistoric")}
+														</InputLabel>
+
+														<Field
+															as={Select}
+															label={i18n.t("userModal.form.allHistoric")}
+															name="allHistoric"
+															labelId="allHistoric-selection-label"
+															id="allHistoric-selection"
+															required
+														>
+															<MenuItem value="enabled">{i18n.t("userModal.form.allHistoricEnabled")}</MenuItem>
+															<MenuItem value="desabled">{i18n.t("userModal.form.allHistoricDesabled")}</MenuItem>
+														</Field>
+													</>
+												</FormControl>
+											</div>
+											<div className={classes.textField}>
+												<FormControl
+													variant="outlined"
+													className={classes.maxWidth}
+													margin="dense"
+													fullWidth
+												>
+													<>
+														<InputLabel id="profile-selection-input-label">
+															{i18n.t("userModal.form.isRemoveTags")}
+														</InputLabel>
+
+														<Field
+															as={Select}
+															label={i18n.t("userModal.form.isRemoveTags")}
+															name="isRemoveTags"
+															labelId="isRemoveTags-selection-label"
+															id="isRemoveTags-selection"
+															required
+														>
+															<MenuItem value="enabled">{i18n.t("userModal.form.isRemoveTagsEnabled")}</MenuItem>
+															<MenuItem value="desabled">{i18n.t("userModal.form.isRemoveTagsDesabled")}</MenuItem>
+														</Field>
+													</>
+												</FormControl>
+											</div>
+										</div>
+									)}
+								/>
+
+								<div className={classes.formWrapper}>
+									<div className={classes.textField}>
+										<FormControl
+											variant="outlined"
+											className={classes.maxWidth}
+											margin="dense"
+											fullWidth
+										>
+											<>
+												<InputLabel id="profile-selection-input-label">
+													{i18n.t("userModal.form.viewConection")}
+												</InputLabel>
+
+												<Field
+													as={Select}
+													label={i18n.t("userModal.form.viewConection")}
+													name="viewConection"
+													labelId="viewConection-selection-label"
+													id="viewConection-selection"
+													required
+												>
+													<MenuItem value="enabled">{i18n.t("userModal.form.viewConectionEnabled")}</MenuItem>
+													<MenuItem value="desabled">{i18n.t("userModal.form.viewConectionDesabled")}</MenuItem>
+												</Field>
+											</>
+										</FormControl>
+									</div>
+									<div className={classes.textField}>
+										<FormControl
+											variant="outlined"
+											className={classes.maxWidth}
+											margin="dense"
+											fullWidth
+										>
+											<>
+												<InputLabel id="profile-selection-input-label">
+													{i18n.t("userModal.form.viewSector")}
+												</InputLabel>
+
+												<Field
+													as={Select}
+													label={i18n.t("userModal.form.viewSector")}
+													name="viewSector"
+													labelId="viewSector-selection-label"
+													id="viewSector-selection"
+													required
+												>
+													<MenuItem value="enabled">{i18n.t("userModal.form.viewSectorEnabled")}</MenuItem>
+													<MenuItem value="desabled">{i18n.t("userModal.form.viewSectorDesabled")}</MenuItem>
+												</Field>
+											</>
+										</FormControl>
+									</div>
+								</div>
+
+								<div className={classes.formWrapper}>
+									<div className={classes.textField}>
+										<FormControl
+											variant="outlined"
+											className={classes.maxWidth}
+											margin="dense"
+											fullWidth
+										>
+											<>
+												<InputLabel id="profile-selection-input-label">
+													{i18n.t("userModal.form.viewName")}
+												</InputLabel>
+
+												<Field
+													as={Select}
+													label={i18n.t("userModal.form.viewName")}
+													name="viewName"
+													labelId="viewName-selection-label"
+													id="viewName-selection"
+													required
+												>
+													<MenuItem value="enabled">{i18n.t("userModal.form.viewNameEnabled")}</MenuItem>
+													<MenuItem value="desabled">{i18n.t("userModal.form.viewNameDesabled")}</MenuItem>
+												</Field>
+											</>
+										</FormControl>
+									</div>
+									<div className={classes.textField}>
+										<FormControl
+											variant="outlined"
+											className={classes.maxWidth}
+											margin="dense"
+											fullWidth
+										>
+											<>
+												<InputLabel id="profile-selection-input-label">
+													{i18n.t("userModal.form.viewTags")}
+												</InputLabel>
+
+												<Field
+													as={Select}
+													label={i18n.t("userModal.form.viewTags")}
+													name="viewTags"
+													labelId="viewTags-selection-label"
+													id="viewTags-selection"
+													required
+												>
+													<MenuItem value="enabled">{i18n.t("userModal.form.viewTagsEnabled")}</MenuItem>
+													<MenuItem value="desabled">{i18n.t("userModal.form.viewTagsDesabled")}</MenuItem>
+												</Field>
+											</>
+										</FormControl>
+									</div>
+								</div>
+
+								<div className={classes.textField}>
+									<FormControl
+										variant="outlined"
+										className={classes.maxWidth}
+										margin="dense"
+										fullWidth
+									>
+										<>
+											<InputLabel id="profile-selection-input-label">
+												{i18n.t("userModal.form.allTicket")}
+											</InputLabel>
+
+											<Field
+												as={Select}
+												label={i18n.t("allTicket.form.viewTags")}
+												name="allTicket"
+												labelId="allTicket-selection-label"
+												id="allTicket-selection"
+												required
+											>
+												<MenuItem value="enabled">{i18n.t("userModal.form.allTicketEnabled")}</MenuItem>
+												<MenuItem value="desabled">{i18n.t("userModal.form.allTicketDesabled")}</MenuItem>
+											</Field>
+										</>
+									</FormControl>
+								</div>
 							</DialogContent>
 							<DialogActions>
 								<Button

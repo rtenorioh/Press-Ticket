@@ -11,9 +11,15 @@ interface Request {
   queueIds?: number[];
   profile?: string;
   allHistoric?: string;
+  isRemoveTags?: string;
   whatsappId?: number;
   startWork?: string;
   endWork?: string;
+  viewConection?: string;
+  viewSector?: string;
+  viewName?: string;
+  viewTags?: string;
+  allTicket?:string;
 }
 
 interface Response {
@@ -29,12 +35,20 @@ const CreateUserService = async ({
   name,
   queueIds = [],
   profile = "admin",
-  allHistoric = "enabled",
+  allHistoric,
+  isRemoveTags,
   whatsappId,
   startWork,
-  endWork
+  endWork,
+  viewConection,
+  viewSector,
+  viewName,
+  viewTags,
+  allTicket,
 }: Request): Promise<Response> => {
   const schema = Yup.object().shape({
+    allHistoric: Yup.string(),
+    isRemoveTags: Yup.string(),
     name: Yup.string().required().min(2),
     email: Yup.string()
       .email()
@@ -54,7 +68,11 @@ const CreateUserService = async ({
   });
 
   try {
-    await schema.validate({ email, password, name, allHistoric });
+    await schema.validate({ 
+      email, 
+      password, 
+      name});
+
   } catch (err) {
     throw new AppError(err.message);
   }
@@ -66,9 +84,15 @@ const CreateUserService = async ({
       name,
       profile,
       allHistoric,
+      isRemoveTags,
       whatsappId: whatsappId || null,
       startWork,
-      endWork
+      endWork,
+      viewConection,
+      viewSector,
+      viewName,
+      viewTags,
+      allTicket,
     },
     { include: ["queues", "whatsapp"] }
   );

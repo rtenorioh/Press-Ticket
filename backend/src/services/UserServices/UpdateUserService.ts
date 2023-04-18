@@ -12,8 +12,14 @@ interface UserData {
   queueIds?: number[];
   whatsappId?: number;
   allHistoric?: string;
+  isRemoveTags?: string;
   startWork?: string;
   endWork?: string;
+  viewConection?: string;
+  viewSector?: string;
+  viewName?: string;
+  viewTags?: string;
+  allTicket?: string;
 }
 
 interface Request {
@@ -26,7 +32,7 @@ interface Response {
   name: string;
   email: string;
   profile: string;
-  
+
 }
 
 const UpdateUserService = async ({
@@ -40,6 +46,12 @@ const UpdateUserService = async ({
     email: Yup.string().email(),
     profile: Yup.string(),
     allHistoric: Yup.string(),
+    isRemoveTags: Yup.string(),
+    viewConection: Yup.string(),
+    viewSector: Yup.string(),
+    viewName: Yup.string(),
+    viewTags: Yup.string(),
+    allTicket: Yup.string(),
     password: Yup.string()
   });
 
@@ -49,14 +61,32 @@ const UpdateUserService = async ({
     profile,
     name,
     allHistoric,
+    isRemoveTags,
     queueIds = [],
     whatsappId,
     startWork,
-    endWork
+    endWork,
+    viewConection,
+    viewSector,
+    viewName,
+    viewTags,
+    allTicket,
   } = userData;
 
   try {
-    await schema.validate({ email, password, profile, name, allHistoric });
+    await schema.validate({
+      email,
+      password,
+      profile,
+      name,
+      allHistoric,
+      isRemoveTags,
+      viewConection,
+      viewSector,
+      viewName,
+      viewTags,
+      allTicket,
+    });
   } catch (err) {
     throw new AppError(err.message);
   }
@@ -66,10 +96,16 @@ const UpdateUserService = async ({
     password,
     profile,
     allHistoric,
+    isRemoveTags,
     name,
     whatsappId: whatsappId || null,
     startWork,
-    endWork
+    endWork,
+    viewConection,
+    viewSector,
+    viewName,
+    viewTags,
+    allTicket,
   });
 
   await user.$set("queues", queueIds);

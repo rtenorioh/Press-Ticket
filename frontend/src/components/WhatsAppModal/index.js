@@ -120,30 +120,30 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
   const [defineWorkHours, SetDefineWorkHours] = useState("");
   const [outOfWorkMessage, setOutOfWorkMessage] = useState("");
 
-  const [StartDefineWorkHoursMonday, setStartDefineWorkHoursMonday] = useState("");
-  const [EndDefineWorkHoursMonday, setEndDefineWorkHoursMonday] = useState("");
-  const [StartDefineWorkHoursMondayLunch, setStartDefineWorkHoursMondayLunch] = useState("");
-  const [EndDefineWorkHoursMondayLunch, setEndDefineWorkHoursMondayLunch] = useState("");
+  const [StartDefineWorkHoursMonday, setStartDefineWorkHoursMonday] = useState('08:00');
+  const [EndDefineWorkHoursMonday, setEndDefineWorkHoursMonday] = useState('18:00')
+  const [StartDefineWorkHoursMondayLunch, setStartDefineWorkHoursMondayLunch] = useState('12:00')
+  const [EndDefineWorkHoursMondayLunch, setEndDefineWorkHoursMondayLunch] = useState('13:00')
 
-  const [StartDefineWorkHoursTuesday, setStartDefineWorkHoursTuesday] = useState("");
-  const [EndDefineWorkHoursTuesday, setEndDefineWorkHoursTuesday] = useState("");
-  const [StartDefineWorkHoursTuesdayLunch, setStartDefineWorkHoursTuesdayLunch] = useState("");
-  const [EndDefineWorkHoursTuesdayLunch, setEndDefineWorkHoursTuesdayLunch] = useState("");
+  const [StartDefineWorkHoursTuesday, setStartDefineWorkHoursTuesday] = useState('08:00')
+  const [EndDefineWorkHoursTuesday, setEndDefineWorkHoursTuesday] = useState('18:00')
+  const [StartDefineWorkHoursTuesdayLunch, setStartDefineWorkHoursTuesdayLunch] = useState('12:00')
+  const [EndDefineWorkHoursTuesdayLunch, setEndDefineWorkHoursTuesdayLunch] = useState('13:00')
 
-  const [StartDefineWorkHoursWednesday, setStartDefineWorkHoursWednesday] = useState("");
-  const [EndDefineWorkHoursWednesday, setEndDefineWorkHoursWednesday] = useState("");
-  const [StartDefineWorkHoursWednesdayLunch, setStartDefineWorkHoursWednesdayLunch] = useState("");
-  const [EndDefineWorkHoursWednesdayLunch, setEndDefineWorkHoursWednesdayLunch] = useState("");
+  const [StartDefineWorkHoursWednesday, setStartDefineWorkHoursWednesday] = useState('08:00')
+  const [EndDefineWorkHoursWednesday, setEndDefineWorkHoursWednesday] = useState('18:00')
+  const [StartDefineWorkHoursWednesdayLunch, setStartDefineWorkHoursWednesdayLunch] = useState('12:00')
+  const [EndDefineWorkHoursWednesdayLunch, setEndDefineWorkHoursWednesdayLunch] = useState('13:00')
 
-  const [StartDefineWorkHoursThursday, setStartDefineWorkHoursThursday] = useState("");
-  const [EndDefineWorkHoursThursday, setEndDefineWorkHoursThursday] = useState("");
-  const [StartDefineWorkHoursThursdayLunch, setStartDefineWorkHoursThursdayLunch] = useState("");
-  const [EndDefineWorkHoursThursdayLunch, setEndDefineWorkHoursThursdayLunch] = useState("");
+  const [StartDefineWorkHoursThursday, setStartDefineWorkHoursThursday] = useState('08:00')
+  const [EndDefineWorkHoursThursday, setEndDefineWorkHoursThursday] = useState('18:00')
+  const [StartDefineWorkHoursThursdayLunch, setStartDefineWorkHoursThursdayLunch] = useState('12:00')
+  const [EndDefineWorkHoursThursdayLunch, setEndDefineWorkHoursThursdayLunch] = useState('13:00')
 
-  const [StartDefineWorkHoursFriday, setStartDefineWorkHoursFriday] = useState("");
-  const [EndDefineWorkHoursFriday, setEndDefineWorkHoursFriday] = useState("");
-  const [StartDefineWorkHoursFridayLunch, setStartDefineWorkHoursFridayLunch] = useState("");
-  const [EndDefineWorkHoursFridayLunch, setEndDefineWorkHoursFridayLunch] = useState("");
+  const [StartDefineWorkHoursFriday, setStartDefineWorkHoursFriday] = useState('08:00')
+  const [EndDefineWorkHoursFriday, setEndDefineWorkHoursFriday] = useState('18:00')
+  const [StartDefineWorkHoursFridayLunch, setStartDefineWorkHoursFridayLunch] = useState('12:00')
+  const [EndDefineWorkHoursFridayLunch, setEndDefineWorkHoursFridayLunch] = useState('13:00')
 
   const [StartDefineWorkHoursSaturday, setStartDefineWorkHoursSaturday] = useState("");
   const [EndDefineWorkHoursSaturday, setEndDefineWorkHoursSaturday] = useState("");

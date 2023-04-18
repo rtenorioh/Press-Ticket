@@ -1,18 +1,21 @@
 import { Chip, Paper, TextField } from "@material-ui/core";
 import Autocomplete from "@material-ui/lab/Autocomplete";
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { isArray, isString } from "lodash";
 import toastError from "../../errors/toastError";
 import api from "../../services/api";
 
-export function TagsContainer ({ contact }) {
+import { AuthContext } from "../../context/Auth/AuthContext";
+
+
+export function TagsContainer({ contact }) {
 
     const [tags, setTags] = useState([]);
     const [selecteds, setSelecteds] = useState([]);
-
+    const { user } = useContext(AuthContext);
     useEffect(() => {
         if (contact) {
-            async function fetchData () {
+            async function fetchData() {
                 await loadTags();
                 if (Array.isArray(contact.tags)) {
                     setSelecteds(contact.tags);
@@ -23,6 +26,7 @@ export function TagsContainer ({ contact }) {
     }, [contact]);
 
     const createTag = async (data) => {
+
         try {
             const { data: responseData } = await api.post(`/tags`, data);
             return responseData;
@@ -69,10 +73,13 @@ export function TagsContainer ({ contact }) {
         setSelecteds(optionsChanged);
         await syncTags({ contactId: contact.id, tags: optionsChanged });
     }
-
+    const isRemoveTags = user.isRemoveTags === 'enabled';
     return (
-        <Paper style={{padding: 12}}>
+        <Paper style={{ padding: 12 }}>
+
             <Autocomplete
+                clearOnBlur={false}
+                disableClearable={true}
                 multiple
                 size="small"
                 options={tags}
@@ -82,20 +89,21 @@ export function TagsContainer ({ contact }) {
                 getOptionLabel={(option) => option.name}
                 renderTags={(value, getTagProps) =>
                     value.map((option, index) => (
+
                         <Chip
                             variant="outlined"
-                            style={{backgroundColor: option.color || '#eee', textShadow: '1px 1px 1px #000', color: 'white'}}
+                            style={{ backgroundColor: option.color || '#eee', textShadow: '1px 1px 1px #000', color: 'white', padding: 5 }}
                             label={option.name}
-                            {...getTagProps({ index })}
+                            {...(isRemoveTags && getTagProps({ index }))}
                             size="small"
                         />
                     ))
                 }
                 renderInput={(params) => (
-                    <TextField {...params} variant="outlined" placeholder="Tags" />
+                    <TextField {...params} variant="outlined" placeholder="Tags" clearOnBlur={false} />
                 )}
                 PaperComponent={({ children }) => (
-                    <Paper style={{width: 400, marginLeft: 12}}>
+                    <Paper style={{ width: 400, marginLeft: 12 }}>
                         {children}
                     </Paper>
                 )}

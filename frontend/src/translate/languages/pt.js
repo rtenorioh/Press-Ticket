@@ -301,7 +301,31 @@ const messages = {
           endWork: "Termino",
           allHistoric: "Ver históricos",
           allHistoricEnabled: "Habilitado",
-          allHistoricDesabled: "Desabilitado"
+          allHistoricDesabled: "Desabilitado",
+
+          isRemoveTags: "Remover tags",
+          isRemoveTagsEnabled: "Habilitado",
+          isRemoveTagsDesabled: "Desabilitado",
+
+          viewConection: "Ver conexões",
+          viewConectionEnabled: "Habilitado",
+          viewConectionDesabled: "Desabilitado",
+
+          viewSector: "Ver setores",
+          viewSectorEnabled: "Habilitado",
+          viewSectorDesabled: "Desabilitado",
+
+          viewName: "Ver nome",
+          viewNameEnabled: "Habilitado",
+          viewNameDesabled: "Desabilitado",
+
+          viewTags: "Ver tags",
+          viewTagsEnabled: "Habilitado",
+          viewTagsDesabled: "Desabilitado",
+
+          allTicket: "Ver chamados sem setor",
+          allTicketEnabled: "Habilitado",
+          allTicketDesabled: "Desabilitado",
         },
         buttons: {
           okAdd: "Adicionar",
@@ -533,22 +557,6 @@ const messages = {
           userCreation: {
             name: "Criação de atendente",
             note: "Permitir a criação de atendente",
-            options: {
-              enabled: "Ativado",
-              disabled: "Desativado",
-            },
-          },
-          allTicket: {
-            name: "Todos podem ver o chamado sem departamento",
-            note: "Ative essa função para deixar todos os usuarios verem os chamados sem setor",
-            options: {
-              enabled: "Ativado",
-              disabled: "Desativado",
-            },
-          },
-          allHistoric: {
-            name: "Todos podem ver o histórico de mensagem do cliente",
-            note: "Ative essa função para deixar todos os usuarios verem o histórico do cliente, caso desative só é possivel ver dentro dos setores.",
             options: {
               enabled: "Ativado",
               disabled: "Desativado",

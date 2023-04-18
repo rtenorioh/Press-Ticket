@@ -40,8 +40,15 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     profile,
     queueIds,
     whatsappId,
+    allHistoric,
+    isRemoveTags,
     startWork,
-    endWork
+    endWork,
+    viewConection,
+    viewSector,
+    viewName,
+    viewTags,
+    allTicket,
   } = req.body;
 
   if (
@@ -60,8 +67,15 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     profile,
     queueIds,
     whatsappId,
+    allHistoric,
+    isRemoveTags,
     startWork,
-    endWork
+    endWork,
+    viewConection,
+    viewSector,
+    viewName,
+    viewTags,
+    allTicket,
   });
 
   const io = getIO();

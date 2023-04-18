@@ -48,15 +48,33 @@ class User extends Model<User> {
   @Column
   profile: string;
 
-  @Column
-  allHistoric: string;
-
   @ForeignKey(() => Whatsapp)
   @Column
   whatsappId: number;
 
   @BelongsTo(() => Whatsapp)
   whatsapp: Whatsapp;
+
+  @Column
+  allHistoric: string;
+
+  @Column
+  isRemoveTags: string;
+
+  @Column
+  viewConection: string;
+
+  @Column
+  viewSector: string;
+
+  @Column
+  viewName: string;
+
+  @Column
+  viewTags: string;
+
+  @Column
+  allTicket: string;
 
   @Default("00:00")
   @Column

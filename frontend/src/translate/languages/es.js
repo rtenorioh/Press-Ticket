@@ -297,9 +297,34 @@ const messages = {
           asistente: "Asistente",
           startWork: "Inicio",
           endWork: "Finalizar",
+
           allHistoric: "Ver Historiales",
           allHistoricEnabled: "Activado",
-          allHistoricDesabled: "Desactivado"
+          allHistoricDesabled: "Desactivado",
+
+          isRemoveTags: "Eliminar etiquetas",
+          isRemoveTagsEnabled: "Activado",
+          isRemoveTagsDesabled: "Desactivado",
+
+          viewConection: "Ver conexiones",
+          viewConectionEnabled: "Activado",
+          viewConectionDesabled: "Desactivado",
+
+          viewSector: "Ver sectores",
+          viewSectorEnabled: "Activado",
+          viewSectorDesabled: "Desactivado",
+
+          viewName: "Ver nombre",
+          viewNameEnabled: "Activado",
+          viewNameDesabled: "Desactivado",
+
+          viewTags: "Ver etiquetas",
+          viewTagsEnabled: "Activado",
+          viewTagsDesabled: "Desactivado",
+
+          allTicket: "Ver entradas sin sector",
+          allTicketEnabled: "Activado",
+          allTicketDesabled: "Desactivado",
         },
         buttons: {
           okAdd: "Agregar",
@@ -539,14 +564,6 @@ const messages = {
           allTicket: {
             name: "Todo el mundo puede ver el ticket sin departamento.",
             note: "Active esta función para que todos los usuarios vean los boletos sin sector.",
-            options: {
-              enabled: "Habilitado",
-              disabled: "Deshabilitado",
-            },
-          },
-          allHistoric: {
-            name: "Todos pueden ver el historial de mensajes del cliente.",
-            note: "Activa esta función para que todos los usuarios vean el historial del cliente, si está desactivada solo es posible ver dentro de los sectores.",
             options: {
               enabled: "Habilitado",
               disabled: "Deshabilitado",

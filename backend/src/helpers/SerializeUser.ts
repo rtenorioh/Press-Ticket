@@ -9,6 +9,13 @@ interface SerializedUser {
   profile: string;
   queues: Queue[];
   whatsapp: Whatsapp;
+  allHistoric: string,
+  isRemoveTags: string,
+  viewConection: string,
+  viewSector: string,
+  viewName: string,
+  viewTags: string,
+  allTicket: string,
   startWork: string;
   endWork: string;
 }
@@ -21,6 +28,13 @@ export const SerializeUser = (user: User): SerializedUser => {
     profile: user.profile,
     queues: user.queues,
     whatsapp: user.whatsapp,
+    allHistoric: user.allHistoric,
+    isRemoveTags: user.isRemoveTags,
+    viewConection: user.viewConection,
+    viewSector: user.viewSector,
+    viewName: user.viewName,
+    viewTags: user.viewTags,
+    allTicket: user.allTicket,
     startWork: user.startWork,
     endWork: user.endWork
   };
