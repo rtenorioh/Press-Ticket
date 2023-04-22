@@ -24,7 +24,7 @@ import {
   DoneAll,
   ExpandMore,
   GetApp,
-  SupportAgent,
+  HeadsetMicOutlined,
 } from "@material-ui/icons";
 
 import MarkdownWrapper from "../MarkdownWrapper";
@@ -572,7 +572,7 @@ const MessagesList = ({ ticketId, isGroup }) => {
   };
 
   const renderMessageAck = (message) => {
-    if (message.ack === 0) {
+    if (message.ack === 0 && message.isPrivate === false) {
       return <AccessTime fontSize="small" className={classes.ackIcons} />;
     }
     if (message.ack === 1) {
@@ -584,8 +584,10 @@ const MessagesList = ({ ticketId, isGroup }) => {
     if (message.ack === 3 || message.ack === 4) {
       return <DoneAll fontSize="small" className={classes.ackDoneAllIcon} />;
     }
-    if (message.isPrivate === true) {
-      return <SupportAgent fontSize="small" className={classes.ackIcons} />;
+    if (message.ack === 0 && message.isPrivate === true) {
+      return (
+        <HeadsetMicOutlined fontSize="small" className={classes.ackIcons} />
+      );
     }
   };
 
