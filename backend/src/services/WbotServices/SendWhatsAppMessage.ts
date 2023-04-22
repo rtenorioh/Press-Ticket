@@ -36,7 +36,6 @@ const SendWhatsAppMessage = async ({
         linkPreview: false
       }
     );
-
     await ticket.update({ lastMessage: body });
     return sentMessage;
   } catch (err) {

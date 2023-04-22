@@ -7,6 +7,11 @@ import React, {
 import { useParams } from "react-router-dom";
 import "emoji-mart/css/emoji-mart.css";
 import { Picker } from "emoji-mart";
+import MicRecorder from "mic-recorder-to-mp3";
+import clsx from "clsx";
+
+import Checkbox from "@material-ui/core/Checkbox";
+import { green } from "@material-ui/core/colors";
 import {
   CircularProgress,
   ClickAwayListener,
@@ -27,7 +32,6 @@ import {
   ListItemAvatar,
   Avatar
 } from "@material-ui/core";
-import { green } from "@material-ui/core/colors";
 import {
   AttachFile,
   Cancel,
@@ -39,8 +43,6 @@ import {
   MoreVert,
   Send
 } from "@material-ui/icons";
-import MicRecorder from "mic-recorder-to-mp3";
-import clsx from "clsx";
 import { ReplyMessageContext } from "../../context/ReplyingMessage/ReplyingMessageContext";
 import { AuthContext } from "../../context/Auth/AuthContext";
 import { i18n } from "../../translate/i18n";
@@ -231,7 +233,9 @@ const MessageInput = ({ ticketStatus }) => {
   const inputRef = useRef();
   const [onDragEnter, setOnDragEnter] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
-  const { setReplyingMessage, replyingMessage } = useContext(ReplyMessageContext);
+  const { setReplyingMessage, replyingMessage } = useContext
+  (ReplyMessageContext);
+ const [isPrivate, setIsPrivate] = useState(false);
   const { user } = useContext(AuthContext);
   const [signMessage, setSignMessage] = useLocalStorage("signOption", true);
 
@@ -305,6 +309,7 @@ const MessageInput = ({ ticketStatus }) => {
     }
     const formData = new FormData();
     formData.append("fromMe", true);
+    formData.append("isPrivate", isPrivate);
     medias.forEach((media) => {
       formData.append("medias", media);
       formData.append("body", media.name);
@@ -326,13 +331,20 @@ const MessageInput = ({ ticketStatus }) => {
       read: 1,
       fromMe: true,
       mediaUrl: "",
-      body: signMessage
-        ? `*${user?.name}:*\n${inputMessage.trim()}`
-        : inputMessage.trim(),
+      body:"",
       quotedMsg: replyingMessage,
+      isPrivate: isPrivate
     };
+    if (isPrivate) {
+      message.body = `*${user?.name} (privado):*\n${inputMessage.trim()}`;
+    } else {
+      message.body = signMessage
+        ? `*${user?.name}:*\n${inputMessage.trim()}`
+        : inputMessage.trim();
+    }
     try {
       await api.post(`/messages/${ticketId}`, message);
+      console.log(message)
     } catch (err) {
       toastError(err);
     }
@@ -551,7 +563,21 @@ const MessageInput = ({ ticketStatus }) => {
                 </ClickAwayListener>
               </div>
             ) : null}
-
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                marginLeft: "-8px",
+              }}
+            >
+              <Checkbox
+                id="private-checkbox"
+                checked={isPrivate}
+                onChange={(e) => setIsPrivate(e.target.checked, console.log(isPrivate))}
+                color="primary"
+              />
+              <span style={{ marginLeft: "5px" }}>Mensaje privado</span>
+            </div>
             <input
               multiple
               type="file"

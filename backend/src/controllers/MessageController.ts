@@ -3,6 +3,7 @@ import { Request, Response } from "express";
 import SetTicketMessagesAsRead from "../helpers/SetTicketMessagesAsRead";
 import { getIO } from "../libs/socket";
 import Message from "../models/Message";
+import CreateMessageService from "../services/MessageServices/CreateMessageService";
 
 import ListMessagesService from "../services/MessageServices/ListMessagesService";
 import ShowTicketService from "../services/TicketServices/ShowTicketService";
@@ -18,6 +19,7 @@ type MessageData = {
   body: string;
   fromMe: boolean;
   read: boolean;
+  isPrivate: boolean;
   quotedMsg?: Message;
 };
 
@@ -37,23 +39,30 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
 
 export const store = async (req: Request, res: Response): Promise<Response> => {
   const { ticketId } = req.params;
-  const { body, quotedMsg }: MessageData = req.body;
+  const { body, quotedMsg, isPrivate }: MessageData = req.body;
   const medias = req.files as Express.Multer.File[];
 
   const ticket = await ShowTicketService(ticketId);
 
   SetTicketMessagesAsRead(ticket);
-
   if (medias) {
     await Promise.all(
       medias.map(async (media: Express.Multer.File) => {
         await SendWhatsAppMedia({ media, ticket });
       })
     );
+  } else if (isPrivate) {
+    const messageData = {
+      id: Math.random().toString(36).substring(2, 8),
+      ticketId: parseInt(ticketId, 2),
+      fromMe: true,
+      body,
+      isPrivate: true
+    };
+    await CreateMessageService({ messageData });
   } else {
     await SendWhatsAppMessage({ body, ticket, quotedMsg });
   }
-
   return res.send();
 };
 

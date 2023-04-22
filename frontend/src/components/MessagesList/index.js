@@ -773,12 +773,13 @@ const MessagesList = ({ ticketId, isGroup }) => {
             </React.Fragment>
           );
         } else {
+          //Si los mensajes son enviados por mi.
           return (
             <React.Fragment key={message.id}>
               {renderDailyTimestamps(message, index)}
               {renderMessageDivider(message, index)}
               {renderNumberTicket(message, index)}
-              <div className={classes.messageRight}>
+              <div className={!message.isPrivate ? (classes.messageRight) : classes.messageCenter}>
                 <IconButton
                   variant="contained"
                   size="small"
@@ -789,9 +790,11 @@ const MessagesList = ({ ticketId, isGroup }) => {
                 >
                   <ExpandMore />
                 </IconButton>
-                {(message.mediaUrl || message.mediaType === "location" || message.mediaType === "vcard"
-                  //|| message.mediaType === "multi_vcard" 
-                ) && checkMessageMedia(message)}
+                {(message.mediaUrl ||
+                  message.mediaType === "location" ||
+                  message.mediaType === "vcard") &&
+                  //|| message.mediaType === "multi_vcard"
+                  checkMessageMedia(message)}
                 <div
                   className={clsx(classes.textContentItem, {
                     [classes.textContentItemDeleted]: message.isDeleted,
