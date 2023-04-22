@@ -7,28 +7,11 @@ import React, {
 import { useParams } from "react-router-dom";
 import "emoji-mart/css/emoji-mart.css";
 import { Picker } from "emoji-mart";
-<<<<<<< HEAD
 import MicRecorder from "mic-recorder-to-mp3";
 import clsx from "clsx";
 
-import { makeStyles } from "@material-ui/core/styles";
-import Paper from "@material-ui/core/Paper";
-import InputBase from "@material-ui/core/InputBase";
 import Checkbox from "@material-ui/core/Checkbox";
-import CircularProgress from "@material-ui/core/CircularProgress";
 import { green } from "@material-ui/core/colors";
-import AttachFileIcon from "@material-ui/icons/AttachFile";
-import IconButton from "@material-ui/core/IconButton";
-import MoreVert from "@material-ui/icons/MoreVert";
-import MoodIcon from "@material-ui/icons/Mood";
-import SendIcon from "@material-ui/icons/Send";
-import CancelIcon from "@material-ui/icons/Cancel";
-import ClearIcon from "@material-ui/icons/Clear";
-import MicIcon from "@material-ui/icons/Mic";
-import CheckCircleOutlineIcon from "@material-ui/icons/CheckCircleOutline";
-import HighlightOffIcon from "@material-ui/icons/HighlightOff";
-=======
->>>>>>> c5a842da034623c837936c3136f79ceff347f9bc
 import {
   CircularProgress,
   ClickAwayListener,
@@ -49,7 +32,6 @@ import {
   ListItemAvatar,
   Avatar
 } from "@material-ui/core";
-import { green } from "@material-ui/core/colors";
 import {
   AttachFile,
   Cancel,
@@ -61,8 +43,6 @@ import {
   MoreVert,
   Send
 } from "@material-ui/icons";
-import MicRecorder from "mic-recorder-to-mp3";
-import clsx from "clsx";
 import { ReplyMessageContext } from "../../context/ReplyingMessage/ReplyingMessageContext";
 import { AuthContext } from "../../context/Auth/AuthContext";
 import { i18n } from "../../translate/i18n";
