@@ -343,7 +343,11 @@ const messages = {
           spy: "Espiar",
           close: "Encerrar",
           reopen: "Reabrir",
-          return: "Mover para aguardando"
+          return: "Mover para aguardando",
+          connection: "Conexão",
+          user: "Atendente",
+          queue: "Setor",
+          tags: "Tags"
         },
         buttons: {
           accept: "Responder",
@@ -358,6 +362,16 @@ const messages = {
       },
       newTicketModal: {
         title: "Criar Ticket",
+        fieldLabel: "Digite para pesquisar o contato",
+        add: "Adicionar",
+        buttons: {
+          ok: "Salvar",
+          cancel: "Cancelar",
+        },
+      },
+      newTicketModalContactPage: {
+        title: "Criar Ticket",
+        queue: "Selecione um Setor",
         fieldLabel: "Digite para pesquisar o contato",
         add: "Adicionar",
         buttons: {
@@ -650,6 +664,8 @@ const messages = {
         ERR_CONNECTION_CREATION_COUNT: "Limite de conexões atingido, para alterar entre em contato com o suporte.",
         ERR_NO_TAG_FOUND: "Tag não encontrada.",
         ERR_OUT_OF_HOURS: "Fora do Horário de Expediente!",
+        ERR_OPEN_USER_TICKET: "Já existe um ticket aberto para este contato com ",
+        ERR_NONE_USER_TICKET: "Já existe um ticket aberto para este contato."
       },
     },
   },

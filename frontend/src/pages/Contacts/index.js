@@ -43,6 +43,7 @@ import Title from "../../components/Title";
 import MainHeaderButtonsWrapper from "../../components/MainHeaderButtonsWrapper";
 import MainContainer from "../../components/MainContainer";
 import { Can } from "../../components/Can";
+import NewTicketModalPageContact from "../../components/NewTicketModalPageContact";
 
 import toastError from "../../errors/toastError";
 import { AuthContext } from "../../context/Auth/AuthContext";
@@ -112,9 +113,7 @@ const useStyles = makeStyles((theme) => ({
 const Contacts = () => {
   const classes = useStyles();
   const history = useHistory();
-
   const { user } = useContext(AuthContext);
-
   const [loading, setLoading] = useState(false);
   const [pageNumber, setPageNumber] = useState(1);
   const [searchParam, setSearchParam] = useState("");
@@ -125,7 +124,9 @@ const Contacts = () => {
   const [deletingAllContact, setDeletingAllContact] = useState(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [hasMore, setHasMore] = useState(false);
-
+  const [newTicketModalOpen, setNewTicketModalOpen] = useState(false);
+  const [contactTicket, setContactTicket] = useState({});
+  
   useEffect(() => {
     dispatch({ type: "RESET" });
     setPageNumber(1);
@@ -183,18 +184,10 @@ const Contacts = () => {
     setContactModalOpen(false);
   };
 
-  const handleSaveTicket = async (contactId) => {
-    if (!contactId) return;
-    setLoading(true);
-    try {
-      const { data: ticket } = await api.post("/tickets", {
-        contactId: contactId,
-        userId: user?.id,
-        status: "open",
-      });
+  const handleCloseOrOpenTicket = (ticket) => {
+    setNewTicketModalOpen(false);
+    if (ticket !== undefined && ticket.id !== undefined) {
       history.push(`/tickets/${ticket.id}`);
-    } catch (err) {
-      toastError(err);
     }
     setLoading(false);
   };
@@ -250,8 +243,17 @@ const Contacts = () => {
     }
   };
 
+  console.log("USER", user.profile)
+
   return (
     <MainContainer className={classes.mainContainer}>
+      <NewTicketModalPageContact
+        modalOpen={newTicketModalOpen}
+        initialContact={contactTicket}
+        onClose={(ticket) => {
+          handleCloseOrOpenTicket(ticket);
+        }}
+      />
       <ContactModal
         open={contactModalOpen}
         onClose={handleCloseContactModal}
@@ -392,23 +394,18 @@ const Contacts = () => {
                     {<Avatar src={contact.profilePicUrl} className={classes.avatar} />}
                   </TableCell>
                   <TableCell>{contact.name}</TableCell>
-                  <TableCell align="center">{contact.number}</TableCell>
+                  <TableCell align="center">{user.profile === "admin" ? contact.number : contact.number.slice(0,-4) + "****"}</TableCell>
                   <TableCell align="center">{contact.email}</TableCell>
                   <TableCell align="center">
-                    <Can
-                      role={user.profile}
-                      perform="drawer-admin-items:view"
-                      yes={() => (
-                        <>
-                          <IconButton
-                            size="small"
-                            onClick={() => handleSaveTicket(contact.id)}
-                          >
-                            <WhatsApp color="secondary" />
-                          </IconButton>
-                        </>
-                      )}
-                    />
+                    <IconButton
+                      size="small"
+                      onClick={() => {
+                        setContactTicket(contact);
+                        setNewTicketModalOpen(true);
+                      }}
+                    >
+                      <WhatsApp color="secondary" />
+                    </IconButton>
                     <IconButton
                       size="small"
                       onClick={() => hadleEditContact(contact.id)}

@@ -343,7 +343,11 @@ const messages = {
           spy: "Espía",
           close: "Cerca",
           reopen: "Reabrir",
-          return: "Mover a espera"
+          return: "Mover a espera",
+          connection: "Conexión",
+          user: "Asistente",
+          queue: "Sector",
+          tags: "Etiquetas"
         },
         buttons: {
           accept: "Responder",
@@ -359,6 +363,16 @@ const messages = {
       newTicketModal: {
         title: "Crear ticket",
         fieldLabel: "Entrar para buscar contacto",
+        add: "Agregar",
+        buttons: {
+          ok: "Guardar",
+          cancel: "Cancelar",
+        },
+      },
+      newTicketModalContactPage: {
+        title: "Crear Ticket",
+        queue: "Seleccione un Sector",
+        fieldLabel: "Escriba para buscar el contacto",
         add: "Agregar",
         buttons: {
           ok: "Guardar",
@@ -591,7 +605,7 @@ const messages = {
         extraInfo: "Otra información",
       },
       copyToClipboard: {
-        copy:"Copiar",
+        copy: "Copiar",
         copied: "Copiado"
       },
       ticketOptionsMenu: {
@@ -649,6 +663,8 @@ const messages = {
         ERR_USER_CREATION_COUNT: "Límite de asistentes alcanzado, comuníquese con soporte para cambiar",
         ERR_CONNECTION_CREATION_COUNT: "Límite de conexión alcanzado, comuníquese con soporte para cambiar.",
         ERR_NO_TAG_FOUND: "Etiqueta no encontrada.",
+        ERR_OPEN_USER_TICKET: "Ya existe un ticket para este contacto con ",
+        ERR_NONE_USER_TICKET: "Ya existe un ticket para este contacto."
       },
     },
   },

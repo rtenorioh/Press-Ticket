@@ -1,27 +1,26 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useTheme } from "@material-ui/core/styles";
+import { useTheme } from "@material-ui/core";
+
 import {
-	BarChart,
 	CartesianGrid,
-	Bar,
 	XAxis,
+	Tooltip,
+	AreaChart,
+	Area,
 	YAxis,
-	Label,
-	ResponsiveContainer,
+	ResponsiveContainer
 } from "recharts";
+
 import { startOfHour, parseISO, format } from "date-fns";
 
 import { i18n } from "../../translate/i18n";
-
 import Title from "./Title";
 import useTickets from "../../hooks/useTickets";
 
 const Chart = () => {
 	const theme = useTheme();
-
 	const date = useRef(new Date().toISOString());
 	const { tickets } = useTickets({ date: date.current });
-
 	const [chartData, setChartData] = useState([
 		{ time: "00:00", amount: 0 },
 		{ time: "01:00", amount: 0 },
@@ -46,8 +45,39 @@ const Chart = () => {
 		{ time: "20:00", amount: 0 },
 		{ time: "21:00", amount: 0 },
 		{ time: "22:00", amount: 0 },
-		{ time: "23:00", amount: 0 },
+		{ time: "23:00", amount: 0 }
 	]);
+
+	function CustomTooltip({ payload, label, active }) {
+		if (active) {
+			return (
+				<div>
+					<div style={{ backgroundColor: "#333333ff", borderRadius: "4px", outline: "none" }}>
+						<div>
+							{payload.map((pld) => (
+								<div style={{ display: "inline-block", padding: 10 }}>
+									<div style={{ color: "white", fontWeight: "600", fontSize: "13px" }}>{`${label}`}</div>
+									<div style={{ color: "white", fontWeight: "400", fontSize: "13px" }}>Tickets: {pld.value}</div>
+								</div>
+							))}
+						</div>
+					</div>
+
+					<div
+						style={{
+							width: "0",
+							height: "0",
+							borderLeft: "5px solid transparent",
+							marginLeft: "35px",
+							borderRight: "5px solid transparent",
+							borderTop: "5px solid #333333ff",
+						}}
+					></div>
+				</div>
+			);
+		}
+		return null;
+	};
 
 	useEffect(() => {
 		setChartData(prevState => {
@@ -66,11 +96,10 @@ const Chart = () => {
 
 	return (
 		<React.Fragment>
-			<Title>{`${i18n.t("dashboard.charts.perDay.title")}${
-				tickets.length
-			}`}</Title>
+			<Title>{`${i18n.t("dashboard.charts.perDay.title")}${tickets.length}`}</Title>
+		
 			<ResponsiveContainer>
-				<BarChart
+				<AreaChart
 					data={chartData}
 					barSize={40}
 					width={730}
@@ -79,26 +108,53 @@ const Chart = () => {
 						top: 16,
 						right: 16,
 						bottom: 0,
-						left: 24,
+						left: 0,
 					}}
 				>
-					<CartesianGrid strokeDasharray="3 3" />
-					<XAxis dataKey="time" stroke={theme.palette.text.secondary} />
+					<XAxis
+						tick={tickProps => {
+							const { x, y } = tickProps;
+							return (
+								<circle
+									cx={x}
+									cy={y - 8}
+									r={1}
+									fill={theme.palette.text.secondary}
+								/>
+							);
+						}}
+						tickLine={false}
+						axisLine={false}
+						dataKey="time"
+						stroke={theme.palette.text.secondary}
+					/>
 					<YAxis
 						type="number"
 						allowDecimals={false}
 						stroke={theme.palette.text.secondary}
+						tickLine={false}
+						axisLine={false}
 					>
-						<Label
-							angle={270}
-							position="left"
-							style={{ textAnchor: "middle", fill: theme.palette.text.primary }}
-						>
-							Tickets
-						</Label>
 					</YAxis>
-					<Bar dataKey="amount" fill={theme.palette.primary.main} />
-				</BarChart>
+					<CartesianGrid vertical={false} strokeDasharray="4" opacity={0.3} />
+					<Tooltip
+						content={<CustomTooltip />}
+						position={{ y: 35 }}
+						animationEasing="ease"
+						cursor={true}
+						shared={false}
+					/>
+					<Area
+						type="monotone"
+						dataKey="amount"
+						stroke={theme.palette.primary.main}
+						strokeDasharray="3 4 5 2"
+						strokeWidth={.1}
+						fillOpacity={1}
+						fill="#a0b3f4"
+						activeDot={true}
+					/>
+				</AreaChart>
 			</ResponsiveContainer>
 		</React.Fragment>
 	);

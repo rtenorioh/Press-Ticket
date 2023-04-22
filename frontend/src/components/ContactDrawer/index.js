@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 
 import { makeStyles } from "@material-ui/core/styles";
 import Typography from "@material-ui/core/Typography";
@@ -19,6 +19,7 @@ import MarkdownWrapper from "../MarkdownWrapper";
 import { TagsContainer } from "../TagsContainer";
 import ModalImageContatc from "./ModalImage";
 import CopyToClipboard from "../CopyToClipboard";
+import { AuthContext } from "../../context/Auth/AuthContext";
 
 const drawerWidth = 320;
 
@@ -87,7 +88,7 @@ const useStyles = makeStyles(theme => ({
 
 const ContactDrawer = ({ open, handleDrawerClose, contact, loading }) => {
 	const classes = useStyles();
-
+	const { user } = useContext(AuthContext);
 	const [modalOpen, setModalOpen] = useState(false);
 
 	return (
@@ -127,8 +128,8 @@ const ContactDrawer = ({ open, handleDrawerClose, contact, loading }) => {
 							<CopyToClipboard content={contact.name} color="secondary" />
 							</Typography>
 						<Typography>
-							<Link href={`tel:${contact.number}`}>{contact.number}</Link>
-							<CopyToClipboard content={contact.number} color="secondary" />
+							<Link href={`tel:${user.profile === "admin" ? contact.number : contact.number.slice(0,-4) + "****"}`}>{user.profile === "admin" ? contact.number : contact.number.slice(0,-4) + "****"}</Link>
+							<CopyToClipboard content={user.profile === "admin" ? contact.number : contact.number.slice(0,-4) + "****"} color="secondary" />
 						</Typography>
 						{contact.email && (
 							<Typography>

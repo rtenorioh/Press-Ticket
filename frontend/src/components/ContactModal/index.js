@@ -1,26 +1,39 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, {
+	useState,
+	useEffect,
+	useRef,
+	useContext
+} from "react";
 
-import * as Yup from "yup";
-import { Formik, FieldArray, Form, Field } from "formik";
-import { toast } from "react-toastify";
+import {
+	Formik,
+	FieldArray,
+	Form,
+	Field
+} from "formik";
 
-import { makeStyles } from "@material-ui/core/styles";
 import { green } from "@material-ui/core/colors";
-import Button from "@material-ui/core/Button";
-import TextField from "@material-ui/core/TextField";
-import Dialog from "@material-ui/core/Dialog";
-import DialogActions from "@material-ui/core/DialogActions";
-import DialogContent from "@material-ui/core/DialogContent";
-import DialogTitle from "@material-ui/core/DialogTitle";
-import Typography from "@material-ui/core/Typography";
-import IconButton from "@material-ui/core/IconButton";
+import {
+	Button,
+	CircularProgress,
+	Dialog,
+	DialogActions,
+	DialogContent,
+	DialogTitle,
+	IconButton,
+	makeStyles,
+	TextField,
+	Typography
+} from "@material-ui/core";
 import DeleteOutlineIcon from "@material-ui/icons/DeleteOutline";
-import CircularProgress from "@material-ui/core/CircularProgress";
 
 import { i18n } from "../../translate/i18n";
-
 import api from "../../services/api";
 import toastError from "../../errors/toastError";
+import * as Yup from "yup";
+import { toast } from "react-toastify";
+import { Can } from "../Can";
+import { AuthContext } from "../../context/Auth/AuthContext";
 
 const useStyles = makeStyles(theme => ({
 	root: {
@@ -31,17 +44,14 @@ const useStyles = makeStyles(theme => ({
 		marginRight: theme.spacing(1),
 		flex: 1,
 	},
-
 	extraAttr: {
 		display: "flex",
 		justifyContent: "center",
 		alignItems: "center",
 	},
-
 	btnWrapper: {
 		position: "relative",
 	},
-
 	buttonProgress: {
 		color: green[500],
 		position: "absolute",
@@ -49,7 +59,7 @@ const useStyles = makeStyles(theme => ({
 		left: "50%",
 		marginTop: -12,
 		marginLeft: -12,
-	},
+	}
 }));
 
 const ContactSchema = Yup.object().shape({
@@ -64,6 +74,7 @@ const ContactSchema = Yup.object().shape({
 const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
 	const classes = useStyles();
 	const isMounted = useRef(true);
+	const { user } = useContext(AuthContext);
 
 	const initialState = {
 		name: "",
@@ -161,15 +172,23 @@ const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
 									margin="dense"
 									className={classes.textField}
 								/>
-								<Field
-									as={TextField}
-									label={i18n.t("contactModal.form.number")}
-									name="number"
-									error={touched.number && Boolean(errors.number)}
-									helperText={touched.number && errors.number}
-									placeholder="5513912344321"
-									variant="outlined"
-									margin="dense"
+								<Can
+									role={user.profile}
+									perform="drawer-admin-items:view"
+									yes={() => (
+										<>
+											<Field
+												as={TextField}
+												label={i18n.t("contactModal.form.number")}
+												name="number"
+												error={touched.number && Boolean(errors.number)}
+												helperText={touched.number && errors.number}
+												placeholder="5522999999999"
+												variant="outlined"
+												margin="dense"
+											/>
+										</>
+									)}
 								/>
 								<div>
 									<Field
