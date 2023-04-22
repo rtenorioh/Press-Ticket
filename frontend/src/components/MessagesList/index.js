@@ -24,6 +24,7 @@ import {
   DoneAll,
   ExpandMore,
   GetApp,
+  SupportAgent,
 } from "@material-ui/icons";
 
 import MarkdownWrapper from "../MarkdownWrapper";
@@ -156,7 +157,35 @@ const useStyles = makeStyles((theme) => ({
     paddingBottom: 0,
     boxShadow: "0 1px 1px #b3b3b3",
   },
+  messageRightPrivate: {
+    marginLeft: 20,
+    marginTop: 2,
+    minWidth: 100,
+    maxWidth: 600,
+    height: "auto",
+    display: "block",
+    position: "relative",
+    "&:hover #messageActionsButton": {
+      display: "flex",
+      position: "absolute",
+      top: 0,
+      right: 0,
+    },
 
+    whiteSpace: "pre-wrap",
+    backgroundColor: "#202C33",
+    color: "#e9edef",
+    alignSelf: "flex-end",
+    borderTopLeftRadius: 8,
+    borderTopRightRadius: 8,
+    borderBottomLeftRadius: 8,
+    borderBottomRightRadius: 0,
+    paddingLeft: 5,
+    paddingRight: 5,
+    paddingTop: 5,
+    paddingBottom: 0,
+    boxShadow: "0 1px 1px #b3b3b3",
+  },
   quotedContainerRight: {
     margin: "-3px -80px 6px -6px",
     overflowY: "hidden",
@@ -178,7 +207,6 @@ const useStyles = makeStyles((theme) => ({
     width: "4px",
     backgroundColor: "#35cd96",
   },
-
   messageActionsButton: {
     display: "none",
     position: "relative",
@@ -253,11 +281,11 @@ const useStyles = makeStyles((theme) => ({
     fontSize: 18,
     verticalAlign: "middle",
     marginRight: 4,
-    color: red[200]
+    color: red[200],
   },
 
   deletedMsg: {
-    color: red[200]
+    color: red[200],
   },
 
   ackDoneAllIcon: {
@@ -556,6 +584,9 @@ const MessagesList = ({ ticketId, isGroup }) => {
     if (message.ack === 3 || message.ack === 4) {
       return <DoneAll fontSize="small" className={classes.ackDoneAllIcon} />;
     }
+    if (message.isPrivate === true) {
+      return <SupportAgent fontSize="small" className={classes.ackIcons} />;
+    }
   };
 
   const renderDailyTimestamps = (message, index) => {
@@ -779,7 +810,13 @@ const MessagesList = ({ ticketId, isGroup }) => {
               {renderDailyTimestamps(message, index)}
               {renderMessageDivider(message, index)}
               {renderNumberTicket(message, index)}
-              <div className={!message.isPrivate ? (classes.messageRight) : classes.messageCenter}>
+              <div
+                className={
+                  !message.isPrivate
+                    ? classes.messageRight
+                    : classes.messageRightPrivate
+                }
+              >
                 <IconButton
                   variant="contained"
                   size="small"
