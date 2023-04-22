@@ -8,6 +8,7 @@ import clsx from "clsx";
 import { makeStyles } from "@material-ui/core/styles";
 import Paper from "@material-ui/core/Paper";
 import InputBase from "@material-ui/core/InputBase";
+import Checkbox from "@material-ui/core/Checkbox";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import { green } from "@material-ui/core/colors";
 import AttachFileIcon from "@material-ui/icons/AttachFile";
@@ -249,7 +250,9 @@ const MessageInput = ({ ticketStatus }) => {
   const inputRef = useRef();
   const [onDragEnter, setOnDragEnter] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
-  const { setReplyingMessage, replyingMessage } = useContext(ReplyMessageContext);
+  const { setReplyingMessage, replyingMessage } = useContext
+  (ReplyMessageContext);
+ const [isPrivate, setIsPrivate] = useState(false);
   const { user } = useContext(AuthContext);
 
   const [signMessage, setSignMessage] = useLocalStorage("signOption", true);
@@ -322,6 +325,7 @@ const MessageInput = ({ ticketStatus }) => {
 
     const formData = new FormData();
     formData.append("fromMe", true);
+    formData.append("isPrivate", isPrivate);
     medias.forEach((media) => {
       formData.append("medias", media);
       formData.append("body", media.name);
@@ -345,13 +349,20 @@ const MessageInput = ({ ticketStatus }) => {
       read: 1,
       fromMe: true,
       mediaUrl: "",
-      body: signMessage
-        ? `*${user?.name}:*\n${inputMessage.trim()}`
-        : inputMessage.trim(),
+      body:"",
       quotedMsg: replyingMessage,
+      isPrivate: isPrivate
     };
+    if (isPrivate) {
+      message.body = `*${user?.name} (privado):*\n${inputMessage.trim()}`;
+    } else {
+      message.body = signMessage
+        ? `*${user?.name}:*\n${inputMessage.trim()}`
+        : inputMessage.trim();
+    }
     try {
       await api.post(`/messages/${ticketId}`, message);
+      console.log(message)
     } catch (err) {
       toastError(err);
     }
@@ -536,14 +547,14 @@ const MessageInput = ({ ticketStatus }) => {
     );
   else {
     return (
-      <Paper 
+      <Paper
         square
         elevation={0}
         className={classes.mainWrapper}
         onDragEnter={() => setOnDragEnter(true)}
-        onDrop={(e) => handleInputDrop(e)}  
+        onDrop={(e) => handleInputDrop(e)}
       >
-        <div className={ onDragEnter ? classes.dropInfo : classes.dropInfoOut}>
+        <div className={onDragEnter ? classes.dropInfo : classes.dropInfoOut}>
           {i18n.t("uploads.titles.titleUploadMsgDragDrop")}
         </div>
         {replyingMessage && renderReplyingMessage(replyingMessage)}
@@ -569,7 +580,21 @@ const MessageInput = ({ ticketStatus }) => {
                 </ClickAwayListener>
               </div>
             ) : null}
-
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                marginLeft: "-8px",
+              }}
+            >
+              <Checkbox
+                id="private-checkbox"
+                checked={isPrivate}
+                onChange={(e) => setIsPrivate(e.target.checked, console.log(isPrivate))}
+                color="primary"
+              />
+              <span style={{ marginLeft: "5px" }}>Mensaje privado</span>
+            </div>
             <input
               multiple
               type="file"
