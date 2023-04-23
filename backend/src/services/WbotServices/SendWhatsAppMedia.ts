@@ -19,9 +19,7 @@ const SendWhatsAppMedia = async ({
 }: Request): Promise<WbotMessage> => {
   try {
     const wbot = await GetTicketWbot(ticket);
-    const hasBody = body
-      ? formatBody(body as string, ticket)
-      : undefined;
+    const hasBody = body ? formatBody(body as string, ticket) : undefined;
 
     const newMedia = MessageMedia.fromFilePath(media.path);
     const sentMessage = await wbot.sendMessage(

@@ -806,7 +806,7 @@ const MessagesList = ({ ticketId, isGroup }) => {
             </React.Fragment>
           );
         } else {
-          //Si los mensajes son enviados por mi.
+          //Si los mensajes son enviados por mi renderiza esto.
           return (
             <React.Fragment key={message.id}>
               {renderDailyTimestamps(message, index)}
