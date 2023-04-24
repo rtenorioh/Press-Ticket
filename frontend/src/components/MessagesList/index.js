@@ -812,7 +812,13 @@ const MessagesList = ({ ticketId, isGroup }) => {
               {renderDailyTimestamps(message, index)}
               {renderMessageDivider(message, index)}
               {renderNumberTicket(message, index)}
-              <div className={!message.isPrivate ? (classes.messageRight) : classes.messageCenter}>
+              <div
+                className={
+                  !message.isPrivate
+                    ? classes.messageRight
+                    : classes.messageRightPrivate
+                }
+              >
                 <IconButton
                   variant="contained"
                   size="small"
