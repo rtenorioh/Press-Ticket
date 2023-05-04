@@ -1,5 +1,28 @@
 # Changelog
 
+### 04/05/2023
+
+- [Integração com ChatGPT](https://github.com/rtenorioh/Press-Ticket/commit/6b5d22895917a0901a5a8e62f5b40a7acfeeece8); e
+- [Alteração de versão](https://github.com/rtenorioh/Press-Ticket/commit/50a021739c5250cce90e6bd624c75acc5e792ecc).
+
+### 11/04/2023
+
+- [Número do cliente trucado para Atendente](https://github.com/rtenorioh/Press-Ticket/commit/c5a842da034623c837936c3136f79ceff347f9bc).
+
+### 10/04/2023
+
+- [Atualização do layout e Capitalização](https://github.com/rtenorioh/Press-Ticket/commit/603931445ce5547a51daf90a3b7a27663a25abdc);
+- [Alterando o layout do Charts](https://github.com/rtenorioh/Press-Ticket/commit/baa5cd21e30240a055095cbe07a5577a29b2b070); e
+- [Limitando caracteres da ultima mensagem exibida](https://github.com/rtenorioh/Press-Ticket/commit/920e31c2564a4ae01015cf728f3e1acbb7277216).
+
+### 08/04/2023
+
+- [Exibindo as Tags e Escolha de Setor](https://github.com/rtenorioh/Press-Ticket/commit/f08c195853cb6b320d232bc729efe4e2f807241c).
+
+### 28/03/2023
+
+- [Inclusão da prop overlap="rectangular"](https://github.com/rtenorioh/Press-Ticket/commit/0f0b988267de9e90e714007f3f189df6a7d8b7c7).
+
 ### 27/03/2023
 
 - [Função Copiar Token](https://github.com/rtenorioh/Press-Ticket/commit/40e9aa01ccec667bac1e63f03ba90c8b32287f92); e
@@ -34,7 +57,6 @@
 - [Exibindo ID dos Setores](https://github.com/rtenorioh/Press-Ticket/commit/b3bd589d4307a5d477e80859f15404308e87f5e7);
 - [Exibindo ID dos Setores - Pages](https://github.com/rtenorioh/Press-Ticket/commit/33792527e1f27b4d7ec3886f485d4290a303a59a); e
 - [Exibindo ID dos Atendentes](https://github.com/rtenorioh/Press-Ticket/commit/19ee73354655deb6674716866da967ddb341b806).
-- 
 
 ### 15/03/2023
 
