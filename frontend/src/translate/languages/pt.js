@@ -390,6 +390,7 @@ const messages = {
           queues: "Setores",
           administration: "Administração",
           users: "Atendentes",
+          integrations: "Integrações",
           settings: "Configurações",
           sendMsg: "Envio de Mensagens",
           sendMedia: "Envio de Mídia",
@@ -482,6 +483,17 @@ const messages = {
         confirmationModal: {
           deleteTitle: "Excluir",
           deleteMessage: "Todos os dados do atendente serão perdidos. Os tickets abertos deste atendente serão movidos para a espera.",
+        },
+      },
+      integrations: {
+        success: "Integração salva com sucesso.",
+        title: "Integrações",
+        integrations: {
+          openai: {
+            title: "OpenAI",
+            organization: "Organization ID",
+            apikey: "KEY"
+          }
         },
       },
       settings: {
@@ -665,7 +677,8 @@ const messages = {
         ERR_NO_TAG_FOUND: "Tag não encontrada.",
         ERR_OUT_OF_HOURS: "Fora do Horário de Expediente!",
         ERR_OPEN_USER_TICKET: "Já existe um ticket aberto para este contato com ",
-        ERR_NONE_USER_TICKET: "Já existe um ticket aberto para este contato."
+        ERR_NONE_USER_TICKET: "Já existe um ticket aberto para este contato.",
+        ERR_NO_INTEGRATION_FOUND: "Integração não encontrada."
       },
     },
   },

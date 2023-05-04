@@ -12,6 +12,7 @@ import queueRoutes from "./queueRoutes";
 import quickAnswerRoutes from "./quickAnswerRoutes";
 import apiRoutes from "./apiRoutes";
 import tagRoutes from "./tagRoutes";
+import integrationRoutes from "./integrationRoutes";
 
 const routes = Router();
 
@@ -27,5 +28,6 @@ routes.use(queueRoutes);
 routes.use(quickAnswerRoutes);
 routes.use("/api/messages", apiRoutes);
 routes.use(tagRoutes);
+routes.use(integrationRoutes);
 
 export default routes;

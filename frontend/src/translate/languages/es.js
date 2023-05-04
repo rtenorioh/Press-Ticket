@@ -484,6 +484,17 @@ const messages = {
           deleteMessage: "Se perderán todos los datos del asistente. Los tickets abiertos para este asistente se moverán a espera.",
         },
       },
+      integrations: {
+        success: "Integracion guardada con exito.",
+        title: "Integraciones",
+        integrations: {
+          openai: {
+            title: "OpenAI",
+            organization: "Organization ID",
+            apikey: "KEY"
+          }
+        },
+      },
       settings: {
         success: "Configuración guardada con éxito.",
         title: "Configuración",
@@ -664,7 +675,8 @@ const messages = {
         ERR_CONNECTION_CREATION_COUNT: "Límite de conexión alcanzado, comuníquese con soporte para cambiar.",
         ERR_NO_TAG_FOUND: "Etiqueta no encontrada.",
         ERR_OPEN_USER_TICKET: "Ya existe un ticket para este contacto con ",
-        ERR_NONE_USER_TICKET: "Ya existe un ticket para este contacto."
+        ERR_NONE_USER_TICKET: "Ya existe un ticket para este contacto.",
+        ERR_NO_INTEGRATION_FOUND: "Integración no encontrada."
       },
     },
   },

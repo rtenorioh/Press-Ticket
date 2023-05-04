@@ -484,6 +484,17 @@ const messages = {
           deleteMessage: "All agent data will be lost. Open tickets for this agent will be moved to hold.",
         },
       },
+      integrations: {
+        success: "Integration saved successfully.",
+        title: "Integrations",
+        integrations: {
+          openai: {
+            title: "OpenAI",
+            organization: "Organization ID",
+            apikey: "KEY"
+          }
+        },
+      },
       settings: {
         success: "Settings saved successfully.",
         title: "Settings",
@@ -665,7 +676,8 @@ const messages = {
         ERR_NO_TAG_FOUND: "Tag not found.",
         ERR_OUT_OF_HOURS: "Out of Office Hours!",
         ERR_OPEN_USER_TICKET: "A ticket already exists for this contact with ",
-        ERR_NONE_USER_TICKET: "A ticket already exists for this contact."
+        ERR_NONE_USER_TICKET: "A ticket already exists for this contact.",
+        ERR_NO_INTEGRATION_FOUND: "Integration not found."
       },
     },
   },
