@@ -7,7 +7,7 @@ OBS: Ter instalado o Banco de Dados, podendo usar o Xamp, o Wamp ou qualquer um 
 1. Criar Banco de dados
 
 ```bash
-CREATE DATABASE pressticket CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+CREATE DATABASE mktsend CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
 ```
 
 2. Clonar o repositório
