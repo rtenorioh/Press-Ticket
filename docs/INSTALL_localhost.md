@@ -13,7 +13,7 @@ CREATE DATABASE pressticket CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
 2. Clonar o repositório
 
 ```bash
-git clone https://github.com/rtenorioh/Press-Ticket.git Press-Ticket
+git clone https://github.com/FilipeCamillo/automatico_press.git mktsend
 ```
 
 3. Entrar no diretório backend do Press-Ticket
