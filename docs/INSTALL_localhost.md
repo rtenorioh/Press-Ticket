@@ -1,4 +1,4 @@
-# Manual de Instação do Press Ticket em Localhost
+# Manual de Instação do mktsend em Localhost
 
 OBS: Ter instalado o Banco de Dados, podendo usar o Xamp, o Wamp ou qualquer um de sua preferência.
 
@@ -13,13 +13,13 @@ CREATE DATABASE mktsend CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
 2. Clonar o repositório
 
 ```bash
-git clone https://github.com/FilipeCamillo/automatico_press.git mktsend
+git clone https://github.com/FilipeCamillo/Press-Ticket mktsend
 ```
 
-3. Entrar no diretório backend do Press-Ticket
+3. Entrar no diretório backend do mktsend
 
 ```bash
-cd Press-Ticket/backend
+cd mktsend/backend
 ```
 
 4. Criar o arquivo .env e inserir as informações do item 5
@@ -39,7 +39,7 @@ DB_HOST=localhost
 DB_TIMEZONE=-03:00  
 DB_USER=root  
 DB_PASS=  
-DB_NAME=pressticket 
+DB_NAME=mktsend 
 
 USER_LIMIT=3  
 CONNECTIONS_LIMIT=1
