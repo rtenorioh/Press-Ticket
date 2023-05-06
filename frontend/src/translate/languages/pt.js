@@ -469,6 +469,7 @@ const messages = {
           name: "Nome",
           email: "E-mail",
           profile: "Perfil",
+          tricked: "Visualizar Contatos",
           whatsapp: "Conexão Padrão",
           startWork: "Horário inicial",
           endWork: "Horário final",
@@ -479,6 +480,7 @@ const messages = {
         },
         toasts: {
           deleted: "Atendente excluído com sucesso.",
+          updated: "Atendente atualizado com sucesso."
         },
         confirmationModal: {
           deleteTitle: "Excluir",

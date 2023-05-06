@@ -468,6 +468,7 @@ const messages = {
           name: "Nombre",
           email: "Correo electrónico",
           profile: "Perfil",
+          tricked: "Ver contactos",
           whatsapp: "Conexión estándar",
           startWork: "Hora de inicio",
           endWork: "Tiempo de finalización",
@@ -477,7 +478,8 @@ const messages = {
           add: "Agregar asistente",
         },
         toasts: {
-          deleted: "asistente eliminado con éxito.",
+          deleted: "Asistente eliminado con éxito.",
+          updated: "Asistente actualizado con éxito."
         },
         confirmationModal: {
           deleteTitle: "Eliminar",

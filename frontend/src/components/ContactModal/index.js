@@ -32,7 +32,6 @@ import api from "../../services/api";
 import toastError from "../../errors/toastError";
 import * as Yup from "yup";
 import { toast } from "react-toastify";
-import { Can } from "../Can";
 import { AuthContext } from "../../context/Auth/AuthContext";
 
 const useStyles = makeStyles(theme => ({
@@ -172,24 +171,19 @@ const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
 									margin="dense"
 									className={classes.textField}
 								/>
-								<Can
-									role={user.profile}
-									perform="drawer-admin-items:view"
-									yes={() => (
-										<>
-											<Field
-												as={TextField}
-												label={i18n.t("contactModal.form.number")}
-												name="number"
-												error={touched.number && Boolean(errors.number)}
-												helperText={touched.number && errors.number}
-												placeholder="5522999999999"
-												variant="outlined"
-												margin="dense"
-											/>
-										</>
-									)}
-								/>
+								{user.isTricked ?
+									<Field
+										as={TextField}
+										label={i18n.t("contactModal.form.number")}
+										name="number"
+										error={touched.number && Boolean(errors.number)}
+										helperText={touched.number && errors.number}
+										placeholder="5522999999999"
+										variant="outlined"
+										margin="dense"
+									/>
+									: ""
+								}
 								<div>
 									<Field
 										as={TextField}

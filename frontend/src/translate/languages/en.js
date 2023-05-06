@@ -468,6 +468,7 @@ const messages = {
           name: "Name",
           email: "Email",
           profile: "Profile",
+          tricked: "View Contacts",
           whatsapp: "Standard Connection",
           startWork: "Start time",
           endWork: "End Time",
@@ -478,6 +479,7 @@ const messages = {
         },
         toasts: {
           deleted: "Attendant deleted successfully.",
+          updated: "Attendant updated successfully."
         },
         confirmationModal: {
           deleteTitle: "Delete",
