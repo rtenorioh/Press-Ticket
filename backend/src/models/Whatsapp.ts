@@ -203,6 +203,22 @@ class Whatsapp extends Model<Whatsapp> {
   @Column
   isGroup: boolean;
 
+  @Default(false)
+  @Column(DataType.BOOLEAN)
+  useNPS: boolean;
+
+  @Default(false)
+  @Column(DataType.BOOLEAN)
+  sendInactiveMessage: boolean;
+
+  @Default("")
+  @Column(DataType.TEXT)
+  inactiveMessage: string;
+
+  @Default("")
+  @Column(DataType.TEXT)
+  timeInactiveMessage: string;
+
   @HasMany(() => Ticket)
   tickets: Ticket[];
 

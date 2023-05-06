@@ -19,6 +19,9 @@ interface WhatsappData {
   status?: string;
   isDefault?: boolean;
   isGroup?: boolean;
+  sendInactiveMessage?: boolean;
+  inactiveMessage?: string;
+  timeInactiveMessage?: string;
 
   //Difinindo horario comercial
   defineWorkHours?: boolean;
@@ -90,6 +93,9 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     farewellMessage,
     queueIds,
     isGroup,
+    sendInactiveMessage,
+    inactiveMessage,
+    timeInactiveMessage,
 
     defineWorkHours,
     outOfWorkMessage,
@@ -146,6 +152,9 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     farewellMessage,
     queueIds,
     isGroup,
+    sendInactiveMessage,
+    inactiveMessage,
+    timeInactiveMessage,
 
     defineWorkHours,
     outOfWorkMessage,

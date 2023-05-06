@@ -63,6 +63,10 @@ interface Request {
   isDefault?: boolean;
   isDisplay?: boolean;
   isGroup?: boolean;
+  sendInactiveMessage?: boolean;
+  inactiveMessage?: string;
+  timeInactiveMessage?: string;
+
 }
 
 interface Response {
@@ -128,6 +132,9 @@ const CreateWhatsAppService = async ({
   isDefault = false,
   isDisplay = false,
   isGroup = false,
+  sendInactiveMessage = false,
+  inactiveMessage = "",
+  timeInactiveMessage = "0"
 
 }: Request): Promise<Response> => {
   const schema = Yup.object().shape({
@@ -239,7 +246,10 @@ const CreateWhatsAppService = async ({
       ratingMessage,
       isDefault,
       isDisplay,
-      isGroup
+      isGroup,
+      sendInactiveMessage,
+      inactiveMessage,
+      timeInactiveMessage
     },
     { include: ["queues"] }
   );

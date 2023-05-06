@@ -64,6 +64,9 @@ interface WhatsappData {
   queueIds?: number[];
   isDisplay?: boolean;
   isGroup?: boolean;
+  sendInactiveMessage?: boolean;
+  inactiveMessage?: string;
+  timeInactiveMessage?: string;
 }
 
 interface Request {
@@ -84,7 +87,10 @@ const UpdateWhatsAppService = async ({
     name: Yup.string().min(2),
     status: Yup.string(),
     isDefault: Yup.boolean(),
-    isGroup: Yup.boolean()
+    isGroup: Yup.boolean(),
+    sendInactiveMessage: Yup.boolean(),
+    inactiveMessage: Yup.string(),
+    timeInactiveMessage: Yup.string()
   });
 
   const {
@@ -144,6 +150,9 @@ const UpdateWhatsAppService = async ({
     ratingMessage,
     isDisplay,
     isGroup,
+    sendInactiveMessage,
+    inactiveMessage,
+    timeInactiveMessage,
     queueIds = []
   } = whatsappData;
 
@@ -174,6 +183,18 @@ const UpdateWhatsAppService = async ({
     });
     if (oldDefaultWhatsapp) {
       await oldDefaultWhatsapp.update({ isGroup: false });
+    }
+  }
+
+  if (sendInactiveMessage) {
+    oldDefaultWhatsapp = await Whatsapp.findOne({
+      where: {
+        sendInactiveMessage: true,
+        id: { [Op.not]: whatsappId }
+      }
+    });
+    if (oldDefaultWhatsapp) {
+      await oldDefaultWhatsapp.update({ sendInactiveMessage: false });
     }
   }
 
@@ -235,7 +256,10 @@ const UpdateWhatsAppService = async ({
     ratingMessage,
     isDefault,
     isDisplay,
-    isGroup
+    isGroup,
+    sendInactiveMessage,
+    inactiveMessage,
+    timeInactiveMessage
   });
 
   await AssociateWhatsappQueue(whatsapp, queueIds);
