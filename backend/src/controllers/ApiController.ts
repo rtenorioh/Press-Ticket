@@ -79,7 +79,7 @@ const createContact = async (
       throw new AppError(`whatsapp #${whatsappId} not found`);
     }
   }
-
+ 
   const createTicket = await FindOrCreateTicketService(
     contact,
     whatsapp.id,
@@ -118,7 +118,8 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
   } catch (err: any) {
     throw new AppError(err.message);
   }
-
+  console.log("entrou api controler: " + body)
+  
   const contactAndTicket = await createContact(userId, tagsId, queueId, whatsappId, newContact.number);
 
   let resp: any;
