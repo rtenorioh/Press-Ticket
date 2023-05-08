@@ -3,20 +3,18 @@ import { logger } from "../../utils/logger";
 import Ticket from "../../models/Ticket"
 //import Whatsapp from "../../models/Whatsapp"
 import { getIO } from "../../libs/socket"
-import Contact from "../../models/Contact";
-import formatBody from "../../helpers/Mustache";
-import GetWhatsappWbot  from "../../helpers/GetWhatsappWbot";
 import SendWhatsAppMessage from "./SendWhatsAppMessage";
 import ShowWhatsAppService from "../WhatsappService/ShowWhatsAppService";
 import ShowTicketService from "../TicketServices/ShowTicketService";
-import GetTicketWbot from "../../helpers/GetTicketWbot";
+import formatBody from "../../helpers/Mustache";
+
 
 //import Tag from "../../models/Tag";
 
 export const ClosedAllOpenTickets = async (): Promise<void> => {
   const io = getIO();
   // @ts-ignore: Unreachable code error
-  const closeTicket = async (ticket: any, useNPS: any, currentStatus: any, body: any) => {
+  const closeTicket = async (ticket: Ticket, useNPS: boolean, currentStatus: any, body: any) => {
     if (currentStatus === 'nps') {
 
       await ticket.update({
@@ -65,8 +63,6 @@ export const ClosedAllOpenTickets = async (): Promise<void> => {
       let fromMe = ticket.fromMe;
       let isMsgGroup = ticket.isMsgGroup;
       
-      const body = `\u200c${messageInactive}`;
-    
       // @ts-ignore: Unreachable code error
       if (horasFecharAutomaticamente && horasFecharAutomaticamente !== "" &&
         // @ts-ignore: Unreachable code error
@@ -80,8 +76,10 @@ export const ClosedAllOpenTickets = async (): Promise<void> => {
           let dataUltimaInteracaoChamado = new Date(ticket.updatedAt)
 
           if (dataUltimaInteracaoChamado < dataLimite) {
+            const body = formatBody(`\u200e${messageInactive}`,ticketBody);
              
             if (sendIsInactive || ticket.status === "open") {
+              console.log(body)
               await SendWhatsAppMessage({ body: body, ticket: ticketBody});
      
              }
@@ -93,12 +91,6 @@ export const ClosedAllOpenTickets = async (): Promise<void> => {
               ticket,
               ticketId: ticket.id
             });
-            io.to(ticket.status).to(ticket.id.toString()).emit(`ticket`, {
-              action: "update",
-              ticket,
-              ticketId: ticket.id
-            });
-
             }
         }
       }

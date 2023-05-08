@@ -2125,7 +2125,7 @@ const handleMessage = async (
     if (msg.fromMe) {
       // messages sent automatically by wbot have a special character in front of it
       // if so, this message was already been stored in database;
-      // console.log("E200"+ /\u200e/.test(msg.body[0]))
+      console.log("E200:"+ /\u200e/.test(msg.body[0]))
       if (/\u200e/.test(msg.body[0])) return;
 
       // media messages sent from me from cell phone, first comes with "hasMedia = false" and type = "image/ptt/etc"
@@ -2199,13 +2199,12 @@ const handleMessage = async (
       (unreadMessages === 0 &&
       whatsapp.farewellMessage &&
       formatBody(whatsapp.farewellMessage, ticket) === msg.body) || (
-        whatsapp.inactiveMessage === msg.body)
+        formatBody(whatsapp.inactiveMessage) === msg.body || `\u200e${whatsapp.inactiveMessage}` === `\u200e${msg.body}` || msg.body === '🢅⠀' + whatsapp.inactiveMessage)
     ) {
       return;
     }
 
-    if (whatsapp.inactiveMessage === msg.body)
-    console.log("entrou depois de encerrar o chamado")
+  
 
     ticket = await FindOrCreateTicketService(
       contact,
