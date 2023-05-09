@@ -1,8 +1,8 @@
 # Changelog
 
-### 07/05/2023
+### 08/05/2023
 
-- []()
+- [Integração com n8n](https://github.com/rtenorioh/Press-Ticket/commit/1beb8c609e53c575c171cb1d0b14f3c6e9d4feb2)
 
 ### 05/05/2023
 
