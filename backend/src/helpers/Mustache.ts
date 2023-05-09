@@ -75,6 +75,5 @@ export default (body: string, ticket?: Ticket): string => {
       ticket ? ticket.id.toString() : ""
     ).join(""),
   };
-
   return Mustache.render(body, view);
 };

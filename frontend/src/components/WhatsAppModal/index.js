@@ -21,6 +21,9 @@ import {
   Tooltip,
   Paper,
   Grid,
+  MenuItem,
+  InputLabel,
+  Select,
   Checkbox,
 } from "@material-ui/core";
 
@@ -113,6 +116,9 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
     isDisplay: false,
     transferTicketMessage: "",
     isGroup: false,
+    inactiveMessage: "",
+    sendInactiveMessage: false,
+    timeInactiveMessage: "",
   };
   const [whatsApp, setWhatsApp] = useState(initialState);
   const [selectedQueueIds, setSelectedQueueIds] = useState([]);
@@ -483,7 +489,7 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
                     margin="dense"
                   />
                 </div>
-                {/* <div>
+                <div>
 									<Field
 										as={TextField}
 										label={i18n.t("whatsappModal.form.ratingMessage")}
@@ -499,8 +505,73 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
 										variant="outlined"
 										margin="dense"
 									/>
-								</div> */}
-
+								</div> 
+                <div>
+                  <FormControlLabel
+                    control={
+                      <Field
+                        as={Switch}
+                        color="primary"
+                        name="sendInactiveMessage"
+                        checked={values.sendInactiveMessage}
+                      />
+                    }
+                      label={i18n.t("whatsappModal.form.sendInactiveMessage")}
+                   />
+                </div>
+                
+                <div>
+                  <Field
+                    as={TextField}
+                    label={i18n.t("whatsappModal.form.inactiveMessage")}
+                    type="inactiveMessage"
+                    multiline
+                    rows={4}
+                    fullWidth
+                    name="inactiveMessage"
+                    error={
+                      touched.inactiveMessage && Boolean(errors.inactiveMessage)
+                    }
+                    helperText={
+                      touched.inactiveMessage && errors.inactiveMessage
+                    }
+                    variant="outlined"
+                    margin="dense"
+                  />
+                </div>
+                <Grid xs={12} md={12} item>
+                    <FormControl
+                      variant="outlined"
+                      margin="dense"
+                      fullWidth
+                      className={classes.formControl}
+                    >
+                      <InputLabel id="timeInactiveMessage-selection-label">
+                        {i18n.t("whatsappModal.form.timeInactiveMessage")}
+                      </InputLabel>
+                      <Field
+                        as={Select}
+                        label={i18n.t("whatsappModal.form.timeInactiveMessage")}
+                        placeholder={i18n.t(
+                          "whatsappModal.form.timeInactiveMessage"
+                        )}
+                        labelId="timeInactiveMessage-selection-label"
+                        id="timeInactiveMessage"
+                        name="timeInactiveMessage"
+                      >
+                        <MenuItem value={"0"}>Desabilitado</MenuItem>
+                        <MenuItem value={"0.25"}>15 minutos</MenuItem>
+                        <MenuItem value={"1"}>1 hora</MenuItem>
+                        <MenuItem value={"4"}>4 horas</MenuItem>
+                        <MenuItem value={"8"}>8 horas</MenuItem>
+                        <MenuItem value={"12"}>12 horas</MenuItem>
+                        <MenuItem value={"24"}>24 horas</MenuItem>
+                        <MenuItem value={"36"}>36 horas</MenuItem>
+                        <MenuItem value={"96"}>4 dias</MenuItem>
+                        <MenuItem value={"168"}>7 dias</MenuItem>
+                      </Field>
+                    </FormControl>
+                  </Grid>
 
                 <div>
                   {/* Expediente */}

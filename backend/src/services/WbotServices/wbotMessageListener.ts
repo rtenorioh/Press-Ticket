@@ -36,6 +36,7 @@ import UserRating from "../../models/UserRating";
 import SendWhatsAppMessage from "./SendWhatsAppMessage";
 import Queue from "../../models/Queue";
 import { boolean } from "yup";
+import ShowTicketService from "../TicketServices/ShowTicketService";
 
 interface Session extends Client {
   id?: number;
@@ -261,6 +262,7 @@ const verifyMessage = async (
 
   if (msg.fromMe == true) {
     await ticket.update({//texto que sai do chat tb,
+      fromMe: msg.fromMe,
       lastMessage:
         msg.type === "location"
           ? msg.location.description
@@ -437,6 +439,7 @@ const verifyQueue = async (
             });
             return;
           }
+
           const selectedOption = msg.body;
           const choosenQueue = queues[+selectedOption - 1];
           if (choosenQueue) {
@@ -2108,6 +2111,7 @@ const handleMessage = async (
       return;
     }
   }
+
   // IGNORAR MENSAGENS DE GRUPO
 
   try {
@@ -2121,6 +2125,7 @@ const handleMessage = async (
     if (msg.fromMe) {
       // messages sent automatically by wbot have a special character in front of it
       // if so, this message was already been stored in database;
+      console.log("E200:"+ /\u200e/.test(msg.body[0]))
       if (/\u200e/.test(msg.body[0])) return;
 
       // media messages sent from me from cell phone, first comes with "hasMedia = false" and type = "image/ptt/etc"
@@ -2162,7 +2167,7 @@ const handleMessage = async (
 
     const contact = await verifyContact(msgContact);
 
-
+    // console.log("OUTRO TESTE " + unreadMessages)
     let ticket = await FindOrCreateTicketService(
       contact,
       wbot.id!,
@@ -2172,7 +2177,7 @@ const handleMessage = async (
       userId,
       groupContact
     );
-
+    
     try {
       if (!msg.fromMe) {
         const ratePending = await verifyRating(ticket);
@@ -2188,13 +2193,18 @@ const handleMessage = async (
       Sentry.captureException(e);
       console.log(e);
     }
-
+    console.log(`\u200c${whatsapp.inactiveMessage}` === msg.body )
+      
     if (
-      unreadMessages === 0 &&
+      (unreadMessages === 0 &&
       whatsapp.farewellMessage &&
-      formatBody(whatsapp.farewellMessage, ticket) === msg.body
-    )
+      formatBody(whatsapp.farewellMessage, ticket) === msg.body) || (
+        formatBody(whatsapp.inactiveMessage) === msg.body || `\u200e${whatsapp.inactiveMessage}` === `\u200e${msg.body}` || msg.body === '🢅⠀' + whatsapp.inactiveMessage)
+    ) {
       return;
+    }
+
+  
 
     ticket = await FindOrCreateTicketService(
       contact,
@@ -2222,6 +2232,19 @@ const handleMessage = async (
       await verifyQueue(wbot, msg, ticket, contact);
     }
 
+      // Atualiza o ticket se a ultima mensagem foi enviada por mim, para que possa ser finalizado. Se for grupo, nao finaliza
+      try{
+        // console.log("FROMME"+ msg.fromMe+" GRUPO "+(await msg.getChat()).isGroup)
+
+        await ticket.update({
+          fromMe: msg.fromMe,
+          isMsgGroup: chat.isGroup
+        });
+      } catch (e) {
+        Sentry.captureException(e);
+        console.log(e);
+      }
+  
     if (msg.type === "vcard") {
       try {
         const array = msg.body.split("\n");
@@ -2356,8 +2379,8 @@ const handleRating = async (msg: WbotMessage, ticket: Ticket) => {
     if (rate < 1) {
       finalRate = 1;
     }
-    if (rate > 3) {
-      finalRate = 3;
+    if (rate > 5) {
+      finalRate = 5;
     }
 
     const record = await UserRating.findOne({
@@ -2397,6 +2420,7 @@ const handleMsgAck = async (msg: WbotMessage, ack: MessageAck) => {
 
   const io = getIO();
 
+  // console.log("entrou no ack" + msg.body)
   try {
     const messageToUpdate = await Message.findByPk(msg.id.id, {
       include: [

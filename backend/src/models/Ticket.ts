@@ -74,6 +74,14 @@ class Ticket extends Model<Ticket> {
 
   @HasMany(() => Message)
   messages: Message[];
+
+  @Default(false)
+  @Column
+  fromMe: boolean;
+
+  @Default(false)
+  @Column
+  isMsgGroup: boolean;
 }
 
 export default Ticket;
