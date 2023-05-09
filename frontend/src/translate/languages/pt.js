@@ -495,6 +495,10 @@ const messages = {
             title: "OpenAI",
             organization: "Organization ID",
             apikey: "KEY"
+          },
+          n8n: {
+            title: "N8N",
+            urlApiN8N: "URL API N8N"
           }
         },
       },

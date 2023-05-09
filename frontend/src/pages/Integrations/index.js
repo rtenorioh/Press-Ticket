@@ -123,6 +123,25 @@ const Integrations = () => {
 					</Paper>
 				</Paper>
 
+				<Paper className={classes.paper1}>
+					<Typography align="center" variant="body1">
+						{i18n.t("integrations.integrations.n8n.title")}
+					</Typography>
+					<Paper elevation={4} className={classes.paper}>
+						<TextField
+							style={{ width: "100%" }}
+							id="urlApiN8N"
+							name="urlApiN8N"
+							margin="dense"
+							label={i18n.t("integrations.integrations.n8n.urlApiN8N")}
+							variant="outlined"
+							value={integrations && integrations.length > 0 && getIntegrationValue("urlApiN8N")}
+							onChange={handleChangeIntegration}
+							fullWidth
+						/>
+					</Paper>
+				</Paper>
+
 			</Container>
 		</div>
 	);

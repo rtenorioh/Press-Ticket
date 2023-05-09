@@ -36,6 +36,7 @@
     "pino-pretty": "^10.0.0",
     "qrcode-terminal": "^0.12.0",
     "reflect-metadata": "^0.1.13",
+    "request": "^2.88.2",
     "sequelize": "^5.22.3",
     "sequelize-cli": "^5.5.1",
     "sequelize-typescript": "^1.1.0",

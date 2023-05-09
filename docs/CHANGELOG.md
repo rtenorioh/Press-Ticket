@@ -1,5 +1,13 @@
 # Changelog
 
+### 07/05/2023
+
+- []()
+
+### 05/05/2023
+
+- [Número do cliente trucado para Atendente com verificação individual](https://github.com/rtenorioh/Press-Ticket/commit/f36e6c6f8ae2a3cd29a0defdc14a8a79a726cbcb).
+
 ### 04/05/2023
 
 - [Integração com ChatGPT](https://github.com/rtenorioh/Press-Ticket/commit/6b5d22895917a0901a5a8e62f5b40a7acfeeece8); e
