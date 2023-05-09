@@ -69,7 +69,13 @@ export const ClosedAllOpenTickets = async (): Promise<void> => {
         horasFecharAutomaticamente !== "0" && Number(horasFecharAutomaticamente) > 0) {
 
         let dataLimite = new Date()
-        dataLimite.setHours(dataLimite.getHours() - Number(horasFecharAutomaticamente));
+        if (Number(horasFecharAutomaticamente) < 1) {
+          dataLimite.setMinutes(dataLimite.getMinutes() - (Number(horasFecharAutomaticamente)*60));
+        } else {
+          dataLimite.setHours(dataLimite.getHours() - Number(horasFecharAutomaticamente));
+        }
+
+        console.log(dataLimite + " TEMPO FECHAMENTO " + horasFecharAutomaticamente)
 
         if (ticket.status === "open" && fromMe && !isMsgGroup) {
 
@@ -79,7 +85,6 @@ export const ClosedAllOpenTickets = async (): Promise<void> => {
             const body = formatBody(`\u200e${messageInactive}`,ticketBody);
              
             if (sendIsInactive || ticket.status === "open") {
-              console.log(body)
               await SendWhatsAppMessage({ body: body, ticket: ticketBody});
      
              }
