@@ -58,6 +58,8 @@ const TicketActionButtons = ({ ticket }) => {
 			await api.put(`/tickets/${ticket.id}`, {
 				status: status,
 				userId: userId || null,
+				ticketData: ticket
+
 			});
 
 			setLoading(false);

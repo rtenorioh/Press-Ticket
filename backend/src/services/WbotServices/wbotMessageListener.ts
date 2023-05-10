@@ -5,6 +5,7 @@ import { promisify } from "util";
 import { writeFile } from "fs";
 import * as Sentry from "@sentry/node";
 import { head, isNull, isNil } from "lodash";
+import moment from "moment";
 
 import {
   Contact as WbotContact,
@@ -33,7 +34,9 @@ import UpdateTicketService from "../TicketServices/UpdateTicketService";
 import CreateContactService from "../ContactServices/CreateContactService";
 import formatBody from "../../helpers/Mustache";
 import UserRating from "../../models/UserRating";
+import TicketTraking from "../../models/TicketTraking";
 import SendWhatsAppMessage from "./SendWhatsAppMessage";
+import FindOrCreateATicketTrakingService from "../TicketServices/FindOrCreateATicketTrakingService";
 import Queue from "../../models/Queue";
 import { boolean } from "yup";
 import ShowTicketService from "../TicketServices/ShowTicketService";
@@ -241,7 +244,7 @@ const prepareLocation = (msg: WbotMessage): WbotMessage => {
   return msg;
 };
 
-const verifyMessage = async (
+export const verifyMessage = async (
   msg: WbotMessage,
   ticket: Ticket,
   contact: Contact
@@ -2123,9 +2126,8 @@ const handleMessage = async (
 
     // console.log(msg)
     if (msg.fromMe) {
-      // messages sent automatically by wbot have a special character in front of it
+     // messages sent automatically by wbot have a special character in front of it
       // if so, this message was already been stored in database;
-      console.log("E200:"+ /\u200e/.test(msg.body[0]))
       if (/\u200e/.test(msg.body[0])) return;
 
       // media messages sent from me from cell phone, first comes with "hasMedia = false" and type = "image/ptt/etc"
@@ -2177,15 +2179,17 @@ const handleMessage = async (
       userId,
       groupContact
     );
-    
+ 
+    const ticketTraking = await FindOrCreateATicketTrakingService({
+      ticketId: ticket.id,
+      whatsappId: whatsapp?.id,
+      userId: ticket.userId
+    });
+
     try {
       if (!msg.fromMe) {
-        const ratePending = await verifyRating(ticket);
-        /**
-         * Tratamento para avaliação do atendente
-         */
-        if (ratePending) {
-          handleRating(msg, ticket);
+        if (ticketTraking !== null && verifyRating(ticketTraking)) {
+          handleRating(msg, ticket, ticketTraking);
           return;
         }
       }
@@ -2198,9 +2202,7 @@ const handleMessage = async (
     if (
       (unreadMessages === 0 &&
       whatsapp.farewellMessage &&
-      formatBody(whatsapp.farewellMessage, ticket) === msg.body) || (
-        formatBody(whatsapp.inactiveMessage) === msg.body || `\u200e${whatsapp.inactiveMessage}` === `\u200e${msg.body}` || msg.body === '🢅⠀' + whatsapp.inactiveMessage)
-    ) {
+      formatBody(whatsapp.farewellMessage, ticket) === msg.body)) {
       return;
     }
 
@@ -2351,17 +2353,21 @@ const handleMessage = async (
   }
 };
 
-const verifyRating = async (ticket: Ticket) => {
-  const record = await UserRating.findOne({
-    where: { ticketId: ticket.id, rate: null }
-  });
-  if (record) {
+export const verifyRating = (ticketTraking: TicketTraking) => {
+  if (
+    ticketTraking &&
+    ticketTraking.finishedAt === null &&
+    ticketTraking.userId !== null &&
+    ticketTraking.ratingAt !== null
+  ) {
     return true;
   }
   return false;
 };
 
-const handleRating = async (msg: WbotMessage, ticket: Ticket) => {
+
+
+const handleRating = async (msg: WbotMessage, ticket: Ticket, ticketTraking: TicketTraking) => {
   const io = getIO();
   let rate: number | null = null;
 
@@ -2383,17 +2389,21 @@ const handleRating = async (msg: WbotMessage, ticket: Ticket) => {
       finalRate = 5;
     }
 
-    const record = await UserRating.findOne({
-      where: {
-        ticketId: ticket.id,
-        rate: null
-      }
+    await UserRating.create({
+      ticketId: ticketTraking.ticketId,
+      userId: ticketTraking.userId,
+      rate: finalRate,
     });
 
-    await record?.update({ rate: finalRate });
+    // await record?.update({ rate: finalRate });
 
     const body = `\u200c${farewellMessage}`;
     await SendWhatsAppMessage({ body, ticket });
+
+    await ticketTraking.update({
+      finishedAt: moment().toDate(),
+      rated: true,
+    });
 
     await ticket.update({
       queueId: null,

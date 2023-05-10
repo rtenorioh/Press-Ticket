@@ -14,14 +14,13 @@ import formatBody from "../../helpers/Mustache";
 export const ClosedAllOpenTickets = async (): Promise<void> => {
   const io = getIO();
   // @ts-ignore: Unreachable code error
-  const closeTicket = async (ticket: Ticket, useNPS: boolean, currentStatus: any, body: any) => {
+  const closeTicket = async (ticket: Ticket, useNPS: boolean, currentStatus: any) => {
     if (currentStatus === 'nps') {
 
       await ticket.update({
         status: "closed",
         userId: ticket.userId || null,
         queueId: null,
-        lastMessage: body,
         unreadMessages: 0
       });
 
@@ -82,14 +81,14 @@ export const ClosedAllOpenTickets = async (): Promise<void> => {
           let dataUltimaInteracaoChamado = new Date(ticket.updatedAt)
 
           if (dataUltimaInteracaoChamado < dataLimite) {
-            const body = formatBody(`\u200e${messageInactive}`,ticketBody);
              
-            if (sendIsInactive || ticket.status === "open") {
+            if (sendIsInactive && ticket.status === "open" && messageInactive ) {
+              const body = formatBody(`\u200e${messageInactive}`,ticketBody);
               await SendWhatsAppMessage({ body: body, ticket: ticketBody});
      
              }
 
-             closeTicket(ticket, useNPS, ticket.status, body);
+             closeTicket(ticket, useNPS, ticket.status);
                       
             io.to("open").emit(`ticket`, {
               action: "delete",

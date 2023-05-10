@@ -1,3 +1,5 @@
+import moment from "moment";
+import * as Sentry from "@sentry/node";
 import CheckContactOpenTickets from "../../helpers/CheckContactOpenTickets";
 import SetTicketMessagesAsRead from "../../helpers/SetTicketMessagesAsRead";
 import { getIO } from "../../libs/socket";
@@ -5,18 +7,21 @@ import Ticket from "../../models/Ticket";
 import SendWhatsAppMessage from "../WbotServices/SendWhatsAppMessage";
 import ShowWhatsAppService from "../WhatsappService/ShowWhatsAppService";
 import ShowTicketService from "./ShowTicketService";
+import FindOrCreateATicketTrakingService from "./FindOrCreateATicketTrakingService";
+import { verifyMessage } from "../WbotServices/wbotMessageListener";
+import { isNil } from "lodash";
 
 interface TicketData {
   status?: string;
-  userId?: number;
-  queueId?: number;
+  userId?: number | null;
+  queueId?: number | null;
   whatsappId?: number;
   fromMe?: boolean;
   isMsgGroup?: boolean;
 }
 
 interface Request {
-  ticketData: TicketData;
+  ticketData: TicketData | Ticket;
   ticketId: string | number;
  }
 
@@ -30,56 +35,113 @@ const UpdateTicketService = async ({
   ticketData,
   ticketId
 }: Request): Promise<Response> => {
-  const { status, userId, queueId, whatsappId, fromMe, isMsgGroup }= ticketData;
+    const { status }= ticketData;  
 
-  const ticket = await ShowTicketService(ticketId);
-  await SetTicketMessagesAsRead(ticket);
+      const io = getIO();
 
-  if(whatsappId && ticket.whatsappId !== whatsappId) {
-    await CheckContactOpenTickets(ticket.contactId, whatsappId);
-  }
+      const ticket = await ShowTicketService(ticketId);
+      let { userId, queueId, whatsappId, fromMe, isMsgGroup }= ticketData;
 
-  const oldStatus = ticket.status;
-  const oldUserId = ticket.user?.id;
+      await SetTicketMessagesAsRead(ticket);
 
-  if (oldStatus === "closed") {
-    await CheckContactOpenTickets(ticket.contact.id, ticket.whatsappId);
-  }
+      if(whatsappId && ticket.whatsappId !== whatsappId) {
+        await CheckContactOpenTickets(ticket.contactId, whatsappId);
+      }
+      console.log("DADOS UPDATE " + userId+ " " + queueId+ " " + whatsappId+ " " + fromMe+ " " + isMsgGroup)
+      console.log("PASSO UPDATE 1" + ticketId + " " + whatsappId)
+      const ticketTraking = await FindOrCreateATicketTrakingService({
+        ticketId,
+        whatsappId: ticket.whatsappId
+      });
 
-  await ticket.update({
-    status,
-    queueId,
-    userId,
-    fromMe,
-    isMsgGroup
-  });
+      const oldStatus = ticket.status;
+      const oldUserId = ticket.user?.id;
 
-  if(whatsappId) {
-    await ticket.update({
-      whatsappId
-    });
-  }
+      if (oldStatus === "closed") {
+        await CheckContactOpenTickets(ticket.contact.id, ticket.whatsappId);
+      }
 
-  await ticket.reload();
+      if (status !== undefined && ["closed"].indexOf(status) > -1) {
+        const { farewellMessage, ratingMessage } = await ShowWhatsAppService(
+          ticket.whatsappId
+        );
 
-  const io = getIO();
+        if (ratingMessage && !ticket.isGroup) {
+          if (ticketTraking.ratingAt == null) {
 
-  if (ticket.status !== oldStatus || ticket.user?.id !== oldUserId) {
-    io.to(oldStatus).emit("ticket", {
-      action: "delete",
-      ticketId: ticket.id
-    });
-  }
 
-  io.to(ticket.status)
-    .to("notification")
-    .to(ticketId.toString())
-    .emit("ticket", {
-      action: "update",
-      ticket
-    });
+            const ratingTxt = ratingMessage || "";
+            let bodyRatingMessage = `\u200e${ratingTxt}\n`;
 
-  return { ticket, oldStatus, oldUserId };
+            const msg = await SendWhatsAppMessage({ body: bodyRatingMessage, ticket });
+
+            await verifyMessage(msg, ticket, ticket.contact);
+
+            await ticketTraking.update({
+              ratingAt: moment().toDate()
+            });
+
+            io.to("open")
+              .to(ticketId.toString())
+              .emit("ticket", {
+                action: "delete",
+                ticketId: ticket.id
+              });
+
+            return { ticket, oldStatus, oldUserId };
+          }
+          ticketTraking.ratingAt = moment().toDate();
+          ticketTraking.rated = false;
+        }
+
+        if (!isNil(farewellMessage) && farewellMessage !== "" && !ticket.isGroup) {
+          const body = `${farewellMessage}`;
+
+          const msg = await SendWhatsAppMessage({ body, ticket });
+
+          await verifyMessage(msg, ticket, ticket.contact);
+
+        ticketTraking.finishedAt = moment().toDate();
+        ticketTraking.whatsappId = ticket.whatsappId;
+        ticketTraking.userId = ticket.userId;
+
+        queueId = null;
+        userId = null;
+      }
+    };
+      await ticket.update({
+        status,
+        queueId,
+        userId,
+        fromMe,
+        isMsgGroup
+      });
+
+      if(whatsappId) {
+        await ticket.update({
+          whatsappId
+        });
+      }
+
+      await ticket.reload();
+
+      
+      if (ticket.status !== oldStatus || ticket.user?.id !== oldUserId) {
+        io.to(oldStatus).emit("ticket", {
+          action: "delete",
+          ticketId: ticket.id
+        });
+      }
+
+      io.to(ticket.status)
+        .to("notification")
+        .to(ticketId.toString())
+        .emit("ticket", {
+          action: "update",
+          ticket
+        });
+
+      return { ticket, oldStatus, oldUserId };
 };
 
 export default UpdateTicketService;

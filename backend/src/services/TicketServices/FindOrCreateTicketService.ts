@@ -13,9 +13,7 @@ const FindOrCreateTicketService = async (
   tagsId?: number,
   userId?: number,
   groupContact?: Contact,
-  fromMe?: boolean,
-  isMsgGroup?: boolean
-): Promise<Ticket> => {
+  ): Promise<Ticket> => {
   let ticket = await Ticket.findOne({
     where: {
       status: {
