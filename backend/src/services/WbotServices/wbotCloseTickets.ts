@@ -44,14 +44,14 @@ export const ClosedAllOpenTickets = async (): Promise<void> => {
 
     }
   };
-   
+
   try {
 
     const { rows: tickets } = await Ticket.findAndCountAll({
       where: { status: "open" },
       order: [["updatedAt", "DESC"]]
     });
-   
+
     tickets.forEach(async ticket => {
 
       const whatsapp = await ShowWhatsAppService(ticket?.whatsappId)
@@ -62,36 +62,43 @@ export const ClosedAllOpenTickets = async (): Promise<void> => {
       let messageInactive = whatsapp?.inactiveMessage;
       let fromMe = ticket.fromMe;
       let isMsgGroup = ticket.isMsgGroup;
-      
+
       // @ts-ignore: Unreachable code error
       if (horasFecharAutomaticamente && horasFecharAutomaticamente !== "" &&
         // @ts-ignore: Unreachable code error
         horasFecharAutomaticamente !== "0" && Number(horasFecharAutomaticamente) > 0) {
 
         let dataLimite = new Date()
-        dataLimite.setHours(dataLimite.getHours() - Number(horasFecharAutomaticamente));
+        if (Number(horasFecharAutomaticamente) < 1) {
+          dataLimite.setMinutes(dataLimite.getMinutes() - (Number(horasFecharAutomaticamente) * 60));
+        } else {
+          dataLimite.setHours(dataLimite.getHours() - Number(horasFecharAutomaticamente));
+        }
 
         if (ticket.status === "open" && fromMe && !isMsgGroup) {
 
           let dataUltimaInteracaoChamado = new Date(ticket.updatedAt)
 
           if (dataUltimaInteracaoChamado < dataLimite) {
-            const body = formatBody(`\u200e${messageInactive}`,ticketBody);
-             
-            if (sendIsInactive || ticket.status === "open") {
-              console.log(body)
-              await SendWhatsAppMessage({ body: body, ticket: ticketBody});
-     
-             }
+            const body = formatBody(`\u200e${messageInactive}`, ticketBody);
 
-             closeTicket(ticket, useNPS, ticket.status, body);
-                      
+            if (sendIsInactive && ticket.status === "open" && messageInactive) {
+              console.log(body);
+
+              // Verificação adicionada para evitar que mensagem vazia seja enviada
+              if (messageInactive.trim() !== '') {
+                await SendWhatsAppMessage({ body: body, ticket: ticketBody });
+              }
+            }
+
+            closeTicket(ticket, useNPS, ticket.status, body);
+
             io.to("open").emit(`ticket`, {
               action: "delete",
               ticket,
               ticketId: ticket.id
             });
-            }
+          }
         }
       }
 

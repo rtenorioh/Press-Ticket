@@ -126,7 +126,7 @@ const messages = {
           group: "Permitir mensagens de grupos",
           farewellMessage: "Mensagem de despedida",
           ratingMessage: "Mensagem de avaliação",
-          sendInactiveMessage: "Enviar mensagem de encerramento automático",
+          sendInactiveMessage: "Encerramento automático",
           timeInactiveMessage: "Tempo para encerrar atendimento automático",
           inactiveMessage: "Mensagem de encerramento automático",
           instructionRatingMessage: "Para habilitar as avaliações, basta preencher este campo",

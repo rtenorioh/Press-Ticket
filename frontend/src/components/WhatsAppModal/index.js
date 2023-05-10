@@ -489,7 +489,7 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
                     margin="dense"
                   />
                 </div>
-                <div>
+                {/* <div>
 									<Field
 										as={TextField}
 										label={i18n.t("whatsappModal.form.ratingMessage")}
@@ -505,21 +505,23 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
 										variant="outlined"
 										margin="dense"
 									/>
-								</div> 
-                <div>
-                  <FormControlLabel
-                    control={
-                      <Field
-                        as={Switch}
-                        color="primary"
-                        name="sendInactiveMessage"
-                        checked={values.sendInactiveMessage}
-                      />
-                    }
+								</div>  */}
+
+
+
+                  <div>
+                    <FormControlLabel
+                      control={
+                        <Field
+                          as={Switch}
+                          color="primary"
+                          name="sendInactiveMessage"
+                          checked={values.sendInactiveMessage}
+                        />
+                      }
                       label={i18n.t("whatsappModal.form.sendInactiveMessage")}
-                   />
-                </div>
-                
+                    />
+                  </div>
                 <div>
                   <Field
                     as={TextField}
@@ -540,38 +542,39 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
                   />
                 </div>
                 <Grid xs={12} md={12} item>
-                    <FormControl
-                      variant="outlined"
-                      margin="dense"
-                      fullWidth
-                      className={classes.formControl}
+                  <FormControl
+                    variant="outlined"
+                    margin="dense"
+                    fullWidth
+                    className={classes.formControl}
+                  >
+                    <InputLabel id="timeInactiveMessage-selection-label">
+                      {i18n.t("whatsappModal.form.timeInactiveMessage")}
+                    </InputLabel>
+                    <Field
+                      as={Select}
+                      label={i18n.t("whatsappModal.form.timeInactiveMessage")}
+                      placeholder={i18n.t(
+                        "whatsappModal.form.timeInactiveMessage"
+                      )}
+                      labelId="timeInactiveMessage-selection-label"
+                      id="timeInactiveMessage"
+                      name="timeInactiveMessage"
                     >
-                      <InputLabel id="timeInactiveMessage-selection-label">
-                        {i18n.t("whatsappModal.form.timeInactiveMessage")}
-                      </InputLabel>
-                      <Field
-                        as={Select}
-                        label={i18n.t("whatsappModal.form.timeInactiveMessage")}
-                        placeholder={i18n.t(
-                          "whatsappModal.form.timeInactiveMessage"
-                        )}
-                        labelId="timeInactiveMessage-selection-label"
-                        id="timeInactiveMessage"
-                        name="timeInactiveMessage"
-                      >
-                        <MenuItem value={"0"}>Desabilitado</MenuItem>
-                        <MenuItem value={"0.25"}>15 minutos</MenuItem>
-                        <MenuItem value={"1"}>1 hora</MenuItem>
-                        <MenuItem value={"4"}>4 horas</MenuItem>
-                        <MenuItem value={"8"}>8 horas</MenuItem>
-                        <MenuItem value={"12"}>12 horas</MenuItem>
-                        <MenuItem value={"24"}>24 horas</MenuItem>
-                        <MenuItem value={"36"}>36 horas</MenuItem>
-                        <MenuItem value={"96"}>4 dias</MenuItem>
-                        <MenuItem value={"168"}>7 dias</MenuItem>
-                      </Field>
-                    </FormControl>
-                  </Grid>
+                      <MenuItem value={"0"}>Desabilitado</MenuItem>
+                      <MenuItem value={"0.01"}>1 minutos</MenuItem>
+                      <MenuItem value={"0.25"}>15 minutos</MenuItem>
+                      <MenuItem value={"1"}>1 hora</MenuItem>
+                      <MenuItem value={"12"}>12 horas</MenuItem>
+                      <MenuItem value={"24"}>1 dia</MenuItem>
+                      <MenuItem value={"48"}>2 dias</MenuItem>
+                      <MenuItem value={"120"}>5 dias</MenuItem>
+                      <MenuItem value={"168"}>7 dias</MenuItem>
+                      <MenuItem value={"240"}>10 dias</MenuItem>
+                      <MenuItem value={"720"}>30 dias</MenuItem>
+                    </Field>
+                  </FormControl>
+                </Grid>
 
                 <div>
                   {/* Expediente */}
@@ -625,19 +628,6 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
                           }}
                         >
                           <Tooltip title={i18n.t("whatsappModal.form.longText")} placement="top">
-                            {/* <FormControlLabel
-                              value="defineWorkHours"
-                              control={
-                                <Checkbox
-                                  size="small"
-                                  checked={defineWorkHours}
-                                  onChange={handleChange}
-                                />
-                              }
-                              label="Definir horário de expediente"
-                              labelPlacement="end"
-
-                            /> */}
 
                             <FormControlLabel
                               control={
