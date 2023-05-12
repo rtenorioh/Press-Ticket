@@ -49,17 +49,17 @@ Um sistema de tickets muito simples baseado em mensagens do WhatsApp, que permit
 
 ## Instalação
 
-- [Localhost](https://github.com/FilipeCamillo/Press-Ticket/blob/main/docs/INSTALL_localhost.md);
-- [VPS](https://github.com/FilipeCamillo/Press-Ticket/blob/main/docs/INSTALL_VPS.md);
-- [Instalador Automático](https://github.com/FilipeCamillo/automatico_press);
-- [phpmyadmin](https://github.com/FilipeCamillo/Press-Ticket/blob/main/docs/INSTALL_phpmyadmin.md); e
-- [Fuso Horário](https://github.com/FilipeCamillo/Press-Ticket/blob/main/docs/INSTALL_horarioVPS.mdd).
+- [Localhost](https://github.com/digaovaa/Press-Ticket/blob/main/docs/INSTALL_localhost.md);
+- [VPS](https://github.com/digaovaa/Press-Ticket/blob/main/docs/INSTALL_VPS.md);
+- [Instalador Automático](https://github.com/digaovaa/automatico_press);
+- [phpmyadmin](https://github.com/digaovaa/Press-Ticket/blob/main/docs/INSTALL_phpmyadmin.md); e
+- [Fuso Horário](https://github.com/digaovaa/Press-Ticket/blob/main/docs/INSTALL_horarioVPS.mdd).
 
 
 ## Caso queira ajudar a manter o projeto, pode contribuir com uma das opções abaixo: 
 - Brasil
     - Chave PIX:
-     - E-mail: filipecamillo@mkthub.tech
+     - E-mail: rodrigo@togiti.com.br
     - Contribuir via NuBank
      - ### Para contribuir com qualquer valor leia o QRcode - valores maiores clique no valor que deseja
     ![Qualquer valor](https://user-images.githubusercontent.com/64233640/209562388-95380a85-1a55-4fc0-8719-9a3aa3ef7711.png)
@@ -76,7 +76,7 @@ Um sistema de tickets muito simples baseado em mensagens do WhatsApp, que permit
   
 ## Registro de todas as alterações:
 
-- [Changelog](https://github.com/FilipeCamillo/Press-Ticket/blob/main/docs/CHANGELOG.md)
+- [Changelog](https://github.com/digaovaa/Press-Ticket/blob/main/docs/CHANGELOG.md)
 
 ## Demo:
 
@@ -93,11 +93,3 @@ admin@mkthub.tech
 admin
 ```
    
-## [![Repography logo](https://images.repography.com/logo.svg)](https://repography.com) / Atividades Recentes [![Time period](https://images.repography.com/32561461/FilipeCamillo/Press-Ticket/recent-activity/ATkOL6iM_WY6Z1VhvBHiPrFvct6k-f9JCUcll_NHmdc_badge.svg)](https://repography.com)
-[![Timeline graph](https://images.repography.com/32561461/FilipeCamillo/Press-Ticket/recent-activity/ATkOL6iM_WY6Z1VhvBHiPrFvct6k-f9JCUcll_NHmdc_timeline.svg)](https://github.com/FilipeCamillo/Press-Ticket/commits)
-[![Top contributors](https://images.repography.com/32561461/FilipeCamillo/Press-Ticket/recent-activity/ATkOL6iM_WY6Z1VhvBHiPrFvct6k-f9JCUcll_NHmdc_users.svg)](https://github.com/FilipeCamillo/Press-Ticket/graphs/contributors)
-
-
-
-## [![Repography logo](https://images.repography.com/logo.svg)](https://repography.com) / Top contribuidores
-[![Top contributors](https://images.repography.com/32561461/FilipeCamillo/Press-Ticket/top-contributors/ATkOL6iM_WY6Z1VhvBHiPrFvct6k-f9JCUcll_NHmdc_table.svg)](https://github.com/FilipeCamillo/Press-Ticket/graphs/contributors)
