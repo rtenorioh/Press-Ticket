@@ -83,7 +83,7 @@ const Login = () => {
             required
             fullWidth
             id="email"
-            label={i18n.t("login.form.email")}
+            label={i18n.t("Login.form.email")}
             name="email"
             value={user.email}
             onChange={handleChangeInput}
@@ -96,7 +96,7 @@ const Login = () => {
             required
             fullWidth
             name="password"
-            label={i18n.t("login.form.password")}
+            label={i18n.t("Login.form.password")}
             id="password"
             value={user.password}
             onChange={handleChangeInput}
@@ -126,7 +126,7 @@ const Login = () => {
             color="primary"
             className={classes.submit}
           >
-            {i18n.t("login.buttons.submit")}
+            {i18n.t("Login.buttons.submit")}
           </Button>
           <Grid container>
             <Grid item>
@@ -136,7 +136,7 @@ const Login = () => {
                 component={RouterLink}
                 to="/signup"
               >
-                {i18n.t("login.buttons.register")}
+                {i18n.t("Login.buttons.register")}
               </Link>
             </Grid>
           </Grid>
