@@ -74,7 +74,7 @@ const Login = () => {
       <div className={classes.paper}>
         <img alt="logo" src={logo}></img>
         <Typography component="h1" variant="h5">
-          {i18n.t("login.title")}
+          {i18n.t("Login.title")}
         </Typography>
         <form className={classes.form} noValidate onSubmit={handlSubmit}>
           <TextField
@@ -101,7 +101,7 @@ const Login = () => {
             value={user.password}
             onChange={handleChangeInput}
             autoComplete="current-password"
-            type={showPassword ? 'text' : 'password'}
+            type={showPassword ? "text" : "password"}
             InputProps={{
               endAdornment: (
                 <InputAdornment position="end">
@@ -109,10 +109,14 @@ const Login = () => {
                     aria-label="toggle password visibility"
                     onClick={() => setShowPassword((e) => !e)}
                   >
-                    {showPassword ? <VisibilityOff color="secondary" /> : <Visibility color="secondary" />}
+                    {showPassword ? (
+                      <VisibilityOff color="secondary" />
+                    ) : (
+                      <Visibility color="secondary" />
+                    )}
                   </IconButton>
                 </InputAdornment>
-              )
+              ),
             }}
           />
           <Button
@@ -138,7 +142,9 @@ const Login = () => {
           </Grid>
         </form>
       </div>
-      <Box mt={8}><Copyright /></Box>
+      <Box mt={8}>
+        <Copyright />
+      </Box>
     </Container>
   );
 };
