@@ -468,6 +468,7 @@ const messages = {
           name: "Nombre",
           email: "Correo electrónico",
           profile: "Perfil",
+          tricked: "Ver contactos",
           whatsapp: "Conexión estándar",
           startWork: "Hora de inicio",
           endWork: "Tiempo de finalización",
@@ -477,11 +478,27 @@ const messages = {
           add: "Agregar asistente",
         },
         toasts: {
-          deleted: "asistente eliminado con éxito.",
+          deleted: "Asistente eliminado con éxito.",
+          updated: "Asistente actualizado con éxito."
         },
         confirmationModal: {
           deleteTitle: "Eliminar",
           deleteMessage: "Se perderán todos los datos del asistente. Los tickets abiertos para este asistente se moverán a espera.",
+        },
+      },
+      integrations: {
+        success: "Integracion guardada con exito.",
+        title: "Integraciones",
+        integrations: {
+          openai: {
+            title: "OpenAI",
+            organization: "Organization ID",
+            apikey: "KEY"
+          },
+          n8n: {
+            title: "N8N",
+            urlApiN8N: "URL API N8N"
+          }
         },
       },
       settings: {
@@ -664,7 +681,8 @@ const messages = {
         ERR_CONNECTION_CREATION_COUNT: "Límite de conexión alcanzado, comuníquese con soporte para cambiar.",
         ERR_NO_TAG_FOUND: "Etiqueta no encontrada.",
         ERR_OPEN_USER_TICKET: "Ya existe un ticket para este contacto con ",
-        ERR_NONE_USER_TICKET: "Ya existe un ticket para este contacto."
+        ERR_NONE_USER_TICKET: "Ya existe un ticket para este contacto.",
+        ERR_NO_INTEGRATION_FOUND: "Integración no encontrada."
       },
     },
   },

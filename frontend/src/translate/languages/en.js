@@ -468,6 +468,7 @@ const messages = {
           name: "Name",
           email: "Email",
           profile: "Profile",
+          tricked: "View Contacts",
           whatsapp: "Standard Connection",
           startWork: "Start time",
           endWork: "End Time",
@@ -478,10 +479,26 @@ const messages = {
         },
         toasts: {
           deleted: "Attendant deleted successfully.",
+          updated: "Attendant updated successfully."
         },
         confirmationModal: {
           deleteTitle: "Delete",
           deleteMessage: "All agent data will be lost. Open tickets for this agent will be moved to hold.",
+        },
+      },
+      integrations: {
+        success: "Integration saved successfully.",
+        title: "Integrations",
+        integrations: {
+          openai: {
+            title: "OpenAI",
+            organization: "Organization ID",
+            apikey: "KEY"
+          },
+          n8n: {
+            title: "N8N",
+            urlApiN8N: "URL API N8N"
+          }
         },
       },
       settings: {
@@ -665,7 +682,8 @@ const messages = {
         ERR_NO_TAG_FOUND: "Tag not found.",
         ERR_OUT_OF_HOURS: "Out of Office Hours!",
         ERR_OPEN_USER_TICKET: "A ticket already exists for this contact with ",
-        ERR_NONE_USER_TICKET: "A ticket already exists for this contact."
+        ERR_NONE_USER_TICKET: "A ticket already exists for this contact.",
+        ERR_NO_INTEGRATION_FOUND: "Integration not found."
       },
     },
   },

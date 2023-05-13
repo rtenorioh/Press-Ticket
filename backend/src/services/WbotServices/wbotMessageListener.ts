@@ -19,6 +19,7 @@ import Contact from "../../models/Contact";
 import Ticket from "../../models/Ticket";
 import Message from "../../models/Message";
 import Settings from "../../models/Setting";
+import Integration from "../../models/Integration";
 
 import { getIO } from "../../libs/socket";
 import CreateMessageService from "../MessageServices/CreateMessageService";
@@ -31,6 +32,8 @@ import { debounce } from "../../helpers/Debounce";
 import UpdateTicketService from "../TicketServices/UpdateTicketService";
 import CreateContactService from "../ContactServices/CreateContactService";
 import formatBody from "../../helpers/Mustache";
+
+const request = require("request");
 
 interface Session extends Client {
   id?: number;
@@ -353,6 +356,27 @@ const handleMessage = async (
 ): Promise<void> => {
   if (!isValidMsg(msg)) {
     return;
+  }
+
+  const Integrationdb = await Integration.findOne({
+    where: { key: "urlApiN8N" }
+  });
+
+  if (Integrationdb?.value) {
+    const options = {
+      method: "POST",
+      url: Integrationdb?.value,
+      headers: {
+        "Content-Type": "application/json"
+      },
+      json: msg
+    };
+    try {
+      const response = await request(options);
+      console.log(response.body);
+    } catch (error) {
+      throw new Error(error);
+    }
   }
 
   // IGNORAR MENSAGENS DE GRUPO

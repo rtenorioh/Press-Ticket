@@ -40,6 +40,7 @@ const ListUsersService = async ({
       "id",
       "email",
       "profile",
+      "isTricked",
       "createdAt",
       "startWork",
       "endWork"

@@ -10,6 +10,7 @@ interface Request {
   name: string;
   queueIds?: number[];
   profile?: string;
+  isTricked?: boolean;
   whatsappId?: number;
   startWork?: string;
   endWork?: string;
@@ -28,6 +29,7 @@ const CreateUserService = async ({
   name,
   queueIds = [],
   profile = "admin",
+  isTricked,
   whatsappId,
   startWork,
   endWork
@@ -63,6 +65,7 @@ const CreateUserService = async ({
       password,
       name,
       profile,
+      isTricked,
       whatsappId: whatsappId || null,
       startWork,
       endWork

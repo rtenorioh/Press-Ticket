@@ -390,6 +390,7 @@ const messages = {
           queues: "Setores",
           administration: "Administração",
           users: "Atendentes",
+          integrations: "Integrações",
           settings: "Configurações",
           sendMsg: "Envio de Mensagens",
           sendMedia: "Envio de Mídia",
@@ -468,6 +469,7 @@ const messages = {
           name: "Nome",
           email: "E-mail",
           profile: "Perfil",
+          tricked: "Visualizar Contatos",
           whatsapp: "Conexão Padrão",
           startWork: "Horário inicial",
           endWork: "Horário final",
@@ -478,10 +480,26 @@ const messages = {
         },
         toasts: {
           deleted: "Atendente excluído com sucesso.",
+          updated: "Atendente atualizado com sucesso."
         },
         confirmationModal: {
           deleteTitle: "Excluir",
           deleteMessage: "Todos os dados do atendente serão perdidos. Os tickets abertos deste atendente serão movidos para a espera.",
+        },
+      },
+      integrations: {
+        success: "Integração salva com sucesso.",
+        title: "Integrações",
+        integrations: {
+          openai: {
+            title: "OpenAI",
+            organization: "Organization ID",
+            apikey: "KEY"
+          },
+          n8n: {
+            title: "N8N",
+            urlApiN8N: "URL API N8N"
+          }
         },
       },
       settings: {
@@ -665,7 +683,8 @@ const messages = {
         ERR_NO_TAG_FOUND: "Tag não encontrada.",
         ERR_OUT_OF_HOURS: "Fora do Horário de Expediente!",
         ERR_OPEN_USER_TICKET: "Já existe um ticket aberto para este contato com ",
-        ERR_NONE_USER_TICKET: "Já existe um ticket aberto para este contato."
+        ERR_NONE_USER_TICKET: "Já existe um ticket aberto para este contato.",
+        ERR_NO_INTEGRATION_FOUND: "Integração não encontrada."
       },
     },
   },
