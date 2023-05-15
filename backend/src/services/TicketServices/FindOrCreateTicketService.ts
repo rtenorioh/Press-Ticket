@@ -4,6 +4,7 @@ import Contact from "../../models/Contact";
 import Ticket from "../../models/Ticket";
 import ShowTicketService from "./ShowTicketService";
 import ListSettingsServiceOne from "../SettingServices/ListSettingsServiceOne";
+import Message from "../../models/Message";
 
 const FindOrCreateTicketService = async (
   contact: Contact,
@@ -23,7 +24,7 @@ const FindOrCreateTicketService = async (
       whatsappId: whatsappId
     }
   });
-
+ 
   if (ticket) {
     await ticket.update({ unreadMessages });
   }

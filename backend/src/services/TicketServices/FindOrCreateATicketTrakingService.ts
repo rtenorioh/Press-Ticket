@@ -13,10 +13,11 @@ const FindOrCreateATicketTrakingService = async ({
   whatsappId,
   userId
   }: Params): Promise<TicketTraking > => {
-  console.log("FINDORCREATE_one antes")
+
   const ticketTraking = await TicketTraking.findOne({
     where: {
-      ticketId
+      ticketId,
+      finishedAt: null
     }
   });
 

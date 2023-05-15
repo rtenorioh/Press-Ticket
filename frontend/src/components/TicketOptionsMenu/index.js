@@ -79,7 +79,7 @@ const TicketOptionsMenu = ({ ticket, menuOpen, handleClose, anchorEl }) => {
 				<MenuItem onClick={handleOpenTransferModal}>
 					{i18n.t("ticketOptionsMenu.transfer")}
 				</MenuItem>
-				<MenuItem onClick={e => handleUpdateTicketStatus(e, "closed", null)}>
+				<MenuItem onClick={e => handleUpdateTicketStatus(e, "closed", ticket.userId)}>
 
 					{i18n.t("messagesList.header.buttons.finish")}
 				</MenuItem>
