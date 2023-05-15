@@ -61,6 +61,8 @@ Um sistema de tickets muito simples baseado em mensagens do WhatsApp, que permit
     - Chave PIX:
      - E-mail: rodrigo@togiti.com.br
   
+  ![image](https://github.com/digaovaa/Press-Ticket/assets/23559774/326c39db-e9c7-4b59-aad9-6ef5b716190a)
+
 ## Registro de todas as alterações:
 
 - [Changelog](https://github.com/digaovaa/Press-Ticket/blob/main/docs/CHANGELOG.md)
