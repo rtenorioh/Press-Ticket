@@ -60,14 +60,6 @@ Um sistema de tickets muito simples baseado em mensagens do WhatsApp, que permit
 - Brasil
     - Chave PIX:
      - E-mail: rodrigo@togiti.com.br
-- Exterior
-
-  - <a href="https://www.paypal.com/donate/?hosted_button_id=3UQXNJ72WHEN4">
-    <img alt="Paypal" src="https://img.shields.io/badge/PayPal-00457C?style=for-the-badge&logo=paypal&logoColor=white">
-</a>
-  
-  
-  
   
 ## Registro de todas as alterações:
 
