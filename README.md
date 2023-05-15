@@ -60,20 +60,9 @@ Um sistema de tickets muito simples baseado em mensagens do WhatsApp, que permit
 - Brasil
     - Chave PIX:
      - E-mail: rodrigo@togiti.com.br
-    - Contribuir via NuBank
-     - ### Para contribuir com qualquer valor leia o QRcode - valores maiores clique no valor que deseja
-    ![Qualquer valor](https://user-images.githubusercontent.com/64233640/209562388-95380a85-1a55-4fc0-8719-9a3aa3ef7711.png)
-     - [R$ 25,00](https://nubank.com.br/cobranca/uxBFXsJRdp1n13jg)
-     - [R$ 50,00](https://nubank.com.br/cobranca/SJt7FTe3gd1n13jg)
-- Exterior
+  
+  ![image](https://github.com/digaovaa/Press-Ticket/assets/23559774/326c39db-e9c7-4b59-aad9-6ef5b716190a)
 
-  - <a href="https://www.paypal.com/donate/?hosted_button_id=3UQXNJ72WHEN4">
-    <img alt="Paypal" src="https://img.shields.io/badge/PayPal-00457C?style=for-the-badge&logo=paypal&logoColor=white">
-</a>
-  
-  
-  
-  
 ## Registro de todas as alterações:
 
 - [Changelog](https://github.com/digaovaa/Press-Ticket/blob/main/docs/CHANGELOG.md)
