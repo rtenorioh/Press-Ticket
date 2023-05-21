@@ -36,6 +36,8 @@ import VcardPreview from "../VcardPreview";
 import LocationPreview from "../LocationPreview";
 import ModalImageCors from "../ModalImageCors";
 import MessageOptionsMenu from "../MessageOptionsMenu";
+import { ReplyMessageContext } from "../../context/ReplyingMessage/ReplyingMessageContext";
+
 import Audio from "../Audio";
 
 import api from "../../services/api";
@@ -395,6 +397,8 @@ const MessagesList = ({ ticketId, isGroup }) => {
   // const { user } = useContext(AuthContext);
 
   const [selectedMessage, setSelectedMessage] = useState({});
+  const { setReplyingMessage } = useContext(ReplyMessageContext);
+  
   const [anchorEl, setAnchorEl] = useState(null);
   const messageOptionsMenuOpen = Boolean(anchorEl);
   const currentTicketId = useRef(ticketId);
@@ -487,6 +491,11 @@ const MessagesList = ({ ticketId, isGroup }) => {
   const handleOpenMessageOptionsMenu = (e, message) => {
     setAnchorEl(e.currentTarget);
     setSelectedMessage(message);
+  };
+
+  const hanldeReplyMessage = (message) => {
+    setAnchorEl(null);
+    setReplyingMessage(message);
   };
 
   const handleCloseMessageOptionsMenu = (e) => {
@@ -756,7 +765,10 @@ const MessagesList = ({ ticketId, isGroup }) => {
               {renderMessageDivider(message, index)}
               {/* {renderNumberTicket(message, index)} */}
               {renderTicketsSeparator(message, index)}
-              <div className={classes.messageCenter}>
+              <div 
+                className={classes.messageCenter}
+                onDoubleClick={(e) => hanldeReplyMessage(message)}
+              >
                 <IconButton
                   variant="contained"
                   size="small"
