@@ -67,17 +67,19 @@ export default function AudioPlayer({ url }) {
   };
 
   const playAudio = () => {
-    audioRef.current.play();
+    audioRef.current.play().catch(error => {
+      // Reprodução do áudio não suportada
+      console.log(error);
+    });
   };
 
   return (
     <>
-      {isIOS ? (
+      <audio ref={audioRef} controls>
+        <source src={url} type="audio/ogg" />
+      </audio>
+      {isIOS && (
         <button onClick={playAudio}>Play Audio</button>
-      ) : (
-        <audio ref={audioRef} controls>
-          <source src={url} type="audio/ogg" />
-        </audio>
       )}
       {showButtonRate && (
         <button
