@@ -1,4 +1,5 @@
 import React, { useRef, useEffect, useState } from "react";
+import ReactPlayer from "react-player";
 
 const LS_NAME = 'audioMessageRate';
 
@@ -8,35 +9,32 @@ export default function AudioPlayer({ url }) {
     parseFloat(localStorage.getItem(LS_NAME) || "1")
   );
   const [showButtonRate, setShowButtonRate] = useState(false);
-  const [isIOS, setIsIOS] = useState(false);
 
   useEffect(() => {
+    audioRef.current.seekTo(0);
     audioRef.current.playbackRate = audioRate;
     localStorage.setItem(LS_NAME, audioRate);
   }, [audioRate]);
 
   useEffect(() => {
-    const isDeviceIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-    setIsIOS(isDeviceIOS);
-
-    audioRef.current.addEventListener("play", () => {
+    audioRef.current.wrapper.addEventListener("play", () => {
       setShowButtonRate(true);
     });
-    audioRef.current.addEventListener("pause", () => {
+    audioRef.current.wrapper.addEventListener("pause", () => {
       setShowButtonRate(false);
     });
-    audioRef.current.addEventListener("ended", () => {
+    audioRef.current.wrapper.addEventListener("ended", () => {
       setShowButtonRate(false);
     });
 
     return () => {
-      audioRef.current.removeEventListener("play", () => {
+      audioRef.current.wrapper.removeEventListener("play", () => {
         setShowButtonRate(true);
       });
-      audioRef.current.removeEventListener("pause", () => {
+      audioRef.current.wrapper.removeEventListener("pause", () => {
         setShowButtonRate(false);
       });
-      audioRef.current.removeEventListener("ended", () => {
+      audioRef.current.wrapper.removeEventListener("ended", () => {
         setShowButtonRate(false);
       });
     };
@@ -66,21 +64,15 @@ export default function AudioPlayer({ url }) {
     setAudioRate(newRate);
   };
 
-  const playAudio = () => {
-    audioRef.current.play().catch(error => {
-      // Reprodução do áudio não suportada
-      console.log(error);
-    });
-  };
-
   return (
     <>
-      <audio ref={audioRef} controls>
-        <source src={url} type="audio/ogg" />
-      </audio>
-      {isIOS && (
-        <button onClick={playAudio}>Play Audio</button>
-      )}
+      <ReactPlayer
+        ref={audioRef}
+        url={url}
+        controls
+        width="100%"
+        height="auto"
+      />
       {showButtonRate && (
         <button
           style={{ marginLeft: "5px", marginTop: "-45px" }}

@@ -29,6 +29,7 @@
     "react-dom": "^16.13.1",
     "react-flatpickr": "^3.10.13",
     "react-modal-image": "^2.5.0",
+    "react-player": "^2.12.0",
     "react-router-dom": "^5.2.0",
     "react-scripts": "3.4.3",
     "react-toastify": "^6.0.9",
