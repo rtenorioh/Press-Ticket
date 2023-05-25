@@ -288,7 +288,7 @@ const TicketListItem = ({ ticket }) => {
 	// Nome do atendente
 	const [uName, setUserName] = useState(null);
 
-	if (ticket.status === "pending") {
+	if (ticket.status === "pending" || ticket.status === "closed") {
 
 	} else {
 

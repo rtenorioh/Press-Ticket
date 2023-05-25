@@ -1,9 +1,11 @@
 
-import React, { useState, 
-  useEffect, 
-  useReducer, 
-  // useContext, 
-  useRef } from "react";
+import React, {
+  useState,
+  useEffect,
+  useReducer,
+  useContext,
+  useRef
+} from "react";
 
 import {
   isSameDay,
@@ -30,6 +32,8 @@ import {
   ExpandMore,
   GetApp,
 } from "@material-ui/icons";
+
+import { ReplyMessageContext } from "../../context/ReplyingMessage/ReplyingMessageContext";
 
 import MarkdownWrapper from "../MarkdownWrapper";
 import VcardPreview from "../VcardPreview";
@@ -399,6 +403,8 @@ const MessagesList = ({ ticketId, isGroup }) => {
   const messageOptionsMenuOpen = Boolean(anchorEl);
   const currentTicketId = useRef(ticketId);
 
+  const { setReplyingMessage } = useContext(ReplyMessageContext);
+
   useEffect(() => {
     dispatch({ type: "RESET" });
     setPageNumber(1);
@@ -482,6 +488,11 @@ const MessagesList = ({ ticketId, isGroup }) => {
     if (scrollTop < 50) {
       loadMore();
     }
+  };
+
+  const hanldeReplyMessage = (e, message) => {
+    setAnchorEl(null);
+    setReplyingMessage(message);
   };
 
   const handleOpenMessageOptionsMenu = (e, message) => {
@@ -756,7 +767,8 @@ const MessagesList = ({ ticketId, isGroup }) => {
               {renderMessageDivider(message, index)}
               {/* {renderNumberTicket(message, index)} */}
               {renderTicketsSeparator(message, index)}
-              <div className={classes.messageCenter}>
+              <div className={classes.messageCenter}
+                onDoubleClick={(e) => hanldeReplyMessage(e, message)}>
                 <IconButton
                   variant="contained"
                   size="small"
@@ -788,7 +800,8 @@ const MessagesList = ({ ticketId, isGroup }) => {
               {renderMessageDivider(message, index)}
               {/* {renderNumberTicket(message, index)} */}
               {renderTicketsSeparator(message, index)}
-              <div className={classes.messageLeft}>
+              <div className={classes.messageLeft}
+                onDoubleClick={(e) => hanldeReplyMessage(e, message)}>
                 <IconButton
                   variant="contained"
                   size="small"
@@ -838,7 +851,8 @@ const MessagesList = ({ ticketId, isGroup }) => {
               {renderMessageDivider(message, index)}
               {renderTicketsSeparator(message, index)}
               {/* {renderNumberTicket(message, index)} */}
-              <div className={classes.messageRight}>
+              <div className={classes.messageRight}
+                onDoubleClick={(e) => hanldeReplyMessage(e, message)}>
                 <IconButton
                   variant="contained"
                   size="small"
@@ -881,29 +895,29 @@ const MessagesList = ({ ticketId, isGroup }) => {
       return <div>Say hello to your new contact!</div>;
     }
   };
-
-  return (
-    <div className={classes.messagesListWrapper}>
-      <MessageOptionsMenu
-        message={selectedMessage}
-        anchorEl={anchorEl}
-        menuOpen={messageOptionsMenuOpen}
-        handleClose={handleCloseMessageOptionsMenu}
-      />
-      <div
-        id="messagesList"
-        className={classes.messagesList}
-        onScroll={handleScroll}
+    return (
+      <div className={classes.messagesListWrapper}
       >
-        {messagesList.length > 0 ? renderMessages() : []}
-      </div>
-      {loading && (
-        <div>
-          <CircularProgress className={classes.circleLoading} />
+        <MessageOptionsMenu
+          message={selectedMessage}
+          anchorEl={anchorEl}
+          menuOpen={messageOptionsMenuOpen}
+          handleClose={handleCloseMessageOptionsMenu}
+        />
+        <div
+          id="messagesList"
+          className={classes.messagesList}
+          onScroll={handleScroll}
+        >
+          {messagesList.length > 0 ? renderMessages() : []}
         </div>
-      )}
-    </div>
-  );
+        {loading && (
+          <div>
+            <CircularProgress className={classes.circleLoading} />
+          </div>
+        )}
+      </div>
+    );
 };
 
 export default MessagesList;
