@@ -111,9 +111,9 @@ const NotificationsPopOver = () => {
 			const UserQueues = user.queues.findIndex((users) => (users.id === data.ticket.queueId));
 			if (
 				(data.action === "create" &&
-				!data.message.read &&
-				(data.ticket.userId === user?.id || !data.ticket.userId)
-				&& (UserQueues !== -1 || !data.ticket.queueId))
+					!data.message.read &&
+					(data.ticket.userId === user?.id || !data.ticket.userId)
+					&& (UserQueues !== -1 || !data.ticket.queueId))
 			) {
 				setNotifications(prevState => {
 					const ticketIndex = prevState.findIndex(t => t.id === data.ticket.id);
@@ -196,7 +196,11 @@ const NotificationsPopOver = () => {
 				aria-label="Open Notifications"
 				color="inherit"
 			>
-				<Badge badgeContent={notifications.length} color="secondary" overlap="rectangular" >
+				<Badge
+					badgeContent={notifications.length}
+					color="secondary"
+					overlap="rectangular"
+					max={9999} >
 					<ChatIcon />
 				</Badge>
 			</IconButton>

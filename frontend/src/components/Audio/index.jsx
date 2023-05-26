@@ -3,7 +3,7 @@ import React, { useRef, useEffect, useState } from "react";
 
 const LS_NAME = 'audioMessageRate';
 
-export default function({url}) {
+const Audio = ({url}) => {
     const audioRef = useRef(null);
     const [audioRate, setAudioRate] = useState( parseFloat(localStorage.getItem(LS_NAME) || "1") );
     const [showButtonRate, setShowButtonRate] = useState(false);
@@ -51,9 +51,11 @@ export default function({url}) {
     return (
         <>
             <audio ref={audioRef} controls>
-                <source src={url} type="audio/ogg"></source>
+                <source src={url} type="audio/mp3"></source>
             </audio>
             {showButtonRate && <Button style={{marginLeft: "5px", marginTop: "-45px"}} onClick={toogleRate}>{audioRate}x</Button>}
         </>
     );
 }
+
+export default Audio;

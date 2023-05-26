@@ -399,6 +399,7 @@ const TicketListItem = ({ ticket, userId }) => {
 								className={classes.newMessagesCount}
 								badgeContent={ticket.unreadMessages}
 								overlap="rectangular"
+								max={9999}
 								classes={{
 									badge: classes.badgeStyle,
 								}}
