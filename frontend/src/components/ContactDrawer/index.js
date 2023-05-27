@@ -128,8 +128,8 @@ const ContactDrawer = ({ open, handleDrawerClose, contact, loading }) => {
 							<CopyToClipboard content={contact.name} color="secondary" />
 							</Typography>
 						<Typography>
-							<Link href={`tel:${user.isTricked ? contact.number : contact.number.slice(0,-4) + "****"}`}>{user.isTricked ? contact.number : contact.number.slice(0,-4) + "****"}</Link>
-							<CopyToClipboard content={user.isTricked ? contact.number : contact.number.slice(0,-4) + "****"} color="secondary" />
+							<Link href={`tel:${user.isTricked === "enabled" ? contact.number : contact.number.slice(0,-4) + "****"}`}>{user.isTricked === "enabled" ? contact.number : contact.number.slice(0,-4) + "****"}</Link>
+							<CopyToClipboard content={user.isTricked === "enabled" ? contact.number : contact.number.slice(0,-4) + "****"} color="secondary" />
 						</Typography>
 						{contact.email && (
 							<Typography>

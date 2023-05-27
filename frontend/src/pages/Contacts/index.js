@@ -394,7 +394,7 @@ const Contacts = () => {
                     {<Avatar src={contact.profilePicUrl} className={classes.avatar} />}
                   </TableCell>
                   <TableCell>{contact.name}</TableCell>
-                  <TableCell align="center">{user.isTricked ? contact.number : contact.number.slice(0,-4) + "****"}</TableCell>
+                  <TableCell align="center">{user.isTricked === "enabled"? contact.number : contact.number.slice(0,-4) + "****"}</TableCell>
                   <TableCell align="center">{contact.email}</TableCell>
                   <TableCell align="center">
                     <IconButton

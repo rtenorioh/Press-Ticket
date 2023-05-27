@@ -171,7 +171,7 @@ const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
 									margin="dense"
 									className={classes.textField}
 								/>
-								{user.isTricked ?
+								{user.isTricked === "enabled" ?
 									<Field
 										as={TextField}
 										label={i18n.t("contactModal.form.number")}
