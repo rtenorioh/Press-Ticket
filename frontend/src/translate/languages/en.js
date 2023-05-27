@@ -274,7 +274,10 @@ const messages = {
           whatsapp: "Standard Connection",
           user: "Attendant",
           startWork: "Start",
-          endWork: "Finish"
+          endWork: "Finish",
+          isTricked: "View Contacts",
+          enabled: "Enabled",
+          disabled: "Disabled"
         },
         buttons: {
           okAdd: "Add",
@@ -485,6 +488,13 @@ const messages = {
           deleteTitle: "Delete",
           deleteMessage: "All agent data will be lost. Open tickets for this agent will be moved to hold.",
         },
+      },
+      company:{
+        success: "Company data successfully saved.",
+        title: "Company Data",
+        info: "Information",
+        name: "Name",
+        url: "Website"
       },
       integrations: {
         success: "Integration saved successfully.",

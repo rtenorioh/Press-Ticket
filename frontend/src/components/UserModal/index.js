@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext, useRef } from "react";
-
+import { useHistory } from "react-router-dom";
 import * as Yup from "yup";
 import {
 	Formik,
@@ -25,9 +25,9 @@ import {
 	IconButton
 } from '@material-ui/core';
 
-import { 
-	Visibility, 
-	VisibilityOff 
+import {
+	Visibility,
+	VisibilityOff
 } from '@material-ui/icons';
 
 import { green } from "@material-ui/core/colors";
@@ -97,6 +97,7 @@ const UserModal = ({ open, onClose, userId }) => {
 		profile: "user",
 		startWork: "",
 		endWork: "",
+		isTricked: "enabled"
 	};
 
 	const { user: loggedInUser } = useContext(AuthContext);
@@ -108,6 +109,7 @@ const UserModal = ({ open, onClose, userId }) => {
 	const { loading, whatsApps } = useWhatsApps();
 	const startWorkRef = useRef();
 	const endWorkRef = useRef();
+	const history = useHistory();
 
 	useEffect(() => {
 		const fetchUser = async () => {
@@ -142,6 +144,7 @@ const UserModal = ({ open, onClose, userId }) => {
 				await api.post("/users", userData);
 			}
 			toast.success(i18n.t("userModal.success"));
+			history.go(0);
 		} catch (err) {
 			toastError(err);
 		}
@@ -341,6 +344,34 @@ const UserModal = ({ open, onClose, userId }) => {
 										</form>
 									)}
 								/>
+								<FormControl
+									variant="outlined"
+									className={classes.formControl}
+									margin="dense"
+								>
+									<Can
+										role={loggedInUser.profile}
+										perform="user-modal:editProfile"
+										yes={() => (
+											<>
+												<InputLabel id="isTricked-selection-input-label">
+													{i18n.t("userModal.form.isTricked")}
+												</InputLabel>
+
+												<Field
+													as={Select}
+													label={i18n.t("userModal.form.isTricked")}
+													name="isTricked"
+													labelId="isTricked-selection-label"
+													id="isTricked-selection"
+												>
+													<MenuItem value="enabled">{i18n.t("userModal.form.enabled")}</MenuItem>
+													<MenuItem value="disabled">{i18n.t("userModal.form.disabled")}</MenuItem>
+												</Field>
+											</>
+										)}
+									/>
+								</FormControl>
 							</DialogContent>
 							<DialogActions>
 								<Button

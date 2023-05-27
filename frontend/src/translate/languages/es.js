@@ -274,7 +274,10 @@ const messages = {
           whatsapp: "Conexión estándar",
           asistente: "Asistente",
           startWork: "Inicio",
-          endWork: "Finalizar"
+          endWork: "Finalizar",
+          isTricked: "Ver contactos",
+          enabled: "Habilitado",
+          disabled: "Deshabilitado"
         },
         buttons: {
           okAdd: "Agregar",
@@ -485,6 +488,13 @@ const messages = {
           deleteTitle: "Eliminar",
           deleteMessage: "Se perderán todos los datos del asistente. Los tickets abiertos para este asistente se moverán a espera.",
         },
+      },
+      company:{
+        success: "Los datos de la empresa se guardaron con éxito.",
+        title: "Datos de la empresa",
+        info: "Información",
+        name: "Nombre",
+        url: "Sitio web"
       },
       integrations: {
         success: "Integracion guardada con exito.",

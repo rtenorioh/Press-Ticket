@@ -48,9 +48,9 @@ class User extends Model<User> {
   @Column
   profile: string;
 
-  @Default(true)
+  @Default("enabled")
   @Column
-  isTricked: boolean;
+  isTricked: string;
 
   @ForeignKey(() => Whatsapp)
   @Column

@@ -1,7 +1,6 @@
-import React, { useState, useEffect, useReducer, useContext } from "react";
+import React, { useState, useEffect, useReducer } from "react";
 import { toast } from "react-toastify";
 import openSocket from "../../services/socket-io";
-import { useHistory } from "react-router-dom";
 import { makeStyles } from "@material-ui/core/styles";
 
 import {
@@ -9,7 +8,6 @@ import {
   IconButton,
   InputAdornment,
   Paper,
-  Switch,
   Table,
   TableBody,
   TableCell,
@@ -33,11 +31,9 @@ import Title from "../../components/Title";
 import TableRowSkeleton from "../../components/TableRowSkeleton";
 import UserModal from "../../components/UserModal";
 import ConfirmationModal from "../../components/ConfirmationModal";
-import { AuthContext } from "../../context/Auth/AuthContext";
 import api from "../../services/api";
 import { i18n } from "../../translate/i18n";
 import toastError from "../../errors/toastError";
-import { Can } from "../../components/Can";
 
 const reducer = (state, action) => {
   if (action.type === "LOAD_USERS") {
@@ -105,9 +101,6 @@ const Users = () => {
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
   const [searchParam, setSearchParam] = useState("");
   const [users, dispatch] = useReducer(reducer, []);
-  const [updatingUserId, setUpdatingUserId] = useState(null);
-  const { user: loggedInUser } = useContext(AuthContext);
-  const history = useHistory();
 
   useEffect(() => {
     dispatch({ type: "RESET" });
@@ -195,20 +188,6 @@ const Users = () => {
     }
   };
 
-  const handleSwitchChange = async (user, newValue) => {
-    try {
-      setUpdatingUserId(user.id);
-      await api.put(`/users/${user.id}`, { isTricked: newValue });
-      dispatch({ type: "UPDATE_USERS", payload: { ...user, isTricked: newValue } });
-      toast.success(i18n.t("users.toasts.updated"));
-      history.go(0);
-    } catch (err) {
-      toastError(err);
-    }
-    setUpdatingUserId(null);
-  };
-
-
   return (
     <MainContainer>
       <ConfirmationModal
@@ -276,15 +255,6 @@ const Users = () => {
               <TableCell align="center">
                 {i18n.t("users.table.profile")}
               </TableCell>
-              <Can
-                role={loggedInUser.profile}
-                perform="user-table:editTricked"
-                yes={() => (
-                  <TableCell align="center">
-                    {i18n.t("users.table.tricked")}
-                  </TableCell>
-                )}
-              />
               <TableCell align="center">
                 {i18n.t("users.table.whatsapp")}
               </TableCell>
@@ -307,19 +277,6 @@ const Users = () => {
                   <TableCell align="center">{user.name}</TableCell>
                   <TableCell align="center">{user.email}</TableCell>
                   <TableCell align="center">{user.profile}</TableCell>
-                  <Can
-                    role={loggedInUser.profile}
-                    perform="user-table:editTricked"
-                    yes={() => (
-                      <TableCell align="center">
-                        <Switch
-                          checked={user.isTricked}
-                          disabled={updatingUserId === user.id}
-                          onChange={(e) => handleSwitchChange(user, e.target.checked)}
-                        />
-                      </TableCell>
-                    )}
-                  />
                   <TableCell align="center">{user.whatsapp?.name}</TableCell>
                   <TableCell align="center">{user.startWork}</TableCell>
                   <TableCell align="center">{user.endWork}</TableCell>
@@ -343,7 +300,7 @@ const Users = () => {
                   </TableCell>
                 </TableRow>
               ))}
-              {loading && <TableRowSkeleton columns={9} />}
+              {loading && <TableRowSkeleton columns={8} />}
             </>
           </TableBody>
         </Table>

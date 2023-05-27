@@ -274,7 +274,10 @@ const messages = {
           whatsapp: "Conexão Padrão",
           user: "Atendente",
           startWork: "Inicio",
-          endWork: "Termino"
+          endWork: "Termino",
+          isTricked: "Ver Contatos",
+          enabled: "Habilitado",
+          disabled: "Desabilitado"
         },
         buttons: {
           okAdd: "Adicionar",
@@ -390,6 +393,7 @@ const messages = {
           queues: "Setores",
           administration: "Administração",
           users: "Atendentes",
+          company: "Empresa",
           integrations: "Integrações",
           settings: "Configurações",
           sendMsg: "Envio de Mensagens",
@@ -469,7 +473,6 @@ const messages = {
           name: "Nome",
           email: "E-mail",
           profile: "Perfil",
-          tricked: "Visualizar Contatos",
           whatsapp: "Conexão Padrão",
           startWork: "Horário inicial",
           endWork: "Horário final",
@@ -486,6 +489,13 @@ const messages = {
           deleteTitle: "Excluir",
           deleteMessage: "Todos os dados do atendente serão perdidos. Os tickets abertos deste atendente serão movidos para a espera.",
         },
+      },
+      company:{
+        success: "Dados da Empresa salvo com sucesso.",
+        title: "Dados da Empresa",
+        info: "Informações",
+        name: "Nome",
+        url: "Site"
       },
       integrations: {
         success: "Integração salva com sucesso.",
