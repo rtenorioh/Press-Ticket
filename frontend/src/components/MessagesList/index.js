@@ -2,7 +2,7 @@
 import React, { useState, 
   useEffect, 
   useReducer, 
-  // useContext, 
+  useContext, 
   useRef } from "react";
 
 import {
@@ -493,7 +493,7 @@ const MessagesList = ({ ticketId, isGroup }) => {
     setSelectedMessage(message);
   };
 
-  const hanldeReplyMessage = (message) => {
+  const hanldeReplyMessage = (e,message) => {
     setAnchorEl(null);
     setReplyingMessage(message);
   };
@@ -688,7 +688,7 @@ const MessagesList = ({ ticketId, isGroup }) => {
 
       if (messageUser !== previousMessageUser) {
         return (
-          <span style={{ marginTop: 16 }} key={`divider-${message.id}`}></span>
+          <span style={{ marginTop: 16 }} key={`divider-${message.id}`} ></span>
         );
       }
     }
@@ -767,7 +767,7 @@ const MessagesList = ({ ticketId, isGroup }) => {
               {renderTicketsSeparator(message, index)}
               <div 
                 className={classes.messageCenter}
-                onDoubleClick={(e) => hanldeReplyMessage(message)}
+                onDoubleClick={(e) => hanldeReplyMessage(e,message)}
               >
                 <IconButton
                   variant="contained"
@@ -800,7 +800,9 @@ const MessagesList = ({ ticketId, isGroup }) => {
               {renderMessageDivider(message, index)}
               {/* {renderNumberTicket(message, index)} */}
               {renderTicketsSeparator(message, index)}
-              <div className={classes.messageLeft}>
+              <div className={classes.messageLeft}
+                  onDoubleClick={(e) => hanldeReplyMessage(e,message)}
+                              >
                 <IconButton
                   variant="contained"
                   size="small"
@@ -850,7 +852,9 @@ const MessagesList = ({ ticketId, isGroup }) => {
               {renderMessageDivider(message, index)}
               {renderTicketsSeparator(message, index)}
               {/* {renderNumberTicket(message, index)} */}
-              <div className={classes.messageRight}>
+              <div className={classes.messageRight}
+              onDoubleClick={(e) => hanldeReplyMessage(e,message)}
+              >
                 <IconButton
                   variant="contained"
                   size="small"

@@ -61,6 +61,9 @@ class TicketTraking extends Model<TicketTraking> {
   queuedAt: Date;
 
   @Column
+  closedAt: Date;
+
+  @Column
   finishedAt: Date;
 
   @Column

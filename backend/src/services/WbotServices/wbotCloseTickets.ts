@@ -20,7 +20,7 @@ export const ClosedAllOpenTickets = async (): Promise<void> => {
       await ticket.update({
         status: "closed",
         userId: ticket.userId || null,
-        queueId: null,
+        queueId: ticket.queueId || null,
         unreadMessages: 0
       });
 
@@ -28,7 +28,7 @@ export const ClosedAllOpenTickets = async (): Promise<void> => {
       await ticket.update({
         status: useNPS ? 'nps' : "closed",
         userId: ticket.userId || null,
-        queueId: null,
+        queueId: ticket.queueId || null,
         unreadMessages: 0
       });
 
@@ -37,7 +37,7 @@ export const ClosedAllOpenTickets = async (): Promise<void> => {
       await ticket.update({
         status: "closed",
         userId: ticket.userId || null,
-        queueId: null,
+        queueId: ticket.queueId || null,
         unreadMessages: 0
       });
 
@@ -74,7 +74,7 @@ export const ClosedAllOpenTickets = async (): Promise<void> => {
           dataLimite.setHours(dataLimite.getHours() - Number(horasFecharAutomaticamente));
         }
 
-        console.log(dataLimite + " TEMPO FECHAMENTO " + horasFecharAutomaticamente)
+       // console.log(dataLimite + " TEMPO FECHAMENTO " + horasFecharAutomaticamente)
 
         if (ticket.status === "open" && fromMe && !isMsgGroup) {
 

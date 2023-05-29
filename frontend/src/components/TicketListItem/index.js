@@ -193,6 +193,7 @@ const TicketListItem = ({ ticket }) => {
 						border: "2px solid #CCC",
 						color: "white"
 					}}
+					overlap="rectangular"
 					badgeContent={tag.name} />
 			</span>
 		)
@@ -426,6 +427,7 @@ const TicketListItem = ({ ticket }) => {
 											<Tooltip title={i18n.t("messageVariablesPicker.vars.connection")}>
 												<Badge
 													className={classes.Radiusdot}
+													overlap="rectangular"
 													style={{
 														backgroundColor: system.color.lightTheme.palette.primary,
 														height: 20,
@@ -453,6 +455,7 @@ const TicketListItem = ({ ticket }) => {
 												<Tooltip title={i18n.t("messageVariablesPicker.vars.queue")}>
 													<Badge
 														className={classes.Radiusdot}
+														overlap="rectangular"
 														style={{
 															backgroundColor: ticket.queue?.color || "#7C7C7C",
 															height: 20,
@@ -484,6 +487,7 @@ const TicketListItem = ({ ticket }) => {
 													<Tooltip title={i18n.t("messageVariablesPicker.vars.user")}>
 														<Badge
 															className={classes.Radiusdot}
+															overlap="rectangular"
 															style={{
 																backgroundColor: "#000",
 																height: 20,

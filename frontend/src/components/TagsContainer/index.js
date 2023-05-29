@@ -78,7 +78,7 @@ export function TagsContainer({ contact }) {
         <Paper style={{ padding: 12 }}>
 
             <Autocomplete
-                clearOnBlur={false}
+                //clearOnBlur={false}
                 disableClearable={true}
                 multiple
                 size="small"
@@ -100,7 +100,7 @@ export function TagsContainer({ contact }) {
                     ))
                 }
                 renderInput={(params) => (
-                    <TextField {...params} variant="outlined" placeholder="Tags" clearOnBlur={false} />
+                    <TextField {...params} variant="outlined" placeholder="Tags" />//clearOnBlur={false} />
                 )}
                 PaperComponent={({ children }) => (
                     <Paper style={{ width: 400, marginLeft: 12 }}>

@@ -1,6 +1,4 @@
-import { Op } from "sequelize";
 import TicketTraking from "../../models/TicketTraking";
-import { isEmpty, isNull } from "lodash";
 
 interface Params {
   ticketId: string | number;

@@ -43,7 +43,7 @@ Um sistema de tickets muito simples baseado em mensagens do WhatsApp, que permit
 
 ## WhatsApp
 
-<a href="http://wa.me/5517991565280">
+<a href="http://wa.me/5551993811607">
     <img alt="WhatsApp" src="https://img.shields.io/badge/WhatsApp-25D366?style=for-the-badge&logo=whatsapp&logoColor=white">
 </a>
 

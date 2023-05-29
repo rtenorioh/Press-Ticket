@@ -27,6 +27,7 @@ interface TicketData {
   queueId: number;
   userId: number;
   transf: boolean;
+  isFinished: boolean;
 }
 
 export const index = async (req: Request, res: Response): Promise<Response> => {
@@ -109,7 +110,7 @@ export const update = async (
     }
   }
 
-  if (ticket.status === "closed" && ticket.isGroup === false && ticket.user !== null) {
+  if (ticket.status === "closed" && ticket.isGroup === false && ticket.user !== null && !ticketData.isFinished) {
     const whatsapp = await ShowWhatsAppService(ticket.whatsappId);
 
     const { farewellMessage } = whatsapp;
@@ -122,7 +123,7 @@ export const update = async (
     }
   }
 
-  if (ticket.status === "closed" && ticket.isGroup === false && ticket.user === null) {
+  if (ticket.status === "closed" && ticket.isGroup === false && ticketData.isFinished) {
     
   }
 

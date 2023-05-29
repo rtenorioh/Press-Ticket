@@ -18,6 +18,7 @@
     "@sentry/node": "^5.29.2",
     "@types/pino": "^6.3.4",
     "bcryptjs": "^2.4.3",
+    "bull": "^4.10.4",
     "cookie-parser": "^1.4.5",
     "cors": "^2.8.5",
     "cron": "^2.3.0",
@@ -43,7 +44,7 @@
     "socket.io": "^3.0.5",
     "swagger-ui-express": "^4.3.0",
     "uuid": "^8.3.2",
-    "whatsapp-web.js": "^1.19.5",
+    "whatsapp-web.js": "^1.20.0",
     "yup": "^0.32.8"
   },
   "devDependencies": {

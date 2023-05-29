@@ -1,5 +1,5 @@
 import moment from "moment";
-import * as Sentry from "@sentry/node";
+// import * as Sentry from "@sentry/node";
 import CheckContactOpenTickets from "../../helpers/CheckContactOpenTickets";
 import SetTicketMessagesAsRead from "../../helpers/SetTicketMessagesAsRead";
 import { getIO } from "../../libs/socket";
@@ -9,7 +9,6 @@ import ShowWhatsAppService from "../WhatsappService/ShowWhatsAppService";
 import ShowTicketService from "./ShowTicketService";
 import FindOrCreateATicketTrakingService from "./FindOrCreateATicketTrakingService";
 import { verifyMessage } from "../WbotServices/wbotMessageListener";
-import { isNil } from "lodash";
 
 interface TicketData {
   status?: string;
@@ -18,12 +17,13 @@ interface TicketData {
   whatsappId?: number;
   fromMe?: boolean;
   isMsgGroup?: boolean;
-}
+  isFinished?: boolean;
+  }
 
 interface Request {
   ticketData: TicketData | Ticket;
   ticketId: string | number;
- }
+  }
 
 interface Response {
   ticket: Ticket;
@@ -40,7 +40,7 @@ const UpdateTicketService = async ({
       const io = getIO();
 
       const ticket = await ShowTicketService(ticketId);
-      let { userId, queueId, whatsappId, fromMe, isMsgGroup }= ticketData;
+      let { userId, queueId, whatsappId, fromMe, isMsgGroup ,isFinished }= ticketData;
 
       await SetTicketMessagesAsRead(ticket);
 
@@ -60,7 +60,7 @@ const UpdateTicketService = async ({
         await CheckContactOpenTickets(ticket.contact.id, ticket.whatsappId);
       }
 
-      if (status !== undefined && ["closed"].indexOf(status) > -1) {
+      if (status !== undefined && ["closed"].indexOf(status) > -1 && !isFinished) {
         const { ratingMessage } = await ShowWhatsAppService(
           ticket.whatsappId
         );
@@ -68,17 +68,16 @@ const UpdateTicketService = async ({
         if (ratingMessage && !ticket.isGroup) {
           if (ticketTraking.ratingAt == null) {
 
-
+            await ticketTraking.update({
+              closedAt: moment().toDate()
+            });
+            
             const ratingTxt = ratingMessage || "";
             let bodyRatingMessage = `\u200e${ratingTxt}\n`;
 
             const msg = await SendWhatsAppMessage({ body: bodyRatingMessage, ticket });
 
             await verifyMessage(msg, ticket, ticket.contact);
-
-            await ticketTraking.update({
-              ratingAt: moment().toDate()
-            });
 
             io.to("open")
               .to(ticketId.toString())
@@ -89,8 +88,6 @@ const UpdateTicketService = async ({
 
             return { ticket, oldStatus, oldUserId };
           }
-          ticketTraking.ratingAt = moment().toDate();
-          ticketTraking.rated = false;
         }
     };
 

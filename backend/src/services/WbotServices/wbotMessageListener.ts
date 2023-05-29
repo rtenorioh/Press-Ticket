@@ -2201,7 +2201,7 @@ const handleMessage = async (
       groupContact
     );
 
-    if (msg.body === "#") {
+    if (msg.body === "#" && ticket.userId === null) {
       await ticket.update({
         queueOptionId: null,
         chatbot: false,
@@ -2369,7 +2369,7 @@ export const verifyRating = (ticketTraking: TicketTraking) => {
     ticketTraking &&
     ticketTraking.finishedAt === null &&
     ticketTraking.userId !== null &&
-    ticketTraking.ratingAt !== null
+    ticketTraking.ratingAt === null
   ) {
     return true;
   }
@@ -2393,11 +2393,11 @@ const handleRating = async (msg: WbotMessage, ticket: Ticket, ticketTraking: Tic
 
     let finalRate = rate;
 
-    if (rate < 1) {
-      finalRate = 1;
+    if (rate < 0) {
+      finalRate = 0;
     }
-    if (rate > 5) {
-      finalRate = 5;
+    if (rate > 10) {
+      finalRate = 10;
     }
 
     await UserRating.create({
@@ -2412,16 +2412,15 @@ const handleRating = async (msg: WbotMessage, ticket: Ticket, ticketTraking: Tic
     await SendWhatsAppMessage({ body, ticket });
 
     await ticketTraking.update({
+      ratingAt: moment().toDate(),
       finishedAt: moment().toDate(),
-      ratingAt: moment().toDate(), 
       rated: true,
     });
 
     await ticket.update({
-      // queueId: null,
-      // userId: null,
       status: "closed"
     });
+
 
     io.to("open").emit(`ticket`, {
       action: "delete",

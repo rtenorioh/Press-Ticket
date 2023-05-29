@@ -31,11 +31,12 @@ const TicketOptionsMenu = ({ ticket, menuOpen, handleClose, anchorEl }) => {
 		}
 	};
 
-	const handleUpdateTicketStatus = async (e, status, userId) => {
+	const handleUpdateTicketStatus = async (e, status, userId, isFinished) => {
 		try {
 			await api.put(`/tickets/${ticket.id}`, {
 				status: status,
 				userId: userId,
+				isFinished: isFinished
 			});
 
 		} catch (err) {
@@ -79,7 +80,7 @@ const TicketOptionsMenu = ({ ticket, menuOpen, handleClose, anchorEl }) => {
 				<MenuItem onClick={handleOpenTransferModal}>
 					{i18n.t("ticketOptionsMenu.transfer")}
 				</MenuItem>
-				<MenuItem onClick={e => handleUpdateTicketStatus(e, "closed", ticket.userId)}>
+				<MenuItem onClick={e => handleUpdateTicketStatus(e, "closed", ticket.userId, true)}>
 
 					{i18n.t("messagesList.header.buttons.finish")}
 				</MenuItem>
