@@ -258,11 +258,7 @@ const Dashboard = () => {
     setSelectedUsers(users);
   };
 
-  const handleSelectedQueues = (selecteds) =>{
-    const queues = selecteds.map((t) => t.id)
-    console.log('QUEUESSSSSSSSSSSSSSSS ' + queues)
-    setSelectedQueues(queues);
-  }
+
   const handleChangeTab = (e, newValue) => {
     setTab(newValue);
   };
@@ -315,9 +311,9 @@ const Dashboard = () => {
 
     const data = await find(params);
 
-
-
+    console.log(data.counters.supportPending);
     setCounters(data.counters);
+  
     if (isArray(data.attendants)) {
       setAttendants(data.attendants);
     } else {
@@ -443,7 +439,7 @@ const Dashboard = () => {
             <Grid container width="100%" >
               <Tabs
                 value={tab}
-                onChange={handleChangeTab}
+                onChange={handleChangeTab}                
                 aria-label="primary tabs example"
                 variant="fullWidth"
               >
