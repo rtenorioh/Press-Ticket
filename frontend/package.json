@@ -1,7 +1,7 @@
 {
   "name": "frontend",
   "version": "0.1.0",
-  "systemVersion": "1.4.7",
+  "systemVersion": "1.4.7.1",
   "private": true,
   "dependencies": {
     "@emotion/styled": "11.11.0",
