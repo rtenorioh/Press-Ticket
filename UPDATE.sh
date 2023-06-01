@@ -81,6 +81,10 @@ if [ ! -e src/config.json ]; then
 fi
 
 sleep 2
+
+ echo " "
+  echo "ATUALIZANDO MARIADB"
+  echo " "
 # Verificar a versão do MariaDB
 mariadb_version=$(mariadb --version | awk '{print $5}')
 
@@ -120,7 +124,7 @@ echo " "
 sleep 2
 
 sudo rm -rf node_modules
-npm install
+npm install --force
 npm run build
 
 echo " "
