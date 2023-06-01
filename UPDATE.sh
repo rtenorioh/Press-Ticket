@@ -92,7 +92,7 @@ version=$(echo "$mariadb_version" | tr -d '.' | grep -o '[0-9]*')
 # Converter a versão para um número inteiro
 version_int=$((version))
 
-if [[ version_int -ge 10520 ]]; then
+if [ "$version_int" -ge 10520 ]; then
   echo "Versão do MariaDB é igual ou superior a 10.5.20"
 else
   echo " "
