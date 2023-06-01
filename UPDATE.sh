@@ -86,10 +86,10 @@ sleep 2
   echo "ATUALIZANDO MARIADB"
   echo " "
 # Verificar a versão do MariaDB
-mariadb_version=$(mariadb --version | awk '{print $5}')
+mariadb_version=$(mysql -V | awk '{print $5}')
 
 # Separar a versão em partes (exemplo: 10.5.12 -> 10 5 12)
-IFS='.' read -ra version_parts <<< "$(echo "$mariadb_version")"
+IFS='.' read -ra version_parts <<< "$(echo "$mariadb_version" | tr -d '[:alpha:]')"
 
 # Extrair as partes da versão
 major_version=${version_parts[0]}
