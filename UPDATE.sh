@@ -87,8 +87,7 @@ sleep 2
   echo " "
 # Verificar a versão do MariaDB
 mariadb_version=$(mysql -V | awk '{print $5}')
-version="${mariadb_version%%-*}"
-version="${version//./}"
+version=$(echo "$mariadb_version" | tr -d '.' | grep -o '[0-9]*')
 
 # Converter a versão para um número inteiro
 version_int=$((version))
