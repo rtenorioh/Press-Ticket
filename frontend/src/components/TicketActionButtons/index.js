@@ -33,7 +33,7 @@ const TicketActionButtons = ({ ticket }) => {
 	const classes = useStyles();
 	const history = useHistory();
 	const [anchorEl, setAnchorEl] = useState(null);
-	const [loading, setLoading] = useState(false);
+	const [loading, setLoading] = useState("false");
 	const ticketOptionsMenuOpen = Boolean(anchorEl);
 	const { user } = useContext(AuthContext);
 
@@ -52,22 +52,25 @@ const TicketActionButtons = ({ ticket }) => {
 		setAnchorEl(null);
 	};
 
-	const handleUpdateTicketStatus = async (e, status, userId) => {
-		setLoading(true);
+	const handleUpdateTicketStatus = async (e, status, userId, isFinished) => {
+		setLoading("true");
 		try {
 			await api.put(`/tickets/${ticket.id}`, {
 				status: status,
 				userId: userId || null,
+				isFinished: isFinished,
+				ticketData: ticket
+
 			});
 
-			setLoading(false);
+			setLoading("false");
 			if (status === "open") {
 				history.push(`/tickets/${ticket.id}`);
 			} else {
 				history.push("/tickets");
 			}
 		} catch (err) {
-			setLoading(false);
+			setLoading("false");
 			toastError(err);
 		}
 	};
@@ -76,7 +79,7 @@ const TicketActionButtons = ({ ticket }) => {
 		<div className={classes.actionButtons}>
 			{ticket.status === "closed" && (
 				<Tooltip title={i18n.t("messagesList.header.buttons.reopen")}>
-					<IconButton loading={loading} style={{ marginRight: 20 }} onClick={e => handleUpdateTicketStatus(e, "open", user?.id)} color="primary">
+					<IconButton loading={loading} style={{ marginRight: 20 }} onClick={e => handleUpdateTicketStatus(e, "open", user?.id,false)} color="primary">
 						<Replay />
 					</IconButton>
 				</Tooltip>
@@ -84,7 +87,7 @@ const TicketActionButtons = ({ ticket }) => {
 			{ticket.status === "open" && (
 				<>
 					<Tooltip title={i18n.t("messagesList.header.buttons.return")}>
-						<IconButton loading={loading} onClick={e => handleUpdateTicketStatus(e, "pending", null)}>
+						<IconButton loading={loading} onClick={e => handleUpdateTicketStatus(e, "pending", null, false)}>
 							<UndoRoundedIcon />
 						</IconButton>
 					</Tooltip>
@@ -92,7 +95,7 @@ const TicketActionButtons = ({ ticket }) => {
 						<Tooltip title={i18n.t("messagesList.header.buttons.resolve")}>
 							<IconButton 
 							loading={loading} 
-							onClick={e => handleUpdateTicketStatus(e, "closed", user?.id)} 
+							onClick={e => handleUpdateTicketStatus(e, "closed", user?.id, false)} 
 							color="secondary">
 								<CancelIcon />
 							</IconButton>

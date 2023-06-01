@@ -4,6 +4,8 @@ import AppError from "../errors/AppError";
 import AuthUserService from "../services/UserServices/AuthUserService";
 import { SendRefreshToken } from "../helpers/SendRefreshToken";
 import { RefreshTokenService } from "../services/AuthServices/RefreshTokenService";
+import FindUserFromToken from "../services/AuthServices/FindUserFromToken";
+import User from "../models/User";
 
 export const store = async (req: Request, res: Response): Promise<Response> => {
   const { email, password } = req.body;
@@ -45,6 +47,9 @@ export const remove = async (
   req: Request,
   res: Response
 ): Promise<Response> => {
+    const { id  } = req.user;
+    const user = await User.findByPk(id);
+    if (user) await user.update({ online: false });
   res.clearCookie("jrt");
 
   return res.send();

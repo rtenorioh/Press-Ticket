@@ -82,6 +82,10 @@ class Ticket extends Model<Ticket> {
   @Default(false)
   @Column
   isMsgGroup: boolean;
+
+  @Default(false)
+  @Column
+  isFinished: boolean;
 }
 
 export default Ticket;

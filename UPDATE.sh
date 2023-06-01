@@ -80,6 +80,36 @@ if [ ! -e src/config.json ]; then
   echo "Aruivo config.json já criado"
 fi
 
+sleep 2
+# Verificar a versão do MariaDB
+mariadb_version=$(mariadb --version | awk '{print $5}')
+
+# Separar a versão em partes (exemplo: 10.5.12 -> 10 5 12)
+IFS='.' read -ra version_parts <<< "$mariadb_version"
+
+# Extrair as partes da versão
+major_version=${version_parts[0]}
+minor_version=${version_parts[1]}
+
+# Verificar se a versão é maior ou igual a 10.5
+if (( $major_version >= 10 && $minor_version >= 5 )); then
+  echo "Versão do MariaDB é igual ou superior a 10.5"
+else
+  echo " "
+  echo "ATUALIZANDO MARIADB"
+  echo " "
+  sleep 2
+  sudo apt-key adv --fetch-keys 'https://mariadb.org/mariadb_release_signing_key.asc'
+  sleep 2
+  sudo add-apt-repository 'deb [arch=amd64,arm64,ppc64el] http://mirror.23media.de/mariadb/repo/10.5/ubuntu focal main'
+  sleep 2
+  sudo apt update
+  sleep 2
+  sudo apt install mariadb-server
+  sleep 2
+  sudo systemctl restart mariadb
+  sleep 2
+fi
 
 sleep 2
 

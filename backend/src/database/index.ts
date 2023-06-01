@@ -5,6 +5,7 @@ import Contact from "../models/Contact";
 import Ticket from "../models/Ticket";
 import Whatsapp from "../models/Whatsapp";
 import ContactCustomField from "../models/ContactCustomField";
+import TicketTraking from "../models/TicketTraking";
 import Message from "../models/Message";
 import Queue from "../models/Queue";
 import WhatsappQueue from "../models/WhatsappQueue";
@@ -34,7 +35,8 @@ const models = [
   QuickAnswer,
   Tag,
   ContactTag,
-  UserRating
+  UserRating,
+  TicketTraking
 ];
 
 sequelize.addModels(models);

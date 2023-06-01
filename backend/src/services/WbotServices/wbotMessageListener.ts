@@ -5,6 +5,7 @@ import { promisify } from "util";
 import { writeFile } from "fs";
 import * as Sentry from "@sentry/node";
 import { head, isNull, isNil } from "lodash";
+import moment from "moment";
 
 import {
   Contact as WbotContact,
@@ -33,7 +34,9 @@ import UpdateTicketService from "../TicketServices/UpdateTicketService";
 import CreateContactService from "../ContactServices/CreateContactService";
 import formatBody from "../../helpers/Mustache";
 import UserRating from "../../models/UserRating";
+import TicketTraking from "../../models/TicketTraking";
 import SendWhatsAppMessage from "./SendWhatsAppMessage";
+import FindOrCreateATicketTrakingService from "../TicketServices/FindOrCreateATicketTrakingService";
 import Queue from "../../models/Queue";
 import { boolean } from "yup";
 import ShowTicketService from "../TicketServices/ShowTicketService";
@@ -241,7 +244,7 @@ const prepareLocation = (msg: WbotMessage): WbotMessage => {
   return msg;
 };
 
-const verifyMessage = async (
+export const verifyMessage = async (
   msg: WbotMessage,
   ticket: Ticket,
   contact: Contact
@@ -2161,14 +2164,16 @@ const handleMessage = async (
     let queueId: number = 0;
     let tagsId: number = 0;
     let userId: number = 0;
+    let isBody: boolean = false;
 
     // console.log(msg)
     if (msg.fromMe) {
-      // messages sent automatically by wbot have a special character in front of it
+     // messages sent automatically by wbot have a special character in front of it
       // if so, this message was already been stored in database;
-      // console.log("E200:"+ /\u200e/.test(msg.body[0]))
-      if (/\u200e/.test(msg.body[0])) return;
 
+      isBody = /\u200e/.test(msg.body[0]);
+     
+      if ( isBody ) return;
       // media messages sent from me from cell phone, first comes with "hasMedia = false" and type = "image/ptt/etc"
       // in this case, return and let this message be handled by "media_uploaded" event, when it will have "hasMedia = true"
 
@@ -2219,30 +2224,13 @@ const handleMessage = async (
       groupContact
     );
 
-    try {
-      if (!msg.fromMe) {
-        const ratePending = await verifyRating(ticket);
-        /**
-         * Tratamento para avaliação do atendente
-         */
-        if (ratePending) {
-          handleRating(msg, ticket);
-          return;
-        }
-      }
-    } catch (e) {
-      Sentry.captureException(e);
-      console.log(e);
-    }
-    console.log(`\u200c${whatsapp.inactiveMessage}` === msg.body)
-
+ 
     if (
-      unreadMessages === 0 &&
+      (unreadMessages === 0 &&
       whatsapp.farewellMessage &&
-      formatBody(whatsapp.farewellMessage, ticket) === msg.body
-    )
+      formatBody(whatsapp.farewellMessage, ticket) === msg.body)) {
       return;
-
+    }
 
 
     ticket = await FindOrCreateTicketService(
@@ -2254,6 +2242,34 @@ const handleMessage = async (
       userId,
       groupContact
     );
+
+    if (msg.body === "#" && ticket.userId === null) {
+      await ticket.update({
+        queueOptionId: null,
+        chatbot: false,
+        queueId: null,
+      });
+      await verifyQueue(wbot, msg, ticket, ticket.contact);
+      return;
+    }
+
+    const ticketTraking = await FindOrCreateATicketTrakingService({
+      ticketId: ticket.id,
+      whatsappId: whatsapp?.id,
+      userId: ticket.userId
+    });
+
+    try {
+      if (!msg.fromMe) {
+        if (ticketTraking !== null && verifyRating(ticketTraking)) {
+          handleRating(msg, ticket, ticketTraking);
+          return;
+        }
+      }
+    } catch (e) {
+      Sentry.captureException(e);
+      console.log(e);
+    }
 
     if (msg.hasMedia) {
       await verifyMediaMessage(msg, ticket, contact);
@@ -2390,17 +2406,21 @@ const handleMessage = async (
   }
 };
 
-const verifyRating = async (ticket: Ticket) => {
-  const record = await UserRating.findOne({
-    where: { ticketId: ticket.id, rate: null }
-  });
-  if (record) {
+export const verifyRating = (ticketTraking: TicketTraking) => {
+  if (
+    ticketTraking &&
+    ticketTraking.finishedAt === null &&
+    ticketTraking.userId !== null &&
+    ticketTraking.ratingAt === null
+  ) {
     return true;
   }
   return false;
 };
 
-const handleRating = async (msg: WbotMessage, ticket: Ticket) => {
+
+
+const handleRating = async (msg: WbotMessage, ticket: Ticket, ticketTraking: TicketTraking) => {
   const io = getIO();
   let rate: number | null = null;
 
@@ -2415,30 +2435,34 @@ const handleRating = async (msg: WbotMessage, ticket: Ticket) => {
 
     let finalRate = rate;
 
-    if (rate < 1) {
-      finalRate = 1;
+    if (rate < 0) {
+      finalRate = 0;
     }
-    if (rate > 5) {
-      finalRate = 5;
+    if (rate > 10) {
+      finalRate = 10;
     }
 
-    const record = await UserRating.findOne({
-      where: {
-        ticketId: ticket.id,
-        rate: null
-      }
+    await UserRating.create({
+      ticketId: ticketTraking.ticketId,
+      userId: ticketTraking.userId,
+      rate: finalRate,
     });
 
-    await record?.update({ rate: finalRate });
+    // await record?.update({ rate: finalRate });
 
-    const body = `\u200c${farewellMessage}`;
+    const body = `\u200e${farewellMessage}`;
     await SendWhatsAppMessage({ body, ticket });
 
+    await ticketTraking.update({
+      ratingAt: moment().toDate(),
+      finishedAt: moment().toDate(),
+      rated: true,
+    });
+
     await ticket.update({
-      queueId: null,
-      userId: null,
       status: "closed"
     });
+
 
     io.to("open").emit(`ticket`, {
       action: "delete",

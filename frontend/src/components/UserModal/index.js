@@ -22,8 +22,7 @@ import {
 	FormControl,
 	TextField,
 	InputAdornment,
-	IconButton,
-	Typography
+	IconButton
 } from '@material-ui/core';
 
 import {

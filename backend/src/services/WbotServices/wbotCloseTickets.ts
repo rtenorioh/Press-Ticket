@@ -14,14 +14,13 @@ import formatBody from "../../helpers/Mustache";
 export const ClosedAllOpenTickets = async (): Promise<void> => {
   const io = getIO();
   // @ts-ignore: Unreachable code error
-  const closeTicket = async (ticket: Ticket, useNPS: boolean, currentStatus: any, body: any) => {
+  const closeTicket = async (ticket: Ticket, useNPS: boolean, currentStatus: any) => {
     if (currentStatus === 'nps') {
 
       await ticket.update({
         status: "closed",
         userId: ticket.userId || null,
-        queueId: null,
-        lastMessage: body,
+        queueId: ticket.queueId || null,
         unreadMessages: 0
       });
 
@@ -29,7 +28,7 @@ export const ClosedAllOpenTickets = async (): Promise<void> => {
       await ticket.update({
         status: useNPS ? 'nps' : "closed",
         userId: ticket.userId || null,
-        queueId: null,
+        queueId: ticket.queueId || null,
         unreadMessages: 0
       });
 
@@ -38,7 +37,7 @@ export const ClosedAllOpenTickets = async (): Promise<void> => {
       await ticket.update({
         status: "closed",
         userId: ticket.userId || null,
-        queueId: null,
+        queueId: ticket.queueId || null,
         unreadMessages: 0
       });
 
@@ -70,6 +69,7 @@ export const ClosedAllOpenTickets = async (): Promise<void> => {
 
         let dataLimite = new Date()
         if (Number(horasFecharAutomaticamente) < 1) {
+
           dataLimite.setMinutes(dataLimite.getMinutes() - (Number(horasFecharAutomaticamente) * 60));
         } else {
           dataLimite.setHours(dataLimite.getHours() - Number(horasFecharAutomaticamente));
@@ -80,19 +80,16 @@ export const ClosedAllOpenTickets = async (): Promise<void> => {
           let dataUltimaInteracaoChamado = new Date(ticket.updatedAt)
 
           if (dataUltimaInteracaoChamado < dataLimite) {
-            const body = formatBody(`\u200e${messageInactive}`, ticketBody);
+
 
             if (sendIsInactive && ticket.status === "open" && messageInactive) {
-              console.log(body);
-
-              // Verificação adicionada para evitar que mensagem vazia seja enviada
+              const body = formatBody(`\u200e${messageInactive}`, ticketBody);
               if (messageInactive.trim() !== '') {
                 await SendWhatsAppMessage({ body: body, ticket: ticketBody });
               }
             }
 
-            closeTicket(ticket, useNPS, ticket.status, body);
-
+            closeTicket(ticket, useNPS, ticket.status);
             io.to("open").emit(`ticket`, {
               action: "delete",
               ticket,

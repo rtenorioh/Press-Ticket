@@ -244,7 +244,6 @@ const LoggedInLayout = ({ children }) => {
             component="h1"
             variant="h6"
             color="inherit"
-            noWrap
             className={classes.title}
           >
 

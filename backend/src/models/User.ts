@@ -76,6 +76,9 @@ class User extends Model<User> {
   @Column
   allTicket: string;
 
+  @Column
+  online: boolean;
+
   @Default("00:00")
   @Column
   startWork: string;

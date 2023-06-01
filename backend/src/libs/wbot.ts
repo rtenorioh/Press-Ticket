@@ -4,7 +4,7 @@ import { getIO } from "./socket";
 import Whatsapp from "../models/Whatsapp";
 import AppError from "../errors/AppError";
 import { logger } from "../utils/logger";
-import { handleMessage } from "../services/WbotServices/wbotMessageListener";
+import { handleMsgAck, handleMessage } from "../services/WbotServices/wbotMessageListener";
 
 interface Session extends Client {
   id?: number;
@@ -14,7 +14,6 @@ const sessions: Session[] = [];
 
 const syncUnreadMessages = async (wbot: Session) => {
   const chats = await wbot.getChats();
-
   /* eslint-disable no-restricted-syntax */
   /* eslint-disable no-await-in-loop */
   for (const chat of chats) {
@@ -29,6 +28,14 @@ const syncUnreadMessages = async (wbot: Session) => {
 
       await chat.sendSeen();
     }
+    /*const messages = await chat.fetchMessages({limit: 10});
+
+    for (const message of messages) {
+      console.log('IMPORTACAO DE MENSAGENS LEGADO: ' + message.body[0]);
+      await handleMessage(message, wbot);
+
+      await handleMsgAck(message, 2);
+    }*/
   }
 };
 

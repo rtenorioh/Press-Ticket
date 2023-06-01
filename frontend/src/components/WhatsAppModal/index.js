@@ -19,7 +19,6 @@ import {
   FormControl,
   FormGroup,
   Tooltip,
-  Paper,
   Grid,
   MenuItem,
   InputLabel,
@@ -579,7 +578,7 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
                 <div>
                   {/* Expediente */}
 
-                  {defineWorkHours == true ? (
+                  {defineWorkHours === true ? (
 
 
                     <div
@@ -648,7 +647,7 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
                       </FormControl>
                     </Grid>
                   </Grid>
-                  {defineWorkHours == true ? (
+                  {defineWorkHours === true ? (
                     <>
                       <Grid item xs={12} sm={12} className={classes.diasSemana} >
                         <FormControl component="fieldset" sx={{ display: "flex", justifyContent: "center" }}>
