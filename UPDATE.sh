@@ -87,17 +87,14 @@ sleep 2
   echo " "
 # Verificar a versão do MariaDB
 mariadb_version=$(mysql -V | awk '{print $5}')
+version="${mariadb_version%%-*}"
+version="${version//.}"
 
-# Separar a versão em partes (exemplo: 10.5.12 -> 10 5 12)
-IFS='.' read -ra version_parts <<< "$(echo "$mariadb_version" | tr -d '[:alpha:]')"
+# Converter a versão para um número inteiro
+version_int=$((version))
 
-# Extrair as partes da versão
-major_version=${version_parts[0]}
-minor_version=${version_parts[1]}
-
-# Verificar se a versão é maior ou igual a 10.5
-if (( $major_version >= 10 && $minor_version >= 5 )); then
-  echo "Versão do MariaDB é igual ou superior a 10.5"
+if [[ version_int -ge 10520 ]]; then
+  echo "Versão do MariaDB é igual ou superior a 10.5.20"
 else
   echo " "
   echo "ATUALIZANDO MARIADB"
