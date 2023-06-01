@@ -88,10 +88,10 @@ sleep 2
 # Verificar a versão do MariaDB
 mariadb_version=$(mysql -V | awk '{print $5}')
 version="${mariadb_version%%-*}"
-version1="${version//.}"
+version="${version//./}"
 
 # Converter a versão para um número inteiro
-version_int=$((version1))
+version_int=$((version))
 
 if [[ version_int -ge 10520 ]]; then
   echo "Versão do MariaDB é igual ou superior a 10.5.20"
