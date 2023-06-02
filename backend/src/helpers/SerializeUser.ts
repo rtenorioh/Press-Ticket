@@ -11,6 +11,7 @@ interface SerializedUser {
   whatsapp: Whatsapp;
   startWork: string;
   endWork: string;
+  isTricked: string;
 }
 
 export const SerializeUser = (user: User): SerializedUser => {
@@ -22,6 +23,7 @@ export const SerializeUser = (user: User): SerializedUser => {
     queues: user.queues,
     whatsapp: user.whatsapp,
     startWork: user.startWork,
-    endWork: user.endWork
+    endWork: user.endWork,
+    isTricked: user.isTricked
   };
 };
