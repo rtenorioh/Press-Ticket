@@ -1,8 +1,27 @@
 # Changelog
 
+### 02/06/2023
+
+- [Ajuste no isTricket](https://github.com/rtenorioh/Press-Ticket/commit/6e6004a3813df2cd661fe164af610de62dfb7012);
+- [Atualização da lib wwebjs](https://github.com/rtenorioh/Press-Ticket/commit/6ee2f7086b8aacd31dc4afe2148577207ff256f6); e
+- [Atualização de versão](https://github.com/rtenorioh/Press-Ticket/commit/9d367cdcf14c0781dc497e2e9f6a270269f0fc17).
+
+### 27/05/2023
+
+- [Correção da visualização de contatos (isTricked)](https://github.com/rtenorioh/Press-Ticket/commit/295158521d81de343f8ba57a9302c35f64d42a26); e
+- [Correção complementar](https://github.com/rtenorioh/Press-Ticket/commit/3c77e32fdafa8288adb93d2baa0bd49ce77a75ec).
+
+### 25/05/2023
+
+- [Ajustes](https://github.com/rtenorioh/Press-Ticket/commit/38cc5d03bd1b3af023cf410afd90077c68fb48a7).
+
+### 22/05/2023
+
+- [Atualização da lib wwebjs de 1.19.5 para 1.20.0](https://github.com/rtenorioh/Press-Ticket/commit/5740410dfad00f6df7a49d89a240e26a9d6ee7cc).
+
 ### 08/05/2023
 
-- [Integração com n8n](https://github.com/rtenorioh/Press-Ticket/commit/1beb8c609e53c575c171cb1d0b14f3c6e9d4feb2)
+- [Integração com n8n](https://github.com/rtenorioh/Press-Ticket/commit/1beb8c609e53c575c171cb1d0b14f3c6e9d4feb2).
 
 ### 05/05/2023
 
