@@ -5,6 +5,7 @@ dist
 .env
 .env.test
 .wwebjs_auth
+.wwebjs_cache
 sequelizeData.json
 
 package-lock.json
