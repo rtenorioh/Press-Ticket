@@ -52,6 +52,7 @@ export default function TableAttendantsStatus(props) {
                 <TableCell align="center" title={a.rating} className={classes.pointer}>
                     <RatingBox rating={a.rating} />
                 </TableCell>
+                <TableCell align="center">{a.countRating}</TableCell>
                 <TableCell align="center">{formatTime(a.avgSupportTime, 2)}</TableCell>
                 <TableCell align="center">{a.tickets}</TableCell>
                 <TableCell align="center">
@@ -78,6 +79,7 @@ export default function TableAttendantsStatus(props) {
                     <TableRow>
                         <TableCell>Nome</TableCell>
                         <TableCell align="center">Avaliações</TableCell>
+                        <TableCell align="center">Total de Avaliações</TableCell>
                         <TableCell align="center">T.M. de Atendimento</TableCell>
                         <TableCell align="center">Nº de Atendimentos</TableCell>
                         <TableCell align="center">Status (Atual)</TableCell>

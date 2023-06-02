@@ -16,7 +16,7 @@ import GroupIcon from "@material-ui/icons/Group";
 import AssignmentIcon from "@material-ui/icons/Assignment";
 import PersonIcon from "@material-ui/icons/Person";
 import AppBar from "@material-ui/core/AppBar";
-import SentimentSatisfiedAltIcon from "@mui/icons-material/SentimentSatisfiedAlt";
+import SentimentSatisfiedAltIcon  from "@mui/icons-material/SentimentSatisfiedAlt";
 import SentimentVeryDissatisfiedIcon from "@mui/icons-material/SentimentDissatisfied";
 import SentimentNeutralIcon from "@mui/icons-material/SentimentNeutral";
 import Score from "@material-ui/icons/Score";
@@ -50,7 +50,7 @@ const useStyles = makeStyles((theme) => ({
     width: "100%",
     backgroundColor: theme.palette.background.paper,
   },
-  container: {
+    container: {
     paddingTop: theme.spacing(2),
     paddingBottom: theme.spacing(4),
     maxWidth: "1150px",
@@ -289,7 +289,7 @@ const Dashboard = () => {
     }
 
     if (!isEmpty(selectedUsers)) {
-      params = {
+       params = {
         ...params,
         userId: selectedUsers,
       };
@@ -297,10 +297,10 @@ const Dashboard = () => {
 
     if (!isEmpty(selectedQueues)) {
       params = {
-        ...params,
-        queueId: selectedQueues,
-      };
-    }
+       ...params,
+       queueId: selectedQueues,
+     };
+   }
 
 
     if (Object.keys(params).length === 0) {
@@ -313,12 +313,7 @@ const Dashboard = () => {
 
     const counters = JSON.parse(data.counters);
     const attendants = JSON.parse(data.attendants);
-    // const supportPending = counters.supportPending;
-    console.log(counters.supportPending);
-
-    console.log(data);
     setCounters(counters);
-
     if (isArray(attendants)) {
       setAttendants(attendants);
     } else {
@@ -333,7 +328,7 @@ const Dashboard = () => {
     }
     fetchData();
   }, [])
-
+  
   function formatTime(minutes) {
     return moment()
       .startOf("day")
@@ -418,16 +413,15 @@ const Dashboard = () => {
 
           {renderFilters()}
 
-    
-          <Grid item xs={12} md={4} style={{ marginLeft: '-10px' }}>
+          <Grid item xs={12}  md={4} style={{ marginLeft: '-10px' }}>
             <UsersFilter onFiltered={handleSelectedUsers} />
           </Grid>
 
-          <Grid item xs={12} md={4} style={{ marginTop: '-15px' }}>
-            <QueueSelect
-              selectedQueueIds={selectedQueues}
-              onChange={values => setSelectedQueues(values)}
-            />
+          <Grid item xs={6}  md={4} style={{ marginTop: '-15px' }}>
+            <QueueSelect 
+              selectedQueueIds={selectedQueues} 
+              onChange={values => setSelectedQueues(values)} 
+            />          
           </Grid>
 
           <Grid item xs={12} className={classes.alignRight}>
@@ -445,7 +439,7 @@ const Dashboard = () => {
             <Grid container width="100%" >
               <Tabs
                 value={tab}
-                onChange={handleChangeTab}
+                onChange={handleChangeTab}                
                 aria-label="primary tabs example"
                 variant="fullWidth"
               >
@@ -464,160 +458,160 @@ const Dashboard = () => {
             <Container maxWidth="lg" className={classes.container}>
               <Grid container spacing={3}>
                 <Grid item xs={12} sm={6} md={4}>
-                  <Paper className={classes.cardContainer1} elevation={0}>
-                    <div>
-                      <Typography
-                        variant="subtitle1"
-                        component="p"
-                        className={classes.cardSubtitle}
-                      >
-                        <span translate="no">{counters.supportPending}</span>
-                      </Typography>
-                      <Typography
-                        variant="h6"
-                        component="h2"
-                        className={classes.cardTitle}
-                      >
-                        {"Aguardando"}
-                      </Typography>
-                    </div>
-                    <div className={classes.cardAvatar}>
-                      <Avatar className={classes.cardAvatar1}>
-                        {<GroupIcon />}
-                      </Avatar>
-                    </div>
-                  </Paper>
-                </Grid>
+                <Paper className={classes.cardContainer1} elevation={0}>
+                  <div>
+                    <Typography
+                      variant="subtitle1"
+                      component="p"
+                      className={classes.cardSubtitle}
+                    >
+                      <span translate="no">{counters.supportPending}</span>
+                    </Typography>
+                    <Typography
+                      variant="h6"
+                      component="h2"
+                      className={classes.cardTitle}
+                    >
+                      {"Aguardando"}
+                    </Typography>
+                  </div>
+                  <div className={classes.cardAvatar}>
+                    <Avatar className={classes.cardAvatar1}>
+                      {<GroupIcon />}
+                    </Avatar>
+                  </div>
+                </Paper>
+              </Grid>
 
-                <Grid item xs={12} sm={6} md={4}>
-                  <Paper className={classes.cardContainer2} elevation={0}>
-                    <div>
-                      <Typography
-                        variant="subtitle1"
-                        component="p"
-                        className={classes.cardSubtitle}
-                      >
-                        {counters.supportHappening}
-                      </Typography>
-                      <Typography
-                        variant="h6"
-                        component="h2"
-                        className={classes.cardTitle}
-                      >
-                        {"Em atendimento"}
-                      </Typography>
-                    </div>
-                    <div className={classes.cardAvatar}>
-                      <Avatar className={classes.cardAvatar2}>
-                        {<AssignmentIcon fontSize="inherit" />}
-                      </Avatar>
-                    </div>
-                  </Paper>
-                </Grid>
+              <Grid item xs={12} sm={6} md={4}>
+                <Paper className={classes.cardContainer2} elevation={0}>
+                  <div>
+                    <Typography
+                      variant="subtitle1"
+                      component="p"
+                      className={classes.cardSubtitle}
+                    >
+                      {counters.supportHappening}
+                    </Typography>
+                    <Typography
+                      variant="h6"
+                      component="h2"
+                      className={classes.cardTitle}
+                    >
+                      {"Em atendimento"}
+                    </Typography>
+                  </div>
+                  <div className={classes.cardAvatar}>
+                    <Avatar className={classes.cardAvatar2}>
+                      {<AssignmentIcon fontSize="inherit" />}
+                    </Avatar>
+                  </div>
+                </Paper>
+              </Grid>
 
-                <Grid item xs={12} sm={6} md={4}>
-                  <Paper className={classes.cardContainer3} elevation={0}>
-                    <div>
-                      <Typography
-                        variant="subtitle1"
-                        component="p"
-                        className={classes.cardSubtitle}
-                      >
-                        {counters.supportFinished}
-                      </Typography>
-                      <Typography
-                        variant="h6"
-                        component="h2"
-                        className={classes.cardTitle}
-                      >
-                        {"Resolvidos"}
-                      </Typography>
-                    </div>
-                    <div className={classes.cardAvatar}>
-                      <Avatar className={classes.cardAvatar3}>
-                        {<AssignmentIcon fontSize="inherit" />}
-                      </Avatar>
-                    </div>
-                  </Paper>
-                </Grid>
+              <Grid item xs={12} sm={6} md={4}>
+                <Paper className={classes.cardContainer3} elevation={0}>
+                  <div>
+                    <Typography
+                      variant="subtitle1"
+                      component="p"
+                      className={classes.cardSubtitle}
+                    >
+                      {counters.supportFinished}
+                    </Typography>
+                    <Typography
+                      variant="h6"
+                      component="h2"
+                      className={classes.cardTitle}
+                    >
+                      {"Resolvidos"}
+                    </Typography>
+                  </div>
+                  <div className={classes.cardAvatar}>
+                    <Avatar className={classes.cardAvatar3}>
+                      {<AssignmentIcon fontSize="inherit" />}
+                    </Avatar>
+                  </div>
+                </Paper>
+              </Grid>
 
-                <Grid item xs={12} sm={6} md={4}>
-                  <Paper className={classes.cardContainer4} elevation={0}>
-                    <div>
-                      <Typography
-                        variant="subtitle1"
-                        component="p"
-                        className={classes.cardSubtitle}
-                      >
-                        {counters.leads}
-                      </Typography>
-                      <Typography
-                        variant="h6"
-                        component="h2"
-                        className={classes.cardTitle}
-                      >
-                        {"Novo contato"}
-                      </Typography>
-                    </div>
-                    <div className={classes.cardAvatar}>
-                      <Avatar className={classes.cardAvatar4}>
-                        {<PersonIcon fontSize="inherit" />}
-                      </Avatar>
-                    </div>
-                  </Paper>
-                </Grid>
+              <Grid item xs={12} sm={6} md={4}>
+                <Paper className={classes.cardContainer4} elevation={0}>
+                  <div>
+                    <Typography
+                      variant="subtitle1"
+                      component="p"
+                      className={classes.cardSubtitle}
+                    >
+                      {counters.leads}
+                    </Typography>
+                    <Typography
+                      variant="h6"
+                      component="h2"
+                      className={classes.cardTitle}
+                    >
+                      {"Leads"}
+                    </Typography>
+                  </div>
+                  <div className={classes.cardAvatar}>
+                    <Avatar className={classes.cardAvatar4}>
+                      {<PersonIcon fontSize="inherit" />}
+                    </Avatar>
+                  </div>
+                </Paper>
+              </Grid>
 
-                <Grid item xs={12} sm={6} md={4}>
-                  <Paper className={classes.cardContainer5} elevation={0}>
-                    <div>
-                      <Typography
-                        variant="subtitle1"
-                        component="p"
-                        className={classes.cardSubtitle}
-                      >
-                        {formatTime(counters.avgSupportTime)}
-                      </Typography>
-                      <Typography
-                        variant="h6"
-                        component="h2"
-                        className={classes.cardTitle}
-                      >
-                        {"T.M. de Atendimento"}
-                      </Typography>
-                    </div>
-                    <div className={classes.cardAvatar}>
-                      <Avatar className={classes.cardAvatar5}>
-                        {<SpeedIcon fontSize="inherit" />}
-                      </Avatar>
-                    </div>
-                  </Paper>
-                </Grid>
+              <Grid item xs={12} sm={6} md={4}>
+                <Paper className={classes.cardContainer5} elevation={0}>
+                  <div>
+                    <Typography
+                      variant="subtitle1"
+                      component="p"
+                      className={classes.cardSubtitle}
+                    >
+                      {formatTime(counters.avgSupportTime)}
+                    </Typography>
+                    <Typography
+                      variant="h6"
+                      component="h2"
+                      className={classes.cardTitle}
+                    >
+                      {"T.M. de Atendimento"}
+                    </Typography>
+                  </div>
+                  <div className={classes.cardAvatar}>
+                    <Avatar className={classes.cardAvatar5}>
+                      {<SpeedIcon fontSize="inherit" />}
+                    </Avatar>
+                  </div>
+                </Paper>
+              </Grid>
 
-                <Grid item xs={12} sm={6} md={4}>
-                  <Paper className={classes.cardContainer6} elevation={0}>
-                    <div>
-                      <Typography
-                        variant="subtitle1"
-                        component="p"
-                        className={classes.cardSubtitle}
-                      >
-                        {formatTime(counters.avgWaitTime)}
-                      </Typography>
-                      <Typography
-                        variant="h6"
-                        component="h2"
-                        className={classes.cardTitle}
-                      >
-                        {"T.M. de Espera"}
-                      </Typography>
-                    </div>
-                    <div className={classes.cardAvatar}>
-                      <Avatar className={classes.cardAvatar6}>
-                        {<SpeedIcon fontSize="inherit" />}
-                      </Avatar>
-                    </div>
-                  </Paper>
-                </Grid>
+              <Grid item xs={12} sm={6} md={4}>
+                <Paper className={classes.cardContainer6} elevation={0}>
+                  <div>
+                    <Typography
+                      variant="subtitle1"
+                      component="p"
+                      className={classes.cardSubtitle}
+                    >
+                      {formatTime(counters.avgWaitTime)}
+                    </Typography>
+                    <Typography
+                      variant="h6"
+                      component="h2"
+                      className={classes.cardTitle}
+                    >
+                      {"T.M. de Espera"}
+                    </Typography>
+                  </div>
+                  <div className={classes.cardAvatar}>
+                    <Avatar className={classes.cardAvatar6}>
+                      {<SpeedIcon fontSize="inherit" />}
+                    </Avatar>
+                  </div>
+                </Paper>
+              </Grid>
               </Grid>
             </Container>
           </TabPanel>
@@ -627,132 +621,132 @@ const Dashboard = () => {
             value={tab}
             name={"NPS"}
           >
-            <Container
-              width="lg%"
-              className={classes.container}
-            //  alignContent="center"
+            <Container 
+               width="lg%" 
+               className={classes.container} 
+              //  alignContent="center"
             >
-              <Grid
-                container
-                spacing={3} >
-                <Grid item xs={12} sm={6} md={4}>
-                  <Paper className={classes.cardContainer5} elevation={0}>
-                    <div>
-                      <Typography
-                        variant="subtitle1"
-                        component="p"
-                        className={classes.cardSubtitle}
-                      >
-                        {Number(counters.npsPromotersPerc / 100).toLocaleString(undefined, { style: 'percent' })}
-                      </Typography>
-                      <Typography
-                        variant="h6"
-                        component="h2"
-                        className={classes.cardTitle}
-                      >
-                        {"Promotores"}
-                      </Typography>
-                    </div>
-                    <div className={classes.cardAvatar}>
-                      <Avatar className={classes.cardAvatar5}>
-                        {<SentimentSatisfiedAltIcon fontSize="inherit" />}
-                      </Avatar>
-                    </div>
-                  </Paper>
-                </Grid>
-
-                <Grid item xs={12} sm={6} md={4}>
-                  <Paper className={classes.cardContainer2} elevation={0}>
-                    <div>
-                      <Typography
-                        variant="subtitle1"
-                        component="p"
-                        className={classes.cardSubtitle}
-                      >
-                        {Number(counters.npsPassivePerc / 100).toLocaleString(undefined, { style: 'percent' })}
-                      </Typography>
-                      <Typography
-                        variant="h6"
-                        component="h2"
-                        className={classes.cardTitle}
-                      >
-                        {"Neutros"}
-                      </Typography>
-                    </div>
-                    <div className={classes.cardAvatar}>
-                      <Avatar className={classes.cardAvatar2}>
-                        {<SentimentNeutralIcon fontSize="inherit" />}
-                      </Avatar>
-                    </div>
-                  </Paper>
-                </Grid>
-
-                <Grid item xs={12} sm={6} md={4}>
-                  <Paper className={classes.cardContainer4} elevation={0}>
-                    <div>
-                      <Typography
-                        variant="subtitle1"
-                        component="p"
-                        className={classes.cardSubtitle}
-                      >
-                        {Number(counters.npsDetractorsPerc / 100).toLocaleString(undefined, { style: 'percent' })}
-                      </Typography>
-                      <Typography
-                        variant="h6"
-                        component="h2"
-                        className={classes.cardTitle}
-                      >
-                        {"Dretatores"}
-                      </Typography>
-                    </div>
-                    <div className={classes.cardAvatar}>
-                      <Avatar className={classes.cardAvatar4}>
-                        {<SentimentVeryDissatisfiedIcon fontSize="inherit" />}
-                      </Avatar>
-                    </div>
-                  </Paper>
-                </Grid>
-
-              </Grid>
-            </Container>
-
-            <Container
-              width="lg%"
-              className={classes.container}
-            >
-              <Grid container spacing={3} >
-                <Grid item xs={12} sm={6} md={4} >
-                  <Paper
-                    className={classes.cardContainer7} elevation={0}
+            <Grid 
+              container 
+              spacing={3} >
+            <Grid item  xs={12} sm={6} md={4}>
+              <Paper className={classes.cardContainer5} elevation={0}>
+                <div>
+                  <Typography
+                    variant="subtitle1"
+                    component="p"
+                    className={classes.cardSubtitle}
                   >
-                    <div>
-                      <Typography
-                        variant="subtitle1"
-                        component="p"
-                        className={classes.cardSubtitle}
-                      >
-                        {counters.npsScore}
-                      </Typography>
-                      <Typography
-                        variant="h6"
-                        component="h2"
-                        className={classes.cardTitle}
-                      >
-                        {"Score"}
-                      </Typography>
-                    </div>
-                    <div className={classes.cardAvatar}>
-                      <Avatar className={classes.cardAvatar6}>
-                        {<Score fontSize="inherit" />}
-                      </Avatar>
-                    </div>
-                  </Paper>
-                </Grid>
-              </Grid>
-            </Container>
+                    {Number(counters.npsPromotersPerc/100).toLocaleString(undefined,{style:'percent'})}
+                  </Typography>
+                  <Typography
+                    variant="h6"
+                    component="h2"
+                    className={classes.cardTitle}
+                  >
+                    {"Promotores"}
+                  </Typography>
+                </div>
+                <div className={classes.cardAvatar}>
+                  <Avatar className={classes.cardAvatar5}>
+                    {<SentimentSatisfiedAltIcon  fontSize="inherit" />}
+                  </Avatar>
+                </div>
+              </Paper>
+            </Grid>
 
+            <Grid item xs={12} sm={6} md={4}>
+              <Paper className={classes.cardContainer2} elevation={0}>
+                <div>
+                  <Typography
+                    variant="subtitle1"
+                    component="p"
+                    className={classes.cardSubtitle}
+                  >
+                    {Number(counters.npsPassivePerc/100).toLocaleString(undefined,{style:'percent'})}
+                  </Typography>
+                  <Typography
+                    variant="h6"
+                    component="h2"
+                    className={classes.cardTitle}
+                  >
+                    {"Neutros"}
+                  </Typography>
+                </div>
+                <div className={classes.cardAvatar}>
+                  <Avatar className={classes.cardAvatar2}>
+                    {<SentimentNeutralIcon fontSize="inherit" />}
+                  </Avatar>
+                </div>
+              </Paper>
+            </Grid>
+
+            <Grid item xs={12} sm={6} md={4}>
+              <Paper className={classes.cardContainer4} elevation={0}>
+                <div>
+                  <Typography
+                    variant="subtitle1"
+                    component="p"
+                    className={classes.cardSubtitle}
+                  >
+                    {Number(counters.npsDetractorsPerc/100).toLocaleString(undefined,{style:'percent'})}
+                  </Typography>
+                  <Typography
+                    variant="h6"
+                    component="h2"
+                    className={classes.cardTitle}
+                  >
+                    {"Dretatores"}
+                  </Typography>
+                </div>
+                <div className={classes.cardAvatar}>
+                  <Avatar className={classes.cardAvatar4}>
+                    {<SentimentVeryDissatisfiedIcon fontSize="inherit" />}
+                  </Avatar>
+                </div>
+              </Paper>
+            </Grid>
+
+            </Grid>
+          </Container>
+
+          <Container
+            width="lg%" 
+            className={classes.container} 
+          >
+          <Grid container spacing={3} >
+           <Grid item  xs={12} sm={6} md={4} >
+              <Paper 
+             className={classes.cardContainer7} elevation={0}    
+              >
+                <div>
+                  <Typography
+                    variant="subtitle1"
+                    component="p"
+                    className={classes.cardSubtitle}
+                  >
+                    {Number(counters.npsScore/100).toLocaleString(undefined,{style:'percent'})}
+                  </Typography>
+                  <Typography
+                    variant="h6"
+                    component="h2"
+                    className={classes.cardTitle}
+                  >
+                    {"Score"}
+                  </Typography>
+                </div>
+                <div className={classes.cardAvatar}>
+                  <Avatar className={classes.cardAvatar6}>
+                    {<Score fontSize="inherit" />}
+                  </Avatar>
+                </div>
+              </Paper>
+             </Grid>
+            </Grid>
+          </Container>
+ 
           </TabPanel>
-
+          
           <TabPanel
             className={classes.container}
             value={tab}
@@ -767,7 +761,7 @@ const Dashboard = () => {
                       loading={loading}
                     />
                   ) : null}
-                </Grid>
+              </Grid>
               </Grid>
             </Container>
           </TabPanel>

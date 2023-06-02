@@ -129,50 +129,41 @@ export default async function DashboardDataService(
           and ur.rate < 7
       ) npsDetractorsPerc,
       (
-        select sum(nps.promoter) - sum(nps.detractor) from (
+        select sum(nps.promoter-nps.detractor)   from (
           (select 
-            (100*count(tt.id))/NULLIF((select count(id) total from traking where rated= 0),0) promoter
+           (100*count(tt.id))/NULLIF((select count(id) total from traking where rated= 1),0) promoter
        , 0 detractor
                     from traking tt
                     left join UserRatings ur on ur.ticketId = tt.ticketId
                 where tt.rated =true 
                 and ur.rate > 8
           union			
-          select 
-                      0,(100*count(tt.id))/NULLIF((select count(id) total from traking where rated= 0),0)
-                    from traking  tt
-                    left join UserRatings ur on ur.ticketId = tt.ticketId
-                where tt.rated =true 
-                and ur.rate < 7)) nps
+           select 
+          0,nullif((100*count(tt.ID))/NULLIF((select count(id) total from traking where rated= 1),0),0)
+        from traking  tt
+        left join UserRatings ur on ur.ticketId = tt.ticketId
+        where tt.rated = true 
+          and ur.rate < 7)) nps
         ) npsScore
   ),
   attedants as (
-    select
-      u.id,
-      u.name,
-      coalesce(att.avgSupportTime, 0) avgSupportTime,
-      att.tickets,
-      att.rating,
-      att.online
-    from Users u
-    inner join (
       select
         u1.id,
         u1.name,
         u1.online,
         avg(t.supportTime) avgSupportTime,
         count(t.id) tickets,
-        coalesce(avg(ur.rate), 0) rating
+        coalesce(avg(ur.rate), 0) rating,
+        coalesce(count(ur.id), 0) countRating
       from Users u1
       left join traking t on t.userId = u1.id
-      left join UserRatings ur on ur.userId = t.userId and DATE(ur.createdAt) = DATE(t.finishedAt)
+      left join UserRatings ur on ur.userId = t.userId and ur.ticketId = t.ticketId 
       group by 1, 2
-    ) att on att.id = u.id
-    order by att.name
+    order by u1.name
   )   
   select (select JSON_OBJECT('leads', leads, 'npsScore', npsScore, 'avgWaitTime',avgWaitTime, 'avgSupportTime', avgSupportTime, 'npsPassivePerc', npsPassivePerc, 'supportPending', supportPending, 'npsPassiveCount', npsPassiveCount, 'supportFinished', supportFinished, 'npsPromotersPerc', npsPromotersPerc, 'supportHappening', supportHappening, 'npsDetractorsPerc', npsDetractorsPerc, 'npsPromotersCount', npsPromotersCount, 'npsDetractorsCount', npsDetractorsCount)  counters from counters  ) counters    
     ,
-   (select JSON_ARRAYAGG(JSON_OBJECT('id', id,'name', name, 'online', online, 'avgSupportTime', avgSupportTime, 'tickets', tickets, 'rating', rating))  attendants  from attedants a) attendants ;
+   (select JSON_ARRAYAGG( JSON_OBJECT('id', id,'name', name, 'online', online, 'avgSupportTime', avgSupportTime, 'tickets', tickets, 'rating', rating, 'countRating', countRating))  attendants  from attedants a) attendants ;
 `;
   
   let where = 'where tt.id is not null';
