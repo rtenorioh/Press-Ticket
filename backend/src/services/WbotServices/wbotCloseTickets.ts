@@ -45,14 +45,14 @@ export const ClosedAllOpenTickets = async (): Promise<void> => {
 
     }
   };
-
+   
   try {
 
     const { rows: tickets } = await Ticket.findAndCountAll({
       where: { status: "open" },
       order: [["updatedAt", "DESC"]]
     });
-
+   
     tickets.forEach(async ticket => {
 
       const whatsapp = await ShowWhatsAppService(ticket?.whatsappId)
@@ -63,15 +63,13 @@ export const ClosedAllOpenTickets = async (): Promise<void> => {
       let messageInactive = whatsapp?.inactiveMessage;
       let fromMe = ticket.fromMe;
       let isMsgGroup = ticket.isMsgGroup;
-      const ticketTraking = await FindOrCreateATicketTrakingService({
-        ticketId: ticket.id,
-        whatsappId: whatsapp.id,
-        userId: ticket.userId
-      });
+      const ticketTraking = await FindOrCreateATicketTrakingService({ticketId: ticket.id, 
+                whatsappId: whatsapp.id, 
+                userId: ticket.userId});
 
       // Define horario para fechar automaticamente ticket aguardando avaliação. Tempo default: 10 minutos
-
-      if (ticketTraking) {
+        
+      if (ticketTraking){
         let dataLimiteNPS = new Date()
 
         dataLimiteNPS.setMinutes(dataLimiteNPS.getMinutes() - 10)
@@ -83,11 +81,11 @@ export const ClosedAllOpenTickets = async (): Promise<void> => {
             finishedAt: moment().toDate()
           });
 
-          io.to("open").emit(`ticket`, {
-            action: "delete",
-            ticket,
-            ticketId: ticket.id
-          });
+              io.to("open").emit(`ticket`, {
+                action: "delete",
+                ticket,
+                ticketId: ticket.id
+              });
         };
       }
       // @ts-ignore: Unreachable code error
@@ -98,34 +96,33 @@ export const ClosedAllOpenTickets = async (): Promise<void> => {
         let dataLimite = new Date()
 
         if (Number(horasFecharAutomaticamente) < 1) {
-          dataLimite.setMinutes(dataLimite.getMinutes() - (Number(horasFecharAutomaticamente) * 60));
+          dataLimite.setMinutes(dataLimite.getMinutes() - (Number(horasFecharAutomaticamente)*60));
         } else {
           dataLimite.setHours(dataLimite.getHours() - Number(horasFecharAutomaticamente));
         }
 
-        // console.log(dataLimite + " TEMPO FECHAMENTO " + horasFecharAutomaticamente)
+       // console.log(dataLimite + " TEMPO FECHAMENTO " + horasFecharAutomaticamente)
 
         if (ticket.status === "open" && fromMe && !isMsgGroup) {
 
           let dataUltimaInteracaoChamado = new Date(ticket.updatedAt)
 
           if (dataUltimaInteracaoChamado < dataLimite) {
+             
+            if (sendIsInactive && ticket.status === "open" && messageInactive ) {
+              const body = formatBody(`\u200e${messageInactive}`,ticketBody);
+              await SendWhatsAppMessage({ body: body, ticket: ticketBody});
+     
+             }
 
-            if (sendIsInactive && ticket.status === "open" && messageInactive) {
-              const body = formatBody(`\u200e${messageInactive}`, ticketBody);
-              if (messageInactive.trim() !== ' ') {
-                await SendWhatsAppMessage({ body: body, ticket: ticketBody });
-              }
-            }
-
-            closeTicket(ticket, useNPS, ticket.status);
-
+             closeTicket(ticket, useNPS, ticket.status);
+                      
             io.to("open").emit(`ticket`, {
               action: "delete",
               ticket,
               ticketId: ticket.id
             });
-          }
+            }
         }
       }
 

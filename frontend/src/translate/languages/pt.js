@@ -362,7 +362,7 @@ const messages = {
           message: "Mensagem de",
         },
         tabs: {
-          open: { title: "Inbox" },
+          open: { title: "Atendendo" },
           closed: { title: "Resolvidos" },
           search: { title: "Busca" },
         },
@@ -386,7 +386,7 @@ const messages = {
         },
       },
       ticketsList: {
-        pendingHeader: "Aguardando",
+        pendingHeader: "Pendente",
         assignedHeader: "Atendendo",
         noTicketsTitle: "Nada aqui!",
         noTicketsMessage: "Nenhum chamado encontrado com esse status ou termo pesquisado",
@@ -397,7 +397,7 @@ const messages = {
           spy: "Espiar",
           close: "Encerrar",
           reopen: "Reabrir",
-          return: "Mover para aguardando"
+          return: "Mover para pendente"
         },
         buttons: {
           accept: "Responder",
@@ -668,8 +668,8 @@ const messages = {
         header: {
           assignedTo: "Responsável:",
           buttons: {
-            return: "Retornar",
-            resolve: "Resolver",
+            return: "Mover para pendente",
+            resolve: "Encerrar",
             reopen: "Reabrir",
             accept: "Aceitar",
             finish: "Finalizar",
