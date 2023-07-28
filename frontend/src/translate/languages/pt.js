@@ -365,6 +365,7 @@ const messages = {
           open: { title: "Atendendo" },
           closed: { title: "Resolvidos" },
           search: { title: "Busca" },
+          group: { title: "Grupos" },
         },
         search: {
           placeholder: "Buscar chamados e mensagens",
