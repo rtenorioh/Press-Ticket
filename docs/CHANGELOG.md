@@ -1,5 +1,20 @@
 # Changelog
 
+### 30/08/2023
+
+- [Ajuste para audio no IOS](https://github.com/rtenorioh/Press-Ticket/commit/163d08c65b8397ff2196cf69d1217579564ca01f);
+- [Restart do PM2 no frontend](https://github.com/rtenorioh/Press-Ticket/commit/448bc9f3c356dee3d782d9fb547066be7f3130df);
+- [Ajustes](https://github.com/rtenorioh/Press-Ticket/commit/448bc9f3c356dee3d782d9fb547066be7f3130df); e
+- [Atualização da versão](https://github.com/rtenorioh/Press-Ticket/commit/d00f71b82afe42f63296a01e8fd1e27f7e680a3b).
+
+### 29/08/2023
+
+- [Atualização da lib wwebjs para uma pre-release](https://github.com/rtenorioh/Press-Ticket/commit/cf930869f7e157bfeb4c0210f1b6d1fa69b69c68).
+
+### 17/08/2023
+
+- [Atualização da lib wwebjs para v1.22.1](https://github.com/rtenorioh/Press-Ticket/commit/1344a86877db51022c3e7c90c0cd4ef784374940).
+
 ### 02/06/2023
 
 - [Ajuste no isTricket](https://github.com/rtenorioh/Press-Ticket/commit/6e6004a3813df2cd661fe164af610de62dfb7012);
