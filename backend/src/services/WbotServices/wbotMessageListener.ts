@@ -12,7 +12,7 @@ import {
   Client
 } from "whatsapp-web.js";
 
-import * as ffmpeg from "fluent-ffmpeg";
+import ffmpeg from "fluent-ffmpeg";
 import Contact from "../../models/Contact";
 import Ticket from "../../models/Ticket";
 import Message from "../../models/Message";
@@ -170,7 +170,7 @@ const verifyMediaMessage = async (
             .on("end", () => {
               resolve();
             })
-            .on("error", err => {
+            .on("error", (err: any) => {
               reject(err);
             });
         });
