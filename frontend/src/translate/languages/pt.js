@@ -78,6 +78,7 @@ const messages = {
         },
         buttons: {
           add: "Adicionar WhatsApp",
+          restart: "Restart",
           disconnect: "desconectar",
           tryAgain: "Tentar novamente",
           qrcode: "QR CODE",

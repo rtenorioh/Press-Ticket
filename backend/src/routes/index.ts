@@ -13,6 +13,8 @@ import quickAnswerRoutes from "./quickAnswerRoutes";
 import apiRoutes from "./apiRoutes";
 import tagRoutes from "./tagRoutes";
 import integrationRoutes from "./integrationRoutes";
+// import companyRoutes from "./companyRoutes";
+import systemRoutes from "./systemRoutes";
 
 const routes = Router();
 
@@ -29,5 +31,7 @@ routes.use(quickAnswerRoutes);
 routes.use("/api/messages", apiRoutes);
 routes.use(tagRoutes);
 routes.use(integrationRoutes);
+// routes.use(companyRoutes);
+routes.use(systemRoutes);
 
 export default routes;

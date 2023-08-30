@@ -25,6 +25,7 @@ import {
 	SignalCellular4Bar,
 	CropFree,
 	DeleteOutline,
+	SyncOutlined,
 	WhatsApp
 } from "@material-ui/icons";
 
@@ -33,11 +34,11 @@ import MainHeader from "../../components/MainHeader";
 import MainHeaderButtonsWrapper from "../../components/MainHeaderButtonsWrapper";
 import Title from "../../components/Title";
 import TableRowSkeleton from "../../components/TableRowSkeleton";
-
-import api from "../../services/api";
 import WhatsAppModal from "../../components/WhatsAppModal";
 import ConfirmationModal from "../../components/ConfirmationModal";
 import QrcodeModal from "../../components/QrcodeModal";
+
+import api from "../../services/api";
 import { i18n } from "../../translate/i18n";
 import { WhatsAppsContext } from "../../context/WhatsApp/WhatsAppsContext";
 import toastError from "../../errors/toastError";
@@ -291,6 +292,14 @@ const Connections = () => {
 		);
 	};
 
+	const restartpm2 = async () => {
+		try {
+			await api.post('/restartpm2');
+		} catch (err) {
+			toastError(err);
+		}
+	}
+
 	return (
 		<MainContainer>
 			<ConfirmationModal
@@ -314,6 +323,15 @@ const Connections = () => {
 			<MainHeader>
 				<Title>{i18n.t("connections.title")} ({whatsApps.length})</Title>
 				<MainHeaderButtonsWrapper>
+					<Tooltip title={i18n.t("connections.buttons.restart")}>
+						<Button
+							variant="contained"
+							color="primary"
+							onClick={restartpm2}
+						>
+							<SyncOutlined />
+						</Button>
+					</Tooltip>
 					<Tooltip title={i18n.t("connections.buttons.add")}>
 						<Button
 							variant="contained"
@@ -329,7 +347,7 @@ const Connections = () => {
 				<Table size="small">
 					<TableHead>
 						<TableRow>
-							<TableCell align="center">
+			 				<TableCell align="center">
 								{i18n.t("connections.table.id")}
 							</TableCell>
 							<TableCell align="center">
