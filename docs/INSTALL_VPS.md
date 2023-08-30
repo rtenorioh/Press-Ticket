@@ -121,7 +121,7 @@ sudo apt-get install -y nodejs
 20. Instalação de libs
 
 ```bash
-sudo apt install apt-transport-https ca-certificates curl software-properties-common git
+sudo apt install apt-transport-https ca-certificates curl software-properties-common git ffmpeg
 ```
 
 21. Atualizando

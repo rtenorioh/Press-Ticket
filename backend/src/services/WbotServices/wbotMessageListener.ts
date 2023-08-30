@@ -12,6 +12,7 @@ import {
   Client
 } from "whatsapp-web.js";
 
+import * as ffmpeg from "fluent-ffmpeg";
 import Contact from "../../models/Contact";
 import Ticket from "../../models/Ticket";
 import Message from "../../models/Message";
@@ -29,6 +30,8 @@ import { debounce } from "../../helpers/Debounce";
 import UpdateTicketService from "../TicketServices/UpdateTicketService";
 import CreateContactService from "../ContactServices/CreateContactService";
 import formatBody from "../../helpers/Mustache";
+
+ffmpeg.setFfmpegPath("/usr/bin/ffmpeg");
 
 const request = require("request");
 
@@ -141,12 +144,45 @@ const verifyMediaMessage = async (
     media.filename = `${new Date().getTime()}${originalFilename}`;
   }
 
+  // try {
+  //   await writeFileAsync(
+  //     join(__dirname, "..", "..", "..", "public", media.filename),
+  //     media.data,
+  //     "base64"
+  //   );
+  // } catch (err: any) {
+  //   Sentry.captureException(err);
+  //   logger.error(err);
+  // }
+
   try {
     await writeFileAsync(
       join(__dirname, "..", "..", "..", "public", media.filename),
       media.data,
       "base64"
-    );
+    )
+      .then(() => {
+        console.log("Arquivo OGG salvo com sucesso!");
+        return new Promise<void>((resolve, reject) => {
+          ffmpeg(`./public/${media.filename}`)
+            .toFormat("mp3")
+            .save(`./public/${media.filename}`.replace(".ogg", ".mp3"))
+            .on("end", () => {
+              resolve();
+            })
+            .on("error", err => {
+              reject(err);
+            });
+        });
+      })
+      .then(() => {
+        console.log("Conversão concluída!");
+        // Aqui você pode fazer o que desejar com o arquivo MP3 convertido.
+      })
+      .catch(err => {
+        console.error("Ocorreu um erro:", err);
+        // Trate o erro de acordo com sua lógica de aplicativo.
+      });
   } catch (err: any) {
     Sentry.captureException(err);
     logger.error(err);
@@ -156,7 +192,7 @@ const verifyMediaMessage = async (
     id: msg.id.id,
     ticketId: ticket.id,
     contactId: msg.fromMe ? undefined : contact.id,
-    body: msg.body || media.filename,
+    body: msg.body,
     fromMe: msg.fromMe,
     read: msg.fromMe,
     mediaUrl: media.filename,
@@ -164,7 +200,7 @@ const verifyMediaMessage = async (
     quotedMsgId: quotedMsg?.id
   };
 
-  await ticket.update({ lastMessage: msg.body || media.filename });
+  await ticket.update({ lastMessage: msg.body });
   const newMessage = await CreateMessageService({ messageData });
 
   return newMessage;
