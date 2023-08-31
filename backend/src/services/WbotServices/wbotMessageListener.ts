@@ -144,17 +144,6 @@ const verifyMediaMessage = async (
     media.filename = `${new Date().getTime()}${originalFilename}`;
   }
 
-  // try {
-  //   await writeFileAsync(
-  //     join(__dirname, "..", "..", "..", "public", media.filename),
-  //     media.data,
-  //     "base64"
-  //   );
-  // } catch (err: any) {
-  //   Sentry.captureException(err);
-  //   logger.error(err);
-  // }
-
   try {
     await writeFileAsync(
       join(__dirname, "..", "..", "..", "public", media.filename),
@@ -162,11 +151,28 @@ const verifyMediaMessage = async (
       "base64"
     )
       .then(() => {
-        console.log("Arquivo OGG salvo com sucesso!");
+        console.log("Arquivo salvo com sucesso!");
+
+        const inputFile = `./public/${media.filename}`;
+        let outputFile: string;
+
+        if (inputFile.endsWith(".mpeg")) {
+          outputFile = inputFile.replace(".mpeg", ".mp3");
+        } else if (inputFile.endsWith(".ogg")) {
+          outputFile = inputFile.replace(".ogg", ".mp3");
+        } else {
+          // Trate outros formatos de arquivo conforme necessário
+          console.error("Formato de arquivo não suportado:", inputFile);
+          return;
+        }
+
+        console.log("Input File:", inputFile);
+        console.log("Output File:", outputFile);
+
         return new Promise<void>((resolve, reject) => {
-          ffmpeg(`./public/${media.filename}`)
+          ffmpeg(inputFile)
             .toFormat("mp3")
-            .save(`./public/${media.filename}`.replace(".ogg", ".mp3"))
+            .save(outputFile)
             .on("end", () => {
               resolve();
             })
