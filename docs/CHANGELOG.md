@@ -1,5 +1,11 @@
 # Changelog
 
+### 08/02/2024
+
+- [Atualização lib wwebjs](https://github.com/rtenorioh/Press-Ticket/commit/130bb54d38b956b5e5569a3909f75abd1bdef6ae);
+- [Atualização no Location](https://github.com/rtenorioh/Press-Ticket/commit/5f1076d1827a6eaedd3feef2f094ddc9cb9a5152); e
+- [Atualização de versão](https://github.com/rtenorioh/Press-Ticket/commit/87117514c8cc961e4c4672903500c3a84ad37f7f).
+
 ### 30/08/2023
 
 - [Ajuste para audio no IOS](https://github.com/rtenorioh/Press-Ticket/commit/163d08c65b8397ff2196cf69d1217579564ca01f);
