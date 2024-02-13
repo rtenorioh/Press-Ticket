@@ -264,7 +264,7 @@ const verifyQueue = async (
     wbot.id!
   );
 
-  if (queues.length === 1) {
+  if (queues.length === 0) {
     await UpdateTicketService({
       ticketData: { queueId: queues[0].id },
       ticketId: ticket.id
