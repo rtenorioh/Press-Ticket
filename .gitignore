@@ -1,4 +1,5 @@
 .docker/data/
 ssl/
 .env
+.wwebjs_auth
 .vscode

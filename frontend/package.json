@@ -1,7 +1,7 @@
 {
   "name": "frontend",
   "version": "0.1.0",
-  "systemVersion": "1.7.1",
+  "systemVersion": "1.7.2",
   "private": true,
   "dependencies": {
     "@material-ui/core": "^4.11.0",
@@ -35,7 +35,7 @@
     "yup": "^0.32.8"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start": "react-scripts --openssl-legacy-provider start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"

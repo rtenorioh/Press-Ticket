@@ -1,12 +1,12 @@
+import { Configuration, CreateImageRequestSizeEnum, OpenAIApi } from "openai";
 import qrCode from "qrcode-terminal";
 import { Client, LocalAuth, MessageMedia } from "whatsapp-web.js";
-import { Configuration, CreateImageRequestSizeEnum, OpenAIApi } from "openai";
-import { getIO } from "./socket";
-import Whatsapp from "../models/Whatsapp";
 import AppError from "../errors/AppError";
-import { logger } from "../utils/logger";
-import { handleMessage } from "../services/WbotServices/wbotMessageListener";
 import Integration from "../models/Integration";
+import Whatsapp from "../models/Whatsapp";
+import { handleMessage } from "../services/WbotServices/wbotMessageListener";
+import { logger } from "../utils/logger";
+import { getIO } from "./socket";
 
 interface Session extends Client {
   id?: number;
@@ -184,9 +184,6 @@ export const initWbot = async (whatsapp: Whatsapp): Promise<Session> => {
 
       wbot.on("authenticated", async session => {
         logger.info(`Session: ${sessionName} AUTHENTICATED`);
-        //        await whatsapp.update({
-        //          session: JSON.stringify(session)
-        //        });
       });
 
       wbot.on("auth_failure", async msg => {

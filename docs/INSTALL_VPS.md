@@ -44,7 +44,7 @@ sudo mysql -u root
 7. Criando o BD
 
 ```bash
-CREATE DATABASE pressticket CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+CREATE DATABASE press-ticket CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
 ```
 
 8. Acessar o BD do mysql
@@ -180,7 +180,7 @@ DB_HOST=localhost
 DB_TIMEZONE=-03:00   
 DB_USER=root  
 DB_PASS=  
-DB_NAME=pressticket
+DB_NAME=press-ticket
 
 USER_LIMIT=3  
 CONNECTIONS_LIMIT=1

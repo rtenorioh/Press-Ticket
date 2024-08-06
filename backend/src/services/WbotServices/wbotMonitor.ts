@@ -33,24 +33,24 @@ const wbotMonitor = async (
       });
     });
 
-    wbot.on("change_battery", async batteryInfo => {
-      const { battery, plugged } = batteryInfo;
-      logger.info(
-        `Battery session: ${sessionName} ${battery}% - Charging? ${plugged}`
-      );
+    // wbot.on("change_battery", async batteryInfo => {
+    //   const { battery, plugged } = batteryInfo;
+    //   logger.info(
+    //     `Battery session: ${sessionName} ${battery}% - Charging? ${plugged}`
+    //   );
 
-      try {
-        await whatsapp.update({ battery, plugged });
-      } catch (err) {
-        Sentry.captureException(err);
-        logger.error(err);
-      }
+    //   try {
+    //     await whatsapp.update({ battery, plugged });
+    //   } catch (err) {
+    //     Sentry.captureException(err);
+    //     logger.error(err);
+    //   }
 
-      io.emit("whatsappSession", {
-        action: "update",
-        session: whatsapp
-      });
-    });
+    //   io.emit("whatsappSession", {
+    //     action: "update",
+    //     session: whatsapp
+    //   });
+    // });
 
     wbot.on("disconnected", async reason => {
       logger.info(`Disconnected session: ${sessionName}, reason: ${reason}`);
