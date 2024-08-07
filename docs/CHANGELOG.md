@@ -1,5 +1,9 @@
 # Changelog
 
+### 06/08/2024
+
+- [Atualização da lib e alguns ajustes](https://github.com/rtenorioh/Press-Ticket/commits/main/#:~:text=Atualiza%C3%A7%C3%A3o%20da%20lib%20e%20alguns%20ajustes)
+
 ### 08/02/2024
 
 - [Atualização lib wwebjs](https://github.com/rtenorioh/Press-Ticket/commit/130bb54d38b956b5e5569a3909f75abd1bdef6ae);
@@ -198,7 +202,7 @@
 
 ### 23/10/2022
 
-- [Configuração da exibição dos horários dos setores](https://github.com/rtenorioh/Press-Ticket/commit/5bc69b6832aada42f39aadfec0b8c171f7b3445a); 
+- [Configuração da exibição dos horários dos setores](https://github.com/rtenorioh/Press-Ticket/commit/5bc69b6832aada42f39aadfec0b8c171f7b3445a);
 - [Função copiar dados do contato](https://github.com/rtenorioh/Press-Ticket/commit/a4f72cfff0df33696bd9a1bcf795cd77fa802d93); e
 - [Atualização da versão](https://github.com/rtenorioh/Press-Ticket/commit/7ce64f1333c520d672266633a46eb1f6ae24e5bf).
 
@@ -225,7 +229,6 @@
 - [Correção na tradução da transferência de setor](https://github.com/rtenorioh/Press-Ticket/commit/1291369d633a7ca1f0d0a5bb914371f1e2039655);
 - [Correção na tradução ao deletar ticket](https://github.com/rtenorioh/Press-Ticket/commit/7e8436fa11740d1f6271b3d321165ca763eb69c6); e
 - [Botão aceitar apenas para Admin ao espiar](https://github.com/rtenorioh/Press-Ticket/commit/4989417415efb0ba91c4e005a51d70b32a1f1f79).
-
 
 ### 09/10/2022
 
@@ -258,6 +261,7 @@
 ### 22/09/2022
 
 - [Retirada do envio da despedida para grupos](https://github.com/rtenorioh/Press-Ticket/commit/7f5a5fa00d9f349a8bbfebdac9ab89778975279a).
+
 ### 21/09/2022
 
 - [Correção na tradução do modal de tranferir usuário](https://github.com/rtenorioh/Press-Ticket/commit/aefec1cad68f7e71025be67639bbf3445d67c8a2); e
@@ -282,7 +286,6 @@
 ### 31/08/2022
 
 - [Exportação e exclusão em massa de contatos](https://github.com/rtenorioh/Press-Ticket/commit/513f516c403a469125603feedf9a6bb095aee421).
-
 
 ### 30/08/2022
 
@@ -353,10 +356,9 @@
 
 - [Correção no nome dos arquivos salvos na pasta public do backend](https://github.com/rtenorioh/Press-Ticket/commit/38ce3a6d2e0f75e523e006e1c465646e465ef80b);
 - [Implementação da tag {{ticket_id}} e correções](https://github.com/rtenorioh/Press-Ticket/commit/9c922767b82252cd11adcd67e62558ae81f21d0f);
-- [Criado as migration para inserção na Tabela ```Queue``` dos campos ```startWork```, ```endWork``` e ```absenceMessage```](https://github.com/rtenorioh/Press-Ticket/commit/ad5fced30354ab06459e392b124c9581d74f8707);
+- [Criado as migration para inserção na Tabela `Queue` dos campos `startWork`, `endWork` e `absenceMessage`](https://github.com/rtenorioh/Press-Ticket/commit/ad5fced30354ab06459e392b124c9581d74f8707);
 - [Atualização da versão do sistema](https://github.com/rtenorioh/Press-Ticket/commit/ab7f6cbdf1cd2589afc0c993759e4d7d369fa629); e
 - [Atualização do README](https://github.com/rtenorioh/Press-Ticket/commit/67f4625116d49680138c3747ca0f868a698a26a5).
-
 
 ### 28/06/2022
 
@@ -390,32 +392,39 @@
 - [Atualizado a versão do sistema](https://github.com/rtenorioh/Press-Ticket/commit/41d0588899f1afc27a27ebf43face25fb33fb761).
 
 ### 08/06/2022
+
 - [Ticket enviado por API sendo encerrado automaticamente e recebimento de resposta do envio da API](https://github.com/rtenorioh/Press-Ticket/commit/30c30447b00341c40f7e94b89b1f9fb7081cbe74);
 - [Update na seed que cria as configurações padrões](https://github.com/rtenorioh/Press-Ticket/commit/9b80e09626561743ec095dc6f7cba7cbe7b9bad7); e
 - [Apresentar a separação dos tickets na conversa](https://github.com/rtenorioh/Press-Ticket/commit/939236129a35d8d6261676892254b1716996cde0).
 
 ### 07/06/2022
+
 - [Correções de erros no build do frontend](https://github.com/rtenorioh/Press-Ticket/commit/b0f4cc64ddfac51bcb6fca17acdb03dcbc29e41c);
 - [Remoção do ícone de bateria na conexão](https://github.com/rtenorioh/Press-Ticket/commit/72d87fd23dbea60884b6ef92fd21497f3b06d4d1);
 - [Atualização do .env.example](https://github.com/rtenorioh/Press-Ticket/commit/b4f63b16a81af67790f42b71e2446487495dab44); e
 - [Correção para não abrir ticket ao mandar mensagens em grupo](https://github.com/rtenorioh/Press-Ticket/commit/086683bf90722e0b2722c19e7a2758fc0a2a640f).
 
 ### 24/05/2022
+
 - [Criação da pasta docs e organização dos tutoriais](https://github.com/rtenorioh/Press-Ticket/commit/ce1da48d64abb87d8b25f7b91a2156bde3e51e24).
 
 ### 22/05/2022
+
 - [Dark Mode](https://github.com/rtenorioh/Press-Ticket/commit/cf8969acbfaf8fdb58274157b933dc360e390ab4); e
 - [Atualização da versão do sistema](https://github.com/rtenorioh/Press-Ticket/commit/6fd1c5e6d1bf6d9237380502d5d74555c3049fd8).
 
 ### 19/05/2022
+
 - [Implementação das tags {{ms}}, {{procol}} e {{hora}}](https://github.com/rtenorioh/Press-Ticket/commit/05dbcb2dba4161309bc312a6058b2a96153275d2); e
 - [Alterar da cor de confirmação de leitura](https://github.com/rtenorioh/Press-Ticket/commit/fd3409824bb22b2e57aaaa3f42eeaa84185ddc47).
 
 ### 18/05/2022
+
 - [Inclusão de whatsappId em api/messages/send](https://github.com/rtenorioh/Press-Ticket/commit/4f98ba2ccd231ec9b72ae44704fcb3761e86ba6c); e
 - [Fechamento automático do ticket enviado por meio do endpoint api/messages/send](https://github.com/rtenorioh/Press-Ticket/commit/e3301057774cc43eb9bfa0bef7e582217920b29b).
 
 ### 14/05/2022
+
 - [Atualização do Manual de instalação](https://github.com/rtenorioh/Press-Ticket/commit/56abd81a31d52e6af3757fd3b047fb4f1916052c?diff=unified).
 
 ### 13/05/2022
