@@ -1,14 +1,27 @@
-# Manual de Instação do Press Ticket em Localhost
+# Manual de Instalação do Press Ticket em Localhost
 
-OBS: Ter instalado o Banco de Dados, podendo usar o Xamp, o Wamp ou qualquer um de sua preferência.
+Programas essenciais:
+
+Node JS
+GIT
+XAMPP ou WAMPP
+IDE (ATOM, Sublime Text, VS Code ou outro da sua escolha)
 
 ================================================
 
 1. Criar Banco de dados
 
-```bash
-CREATE DATABASE press-ticket CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
-```
+   1.1. Via Comando SQL
+
+   ```bash
+   CREATE DATABASE press-ticket CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+   ```
+
+   2.2. Se tiver instalado XAMPP ou WAMPP poderá criar pelo phpmyadmin
+
+   ```bash
+   http://localhost/phpmyadmin
+   ```
 
 2. Clonar o repositório
 
@@ -22,31 +35,31 @@ git clone https://github.com/rtenorioh/Press-Ticket.git Press-Ticket
 cd Press-Ticket/backend
 ```
 
-4. Criar o arquivo .env e inserir as informações do item 5
-
-5. Editar os dados que serão inseridos no arquivo .env
+4. Editar os dados que serão inseridos no arquivo .env
 
 ```bash
-NODE_ENV=  
-BACKEND_URL=http://localhost  
+NODE_ENV=
+BACKEND_URL=http://localhost
 FRONTEND_URL=http://localhost:3333
-PORT=8080  
-PROXY_PORT=8080  
-CHROME_BIN=C:\Program Files\Google\Chrome\Application\chrome.exe  
+PORT=8080
+PROXY_PORT=8080
+CHROME_BIN=C:\Program Files\Google\Chrome\Application\chrome.exe
 
-DB_DIALECT=mysql  
-DB_HOST=localhost  
-DB_TIMEZONE=-03:00  
-DB_USER=root  
-DB_PASS=  
-DB_NAME=press-ticket 
+DB_DIALECT=mysql
+DB_HOST=localhost
+DB_TIMEZONE=-03:00
+DB_USER=root
+DB_PASS=
+DB_NAME=press-ticket
 
-USER_LIMIT=3  
+USER_LIMIT=3
 CONNECTIONS_LIMIT=1
 
-JWT_SECRET=5g1yk7pD9q3YL0iBEuUlPwOiWLj3I5tK+/rhHm+jgdE=  
+JWT_SECRET=5g1yk7pD9q3YL0iBEuUlPwOiWLj3I5tK+/rhHm+jgdE=
 JWT_REFRESH_SECRET=F2c8gag5nvqQkBOmOu5dWkK+gqZnjPUzHmx7S2tWkvs=
 ```
+
+5. Criar o arquivo .env e inserir as informações do item 4
 
 6. Instalar as dependências
 
@@ -68,7 +81,7 @@ npx sequelize db:migrate
 
 9. Popular o banco de dados
 
-```bash 
+```bash
 npx sequelize db:seed:all
 ```
 
@@ -82,18 +95,18 @@ npm start
 
 ```bash
 cd Press-Ticket/frontend
-``` 
+```
 
-12. Criar o arquivo .env e inserir as informações do item 13
-
-13. Editar os dados que serão inseridos no arquivo .env
+12. Editar os dados que serão inseridos no arquivo .env
 
 ```bash
 REACT_APP_BACKEND_URL=http://localhost:8080
 REACT_APP_HOURS_CLOSE_TICKETS_AUTO=
 REACT_APP_PAGE_TITLE=PressTicket
 PORT=3333
-```  
+```
+
+13. Criar o arquivo .env e inserir as informações do item 12
 
 14. Instalar as dependências
 
@@ -107,20 +120,18 @@ npm install
 npm start
 ```
 
-OBS: Caso ao rodar o frontend der erro de ssl, usar o comando abaixo no terminal.
-```bash
-export NODE_OPTIONS=--openssl-legancy-provider
-```
-
 ==============================================================
 
 ### Usuário padrão para acesso
 
-* User: 
+- User:
+
 ```bash
-admin@pressticket.com.br  
+admin@pressticket.com.br
 ```
-* Password: 
+
+- Password:
+
 ```bash
 admin
 ```
