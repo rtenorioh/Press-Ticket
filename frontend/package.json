@@ -1,8 +1,14 @@
 {
   "name": "frontend",
   "version": "0.1.0",
-  "systemVersion": "1.7.2",
+  "systemVersion": "1.7.3",
   "private": true,
+  "scripts": {
+    "start": "react-scripts --openssl-legacy-provider start",
+    "build": "react-scripts --openssl-legacy-provider build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
   "dependencies": {
     "@material-ui/core": "^4.11.0",
     "@material-ui/icons": "^4.9.1",
@@ -33,12 +39,6 @@
     "socket.io-client": "^3.0.5",
     "use-sound": "^2.0.1",
     "yup": "^0.32.8"
-  },
-  "scripts": {
-    "start": "react-scripts --openssl-legacy-provider start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
   },
   "eslintConfig": {
     "extends": "react-app"
