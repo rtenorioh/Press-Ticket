@@ -1,5 +1,15 @@
 # Changelog
 
+### 12/09/2024
+
+- [Atualização dos Docs](https://github.com/rtenorioh/Press-Ticket/commit/27595a5340af73c0d178f13df5b81d3c5e3aae65);
+- [Compatibilidade com Node 20.x](https://github.com/rtenorioh/Press-Ticket/commits/main/#:~:text=Compatibilidade%20com%20Node%2020.x);
+- [Envio de Notificação](https://github.com/rtenorioh/Press-Ticket/commit/ca05f414169739b1137fc60994ddeacc24c28f1b);
+- [Melhoria no atualizador](https://github.com/rtenorioh/Press-Ticket/commit/944a320e943ae673fd37e382bd7e9c45b7f97a7e);
+- [Liberação da Demo](https://github.com/rtenorioh/Press-Ticket/commit/cf22e13ad32d49a54073415a946fc93a560ba27b);
+- [Create Release on Tag Push](https://github.com/rtenorioh/Press-Ticket/commit/5d3ad77078f985b5fe01335b24b26f8445ecc712); e
+- [Add ENV](https://github.com/rtenorioh/Press-Ticket/commit/42f0787b3beb288eb7ff631912d07e5a35ee3eaf).
+
 ### 06/08/2024
 
 - [Atualização da lib e alguns ajustes](https://github.com/rtenorioh/Press-Ticket/commits/main/#:~:text=Atualiza%C3%A7%C3%A3o%20da%20lib%20e%20alguns%20ajustes)
