@@ -1,0 +1,23 @@
+name: Notify Telegram on Release
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send Telegram notification
+        uses: appleboy/telegram-notify@master
+        with:
+          token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          chat_id: ${{ secrets.TELEGRAM_CHAT_ID }}
+          message: |
+            Nova atualização publicada!
+            Data: {{ datetime.datetime.fromisoformat(github.event.release.created_at).strftime('%d-%m-%Y') }}
+            Versão: ${{ github.ref }}
+            Descrição: ${{ github.event.release.body }}
+            Link: https://github.com/${{ github.repository }}/releases/tag/${{ github.ref }}
+            Link do Source: https://api.github.com/repos/${{ github.repository }}/zipball/${{ github.ref }}
+            #CHANGELOG_V1.X
