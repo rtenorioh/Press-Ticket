@@ -1,5 +1,5 @@
-import React, { useState, useContext, useEffect } from "react";
 import clsx from "clsx";
+import React, { useContext, useEffect, useState } from "react";
 
 import {
   AppBar,
@@ -12,25 +12,27 @@ import {
   Menu,
   MenuItem,
   Toolbar,
+  Tooltip,
   Typography
 } from "@material-ui/core";
 
-import MenuIcon from "@material-ui/icons/Menu";
-import ChevronLeftIcon from "@material-ui/icons/ChevronLeft";
 import AccountCircle from "@material-ui/icons/AccountCircle";
+import ChevronLeftIcon from "@material-ui/icons/ChevronLeft";
+import MenuIcon from "@material-ui/icons/Menu";
 
-import MainListItems from "./MainListItems";
+import BackdropLoading from "../components/BackdropLoading";
 import NotificationsPopOver from "../components/NotificationsPopOver";
 import UserModal from "../components/UserModal";
 import { AuthContext } from "../context/Auth/AuthContext";
-import BackdropLoading from "../components/BackdropLoading";
 import { i18n } from "../translate/i18n";
+import MainListItems from "./MainListItems";
 
-import api from "../services/api";
-import toastError from "../errors/toastError";
-import { system } from "../config.json";
+import { CheckCircle, Info } from "@material-ui/icons";
 import { systemVersion } from "../../package.json";
 import logodash from "../assets/logo-dash.png";
+import { system } from "../config.json";
+import toastError from "../errors/toastError";
+import api from "../services/api";
 
 const drawerWidth = 240;
 
@@ -43,7 +45,7 @@ const useStyles = makeStyles((theme) => ({
     },
   },
   toolbar: {
-    paddingRight: 24, // keep right padding when drawer closed
+    paddingRight: 24,
     color: "#ffffff",
     background: theme.palette.toolbar.main
   },
@@ -119,7 +121,6 @@ const useStyles = makeStyles((theme) => ({
   systemCss: {
     display: "flex",
     justifyContent: "center",
-    opacity: 0.2,
     fontSize: 12
   }
 }));
@@ -133,6 +134,33 @@ const LoggedInLayout = ({ children }) => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [drawerVariant, setDrawerVariant] = useState("permanent");
   const { user } = useContext(AuthContext);
+  const [latestVersion, setLatestVersion] = useState("");
+
+  useEffect(() => {
+    const compareVersions = async () => {
+      const latest = await fetchLatestRelease();
+
+      if (latest) {
+        setLatestVersion(latest);
+        if (systemVersion < latest) {
+          console.warn(`Uma nova versão está disponível: ${latest}. Atualize para a versão mais recente.`);
+        }
+      }
+    };
+
+    compareVersions();
+  }, []);
+
+  const fetchLatestRelease = async () => {
+    try {
+      const response = await fetch("https://api.github.com/repos/rtenorioh/Press-Ticket/releases/latest");
+      const data = await response.json();
+      return data.tag_name;
+    } catch (error) {
+      console.error("Erro ao buscar a versão mais recente no GitHub:", error);
+      return null;
+    }
+  };
 
   useEffect(() => {
 
@@ -284,8 +312,25 @@ const LoggedInLayout = ({ children }) => {
               </MenuItem>
               <Divider />
               <span className={classes.systemCss}>
-                <Link color="inherit" href={system.url || "https://github.com/rtenorioh/Press-Ticket"}>
-                  v{systemVersion}
+                <Link
+                  color="inherit"
+                  href={system.url || "https://github.com/rtenorioh/Press-Ticket"}
+                  style={{ display: "flex", alignItems: "center", marginTop: 10 }}
+                >
+                  {latestVersion && latestVersion > systemVersion ? (
+                    <span style={{ color: "#eee8aa" }}>
+                      <Tooltip title="Entrar em contato com o Suporte para solicitar Atualização!" arrow placement="left-start" >
+                        <Info fontSize="small" />
+                      </Tooltip>
+                    </span>
+                  ) : (
+                    <span style={{ color: "green" }}>
+                      <Tooltip title="Versão atualizada!" arrow placement="left-start" >
+                        <CheckCircle fontSize="small" />
+                      </Tooltip>
+                    </span>
+                  )}
+                  <span style={{ marginLeft: "5px" }}>{systemVersion}</span>
                 </Link>
               </span>
             </Menu>
