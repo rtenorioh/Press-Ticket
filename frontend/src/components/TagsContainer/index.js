@@ -88,7 +88,7 @@ export function TagsContainer({ contact }) {
                 renderTags={(value, getTagProps) =>
                     value.map((option, index) => (
                         <Chip
-                            key={option.name}
+                            key={option?.name}
                             variant="outlined"
                             style={{
                                 backgroundColor: option.color || colorGenerator(),
