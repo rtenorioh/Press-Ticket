@@ -1,18 +1,23 @@
 import { Chip, Paper, TextField } from "@material-ui/core";
 import Autocomplete from "@material-ui/lab/Autocomplete";
-import React, { useEffect, useState } from "react";
 import { isArray, isString } from "lodash";
+import React, { useEffect, useState } from "react";
 import toastError from "../../errors/toastError";
 import api from "../../services/api";
 
-export function TagsContainer ({ contact }) {
+export function TagsContainer({ contact }) {
 
     const [tags, setTags] = useState([]);
     const [selecteds, setSelecteds] = useState([]);
 
+    const colorGenerator = () => {
+        const randomColor = '#' + Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0');
+        return randomColor;
+    };
+
     useEffect(() => {
         if (contact) {
-            async function fetchData () {
+            async function fetchData() {
                 await loadTags();
                 if (Array.isArray(contact.tags)) {
                     setSelecteds(contact.tags);
@@ -55,7 +60,7 @@ export function TagsContainer ({ contact }) {
             if (isArray(value)) {
                 for (let item of value) {
                     if (isString(item)) {
-                        const newTag = await createTag({ name: item })
+                        const newTag = await createTag({ name: item, color: colorGenerator() })
                         optionsChanged.push(newTag);
                     } else {
                         optionsChanged.push(item);
@@ -71,7 +76,7 @@ export function TagsContainer ({ contact }) {
     }
 
     return (
-        <Paper style={{padding: 12}}>
+        <Paper style={{ padding: 12 }}>
             <Autocomplete
                 multiple
                 size="small"
@@ -83,8 +88,13 @@ export function TagsContainer ({ contact }) {
                 renderTags={(value, getTagProps) =>
                     value.map((option, index) => (
                         <Chip
+                            key={option.name}
                             variant="outlined"
-                            style={{backgroundColor: option.color || '#eee', textShadow: '1px 1px 1px #000', color: 'white'}}
+                            style={{
+                                backgroundColor: option.color || colorGenerator(),
+                                textShadow: '1px 1px 1px #000',
+                                color: 'white',
+                            }}
                             label={option.name}
                             {...getTagProps({ index })}
                             size="small"
@@ -95,7 +105,7 @@ export function TagsContainer ({ contact }) {
                     <TextField {...params} variant="outlined" placeholder="Tags" />
                 )}
                 PaperComponent={({ children }) => (
-                    <Paper style={{width: 400, marginLeft: 12}}>
+                    <Paper style={{ width: 400, marginLeft: 12 }}>
                         {children}
                     </Paper>
                 )}
