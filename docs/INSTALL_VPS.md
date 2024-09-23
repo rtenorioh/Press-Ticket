@@ -104,7 +104,7 @@ usermod -aG sudo deploy
 su deploy
 ```
 
-17. Realizar o download do node 16.x
+17. Realizar o download do node 20.x
 
 ```bash
 curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
