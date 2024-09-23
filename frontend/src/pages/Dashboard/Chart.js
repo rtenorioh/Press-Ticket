@@ -1,21 +1,21 @@
-import React, { useState, useEffect, useRef } from "react";
 import { useTheme } from "@material-ui/core";
+import React, { useEffect, useRef, useState } from "react";
 
 import {
-	CartesianGrid,
-	XAxis,
-	Tooltip,
-	AreaChart,
 	Area,
-	YAxis,
-	ResponsiveContainer
+	AreaChart,
+	CartesianGrid,
+	ResponsiveContainer,
+	Tooltip,
+	XAxis,
+	YAxis
 } from "recharts";
 
-import { startOfHour, parseISO, format } from "date-fns";
+import { format, parseISO, startOfHour } from "date-fns";
 
+import useTickets from "../../hooks/useTickets";
 import { i18n } from "../../translate/i18n";
 import Title from "./Title";
-import useTickets from "../../hooks/useTickets";
 
 const Chart = () => {
 	const theme = useTheme();
@@ -54,8 +54,8 @@ const Chart = () => {
 				<div>
 					<div style={{ backgroundColor: "#333333ff", borderRadius: "4px", outline: "none" }}>
 						<div>
-							{payload.map((pld) => (
-								<div style={{ display: "inline-block", padding: 10 }}>
+							{payload.map((pld, index) => (
+								<div key={index} style={{ display: "inline-block", padding: 10 }}>
 									<div style={{ color: "white", fontWeight: "600", fontSize: "13px" }}>{`${label}`}</div>
 									<div style={{ color: "white", fontWeight: "400", fontSize: "13px" }}>Tickets: {pld.value}</div>
 								</div>
@@ -97,7 +97,6 @@ const Chart = () => {
 	return (
 		<React.Fragment>
 			<Title>{`${i18n.t("dashboard.charts.perDay.title")}${tickets.length}`}</Title>
-		
 			<ResponsiveContainer>
 				<AreaChart
 					data={chartData}

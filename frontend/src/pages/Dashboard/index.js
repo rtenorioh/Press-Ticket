@@ -1,18 +1,16 @@
-import React, { useContext } from "react"
+// frontend/src/pages/Dashboard/index.js
 
-import Paper from "@material-ui/core/Paper"
-import Container from "@material-ui/core/Container"
-import Grid from "@material-ui/core/Grid"
-import { makeStyles } from "@material-ui/core/styles"
+import Container from "@material-ui/core/Container";
+import Grid from "@material-ui/core/Grid";
+import Paper from "@material-ui/core/Paper";
+import { makeStyles } from "@material-ui/core/styles";
 import Typography from "@material-ui/core/Typography";
-
-import useTickets from "../../hooks/useTickets"
-
+import React, { useContext } from "react";
 import { AuthContext } from "../../context/Auth/AuthContext";
-
+import useTickets from "../../hooks/useTickets";
 import { i18n } from "../../translate/i18n";
-
-import Chart from "./Chart"
+import Chart from "./Chart";
+import TagCloud from "./TagCloud";
 
 const useStyles = makeStyles(theme => ({
 	container: {
@@ -40,11 +38,10 @@ const useStyles = makeStyles(theme => ({
 		flexDirection: "column",
 		height: "100%",
 	},
-}))
+}));
 
 const Dashboard = () => {
-	const classes = useStyles()
-
+	const classes = useStyles();
 	const { user } = useContext(AuthContext);
 	var userQueueIds = [];
 
@@ -53,7 +50,6 @@ const Dashboard = () => {
 	}
 
 	const GetTickets = (status, showAll, withUnreadMessages) => {
-
 		const { count } = useTickets({
 			status: status,
 			showAll: showAll,
@@ -61,7 +57,7 @@ const Dashboard = () => {
 			queueIds: JSON.stringify(userQueueIds)
 		});
 		return count;
-	}
+	};
 
 	return (
 		<div>
@@ -108,10 +104,15 @@ const Dashboard = () => {
 							<Chart />
 						</Paper>
 					</Grid>
+					<Grid item xs={12}>
+						<Paper className={classes.fixedHeightPaper}>
+							<TagCloud />
+						</Paper>
+					</Grid>
 				</Grid>
 			</Container>
 		</div>
-	)
-}
+	);
+};
 
-export default Dashboard
+export default Dashboard;

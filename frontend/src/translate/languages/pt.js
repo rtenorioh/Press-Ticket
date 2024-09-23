@@ -48,11 +48,6 @@ const messages = {
         }
       },
       dashboard: {
-        charts: {
-          perDay: {
-            title: "Tickets hoje: ",
-          },
-        },
         messages: {
           inAttendance: {
             title: "Em Atendimento"
@@ -63,6 +58,15 @@ const messages = {
           closed: {
             title: "Resolvido"
           }
+        },
+        charts: {
+          perDay: {
+            title: "Tickets hoje: ",
+          },
+        },
+        tags: {
+          cloudTitle: "Tags: ",
+          noTags: "Sem tags no momento!"
         }
       },
       connections: {
@@ -491,13 +495,6 @@ const messages = {
           deleteMessage: "Todos os dados do atendente serão perdidos. Os tickets abertos deste atendente serão movidos para a espera.",
         },
       },
-      company:{
-        success: "Dados da Empresa salvo com sucesso.",
-        title: "Dados da Empresa",
-        info: "Informações",
-        name: "Nome",
-        url: "Site"
-      },
       integrations: {
         success: "Integração salva com sucesso.",
         title: "Integrações",
@@ -535,7 +532,7 @@ const messages = {
           },
           CheckMsgIsGroup: {
             name: "Ignorar Mensagens de Grupos",
-            note: "Se desabilitar, irá receber mensage dos grupos.",
+            note: "Se desabilitar, irá receber mensagem dos grupos.",
             options: {
               enabled: "Ativado",
               disabled: "Desativado",
@@ -702,3 +699,4 @@ const messages = {
 };
 
 export { messages };
+
