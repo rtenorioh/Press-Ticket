@@ -5,14 +5,23 @@ on:
     branches: [main]
     tags:
       - "v*"
-    repository:
-      url: https://github.com/rtenorioh/Press-Ticket
 
 jobs:
   create_release:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+
+      - name: List closed issues
+        id: list_closed_issues
+        run: |
+          echo "issues=$(gh issue list --closed --since=\"tags/$(git describe --tags --abbrev=0)\" --format='- {{.title}} (#{{.number}})')" >> $GITHUB_OUTPUT
+
+      - name: Get commit log
+        id: commit_log
+        run: |
+          echo "log=$(git log --pretty=format:'- %s (%h)' --abbrev-commit --since=\"$(git describe --tags --abbrev=0)\")" >> $GITHUB_OUTPUT
+
       - name: Create Release
         uses: actions/create-release@v1
         env:
@@ -23,14 +32,7 @@ jobs:
           body: |
             O que mudou:
 
-            ```
-            git log --pretty=format:'- %s (%h)' --abbrev-commit --since="tags/$(git describe --tags --abbrev=0)"
-            ```
+            ${{ steps.commit_log.outputs.log }}
 
-            Issues Fechadas:**
+            **Issues Fechadas:**
             ${{ steps.list_closed_issues.outputs.issues }}
-      - name: List closed issues
-        id: list_closed_issues
-        run: |
-
-          echo "issues=$(gh issue list --closed --since=\"tags/$(git describe --tags --abbrev=0)\" --format='- {{.title}} (#{{.number}})')" >> $GITHUB_OUTPUT
