@@ -1,52 +1,49 @@
-import React, { useState, useEffect, useReducer, useContext } from "react";
-import openSocket from "../../services/socket-io";
-import { toast } from "react-toastify";
-import { useHistory } from "react-router-dom";
-import { CSVLink } from "react-csv";
-
 import { makeStyles } from "@material-ui/core/styles";
+import React, { useContext, useEffect, useReducer, useState } from "react";
+import { CSVLink } from "react-csv";
+import { useHistory } from "react-router-dom";
+import { toast } from "react-toastify";
+import openSocket from "../../services/socket-io";
 
 import {
   Avatar,
   Button,
   IconButton,
-  InputAdornment,
   Paper,
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableRow,
-  TextField,
   Tooltip
 } from "@material-ui/core";
 
 import {
   AddCircleOutline,
+  Archive,
   DeleteForever,
   DeleteOutline,
-  ImportContacts,
-  Archive,
   Edit,
-  Search,
+  ImportContacts,
   WhatsApp
 } from "@material-ui/icons";
 
 import api from "../../services/api";
 import { i18n } from "../../translate/i18n";
 
-import TableRowSkeleton from "../../components/TableRowSkeleton";
-import ContactModal from "../../components/ContactModal";
-import ConfirmationModal from "../../components/ConfirmationModal/";
-import MainHeader from "../../components/MainHeader";
-import Title from "../../components/Title";
-import MainHeaderButtonsWrapper from "../../components/MainHeaderButtonsWrapper";
-import MainContainer from "../../components/MainContainer";
 import { Can } from "../../components/Can";
+import ConfirmationModal from "../../components/ConfirmationModal/";
+import ContactModal from "../../components/ContactModal";
+import MainContainer from "../../components/MainContainer";
+import MainHeader from "../../components/MainHeader";
+import MainHeaderButtonsWrapper from "../../components/MainHeaderButtonsWrapper";
 import NewTicketModalPageContact from "../../components/NewTicketModalPageContact";
+import TableRowSkeleton from "../../components/TableRowSkeleton";
+import TagsFilter from "../../components/TagsFilter";
+import Title from "../../components/Title";
 
-import toastError from "../../errors/toastError";
 import { AuthContext } from "../../context/Auth/AuthContext";
+import toastError from "../../errors/toastError";
 
 const reducer = (state, action) => {
   if (action.type === "LOAD_CONTACTS") {
@@ -107,7 +104,12 @@ const useStyles = makeStyles((theme) => ({
     width: "50px",
     height: "50px",
     borderRadius: "25%"
-  }
+  },
+  buttonSize: {
+    maxWidth: "36px",
+    maxHeight: "36px",
+    padding: theme.spacing(1),
+  },
 }));
 
 const Contacts = () => {
@@ -126,7 +128,8 @@ const Contacts = () => {
   const [hasMore, setHasMore] = useState(false);
   const [newTicketModalOpen, setNewTicketModalOpen] = useState(false);
   const [contactTicket, setContactTicket] = useState({});
-  
+  const [filteredTags, setFilteredTags] = useState([]);
+
   useEffect(() => {
     dispatch({ type: "RESET" });
     setPageNumber(1);
@@ -140,7 +143,13 @@ const Contacts = () => {
           const { data } = await api.get("/contacts/", {
             params: { searchParam, pageNumber },
           });
-          dispatch({ type: "LOAD_CONTACTS", payload: data.contacts });
+
+          const filteredContacts = data.contacts.filter(contact => {
+            if (filteredTags.length === 0) return true;
+            return contact.tags && contact.tags.length > 0 && filteredTags.every(tag => contact.tags.some(ctag => ctag.id === tag.id));
+          });
+
+          dispatch({ type: "LOAD_CONTACTS", payload: filteredContacts });
           setHasMore(data.hasMore);
           setLoading(false);
         } catch (err) {
@@ -150,7 +159,7 @@ const Contacts = () => {
       fetchContacts();
     }, 500);
     return () => clearTimeout(delayDebounceFn);
-  }, [searchParam, pageNumber]);
+  }, [searchParam, pageNumber, filteredTags]);
 
   useEffect(() => {
     const socket = openSocket();
@@ -170,9 +179,13 @@ const Contacts = () => {
     };
   }, []);
 
-  const handleSearch = (event) => {
-    setSearchParam(event.target.value.toLowerCase());
+  const handleTagFilter = (tags) => {
+    setFilteredTags(tags);
   };
+
+  // const handleSearch = (event) => {
+  //   setSearchParam(event.target.value.toLowerCase());
+  // };
 
   const handleOpenContactModal = () => {
     setSelectedContactId(null);
@@ -243,7 +256,16 @@ const Contacts = () => {
     }
   };
 
-  console.log("USER", user.profile)
+  const formatPhoneNumber = (number) => {
+    if (number.startsWith('55') && number.length === 13) {
+      const ddd = number.slice(2, 4);
+      const firstPart = number.slice(4, 9);
+      const secondPart = number.slice(9);
+      return `(${ddd}) ${firstPart}-${secondPart}`;
+    }
+
+    return number;
+  };
 
   return (
     <MainContainer className={classes.mainContainer}>
@@ -283,19 +305,6 @@ const Contacts = () => {
       <MainHeader>
         <Title>{i18n.t("contacts.title")} ({contacts.length})</Title>
         <MainHeaderButtonsWrapper>
-          <TextField
-            placeholder={i18n.t("contacts.searchPlaceholder")}
-            type="search"
-            value={searchParam}
-            onChange={handleSearch}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <Search color="secondary" />
-                </InputAdornment>
-              ),
-            }}
-          />
           <Can
             role={user.profile}
             perform="drawer-admin-items:view"
@@ -305,6 +314,7 @@ const Contacts = () => {
                   <Button
                     variant="contained"
                     color="primary"
+                    className={classes.buttonSize}
                     onClick={(e) => setConfirmOpen(true)}
                   >
                     <ImportContacts />
@@ -317,6 +327,7 @@ const Contacts = () => {
             <Button
               variant="contained"
               color="primary"
+              className={classes.buttonSize}
               onClick={handleOpenContactModal}
             >
               <AddCircleOutline />
@@ -350,6 +361,7 @@ const Contacts = () => {
                   <Button
                     variant="contained"
                     color="primary"
+                    className={classes.buttonSize}
                     onClick={(e) => {
                       setConfirmOpen(true);
                       setDeletingAllContact(contacts);
@@ -363,6 +375,7 @@ const Contacts = () => {
           />
         </MainHeaderButtonsWrapper>
       </MainHeader>
+      <TagsFilter onFiltered={handleTagFilter} />
       <Paper
         className={classes.mainPaper}
         variant="outlined"
@@ -388,54 +401,65 @@ const Contacts = () => {
           </TableHead>
           <TableBody>
             <>
-              {contacts.map((contact) => (
-                <TableRow key={contact.id}>
-                  <TableCell style={{ paddingRight: 0 }}>
-                    {<Avatar src={contact.profilePicUrl} className={classes.avatar} />}
-                  </TableCell>
-                  <TableCell>{contact.name}</TableCell>
-                  <TableCell align="center">{user.isTricked === "enabled"? contact.number : contact.number.slice(0,-4) + "****"}</TableCell>
-                  <TableCell align="center">{contact.email}</TableCell>
-                  <TableCell align="center">
-                    <IconButton
-                      size="small"
-                      onClick={() => {
-                        setContactTicket(contact);
-                        setNewTicketModalOpen(true);
-                      }}
-                    >
-                      <WhatsApp color="secondary" />
-                    </IconButton>
-                    <IconButton
-                      size="small"
-                      onClick={() => hadleEditContact(contact.id)}
-                    >
-                      <Edit color="secondary" />
-                    </IconButton>
-                    <Can
-                      role={user.profile}
-                      perform="contacts-page:deleteContact"
-                      yes={() => (
-                        <IconButton
-                          size="small"
-                          onClick={(e) => {
-                            setConfirmOpen(true);
-                            setDeletingContact(contact);
-                          }}
-                        >
-                          <DeleteOutline color="secondary" />
-                        </IconButton>
-                      )}
-                    />
-                  </TableCell>
-                </TableRow>
-              ))}
+              {contacts
+                .filter((contact) => {
+                  if (filteredTags.length === 0) return true;
+                  return (
+                    contact.tags &&
+                    contact.tags.length > 0 &&
+                    filteredTags.every(tag => contact.tags.some(ctag => ctag.id === tag.id))
+                  );
+                })
+                .map((contact) => (
+                  <TableRow key={contact.id}>
+                    <TableCell style={{ paddingRight: 0 }}>
+                      {<Avatar src={contact.profilePicUrl} className={classes.avatar} />}
+                    </TableCell>
+                    <TableCell>{contact.name}</TableCell>
+                    <TableCell align="center">
+                      {user.isTricked === "enabled" ? formatPhoneNumber(contact.number) : formatPhoneNumber(contact.number).slice(0, -4) + "****"}
+                    </TableCell>
+                    <TableCell align="center">{contact.email}</TableCell>
+                    <TableCell align="center">
+                      <IconButton
+                        size="small"
+                        onClick={() => {
+                          setContactTicket(contact);
+                          setNewTicketModalOpen(true);
+                        }}
+                      >
+                        <WhatsApp color="secondary" />
+                      </IconButton>
+                      <IconButton
+                        size="small"
+                        onClick={() => hadleEditContact(contact.id)}
+                      >
+                        <Edit color="secondary" />
+                      </IconButton>
+                      <Can
+                        role={user.profile}
+                        perform="contacts-page:deleteContact"
+                        yes={() => (
+                          <IconButton
+                            size="small"
+                            onClick={(e) => {
+                              setConfirmOpen(true);
+                              setDeletingContact(contact);
+                            }}
+                          >
+                            <DeleteOutline color="secondary" />
+                          </IconButton>
+                        )}
+                      />
+                    </TableCell>
+                  </TableRow>
+                ))}
               {loading && <TableRowSkeleton avatar columns={3} />}
             </>
           </TableBody>
         </Table>
       </Paper>
-    </MainContainer>
+    </MainContainer >
   );
 };
 
