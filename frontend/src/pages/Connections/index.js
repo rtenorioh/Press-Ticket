@@ -1,47 +1,47 @@
-import React, { useState, useCallback, useContext } from "react";
-import { toast } from "react-toastify";
 import { format, parseISO } from "date-fns";
+import React, { useCallback, useContext, useState } from "react";
+import { toast } from "react-toastify";
 
-import { makeStyles } from "@material-ui/core/styles";
-import { green } from "@material-ui/core/colors";
 import {
 	Button,
-	TableBody,
-	TableRow,
-	TableCell,
+	CircularProgress,
 	IconButton,
-	Table,
-	TableHead,
 	Paper,
+	Table,
+	TableBody,
+	TableCell,
+	TableHead,
+	TableRow,
 	Tooltip,
 	Typography,
-	CircularProgress,
 } from "@material-ui/core";
+import { green } from "@material-ui/core/colors";
+import { makeStyles } from "@material-ui/core/styles";
 import {
-	Edit,
 	CheckCircle,
-	SignalCellularConnectedNoInternet2Bar,
-	SignalCellularConnectedNoInternet0Bar,
-	SignalCellular4Bar,
 	CropFree,
 	DeleteOutline,
+	Edit,
+	SignalCellular4Bar,
+	SignalCellularConnectedNoInternet0Bar,
+	SignalCellularConnectedNoInternet2Bar,
 	SyncOutlined,
 	WhatsApp
 } from "@material-ui/icons";
 
+import ConfirmationModal from "../../components/ConfirmationModal";
 import MainContainer from "../../components/MainContainer";
 import MainHeader from "../../components/MainHeader";
 import MainHeaderButtonsWrapper from "../../components/MainHeaderButtonsWrapper";
-import Title from "../../components/Title";
-import TableRowSkeleton from "../../components/TableRowSkeleton";
-import WhatsAppModal from "../../components/WhatsAppModal";
-import ConfirmationModal from "../../components/ConfirmationModal";
 import QrcodeModal from "../../components/QrcodeModal";
+import TableRowSkeleton from "../../components/TableRowSkeleton";
+import Title from "../../components/Title";
+import WhatsAppModal from "../../components/WhatsAppModal";
 
-import api from "../../services/api";
-import { i18n } from "../../translate/i18n";
 import { WhatsAppsContext } from "../../context/WhatsApp/WhatsAppsContext";
 import toastError from "../../errors/toastError";
+import api from "../../services/api";
+import { i18n } from "../../translate/i18n";
 
 const useStyles = makeStyles(theme => ({
 	mainPaper: {
@@ -300,6 +300,17 @@ const Connections = () => {
 		}
 	}
 
+	const formatPhoneNumber = (number) => {
+		if (number.startsWith('55') && number.length === 13) {
+			const ddd = number.slice(2, 4);
+			const firstPart = number.slice(4, 9);
+			const secondPart = number.slice(9);
+			return `(${ddd}) ${firstPart}-${secondPart}`;
+		}
+
+		return number;
+	};
+
 	return (
 		<MainContainer>
 			<ConfirmationModal
@@ -347,7 +358,7 @@ const Connections = () => {
 				<Table size="small">
 					<TableHead>
 						<TableRow>
-			 				<TableCell align="center">
+							<TableCell align="center">
 								{i18n.t("connections.table.id")}
 							</TableCell>
 							<TableCell align="center">
@@ -393,7 +404,7 @@ const Connections = () => {
 											<TableCell align="center">
 												{whatsApp.number ? (
 													<>
-														+{whatsApp.number}
+														{formatPhoneNumber(whatsApp.number)}
 													</>
 												) : "-"}
 
