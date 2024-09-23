@@ -1,14 +1,14 @@
 import React, { useContext, useEffect, useState } from "react";
 
-import { 
+import {
   Badge,
   Button,
   FormControlLabel,
   makeStyles,
   Paper,
+  Switch,
   Tab,
-  Tabs,
-  Switch
+  Tabs
 } from "@material-ui/core";
 
 import {
@@ -18,15 +18,14 @@ import {
   Search
 } from "@material-ui/icons";
 
-import NewTicketModal from "../NewTicketModal";
-import TicketsList from "../TicketsList";
-import TabPanel from "../TabPanel";
-import { TagsFilter } from "../TagsFilter";
 import { Can } from "../Can";
+import NewTicketModal from "../NewTicketModal";
+import TabPanel from "../TabPanel";
+import TicketsList from "../TicketsList";
 import TicketsQueueSelect from "../TicketsQueueSelect";
 
-import { i18n } from "../../translate/i18n";
 import { AuthContext } from "../../context/Auth/AuthContext";
+import { i18n } from "../../translate/i18n";
 
 const useStyles = makeStyles((theme) => ({
   ticketsWrapper: {
@@ -115,7 +114,6 @@ const TicketsManager = () => {
 
   const [openCount, setOpenCount] = useState(0);
   const [pendingCount, setPendingCount] = useState(0);
-  const [selectedTags, setSelectedTags] = useState([]);
 
   const userQueueIds = user.queues.map((q) => q.id);
   const [selectedQueueIds, setSelectedQueueIds] = useState(userQueueIds || []);
@@ -139,11 +137,6 @@ const TicketsManager = () => {
     }
 
   };
-
-  const handleSelectedTags = (selecteds) => {
-    const tags = selecteds.map(t => t.id);
-    setSelectedTags(tags);
-  }
 
   const handleChangeTab = (e, newValue) => {
     setTab(newValue);
@@ -257,7 +250,6 @@ const TicketsManager = () => {
         />
       </Paper>
       <TabPanel value={tab} name="open" className={classes.ticketsWrapper}>
-      <TagsFilter onFiltered={handleSelectedTags} />
         <Paper className={classes.ticketsWrapper}>
           <TicketsList
             status="open"
@@ -274,20 +266,14 @@ const TicketsManager = () => {
           />
         </Paper>
       </TabPanel>
-
       <TabPanel value={tab} name="pending" className={classes.ticketsWrapper}>
-      <TagsFilter onFiltered={handleSelectedTags} />
         <TicketsList
           status="pending"
           showAll={true}
           selectedQueueIds={selectedQueueIds}
         />
       </TabPanel>
-
-
-
       <TabPanel value={tab} name="closed" className={classes.ticketsWrapper}>
-      <TagsFilter onFiltered={handleSelectedTags} />
         <TicketsList
           status="closed"
           showAll={true}
@@ -295,10 +281,8 @@ const TicketsManager = () => {
         />
       </TabPanel>
       <TabPanel value={tab} name="search" className={classes.ticketsWrapper}>
-      <TagsFilter onFiltered={handleSelectedTags} />
         <TicketsList
           searchParam={searchParam}
-          tags={selectedTags}
           showAll={true}
           selectedQueueIds={selectedQueueIds}
         />

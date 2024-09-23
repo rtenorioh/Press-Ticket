@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useReducer, useContext } from "react";
+import React, { useContext, useEffect, useReducer, useState } from "react";
 import openSocket from "../../services/socket-io";
 
 import {
@@ -7,15 +7,16 @@ import {
 	Paper
 } from "@material-ui/core";
 
+import TagsFilter from "../TagsFilter";
 import TicketListItem from "../TicketListItem";
 import TicketsListSkeleton from "../TicketsListSkeleton";
 
+import { AuthContext } from "../../context/Auth/AuthContext";
 import useTickets from "../../hooks/useTickets";
 import { i18n } from "../../translate/i18n";
-import { AuthContext } from "../../context/Auth/AuthContext";
 
-import api from "../../services/api";
 import toastError from "../../errors/toastError";
+import api from "../../services/api";
 
 const useStyles = makeStyles((theme) => ({
 	ticketsListWrapper: {
@@ -173,6 +174,11 @@ const TicketsList = (props) => {
 	const { user } = useContext(AuthContext);
 	const { profile, queues } = user;
 	const [settings, setSettings] = useState([]);
+	const [filteredTags, setFilteredTags] = useState([]);
+
+	const handleTagFilter = (tags) => {
+		setFilteredTags(tags);
+	};
 
 	useEffect(() => {
 		dispatch({ type: "RESET" });
@@ -211,7 +217,7 @@ const TicketsList = (props) => {
 		const allticket = settings && settings.length > 0 && getSettingValue("allTicket") === "enabled";
 
 		if (allticket === true) {
-			
+
 			if (profile === "") {
 				dispatch({ type: "LOAD_TICKETS", payload: filteredTickets });
 
@@ -219,7 +225,7 @@ const TicketsList = (props) => {
 				dispatch({ type: "LOAD_TICKETS", payload: tickets });
 			}
 		} else {
-			
+
 			if (profile === "user") {
 				dispatch({ type: "LOAD_TICKETS", payload: filteredTickets });
 
@@ -337,8 +343,9 @@ const TicketsList = (props) => {
 						</div>
 					) : (
 						<>
+							<TagsFilter onFiltered={handleTagFilter} />
 							{ticketsList.map((ticket) => (
-								<TicketListItem ticket={ticket} key={ticket.id} />
+								<TicketListItem key={ticket.id} ticket={ticket} filteredTags={filteredTags} />
 							))}
 						</>
 					)}

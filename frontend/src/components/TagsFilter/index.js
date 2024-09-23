@@ -4,13 +4,13 @@ import React, { useEffect, useState } from "react";
 import toastError from "../../errors/toastError";
 import api from "../../services/api";
 
-export function TagsFilter ({ onFiltered }) {
+const TagsFilter = ({ onFiltered }) => {
 
     const [tags, setTags] = useState([]);
     const [selecteds, setSelecteds] = useState([]);
 
     useEffect(() => {
-        async function fetchData () {
+        async function fetchData() {
             await loadTags();
         }
         fetchData();
@@ -31,7 +31,7 @@ export function TagsFilter ({ onFiltered }) {
     }
 
     return (
-        <Paper style={{padding: 10}}>
+        <Paper style={{ padding: 10 }}>
             <Autocomplete
                 multiple
                 size="small"
@@ -43,7 +43,7 @@ export function TagsFilter ({ onFiltered }) {
                     value.map((option, index) => (
                         <Chip
                             variant="outlined"
-                            style={{backgroundColor: option.color || '#eee', textShadow: '1px 1px 1px #000', color: 'white'}}
+                            style={{ backgroundColor: option.color || '#eee', textShadow: '1px 1px 1px #000', color: 'white' }}
                             label={option.name}
                             {...getTagProps({ index })}
                             size="small"
@@ -57,3 +57,5 @@ export function TagsFilter ({ onFiltered }) {
         </Paper>
     )
 }
+
+export default TagsFilter;

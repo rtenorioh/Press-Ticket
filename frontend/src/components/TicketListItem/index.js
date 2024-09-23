@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useContext } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 
 import {
 	useHistory,
@@ -6,9 +6,9 @@ import {
 } from "react-router-dom";
 
 import {
-	parseISO,
 	format,
-	isSameDay
+	isSameDay,
+	parseISO
 } from "date-fns";
 
 import {
@@ -20,8 +20,8 @@ import {
 	ListItemAvatar,
 	ListItemText,
 	makeStyles,
-	Typography,
-	Tooltip
+	Tooltip,
+	Typography
 } from "@material-ui/core";
 
 import {
@@ -34,16 +34,16 @@ import {
 import { green } from "@material-ui/core/colors";
 
 import AcceptTicketWithouSelectQueue from "../AcceptTicketWithoutQueueModal";
-import MarkdownWrapper from "../MarkdownWrapper";
 import ContactTag from "../ContactTag";
+import MarkdownWrapper from "../MarkdownWrapper";
 
+import clsx from "clsx";
 import { AuthContext } from "../../context/Auth/AuthContext";
 import toastError from "../../errors/toastError";
-import clsx from "clsx";
-import { i18n } from "../../translate/i18n";
 import api from "../../services/api";
+import { i18n } from "../../translate/i18n";
 
-import { system } from "../../config.json"
+import { system } from "../../config.json";
 
 
 const useStyles = makeStyles(theme => ({
@@ -150,7 +150,7 @@ const useStyles = makeStyles(theme => ({
 	}
 }));
 
-const TicketListItem = ({ ticket, userId }) => {
+const TicketListItem = ({ ticket, userId, filteredTags }) => {
 	const classes = useStyles();
 	const history = useHistory();
 	const [loading, setLoading] = useState(false);
@@ -185,6 +185,17 @@ const TicketListItem = ({ ticket, userId }) => {
 		};
 	}, []);
 
+	const filterTicketByTags = () => {
+		if (!filteredTags || filteredTags.length === 0) return true;
+		if (!tag || tag.length === 0) return false;
+
+		return filteredTags.every(filterTag => tag.some(t => t.id === filterTag.id));
+	};
+
+	if (!filterTicketByTags()) {
+		return null;
+	}
+
 	const handleAcepptTicket = async id => {
 		setLoading(true);
 		try {
@@ -201,18 +212,6 @@ const TicketListItem = ({ ticket, userId }) => {
 		}
 		history.push(`/tickets/${id}`);
 	};
-
-	// const userName = selectedUserName => {
-	// 	let userName = null;
-	// 	user.queues.forEach(userId => {
-	// 		if (userId === selectedUserName.userId) {
-	// 			userName = userId.name;
-	// 		}
-	// 	});
-	// 	return {
-	// 		userName
-	// 	};
-	// }
 
 	const queueName = selectedTicket => {
 		let name = null;
@@ -318,7 +317,7 @@ const TicketListItem = ({ ticket, userId }) => {
 				}}
 				selected={ticketId && +ticketId === ticket.id}
 				className={clsx(classes.ticket, {
-					[classes.pendingTicket]: (ticket.status === "pending"),
+					[classes.pendingTicket]: ticket.status === "pending",
 				})}
 			>
 				<Tooltip
