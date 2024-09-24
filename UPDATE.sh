@@ -1,10 +1,17 @@
 #!/bin/bash
 VERSION="v1.7.4"
-LOG_FILE="update_$(date +"%Y-%m-%d_%H-%M-%S").log"
+
+SCRIPT_DIR=$(dirname "$0")
+
+LOG_DIR="$SCRIPT_DIR/log"
+mkdir -p "$LOG_DIR"
+
+LOG_FILE="$LOG_DIR/update_$(date +"%Y-%m-%d_%H-%M-%S").log"
 
 COLOR="\e[38;5;92m"
 RESET="\e[0m"
 
+echo " "
 echo -e "${COLOR}██████╗ ██████╗ ███████╗███████╗███████╗    ████████╗██╗ ██████╗██╗  ██╗███████╗████████╗${RESET}"
 echo -e "${COLOR}██╔══██╗██╔══██╗██╔════╝██╔════╝██╔════╝    ╚══██╔══╝██║██╔════╝██║ ██╔╝██╔════╝╚══██╔══╝${RESET}"
 echo -e "${COLOR}██████╔╝██████╔╝█████╗  ███████╗███████╗       ██║   ██║██║     █████╔╝ █████╗     ██║   ${RESET}"
@@ -38,10 +45,11 @@ fi
 
 REMOTE_VERSION=$(extract_version "$TEMP_FILE")
 
-if [ -z "$REMOTE_VERSION" ] || [ "$REMOTE_VERSION" ] >"$VERSION"; then
+if [ -z "$REMOTE_VERSION" ] || [ "$REMOTE_VERSION" != "$VERSION" ]; then
   echo "Versão remota é mais recente ou não foi encontrada. Atualizando..." | tee -a "$LOG_FILE"
+  chmod +x "$TEMP_FILE"
   cp "$TEMP_FILE" "$0"
-  "$TEMP_FILE"
+  bash "$TEMP_FILE"
   echo "$(date +"%Y-%m-%d %H:%M:%S") - Script atualizado para a versão $REMOTE_VERSION" | tee -a "$LOG_FILE"
 else
   echo "O script local está atualizado." | tee -a "$LOG_FILE"
@@ -60,24 +68,15 @@ sleep 2
 
 CURRENT_NODE_VERSION=$(node -v | cut -d'v' -f2)
 
+# Função para comparar versões utilizando dpkg
 compare_versions() {
-  local version1="$1"
-  local version2="$2"
-  IFS=. read -ra v1 <<<"$version1"
-  IFS=. read -ra v2 <<<"$version2"
-  for ((i = 0; i < ${#v1[@]}; i++)); do
-    if [[ ${v1[$i]} -gt ${v2[$i]} ]]; then
-      return 1
-    elif [[ ${v1[$i]} -lt ${v2[$i]} ]]; then
-      return -1
-    fi
-  done
-  return 0
+  dpkg --compare-versions "$1" "lt" "$2"
 }
 
+# Comparação de versões
 if compare_versions "$CURRENT_NODE_VERSION" "18"; then
   echo "Versão do Node.js atual é inferior a 18. Atualizando para a 20.x..." | tee -a "$LOG_FILE"
-  sudo apt-get remove nodejs | tee -a "$LOG_FILE"
+  sudo apt-get remove -y nodejs | tee -a "$LOG_FILE"
   curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash - | tee -a "$LOG_FILE"
   sudo apt-get install -y nodejs | tee -a "$LOG_FILE"
   sudo npm install -g npm | tee -a "$LOG_FILE"
