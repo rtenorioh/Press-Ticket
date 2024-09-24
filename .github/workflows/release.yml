@@ -12,15 +12,20 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Get previous tag
+        id: prev_tag
+        run: |
+          echo "previous_tag=$(git describe --tags --abbrev=0 --always $(git rev-list --tags --skip=1 --max-count=1))" >> $GITHUB_OUTPUT
+
       - name: List closed issues
         id: list_closed_issues
         run: |
-          echo "issues=$(gh issue list --closed --since=\"tags/$(git describe --tags --abbrev=0)\" --format='- {{.title}} (#{{.number}})')" >> $GITHUB_OUTPUT
+          echo "issues=$(gh issue list --closed --since=\"$(git describe --tags --abbrev=0 --always $(git rev-list --tags --skip=1 --max-count=1))\" --format='- {{.title}} (#{{.number}})')" >> $GITHUB_OUTPUT
 
       - name: Get commit log
         id: commit_log
         run: |
-          echo "log=$(git log --pretty=format:'- %s (%h)' --abbrev-commit --since=\"$(git describe --tags --abbrev=0)\")" >> $GITHUB_OUTPUT
+          echo "log=$(git log --pretty=format:'- %s (%h)' --abbrev-commit $(git describe --tags --abbrev=0 --always $(git rev-list --tags --skip=1 --max-count=1))..HEAD)" >> $GITHUB_OUTPUT
 
       - name: Create Release
         uses: actions/create-release@v1
@@ -28,7 +33,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.TOKEN_GITHUB }}
         with:
           tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.run_number }}
+          release_name: ${{ github.ref }}
           body: |
             O que mudou:
 
@@ -36,3 +41,6 @@ jobs:
 
             **Issues Fechadas:**
             ${{ steps.list_closed_issues.outputs.issues }}
+
+            **Comparação de Alterações:**
+            [Comparar alterações](https://github.com/${{ github.repository }}/compare/${{ steps.prev_tag.outputs.previous_tag }}...${{ github.ref }})
