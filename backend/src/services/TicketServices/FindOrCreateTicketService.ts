@@ -2,13 +2,15 @@ import { subSeconds } from "date-fns";
 import { Op } from "sequelize";
 import Contact from "../../models/Contact";
 import Ticket from "../../models/Ticket";
-import ShowTicketService from "./ShowTicketService";
 import ListSettingsServiceOne from "../SettingServices/ListSettingsServiceOne";
+import ShowTicketService from "./ShowTicketService";
 
 const FindOrCreateTicketService = async (
   contact: Contact,
   whatsappId: number,
   unreadMessages: number,
+  userId?: number,
+  queueId?: number,
   groupContact?: Contact
 ): Promise<Ticket> => {
   let ticket = await Ticket.findOne({
@@ -17,7 +19,7 @@ const FindOrCreateTicketService = async (
         [Op.or]: ["open", "pending"]
       },
       contactId: groupContact ? groupContact.id : contact.id,
-      whatsappId: whatsappId
+      whatsappId
     }
   });
 
@@ -29,7 +31,7 @@ const FindOrCreateTicketService = async (
     ticket = await Ticket.findOne({
       where: {
         contactId: groupContact.id,
-        whatsappId: whatsappId
+        whatsappId
       },
       order: [["updatedAt", "DESC"]]
     });
@@ -44,17 +46,21 @@ const FindOrCreateTicketService = async (
   }
 
   if (!ticket && !groupContact) {
-    const listSettingsService = await ListSettingsServiceOne({key: "timeCreateNewTicket"});
-    var timeCreateNewTicket = listSettingsService?.value;
-
+    const listSettingsService = await ListSettingsServiceOne({
+      key: "timeCreateNewTicket"
+    });
+    const timeCreateNewTicket = listSettingsService?.value;
 
     ticket = await Ticket.findOne({
       where: {
         updatedAt: {
-          [Op.between]: [+subSeconds(new Date(), Number(timeCreateNewTicket)), +new Date()] 
+          [Op.between]: [
+            +subSeconds(new Date(), Number(timeCreateNewTicket)),
+            +new Date()
+          ]
         },
         contactId: contact.id,
-        whatsappId: whatsappId
+        whatsappId
       },
       order: [["updatedAt", "DESC"]]
     });
@@ -73,6 +79,8 @@ const FindOrCreateTicketService = async (
       contactId: groupContact ? groupContact.id : contact.id,
       status: "pending",
       isGroup: !!groupContact,
+      userId,
+      queueId,
       unreadMessages,
       whatsappId
     });

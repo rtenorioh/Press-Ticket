@@ -6,19 +6,19 @@ import SetTicketMessagesAsRead from "../helpers/SetTicketMessagesAsRead";
 import Message from "../models/Message";
 import Whatsapp from "../models/Whatsapp";
 import CreateOrUpdateContactService from "../services/ContactServices/CreateOrUpdateContactService";
+import ListSettingsServiceOne from "../services/SettingServices/ListSettingsServiceOne";
 import FindOrCreateTicketService from "../services/TicketServices/FindOrCreateTicketService";
 import ShowTicketService from "../services/TicketServices/ShowTicketService";
+import UpdateTicketService from "../services/TicketServices/UpdateTicketService";
 import CheckIsValidContact from "../services/WbotServices/CheckIsValidContact";
 import CheckContactNumber from "../services/WbotServices/CheckNumber";
 import GetProfilePicUrl from "../services/WbotServices/GetProfilePicUrl";
 import SendWhatsAppMedia from "../services/WbotServices/SendWhatsAppMedia";
 import SendWhatsAppMessage from "../services/WbotServices/SendWhatsAppMessage";
-import UpdateTicketService from "../services/TicketServices/UpdateTicketService";
-import ListSettingsServiceOne from "../services/SettingServices/ListSettingsServiceOne";
 
 type WhatsappData = {
   whatsappId: number;
-}
+};
 
 type MessageData = {
   body: string;
@@ -33,7 +33,9 @@ interface ContactData {
 
 const createContact = async (
   whatsappId: number | undefined,
-  newContact: string
+  newContact: string,
+  userId?: number,
+  queueId?: number
 ) => {
   await CheckIsValidContact(newContact);
 
@@ -67,7 +69,9 @@ const createContact = async (
   const createTicket = await FindOrCreateTicketService(
     contact,
     whatsapp.id,
-    1
+    1,
+    userId,
+    queueId
   );
 
   const ticket = await ShowTicketService(createTicket.id);
@@ -78,43 +82,65 @@ const createContact = async (
 };
 
 export const index = async (req: Request, res: Response): Promise<Response> => {
-  const newContact: ContactData = req.body;
-  const { whatsappId }: WhatsappData = req.body;
-  const { body, quotedMsg }: MessageData = req.body;
+  const {
+    whatsappId,
+    body,
+    quotedMsg,
+    userId,
+    queueId
+  }: MessageData & WhatsappData & { userId: number; queueId: number } =
+    req.body;
   const medias = req.files as Express.Multer.File[];
+  const newContact: ContactData = req.body;
 
-  newContact.number = newContact.number.replace("-", "").replace(" ", "");
+  const formattedNumber = newContact.number.replace("-", "").replace(" ", "");
 
   const schema = Yup.object().shape({
     number: Yup.string()
       .required()
-      .matches(/^\d+$/, "Invalid number format. Only numbers is allowed.")
+      .matches(/^\d+$/, "Invalid number format. Only numbers are allowed."),
+    userId: Yup.number().required("User ID is required")
   });
 
   try {
-    await schema.validate(newContact);
+    await schema.validate({ number: formattedNumber, userId });
   } catch (err: any) {
     throw new AppError(err.message);
   }
 
-  const contactAndTicket = await createContact(whatsappId, newContact.number);
+  const contactAndTicket = await createContact(
+    whatsappId,
+    formattedNumber,
+    userId,
+    queueId
+  );
 
   let resp: any;
 
   if (medias) {
     await Promise.all(
       medias.map(async (media: Express.Multer.File) => {
-        resp = await SendWhatsAppMedia({ body, media, ticket: contactAndTicket });
+        resp = await SendWhatsAppMedia({
+          body,
+          media,
+          ticket: contactAndTicket
+        });
       })
     );
   } else {
-    resp = await SendWhatsAppMessage({ body, ticket: contactAndTicket, quotedMsg });
+    resp = await SendWhatsAppMessage({
+      body,
+      ticket: contactAndTicket,
+      quotedMsg
+    });
   }
 
-  const listSettingsService = await ListSettingsServiceOne({ key: "closeTicketApi" });
-  var closeTicketApi = listSettingsService?.value;
+  const listSettingsService = await ListSettingsServiceOne({
+    key: "closeTicketApi"
+  });
+  const closeTicketApi = listSettingsService?.value;
 
-  if (closeTicketApi === 'enabled') {
+  if (closeTicketApi === "enabled") {
     setTimeout(async () => {
       await UpdateTicketService({
         ticketId: contactAndTicket.id,
@@ -122,5 +148,6 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
       });
     }, 1000);
   }
+
   return res.send({ error: resp });
 };

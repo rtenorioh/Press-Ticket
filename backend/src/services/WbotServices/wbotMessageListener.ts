@@ -1,35 +1,35 @@
 /* eslint-disable no-plusplus */
 /* eslint-disable no-nested-ternary */
+import * as Sentry from "@sentry/node";
+import { writeFile } from "fs";
 import { join } from "path";
 import { promisify } from "util";
-import { writeFile } from "fs";
-import * as Sentry from "@sentry/node";
 
 import {
-  Contact as WbotContact,
-  Message as WbotMessage,
+  Client,
   MessageAck,
-  Client
+  Contact as WbotContact,
+  Message as WbotMessage
 } from "whatsapp-web.js";
 
 import ffmpeg from "fluent-ffmpeg";
 import Contact from "../../models/Contact";
-import Ticket from "../../models/Ticket";
+import Integration from "../../models/Integration";
 import Message from "../../models/Message";
 import Settings from "../../models/Setting";
-import Integration from "../../models/Integration";
+import Ticket from "../../models/Ticket";
 
+import { debounce } from "../../helpers/Debounce";
+import formatBody from "../../helpers/Mustache";
 import { getIO } from "../../libs/socket";
-import CreateMessageService from "../MessageServices/CreateMessageService";
 import { logger } from "../../utils/logger";
+import CreateContactService from "../ContactServices/CreateContactService";
 import CreateOrUpdateContactService from "../ContactServices/CreateOrUpdateContactService";
+import CreateMessageService from "../MessageServices/CreateMessageService";
 import ListSettingsServiceOne from "../SettingServices/ListSettingsServiceOne";
 import FindOrCreateTicketService from "../TicketServices/FindOrCreateTicketService";
-import ShowWhatsAppService from "../WhatsappService/ShowWhatsAppService";
-import { debounce } from "../../helpers/Debounce";
 import UpdateTicketService from "../TicketServices/UpdateTicketService";
-import CreateContactService from "../ContactServices/CreateContactService";
-import formatBody from "../../helpers/Mustache";
+import ShowWhatsAppService from "../WhatsappService/ShowWhatsAppService";
 
 ffmpeg.setFfmpegPath("/usr/bin/ffmpeg");
 
@@ -93,7 +93,6 @@ const verifyRevoked = async (msgBody?: string): Promise<void> => {
     }
 
     if (message) {
-      // console.log(message);
       await Message.update(
         { isDeleted: true },
         {
@@ -140,7 +139,6 @@ const verifyMediaMessage = async (
     media.filename = `${new Date().getTime()}.${ext}`;
   } else {
     const originalFilename = media.filename ? `-${media.filename}` : "";
-    // Always write a random filename
     media.filename = `${new Date().getTime()}${originalFilename}`;
   }
 
@@ -151,8 +149,6 @@ const verifyMediaMessage = async (
       "base64"
     )
       .then(() => {
-        console.log("Arquivo salvo com sucesso!");
-
         const inputFile = `./public/${media.filename}`;
         let outputFile: string;
 
@@ -161,13 +157,9 @@ const verifyMediaMessage = async (
         } else if (inputFile.endsWith(".ogg")) {
           outputFile = inputFile.replace(".ogg", ".mp3");
         } else {
-          // Trate outros formatos de arquivo conforme necessário
-          console.error("Formato de arquivo não suportado:", inputFile);
+          console.warn("Formato de arquivo não é .mpeg ou .ogg:", inputFile);
           return;
         }
-
-        console.log("Input File:", inputFile);
-        console.log("Output File:", outputFile);
 
         return new Promise<void>((resolve, reject) => {
           ffmpeg(inputFile)
@@ -215,11 +207,10 @@ const verifyMediaMessage = async (
 const prepareLocation = (msg: WbotMessage): WbotMessage => {
   const gmapsUrl = `https://maps.google.com/maps?q=${msg.location.latitude}%2C${msg.location.longitude}&z=17`;
   msg.body = `data:image/png;base64,${msg.body}|${gmapsUrl}`;
-  msg.body += `|${
-    msg.location.options
+  msg.body += `|${msg.location.options
       ? msg.location.options
       : `${msg.location.latitude}, ${msg.location.longitude}`
-  }`;
+    }`;
   return msg;
 };
 
@@ -336,9 +327,8 @@ const verifyQueue = async (
     queues.forEach((queue, index) => {
       if (queue.startWork && queue.endWork) {
         if (isDisplay) {
-          options += `*${index + 1}* - ${queue.name} das ${
-            queue.startWork
-          } as ${queue.endWork}\n`;
+          options += `*${index + 1}* - ${queue.name} das ${queue.startWork
+            } as ${queue.endWork}\n`;
         } else {
           options += `*${index + 1}* - ${queue.name}\n`;
         }
@@ -427,7 +417,7 @@ const handleMessage = async (
       msg.type === "e2e_notification" ||
       msg.type === "notification_template" ||
       msg.from === "status@broadcast" ||
-      msg.author != null ||
+      // msg.author !== null ||
       chat.isGroup
     ) {
       return;
@@ -438,6 +428,8 @@ const handleMessage = async (
   try {
     let msgContact: WbotContact;
     let groupContact: Contact | undefined;
+    const userId = 0;
+    const queueId = 0;
 
     if (msg.fromMe) {
       // messages sent automatically by wbot have a special character in front of it
@@ -487,6 +479,8 @@ const handleMessage = async (
       contact,
       wbot.id!,
       unreadMessages,
+      queueId,
+      userId,
       groupContact
     );
 
@@ -501,6 +495,8 @@ const handleMessage = async (
       contact,
       wbot.id!,
       unreadMessages,
+      userId,
+      queueId,
       groupContact
     );
 
@@ -680,4 +676,4 @@ const wbotMessageListener = async (wbot: Session): Promise<void> => {
   });
 };
 
-export { wbotMessageListener, handleMessage, handleMsgAck };
+export { handleMessage, handleMsgAck, wbotMessageListener };
