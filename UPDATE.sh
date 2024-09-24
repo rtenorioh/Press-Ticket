@@ -49,8 +49,12 @@ if [ -z "$REMOTE_VERSION" ] || [ "$REMOTE_VERSION" != "$VERSION" ]; then
   echo "Versão remota é mais recente ou não foi encontrada. Atualizando..." | tee -a "$LOG_FILE"
   chmod +x "$TEMP_FILE"
   cp "$TEMP_FILE" "$0"
-  bash "$TEMP_FILE"
+
   echo "$(date +"%Y-%m-%d %H:%M:%S") - Script atualizado para a versão $REMOTE_VERSION" | tee -a "$LOG_FILE"
+  rm -f "$TEMP_FILE"
+
+  echo "O script foi atualizado. Execute novamente para continuar." | tee -a "$LOG_FILE"
+  exit 0
 else
   echo "O script local está atualizado." | tee -a "$LOG_FILE"
   sudo rm -rf "$TEMP_FILE"
