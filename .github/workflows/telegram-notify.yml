@@ -13,7 +13,7 @@ jobs:
         uses: appleboy/telegram-action@master
         with:
           token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          chat_id: ${{ secrets.TELEGRAM_CHAT_ID }}
+          to: ${{ secrets.TELEGRAM_CHAT_ID }}
           message: |
             Nova atualização publicada!
             Data: {{ datetime.datetime.fromisoformat(github.event.release.created_at).strftime('%d-%m-%Y') }}
