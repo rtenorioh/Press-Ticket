@@ -1,0 +1,20 @@
+# PARA USAR PRECISA DA EXTENSÃO DO VS CODE "REST Client"
+
+#Variaveis
+@baseUrl = http://localhost:4000
+@token = a3031d64-7423-4bfc-b43e-6b6f2ab24160
+
+# (Enviar Mensagem) Teste da Rota POST /api/messages/send
+POST {{baseUrl}}/api/messages/send
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "number": "5522999999999",
+  "body": "Mensagem de Teste da API com user e queue atualizado",
+  "userId": "1",
+  "queueId": "2",
+  "whatsappId": "1"
+}
+
+###
