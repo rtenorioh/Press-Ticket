@@ -23,8 +23,8 @@ jobs:
           message: |
             Nova atualização publicada!
             Data: ${{ env.release_date }}
-            Versão: ${{ github.ref }}
+            Versão: ${{ github.event.release.tag_name }}
             Descrição: ${{ github.event.release.body }}
-            Link: https://github.com/${{ github.repository }}/releases/tag/${{ github.ref }}
-            Link do Source: https://api.github.com/repos/${{ github.repository }}/zipball/${{ github.ref }}
+            Link: https://github.com/${{ github.repository }}/releases/tag/${{ github.event.release.tag_name }}
+            Link do Source: https://api.github.com/repos/${{ github.repository }}/zipball/${{ github.event.release.tag_name }}
             #CHANGELOG_V1.X
