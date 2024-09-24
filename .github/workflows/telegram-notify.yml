@@ -15,6 +15,15 @@ jobs:
           RELEASE_DATE=$(date -d "${{ github.event.release.created_at }}" +"%d-%m-%Y")
           echo "release_date=$RELEASE_DATE" >> $GITHUB_ENV
 
+      - name: Check release description
+        id: check_description
+        run: |
+          if [ -z "${{ github.event.release.body }}" ]; then
+            echo "description=No description provided" >> $GITHUB_ENV
+          else
+            echo "description=${{ github.event.release.body }}" >> $GITHUB_ENV
+          fi
+
       - name: Send Telegram notification
         uses: appleboy/telegram-action@master
         with:
@@ -24,7 +33,7 @@ jobs:
             Nova atualização publicada!
             Data: ${{ env.release_date }}
             Versão: ${{ github.event.release.tag_name }}
-            Descrição: ${{ github.event.release.body }}
+            Descrição: ${{ env.description }}
             Link: https://github.com/${{ github.repository }}/releases/tag/${{ github.event.release.tag_name }}
             Link do Source: https://api.github.com/repos/${{ github.repository }}/zipball/${{ github.event.release.tag_name }}
             #CHANGELOG_V1.X
