@@ -9,6 +9,12 @@ jobs:
   notify:
     runs-on: ubuntu-latest
     steps:
+      - name: Format release date
+        id: format_date
+        run: |
+          RELEASE_DATE=$(date -d "${{ github.event.release.created_at }}" +"%d-%m-%Y")
+          echo "release_date=$RELEASE_DATE" >> $GITHUB_ENV
+
       - name: Send Telegram notification
         uses: appleboy/telegram-action@master
         with:
@@ -16,7 +22,7 @@ jobs:
           to: ${{ secrets.TELEGRAM_CHAT_ID }}
           message: |
             Nova atualização publicada!
-            Data: {{ datetime.datetime.fromisoformat(github.event.release.created_at).strftime('%d-%m-%Y') }}
+            Data: ${{ env.release_date }}
             Versão: ${{ github.ref }}
             Descrição: ${{ github.event.release.body }}
             Link: https://github.com/${{ github.repository }}/releases/tag/${{ github.ref }}
