@@ -1,5 +1,6 @@
+/* eslint-disable no-useless-escape */
 const codeSnippets = {
-    HTTP: (number, body, userId, queueId, whatsappId, token) => `POST ${process.env.REACT_APP_BACKEND_URL}/api/messages/send HTTP/1.1
+  HTTP: (number, body, userId, queueId, whatsappId, token) => `POST ${process.env.REACT_APP_BACKEND_URL}/api/messages/send HTTP/1.1
 User-Agent: vscode-restclient
 Authorization: Bearer ${token}
 Content-Type: application/json
@@ -13,7 +14,7 @@ Content-Length: ${85 + body.length}
             "queueId": "${queueId}",
             "whatsappId": "${whatsappId}"
         }`,
-    JavaScript_JQuery: (number, body, userId, queueId, whatsappId, token) => `const settings = {
+  JavaScript_JQuery: (number, body, userId, queueId, whatsappId, token) => `const settings = {
   "async": true,
   "crossDomain": true,
   "url": "${process.env.REACT_APP_BACKEND_URL}/api/messages/send}",
@@ -31,7 +32,7 @@ $.ajax(settings).done(function (response) {
   console.log(response);
 });
         `,
-    JavaScript_fetch: (number, body, userId, queueId, whatsappId, token) => `
+  JavaScript_fetch: (number, body, userId, queueId, whatsappId, token) => `
         fetch("${process.env.REACT_APP_BACKEND_URL}/api/messages/send", {
             "method": "POST",
             "headers": {
@@ -54,7 +55,7 @@ $.ajax(settings).done(function (response) {
   console.error(err);
 });
         `,
-    NODEjs_Request: (number, body, userId, queueId, whatsappId, token) => `
+  NODEjs_Request: (number, body, userId, queueId, whatsappId, token) => `
         const request = require('request');
         const options = {
             method: 'POST',
@@ -79,7 +80,7 @@ $.ajax(settings).done(function (response) {
 
             console.log('Response:', body);
         });`,
-    PHP_cURL: (number, body, userId, queueId, whatsappId, token) => `
+  PHP_cURL: (number, body, userId, queueId, whatsappId, token) => `
         <?php
 
 $curl = curl_init();
