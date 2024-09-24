@@ -1,5 +1,23 @@
 # Changelog
 
+### 23/09/2024
+
+- [Ajuste no atualizador](https://github.com/rtenorioh/Press-Ticket/commit/0a96ad8bdc537f3670afb5ecd31a9242bcc44b21);
+- [Cores aleatórias nas Tags](https://github.com/rtenorioh/Press-Ticket/commit/6306cc2e805ba097c273fd2192d48ab2b5df9cc5);
+- [Ajuste no Doc Install_VPS](https://github.com/rtenorioh/Press-Ticket/commit/f32e2a18c6054e54742dfadd791dcb4b551ed130);
+- [Ajuste no workflow do github](https://github.com/rtenorioh/Press-Ticket/commit/c593b1600e517d07b17feb84f71e5e2ce2e5578b);
+- [Alteração e verificação de versão](https://github.com/rtenorioh/Press-Ticket/commit/94ec0759b89064a486775116d8c20745608ac831);
+- [Correção no filtro de Tags](https://github.com/rtenorioh/Press-Ticket/commit/5cb87ca04b3a541c4da7cf0cc199cbc024724ff4);
+- [Inclusão do filtro de Tags em Contatos](https://github.com/rtenorioh/Press-Ticket/commit/4ec909463a21395690f432643487cf0a4122f09d);
+- [Ajuste na visualização dos números](https://github.com/rtenorioh/Press-Ticket/commit/1ce5209425ffd851018e5d9891c25a3bad10fd43);
+- [Nuvem de Tags no Dashboard](https://github.com/rtenorioh/Press-Ticket/commits/main/#:~:text=Nuvem%20de%20Tags%20no%20Dashboard);
+- [Validação na key](https://github.com/rtenorioh/Press-Ticket/commit/d7c442c39bea5ffbcde5932ef8d0c7055b2e09a0);
+- [Inclusão na Api: userId e queueId](https://github.com/rtenorioh/Press-Ticket/commit/3847ac7069a3ebfda65bd502e3bdd4cb2c6e3cf0);
+- [Teste de Api](https://github.com/rtenorioh/Press-Ticket/commit/93c9e21d18bb160696b6e5b6e4e9bafd2178d3d9);
+- [Atualização de Doc para envio de mensagem](https://github.com/rtenorioh/Press-Ticket/commit/d24f5b67e4362afaff06a253d63c58966d5f6eac);
+- [Implementando gerador de CodeSnippet](https://github.com/rtenorioh/Press-Ticket/commit/8be45a3702bea84bd90dc1d2a9d0e8d7050ab3a9); e
+- [Ajuste no Eslint](https://github.com/rtenorioh/Press-Ticket/commit/938e0d0c715c5e20ad151e2229c79421fddf60f5)
+
 ### 12/09/2024
 
 - [Atualização dos Docs](https://github.com/rtenorioh/Press-Ticket/commit/27595a5340af73c0d178f13df5b81d3c5e3aae65);
