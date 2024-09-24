@@ -428,8 +428,8 @@ const handleMessage = async (
   try {
     let msgContact: WbotContact;
     let groupContact: Contact | undefined;
-    const userId = 0;
-    const queueId = 0;
+    let userId;
+    let queueId;
 
     if (msg.fromMe) {
       // messages sent automatically by wbot have a special character in front of it

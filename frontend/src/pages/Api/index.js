@@ -6,6 +6,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import TextField from "@material-ui/core/TextField";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
+import CodeSnippetGenerator from "../../components/CodeSnippetGenerator"; // Import do componente
 import toastError from "../../errors/toastError";
 import api from "../../services/api";
 
@@ -53,6 +54,11 @@ const useStyles = makeStyles(theme => ({
     textP: {
         marginBottom: theme.spacing(2),
     },
+    observacao: {
+        marginBottom: theme.spacing(2),
+        color: theme.palette.text.secondary,
+        fontSize: '0.9rem',
+    }
 }));
 
 const Api = () => {
@@ -201,6 +207,9 @@ const Api = () => {
                 <Grid item xs={12} md={6}>
                     <Paper className={classes.formContainer}>
                         <h2>Envie Mensagens de Texto ou Mídia</h2>
+                        <p className={classes.observacao}>
+                            Observação: Neste formulário, o token é puxado automaticamente. Para utilizar em outros locais, é necessário ter o token.
+                        </p>
                         <form onSubmit={handleSubmit}>
                             <TextField
                                 className={classes.input}
@@ -239,7 +248,6 @@ const Api = () => {
                                         ))}
                                     </TextField>
                                 </Grid>
-
                                 <Grid item xs={4}>
                                     <TextField
                                         select
@@ -258,7 +266,6 @@ const Api = () => {
                                         ))}
                                     </TextField>
                                 </Grid>
-
                                 <Grid item xs={4}>
                                     <TextField
                                         select
@@ -292,6 +299,14 @@ const Api = () => {
                                 ENVIAR MENSAGEM
                             </Button>
                         </form>
+                        <CodeSnippetGenerator
+                            number={number}
+                            body={body}
+                            userId={userId}
+                            queueId={queueId}
+                            whatsappId={whatsappId}
+                            token={settings && settings.length > 0 && getSettingValue("userApiToken")}
+                        />
                     </Paper>
                 </Grid>
             </Grid>

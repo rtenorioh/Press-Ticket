@@ -15,13 +15,19 @@
     "ecmaVersion": 12,
     "sourceType": "module"
   },
-  "plugins": ["@typescript-eslint", "prettier"],
+  "plugins": [
+    "@typescript-eslint",
+    "prettier"
+  ],
   "rules": {
     "@typescript-eslint/no-non-null-assertion": "off",
     "@typescript-eslint/no-unused-vars": [
       "error",
-      { "argsIgnorePattern": "_" }
+      {
+        "argsIgnorePattern": "_"
+      }
     ],
+    "prefer-const": "off",
     "import/prefer-default-export": "off",
     "no-console": "off",
     "no-param-reassign": "off",
