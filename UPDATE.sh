@@ -21,46 +21,46 @@ echo -e "${COLOR}╚═╝     ╚═╝  ╚═╝╚══════╝╚�
 echo -e "\e[92mATUALIZANDO PARA A VERSÃO:\e[0m \e[1m$VERSION\e[0m" | tee -a "$LOG_FILE"
 echo " "
 
-sleep 2
+# sleep 2
 
-echo " " | tee -a "$LOG_FILE"
-echo "VERIFICANDO A VERSÃO DO UPDATE" | tee -a "$LOG_FILE"
-echo " " | tee -a "$LOG_FILE"
+# echo " "
+# echo "VERIFICANDO A VERSÃO DO UPDATE" | tee -a "$LOG_FILE"
+# echo " "
 
-sleep 2
+# sleep 2
 
-extract_version() {
-  local script="$1"
-  grep -oP 'VERSION="([^"]+)"' "$script" | cut -d'"' -f2
-}
+# extract_version() {
+#   local script="$1"
+#   grep -oP 'VERSION="([^"]+)"' "$script" | cut -d'"' -f2
+# }
 
-TEMP_FILE=$(mktemp)
-curl -s https://raw.githubusercontent.com/rtenorioh/Press-Ticket/main/UPDATE.sh >$TEMP_FILE
+# TEMP_FILE=$(mktemp)
+# curl -s https://raw.githubusercontent.com/rtenorioh/Press-Ticket/main/UPDATE.sh >$TEMP_FILE
 
-if [ $? -ne 0 ]; then
-  echo "$(date +"%Y-%m-%d %H:%M:%S") - Erro ao baixar o arquivo do GitHub: $TEMP_FILE" | tee -a "$LOG_FILE"
-  echo "Verifique sua conexão com a internet e as credenciais do GitHub." | tee -a "$LOG_FILE"
-  exit 1
-fi
+# if [ $? -ne 0 ]; then
+#   echo "$(date +"%Y-%m-%d %H:%M:%S") - Erro ao baixar o arquivo do GitHub: $TEMP_FILE" | tee -a "$LOG_FILE"
+#   echo "Verifique sua conexão com a internet e as credenciais do GitHub." | tee -a "$LOG_FILE"
+#   exit 1
+# fi
 
-REMOTE_VERSION=$(extract_version "$TEMP_FILE")
+# REMOTE_VERSION=$(extract_version "$TEMP_FILE")
 
-if [ -z "$REMOTE_VERSION" ] || [ "$REMOTE_VERSION" != "$VERSION" ]; then
-  echo "Versão remota é mais recente ou não foi encontrada. Atualizando..." | tee -a "$LOG_FILE"
-  chmod +x "$TEMP_FILE"
-  cp "$TEMP_FILE" "$0"
+# if [ -z "$REMOTE_VERSION" ] || [ "$REMOTE_VERSION" !== "$VERSION" ]; then
+#   echo "Versão remota é mais recente ou não foi encontrada. Atualizando..." | tee -a "$LOG_FILE"
+#   chmod +x "$TEMP_FILE"
+#   cp "$TEMP_FILE" "$0"
 
-  echo "$(date +"%Y-%m-%d %H:%M:%S") - Script atualizado para a versão $REMOTE_VERSION" | tee -a "$LOG_FILE"
-  rm -f "$TEMP_FILE"
+#   echo "$(date +"%Y-%m-%d %H:%M:%S") - Script atualizado para a versão $REMOTE_VERSION" | tee -a "$LOG_FILE"
+#   rm -f "$TEMP_FILE"
 
-  echo "O script foi atualizado. Execute novamente para continuar." | tee -a "$LOG_FILE"
-  exit 0
-else
-  echo "O script local está atualizado." | tee -a "$LOG_FILE"
-  sudo rm -rf "$TEMP_FILE"
-fi
+#   echo "O script foi atualizado. Execute novamente para continuar." | tee -a "$LOG_FILE"
+#   exit 0
+# else
+#   echo "O script local está atualizado." | tee -a "$LOG_FILE"
+#   sudo rm -rf "$TEMP_FILE"
+# fi
 
-sudo rm -rf "$TEMP_FILE"
+# sudo rm -rf "$TEMP_FILE"
 
 sleep 2
 
