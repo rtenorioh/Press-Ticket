@@ -489,7 +489,7 @@ const messages = {
           deleteMessage: "All agent data will be lost. Open tickets for this agent will be moved to hold.",
         },
       },
-      company:{
+      company: {
         success: "Company data successfully saved.",
         title: "Company Data",
         info: "Information",
@@ -553,6 +553,14 @@ const messages = {
             options: {
               enabled: "Open",
               disabled: "Closed",
+            },
+          },
+          quickAnswer: {
+            name: "Quick Answers",
+            note: "If enabled, you can edit quick answers",
+            options: {
+              enabled: "Enabled",
+              disabled: "Disabled",
             },
           },
           closeTicketApi: {
@@ -700,3 +708,4 @@ const messages = {
 };
 
 export { messages };
+

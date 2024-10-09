@@ -489,7 +489,7 @@ const messages = {
           deleteMessage: "Se perderán todos los datos del asistente. Los tickets abiertos para este asistente se moverán a espera.",
         },
       },
-      company:{
+      company: {
         success: "Los datos de la empresa se guardaron con éxito.",
         title: "Datos de la empresa",
         info: "Información",
@@ -553,6 +553,14 @@ const messages = {
             options: {
               enabled: "Abrir",
               disabled: "Cerrado",
+            },
+          },
+          quickAnswer: {
+            name: "Respuestas rápidas",
+            note: "Si está habilitado, puedes editar respuestas rápidas",
+            options: {
+              enabled: "Habilitado",
+              disabled: "Deshabilitado",
             },
           },
           closeTicketApi: {

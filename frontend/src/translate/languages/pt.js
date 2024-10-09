@@ -554,6 +554,14 @@ const messages = {
               disabled: "Fechado",
             },
           },
+          quickAnswer: {
+            name: "Respostas Rápidas",
+            note: "Se habilitado, poderá editar as respostas rápidas",
+            options: {
+              enabled: "Ativado",
+              disabled: "Desativado",
+            },
+          },
           closeTicketApi: {
             name: "Encerrar Ticket enviado API",
             note: "Fecha automaticamente o ticket quando enviado por API",

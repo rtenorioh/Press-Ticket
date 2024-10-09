@@ -1,21 +1,21 @@
-import React, { useState, useEffect } from "react";
-import openSocket from "socket.io-client";
+import React, { useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
+import openSocket from "socket.io-client";
 
-import { makeStyles, withStyles } from "@material-ui/core/styles";
-import Paper from "@material-ui/core/Paper";
-import Typography from "@material-ui/core/Typography";
 import Container from "@material-ui/core/Container";
+import Paper from "@material-ui/core/Paper";
 import Select from "@material-ui/core/Select";
+import { makeStyles, withStyles } from "@material-ui/core/styles";
+import Typography from "@material-ui/core/Typography";
 import { toast } from "react-toastify";
 
 import Tooltip from "@material-ui/core/Tooltip";
 
-import api from "../../services/api";
-import { i18n } from "../../translate/i18n.js";
-import toastError from "../../errors/toastError";
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Switch from '@material-ui/core/Switch';
+import toastError from "../../errors/toastError";
+import api from "../../services/api";
+import { i18n } from "../../translate/i18n.js";
 
 const useStyles = makeStyles(theme => ({
 	root: {
@@ -243,9 +243,22 @@ const Settings = () => {
 					</Tooltip>
 				</Paper>
 
-
 			</Container>
 			<Container className={classes.container} maxWidth="xs">
+
+				<Typography variant="body2" gutterBottom></Typography>
+				<Paper className={classes.paper}>
+					<Tooltip title={i18n.t("settings.settings.quickAnswer.note")}>
+						<FormControlLabel
+							control={
+								<IOSSwitch
+									checked={settings && settings.length > 0 && getSettingValue("quickAnswer") === "enabled"}
+									onChange={handleChangeBooleanSetting} name="quickAnswer"
+								/>}
+							label={i18n.t("settings.settings.quickAnswer.name")}
+						/>
+					</Tooltip>
+				</Paper>
 
 				<Typography variant="body2" gutterBottom></Typography>
 				<Paper className={classes.paper}>

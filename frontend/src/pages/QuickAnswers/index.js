@@ -1,10 +1,7 @@
-import React, { useState, useEffect, useReducer } from "react";
-import openSocket from "../../services/socket-io";
-import { useHistory } from "react-router-dom";
-
 import {
   Button,
   IconButton,
+  InputAdornment,
   makeStyles,
   Paper,
   Table,
@@ -12,7 +9,6 @@ import {
   TableCell,
   TableHead,
   TableRow,
-  InputAdornment,
   TextField,
   Tooltip
 } from "@material-ui/core";
@@ -24,16 +20,20 @@ import {
   Search
 } from "@material-ui/icons";
 
-import api from "../../services/api";
-import { i18n } from "../../translate/i18n";
+import React, { useContext, useEffect, useReducer, useState } from "react";
+import { useHistory } from "react-router-dom";
+import openSocket from "../../services/socket-io";
 
+import ConfirmationModal from "../../components/ConfirmationModal";
 import MainContainer from "../../components/MainContainer";
 import MainHeader from "../../components/MainHeader";
 import MainHeaderButtonsWrapper from "../../components/MainHeaderButtonsWrapper";
-import Title from "../../components/Title";
-import TableRowSkeleton from "../../components/TableRowSkeleton";
 import QuickAnswersModal from "../../components/QuickAnswersModal";
-import ConfirmationModal from "../../components/ConfirmationModal";
+import TableRowSkeleton from "../../components/TableRowSkeleton";
+import Title from "../../components/Title";
+import { AuthContext } from "../../context/Auth/AuthContext";
+import api from "../../services/api";
+import { i18n } from "../../translate/i18n";
 
 import { toast } from "react-toastify";
 import toastError from "../../errors/toastError";
@@ -95,7 +95,6 @@ const useStyles = makeStyles((theme) => ({
 const QuickAnswers = () => {
   const classes = useStyles();
   const history = useHistory();
-
   const [loading, setLoading] = useState(false);
   const [pageNumber, setPageNumber] = useState(1);
   const [searchParam, setSearchParam] = useState("");
@@ -106,6 +105,9 @@ const QuickAnswers = () => {
   const [deletingAllQuickAnswers, setDeletingAllQuickAnswers] = useState(null);
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
   const [hasMore, setHasMore] = useState(false);
+  const [settings, setSettings] = useState([]);
+  const { user } = useContext(AuthContext);
+  const isAdmin = user.profile;
 
   useEffect(() => {
     dispatch({ type: "RESET" });
@@ -152,6 +154,23 @@ const QuickAnswers = () => {
       socket.disconnect();
     };
   }, []);
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const { data } = await api.get("/settings");
+        setSettings(data);
+      } catch (err) {
+        toastError(err);
+      }
+    };
+    fetchSettings();
+  }, []);
+
+  const getSettingValue = key => {
+    const { value } = settings.find(s => s.key === key);
+    return value;
+  };
 
   const handleSearch = (event) => {
     setSearchParam(event.target.value.toLowerCase());
@@ -214,13 +233,13 @@ const QuickAnswers = () => {
       <ConfirmationModal
         title={
           deletingQuickAnswers ? `${i18n.t("quickAnswers.confirmationModal.deleteTitle")} ${deletingQuickAnswers.shortcut}?`
-          : `${i18n.t("quickAnswers.confirmationModal.deleteAllTitle")}`
+            : `${i18n.t("quickAnswers.confirmationModal.deleteAllTitle")}`
         }
         open={confirmModalOpen}
         onClose={setConfirmModalOpen}
-        onConfirm={() => 
+        onConfirm={() =>
           deletingQuickAnswers ? handleDeleteQuickAnswers(deletingQuickAnswers.id)
-         : handleDeleteAllQuickAnswers(deletingAllQuickAnswers)
+            : handleDeleteAllQuickAnswers(deletingAllQuickAnswers)
         }
       >
         {
@@ -250,27 +269,31 @@ const QuickAnswers = () => {
               ),
             }}
           />
-          <Tooltip title={i18n.t("quickAnswers.buttons.add")}>
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={handleOpenQuickAnswersModal}
-            >
-              <AddCircleOutline />
-            </Button>
-          </Tooltip>
-          <Tooltip title={i18n.t("quickAnswers.buttons.deleteAll")}>
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={(e) => {
-                setConfirmModalOpen(true);
-                setDeletingAllQuickAnswers(quickAnswers);
-              }}
-            >
-              <DeleteForever />
-            </Button>
-          </Tooltip>
+          {((settings && settings.length > 0 && getSettingValue("quickAnswer") === "enabled") || (isAdmin === "admin")) && (
+            <Tooltip title={i18n.t("quickAnswers.buttons.add")}>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleOpenQuickAnswersModal}
+              >
+                <AddCircleOutline />
+              </Button>
+            </Tooltip>
+          )}
+          {((settings && settings.length > 0 && getSettingValue("quickAnswer") === "enabled") || (isAdmin === "admin")) && (
+            <Tooltip title={i18n.t("quickAnswers.buttons.deleteAll")}>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={(e) => {
+                  setConfirmModalOpen(true);
+                  setDeletingAllQuickAnswers(quickAnswers);
+                }}
+              >
+                <DeleteForever />
+              </Button>
+            </Tooltip>
+          )}
         </MainHeaderButtonsWrapper>
       </MainHeader>
       <Paper
@@ -287,9 +310,11 @@ const QuickAnswers = () => {
               <TableCell align="center">
                 {i18n.t("quickAnswers.table.message")}
               </TableCell>
-              <TableCell align="center">
-                {i18n.t("quickAnswers.table.actions")}
-              </TableCell>
+              {((settings && settings.length > 0 && getSettingValue("quickAnswer") === "enabled") || (isAdmin === "admin")) && (
+                <TableCell align="center">
+                  {i18n.t("quickAnswers.table.actions")}
+                </TableCell>
+              )}
             </TableRow>
           </TableHead>
           <TableBody>
@@ -298,24 +323,26 @@ const QuickAnswers = () => {
                 <TableRow key={quickAnswer.id}>
                   <TableCell align="center">{quickAnswer.shortcut}</TableCell>
                   <TableCell align="center">{quickAnswer.message}</TableCell>
-                  <TableCell align="center">
-                    <IconButton
-                      size="small"
-                      onClick={() => handleEditQuickAnswers(quickAnswer)}
-                    >
-                      <Edit color="secondary" />
-                    </IconButton>
+                  {((settings && settings.length > 0 && getSettingValue("quickAnswer") === "enabled") || (isAdmin === "admin")) && (
+                    <TableCell align="center">
+                      <IconButton
+                        size="small"
+                        onClick={() => handleEditQuickAnswers(quickAnswer)}
+                      >
+                        <Edit color="secondary" />
+                      </IconButton>
 
-                    <IconButton
-                      size="small"
-                      onClick={(e) => {
-                        setConfirmModalOpen(true);
-                        setDeletingQuickAnswers(quickAnswer);
-                      }}
-                    >
-                      <DeleteOutline color="secondary" />
-                    </IconButton>
-                  </TableCell>
+                      <IconButton
+                        size="small"
+                        onClick={(e) => {
+                          setConfirmModalOpen(true);
+                          setDeletingQuickAnswers(quickAnswer);
+                        }}
+                      >
+                        <DeleteOutline color="secondary" />
+                      </IconButton>
+                    </TableCell>
+                  )}
                 </TableRow>
               ))}
               {loading && <TableRowSkeleton columns={3} />}
