@@ -108,6 +108,7 @@ const messages = {
         },
         table: {
           id: "ID da Instância",
+          channel: "Canal",
           name: "Nome",
           number: "Número",
           status: "Status",
@@ -162,7 +163,7 @@ const messages = {
         table: {
           name: "Nome",
           whatsapp: "WhatsApp",
-          email: "E-mail",
+          channels: "Canais",
           actions: "Ações",
         },
       },
@@ -507,6 +508,10 @@ const messages = {
           n8n: {
             title: "N8N",
             urlApiN8N: "URL API N8N"
+          },
+          hub: {
+            title: "Notificame Hub",
+            hubToken: "Token"
           }
         },
       },

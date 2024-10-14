@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import openSocket from "socket.io-client";
 
 import {
@@ -11,9 +11,9 @@ import {
 
 import { toast } from "react-toastify";
 import Title from "../../components/Title";
+import toastError from "../../errors/toastError";
 import api from "../../services/api";
 import { i18n } from "../../translate/i18n.js";
-import toastError from "../../errors/toastError";
 
 const useStyles = makeStyles(theme => ({
 	root: {
@@ -142,6 +142,24 @@ const Integrations = () => {
 					</Paper>
 				</Paper>
 
+				<Paper className={classes.paper1}>
+					<Typography align="center" variant="body1">
+						{i18n.t("integrations.integrations.hub.title")}
+					</Typography>
+					<Paper elevation={4} className={classes.paper}>
+						<TextField
+							style={{ width: "100%" }}
+							id="hubToken"
+							name="hubToken"
+							margin="dense"
+							label={i18n.t("integrations.integrations.hub.hubToken")}
+							variant="outlined"
+							value={integrations && integrations.length > 0 && getIntegrationValue("hubToken")}
+							onChange={handleChangeIntegration}
+							fullWidth
+						/>
+					</Paper>
+				</Paper>
 			</Container>
 		</div>
 	);

@@ -1,13 +1,13 @@
-import { Op, fn, where, col, Filterable, Includeable } from "sequelize";
-import { startOfDay, endOfDay, parseISO } from "date-fns";
+import { endOfDay, parseISO, startOfDay } from "date-fns";
+import { col, Filterable, fn, Includeable, Op, where } from "sequelize";
 
-import Ticket from "../../models/Ticket";
 import Contact from "../../models/Contact";
 import Message from "../../models/Message";
 import Queue from "../../models/Queue";
+import Ticket from "../../models/Ticket";
 import Whatsapp from "../../models/Whatsapp";
-import ShowUserService from "../UserServices/ShowUserService";
 import ListSettingsServiceOne from "../SettingServices/ListSettingsServiceOne";
+import ShowUserService from "../UserServices/ShowUserService";
 
 interface Request {
   searchParam?: string;
@@ -46,7 +46,17 @@ const ListTicketsService = async ({
     {
       model: Contact,
       as: "contact",
-      attributes: ["id", "name", "number", "profilePicUrl"]
+      attributes: [
+        "id",
+        "name",
+        "number",
+        "email",
+        "profilePicUrl",
+        "messengerId",
+        "instagramId",
+        "telegramId",
+        "webchatId"
+      ]
       // include: ["extraInfo", "contactTags", "tags"]
     },
     {
@@ -57,7 +67,7 @@ const ListTicketsService = async ({
     {
       model: Whatsapp,
       as: "whatsapp",
-      attributes: ["name"]
+      attributes: ["name", "type"]
     }
   ];
 

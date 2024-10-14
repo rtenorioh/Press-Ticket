@@ -1,7 +1,3 @@
-import { format, parseISO } from "date-fns";
-import React, { useCallback, useContext, useState } from "react";
-import { toast } from "react-toastify";
-
 import {
 	Button,
 	CircularProgress,
@@ -22,12 +18,21 @@ import {
 	CropFree,
 	DeleteOutline,
 	Edit,
+	Email,
+	Facebook,
+	Instagram,
 	SignalCellular4Bar,
 	SignalCellularConnectedNoInternet0Bar,
 	SignalCellularConnectedNoInternet2Bar,
+	Sms,
 	SyncOutlined,
+	Telegram,
 	WhatsApp
 } from "@material-ui/icons";
+import { format, parseISO } from "date-fns";
+import React, { useCallback, useContext, useState } from "react";
+import { useHistory } from "react-router-dom";
+import { toast } from "react-toastify";
 
 import ConfirmationModal from "../../components/ConfirmationModal";
 import MainContainer from "../../components/MainContainer";
@@ -97,7 +102,7 @@ const CustomToolTip = ({ title, content, children }) => {
 
 const Connections = () => {
 	const classes = useStyles();
-
+	const history = useHistory();
 	const { whatsApps, loading } = useContext(WhatsAppsContext);
 	const [whatsAppModalOpen, setWhatsAppModalOpen] = useState(false);
 	const [qrModalOpen, setQrModalOpen] = useState(false);
@@ -113,6 +118,25 @@ const Connections = () => {
 	const [confirmModalInfo, setConfirmModalInfo] = useState(
 		confirmationModalInitialState
 	);
+
+	const getChannelIcon = (channel) => {
+		switch (channel) {
+			case "facebook":
+				return <Facebook style={{ color: "#3b5998" }} />;
+			case "instagram":
+				return <Instagram style={{ color: "#cd486b" }} />;
+			case "telegram":
+				return <Telegram style={{ color: "#85b2ff" }} />;
+			case "email":
+				return <Email style={{ color: "#004f9f" }} />;
+			case "webchat":
+				return <Sms style={{ color: "#EB6D58" }} />;
+			case null:
+				return <WhatsApp style={{ color: "#075e54" }} />;
+			default:
+				return null;
+		}
+	};
 
 	const handleStartWhatsAppSession = async whatsAppId => {
 		try {
@@ -232,7 +256,8 @@ const Connections = () => {
 				)}
 				{(whatsApp.status === "CONNECTED" ||
 					whatsApp.status === "PAIRING" ||
-					whatsApp.status === "TIMEOUT") && (
+					whatsApp.status === "TIMEOUT") &&
+					whatsApp.type === null && (
 						<Button
 							size="small"
 							variant="outlined"
@@ -295,6 +320,7 @@ const Connections = () => {
 	const restartpm2 = async () => {
 		try {
 			await api.post('/restartpm2');
+			history.go(0);
 		} catch (err) {
 			toastError(err);
 		}
@@ -305,6 +331,11 @@ const Connections = () => {
 			const ddd = number.slice(2, 4);
 			const firstPart = number.slice(4, 9);
 			const secondPart = number.slice(9);
+			return `(${ddd}) ${firstPart}-${secondPart}`;
+		} else if (number.startsWith('55') && number.length === 12) {
+			const ddd = number.slice(2, 4);
+			const firstPart = number.slice(4, 8);
+			const secondPart = number.slice(8);
 			return `(${ddd}) ${firstPart}-${secondPart}`;
 		}
 
@@ -362,6 +393,9 @@ const Connections = () => {
 								{i18n.t("connections.table.id")}
 							</TableCell>
 							<TableCell align="center">
+								{i18n.t("connections.table.channel")}
+							</TableCell>
+							<TableCell align="center">
 								{i18n.t("connections.table.name")}
 							</TableCell>
 							<TableCell align="center">
@@ -396,6 +430,9 @@ const Connections = () => {
 												{whatsApp.id}
 											</TableCell>
 											<TableCell align="center">
+												{getChannelIcon(whatsApp.type)}
+											</TableCell>
+											<TableCell align="center">
 												{whatsApp.name}
 											</TableCell>
 											<TableCell align="center">
@@ -423,13 +460,14 @@ const Connections = () => {
 												)}
 											</TableCell>
 											<TableCell align="center">
-												<IconButton
-													size="small"
-													onClick={() => handleEditWhatsApp(whatsApp)}
-												>
-													<Edit color="secondary" />
-												</IconButton>
-
+												{whatsApp.type === null && (
+													<IconButton
+														size="small"
+														onClick={() => handleEditWhatsApp(whatsApp)}
+													>
+														<Edit color="secondary" />
+													</IconButton>
+												)}
 												<IconButton
 													size="small"
 													onClick={e => {

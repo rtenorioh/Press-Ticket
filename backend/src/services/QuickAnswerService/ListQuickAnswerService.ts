@@ -28,7 +28,7 @@ const ListQuickAnswerService = async ({
 
   const { count, rows: quickAnswers } = await QuickAnswer.findAndCountAll({
     where: whereCondition,
-    limit,
+    // limit,
     offset,
     order: [["message", "ASC"]]
   });

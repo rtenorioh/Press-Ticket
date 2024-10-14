@@ -1,20 +1,22 @@
 import { Router } from "express";
 
-import userRoutes from "./userRoutes";
+import apiRoutes from "./apiRoutes";
 import authRoutes from "./authRoutes";
-import settingRoutes from "./settingRoutes";
 import contactRoutes from "./contactRoutes";
-import ticketRoutes from "./ticketRoutes";
-import whatsappRoutes from "./whatsappRoutes";
+import hubChannelRoutes from "./hubChannelRoutes";
+import hubMessageRoutes from "./hubMessageRoutes";
+import hubWebhookRoutes from "./hubWebhookRoutes";
+import integrationRoutes from "./integrationRoutes";
 import messageRoutes from "./messageRoutes";
-import whatsappSessionRoutes from "./whatsappSessionRoutes";
 import queueRoutes from "./queueRoutes";
 import quickAnswerRoutes from "./quickAnswerRoutes";
-import apiRoutes from "./apiRoutes";
-import tagRoutes from "./tagRoutes";
-import integrationRoutes from "./integrationRoutes";
-// import companyRoutes from "./companyRoutes";
+import settingRoutes from "./settingRoutes";
 import systemRoutes from "./systemRoutes";
+import tagRoutes from "./tagRoutes";
+import ticketRoutes from "./ticketRoutes";
+import userRoutes from "./userRoutes";
+import whatsappRoutes from "./whatsappRoutes";
+import whatsappSessionRoutes from "./whatsappSessionRoutes";
 
 const routes = Router();
 
@@ -31,7 +33,9 @@ routes.use(quickAnswerRoutes);
 routes.use("/api/messages", apiRoutes);
 routes.use(tagRoutes);
 routes.use(integrationRoutes);
-// routes.use(companyRoutes);
+routes.use(hubChannelRoutes);
+routes.use(hubMessageRoutes);
+routes.use(hubWebhookRoutes);
 routes.use(systemRoutes);
 
 export default routes;

@@ -186,11 +186,58 @@ const verifyMediaMessage = async (
     logger.error(err);
   }
 
+  let $tipoArquivo: string;
+
+  switch (media.mimetype.split("/")[0]) {
+    case "audio":
+      $tipoArquivo = "🔉 Mensagem de audio";
+      break;
+
+    case "image":
+      $tipoArquivo = "🖼️ Arquivo de imagem";
+      break;
+
+    case "video":
+      $tipoArquivo = "🎬 Arquivo de vídeo";
+      break;
+
+    case "document":
+      $tipoArquivo = "📘 Documento";
+      break;
+
+    case "application":
+      $tipoArquivo = "📎 Arquivo";
+      break;
+
+    case "ciphertext":
+      $tipoArquivo = "⚠️ Notificação";
+      break;
+
+    case "e2e_notification":
+      $tipoArquivo = "⛔ Notificação";
+      break;
+
+    case "revoked":
+      $tipoArquivo = "❌ Apagado";
+      break;
+    default:
+      $tipoArquivo = "📎 Arquivo";
+      break;
+  }
+
+  let $strBody: string;
+
+  if (msg.fromMe === true) {
+    $strBody = msg.body;
+  } else {
+    $strBody = msg.body;
+  }
+
   const messageData = {
     id: msg.id.id,
     ticketId: ticket.id,
     contactId: msg.fromMe ? undefined : contact.id,
-    body: msg.body,
+    body: $strBody,
     fromMe: msg.fromMe,
     read: msg.fromMe,
     mediaUrl: media.filename,
@@ -198,7 +245,15 @@ const verifyMediaMessage = async (
     quotedMsgId: quotedMsg?.id
   };
 
-  await ticket.update({ lastMessage: msg.body });
+  if (msg.fromMe === true) {
+    await ticket.update({
+      lastMessage: `🢅 ${$tipoArquivo}` || `🢅 ${$tipoArquivo}`
+    });
+  } else {
+    await ticket.update({
+      lastMessage: `🢇 ${$tipoArquivo}` || `🢇 ${$tipoArquivo}`
+    });
+  }
   const newMessage = await CreateMessageService({ messageData });
 
   return newMessage;
@@ -233,14 +288,43 @@ const verifyMessage = async (
     quotedMsgId: quotedMsg?.id
   };
 
-  await ticket.update({
-    lastMessage:
-      msg.type === "location"
-        ? msg.location.options
-          ? `Localization - ${msg.location.options}`
-          : "Localization"
-        : msg.body
-  });
+  // if (msg.fromMe === true) {
+  //   await ticket.update({
+  //     fromMe: msg.fromMe,
+  //     lastMessage:
+  //       msg.type === "location"
+  //         ? msg.location.options
+  //           ? `🢅 Localization - ${msg.location.options}`
+  //           : "🢅 🗺️: Localization"
+  //         : `🢅 ${msg.body}`
+  //   });
+  // } else {
+  //   await ticket.update({
+  //     lastMessage:
+  //       msg.type === "location"
+  //         ? msg.location.options
+  //           ? `🢇 🗺️: Localization - ${msg.location.options}`
+  //           : "🢇 🗺️: Localization"
+  //         : `🢇 ${msg.body}`
+  //   });
+  // }
+
+  if (msg.fromMe === true) {
+    await ticket.update({
+      fromMe: msg.fromMe,
+      lastMessage:
+        msg.type === "location"
+          ? "🢅 🌍 Localization - Ver no Google Maps"
+          : `🢅 ${msg.body}`
+    });
+  } else {
+    await ticket.update({
+      lastMessage:
+        msg.type === "location"
+          ? "🢇 🌍 Localization - Ver no Google Maps"
+          : `🢇 ${msg.body}`
+    });
+  }
 
   await CreateMessageService({ messageData });
 };

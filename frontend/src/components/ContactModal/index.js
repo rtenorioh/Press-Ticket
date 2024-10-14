@@ -1,18 +1,17 @@
 import React, {
-	useState,
+	useContext,
 	useEffect,
 	useRef,
-	useContext
+	useState
 } from "react";
 
 import {
-	Formik,
+	Field,
 	FieldArray,
 	Form,
-	Field
+	Formik
 } from "formik";
 
-import { green } from "@material-ui/core/colors";
 import {
 	Button,
 	CircularProgress,
@@ -25,14 +24,15 @@ import {
 	TextField,
 	Typography
 } from "@material-ui/core";
+import { green } from "@material-ui/core/colors";
 import DeleteOutlineIcon from "@material-ui/icons/DeleteOutline";
 
-import { i18n } from "../../translate/i18n";
-import api from "../../services/api";
-import toastError from "../../errors/toastError";
-import * as Yup from "yup";
 import { toast } from "react-toastify";
+import * as Yup from "yup";
 import { AuthContext } from "../../context/Auth/AuthContext";
+import toastError from "../../errors/toastError";
+import api from "../../services/api";
+import { i18n } from "../../translate/i18n";
 
 const useStyles = makeStyles(theme => ({
 	root: {
@@ -66,21 +66,20 @@ const ContactSchema = Yup.object().shape({
 		.min(2, "Too Short!")
 		.max(50, "Too Long!")
 		.required("Required"),
-	number: Yup.string().min(8, "Too Short!").max(50, "Too Long!"),
+	// number: Yup.string().min(8, "Too Short!").max(50, "Too Long!"),
 	email: Yup.string().email("Invalid email"),
 });
 
 const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
-	const classes = useStyles();
-	const isMounted = useRef(true);
-	const { user } = useContext(AuthContext);
-
 	const initialState = {
 		name: "",
 		number: "",
 		email: "",
 	};
 
+	const classes = useStyles();
+	const isMounted = useRef(true);
+	const { user } = useContext(AuthContext);
 	const [contact, setContact] = useState(initialState);
 
 	useEffect(() => {
