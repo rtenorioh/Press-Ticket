@@ -512,6 +512,10 @@ const messages = {
           hub: {
             title: "Notificame Hub",
             hubToken: "Token"
+          },
+          maps: {
+            title: "Api Google Maps",
+            apiMaps: "Api Key"
           }
         },
       },

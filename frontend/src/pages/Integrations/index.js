@@ -160,6 +160,25 @@ const Integrations = () => {
 						/>
 					</Paper>
 				</Paper>
+
+				<Paper className={classes.paper1}>
+					<Typography align="center" variant="body1">
+						{i18n.t("integrations.integrations.maps.title")}
+					</Typography>
+					<Paper elevation={4} className={classes.paper}>
+						<TextField
+							style={{ width: "100%" }}
+							id="apiMaps"
+							name="apiMaps"
+							margin="dense"
+							label={i18n.t("integrations.integrations.maps.apiMaps")}
+							variant="outlined"
+							value={integrations && integrations.length > 0 && getIntegrationValue("apiMaps")}
+							onChange={handleChangeIntegration}
+							fullWidth
+						/>
+					</Paper>
+				</Paper>
 			</Container>
 		</div>
 	);
