@@ -12,21 +12,53 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      # Validar que a tag segue o padrão semântico de versão (vX.X.X)
+      - name: Validate tag format
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          if ! [[ "${GITHUB_REF#refs/tags/}" =~ ^v[0-9]+(\.[0-9]+){2}$ ]]; then
+            echo "Tag format is invalid. Must follow vX.X.X"
+            exit 1
+          fi
+
+      # Instalar GitHub CLI
+      - name: Install GitHub CLI
+        run: sudo apt-get install gh
+
+      # Pegar a tag anterior
       - name: Get previous tag
         id: prev_tag
         run: |
-          echo "previous_tag=$(git describe --tags --abbrev=0 --always $(git rev-list --tags --skip=1 --max-count=1))" >> $GITHUB_OUTPUT
+          echo "Fetching the previous tag..."
+          previous_tag=$(git describe --tags --abbrev=0 --always $(git rev-list --tags --skip=1 --max-count=1))
+          echo "Previous tag: $previous_tag"
+          echo "previous_tag=$previous_tag" >> $GITHUB_OUTPUT
 
+      # Listar issues fechadas desde a tag anterior
       - name: List closed issues
         id: list_closed_issues
         run: |
-          echo "issues=$(gh issue list --closed --since=\"$(git describe --tags --abbrev=0 --always $(git rev-list --tags --skip=1 --max-count=1))\" --format='- {{.title}} (#{{.number}})')" >> $GITHUB_OUTPUT
+          echo "Fetching closed issues since the previous tag..."
+          issues=$(gh issue list --closed --since="$(git describe --tags --abbrev=0 --always $(git rev-list --tags --skip=1 --max-count=1))" --format='- {{.title}} (#{{.number}})')
+          if [ -z "$issues" ]; then
+            issues="No issues closed."
+          fi
+          echo "Issues: $issues"
+          echo "issues=$issues" >> $GITHUB_OUTPUT
 
+      # Obter o log de commits desde a tag anterior
       - name: Get commit log
         id: commit_log
         run: |
-          echo "log=$(git log --pretty=format:'- %s (%h)' --abbrev-commit $(git describe --tags --abbrev=0 --always $(git rev-list --tags --skip=1 --max-count=1))..HEAD)" >> $GITHUB_OUTPUT
+          echo "Fetching commit log since the previous tag..."
+          log=$(git log --pretty=format:'- %s (%h)' --abbrev-commit $(git describe --tags --abbrev=0 --always $(git rev-list --tags --skip=1 --max-count=1))..HEAD)
+          if [ -z "$log" ]; then
+            log="No commits."
+          fi
+          echo "Log: $log"
+          echo "log=$log" >> $GITHUB_OUTPUT
 
+      # Criar a release com as informações coletadas
       - name: Create Release
         uses: actions/create-release@v1
         env:
