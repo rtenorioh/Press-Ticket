@@ -1,12 +1,16 @@
 #!/bin/bash
-VERSION="v1.7.4"
+VERSION="v1.8.0"
 
 SCRIPT_DIR=$(dirname "$0")
 
 LOG_DIR="$SCRIPT_DIR/log"
-mkdir -p "$LOG_DIR"
+CURRENT_LOG_DIR="$LOG_DIR/atual"
+ARCHIVED_LOG_DIR="$LOG_DIR/arquivos"
 
-LOG_FILE="$LOG_DIR/update_$(date +"%Y-%m-%d_%H-%M-%S").log"
+mkdir -p "$CURRENT_LOG_DIR"
+mkdir -p "$ARCHIVED_LOG_DIR"
+
+LOG_FILE="$CURRENT_LOG_DIR/update_$(date +"%Y-%m-%d_%H-%M-%S").log"
 
 COLOR="\e[38;5;92m"
 RESET="\e[0m"
@@ -21,46 +25,23 @@ echo -e "${COLOR}╚═╝     ╚═╝  ╚═╝╚══════╝╚�
 echo -e "\e[92mATUALIZANDO PARA A VERSÃO:\e[0m \e[1m$VERSION\e[0m" | tee -a "$LOG_FILE"
 echo " "
 
-# sleep 2
+sleep 2
 
-# echo " "
-# echo "VERIFICANDO A VERSÃO DO UPDATE" | tee -a "$LOG_FILE"
-# echo " "
+# Função para verificar se comandos necessários estão instalados
+check_dependency() {
+  if ! command -v "$1" &>/dev/null; then
+    echo "$1 não está instalado. Saindo..." | tee -a "$LOG_FILE"
+    exit 1
+  fi
+}
 
-# sleep 2
+# Verificar se as dependências estão instaladas
+check_dependency node
+check_dependency npm
+check_dependency pm2
 
-# extract_version() {
-#   local script="$1"
-#   grep -oP 'VERSION="([^"]+)"' "$script" | cut -d'"' -f2
-# }
-
-# TEMP_FILE=$(mktemp)
-# curl -s https://raw.githubusercontent.com/rtenorioh/Press-Ticket/main/UPDATE.sh >$TEMP_FILE
-
-# if [ $? -ne 0 ]; then
-#   echo "$(date +"%Y-%m-%d %H:%M:%S") - Erro ao baixar o arquivo do GitHub: $TEMP_FILE" | tee -a "$LOG_FILE"
-#   echo "Verifique sua conexão com a internet e as credenciais do GitHub." | tee -a "$LOG_FILE"
-#   exit 1
-# fi
-
-# REMOTE_VERSION=$(extract_version "$TEMP_FILE")
-
-# if [ -z "$REMOTE_VERSION" ] || [ "$REMOTE_VERSION" !== "$VERSION" ]; then
-#   echo "Versão remota é mais recente ou não foi encontrada. Atualizando..." | tee -a "$LOG_FILE"
-#   chmod +x "$TEMP_FILE"
-#   cp "$TEMP_FILE" "$0"
-
-#   echo "$(date +"%Y-%m-%d %H:%M:%S") - Script atualizado para a versão $REMOTE_VERSION" | tee -a "$LOG_FILE"
-#   rm -f "$TEMP_FILE"
-
-#   echo "O script foi atualizado. Execute novamente para continuar." | tee -a "$LOG_FILE"
-#   exit 0
-# else
-#   echo "O script local está atualizado." | tee -a "$LOG_FILE"
-#   sudo rm -rf "$TEMP_FILE"
-# fi
-
-# sudo rm -rf "$TEMP_FILE"
+# Gerenciar logs antigos: compactar e mover para a pasta de arquivos (logs mais antigos que 30 dias)
+find "$CURRENT_LOG_DIR" -type f -mtime +30 -exec gzip {} \; -exec mv {}.gz "$ARCHIVED_LOG_DIR" \;
 
 sleep 2
 
@@ -77,13 +58,17 @@ compare_versions() {
   dpkg --compare-versions "$1" "lt" "$2"
 }
 
-# Comparação de versões
+# Comparação de versões do Node.js
 if compare_versions "$CURRENT_NODE_VERSION" "18"; then
   echo "Versão do Node.js atual é inferior a 18. Atualizando para a 20.x..." | tee -a "$LOG_FILE"
   sudo apt-get remove -y nodejs | tee -a "$LOG_FILE"
   curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash - | tee -a "$LOG_FILE"
   sudo apt-get install -y nodejs | tee -a "$LOG_FILE"
   sudo npm install -g npm | tee -a "$LOG_FILE"
+  if [ $? -ne 0 ]; then
+    echo "Erro ao atualizar o Node.js ou o npm. Saindo..." | tee -a "$LOG_FILE"
+    exit 1
+  fi
 else
   echo "Versão do Node.js é 18 ou superior. Prosseguindo com a atualização..." | tee -a "$LOG_FILE"
 fi
@@ -98,6 +83,10 @@ sleep 2
 
 git reset --hard | tee -a "$LOG_FILE"
 git pull | tee -a "$LOG_FILE"
+if [ $? -ne 0 ]; then
+  echo "Erro ao realizar o git pull. Saindo..." | tee -a "$LOG_FILE"
+  exit 1
+fi
 
 echo " " | tee -a "$LOG_FILE"
 echo "ACESSANDO O BACKEND" | tee -a "$LOG_FILE"
@@ -115,6 +104,10 @@ sleep 2
 
 sudo rm -rf node_modules | tee -a "$LOG_FILE"
 npm install | tee -a "$LOG_FILE"
+if [ $? -ne 0 ]; then
+  echo "Erro ao instalar dependências do backend. Saindo..." | tee -a "$LOG_FILE"
+  exit 1
+fi
 sudo rm -rf dist | tee -a "$LOG_FILE"
 npm run build | tee -a "$LOG_FILE"
 
@@ -125,6 +118,10 @@ echo " " | tee -a "$LOG_FILE"
 sleep 2
 
 npx sequelize db:migrate | tee -a "$LOG_FILE"
+if [ $? -ne 0 ]; then
+  echo "Erro ao executar as migrações do banco de dados. Saindo..." | tee -a "$LOG_FILE"
+  exit 1
+fi
 
 echo " " | tee -a "$LOG_FILE"
 echo "EXECUTANDO O DB:SEED:ALL" | tee -a "$LOG_FILE"
@@ -132,6 +129,10 @@ echo "EXECUTANDO O DB:SEED:ALL" | tee -a "$LOG_FILE"
 sleep 2
 
 npx sequelize db:seed:all | tee -a "$LOG_FILE"
+if [ $? -ne 0 ]; then
+  echo "Erro ao rodar seeds no banco de dados. Saindo..." | tee -a "$LOG_FILE"
+  exit 1
+fi
 
 echo " " | tee -a "$LOG_FILE"
 echo "ACESSANDO O FRONTEND" | tee -a "$LOG_FILE"
@@ -166,6 +167,10 @@ sleep 2
 
 sudo rm -rf node_modules | tee -a "$LOG_FILE"
 npm install | tee -a "$LOG_FILE"
+if [ $? -ne 0 ]; then
+  echo "Erro ao instalar dependências do frontend. Saindo..." | tee -a "$LOG_FILE"
+  exit 1
+fi
 sudo rm -rf build | tee -a "$LOG_FILE"
 npm run build | tee -a "$LOG_FILE"
 
@@ -176,6 +181,10 @@ echo " " | tee -a "$LOG_FILE"
 sleep 2
 
 pm2 restart all | tee -a "$LOG_FILE"
+if [ $? -ne 0 ]; then
+  echo "Erro ao reiniciar o PM2. Saindo..." | tee -a "$LOG_FILE"
+  exit 1
+fi
 
 echo " " | tee -a "$LOG_FILE"
 echo "PRESS TICKET ATUALIZADO COM SUCESSO!!!" | tee -a "$LOG_FILE"
