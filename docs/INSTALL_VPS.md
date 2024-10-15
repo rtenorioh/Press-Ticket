@@ -44,7 +44,9 @@ sudo systemctl status mysql
 
 7. Para sair da visualização de status do mysql tecle
 
+```bash
 CTRL + C
+```
 
 8. Acessando o mysql server
 
@@ -166,6 +168,7 @@ NODE_ENV=
 #URLs e Portas
 BACKEND_URL=https://back.pressticket.com.br
 FRONTEND_URL=https://ticket.pressticket.com.br
+WEBHOOK=https://back.pressticket.com.br
 PORT=8080
 PROXY_PORT=443
 

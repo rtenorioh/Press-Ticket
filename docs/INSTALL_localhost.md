@@ -39,6 +39,7 @@ cd Press-Ticket/backend
 
 ```bash
 NODE_ENV=
+WEBHOOK=https://true-melons-travel.loca.lt
 BACKEND_URL=http://localhost
 FRONTEND_URL=http://localhost:3333
 PORT=8080
