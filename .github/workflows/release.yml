@@ -25,6 +25,10 @@ jobs:
       - name: Install GitHub CLI
         run: sudo apt-get install gh
 
+      # Autenticar GitHub CLI usando o token do GitHub Actions
+      - name: Authenticate GitHub CLI
+        run: gh auth login --with-token <<< "${{ secrets.TOKEN_GITHUB }}"
+
       # Pegar a tag anterior
       - name: Get previous tag date
         id: prev_tag_date
