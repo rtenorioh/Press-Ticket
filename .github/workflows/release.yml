@@ -39,7 +39,7 @@ jobs:
         id: list_closed_issues
         run: |
           echo "Fetching closed issues since the previous tag..."
-          issues=$(gh issue list --state closed --search "closed:>${{ steps.prev_tag_date.outputs.prev_tag_date }}" --format='- {{.title}} (#{{.number}})')
+          issues=$(gh issue list --state closed --search "closed:>${{ steps.prev_tag_date.outputs.prev_tag_date }}" --json title,number --jq '.[] | "- \(.title) (#\(.number))"')
           if [ -z "$issues" ]; then
             issues="No issues closed."
           fi
