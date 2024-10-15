@@ -277,11 +277,14 @@ const Api = () => {
                                         onChange={(e) => setWhatsappId(e.target.value)}
                                         required
                                     >
-                                        {whatsapps.map((whatsapp) => (
-                                            <option key={whatsapp.id} value={whatsapp.id}>
-                                                {whatsapp.name}
-                                            </option>
-                                        ))}
+                                        {whatsapps
+                                            .filter(whatsapp => whatsapp.type === null)
+                                            .map((whatsapp) => (
+                                                <option key={whatsapp.id} value={whatsapp.id}>
+                                                    {whatsapp.name}
+                                                </option>
+                                            ))
+                                        }
                                     </TextField>
                                 </Grid>
                             </Grid>
