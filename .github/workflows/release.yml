@@ -39,7 +39,7 @@ jobs:
         id: list_closed_issues
         run: |
           echo "Fetching closed issues since the previous tag..."
-          issues=$(gh issue list --closed --since="$(git describe --tags --abbrev=0 --always $(git rev-list --tags --skip=1 --max-count=1))" --format='- {{.title}} (#{{.number}})')
+          issues=$(gh issue list --state closed --since="$(git describe --tags --abbrev=0 --always $(git rev-list --tags --skip=1 --max-count=1))" --format='- {{.title}} (#{{.number}})')
           if [ -z "$issues" ]; then
             issues="No issues closed."
           fi
