@@ -76,6 +76,7 @@ const useStyles = makeStyles(theme => ({
 		lineHeight: 1.6,
 		fontSize: '14px',
 		color: '#333',
+		textAlign: 'justify',
 		marginTop: theme.spacing(1),
 	},
 	couponBox: {
@@ -299,17 +300,21 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
 												</MenuItem>
 											))}
 										</Select>
+
 										<div className={classes.integrationBox}>
 											<div className={classes.integrationHeader}>
 												<InfoOutlined style={{ marginRight: '10px', color: '#3f51b5' }} />
 												<strong className={classes.integrationTitle}>Integração de Canais</strong>
 											</div>
+
 											<span className={classes.integrationDescription}>
-												Para integrar <strong>Facebook</strong>, <strong>Instagram</strong>, <strong>Telegram</strong> e <strong>WebChat</strong>, você precisa realizar o cadastro no botão abaixo, adquirir os canais e ativar a integração desejada.
+												Para ativar <strong>Facebook</strong>, <strong>Instagram</strong>, <strong>Telegram</strong> e <strong>WebChat</strong>, cadastre-se pelo botão abaixo, depois adquirir os canais desejados usando o cupom abaixo. Insira o token da sua <strong>Account</strong> na página de Configurações para finalizar a integração.
 											</span>
+
 											<span className={classes.integrationDescription}>
-												Use o cupom de desconto abaixo para ganhar <strong>50% de desconto</strong> na compra de cada canal!
+												Use o cupom abaixo para <strong>50% de desconto</strong> na compra dos canais!
 											</span>
+
 											<div className={classes.couponBox}>
 												<strong className={classes.couponText}>
 													PRESS60
@@ -322,6 +327,7 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
 													</Tooltip>
 												</CopyToClipboard>
 											</div>
+
 											<a
 												href="https://hub.notificame.com.br/signup/registrar?from=@pressticket"
 												target="_blank"
