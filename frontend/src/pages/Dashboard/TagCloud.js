@@ -38,7 +38,11 @@ const TagCloud = () => {
                         <Chip
                             key={tag.id}
                             label={`${tag.name} (${tag.usageCount})`}
-                            style={{ backgroundColor: tag.color }}
+                            style={{
+                                backgroundColor: tag.color,
+                                borderRadius: "8px",
+                                padding: "6px 12px",
+                            }}
                             className={classes.chip}
                         />
                     ))}

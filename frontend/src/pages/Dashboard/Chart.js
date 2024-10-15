@@ -147,11 +147,10 @@ const Chart = () => {
 						type="monotone"
 						dataKey="amount"
 						stroke={theme.palette.primary.main}
-						strokeDasharray="3 4 5 2"
-						strokeWidth={.1}
-						fillOpacity={1}
-						fill="#a0b3f4"
-						activeDot={true}
+						strokeWidth={2}
+						fillOpacity={0.7}
+						fill="#3f51b5"
+						activeDot={{ r: 8 }}
 					/>
 				</AreaChart>
 			</ResponsiveContainer>

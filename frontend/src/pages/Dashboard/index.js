@@ -23,13 +23,18 @@ const useStyles = makeStyles(theme => ({
 		overflow: "auto",
 		flexDirection: "column",
 		height: 240,
+		borderRadius: "12px",
+		backgroundColor: "#f9fafc",
 	},
 	customFixedHeightPaper: {
 		padding: theme.spacing(2),
 		display: "flex",
-		overflow: "auto",
+		overflow: "none",
 		flexDirection: "column",
 		height: 120,
+		borderRadius: "12px",
+		backgroundColor: "#f9fafc",
+		boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
 	},
 	customFixedHeightPaperLg: {
 		padding: theme.spacing(2),
@@ -37,6 +42,8 @@ const useStyles = makeStyles(theme => ({
 		overflow: "auto",
 		flexDirection: "column",
 		height: "100%",
+		borderRadius: "12px",
+		backgroundColor: "#f9fafc",
 	},
 }));
 
@@ -63,8 +70,8 @@ const Dashboard = () => {
 		<div>
 			<Container maxWidth="lg" className={classes.container}>
 				<Grid container spacing={3}>
-					<Grid item xs={4}>
-						<Paper className={classes.customFixedHeightPaper} style={{ overflow: "hidden" }}>
+					<Grid item xs={12} sm={6} md={4}>
+						<Paper className={classes.customFixedHeightPaper}>
 							<Typography component="h3" variant="h6" color="primary" paragraph>
 								{i18n.t("dashboard.messages.inAttendance.title")}
 							</Typography>
@@ -75,8 +82,8 @@ const Dashboard = () => {
 							</Grid>
 						</Paper>
 					</Grid>
-					<Grid item xs={4}>
-						<Paper className={classes.customFixedHeightPaper} style={{ overflow: "hidden" }}>
+					<Grid item xs={12} sm={6} md={4}>
+						<Paper className={classes.customFixedHeightPaper}>
 							<Typography component="h3" variant="h6" color="primary" paragraph>
 								{i18n.t("dashboard.messages.waiting.title")}
 							</Typography>
@@ -87,8 +94,8 @@ const Dashboard = () => {
 							</Grid>
 						</Paper>
 					</Grid>
-					<Grid item xs={4}>
-						<Paper className={classes.customFixedHeightPaper} style={{ overflow: "hidden" }}>
+					<Grid item xs={12} sm={6} md={4}>
+						<Paper className={classes.customFixedHeightPaper}>
 							<Typography component="h3" variant="h6" color="primary" paragraph>
 								{i18n.t("dashboard.messages.closed.title")}
 							</Typography>
