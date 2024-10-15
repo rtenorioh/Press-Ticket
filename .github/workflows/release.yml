@@ -26,20 +26,20 @@ jobs:
         run: sudo apt-get install gh
 
       # Pegar a tag anterior
-      - name: Get previous tag
-        id: prev_tag
+      - name: Get previous tag date
+        id: prev_tag_date
         run: |
-          echo "Fetching the previous tag..."
-          previous_tag=$(git describe --tags --abbrev=0 --always $(git rev-list --tags --skip=1 --max-count=1))
-          echo "Previous tag: $previous_tag"
-          echo "previous_tag=$previous_tag" >> $GITHUB_OUTPUT
+          echo "Fetching the date of the previous tag..."
+          prev_tag_date=$(git log -1 --format=%aI $(git describe --tags --abbrev=0 --always $(git rev-list --tags --skip=1 --max-count=1)))
+          echo "Previous tag date: $prev_tag_date"
+          echo "prev_tag_date=$prev_tag_date" >> $GITHUB_OUTPUT
 
       # Listar issues fechadas desde a tag anterior
       - name: List closed issues
         id: list_closed_issues
         run: |
           echo "Fetching closed issues since the previous tag..."
-          issues=$(gh issue list --state closed --since="$(git describe --tags --abbrev=0 --always $(git rev-list --tags --skip=1 --max-count=1))" --format='- {{.title}} (#{{.number}})')
+          issues=$(gh issue list --state closed --search "closed:>${{ steps.prev_tag_date.outputs.prev_tag_date }}" --format='- {{.title}} (#{{.number}})')
           if [ -z "$issues" ]; then
             issues="No issues closed."
           fi
