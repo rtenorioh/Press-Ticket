@@ -68,8 +68,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.TOKEN_GITHUB }}
         with:
-          tag_name: ${{ github.ref }}
-          release_name: ${{ github.ref }}
+          tag_name: ${{ github.ref_name }}
+          release_name: ${{ github.ref_name }}
           body: |
             O que mudou:
 
@@ -79,4 +79,4 @@ jobs:
             ${{ steps.list_closed_issues.outputs.issues }}
 
             **Comparação de Alterações:**
-            [Comparar alterações](https://github.com/${{ github.repository }}/compare/${{ steps.prev_tag.outputs.previous_tag }}...${{ github.ref }})
+            [Comparar alterações](https://github.com/${{ github.repository }}/compare/${{ steps.prev_tag.outputs.previous_tag }}...${{ github.ref_name }})
