@@ -92,10 +92,10 @@ sleep 2
 
 git reset --hard | tee -a "$LOG_FILE"
 git pull | tee -a "$LOG_FILE"
-if [ $? -ne 0 ]; then
-  echo "Erro ao realizar o git pull. Saindo..." | tee -a "$LOG_FILE"
-  exit 1
-fi
+# if [ $? -ne 0 ]; then
+#   echo "Erro ao realizar o git pull. Saindo..." | tee -a "$LOG_FILE"
+#   exit 1
+# fi
 
 echo " " | tee -a "$LOG_FILE"
 echo "ACESSANDO O BACKEND" | tee -a "$LOG_FILE"
@@ -113,10 +113,10 @@ sleep 2
 
 sudo rm -rf node_modules | tee -a "$LOG_FILE"
 npm install | tee -a "$LOG_FILE"
-if [ $? -ne 0 ]; then
-  echo "Erro ao instalar dependências do backend. Saindo..." | tee -a "$LOG_FILE"
-  exit 1
-fi
+# if [ $? -ne 0 ]; then
+#   echo "Erro ao instalar dependências do backend. Saindo..." | tee -a "$LOG_FILE"
+#   exit 1
+# fi
 sudo rm -rf dist | tee -a "$LOG_FILE"
 npm run build | tee -a "$LOG_FILE"
 
@@ -127,10 +127,10 @@ echo " " | tee -a "$LOG_FILE"
 sleep 2
 
 npx sequelize db:migrate | tee -a "$LOG_FILE"
-if [ $? -ne 0 ]; then
-  echo "Erro ao executar as migrações do banco de dados. Saindo..." | tee -a "$LOG_FILE"
-  exit 1
-fi
+# if [ $? -ne 0 ]; then
+#   echo "Erro ao executar as migrações do banco de dados. Saindo..." | tee -a "$LOG_FILE"
+#   exit 1
+# fi
 
 echo " " | tee -a "$LOG_FILE"
 echo "EXECUTANDO O DB:SEED:ALL" | tee -a "$LOG_FILE"
@@ -138,10 +138,10 @@ echo "EXECUTANDO O DB:SEED:ALL" | tee -a "$LOG_FILE"
 sleep 2
 
 npx sequelize db:seed:all | tee -a "$LOG_FILE"
-if [ $? -ne 0 ]; then
-  echo "Erro ao rodar seeds no banco de dados. Saindo..." | tee -a "$LOG_FILE"
-  exit 1
-fi
+# if [ $? -ne 0 ]; then
+#   echo "Erro ao rodar seeds no banco de dados. Saindo..." | tee -a "$LOG_FILE"
+#   exit 1
+# fi
 
 echo " " | tee -a "$LOG_FILE"
 echo "ACESSANDO O FRONTEND" | tee -a "$LOG_FILE"
@@ -176,10 +176,10 @@ sleep 2
 
 sudo rm -rf node_modules | tee -a "$LOG_FILE"
 npm install | tee -a "$LOG_FILE"
-if [ $? -ne 0 ]; then
-  echo "Erro ao instalar dependências do frontend. Saindo..." | tee -a "$LOG_FILE"
-  exit 1
-fi
+# if [ $? -ne 0 ]; then
+#   echo "Erro ao instalar dependências do frontend. Saindo..." | tee -a "$LOG_FILE"
+#   exit 1
+# fi
 sudo rm -rf build | tee -a "$LOG_FILE"
 npm run build | tee -a "$LOG_FILE"
 
@@ -190,10 +190,10 @@ echo " " | tee -a "$LOG_FILE"
 sleep 2
 
 pm2 restart all | tee -a "$LOG_FILE"
-if [ $? -ne 0 ]; then
-  echo "Erro ao reiniciar o PM2. Saindo..." | tee -a "$LOG_FILE"
-  exit 1
-fi
+# if [ $? -ne 0 ]; then
+#   echo "Erro ao reiniciar o PM2. Saindo..." | tee -a "$LOG_FILE"
+#   exit 1
+# fi
 
 echo " " | tee -a "$LOG_FILE"
 echo "PRESS TICKET ATUALIZADO COM SUCESSO!!!" | tee -a "$LOG_FILE"
