@@ -25,53 +25,62 @@ echo -e "${COLOR}╚═╝     ╚═╝  ╚═╝╚══════╝╚�
 echo -e "\e[92mATUALIZANDO PARA A VERSÃO:\e[0m \e[1m$VERSION\e[0m" | tee -a "$LOG_FILE"
 echo " "
 
-sleep 2
+# sleep 2
 
-# Função para verificar se comandos necessários estão instalados
-check_dependency() {
-  if ! command -v "$1" &>/dev/null; then
-    echo "$1 não está instalado. Saindo..." | tee -a "$LOG_FILE"
-    exit 1
-  fi
-}
+# echo "PATH: $PATH" | tee -a "$LOG_FILE"
 
-# Verificar se as dependências estão instaladas
-check_dependency node
-check_dependency npm
-check_dependency pm2
+# # Função para verificar se comandos necessários estão instalados
+# check_dependency() {
+#   if ! command -v "$1" &>/dev/null; then
+#     echo "$1 não está instalado. Saindo..." | tee -a "$LOG_FILE"
+#     exit 1
+#   fi
+# }
 
-# Gerenciar logs antigos: compactar e mover para a pasta de arquivos (logs mais antigos que 30 dias)
-find "$CURRENT_LOG_DIR" -type f -mtime +30 -exec gzip {} \; -exec mv {}.gz "$ARCHIVED_LOG_DIR" \;
+# # Verificar se as dependências estão instaladas
+# check_dependency node
+# check_dependency npm
+# check_dependency pm2
 
-sleep 2
+# # Gerenciar logs antigos: compactar e mover para a pasta de arquivos (logs mais antigos que 30 dias)
+# find "$CURRENT_LOG_DIR" -type f -mtime +30 -exec gzip {} \; -exec mv {}.gz "$ARCHIVED_LOG_DIR" \;
 
-echo " " | tee -a "$LOG_FILE"
-echo "VERIFICANDO A VERSÃO DO NODE JS" | tee -a "$LOG_FILE"
-echo " " | tee -a "$LOG_FILE"
+# sleep 2
 
-sleep 2
+# echo " " | tee -a "$LOG_FILE"
+# echo "VERIFICANDO A VERSÃO DO NODE JS" | tee -a "$LOG_FILE"
+# echo " " | tee -a "$LOG_FILE"
 
-CURRENT_NODE_VERSION=$(node -v | cut -d'v' -f2)
+# sleep 2
 
-# Função para comparar versões utilizando dpkg
-compare_versions() {
-  dpkg --compare-versions "$1" "lt" "$2"
-}
+# NODE_PATH="/usr/bin/node"
 
-# Comparação de versões do Node.js
-if compare_versions "$CURRENT_NODE_VERSION" "18"; then
-  echo "Versão do Node.js atual é inferior a 18. Atualizando para a 20.x..." | tee -a "$LOG_FILE"
-  sudo apt-get remove -y nodejs | tee -a "$LOG_FILE"
-  curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash - | tee -a "$LOG_FILE"
-  sudo apt-get install -y nodejs | tee -a "$LOG_FILE"
-  sudo npm install -g npm | tee -a "$LOG_FILE"
-  if [ $? -ne 0 ]; then
-    echo "Erro ao atualizar o Node.js ou o npm. Saindo..." | tee -a "$LOG_FILE"
-    exit 1
-  fi
-else
-  echo "Versão do Node.js é 18 ou superior. Prosseguindo com a atualização..." | tee -a "$LOG_FILE"
-fi
+# if [ ! -x "$NODE_PATH" ]; then
+#   echo "Node.js não está instalado corretamente ou não foi encontrado. Saindo..." | tee -a "$LOG_FILE"
+#   exit 1
+# fi
+
+# CURRENT_NODE_VERSION=$($NODE_PATH -v | cut -d'v' -f2)
+
+# # Função para comparar versões utilizando dpkg
+# compare_versions() {
+#   dpkg --compare-versions "$1" "lt" "$2"
+# }
+
+# # Comparação de versões do Node.js
+# if compare_versions "$CURRENT_NODE_VERSION" "18"; then
+#   echo "Versão do Node.js atual é inferior a 18. Atualizando para a 20.x..." | tee -a "$LOG_FILE"
+#   sudo apt-get remove -y nodejs | tee -a "$LOG_FILE"
+#   curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash - | tee -a "$LOG_FILE"
+#   sudo apt-get install -y nodejs | tee -a "$LOG_FILE"
+#   sudo npm install -g npm | tee -a "$LOG_FILE"
+#   if [ $? -ne 0 ]; then
+#     echo "Erro ao atualizar o Node.js ou o npm. Saindo..." | tee -a "$LOG_FILE"
+#     exit 1
+#   fi
+# else
+#   echo "Versão do Node.js é 18 ou superior. Prosseguindo com a atualização..." | tee -a "$LOG_FILE"
+# fi
 
 sleep 2
 
