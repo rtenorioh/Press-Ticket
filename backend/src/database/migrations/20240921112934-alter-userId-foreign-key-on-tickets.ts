@@ -2,13 +2,13 @@ import { QueryInterface } from "sequelize";
 
 module.exports = {
   up: async (queryInterface: QueryInterface) => {
-    await queryInterface.removeConstraint("tickets", "tickets_ibfk_2");
+    await queryInterface.removeConstraint("Tickets", "Tickets_ibfk_2");
 
-    await queryInterface.addConstraint("tickets", ["userId"], {
+    await queryInterface.addConstraint("Tickets", ["userId"], {
       type: "foreign key",
-      name: "tickets_ibfk_2",
+      name: "Tickets_ibfk_2",
       references: {
-        table: "users",
+        table: "Users",
         field: "id"
       },
       onDelete: "CASCADE",
@@ -17,13 +17,13 @@ module.exports = {
   },
 
   down: async (queryInterface: QueryInterface) => {
-    await queryInterface.removeConstraint("tickets", "tickets_ibfk_2");
+    await queryInterface.removeConstraint("Tickets", "Tickets_ibfk_2");
 
-    await queryInterface.addConstraint("tickets", ["userId"], {
+    await queryInterface.addConstraint("Tickets", ["userId"], {
       type: "foreign key",
-      name: "tickets_ibfk_2",
+      name: "Tickets_ibfk_2",
       references: {
-        table: "users",
+        table: "Users",
         field: "id"
       },
       onDelete: "SET NULL",

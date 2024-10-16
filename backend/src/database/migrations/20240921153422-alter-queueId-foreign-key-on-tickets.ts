@@ -2,41 +2,45 @@ import { QueryInterface } from "sequelize";
 
 export default {
   up: async (queryInterface: QueryInterface) => {
-    // Remover a constraint antiga
-    await queryInterface.removeConstraint(
-      "tickets",
-      "Tickets_queueId_foreign_idx"
-    );
+    const [results]: any = await queryInterface.sequelize.query(`
+      SELECT CONSTRAINT_NAME
+      FROM information_schema.KEY_COLUMN_USAGE
+      WHERE TABLE_NAME = 'Tickets' AND COLUMN_NAME = 'queueId';
+    `);
 
-    // Adicionar a nova constraint com SET NULL e CASCADE
-    await queryInterface.addConstraint("tickets", ["queueId"], {
+    if (results.length > 0) {
+      const constraintName = results[0].CONSTRAINT_NAME;
+      if (constraintName) {
+        await queryInterface.removeConstraint("Tickets", constraintName);
+      }
+    }
+
+    await queryInterface.addConstraint("Tickets", ["queueId"], {
       type: "foreign key",
-      name: "Tickets_queueId_foreign_idx",
+      name: "Tickets_queueId_custom_foreign",
       references: {
-        table: "queues",
+        table: "Queues",
         field: "id"
       },
-      onDelete: "SET NULL", // Ao deletar, coloca NULL no campo queueId
-      onUpdate: "CASCADE" // Ao atualizar o id na tabela queues, atualiza o queueId em tickets
+      onDelete: "SET NULL",
+      onUpdate: "CASCADE"
     });
   },
 
   down: async (queryInterface: QueryInterface) => {
-    // Remover a constraint recém adicionada
     await queryInterface.removeConstraint(
-      "tickets",
-      "Tickets_queueId_foreign_idx"
+      "Tickets",
+      "Tickets_queueId_custom_foreign"
     );
 
-    // Restaurar a constraint antiga
-    await queryInterface.addConstraint("tickets", ["queueId"], {
+    await queryInterface.addConstraint("Tickets", ["queueId"], {
       type: "foreign key",
       name: "Tickets_queueId_foreign_idx",
       references: {
-        table: "queues",
+        table: "Queues",
         field: "id"
       },
-      onDelete: "RESTRICT",
+      onDelete: "SET NULL",
       onUpdate: "CASCADE"
     });
   }
