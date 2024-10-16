@@ -15,6 +15,7 @@ const CreateChannelsService = async ({
   channels = channels.map(channel => {
     return {
       ...channel,
+      id: undefined,
       type: channel.channel,
       qrcode: channel.id,
       status: "CONNECTED"
@@ -22,17 +23,6 @@ const CreateChannelsService = async ({
   });
 
   const whatsapps = await Whatsapp.bulkCreate(channels);
-
-  // for(const whatsapp of whatsapps){
-  //   const connection = await Whatsapp.findOne({
-  //     where: { qrcode: whatsapp.id }
-  //   });
-  //   const io = getIO();
-  //   io.emit("whatsapp", {
-  //     action: "update",
-  //     connection
-  //   });
-  // }
 
   return { whatsapps };
 };
