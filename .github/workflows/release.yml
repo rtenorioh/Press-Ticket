@@ -28,14 +28,14 @@ jobs:
       - name: Authenticate GitHub CLI
         run: gh auth login --with-token <<< "${{ secrets.TOKEN_GITHUB }}"
 
-      # Pegar a tag anterior
-      - name: Get previous tag date
-        id: prev_tag_date
+      # Pegar a tag anterior corretamente
+      - name: Get previous tag
+        id: prev_tag
         run: |
-          echo "Fetching the date of the previous tag..."
-          prev_tag_date=$(git log -1 --format=%aI $(git describe --tags --abbrev=0 --always $(git rev-list --tags --skip=1 --max-count=1)))
-          echo "Previous tag date: $prev_tag_date"
-          echo "prev_tag_date=$prev_tag_date" >> $GITHUB_OUTPUT
+          echo "Fetching the previous tag..."
+          previous_tag=$(git describe --tags --abbrev=0 $(git rev-list --tags --skip=1 --max-count=1))
+          echo "Previous tag: $previous_tag"
+          echo "previous_tag=$previous_tag" >> $GITHUB_OUTPUT
 
       # Listar issues fechadas desde a tag anterior
       - name: List closed issues
@@ -49,12 +49,12 @@ jobs:
           echo "Issues: $issues"
           echo "issues=$issues" >> $GITHUB_OUTPUT
 
-      # Obter o log de commits desde a tag anterior
+      # Atualizar o log de commits
       - name: Get commit log
         id: commit_log
         run: |
           echo "Fetching commit log since the previous tag..."
-          log=$(git log --pretty=format:'- %s (%h)' --abbrev-commit $(git describe --tags --abbrev=0 --always $(git rev-list --tags --skip=1 --max-count=1))..HEAD)
+          log=$(git log --pretty=format:'- %s (%h)' --abbrev-commit ${{ steps.prev_tag.outputs.previous_tag }}..HEAD)
           if [ -z "$log" ]; then
             log="No commits."
           fi
@@ -70,7 +70,7 @@ jobs:
           tag_name: ${{ github.ref_name }}
           release_name: ${{ github.ref_name }}
           body: |
-            O que mudou:
+            # O que mudou:
 
             ${{ steps.commit_log.outputs.log }}
 
