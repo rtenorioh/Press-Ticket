@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from "react";
-import openSocket from "../../services/socket-io";
+import React, { useEffect, useState } from "react";
+import connectToSocket from "../../services/socket-io";
 
-import { 
+import {
     Container,
     makeStyles,
     Paper,
@@ -11,9 +11,9 @@ import {
 
 import CopyToClipboard from "../../components/CopyToClipboard";
 
+import toastError from "../../errors/toastError";
 import api from "../../services/api";
 import { i18n } from "../../translate/i18n.js";
-import toastError from "../../errors/toastError";
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -63,7 +63,7 @@ const Settings = () => {
     }, []);
 
     useEffect(() => {
-        const socket = openSocket(process.env.REACT_APP_BACKEND_URL);
+        const socket = connectToSocket();
 
         socket.on("settings", data => {
             if (data.action === "update") {
@@ -94,17 +94,17 @@ const Settings = () => {
                 </Typography>
 
                 <Paper className={classes.paper}>
-					<TextField
-						id="api-token-setting"
-						readonly
-						label="Api Key"
-						margin="dense"
-						variant="outlined"
-						fullWidth
-						value={settings && settings.length > 0 && getSettingValue("userApiToken")}
-					/>
+                    <TextField
+                        id="api-token-setting"
+                        readOnly
+                        label="Api Key"
+                        margin="dense"
+                        variant="outlined"
+                        fullWidth
+                        value={settings && settings.length > 0 && getSettingValue("userApiToken")}
+                    />
                     <CopyToClipboard content={settings && settings.length > 0 && getSettingValue("userApiToken")} color="secondary" />
-				</Paper>
+                </Paper>
 
             </Container>
         </div>
