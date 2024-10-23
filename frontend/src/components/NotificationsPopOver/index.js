@@ -1,24 +1,24 @@
-import React, { useState, useRef, useEffect, useContext } from "react";
+import React, { useCallback, useContext, useEffect, useRef, useState } from "react";
 
-import { useHistory } from "react-router-dom";
-import { format } from "date-fns";
-import openSocket from "../../services/socket-io";
-import useSound from "use-sound";
-
-import Popover from "@material-ui/core/Popover";
+import Badge from "@material-ui/core/Badge";
 import IconButton from "@material-ui/core/IconButton";
 import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
 import ListItemText from "@material-ui/core/ListItemText";
+import Popover from "@material-ui/core/Popover";
 import { makeStyles } from "@material-ui/core/styles";
-import Badge from "@material-ui/core/Badge";
 import ChatIcon from "@material-ui/icons/Chat";
-
-import TicketListItem from "../TicketListItem";
-import { i18n } from "../../translate/i18n";
-import useTickets from "../../hooks/useTickets";
+import VolumeOffIcon from "@material-ui/icons/VolumeOff";
+import VolumeUpIcon from "@material-ui/icons/VolumeUp";
+import { format } from "date-fns";
+import { useHistory } from "react-router-dom";
+import useSound from "use-sound";
 import alertSound from "../../assets/sound.mp3";
 import { AuthContext } from "../../context/Auth/AuthContext";
+import useTickets from "../../hooks/useTickets";
+import openSocket from "../../services/socket-io";
+import { i18n } from "../../translate/i18n";
+import TicketListItem from "../TicketListItem";
 
 const useStyles = makeStyles(theme => ({
 	tabContainer: {
@@ -50,11 +50,13 @@ const NotificationsPopOver = () => {
 	const anchorEl = useRef();
 	const [isOpen, setIsOpen] = useState(false);
 	const [notifications, setNotifications] = useState([]);
-
+	const [isAudioEnabled, setIsAudioEnabled] = useState(
+		localStorage.getItem("userAudioEnabled") === "true"
+	);
 	const [, setDesktopNotifications] = useState([]);
 
 	const { tickets } = useTickets({ withUnreadMessages: "true" });
-	const [play] = useSound(alertSound);
+	const [play, { stop }] = useSound(alertSound, { soundEnabled: isAudioEnabled });
 	const soundAlertRef = useRef();
 
 	const historyRef = useRef(history);
@@ -76,6 +78,43 @@ const NotificationsPopOver = () => {
 	useEffect(() => {
 		ticketIdRef.current = ticketIdUrl;
 	}, [ticketIdUrl]);
+
+	const handleNotifications = useCallback((data) => {
+		const { message, contact, ticket } = data;
+
+		const options = {
+			body: `${message.body} - ${format(new Date(), "HH:mm")}`,
+			icon: contact.profilePicUrl,
+			tag: ticket.id,
+			renotify: true,
+		};
+
+		const notification = new Notification(
+			`${i18n.t("tickets.notification.message")} ${contact.name}`,
+			options
+		);
+
+		notification.onclick = e => {
+			e.preventDefault();
+			window.focus();
+			historyRef.current.push(`/tickets/${ticket.id}`);
+		};
+
+		setDesktopNotifications(prevState => {
+			const notfiticationIndex = prevState.findIndex(
+				n => n.tag === notification.tag
+			);
+			if (notfiticationIndex !== -1) {
+				prevState[notfiticationIndex] = notification;
+				return [...prevState];
+			}
+			return [notification, ...prevState];
+		});
+
+		if (isAudioEnabled && soundAlertRef.current) {
+			soundAlertRef.current();
+		}
+	}, [isAudioEnabled]);
 
 	useEffect(() => {
 		const socket = openSocket();
@@ -139,41 +178,16 @@ const NotificationsPopOver = () => {
 		return () => {
 			socket.disconnect();
 		};
-	}, [user]);
+	}, [user, handleNotifications]);
 
-	const handleNotifications = data => {
-		const { message, contact, ticket } = data;
+	const toggleAudio = () => {
+		const newAudioStatus = !isAudioEnabled;
+		setIsAudioEnabled(newAudioStatus);
+		localStorage.setItem("userAudioEnabled", newAudioStatus.toString());
 
-		const options = {
-			body: `${message.body} - ${format(new Date(), "HH:mm")}`,
-			icon: contact.profilePicUrl,
-			tag: ticket.id,
-			renotify: true,
-		};
-
-		const notification = new Notification(
-			`${i18n.t("tickets.notification.message")} ${contact.name}`,
-			options
-		);
-
-		notification.onclick = e => {
-			e.preventDefault();
-			window.focus();
-			historyRef.current.push(`/tickets/${ticket.id}`);
-		};
-
-		setDesktopNotifications(prevState => {
-			const notfiticationIndex = prevState.findIndex(
-				n => n.tag === notification.tag
-			);
-			if (notfiticationIndex !== -1) {
-				prevState[notfiticationIndex] = notification;
-				return [...prevState];
-			}
-			return [notification, ...prevState];
-		});
-
-		soundAlertRef.current();
+		if (!newAudioStatus) {
+			stop();
+		}
 	};
 
 	const handleClick = () => {
@@ -190,6 +204,9 @@ const NotificationsPopOver = () => {
 
 	return (
 		<>
+			<IconButton onClick={toggleAudio} aria-label="Toggle Sound" color="inherit">
+				{isAudioEnabled ? <VolumeUpIcon /> : <VolumeOffIcon />}
+			</IconButton>
 			<IconButton
 				onClick={handleClick}
 				ref={anchorEl}
