@@ -10,20 +10,27 @@ const TagsFilter = ({ onFiltered }) => {
     const [selecteds, setSelecteds] = useState([]);
 
     useEffect(() => {
-        async function fetchData() {
-            await loadTags();
-        }
-        fetchData();
-    }, []);
+        let isMounted = true;
 
-    const loadTags = async () => {
-        try {
-            const { data } = await api.get(`/tags/list`);
-            setTags(data);
-        } catch (err) {
-            toastError(err);
+        async function fetchData() {
+            try {
+                const { data } = await api.get(`/tags/list`);
+                if (isMounted) {
+                    setTags(data);
+                }
+            } catch (err) {
+                if (isMounted) {
+                    toastError(err);
+                }
+            }
         }
-    }
+
+        fetchData();
+
+        return () => {
+            isMounted = false;
+        };
+    }, []);
 
     const onChange = async (value) => {
         setSelecteds(value);
