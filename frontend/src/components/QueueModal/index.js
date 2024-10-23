@@ -1,11 +1,11 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
-import * as Yup from "yup";
-import { 
-	Formik, 
-	Form, 
-	Field 
+import {
+	Field,
+	Form,
+	Formik
 } from "formik";
+import * as Yup from "yup";
 
 import {
 	Button,
@@ -24,10 +24,10 @@ import { green } from "@material-ui/core/colors";
 import { toast } from "react-toastify";
 import { i18n } from "../../translate/i18n";
 
-import api from "../../services/api";
-import toastError from "../../errors/toastError";
-import ColorPicker from "../ColorPicker";
 import { Colorize } from "@material-ui/icons";
+import toastError from "../../errors/toastError";
+import api from "../../services/api";
+import ColorPicker from "../ColorPicker";
 
 const useStyles = makeStyles(theme => ({
 	root: {
@@ -223,7 +223,7 @@ const QueueModal = ({ open, onClose, queueId }) => {
 										type="greetingMessage"
 										multiline
 										inputRef={greetingRef}
-										rows={4}
+										minRows={4}
 										fullWidth
 										name="greetingMessage"
 										error={
@@ -295,7 +295,7 @@ const QueueModal = ({ open, onClose, queueId }) => {
 										type="absenceMessage"
 										multiline
 										inputRef={absenceRef}
-										rows={2}
+										minRows={2}
 										fullWidth
 										name="absenceMessage"
 										error={

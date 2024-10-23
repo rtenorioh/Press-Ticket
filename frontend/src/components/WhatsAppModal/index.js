@@ -169,7 +169,6 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
 
 	const handleSaveWhatsApp = async values => {
 		const whatsappData = { ...values, queueIds: selectedQueueIds };
-
 		try {
 			if (isHubSelected && selectedChannel) {
 				const selectedChannelObj = availableChannels.find(
@@ -188,7 +187,7 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
 				}
 			} else {
 				if (whatsAppId) {
-					await api.put(`/whatsapp/${whatsAppId}`, ...whatsappData);
+					await api.put(`/whatsapp/${whatsAppId}`, whatsappData);
 				} else {
 					await api.post("/whatsapp", whatsappData);
 				}
@@ -348,7 +347,7 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
 												label={i18n.t("queueModal.form.greetingMessage")}
 												type="greetingMessage"
 												multiline
-												rows={5}
+												minRows={5}
 												fullWidth
 												name="greetingMessage"
 												error={
@@ -367,7 +366,7 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
 												label={i18n.t("whatsappModal.form.farewellMessage")}
 												type="farewellMessage"
 												multiline
-												rows={5}
+												minRows={5}
 												fullWidth
 												name="farewellMessage"
 												error={
