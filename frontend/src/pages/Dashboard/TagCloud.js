@@ -31,7 +31,7 @@ const TagCloud = () => {
 
     return (
         <div>
-            <h2><Title>{i18n.t("dashboard.tags.cloudTitle")} {tags.length}</Title></h2>
+            <Title>{i18n.t("dashboard.tags.cloudTitle")} {tags.length}</Title>
             {tags.length > 0 ? (
                 <div>
                     {tags.map((tag) => (
