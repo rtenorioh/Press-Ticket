@@ -88,10 +88,10 @@ const Integrations = () => {
 	return (
 		<div className={classes.root}>
 			<Container className={classes.container} >
-				<Typography variant="body2" gutterBottom>
-					<Title>{i18n.t("integrations.title")}</Title>
-				</Typography>
-
+				{/* <Typography variant="body2" gutterBottom>
+					
+				</Typography> */}
+				<Title>{i18n.t("integrations.title")}</Title>
 
 				<Paper className={classes.paper1}>
 					<Typography align="center" variant="body1">
