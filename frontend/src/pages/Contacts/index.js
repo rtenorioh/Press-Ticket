@@ -455,7 +455,7 @@ const Contacts = () => {
                 .map((contact) => (
                   <TableRow key={contact.id}>
                     <TableCell style={{ paddingRight: 0 }}>
-                      <Avatar src={contact.profilePicUrl} className={classes.avatar} />
+                      <Avatar src={contact.profilePicUrl} className={classes.avatar} alt="contact_image" />
                     </TableCell>
                     <TableCell>{contact.name}</TableCell>
                     <TableCell align="center">

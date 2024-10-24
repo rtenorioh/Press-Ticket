@@ -60,6 +60,11 @@ const useStyles = makeStyles(theme => ({
 	avatarContainer: {
 		position: "relative",
 	},
+	avatar: {
+		width: "50px",
+		height: "50px",
+		borderRadius: "25%"
+	},
 	badgeStyle: {
 		color: "white",
 		backgroundColor: green[500],
@@ -370,11 +375,9 @@ const TicketListItem = ({ ticket, userId, filteredTags }) => {
 
 				<ListItemAvatar className={classes.avatarContainer}>
 					<Avatar
-						style={{
-							width: "50px",
-							height: "50px",
-						}}
+						className={classes.avatar}
 						src={ticket?.contact?.profilePicUrl}
+						alt="contact_image"
 					/>
 					<Badge
 						className={classes.badgeStyle}
