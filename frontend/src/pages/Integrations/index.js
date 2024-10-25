@@ -3,11 +3,14 @@ import openSocket from "socket.io-client";
 
 import {
 	Container,
+	Grid,
+	IconButton,
 	makeStyles,
 	Paper,
 	TextField,
 	Typography
 } from "@material-ui/core";
+import { Visibility, VisibilityOff } from "@material-ui/icons";
 
 import { toast } from "react-toastify";
 import Title from "../../components/Title";
@@ -19,14 +22,30 @@ const useStyles = makeStyles(theme => ({
 	root: {
 		display: "flex",
 		alignItems: "center",
-		padding: theme.spacing(8, 8, 3),
+		padding: theme.spacing(2, 2, 3),
 	},
 	paper: {
-		padding: theme.spacing(2),
+		padding: theme.spacing(1),
+		marginBottom: 12,
+	},
+	integrationRow: {
 		display: "flex",
 		alignItems: "center",
-		marginBottom: 12,
-
+		marginBottom: theme.spacing(1),
+		gap: theme.spacing(2),
+	},
+	textFieldContainer: {
+		position: "relative",
+		width: "100%",
+	},
+	textField: {
+		width: "100%",
+	},
+	iconButton: {
+		position: "absolute",
+		right: theme.spacing(1),
+		top: "50%",
+		transform: "translateY(-50%)"
 	}
 }));
 
@@ -34,6 +53,13 @@ const Integrations = () => {
 	const classes = useStyles();
 
 	const [integrations, setIntegrations] = useState([]);
+	const [showKeys, setShowKeys] = useState({
+		organization: false,
+		apikey: false,
+		urlApiN8N: false,
+		hubToken: false,
+		apiMaps: false
+	});
 
 	useEffect(() => {
 		const fetchSession = async () => {
@@ -80,104 +106,151 @@ const Integrations = () => {
 		}
 	};
 
+	const handleToggleShowKey = key => {
+		setShowKeys(prevState => ({
+			...prevState,
+			[key]: !prevState[key]
+		}));
+	};
+
 	const getIntegrationValue = key => {
-		const { value } = integrations.find(s => s.key === key);
-		return value;
+		const integration = integrations.find(s => s.key === key);
+		return integration ? integration.value : "";
 	};
 
 	return (
 		<div className={classes.root}>
-			<Container className={classes.container} >
-				{/* <Typography variant="body2" gutterBottom>
-					
-				</Typography> */}
+			<Container className={classes.container}>
 				<Title>{i18n.t("integrations.title")}</Title>
 
-				<Paper className={classes.paper1}>
-					<Typography align="center" variant="body1">
-						{i18n.t("integrations.integrations.openai.title")}
-					</Typography>
-					<Paper elevation={4} className={classes.paper}>
-						<TextField
-							style={{ marginRight: "1%", width: "50%" }}
-							id="organization"
-							name="organization"
-							margin="dense"
-							label={i18n.t("integrations.integrations.openai.organization")}
-							variant="outlined"
-							value={integrations && integrations.length > 0 && getIntegrationValue("organization")}
-							onChange={handleChangeIntegration}
-							fullWidth
-						/>
-						<TextField
-							style={{ marginRight: "1%", width: "50%" }}
-							id="apikey"
-							name="apikey"
-							label={i18n.t("integrations.integrations.openai.apikey")}
-							margin="dense"
-							variant="outlined"
-							onChange={handleChangeIntegration}
-							fullWidth
-							value={integrations && integrations.length > 0 && getIntegrationValue("apikey")}
-						/>
-					</Paper>
+				<Paper className={classes.paper}>
+					<div className={classes.integrationRow}>
+						<Typography align="left" variant="body1">
+							{i18n.t("integrations.integrations.openai.title")}
+						</Typography>
+
+						<div className={classes.textFieldContainer}>
+							<TextField
+								className={classes.textField}
+								id="organization"
+								name="organization"
+								margin="dense"
+								label={i18n.t("integrations.integrations.openai.organization")}
+								variant="outlined"
+								value={integrations && integrations.length > 0 && getIntegrationValue("organization")}
+								onChange={handleChangeIntegration}
+								fullWidth
+								type={showKeys["organization"] ? "text" : "password"}
+							/>
+							<IconButton className={classes.iconButton} onClick={() => handleToggleShowKey("organization")}>
+								{showKeys["organization"] ? <VisibilityOff /> : <Visibility />}
+							</IconButton>
+						</div>
+
+						<div className={classes.textFieldContainer}>
+							<TextField
+								className={classes.textField}
+								id="apikey"
+								name="apikey"
+								label={i18n.t("integrations.integrations.openai.apikey")}
+								margin="dense"
+								variant="outlined"
+								onChange={handleChangeIntegration}
+								fullWidth
+								value={integrations && integrations.length > 0 && getIntegrationValue("apikey")}
+								type={showKeys["apikey"] ? "text" : "password"}
+							/>
+							<IconButton className={classes.iconButton} onClick={() => handleToggleShowKey("apikey")}>
+								{showKeys["apikey"] ? <VisibilityOff /> : <Visibility />}
+							</IconButton>
+						</div>
+					</div>
 				</Paper>
 
-				<Paper className={classes.paper1}>
-					<Typography align="center" variant="body1">
-						{i18n.t("integrations.integrations.n8n.title")}
-					</Typography>
-					<Paper elevation={4} className={classes.paper}>
-						<TextField
-							style={{ width: "100%" }}
-							id="urlApiN8N"
-							name="urlApiN8N"
-							margin="dense"
-							label={i18n.t("integrations.integrations.n8n.urlApiN8N")}
-							variant="outlined"
-							value={integrations && integrations.length > 0 && getIntegrationValue("urlApiN8N")}
-							onChange={handleChangeIntegration}
-							fullWidth
-						/>
-					</Paper>
+				<Paper className={classes.paper}>
+					<Grid container spacing={2}>
+						<Grid item xs={12} sm={6}>
+							<div className={classes.integrationRow}>
+								<Typography align="left" variant="body1">
+									{i18n.t("integrations.integrations.n8n.title")}
+								</Typography>
+
+								<div className={classes.textFieldContainer}>
+									<TextField
+										className={classes.textField}
+										id="urlApiN8N"
+										name="urlApiN8N"
+										margin="dense"
+										label={i18n.t("integrations.integrations.n8n.urlApiN8N")}
+										variant="outlined"
+										value={integrations && integrations.length > 0 && getIntegrationValue("urlApiN8N")}
+										onChange={handleChangeIntegration}
+										fullWidth
+										type={showKeys["urlApiN8N"] ? "text" : "password"}
+									/>
+									<IconButton className={classes.iconButton} onClick={() => handleToggleShowKey("urlApiN8N")}>
+										{showKeys["urlApiN8N"] ? <VisibilityOff /> : <Visibility />}
+									</IconButton>
+								</div>
+							</div>
+						</Grid>
+
+						<Grid item xs={12} sm={6}>
+							<div className={classes.integrationRow}>
+								<Typography align="left" variant="body1">
+									{i18n.t("integrations.integrations.hub.title")}
+								</Typography>
+
+								<div className={classes.textFieldContainer}>
+									<TextField
+										className={classes.textField}
+										id="hubToken"
+										name="hubToken"
+										margin="dense"
+										label={i18n.t("integrations.integrations.hub.hubToken")}
+										variant="outlined"
+										value={integrations && integrations.length > 0 && getIntegrationValue("hubToken")}
+										onChange={handleChangeIntegration}
+										fullWidth
+										type={showKeys["hubToken"] ? "text" : "password"}
+									/>
+									<IconButton className={classes.iconButton} onClick={() => handleToggleShowKey("hubToken")}>
+										{showKeys["hubToken"] ? <VisibilityOff /> : <Visibility />}
+									</IconButton>
+								</div>
+							</div>
+						</Grid>
+					</Grid>
 				</Paper>
 
-				<Paper className={classes.paper1}>
-					<Typography align="center" variant="body1">
-						{i18n.t("integrations.integrations.hub.title")}
-					</Typography>
-					<Paper elevation={4} className={classes.paper}>
-						<TextField
-							style={{ width: "100%" }}
-							id="hubToken"
-							name="hubToken"
-							margin="dense"
-							label={i18n.t("integrations.integrations.hub.hubToken")}
-							variant="outlined"
-							value={integrations && integrations.length > 0 && getIntegrationValue("hubToken")}
-							onChange={handleChangeIntegration}
-							fullWidth
-						/>
-					</Paper>
-				</Paper>
+				<Paper className={classes.paper}>
+					<Grid container spacing={2}>
+						<Grid item xs={12}>
+							<div className={classes.integrationRow}>
+								<Typography align="left" variant="body1">
+									{i18n.t("integrations.integrations.maps.title")}
+								</Typography>
 
-				<Paper className={classes.paper1}>
-					<Typography align="center" variant="body1">
-						{i18n.t("integrations.integrations.maps.title")}
-					</Typography>
-					<Paper elevation={4} className={classes.paper}>
-						<TextField
-							style={{ width: "100%" }}
-							id="apiMaps"
-							name="apiMaps"
-							margin="dense"
-							label={i18n.t("integrations.integrations.maps.apiMaps")}
-							variant="outlined"
-							value={integrations && integrations.length > 0 && getIntegrationValue("apiMaps")}
-							onChange={handleChangeIntegration}
-							fullWidth
-						/>
-					</Paper>
+								<div className={classes.textFieldContainer}>
+									<TextField
+										className={classes.textField}
+										id="apiMaps"
+										name="apiMaps"
+										margin="dense"
+										label={i18n.t("integrations.integrations.maps.apiMaps")}
+										variant="outlined"
+										value={integrations && integrations.length > 0 && getIntegrationValue("apiMaps")}
+										onChange={handleChangeIntegration}
+										fullWidth
+										type={showKeys["apiMaps"] ? "text" : "password"}
+									/>
+									<IconButton className={classes.iconButton} onClick={() => handleToggleShowKey("apiMaps")}>
+										{showKeys["apiMaps"] ? <VisibilityOff /> : <Visibility />}
+									</IconButton>
+								</div>
+							</div>
+						</Grid>
+					</Grid>
 				</Paper>
 			</Container>
 		</div>
