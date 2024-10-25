@@ -307,7 +307,7 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
 											</div>
 
 											<span className={classes.integrationDescription}>
-												Para ativar <strong>Facebook</strong>, <strong>Instagram</strong>, <strong>Telegram</strong> e <strong>WebChat</strong>, cadastre-se pelo botão abaixo, depois adquirir os canais desejados usando o cupom abaixo. Insira o token da sua <strong>Account</strong> na página de Configurações para finalizar a integração.
+												Para ativar <strong>Facebook</strong>, <strong>Instagram</strong>, <strong>Telegram</strong> e <strong>WebChat</strong>, cadastre-se pelo botão abaixo, depois adquirir os canais desejados usando o cupom abaixo. Insira o token da sua <strong>Account</strong> na página de Integrações para finalizar a integração.
 											</span>
 
 											<span className={classes.integrationDescription}>
