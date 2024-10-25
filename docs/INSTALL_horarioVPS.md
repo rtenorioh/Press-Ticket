@@ -1,27 +1,53 @@
-# Alterar o horário da VPS pelo terminal
+# Alterar o Horário da VPS pelo Terminal
 
-OBS: O Tutorial abaixo deve ser usado em casos onde alguma implementação que dependa de horário não esteja funcionando corretamente devido ao fuso horário da VPS.
+> **Observação:** Este tutorial deve ser seguido quando houver problemas relacionados a horário, como falhas em implementações que dependem do fuso horário correto da VPS.
 
-================================================
+---
 
-1. Verificar a hora atual da VPS pelo terminal
+## Passos para Alterar o Fuso Horário
+
+### 1. Verificar a hora atual da VPS
+
+Para verificar o horário atual configurado na sua VPS, execute o seguinte comando no terminal:
 
 ```bash
 date
 ```
 
-2. Comando para alterar o fuso horário da VPS
+### 2. Alterar o fuso horário da VPS
+
+Para alterar o fuso horário, utilize o seguinte comando:
 
 ```bash
 sudo dpkg-reconfigure tzdata
 ```
 
-3. Iniciará uma tela de configuração do fuso horário onde deverá escolher ```America``` e selecionar ok
+### 3. Escolher o continente
 
-4. Nesta tela deverá a cidade correspondente ao seu fuso horário, no meu caso usarei ```Sao_Paulo```
+Após rodar o comando acima, será exibida uma tela de configuração. Na primeira etapa, selecione o continente correspondente ao seu fuso horário. No caso de fuso horário de América, escolha:
 
-5. Agora será exibido um log similar a este informando que o fuso horário foi alterado com sucesso
+```bash
+America
+```
 
-```Current default time zone: 'America/Sao_Paulo'```  
-```Local time is now:      Tue Mar 20 08:21:57 -03 2018.```  
-```Universal Time is now:  Tue Mar 20 11:21:57 UTC 2018.```
+### 4. Selecionar a cidade
+
+Na próxima tela, selecione a cidade que corresponde ao seu fuso horário. Por exemplo, para o horário de São Paulo, escolha:
+
+```bash
+Sao_Paulo
+```
+
+### 5. Verificar a alteração
+
+Após concluir a seleção, o sistema exibirá uma mensagem confirmando que o fuso horário foi alterado com sucesso. A saída será algo similar a:
+
+```bash
+Current default time zone: 'America/Sao_Paulo'
+Local time is now:      Tue Mar 20 08:21:57 -03 2018.
+Universal Time is now:  Tue Mar 20 11:21:57 UTC 2018.
+```
+
+---
+
+Agora o fuso horário da sua VPS estará configurado corretamente de acordo com sua localização.
