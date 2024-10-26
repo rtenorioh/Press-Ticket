@@ -510,7 +510,7 @@ const TicketListItem = ({ ticket, userId, filteredTags }) => {
 								<Tooltip title={i18n.t("ticketsList.items.connection")}>
 									<Badge
 										className={classes.Radiusdot}
-										// overlap="rectangular"
+										overlap="rectangular"
 										style={{
 											backgroundColor: system.color.lightTheme.palette.primary,
 											height: 16,
@@ -533,7 +533,7 @@ const TicketListItem = ({ ticket, userId, filteredTags }) => {
 								<Tooltip title={i18n.t("ticketsList.items.queue")}>
 									<Badge
 										className={classes.Radiusdot}
-										// overlap="rectangular"
+										overlap="rectangular"
 										style={{
 											backgroundColor: ticket.queue?.color || "#7C7C7C",
 											height: 16,
@@ -554,7 +554,7 @@ const TicketListItem = ({ ticket, userId, filteredTags }) => {
 								<Tooltip title={i18n.t("ticketsList.items.user")}>
 									<Badge
 										className={classes.Radiusdot}
-										// overlap="rectangular"
+										overlap="rectangular"
 										style={{
 											backgroundColor: "black",
 											height: 16,
