@@ -34,6 +34,7 @@ import clsx from "clsx";
 import { Picker } from "emoji-mart";
 import "emoji-mart/css/emoji-mart.css";
 import MicRecorder from "mic-recorder-to-mp3";
+import PropTypes from "prop-types";
 import React, {
   useContext,
   useEffect,
@@ -785,5 +786,9 @@ const MessageInput = ({ ticketStatus }) => {
     );
   }
 };
+
+MessageInput.propTypes = {
+  ticketStatus: PropTypes.string
+}
 
 export default MessageInput;
