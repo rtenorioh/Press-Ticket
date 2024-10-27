@@ -14,6 +14,7 @@ import {
 import {
 	Avatar,
 	Badge,
+	Chip,
 	Divider,
 	IconButton,
 	ListItem,
@@ -510,65 +511,42 @@ const TicketListItem = ({ ticket, userId, filteredTags }) => {
 							<br></br>
 							{ticket.whatsappId && (
 								<Tooltip title={i18n.t("ticketsList.items.connection")}>
-									<Badge
+									<Chip
 										className={classes.Radiusdot}
-										overlap="rectangular"
 										style={{
 											backgroundColor: system.color.lightTheme.palette.primary,
+											fontSize: "0.8em",
+											fontWeight: "bold",
 											height: 16,
-											padding: "5px 5px",
+											padding: "5px 0px",
 											position: "inherit",
 											borderRadius: "3px",
 											color: "white",
 											marginRight: "5px",
 											marginBottom: "3px",
-
 										}}
-										badgeContent={ticket.whatsapp?.name || i18n.t("ticketsList.items.user")}
-
-									/>
-
-								</Tooltip>
-							)}
-
-							{ticket.queueId && (
-								<Tooltip title={i18n.t("ticketsList.items.queue")}>
-									<Badge
-										className={classes.Radiusdot}
-										overlap="rectangular"
-										style={{
-											backgroundColor: ticket.queue?.color || "#7C7C7C",
-											height: 16,
-											padding: "5px 5px",
-											position: "inherit",
-											borderRadius: "3px",
-											color: "white",
-											marginRight: "5px",
-											marginBottom: "3px",
-
-										}}
-										badgeContent={ticket.queue?.name || "No sector"}
+										label={(ticket.whatsapp?.name || i18n.t("ticketsList.items.user")).toUpperCase()}
 									/>
 								</Tooltip>
 							)}
 
 							{uName && (
 								<Tooltip title={i18n.t("ticketsList.items.user")}>
-									<Badge
+									<Chip
 										className={classes.Radiusdot}
-										overlap="rectangular"
 										style={{
 											backgroundColor: "black",
+											fontSize: "0.8em",
+											fontWeight: "bold",
 											height: 16,
-											padding: "5px 5px",
+											padding: "5px 0px",
 											position: "inherit",
 											borderRadius: "3px",
 											color: "white",
 											marginRight: "5px",
 											marginBottom: "3px",
-
 										}}
-										badgeContent={uName}
+										label={uName.toUpperCase()}
 									/>
 								</Tooltip>
 							)}
