@@ -1,15 +1,3 @@
-import React, { useState, useEffect, useReducer, useRef } from "react";
-import { 
-  isSameDay,
-  parseISO,
-  format 
-} from "date-fns";
-import openSocket from "../../services/socket-io";
-import clsx from "clsx";
-import { 
-  blue, 
-  red 
-} from "@material-ui/core/colors";
 import {
   Button,
   CircularProgress,
@@ -18,6 +6,10 @@ import {
   makeStyles,
 } from "@material-ui/core";
 import {
+  blue,
+  red
+} from "@material-ui/core/colors";
+import {
   AccessTime,
   Block,
   Done,
@@ -25,17 +17,26 @@ import {
   ExpandMore,
   GetApp,
 } from "@material-ui/icons";
+import clsx from "clsx";
+import {
+  format,
+  isSameDay,
+  parseISO
+} from "date-fns";
+import React, { useEffect, useReducer, useRef, useState } from "react";
+import openSocket from "../../services/socket-io";
 
-import MarkdownWrapper from "../MarkdownWrapper";
-import VcardPreview from "../VcardPreview";
-import LocationPreview from "../LocationPreview";
-import ModalImageCors from "../ModalImageCors";
-import MessageOptionsMenu from "../MessageOptionsMenu";
 import Audio from "../Audio";
+import LocationPreview from "../LocationPreview";
+import MarkdownWrapper from "../MarkdownWrapper";
+import MessageOptionsMenu from "../MessageOptionsMenu";
+import ModalImageCors from "../ModalImageCors";
+import VcardPreview from "../VcardPreview";
 
-import api from "../../services/api";
-import toastError from "../../errors/toastError";
 import { toast } from "react-toastify";
+import toastError from "../../errors/toastError";
+import api from "../../services/api";
+import { i18n } from "../../translate/i18n";
 
 const useStyles = makeStyles((theme) => ({
   messagesListWrapper: {
@@ -205,6 +206,11 @@ const useStyles = makeStyles((theme) => ({
     color: "rgba(0, 0, 0, 0.36)",
     overflowWrap: "break-word",
     padding: "3px 80px 6px 6px",
+  },
+
+  textContentItemEdited: {
+    overflowWrap: "break-word",
+    padding: "3px 120px 6px 6px",
   },
 
   messageMedia: {
@@ -746,7 +752,6 @@ const MessagesList = ({ ticketId, isGroup }) => {
                   </span>
                 )}
                 {message.isDeleted && (
-
                   <div>
                     <span className={classes.deletedMsg}>
                       <Block
@@ -757,15 +762,21 @@ const MessagesList = ({ ticketId, isGroup }) => {
                       Mensagem apagada
                     </span>
                   </div>
-
                 )}
                 {(message.mediaUrl || message.mediaType === "location" || message.mediaType === "vcard"
                   //|| message.mediaType === "multi_vcard" 
                 ) && checkMessageMedia(message)}
-                <div className={classes.textContentItem}>
+                <div
+                  className={clsx(classes.textContentItem, {
+                    [classes.textContentItemEdited]: message.isEdited,
+                    [classes.mediaMessage]: message.mediaUrl && !message.body ? true : false
+
+                  })}
+                >
                   {message.quotedMsg && renderQuotedMessage(message)}
                   <MarkdownWrapper>{message.body}</MarkdownWrapper>
                   <span className={classes.timestamp}>
+                    {message.isEdited && <span>{i18n.t("message.edited")} </span>}
                     {format(parseISO(message.createdAt), "HH:mm")}
                   </span>
                 </div>
@@ -795,18 +806,26 @@ const MessagesList = ({ ticketId, isGroup }) => {
                 <div
                   className={clsx(classes.textContentItem, {
                     [classes.textContentItemDeleted]: message.isDeleted,
+                    [classes.textContentItemEdited]: message.isEdited,
+                    [classes.mediaMessage]: message.mediaUrl && !message.body ? true : false
                   })}
                 >
                   {message.isDeleted && (
-                    <Block
-                      color="disabled"
-                      fontSize="small"
-                      className={classes.deletedIcon}
-                    />
+                    <div>
+                      <span className={classes.deletedMsg}>
+                        <Block
+                          color=""
+                          fontSize="small"
+                          className={classes.deletedIcon}
+                        />
+                        Mensagem apagada
+                      </span>
+                    </div>
                   )}
                   {message.quotedMsg && renderQuotedMessage(message)}
                   <MarkdownWrapper>{message.body}</MarkdownWrapper>
                   <span className={classes.timestamp}>
+                    {message.isEdited && <span>{i18n.t("message.edited")} </span>}
                     {format(parseISO(message.createdAt), "HH:mm")}
                     {renderMessageAck(message)}
                   </span>

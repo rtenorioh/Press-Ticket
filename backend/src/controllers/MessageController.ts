@@ -7,6 +7,7 @@ import Message from "../models/Message";
 import ListMessagesService from "../services/MessageServices/ListMessagesService";
 import ShowTicketService from "../services/TicketServices/ShowTicketService";
 import DeleteWhatsAppMessage from "../services/WbotServices/DeleteWhatsAppMessage";
+import EditWhatsAppMessage from "../services/WbotServices/EditWhatsAppMessage";
 import SendWhatsAppMedia from "../services/WbotServices/SendWhatsAppMedia";
 import SendWhatsAppMessage from "../services/WbotServices/SendWhatsAppMessage";
 
@@ -53,6 +54,21 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
   } else {
     await SendWhatsAppMessage({ body, ticket, quotedMsg });
   }
+
+  return res.send();
+};
+
+export const edit = async (req: Request, res: Response): Promise<Response> => {
+  const { messageId } = req.params;
+  const { body }: MessageData = req.body;
+
+  const message = await EditWhatsAppMessage(messageId, body);
+
+  const io = getIO();
+  io.to(message.ticketId.toString()).emit("appMessage", {
+    action: "update",
+    message
+  });
 
   return res.send();
 };

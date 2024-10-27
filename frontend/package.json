@@ -26,6 +26,7 @@
     "material-ui-color": "^1.2.0",
     "mic-recorder-to-mp3": "^2.2.2",
     "mui-audio-player": "^1.0.1",
+    "prop-types": "^15.8.1",
     "qrcode.react": "^1.0.0",
     "react": "^16.13.1",
     "react-color": "^2.19.3",

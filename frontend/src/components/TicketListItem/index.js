@@ -374,30 +374,32 @@ const TicketListItem = ({ ticket, userId, filteredTags }) => {
 				</Tooltip>
 
 				<ListItemAvatar className={classes.avatarContainer}>
-					<Avatar
-						className={classes.avatar}
-						src={ticket?.contact?.profilePicUrl}
-						alt="contact_image"
-					/>
-					<Badge
-						className={classes.badgeStyle}
-						badgeContent={ticket.unreadMessages}
-						overlap="rectangular"
-						max={9999}
-						classes={{
-							badge: classes.badgeStyle,
-						}}
-					/>
-					{ticket.isGroup && (
+					<>
+						<Avatar
+							className={classes.avatar}
+							src={ticket?.contact?.profilePicUrl}
+							alt="contact_image"
+						/>
 						<Badge
-							className={classes.groupBadgeStyle}
+							className={classes.badgeStyle}
+							badgeContent={ticket.unreadMessages}
 							overlap="rectangular"
-							badgeContent={<Group style={{ fontSize: '1rem' }} />}
+							max={9999}
 							classes={{
-								badge: classes.groupBadgeStyle,
+								badge: classes.badgeStyle,
 							}}
 						/>
-					)}
+						{ticket.isGroup && (
+							<Badge
+								className={classes.groupBadgeStyle}
+								overlap="rectangular"
+								badgeContent={<Group style={{ fontSize: '1rem' }} />}
+								classes={{
+									badge: classes.groupBadgeStyle,
+								}}
+							/>
+						)}
+					</>
 				</ListItemAvatar>
 
 				<ListItemText

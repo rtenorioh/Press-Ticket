@@ -640,6 +640,9 @@ const messages = {
         placeholderClosed: "Reabra ou aceite esse ticket para enviar uma mensagem.",
         signMessage: "Assinar",
       },
+      message: {
+        edited: "Editada"
+      },
       contactDrawer: {
         header: "Dados do contato",
         buttons: {
@@ -671,6 +674,7 @@ const messages = {
         },
       },
       messageOptionsMenu: {
+        edit: "Editar",
         delete: "Deletar",
         reply: "Responder",
         confirmationModal: {

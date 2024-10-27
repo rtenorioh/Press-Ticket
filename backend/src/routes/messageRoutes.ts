@@ -1,7 +1,7 @@
 import { Router } from "express";
 import multer from "multer";
-import isAuth from "../middleware/isAuth";
 import uploadConfig from "../config/upload";
+import isAuth from "../middleware/isAuth";
 
 import * as MessageController from "../controllers/MessageController";
 
@@ -17,7 +17,7 @@ messageRoutes.post(
   upload.array("medias"),
   MessageController.store
 );
-
+messageRoutes.post("/messages/edit/:messageId", isAuth, MessageController.edit);
 messageRoutes.delete("/messages/:messageId", isAuth, MessageController.remove);
 
 export default messageRoutes;

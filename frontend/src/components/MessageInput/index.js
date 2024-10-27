@@ -42,6 +42,7 @@ import React, {
 } from "react";
 import { useParams } from "react-router-dom";
 import { AuthContext } from "../../context/Auth/AuthContext";
+import { EditMessageContext } from "../../context/EditingMessage/EditingMessageContext";
 import { ReplyMessageContext } from "../../context/ReplyingMessage/ReplyingMessageContext";
 import toastError from "../../errors/toastError";
 import { useLocalStorage } from "../../hooks/useLocalStorage";
@@ -234,13 +235,14 @@ const MessageInput = ({ ticketStatus }) => {
   const [onDragEnter, setOnDragEnter] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const { setReplyingMessage, replyingMessage } = useContext(ReplyMessageContext);
+  const { setEditingMessage, editingMessage } = useContext(EditMessageContext);
   const { user } = useContext(AuthContext);
   const [signMessage, setSignMessage] = useLocalStorage("signOption", true);
   const [channelType, setChannelType] = useState(null);
 
   useEffect(() => {
     inputRef.current.focus();
-  }, [replyingMessage]);
+  }, [replyingMessage, editingMessage]);
 
   useEffect(() => {
     const fetchChannelType = async () => {
@@ -262,8 +264,9 @@ const MessageInput = ({ ticketStatus }) => {
       setShowEmoji(false);
       setMedias([]);
       setReplyingMessage(null);
+      setEditingMessage(null);
     };
-  }, [ticketId, setReplyingMessage]);
+  }, [ticketId, setReplyingMessage, setEditingMessage]);
 
   useEffect(() => {
     setTimeout(() => {
@@ -352,8 +355,11 @@ const MessageInput = ({ ticketStatus }) => {
     try {
       if (channelType !== null) {
         await api.post(`/hub-message/${ticketId}`, message);
+      } else if (editingMessage !== null) {
+        await api.post(`/messages/edit/${editingMessage.id}`, message);
       } else {
         await api.post(`/messages/${ticketId}`, message);
+
       }
     } catch (err) {
       toastError(err);
@@ -362,6 +368,7 @@ const MessageInput = ({ ticketStatus }) => {
     setShowEmoji(false);
     setLoading(false);
     setReplyingMessage(null);
+    setEditingMessage(null);
   };
 
   const handleStartRecording = async () => {
@@ -464,7 +471,10 @@ const MessageInput = ({ ticketStatus }) => {
           aria-label="showRecorder"
           component="span"
           disabled={loading || ticketStatus !== "open"}
-          onClick={() => setReplyingMessage(null)}
+          onClick={() => {
+            setReplyingMessage(null);
+            setEditingMessage(null);
+          }}
         >
           <Clear className={classes.sendMessageIcons} />
         </IconButton>
@@ -551,7 +561,7 @@ const MessageInput = ({ ticketStatus }) => {
         <div className={onDragEnter ? classes.dropInfo : classes.dropInfoOut}>
           {i18n.t("uploads.titles.titleUploadMsgDragDrop")}
         </div>
-        {replyingMessage && renderReplyingMessage(replyingMessage)}
+        {(replyingMessage && renderReplyingMessage(replyingMessage)) || (editingMessage && renderReplyingMessage(editingMessage))}
         <div className={classes.newMessageBox}>
           <Hidden only={["sm", "xs"]}>
             <IconButton

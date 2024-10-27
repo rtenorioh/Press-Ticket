@@ -1,16 +1,18 @@
 import {
-  Table,
+  BelongsTo,
   Column,
   CreatedAt,
-  UpdatedAt,
-  Model,
   DataType,
-  PrimaryKey,
   Default,
-  BelongsTo,
-  ForeignKey
+  ForeignKey,
+  HasMany,
+  Model,
+  PrimaryKey,
+  Table,
+  UpdatedAt
 } from "sequelize-typescript";
 import Contact from "./Contact";
+import OldMessage from "./OldMessage";
 import Ticket from "./Ticket";
 
 @Table
@@ -37,9 +39,8 @@ class Message extends Model<Message> {
   @Column(DataType.STRING)
   get mediaUrl(): string | null {
     if (this.getDataValue("mediaUrl")) {
-      return `${process.env.BACKEND_URL}:${
-        process.env.PROXY_PORT
-      }/public/${this.getDataValue("mediaUrl")}`;
+      return `${process.env.BACKEND_URL}:${process.env.PROXY_PORT
+        }/public/${this.getDataValue("mediaUrl")}`;
     }
     return null;
   }
@@ -50,6 +51,10 @@ class Message extends Model<Message> {
   @Default(false)
   @Column
   isDeleted: boolean;
+
+  @Default(false)
+  @Column
+  isEdited: boolean;
 
   @CreatedAt
   @Column(DataType.DATE(6))
@@ -72,6 +77,9 @@ class Message extends Model<Message> {
 
   @BelongsTo(() => Ticket)
   ticket: Ticket;
+
+  @HasMany(() => OldMessage)
+  oldMessages: OldMessage[];
 
   @ForeignKey(() => Contact)
   @Column
