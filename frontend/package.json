@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@material-ui/core": "^4.11.0",
-    "@material-ui/icons": "^4.9.1",
+    "@material-ui/icons": "^4.11.3",
     "@material-ui/lab": "^4.0.0-alpha.56",
     "@testing-library/jest-dom": "^5.11.4",
     "@testing-library/react": "^11.0.4",
@@ -38,7 +38,7 @@
     "react-scripts": "3.4.3",
     "react-tagcloud": "^2.3.3",
     "react-toastify": "^6.0.9",
-    "recharts": "^2.0.2",
+    "recharts": "^2.13.0",
     "socket.io-client": "^3.0.5",
     "use-sound": "^2.0.1",
     "yup": "^0.32.8"

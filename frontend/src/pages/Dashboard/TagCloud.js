@@ -7,8 +7,27 @@ import Title from "./Title";
 
 const useStyles = makeStyles((theme) => ({
     chip: {
-        margin: theme.spacing(0.5),
+        margin: theme.spacing(1),
         fontWeight: 500,
+        color: "#fff",
+        boxShadow: "0 2px 5p rgba(0, 0, 0, 0.2)",
+        borderRadius: "8px",
+        transition: "transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out",
+        '&:hover': {
+            transform: "scale(1.05)",
+            boxShadow: "0 4px 10px rgba(0, 0, 0, 0.3)"
+        }
+    },
+    tagContainer: {
+        margin: theme.spacing(2, 0),
+        display: "flex",
+        flexWrap: "wrap",
+        justifyContent: "center",
+    },
+    tagCounter: {
+        fontSize: "0.8rem",
+        marginLeft: theme.spacing(0.5),
+        color: "#fff",
     },
 }));
 
@@ -33,15 +52,18 @@ const TagCloud = () => {
         <div>
             <Title>{i18n.t("dashboard.tags.cloudTitle")} {tags.length}</Title>
             {tags.length > 0 ? (
-                <div>
+                <div className={classes.tagContainer}>
                     {tags.map((tag) => (
                         <Chip
                             key={tag.id}
-                            label={`${tag.name} (${tag.usageCount})`}
+                            label={
+                                <span>
+                                    {tag.name}
+                                    <span className={classes.tagCounter}> ({tag.usageCount})</span>
+                                </span>
+                            }
                             style={{
                                 backgroundColor: tag.color,
-                                borderRadius: "8px",
-                                padding: "6px 12px",
                             }}
                             className={classes.chip}
                         />

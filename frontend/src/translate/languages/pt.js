@@ -61,8 +61,51 @@ const messages = {
         },
         charts: {
           perDay: {
-            title: "Tickets hoje: ",
+            title: "Tickets por dia: ",
           },
+          date: {
+            title: "Filtrar"
+          }
+        },
+        chartPerUser: {
+          title: "Tickets por usuário",
+          ticket: "Ticket",
+          date: {
+            title: "Filtrar"
+          }
+        },
+        chartPerConnection: {
+          date: {
+            title: "Filtrar"
+          },
+          perConnection: {
+            title: "Tickets por conexão"
+          }
+        },
+        chartPerQueue: {
+          date: {
+            title: "Filtrar"
+          },
+          perQueue: {
+            title: "Tickets por Setor"
+          }
+        },
+        newContacts: {
+          contact: "Contatos",
+          date: {
+            start: "Data inicial",
+            end: "Data final"
+          },
+          title: "Contatos novos por dia"
+        },
+        contactsWithTickets: {
+          message: "Nenhum contato encontrado para esta data.",
+          unique: "Contato único",
+          date: {
+            start: "Data inicial",
+            end: "Data final"
+          },
+          title: "Contatos que abriram tickets no período"
         },
         tags: {
           cloudTitle: "Tags: ",

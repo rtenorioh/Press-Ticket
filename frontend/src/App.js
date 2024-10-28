@@ -1,17 +1,17 @@
-import React, { useState, useEffect } from "react";
-import Routes from "./routes";
+import React, { useEffect, useState } from "react";
 import "react-toastify/dist/ReactToastify.css";
+import Routes from "./routes";
 
-import { createTheme, ThemeProvider } from "@material-ui/core/styles";
 import { ptBR } from "@material-ui/core/locale";
+import { createTheme, ThemeProvider } from "@material-ui/core/styles";
 
 import { CssBaseline } from "@material-ui/core";
 
-import api from "./services/api";
 import toastError from "./errors/toastError";
+import api from "./services/api";
 
-import lightBackground from "./assets/wa-background-light.png";
 import darkBackground from "./assets/wa-background-dark.jpg";
+import lightBackground from "./assets/wa-background-light.png";
 import { system } from "./config.json";
 
 const App = () => {
@@ -35,8 +35,12 @@ const App = () => {
         toolbar: { main: system.color.lightTheme.toolbar.background || "#6B62FE" },
         menuItens: { main: system.color.lightTheme.menuItens || "#ffffff" },
         sub: { main: system.color.lightTheme.sub || "#ffffff" },
-        toolbarIcon: { main: system.color.lightTheme.toolbarIcon || "#ffffff"},
+        toolbarIcon: { main: system.color.lightTheme.toolbarIcon || "#ffffff" },
         divide: { main: system.color.lightTheme.divide || "#E0E0E0" },
+        background: {
+          default: system.color.lightTheme.palette.background.default || "#ffffff",
+          paper: system.color.lightTheme.palette.background.paper || "#eeeeee",
+        },
       },
       backgroundImage: `url(${lightBackground})`,
     },
@@ -70,7 +74,7 @@ const App = () => {
         toolbar: { main: system.color.darkTheme.toolbar.background || "#52d869" },
         menuItens: { main: system.color.darkTheme.menuItens || "#181d22" },
         sub: { main: system.color.darkTheme.sub || "#181d22" },
-        toolbarIcon: { main: system.color.darkTheme.toolbarIcon || "#181d22"},
+        toolbarIcon: { main: system.color.darkTheme.toolbarIcon || "#181d22" },
         divide: { main: system.color.darkTheme.divide || "#080d14" },
         background: {
           default: system.color.darkTheme.palette.background.default || "#080d14",
