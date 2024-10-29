@@ -1,5 +1,5 @@
 import { useTheme } from "@material-ui/core/styles";
-import TextField from '@material-ui/core/TextField'; // Importação do TextField
+import TextField from '@material-ui/core/TextField';
 import React, { useEffect, useState } from "react";
 import {
     Cell,
@@ -14,8 +14,6 @@ import { i18n } from "../../translate/i18n";
 import CustomTooltip from "./CustomTooltip";
 import Title from "./Title";
 
-const COLORS = ["#8884d8", "#82ca9d", "#ffc658", "#ff8042", "#8dd1e1"];
-
 const ChartPerConnection = ({ searchParam, pageNumber, status, date, showAll, queueIds, withUnreadMessages }) => {
     const theme = useTheme();
 
@@ -28,36 +26,39 @@ const ChartPerConnection = ({ searchParam, pageNumber, status, date, showAll, qu
     };
 
     const [selectedDate, setSelectedDate] = useState(getCurrentDate());
-    const { ticketsByConnection, formatDateToDDMMYYYY } = useTickets({ searchParam, pageNumber, status, date, showAll, queueIds, withUnreadMessages });
+    const { tickets } = useTickets({
+        searchParam,
+        pageNumber,
+        status,
+        date: selectedDate,
+        showAll,
+        queueIds,
+        withUnreadMessages,
+    });
+
     const [connectionChartData, setConnectionChartData] = useState([]);
 
     useEffect(() => {
-        if (ticketsByConnection && Object.keys(ticketsByConnection).length > 0) {
-            let updatedData;
+        const connectionData = tickets.reduce((acc, ticket) => {
+            const connectionName = ticket.whatsapp?.name || "Sem Conexão";
+            const connectionColor = ticket.whatsapp?.color || "#5C59A0";
 
-            if (selectedDate === getCurrentDate()) {
-                updatedData = Object.entries(ticketsByConnection).map(([connectionName, dateCounts]) => {
-                    const totalCount = Object.values(dateCounts).reduce((acc, count) => acc + count, 0);
-                    return { name: connectionName, value: totalCount };
-                });
-            } else {
-                updatedData = Object.entries(ticketsByConnection).map(([connectionName, dateCounts]) => {
-                    const formattedDate = formatDateToDDMMYYYY(selectedDate);
-                    const count = dateCounts[formattedDate] || 0;
-                    return { name: connectionName, value: count };
-                });
+            if (!acc[connectionName]) {
+                acc[connectionName] = { value: 0, color: connectionColor };
             }
+            acc[connectionName].value++;
 
-            if (JSON.stringify(updatedData) !== JSON.stringify(connectionChartData)) {
-                setConnectionChartData(updatedData);
-            }
-        } else {
-            if (connectionChartData.length !== 0) {
-                setConnectionChartData([]);
-            }
-        }
-    }, [ticketsByConnection, selectedDate, formatDateToDDMMYYYY, connectionChartData]);
+            return acc;
+        }, {});
 
+        const formattedData = Object.entries(connectionData).map(([name, { value, color }]) => ({
+            name,
+            value,
+            color,
+        }));
+
+        setConnectionChartData(formattedData);
+    }, [tickets]);
 
     const handleDateChange = (event) => {
         setSelectedDate(event.target.value);
@@ -91,7 +92,7 @@ const ChartPerConnection = ({ searchParam, pageNumber, status, date, showAll, qu
                         label
                     >
                         {filteredChartData.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                            <Cell key={`cell-${index}`} fill={entry.color} />
                         ))}
                     </Pie>
                     <Tooltip content={<CustomTooltip />} cursor={true} />

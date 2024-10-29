@@ -18,7 +18,13 @@ import Title from "./Title";
 
 const Chart = () => {
 	const theme = useTheme();
-	const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split("T")[0]);
+	const [selectedDate, setSelectedDate] = useState(() => {
+		const today = new Date();
+		const year = today.getFullYear();
+		const month = String(today.getMonth() + 1).padStart(2, '0');
+		const day = String(today.getDate()).padStart(2, '0');
+		return `${year}-${month}-${day}`;
+	});
 	const { tickets } = useTickets({ date: selectedDate });
 	const [chartData, setChartData] = useState([]);
 
