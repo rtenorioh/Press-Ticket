@@ -573,7 +573,8 @@ const TicketListItem = ({ ticket, userId, filteredTags }) => {
 								className={classes.bottomButton}
 								color="primary"
 								onClick={e => handleOpenAcceptTicketWithouSelectQueue()}
-								loading={loading}>
+								loading={loading ? "true" : undefined}
+							>
 								<Done />
 							</IconButton>
 						</Tooltip>
