@@ -12,7 +12,9 @@ import api from "./services/api";
 
 import darkBackground from "./assets/wa-background-dark.jpg";
 import lightBackground from "./assets/wa-background-light.png";
-import { system } from "./config.json";
+import config from "./config.json";
+
+const { system } = config;
 
 const App = () => {
   const [locale, setLocale] = useState();
@@ -30,16 +32,16 @@ const App = () => {
         },
       },
       palette: {
-        primary: { main: system.color.lightTheme.palette.primary || "#6B62FE" },
-        secondary: { main: system.color.lightTheme.palette.secondary || "#F50057" },
-        toolbar: { main: system.color.lightTheme.toolbar.background || "#6B62FE" },
-        menuItens: { main: system.color.lightTheme.menuItens || "#ffffff" },
-        sub: { main: system.color.lightTheme.sub || "#ffffff" },
-        toolbarIcon: { main: system.color.lightTheme.toolbarIcon || "#ffffff" },
-        divide: { main: system.color.lightTheme.divide || "#E0E0E0" },
+        primary: { main: system?.color?.lightTheme?.palette?.primary || "#6B62FE" },
+        secondary: { main: system?.color?.lightTheme?.palette?.secondary || "#F50057" },
+        toolbar: { main: system?.color?.lightTheme?.toolbar?.background || "#6B62FE" },
+        menuItens: { main: system?.color?.lightTheme?.menuItens || "#ffffff" },
+        sub: { main: system?.color?.lightTheme?.sub || "#ffffff" },
+        toolbarIcon: { main: system?.color?.lightTheme?.toolbarIcon || "#ffffff" },
+        divide: { main: system?.color?.lightTheme?.divide || "#E0E0E0" },
         background: {
-          default: system.color.lightTheme.palette.background.default || "#eeeeee",
-          paper: system.color.lightTheme.palette.background.paper || "#ffffff",
+          default: system?.color?.lightTheme?.palette?.background?.default || "#eeeeee",
+          paper: system?.color?.lightTheme?.palette?.background?.paper || "#ffffff",
         },
       },
       backgroundImage: `url(${lightBackground})`,
