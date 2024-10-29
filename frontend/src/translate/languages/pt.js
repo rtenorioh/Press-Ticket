@@ -150,9 +150,10 @@ const messages = {
           },
         },
         table: {
-          id: "ID da Instância",
+          id: "ID",
           channel: "Canal",
           name: "Nome",
+          color: "Cor",
           number: "Número",
           status: "Status",
           lastUpdate: "Última atualização",

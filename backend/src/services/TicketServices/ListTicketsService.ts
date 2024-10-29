@@ -67,7 +67,7 @@ const ListTicketsService = async ({
     {
       model: Whatsapp,
       as: "whatsapp",
-      attributes: ["name", "type"]
+      attributes: ["name", "type", "color"]
     }
   ];
 

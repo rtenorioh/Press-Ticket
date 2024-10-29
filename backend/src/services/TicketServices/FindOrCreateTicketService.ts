@@ -2,6 +2,7 @@ import { subSeconds } from "date-fns";
 import { Op } from "sequelize";
 import Contact from "../../models/Contact";
 import Ticket from "../../models/Ticket";
+import Whatsapp from "../../models/Whatsapp";
 import ListSettingsServiceOne from "../SettingServices/ListSettingsServiceOne";
 import ShowTicketService from "./ShowTicketService";
 
@@ -20,7 +21,13 @@ const FindOrCreateTicketService = async (
       },
       contactId: groupContact ? groupContact.id : contact.id,
       whatsappId
-    }
+    },
+    include: [
+      {
+        model: Whatsapp,
+        attributes: ["color"]
+      }
+    ]
   });
 
   if (ticket) {
@@ -33,6 +40,12 @@ const FindOrCreateTicketService = async (
         contactId: groupContact.id,
         whatsappId
       },
+      include: [
+        {
+          model: Whatsapp,
+          attributes: ["color"]
+        }
+      ],
       order: [["updatedAt", "DESC"]]
     });
 
@@ -75,15 +88,25 @@ const FindOrCreateTicketService = async (
   }
 
   if (!ticket) {
-    ticket = await Ticket.create({
-      contactId: groupContact ? groupContact.id : contact.id,
-      status: "pending",
-      isGroup: !!groupContact,
-      userId,
-      queueId,
-      unreadMessages,
-      whatsappId
-    });
+    ticket = await Ticket.create(
+      {
+        contactId: groupContact ? groupContact.id : contact.id,
+        status: "pending",
+        isGroup: !!groupContact,
+        userId,
+        queueId,
+        unreadMessages,
+        whatsappId
+      },
+      {
+        include: [
+          {
+            model: Whatsapp,
+            attributes: ["color"]
+          }
+        ]
+      }
+    );
   }
 
   ticket = await ShowTicketService(ticket.id);

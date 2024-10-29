@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
+import AppError from "../errors/AppError";
 import { getIO } from "../libs/socket";
 import { removeWbot } from "../libs/wbot";
 import { StartWhatsAppSession } from "../services/WbotServices/StartWhatsAppSession";
-import AppError from "../errors/AppError";
 
 import CreateWhatsAppService from "../services/WhatsappService/CreateWhatsAppService";
 import DeleteWhatsAppService from "../services/WhatsappService/DeleteWhatsAppService";
@@ -17,6 +17,7 @@ interface WhatsappData {
   farewellMessage?: string;
   status?: string;
   isDefault?: boolean;
+  color?: string;
 }
 
 export const index = async (req: Request, res: Response): Promise<Response> => {
@@ -26,9 +27,8 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
 };
 
 export const store = async (req: Request, res: Response): Promise<Response> => {
+  const WhatsApps = await ListWhatsAppsService();
 
-const WhatsApps = await ListWhatsAppsService();
-  
   if (WhatsApps.length >= Number(process.env.CONNECTIONS_LIMIT)) {
     throw new AppError("ERR_CONNECTION_CREATION_COUNT", 403);
   }
@@ -39,7 +39,8 @@ const WhatsApps = await ListWhatsAppsService();
     isDefault,
     greetingMessage,
     farewellMessage,
-    queueIds
+    queueIds,
+    color
   }: WhatsappData = req.body;
 
   const { whatsapp, oldDefaultWhatsapp } = await CreateWhatsAppService({
@@ -48,7 +49,8 @@ const WhatsApps = await ListWhatsAppsService();
     isDefault,
     greetingMessage,
     farewellMessage,
-    queueIds
+    queueIds,
+    color
   });
 
   StartWhatsAppSession(whatsapp);

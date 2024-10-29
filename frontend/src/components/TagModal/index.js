@@ -1,12 +1,12 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useContext, useEffect, useState } from "react";
 
-import * as Yup from "yup";
 import {
-    Formik,
+    Field,
     Form,
-    Field
+    Formik
 } from "formik";
 import { toast } from "react-toastify";
+import * as Yup from "yup";
 
 import {
     Button,
@@ -21,15 +21,15 @@ import {
     TextField
 } from "@material-ui/core";
 
-import { Colorize } from "@material-ui/icons";
-import { ColorBox } from 'material-ui-color';
 import { green } from "@material-ui/core/colors";
+import ColorLensIcon from '@material-ui/icons/ColorLens';
+import { SketchPicker } from 'react-color';
 
 import { i18n } from "../../translate/i18n";
 
-import api from "../../services/api";
-import toastError from "../../errors/toastError";
 import { AuthContext } from "../../context/Auth/AuthContext";
+import toastError from "../../errors/toastError";
+import api from "../../services/api";
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -42,11 +42,9 @@ const useStyles = makeStyles(theme => ({
             marginRight: theme.spacing(1),
         },
     },
-
     btnWrapper: {
         position: "relative",
     },
-
     buttonProgress: {
         color: green[500],
         position: "absolute",
@@ -59,10 +57,15 @@ const useStyles = makeStyles(theme => ({
         margin: theme.spacing(1),
         minWidth: 120,
     },
-    colorAdorment: {
+    colorPreview: {
         width: 20,
         height: 20,
+        border: '1px solid rgba(0, 0, 0, 0.23)',
     },
+    colorPicker: {
+        position: 'absolute',
+        zIndex: 2,
+    }
 }));
 
 const TagSchema = Yup.object().shape({
@@ -74,14 +77,17 @@ const TagSchema = Yup.object().shape({
 const TagModal = ({ open, onClose, tagId, reload }) => {
     const classes = useStyles();
     const { user } = useContext(AuthContext);
-    const [colorPickerModalOpen, setColorPickerModalOpen] = useState(false);
-
+    const [showColorPicker, setShowColorPicker] = useState(false);
+    const [color, setColor] = useState("#5C59A0");
     const initialState = {
         name: "",
         color: ""
     };
-
     const [tag, setTag] = useState(initialState);
+
+    const handleColorChange = (color) => {
+        setColor(color.hex);
+    };
 
     useEffect(() => {
         try {
@@ -100,7 +106,6 @@ const TagModal = ({ open, onClose, tagId, reload }) => {
 
     const handleClose = () => {
         setTag(initialState);
-        setColorPickerModalOpen(false);
         onClose();
     };
 
@@ -163,51 +168,34 @@ const TagModal = ({ open, onClose, tagId, reload }) => {
                                 </div>
                                 <br />
                                 <div className={classes.multFieldLine}>
-                                    <Field
-                                        as={TextField}
-                                        fullWidth
-                                        label={i18n.t("tagModal.form.color")}
-                                        name="color"
-                                        id="color"
-                                        error={touched.color && Boolean(errors.color)}
-                                        helperText={touched.color && errors.color}
+                                    <TextField
+                                        label="Color"
+                                        onClick={() => setShowColorPicker(show => !show)}
+                                        value={color}
+                                        variant="outlined"
+                                        margin="dense"
+                                        className={classes.textField}
                                         InputProps={{
                                             startAdornment: (
                                                 <InputAdornment position="start">
-                                                    <div
-                                                        style={{ backgroundColor: values.color }}
-                                                        className={classes.colorAdorment}
-                                                    ></div>
+                                                    <div className={classes.colorPreview} style={{ backgroundColor: color }} />
                                                 </InputAdornment>
                                             ),
                                             endAdornment: (
-                                                <IconButton
-                                                    size="small"
-                                                    color="secondary"
-                                                    onClick={() => setColorPickerModalOpen(!colorPickerModalOpen)}
-                                                >
-                                                    <Colorize />
-                                                </IconButton>
+                                                <InputAdornment position="end">
+                                                    <IconButton aria-label="color picker">
+                                                        <ColorLensIcon />
+                                                    </IconButton>
+                                                </InputAdornment>
                                             ),
                                         }}
-                                        variant="outlined"
-                                        margin="dense"
                                     />
+                                    {showColorPicker && (
+                                        <div style={{ position: 'absolute', zIndex: 2 }}>
+                                            <SketchPicker color={color} onChangeComplete={handleColorChange} />
+                                        </div>
+                                    )}
                                 </div>
-
-                                {colorPickerModalOpen && (
-                                    <div>
-                                        <ColorBox
-                                            disableAlpha={true}
-                                            hslGradient={false}
-                                            style={{ margin: '20px auto 0' }}
-                                            value={tag.color}
-                                            onChange={val => {
-                                                setTag(prev => ({ ...prev, color: `#${val.hex}` }));
-                                            }}
-                                        />
-                                    </div>
-                                )}
                             </DialogContent>
                             <DialogActions>
                                 <Button

@@ -38,8 +38,8 @@ const App = () => {
         toolbarIcon: { main: system.color.lightTheme.toolbarIcon || "#ffffff" },
         divide: { main: system.color.lightTheme.divide || "#E0E0E0" },
         background: {
-          default: system.color.lightTheme.palette.background.default || "#ffffff",
-          paper: system.color.lightTheme.palette.background.paper || "#eeeeee",
+          default: system.color.lightTheme.palette.background.default || "#eeeeee",
+          paper: system.color.lightTheme.palette.background.paper || "#ffffff",
         },
       },
       backgroundImage: `url(${lightBackground})`,

@@ -15,15 +15,16 @@ import {
 	DialogTitle,
 	FormControlLabel,
 	IconButton,
+	InputAdornment,
 	MenuItem,
 	Select,
 	Switch,
 	TextField,
 	Tooltip
 } from "@material-ui/core";
-
 import { FileCopyOutlined, InfoOutlined } from "@material-ui/icons";
-
+import ColorLensIcon from '@material-ui/icons/ColorLens';
+import { SketchPicker } from 'react-color';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import toastError from "../../errors/toastError";
 import api from "../../services/api";
@@ -34,6 +35,15 @@ const useStyles = makeStyles(theme => ({
 	root: {
 		display: "flex",
 		flexWrap: "wrap",
+	},
+	colorPreview: {
+		width: 20,
+		height: 20,
+		border: '1px solid rgba(0, 0, 0, 0.23)',
+	},
+	colorPicker: {
+		position: 'absolute',
+		zIndex: 2,
 	},
 	multiFieldLine: {
 		display: "flex",
@@ -131,6 +141,12 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
 	const [availableChannels, setAvailableChannels] = useState([]);
 	const [selectedChannel, setSelectedChannel] = useState("");
 	const [copySuccess, setCopySuccess] = useState(false);
+	const [color, setColor] = useState("#5C59A0");
+	const [showColorPicker, setShowColorPicker] = useState(false);
+
+	const handleColorChange = (color) => {
+		setColor(color.hex);
+	};
 
 	const fetchChannels = async () => {
 		try {
@@ -152,7 +168,7 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
 			try {
 				const { data } = await api.get(`whatsapp/${whatsAppId}`);
 				setWhatsApp(data);
-
+				setColor(data?.color)
 				const whatsQueueIds = data.queues?.map(queue => queue.id);
 				setSelectedQueueIds(whatsQueueIds);
 			} catch (err) {
@@ -168,7 +184,7 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
 	};
 
 	const handleSaveWhatsApp = async values => {
-		const whatsappData = { ...values, queueIds: selectedQueueIds };
+		const whatsappData = { ...values, queueIds: selectedQueueIds, color: color };
 		try {
 			if (isHubSelected && selectedChannel) {
 				const selectedChannelObj = availableChannels.find(
@@ -281,7 +297,7 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
 								{isHubSelected && (
 									<div>
 										<Select
-											label="Select Channel"
+											label="Selecionar Canal"
 											fullWidth
 											value={selectedChannel || ""}
 											onChange={e => {
@@ -379,6 +395,33 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
 												margin="dense"
 											/>
 										</div>
+										<TextField
+											label="Color"
+											onClick={() => setShowColorPicker(show => !show)}
+											value={color}
+											variant="outlined"
+											margin="dense"
+											className={classes.textField}
+											InputProps={{
+												startAdornment: (
+													<InputAdornment position="start">
+														<div className={classes.colorPreview} style={{ backgroundColor: color }} />
+													</InputAdornment>
+												),
+												endAdornment: (
+													<InputAdornment position="end">
+														<IconButton aria-label="color picker">
+															<ColorLensIcon />
+														</IconButton>
+													</InputAdornment>
+												),
+											}}
+										/>
+										{showColorPicker && (
+											<div style={{ position: 'absolute', zIndex: 2 }}>
+												<SketchPicker color={color} onChangeComplete={handleColorChange} />
+											</div>
+										)}
 										<QueueSelect
 											selectedQueueIds={selectedQueueIds}
 											onChange={selectedIds => setSelectedQueueIds(selectedIds)}

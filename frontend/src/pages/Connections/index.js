@@ -73,7 +73,7 @@ const useStyles = makeStyles(theme => ({
 	},
 	buttonProgress: {
 		color: green[500],
-	},
+	}
 }));
 
 const CustomToolTip = ({ title, content, children }) => {
@@ -399,6 +399,9 @@ const Connections = () => {
 								{i18n.t("connections.table.name")}
 							</TableCell>
 							<TableCell align="center">
+								{i18n.t("connections.table.color")}
+							</TableCell>
+							<TableCell align="center">
 								{i18n.t("connections.table.status")}
 							</TableCell>
 							<TableCell align="center">
@@ -436,6 +439,19 @@ const Connections = () => {
 												{whatsApp.name}
 											</TableCell>
 											<TableCell align="center">
+												<div className={classes.customTableCell}>
+													<span
+														style={{
+															backgroundColor: whatsApp.color,
+															width: 20,
+															height: 20,
+															alignSelf: "center",
+															borderRadius: 10
+														}}
+													/>
+												</div>
+											</TableCell>
+											<TableCell align="center">
 												{renderStatusToolTips(whatsApp)}
 											</TableCell>
 											<TableCell align="center">
@@ -460,14 +476,12 @@ const Connections = () => {
 												)}
 											</TableCell>
 											<TableCell align="center">
-												{whatsApp.type === null && (
-													<IconButton
-														size="small"
-														onClick={() => handleEditWhatsApp(whatsApp)}
-													>
-														<Edit color="secondary" />
-													</IconButton>
-												)}
+												<IconButton
+													size="small"
+													onClick={() => handleEditWhatsApp(whatsApp)}
+												>
+													<Edit color="secondary" />
+												</IconButton>
 												<IconButton
 													size="small"
 													onClick={e => {

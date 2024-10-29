@@ -69,6 +69,13 @@ class Whatsapp extends Model<Whatsapp> {
   @Column
   isDisplay: boolean;
 
+  @AllowNull
+  @Column({
+    type: DataType.STRING,
+    defaultValue: "#5C59A0"
+  })
+  color: string;
+
   @CreatedAt
   createdAt: Date;
 
