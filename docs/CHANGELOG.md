@@ -1,5 +1,27 @@
 # Changelog
 
+### v1.9.0
+
+### v1.8.1
+
+- [Correção do workflow release.yml](https://github.com/rtenorioh/Press-Ticket/commit/679c0d28b7852b3a625551209d3f49ae4ecda7fa);
+- [Correção em foreign key](https://github.com/rtenorioh/Press-Ticket/commit/fc4e30f1483cb807a2d4ae386a930c39d2e128fc);
+- [Ajuste na validação do toastError](https://github.com/rtenorioh/Press-Ticket/commit/68d9c80338a274543d3ffbe2512218dc46480ec1);
+- [Correção no ID na ativação do Channel](https://github.com/rtenorioh/Press-Ticket/commit/b90fa7ee36802bf62326b806db57b84420d3e242); e
+- [Atualização do README](https://github.com/rtenorioh/Press-Ticket/commit/8276c9ee378f065fc48dfc5db60a22a086491560).
+
+### v1.8.0
+
+- [CRUD apenas admin ou habilitado nas configurações](https://github.com/rtenorioh/Press-Ticket/commit/87638c7c7410e6f29c3775aeab2f186888f16bb6)
+- [Atualização](https://github.com/rtenorioh/Press-Ticket/commit/addd9c4e0d1e5425588894304c78bc6cdca61da8)
+- [Implementação NotificameHub](https://github.com/rtenorioh/Press-Ticket/commit/4cf78a3a5f19e8c9217c41529ed74efc3c66c0bf)
+- [Melhoria no Location](https://github.com/rtenorioh/Press-Ticket/commit/bf3ed164db6364ed7dea5352286299490c0b4407)
+- [Atualização no UPDATE.sh](https://github.com/rtenorioh/Press-Ticket/commit/bc67ab2813805f721c601fa67e93df4a59d33393)
+- [Ajustes nos Docs de Instalação](https://github.com/rtenorioh/Press-Ticket/commit/11f1b8bc2e5b945edff7d5c95d17a8b60b9a9cd1)
+- [Correção para exibir apenas a wwebjs](https://github.com/rtenorioh/Press-Ticket/commit/01f24ef412d82fac4a692dc7e9efb4d88058a19e)
+- [Leve ajuste no layout do dashboard](https://github.com/rtenorioh/Press-Ticket/commit/61bb2962e6face78b057d59147ac30acd24ce80a)
+- [ajuste no layout do whatsappModal](https://github.com/rtenorioh/Press-Ticket/commit/26c3874c9daa62597b3cde79563540322c7c3ae8)
+
 ### 23/09/2024
 
 - [Ajuste no atualizador](https://github.com/rtenorioh/Press-Ticket/commit/0a96ad8bdc537f3670afb5ecd31a9242bcc44b21);

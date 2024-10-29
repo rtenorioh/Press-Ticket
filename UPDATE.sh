@@ -1,5 +1,5 @@
 #!/bin/bash
-VERSION="v1.8.1"
+VERSION="v1.9.0"
 
 SCRIPT_DIR=$(dirname "$0")
 
