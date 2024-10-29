@@ -33,7 +33,7 @@ jobs:
         id: prev_tag
         run: |
           echo "Fetching the previous tag..."
-          previous_tag=$(git describe --tags --abbrev=0 $(git rev-list --tags --skip=1 --max-count=1))
+          previous_tag=$(git describe --tags $(git rev-list --tags --skip=1 --max-count=1))
           echo "Previous tag: $previous_tag"
           echo "previous_tag=$previous_tag" >> $GITHUB_OUTPUT
 
