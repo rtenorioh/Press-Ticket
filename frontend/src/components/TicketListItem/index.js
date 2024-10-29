@@ -205,20 +205,29 @@ const TicketListItem = ({ ticket, userId, filteredTags }) => {
 	const [uName, setUserName] = useState(null);
 
 	useEffect(() => {
+		isMounted.current = true;
+
 		const delayDebounceFn = setTimeout(() => {
 			const fetchTicket = async () => {
+				if (!isMounted.current) return;
+
 				try {
 					const { data } = await api.get("/tickets/" + ticket.id);
-					setTag(data?.contact?.tags);
+					if (isMounted.current) {
+						setTag(data?.contact?.tags);
+					}
 				} catch (err) {
+					if (isMounted.current) {
+						toastError(err);
+					}
 				}
 			};
 			fetchTicket();
 		}, 500);
+
 		return () => {
-			if (delayDebounceFn !== null) {
-				clearTimeout(delayDebounceFn);
-			}
+			clearTimeout(delayDebounceFn);
+			isMounted.current = false;
 		};
 	}, [ticket.id, user, history]);
 

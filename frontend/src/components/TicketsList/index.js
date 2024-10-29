@@ -297,6 +297,9 @@ const TicketsList = (props) => {
 		});
 
 		return () => {
+			socket.off("ticket");
+			socket.off("appMessage");
+			socket.off("contact");
 			socket.disconnect();
 		};
 	}, [status, showAll, user, selectedQueueIds]);
