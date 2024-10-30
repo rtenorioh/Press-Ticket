@@ -43,12 +43,10 @@ interface Session extends Client {
 const writeFileAsync = promisify(writeFile);
 
 const verifyContact = async (msgContact: WbotContact): Promise<Contact> => {
-  const profilePicUrl = await msgContact.getProfilePicUrl();
 
   const contactData = {
     name: msgContact.name || msgContact.pushname || msgContact.id.user,
     number: msgContact.id.user,
-    profilePicUrl,
     isGroup: msgContact.isGroup
   };
 
@@ -713,6 +711,14 @@ const handleMessage = async (
       );
       await verifyMessage(sentMessage, ticket, contact);
     }
+    const profilePicUrl = await msgContact.getProfilePicUrl();
+    const contactData = {
+      name: msgContact.name || msgContact.pushname || msgContact.id.user,
+      number: msgContact.id.user,
+      profilePicUrl,
+      isGroup: msgContact.isGroup
+    };
+    await CreateOrUpdateContactService(contactData);
   } catch (err) {
     Sentry.captureException(err);
     logger.error(`Error handling whatsapp message: Err: ${err}`);
