@@ -20,15 +20,14 @@ import {
 	TextField,
 } from "@material-ui/core";
 
-
 import { green } from "@material-ui/core/colors";
 import { toast } from "react-toastify";
 import { i18n } from "../../translate/i18n";
 
-import ColorLensIcon from '@material-ui/icons/ColorLens';
-import { SketchPicker } from 'react-color';
+import { Colorize } from "@material-ui/icons";
 import toastError from "../../errors/toastError";
 import api from "../../services/api";
+import ColorPicker from "../ColorPicker";
 
 const useStyles = makeStyles(theme => ({
 	root: {
@@ -58,15 +57,10 @@ const useStyles = makeStyles(theme => ({
 		margin: theme.spacing(1),
 		minWidth: 120,
 	},
-	colorPreview: {
+	colorAdorment: {
 		width: 20,
 		height: 20,
-		border: '1px solid rgba(0, 0, 0, 0.23)',
 	},
-	colorPicker: {
-		position: 'absolute',
-		zIndex: 2,
-	}
 }));
 
 const QueueSchema = Yup.object().shape({
@@ -91,17 +85,12 @@ const QueueModal = ({ open, onClose, queueId }) => {
 		endWork: "",
 		absenceMessage: ""
 	};
-	const [showColorPicker, setShowColorPicker] = useState(false);
-	const [color, setColor] = useState("#5C59A0");
+	const [colorPickerModalOpen, setColorPickerModalOpen] = useState(false);
 	const [queue, setQueue] = useState(initialState);
 	const greetingRef = useRef();
 	const absenceRef = useRef();
 	const startWorkRef = useRef();
 	const endWorkRef = useRef();
-
-	const handleColorChange = (color) => {
-		setColor(color.hex);
-	};
 
 	useEffect(() => {
 		(async () => {
@@ -180,33 +169,49 @@ const QueueModal = ({ open, onClose, queueId }) => {
 									margin="dense"
 									className={classes.textField}
 								/>
-								<TextField
-									label="Color"
-									onClick={() => setShowColorPicker(show => !show)}
-									value={color}
-									variant="outlined"
-									margin="dense"
-									className={classes.textField}
+								<Field
+									as={TextField}
+									label={i18n.t("queueModal.form.color")}
+									name="color"
+									id="color"
+									onFocus={() => {
+										setColorPickerModalOpen(true);
+										greetingRef.current.focus();
+									}}
+									error={touched.color && Boolean(errors.color)}
+									helperText={touched.color && errors.color}
 									InputProps={{
 										startAdornment: (
 											<InputAdornment position="start">
-												<div className={classes.colorPreview} style={{ backgroundColor: color }} />
+												<div
+													style={{ backgroundColor: values.color }}
+													className={classes.colorAdorment}
+												></div>
 											</InputAdornment>
 										),
 										endAdornment: (
-											<InputAdornment position="end">
-												<IconButton aria-label="color picker">
-													<ColorLensIcon />
-												</IconButton>
-											</InputAdornment>
+											<IconButton
+												size="small"
+												color="default"
+												onClick={() => setColorPickerModalOpen(true)}
+											>
+												<Colorize />
+											</IconButton>
 										),
 									}}
+									variant="outlined"
+									margin="dense"
 								/>
-								{showColorPicker && (
-									<div style={{ position: 'absolute', zIndex: 2 }}>
-										<SketchPicker color={color} onChangeComplete={handleColorChange} />
-									</div>
-								)}
+								<ColorPicker
+									open={colorPickerModalOpen}
+									handleClose={() => setColorPickerModalOpen(false)}
+									onChange={color => {
+										values.color = color;
+										setQueue(() => {
+											return { ...values, color };
+										});
+									}}
+								/>
 								<div>
 									<Field
 										as={TextField}
