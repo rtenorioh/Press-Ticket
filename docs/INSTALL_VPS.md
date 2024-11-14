@@ -323,31 +323,25 @@ PORT=3333
 nano .env
 ```
 
-### 8.5 Criando o arquivo config.json baseado no exemplo
-
-```
-cp src/config.json.example src/config.json
-```
-
-### 8.6 Compilando o frontend
+### 8.5 Compilando o frontend
 
 ```
 npm run build
 ```
 
-### 8.7 Iniciando o frontend com PM2
+### 8.6 Iniciando o frontend com PM2
 
 ```
 pm2 start server.js --name Press-Ticket-frontend
 ```
 
-### 8.8 Salvando os serviços iniciados pelo PM2
+### 8.7 Salvando os serviços iniciados pelo PM2
 
 ```
 pm2 save
 ```
 
-### 8.9 Listar os serviços iniciados pelo PM2
+### 8.8 Listar os serviços iniciados pelo PM2
 
 ```
 pm2 list

@@ -151,20 +151,20 @@ sleep 2
 
 cd ../frontend
 
-sleep 2
+# sleep 2
 
-echo " " | tee -a "$LOG_FILE"
-echo "VERIFICANDO O CONFIG.JSON" | tee -a "$LOG_FILE"
-echo " " | tee -a "$LOG_FILE"
+# echo " " | tee -a "$LOG_FILE"
+# echo "VERIFICANDO O CONFIG.JSON" | tee -a "$LOG_FILE"
+# echo " " | tee -a "$LOG_FILE"
 
-sleep 2
+# sleep 2
 
-if [ ! -e src/config.json ]; then
-  echo "Criando o arquivo config.json" | tee -a "$LOG_FILE"
-  cp src/config.json.example src/config.json | tee -a "$LOG_FILE"
-else
-  echo "O arquivo config.json já existe" | tee -a "$LOG_FILE"
-fi
+# if [ ! -e src/config.json ]; then
+#   echo "Criando o arquivo config.json" | tee -a "$LOG_FILE"
+#   cp src/config.json.example src/config.json | tee -a "$LOG_FILE"
+# else
+#   echo "O arquivo config.json já existe" | tee -a "$LOG_FILE"
+# fi
 
 sleep 2
 
