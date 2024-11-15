@@ -40,12 +40,6 @@ module.exports = {
           value: "disabled",
           createdAt: new Date(),
           updatedAt: new Date()
-        },
-        {
-          key: "darkMode",
-          value: "disabled",
-          createdAt: new Date(),
-          updatedAt: new Date()
         }
       ],
       {}

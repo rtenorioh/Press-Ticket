@@ -47,12 +47,10 @@ import MarkdownWrapper from "../MarkdownWrapper";
 import clsx from "clsx";
 import receiveIcon from "../../assets/receive.png";
 import sendIcon from "../../assets/send.png";
-import { system } from "../../config.json";
 import { AuthContext } from "../../context/Auth/AuthContext";
 import toastError from "../../errors/toastError";
 import api from "../../services/api";
 import { i18n } from "../../translate/i18n";
-
 
 const useStyles = makeStyles(theme => ({
 	ticket: {
@@ -523,7 +521,7 @@ const TicketListItem = ({ ticket, userId, filteredTags }) => {
 									<Chip
 										className={classes.Radiusdot}
 										style={{
-											backgroundColor: system.color.lightTheme.palette.primary,
+											backgroundColor: ticket.whatsapp?.color || "#F7F7F7",
 											fontSize: "0.8em",
 											fontWeight: "bold",
 											height: 16,

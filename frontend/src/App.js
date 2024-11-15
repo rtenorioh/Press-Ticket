@@ -1,132 +1,98 @@
-import React, { useEffect, useState } from "react";
-import "react-toastify/dist/ReactToastify.css";
-import Routes from "./routes";
-
-import { ptBR } from "@material-ui/core/locale";
-import { createTheme, ThemeProvider } from "@material-ui/core/styles";
-
 import { CssBaseline } from "@material-ui/core";
-
+import { ptBR } from "@material-ui/core/locale";
+import { ThemeProvider } from "@material-ui/core/styles";
+import React, { useEffect, useState } from 'react';
+import "react-toastify/dist/ReactToastify.css";
 import toastError from "./errors/toastError";
+import Routes from "./routes";
 import api from "./services/api";
-
-import darkBackground from "./assets/wa-background-dark.jpg";
-import lightBackground from "./assets/wa-background-light.png";
-import config from "./config.json";
-
-const { system } = config;
+import loadThemeConfig from './themes/themeConfig';
 
 const App = () => {
-  const [locale, setLocale] = useState();
-
-  const lightTheme = createTheme(
-    {
-      scrollbarStyles: {
-        "&::-webkit-scrollbar": {
-          width: "8px",
-          height: "8px",
-        },
-        "&::-webkit-scrollbar-thumb": {
-          boxShadow: "inset 0 0 6px rgba(0, 0, 0, 0.3)",
-          backgroundColor: "#e8e8e8",
-        },
-      },
-      palette: {
-        primary: { main: system?.color?.lightTheme?.palette?.primary || "#6B62FE" },
-        secondary: { main: system?.color?.lightTheme?.palette?.secondary || "#F50057" },
-        toolbar: { main: system?.color?.lightTheme?.toolbar?.background || "#6B62FE" },
-        menuItens: { main: system?.color?.lightTheme?.menuItens || "#ffffff" },
-        sub: { main: system?.color?.lightTheme?.sub || "#ffffff" },
-        toolbarIcon: { main: system?.color?.lightTheme?.toolbarIcon || "#ffffff" },
-        divide: { main: system?.color?.lightTheme?.divide || "#E0E0E0" },
-        background: {
-          default: system?.color?.lightTheme?.palette?.background?.default || "#eeeeee",
-          paper: system?.color?.lightTheme?.palette?.background?.paper || "#ffffff",
-        },
-      },
-      backgroundImage: `url(${lightBackground})`,
-    },
-    locale
-  );
-
-  const darkTheme = createTheme(
-    {
-      overrides: {
-        MuiCssBaseline: {
-          '@global': {
-            body: {
-              backgroundColor: "#080d14",
-            }
-          }
-        }
-      },
-      scrollbarStyles: {
-        "&::-webkit-scrollbar": {
-          width: "8px",
-          height: "8px",
-        },
-        "&::-webkit-scrollbar-thumb": {
-          boxShadow: "inset 0 0 6px rgba(0, 0, 0, 0.3)",
-          backgroundColor: "#ffffff",
-        },
-      },
-      palette: {
-        primary: { main: system.color.darkTheme.palette.primary || "#52d869" },
-        secondary: { main: system.color.darkTheme.palette.secondary || "#ff9100" },
-        toolbar: { main: system.color.darkTheme.toolbar.background || "#52d869" },
-        menuItens: { main: system.color.darkTheme.menuItens || "#181d22" },
-        sub: { main: system.color.darkTheme.sub || "#181d22" },
-        toolbarIcon: { main: system.color.darkTheme.toolbarIcon || "#181d22" },
-        divide: { main: system.color.darkTheme.divide || "#080d14" },
-        background: {
-          default: system.color.darkTheme.palette.background.default || "#080d14",
-          paper: system.color.darkTheme.palette.background.paper || "#181d22",
-        },
-        text: {
-          primary: system.color.darkTheme.palette.text.primary || "#52d869",
-          secondary: system.color.darkTheme.palette.text.secondary || "#ffffff",
-        },
-      },
-      backgroundImage: `url(${darkBackground})`,
-    },
-    locale
-  );
-
+  const [locale, setLocale] = useState(ptBR);
   const [theme, setTheme] = useState("light");
+  const [lightThemeConfig, setLightThemeConfig] = useState({});
+  const [darkThemeConfig, setDarkThemeConfig] = useState({});
+
+  const toggleTheme = () => {
+    const newTheme = theme === "light" ? "dark" : "light";
+    setTheme(newTheme);
+    localStorage.setItem("theme", newTheme);
+  };
+
+  const onThemeConfigUpdate = (themeType, updatedConfig) => {
+    if (themeType === "light") {
+      setLightThemeConfig((prevConfig) => ({ ...prevConfig, ...updatedConfig }));
+    } else if (themeType === "dark") {
+      setDarkThemeConfig((prevConfig) => ({ ...prevConfig, ...updatedConfig }));
+    }
+  };
 
   useEffect(() => {
-
-    const fetchDarkMode = async () => {
+    const fetchThemeConfig = async () => {
       try {
-        const { data } = await api.get("/settings");
-        const settingIndex = data.filter(s => s.key === 'darkMode');
+        const { data } = await api.get("/personalizations");
 
-        if (settingIndex[0].value === "enabled") {
-          setTheme("dark")
+        if (data && data.length > 0) {
+          const lightConfig = data.find(themeConfig => themeConfig.theme === "light");
+          const darkConfig = data.find(themeConfig => themeConfig.theme === "dark");
+
+          if (lightConfig) {
+            setLightThemeConfig(lightConfig);
+          }
+          if (darkConfig) {
+            setDarkThemeConfig(darkConfig);
+          }
         }
-
       } catch (err) {
-        setTheme("light")
         toastError(err);
       }
     };
 
-    fetchDarkMode();
-
+    fetchThemeConfig();
   }, []);
 
   useEffect(() => {
-    const i18nlocale = localStorage.getItem("i18nextLng");
-    const browserLocale = i18nlocale.substring(0, 2) + i18nlocale.substring(3, 5);
+    const savedTheme = localStorage.getItem("theme") || "light";
+    setTheme(savedTheme);
+  }, [theme]);
 
-    if (browserLocale === "ptBR") {
-      setLocale(ptBR);
+  useEffect(() => {
+    const i18nlocale = localStorage.getItem("i18nextLng");
+    if (i18nlocale) {
+      const browserLocale = i18nlocale.substring(0, 2) + i18nlocale.substring(3, 5);
+      if (browserLocale === "ptBR") {
+        setLocale(ptBR);
+      }
     }
   }, []);
 
+  useEffect(() => {
+    const favicon = document.querySelector("link[rel*='icon']") || document.createElement("link");
+    favicon.type = "image/x-icon";
+    favicon.rel = "shortcut icon";
+
+    const faviconPath = theme === "dark" ? "/assets/favicoDark.ico" : "/assets/favico.ico";
+    fetch(faviconPath, { method: "HEAD" })
+      .then(response => {
+        if (response.ok) {
+          favicon.href = faviconPath;
+        } else {
+          favicon.href = "/favicon.ico";
+        }
+      })
+      .catch(() => {
+        favicon.href = "/favicon.ico";
+      });
+
+    document.head.appendChild(favicon);
+  }, [theme]);
+
+  const selectedTheme = loadThemeConfig(theme, theme === "light" ? lightThemeConfig : darkThemeConfig, locale);
+
   return (
-    <ThemeProvider theme={theme === "light" ? lightTheme : darkTheme}>
-      <Routes />
+    <ThemeProvider theme={selectedTheme}>
+      <Routes toggleTheme={toggleTheme} onThemeConfigUpdate={onThemeConfigUpdate} />
       <CssBaseline />
     </ThemeProvider>
   );
