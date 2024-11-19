@@ -6,6 +6,7 @@ import "react-toastify/dist/ReactToastify.css";
 import toastError from "./errors/toastError";
 import Routes from "./routes";
 import api from "./services/api";
+import openSocket from "./services/socket-io";
 import loadThemeConfig from './themes/themeConfig';
 
 const App = () => {
@@ -87,6 +88,41 @@ const App = () => {
 
     document.head.appendChild(favicon);
   }, [theme]);
+
+  useEffect(() => {
+    const fetchPageTitle = async () => {
+      try {
+        const { data } = await api.get("/personalizations");
+
+        if (data && data.length > 0) {
+
+          const lightConfig = data.find(themeConfig => themeConfig.theme === "light");
+
+          if (lightConfig) {
+            document.title = lightConfig.company;
+          } else {
+            document.title = "Press Ticket";
+          }
+        }
+      } catch (err) {
+        toastError(err);
+        document.title = "Erro ao carregar título";
+      }
+    };
+
+    const socket = openSocket();
+    socket.on("personalization", data => {
+      if (data.action === "update") {
+        fetchPageTitle();
+      }
+    });
+
+    fetchPageTitle();
+
+    return () => {
+      socket.disconnect();
+    };
+  }, []);
 
   const selectedTheme = loadThemeConfig(theme, theme === "light" ? lightThemeConfig : darkThemeConfig, locale);
 

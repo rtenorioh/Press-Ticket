@@ -1,15 +1,13 @@
-import React, { useEffect, useState } from "react";
-import { useHistory } from "react-router-dom";
-import openSocket from "socket.io-client";
-
 import { Box, Container, makeStyles, Tab, Tabs } from "@material-ui/core";
+import React, { useContext, useEffect, useState } from "react";
+import { useHistory } from "react-router-dom";
 import { toast } from "react-toastify";
-
+import ErrorBoundary from "../../components/ErrorBoundary";
+import { AuthContext } from "../../context/Auth/AuthContext";
 import toastError from "../../errors/toastError";
 import api from "../../services/api";
+import openSocket from "../../services/socket-io.js";
 import { i18n } from "../../translate/i18n.js";
-
-import ErrorBoundary from "../../components/ErrorBoundary";
 import ComponentSettings from "./ComponentSettings";
 import Personalize from "./Personalize.js";
 
@@ -19,7 +17,7 @@ const useStyles = makeStyles(theme => ({
 		display: "flex",
 		height: "92%",
 		backgroundColor: theme.palette.background.paper,
-		padding: theme.spacing(1)
+		padding: theme.spacing(1),
 	},
 	tabs: {
 		borderRight: `1px solid ${theme.palette.divider}`,
@@ -35,6 +33,8 @@ const Settings = ({ onThemeConfigUpdate }) => {
 	const history = useHistory();
 	const [settings, setSettings] = useState([]);
 	const [tabValue, setTabValue] = useState(0);
+	const { user } = useContext(AuthContext);
+	const isMasterAdminEnabled = process.env.REACT_APP_MASTERADMIN === "ON";
 
 	useEffect(() => {
 		let isMounted = true;
@@ -59,13 +59,13 @@ const Settings = ({ onThemeConfigUpdate }) => {
 
 	useEffect(() => {
 		let isMounted = true;
-		const socket = openSocket(process.env.REACT_APP_BACKEND_URL);
+		const socket = openSocket();
 
-		socket.on("settings", data => {
+		socket.on("settings", (data) => {
 			if (isMounted && data.action === "update") {
-				setSettings(prevState => {
+				setSettings((prevState) => {
 					const aux = [...prevState];
-					const settingIndex = aux.findIndex(s => s.key === data.setting.key);
+					const settingIndex = aux.findIndex((s) => s.key === data.setting.key);
 					if (settingIndex !== -1) {
 						aux[settingIndex].value = data.setting.value;
 					}
@@ -80,7 +80,7 @@ const Settings = ({ onThemeConfigUpdate }) => {
 		};
 	}, []);
 
-	const handleChangeBooleanSetting = async e => {
+	const handleChangeBooleanSetting = async (e) => {
 		const selectedValue = e.target.checked ? "enabled" : "disabled";
 		const settingKey = e.target.name;
 
@@ -95,7 +95,7 @@ const Settings = ({ onThemeConfigUpdate }) => {
 		}
 	};
 
-	const handleChangeSetting = async e => {
+	const handleChangeSetting = async (e) => {
 		const selectedValue = e.target.value;
 		const settingKey = e.target.name;
 
@@ -109,8 +109,8 @@ const Settings = ({ onThemeConfigUpdate }) => {
 		}
 	};
 
-	const getSettingValue = key => {
-		const setting = settings.find(s => s.key === key);
+	const getSettingValue = (key) => {
+		const setting = settings.find((s) => s.key === key);
 		return setting ? setting.value : "";
 	};
 
@@ -128,7 +128,9 @@ const Settings = ({ onThemeConfigUpdate }) => {
 				className={classes.tabs}
 			>
 				<Tab label={i18n.t("settings.title")} />
-				<Tab label="Personalização" />
+				{(!isMasterAdminEnabled || user.profile === "masteradmin") && (
+					<Tab label="Personalização" />
+				)}
 			</Tabs>
 			<Box p={3}>
 				{tabValue === 0 && (
@@ -143,12 +145,10 @@ const Settings = ({ onThemeConfigUpdate }) => {
 						</ErrorBoundary>
 					</Container>
 				)}
-				{tabValue === 1 && (
+				{tabValue === 1 && (!isMasterAdminEnabled || user.profile === "masteradmin") && (
 					<Container className={classes.container}>
 						<ErrorBoundary>
-							<Personalize
-								onThemeConfigUpdate={onThemeConfigUpdate}
-							/>
+							<Personalize onThemeConfigUpdate={onThemeConfigUpdate} />
 						</ErrorBoundary>
 					</Container>
 				)}

@@ -307,14 +307,14 @@ npm install
 #URL BACKEND
 REACT_APP_BACKEND_URL=https://back.pressticket.com.br
 
-#Tempo de encerramento automático dos tickets
+#Tempo de encerramento automático dos tickets em horas
 REACT_APP_HOURS_CLOSE_TICKETS_AUTO=
-
-#Nome da Guia do navegador
-REACT_APP_PAGE_TITLE=PressTicket
 
 #PORTA do frontend
 PORT=3333
+
+#Para permitir acesso apenas do MasterAdmin (sempre ON)
+REACT_APP_MASTERADMIN=OFF
 ```
 
 ### 8.4 Editando o arquivo .env do frontend usando os dados do item 8.3
@@ -464,7 +464,7 @@ sudo nano /etc/nginx/nginx.conf
 ### 9.12 Incluir no arquivos de configuração do nginx dentro do http no item 9.11
 
 ```
-client_max_body_size 20M;
+client_max_body_size 50M;
 ```
 
 ### 9.13 Testando o Nginx
@@ -521,4 +521,18 @@ Senha:
 
 ```
 admin
+```
+
+# Seção 12: Usuário Master para Acesso
+
+Usuário:
+
+```
+masteradmin@pressticket.com.br
+```
+
+Senha:
+
+```
+masteradmin
 ```

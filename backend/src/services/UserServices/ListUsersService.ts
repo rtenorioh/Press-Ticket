@@ -19,15 +19,20 @@ const ListUsersService = async ({
   pageNumber = "1"
 }: Request): Promise<Response> => {
   const whereCondition = {
-    [Op.or]: [
+    [Op.and]: [
+      { profile: { [Op.ne]: "masteradmin" } },
       {
-        "$User.name$": Sequelize.where(
-          Sequelize.fn("LOWER", Sequelize.col("User.name")),
-          "LIKE",
-          `%${searchParam.toLowerCase()}%`
-        )
-      },
-      { email: { [Op.like]: `%${searchParam.toLowerCase()}%` } }
+        [Op.or]: [
+          {
+            "$User.name$": Sequelize.where(
+              Sequelize.fn("LOWER", Sequelize.col("User.name")),
+              "LIKE",
+              `%${searchParam.toLowerCase()}%`
+            )
+          },
+          { email: { [Op.like]: `%${searchParam.toLowerCase()}%` } }
+        ]
+      }
     ]
   };
   const limit = 20;
