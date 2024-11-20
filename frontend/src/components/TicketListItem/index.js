@@ -205,10 +205,8 @@ const TicketListItem = ({ ticket, userId, filteredTags }) => {
 	useEffect(() => {
 		isMounted.current = true;
 
-		const delayDebounceFn = setTimeout(() => {
+		setTimeout(() => {
 			const fetchTicket = async () => {
-				if (!isMounted.current) return;
-
 				try {
 					const { data } = await api.get("/tickets/" + ticket.id);
 					if (isMounted.current) {
@@ -224,7 +222,6 @@ const TicketListItem = ({ ticket, userId, filteredTags }) => {
 		}, 500);
 
 		return () => {
-			clearTimeout(delayDebounceFn);
 			isMounted.current = false;
 		};
 	}, [ticket.id, user, history]);
@@ -253,15 +250,18 @@ const TicketListItem = ({ ticket, userId, filteredTags }) => {
 				status: "open",
 				userId: user?.id,
 			});
+			history.push(`/tickets/${id}`);
 		} catch (err) {
-			setLoading(false);
-			toastError(err);
+			if (isMounted.current) {
+				toastError(err);
+			}
+		} finally {
+			if (isMounted.current) {
+				setLoading(false);
+			}
 		}
-		if (isMounted.current) {
-			setLoading(false);
-		}
-		history.push(`/tickets/${id}`);
 	};
+
 
 	const queueName = selectedTicket => {
 		let name = null;
@@ -340,12 +340,16 @@ const TicketListItem = ({ ticket, userId, filteredTags }) => {
 
 	} else {
 		const fetchUserName = async () => {
+			if (!isMounted.current) return;
 			try {
-				const { data } = await api.get("/users/" + ticket.userId, {
-				});
-				setUserName(data['name']);
+				const { data } = await api.get("/users/" + ticket.userId, {});
+				if (isMounted.current) {
+					setUserName(data['name']);
+				}
 			} catch (err) {
-				toastError(err);
+				if (isMounted.current) {
+					toastError(err);
+				}
 			}
 		};
 		fetchUserName();
@@ -441,6 +445,7 @@ const TicketListItem = ({ ticket, userId, filteredTags }) => {
 							{ticket.status === "closed" && (
 								<Badge
 									className={classes.closedBadge}
+									overlap="rectangular"
 									badgeContent={"closed"}
 									color="primary"
 								/>
