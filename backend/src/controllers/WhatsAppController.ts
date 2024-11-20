@@ -1,12 +1,14 @@
 import { Request, Response } from "express";
 import AppError from "../errors/AppError";
 import { getIO } from "../libs/socket";
-import { removeWbot } from "../libs/wbot";
+import { initWbot, removeWbot, shutdownWbot } from "../libs/wbot";
 import { StartWhatsAppSession } from "../services/WbotServices/StartWhatsAppSession";
 
+import Whatsapp from "../models/Whatsapp";
 import CreateWhatsAppService from "../services/WhatsappService/CreateWhatsAppService";
 import DeleteWhatsAppService from "../services/WhatsappService/DeleteWhatsAppService";
 import ListWhatsAppsService from "../services/WhatsappService/ListWhatsAppsService";
+import RestartWhatsAppService from "../services/WhatsappService/RestartWhatsAppService";
 import ShowWhatsAppService from "../services/WhatsappService/ShowWhatsAppService";
 import UpdateWhatsAppService from "../services/WhatsappService/UpdateWhatsAppService";
 
@@ -123,4 +125,75 @@ export const remove = async (
   });
 
   return res.status(200).json({ message: "Whatsapp deleted." });
+};
+
+export const restart = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  const { whatsappId } = req.params;
+
+  try {
+    await RestartWhatsAppService(whatsappId);
+    const io = getIO();
+    io.emit("whatsapp", {
+      action: "update",
+      whatsappId
+    });
+    return res
+      .status(200)
+      .json({ message: "WhatsApp session restarted successfully." });
+  } catch (error) {
+    return res.status(500).json({
+      message: "Failed to restart WhatsApp session.",
+      error: (error as Error).message
+    });
+  }
+};
+
+export const shutdown = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  const { whatsappId } = req.params;
+
+  try {
+    await shutdownWbot(whatsappId);
+    const io = getIO();
+    io.emit("whatsapp", {
+      action: "update",
+      whatsappId
+    });
+    return res
+      .status(200)
+      .json({ message: "WhatsApp session shutdown successfully." });
+  } catch (error) {
+    return res.status(500).json({
+      message: "Failed to shutdown WhatsApp session.",
+      error: (error as Error).message
+    });
+  }
+};
+
+export const start = async (req: Request, res: Response): Promise<Response> => {
+  const { whatsappId } = req.params;
+  const whatsapp = await Whatsapp.findByPk(whatsappId);
+  if (!whatsapp) throw Error("no se encontro el whatsapp");
+
+  try {
+    await initWbot(whatsapp);
+    const io = getIO();
+    io.emit("whatsapp", {
+      action: "update",
+      whatsappId
+    });
+    return res
+      .status(200)
+      .json({ message: "WhatsApp session started successfully." });
+  } catch (error) {
+    return res.status(500).json({
+      message: "Failed to start WhatsApp session.",
+      error: (error as Error).message
+    });
+  }
 };

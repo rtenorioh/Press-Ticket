@@ -285,3 +285,31 @@ export const removeWbot = (whatsappId: number): void => {
     logger.error(err);
   }
 };
+
+export const restartWbot = async (whatsappId: number): Promise<Session> => {
+  const sessionIndex = sessions.findIndex(s => s.id === whatsappId);
+  if (sessionIndex !== -1) {
+    const whatsapp = await Whatsapp.findByPk(whatsappId);
+    if (!whatsapp) {
+      throw new AppError("WhatsApp not found.");
+    }
+    sessions[sessionIndex].destroy();
+    sessions.splice(sessionIndex, 1);
+
+    const newSession = await initWbot(whatsapp);
+    return newSession;
+  }
+  throw new AppError("WhatsApp session not initialized.");
+};
+
+export const shutdownWbot = async (whatsappId: string): Promise<void> => {
+  const whatsappIDNumber: number = parseInt(whatsappId, 10);
+
+  const sessionIndex = sessions.findIndex(s => s.id === whatsappIDNumber);
+  if (sessionIndex !== -1) {
+    await sessions[sessionIndex].destroy();
+    sessions.splice(sessionIndex, 1);
+  } else {
+    throw new AppError("WhatsApp session not initialized.");
+  }
+};
