@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc",
-    "create": "npx sequelize db:create",
+    "create": "npx sequelize-cli db:create",
     "migrate": "tsc && npx sequelize-cli db:migrate",
     "migrate:undo": "tsc && npx sequelize-cli db:migrate:undo",
     "sequelize": "npx sequelize-cli db:migrate && npx sequelize-cli db:seed:all",
