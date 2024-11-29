@@ -2,9 +2,8 @@ import { Request, Response } from "express";
 import AppError from "../errors/AppError";
 import { getIO } from "../libs/socket";
 import { initWbot, removeWbot, shutdownWbot } from "../libs/wbot";
-import { StartWhatsAppSession } from "../services/WbotServices/StartWhatsAppSession";
-
 import Whatsapp from "../models/Whatsapp";
+import { StartWhatsAppSession } from "../services/WbotServices/StartWhatsAppSession";
 import CreateWhatsAppService from "../services/WhatsappService/CreateWhatsAppService";
 import DeleteWhatsAppService from "../services/WhatsappService/DeleteWhatsAppService";
 import ListWhatsAppsService from "../services/WhatsappService/ListWhatsAppsService";
@@ -157,17 +156,31 @@ export const shutdown = async (
 ): Promise<Response> => {
   const { whatsappId } = req.params;
 
+  if (!whatsappId) {
+    return res.status(400).json({ message: "WhatsApp ID is required." });
+  }
+
   try {
+    console.log(`Iniciando shutdown para WhatsApp ID: ${whatsappId}`);
+
     await shutdownWbot(whatsappId);
+    console.log(
+      `Shutdown realizado com sucesso para WhatsApp ID: ${whatsappId}`
+    );
+
     const io = getIO();
     io.emit("whatsapp", {
       action: "update",
       whatsappId
     });
-    return res
-      .status(200)
-      .json({ message: "WhatsApp session shutdown successfully." });
+    console.log("Evento emitido com sucesso via WebSocket.");
+
+    return res.status(200).json({
+      message: "WhatsApp session shutdown successfully."
+    });
   } catch (error) {
+    console.error("Erro ao desligar o WhatsApp:", error);
+
     return res.status(500).json({
       message: "Failed to shutdown WhatsApp session.",
       error: (error as Error).message

@@ -125,6 +125,7 @@ const messages = {
         },
         buttons: {
           add: "Adicionar WhatsApp",
+          shutdown: "Excluir",
           restart: "Restart",
           disconnect: "desconectar",
           tryAgain: "Tentar novamente",
@@ -457,7 +458,7 @@ const messages = {
         appBar: {
           message: {
             hi: "Olá",
-            text: "seja bem vindo ao Sistema"
+            text: "Seja bem-vindo ao Sistema"
           },
           user: {
             profile: "Perfil",

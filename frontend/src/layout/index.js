@@ -351,7 +351,7 @@ const LoggedInLayout = ({ children, toggleTheme, onThemeConfigUpdate }) => {
             noWrap
             className={classes.title}
           >
-            {i18n.t("mainDrawer.appBar.message.hi")} {user.name}, {i18n.t("mainDrawer.appBar.message.text")} {companyData.name || "Press Ticket"}
+            {i18n.t("mainDrawer.appBar.message.hi")}, {user.name}! {i18n.t("mainDrawer.appBar.message.text")} {companyData.name || "Press Ticket"}.
           </Typography>
 
           <ThemeSelector toggleTheme={toggleTheme} />
