@@ -1,16 +1,3 @@
-import React, { useContext, useEffect, useRef, useState } from "react";
-
-import {
-	useHistory,
-	useParams
-} from "react-router-dom";
-
-import {
-	format,
-	isSameDay,
-	parseISO
-} from "date-fns";
-
 import {
 	Avatar,
 	Badge,
@@ -24,7 +11,7 @@ import {
 	Tooltip,
 	Typography
 } from "@material-ui/core";
-
+import { green } from "@material-ui/core/colors";
 import {
 	ClearOutlined,
 	Done,
@@ -37,20 +24,26 @@ import {
 	Visibility,
 	WhatsApp
 } from "@material-ui/icons";
-
-import { green } from "@material-ui/core/colors";
-
-import AcceptTicketWithouSelectQueue from "../AcceptTicketWithoutQueueModal";
-import ContactTag from "../ContactTag";
-import MarkdownWrapper from "../MarkdownWrapper";
-
 import clsx from "clsx";
+import {
+	format,
+	isSameDay,
+	parseISO
+} from "date-fns";
+import React, { useContext, useEffect, useRef, useState } from "react";
+import {
+	useHistory,
+	useParams
+} from "react-router-dom";
 import receiveIcon from "../../assets/receive.png";
 import sendIcon from "../../assets/send.png";
 import { AuthContext } from "../../context/Auth/AuthContext";
 import toastError from "../../errors/toastError";
 import api from "../../services/api";
 import { i18n } from "../../translate/i18n";
+import AcceptTicketWithouSelectQueue from "../AcceptTicketWithoutQueueModal";
+import ContactTag from "../ContactTag";
+import MarkdownWrapper from "../MarkdownWrapper";
 
 const useStyles = makeStyles(theme => ({
 	ticket: {
@@ -176,7 +169,6 @@ const useStyles = makeStyles(theme => ({
 	secondaryContentSecond: {
 		display: 'flex',
 		marginTop: 2,
-		//marginLeft: "5px",
 		alignItems: "flex-start",
 		flexWrap: "wrap",
 		flexDirection: "row",
@@ -200,7 +192,6 @@ const TicketListItem = ({ ticket, userId, filteredTags }) => {
 	const { user } = useContext(AuthContext);
 	const [acceptTicketWithouSelectQueueOpen, setAcceptTicketWithouSelectQueueOpen] = useState(false);
 	const [tag, setTag] = useState([]);
-	const [uName, setUserName] = useState(null);
 
 	useEffect(() => {
 		isMounted.current = true;
@@ -261,7 +252,6 @@ const TicketListItem = ({ ticket, userId, filteredTags }) => {
 			}
 		}
 	};
-
 
 	const queueName = selectedTicket => {
 		let name = null;
@@ -335,25 +325,6 @@ const TicketListItem = ({ ticket, userId, filteredTags }) => {
 	const handleSelectTicket = id => {
 		history.push(`/tickets/${id}`);
 	};
-
-	if (ticket.status === "pending") {
-
-	} else {
-		const fetchUserName = async () => {
-			if (!isMounted.current) return;
-			try {
-				const { data } = await api.get("/users/" + ticket.userId, {});
-				if (isMounted.current) {
-					setUserName(data['name']);
-				}
-			} catch (err) {
-				if (isMounted.current) {
-					toastError(err);
-				}
-			}
-		};
-		fetchUserName();
-	}
 
 	return (
 		<React.Fragment key={ticket.id}>
@@ -541,8 +512,7 @@ const TicketListItem = ({ ticket, userId, filteredTags }) => {
 									/>
 								</Tooltip>
 							)}
-
-							{uName && (
+							{ticket.status !== "pending" && ticket?.user?.name && (
 								<Tooltip title={i18n.t("ticketsList.items.user")}>
 									<Chip
 										className={classes.Radiusdot}
@@ -558,7 +528,7 @@ const TicketListItem = ({ ticket, userId, filteredTags }) => {
 											marginRight: "5px",
 											marginBottom: "3px",
 										}}
-										label={uName.toUpperCase()}
+										label={ticket?.user?.name.toUpperCase()}
 									/>
 								</Tooltip>
 							)}
