@@ -9,27 +9,54 @@ interface PersonalizationData {
   theme: string;
   company?: string;
   url?: string;
-  primaryColor: string;
-  secondaryColor: string;
-  backgroundDefault: string;
-  backgroundPaper: string;
+  primaryColor?: string;
+  secondaryColor?: string;
+  backgroundDefault?: string;
+  backgroundPaper?: string;
   favico?: string | null;
   logo?: string | null;
   logoTicket?: string | null;
 }
 
-export const createOrUpdate = async (
+export const createOrUpdateCompany = async (
   req: Request,
   res: Response
 ): Promise<Response> => {
   try {
-    const personalizationData: PersonalizationData = req.body;
     const { theme } = req.params;
+    const { company, url } = req.body;
+
+    const personalizationData = { theme, company, url };
+
+    const personalization = await createOrUpdatePersonalization({
+      personalizationData,
+      theme
+    });
+
+    const io = getIO();
+    io.emit("personalization", {
+      action: personalization.isNew ? "create" : "update",
+      personalization: personalization.data
+    });
+
+    return res.status(200).json(personalization.data);
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+export const createOrUpdateLogos = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  try {
+    const { theme } = req.params;
+    const personalizationData: PersonalizationData = {
+      theme
+    };
 
     if (req.files) {
-      const files = req.files as {
-        [fieldname: string]: Express.Multer.File[];
-      };
+      const files = req.files as { [fieldname: string]: Express.Multer.File[] };
 
       if (files.favico && files.favico.length > 0) {
         personalizationData.favico = path.basename(files.favico[0].path);
@@ -43,6 +70,42 @@ export const createOrUpdate = async (
         );
       }
     }
+
+    personalizationData.theme = theme;
+
+    const personalization = await createOrUpdatePersonalization({
+      personalizationData,
+      theme
+    });
+
+    const io = getIO();
+    io.emit("personalization", {
+      action: personalization.isNew ? "create" : "update",
+      personalization: personalization.data
+    });
+
+    return res.status(200).json(personalization.data);
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+export const createOrUpdateColors = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  try {
+    const { theme } = req.params;
+    const { primaryColor, secondaryColor, backgroundDefault, backgroundPaper } =
+      req.body;
+
+    const personalizationData: PersonalizationData = {
+      theme,
+      primaryColor,
+      secondaryColor,
+      backgroundDefault,
+      backgroundPaper
+    };
 
     const personalization = await createOrUpdatePersonalization({
       personalizationData,

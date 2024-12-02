@@ -3,7 +3,7 @@
 #Variaveis
 @baseUrl = http://localhost:8080
 @token = 6175c0d0-acd5-4776-95a9-592c795da986
-@token2 = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IlByZXNzIFRpY2tldCIsInByb2ZpbGUiOiJhZG1pbiIsImlkIjoxLCJpYXQiOjE3MzI4ODUzMzQsImV4cCI6MTczMjg4ODkzNH0.4MSoKumH6IT2loUzdlm9OwKzy8BOohcAkMBv6j6Ho4o
+@token2 = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Ik1hc3RlckFkbWluIiwicHJvZmlsZSI6Im1hc3RlcmFkbWluIiwiaWQiOjIsImlhdCI6MTczMzEzNjUxOCwiZXhwIjoxNzMzMTQwMTE4fQ.UOA-goHaIATCvMs_eAXIIR6bjEBuOg1VbF40Q2zxUn0
 
 @refreshToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidG9rZW5WZXJzaW9uIjowLCJpYXQiOjE3MzI4ODUzMzQsImV4cCI6MTczMzQ5MDEzNH0.RwuRIufYUB9dQZQg0aeaVtnOryn-sESNL1mFlShmBM4
 
@@ -12,8 +12,8 @@ POST {{baseUrl}}/auth/login
 Content-Type: application/json
 
 {
-  "email": "admin@pressticket.com.br",
-  "password": "admin"
+  "email": "masteradmin@pressticket.com.br",
+  "password": "masteradmin"
 }
 
 ### Teste da Rota POST /auth/refresh_token
@@ -38,18 +38,34 @@ Content-Type: application/json
 GET {{baseUrl}}/personalizations
 Content-Type: application/json
 
-### (Criar ou Atualizar Personalização) Teste da Rota PUT /personalizations/:theme
-PUT {{baseUrl}}/personalizations/dark
+### (Criar ou Atualizar Dados da Empresa) Teste da Rota PUT /personalizations/:theme/company
+PUT {{baseUrl}}/personalizations/light/company
 Authorization: Bearer {{token2}}
 Content-Type: application/json
 
 {
   "company": "Press Ticket",
-  "url": "https://pressticket.com.br",
+  "url": "https://pressticket.com.br"
+}
+
+### (Criar ou Atualizar Cores) Teste da Rota PUT /personalizations/:theme/colors
+PUT {{baseUrl}}/personalizations/light/colorS
+Authorization: Bearer {{token2}}
+Content-Type: application/json
+
+{
   "primaryColor": "#ffffff",
   "secondaryColor": "#0000ff",
   "backgroundDefault": "#ff00ff",
-  "backgroundPaper": "#00ff00",
+  "backgroundPaper": "#00ff00"
+}
+
+### (Criar ou Atualizar Logos) Teste da Rota PUT /personalizations/:theme/logos
+PUT {{baseUrl}}/personalizations/light/logos
+Authorization: Bearer {{token2}}
+Content-Type: application/json
+
+{
   "favico": "teste.ico",
   "logo": null,
   "logoTicket": null

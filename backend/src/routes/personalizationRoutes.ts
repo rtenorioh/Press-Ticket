@@ -6,20 +6,32 @@ import isAuth from "../middleware/isAuth";
 const personalizationRoutes = Router();
 
 personalizationRoutes.get("/personalizations", PersonalizationController.list);
-personalizationRoutes.put(
+personalizationRoutes.delete(
   "/personalizations/:theme",
+  isAuth,
+  PersonalizationController.remove
+);
+personalizationRoutes.put(
+  "/personalizations/:theme/company",
+  isAuth,
+  PersonalizationController.createOrUpdateCompany
+);
+
+personalizationRoutes.put(
+  "/personalizations/:theme/logos",
   isAuth,
   uploadConfig.fields([
     { name: "favico", maxCount: 1 },
     { name: "logo", maxCount: 1 },
     { name: "logoTicket", maxCount: 1 }
   ]),
-  PersonalizationController.createOrUpdate
+  PersonalizationController.createOrUpdateLogos
 );
-personalizationRoutes.delete(
-  "/personalizations/:theme",
+
+personalizationRoutes.put(
+  "/personalizations/:theme/colors",
   isAuth,
-  PersonalizationController.remove
+  PersonalizationController.createOrUpdateColors
 );
 
 export default personalizationRoutes;

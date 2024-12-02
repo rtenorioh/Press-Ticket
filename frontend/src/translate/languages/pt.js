@@ -567,7 +567,7 @@ const messages = {
       },
       settings: {
         success: "Configurações salvas com sucesso.",
-        title: "Configurações",
+        title: "Gerais",
         settings: {
           userCreation: {
             name: "Criação de atendente",
@@ -579,7 +579,7 @@ const messages = {
           },
           allTicket: {
             name: "Todos podem ver o chamado sem departamento",
-            note: "Ative essa função para deixar todos os usuarios verem os chamados sem setor",
+            note: "Ative essa função para deixar todos os usuários verem os chamados sem setor",
             options: {
               enabled: "Ativado",
               disabled: "Desativado",

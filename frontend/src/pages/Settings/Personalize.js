@@ -195,7 +195,7 @@ const PersonalizeSettings = ({ onThemeConfigUpdate }) => {
             url: data.url,
         };
         try {
-            await api.put("/personalizations/light", payload);
+            await api.put("/personalizations/light/company", payload);
             toast.success("Dados da empresa salvos com sucesso!");
         } catch (err) {
             toast.error("Erro ao salvar dados da empresa");
@@ -210,7 +210,7 @@ const PersonalizeSettings = ({ onThemeConfigUpdate }) => {
             formData.append(type, file);
 
             try {
-                const response = await api.put(`/personalizations/${theme}`, formData, {
+                const response = await api.put(`/personalizations/${theme}/logos`, formData, {
                     headers: { "Content-Type": "multipart/form-data" },
                 });
 
@@ -273,7 +273,7 @@ const PersonalizeSettings = ({ onThemeConfigUpdate }) => {
         };
 
         try {
-            const response = await api.put(`/personalizations/${theme}`, payload);
+            const response = await api.put(`/personalizations/${theme}/colors`, payload);
 
             if (response.status === 200) {
                 toast.success(`Cores do tema ${theme} salvas com sucesso!`);

@@ -127,13 +127,20 @@ const Settings = ({ onThemeConfigUpdate }) => {
 				onChange={handleTabChange}
 				className={classes.tabs}
 			>
-				<Tab label={i18n.t("settings.title")} />
 				{(!isMasterAdminEnabled || user.profile === "masteradmin") && (
 					<Tab label="Personalização" />
 				)}
+				<Tab label={i18n.t("settings.title")} />
 			</Tabs>
 			<Box p={3}>
-				{tabValue === 0 && (
+				{tabValue === 0 && (!isMasterAdminEnabled || user.profile === "masteradmin") && (
+					<Container className={classes.container}>
+						<ErrorBoundary>
+							<Personalize onThemeConfigUpdate={onThemeConfigUpdate} />
+						</ErrorBoundary>
+					</Container>
+				)}
+				{tabValue === 1 && (
 					<Container className={classes.container}>
 						<ErrorBoundary>
 							<ComponentSettings
@@ -142,13 +149,6 @@ const Settings = ({ onThemeConfigUpdate }) => {
 								handleChangeBooleanSetting={handleChangeBooleanSetting}
 								handleChangeSetting={handleChangeSetting}
 							/>
-						</ErrorBoundary>
-					</Container>
-				)}
-				{tabValue === 1 && (!isMasterAdminEnabled || user.profile === "masteradmin") && (
-					<Container className={classes.container}>
-						<ErrorBoundary>
-							<Personalize onThemeConfigUpdate={onThemeConfigUpdate} />
 						</ErrorBoundary>
 					</Container>
 				)}
