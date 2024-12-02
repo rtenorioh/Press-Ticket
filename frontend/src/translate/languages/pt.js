@@ -127,7 +127,7 @@ const messages = {
           add: "Adicionar WhatsApp",
           shutdown: "Excluir",
           restart: "Restart",
-          disconnect: "desconectar",
+          disconnect: "Desconectar",
           tryAgain: "Tentar novamente",
           qrcode: "QR CODE",
           newQr: "Novo QR CODE",
@@ -435,6 +435,7 @@ const messages = {
       },
       mainDrawer: {
         listItems: {
+          general: "Geral",
           dashboard: "Dashboard",
           connections: "Conexões",
           tickets: "Tickets",
@@ -649,7 +650,7 @@ const messages = {
             },
           },
           timeCreateNewTicket: {
-            name: "Cria novo ticket após",
+            name: "Novo Ticket em:",
             note: "Selecione o tempo que será necessário para abrir um novo ticket, caso o cliente entre em contatos novamente",
             options: {
               "10": "10 Segundos",

@@ -18,6 +18,7 @@ import ChevronLeftIcon from "@material-ui/icons/ChevronLeft";
 import MenuIcon from "@material-ui/icons/Menu";
 import clsx from "clsx";
 import React, { useContext, useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 import { systemVersion } from "../../package.json";
 import defaultLogo from '../assets/logo.jpg';
 import BackdropLoading from "../components/BackdropLoading";
@@ -126,6 +127,7 @@ const useStyles = makeStyles((theme) => ({
 
 const LoggedInLayout = ({ children, toggleTheme, onThemeConfigUpdate }) => {
   const classes = useStyles();
+  const location = useLocation();
   const [userModalOpen, setUserModalOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -250,8 +252,12 @@ const LoggedInLayout = ({ children, toggleTheme, onThemeConfigUpdate }) => {
           setDrawerOpen(settingIndex[0].value === "disabled" ? false : true);
 
         } catch (err) {
-          setDrawerOpen(true);
-          toastError(err);
+          if (err.response && err.response.status === 403) {
+            toastError("Acesso negado. Você não tem permissão para acessar esta configuração.");
+          } else {
+            setDrawerOpen(true);
+            toastError(err);
+          }
         }
       };
       fetchDrawerState();
@@ -317,7 +323,7 @@ const LoggedInLayout = ({ children, toggleTheme, onThemeConfigUpdate }) => {
         </div>
         <Divider />
         <List>
-          <MainListItems drawerClose={drawerClose} />
+          <MainListItems drawerClose={drawerClose} location={location} />
         </List>
         <Divider />
       </Drawer>
@@ -351,7 +357,7 @@ const LoggedInLayout = ({ children, toggleTheme, onThemeConfigUpdate }) => {
             noWrap
             className={classes.title}
           >
-            {i18n.t("mainDrawer.appBar.message.hi")}, {user.name}! {i18n.t("mainDrawer.appBar.message.text")} {companyData.name || "Press Ticket"}.
+            {i18n.t("mainDrawer.appBar.message.hi")} {user.name}, {i18n.t("mainDrawer.appBar.message.text")} {companyData.name || "Press Ticket"}
           </Typography>
 
           <ThemeSelector toggleTheme={toggleTheme} />

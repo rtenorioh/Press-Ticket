@@ -1,8 +1,7 @@
-import React, { useState, useEffect, useReducer, useCallback } from "react";
+import React, { useCallback, useEffect, useReducer, useState } from "react";
 import { toast } from "react-toastify";
-import openSocket from "socket.io-client";
+import openSocket from "../../services/socket-io";
 
-import { makeStyles } from "@material-ui/core/styles";
 import {
   Button,
   IconButton,
@@ -16,6 +15,7 @@ import {
   TextField,
   Tooltip
 } from "@material-ui/core";
+import { makeStyles } from "@material-ui/core/styles";
 
 import {
   AddCircleOutline,
@@ -30,12 +30,12 @@ import MainHeader from "../../components/MainHeader";
 import MainHeaderButtonsWrapper from "../../components/MainHeaderButtonsWrapper";
 import Title from "../../components/Title";
 
-import api from "../../services/api";
-import { i18n } from "../../translate/i18n";
+import ConfirmationModal from "../../components/ConfirmationModal";
 import TableRowSkeleton from "../../components/TableRowSkeleton";
 import TagModal from "../../components/TagModal";
-import ConfirmationModal from "../../components/ConfirmationModal";
 import toastError from "../../errors/toastError";
+import api from "../../services/api";
+import { i18n } from "../../translate/i18n";
 
 const reducer = (state, action) => {
   if (action.type === "LOAD_TAGS") {
@@ -137,7 +137,7 @@ const Tags = () => {
   }, [searchParam, pageNumber, fetchTags]);
 
   useEffect(() => {
-    const socket = openSocket(process.env.REACT_APP_BACKEND_URL);
+    const socket = openSocket();
 
     socket.on("tags", (data) => {
       if (data.action === "update" || data.action === "create") {
@@ -222,13 +222,13 @@ const Tags = () => {
       <ConfirmationModal
         title={
           deletingTag ? `${i18n.t("tags.confirmationModal.deleteTitle")}`
-          : `${i18n.t("tags.confirmationModal.deleteAllTitle")}`
+            : `${i18n.t("tags.confirmationModal.deleteAllTitle")}`
         }
         open={confirmModalOpen}
         onClose={setConfirmModalOpen}
-        onConfirm={() => 
+        onConfirm={() =>
           deletingTag ? handleDeleteTag(deletingTag.id)
-         : handleDeleteAllTags(deletingAllTags)
+            : handleDeleteAllTags(deletingAllTags)
         }
       >
         {
@@ -322,7 +322,7 @@ const Tags = () => {
                       size="small"
                       onClick={() => handleEditTag(tag)}
                     >
-                      <Edit color="secondary"/>
+                      <Edit color="secondary" />
                     </IconButton>
 
                     <IconButton
@@ -332,7 +332,7 @@ const Tags = () => {
                         setDeletingTag(tag);
                       }}
                     >
-                      <DeleteOutline color="secondary"/>
+                      <DeleteOutline color="secondary" />
                     </IconButton>
                   </TableCell>
                 </TableRow>

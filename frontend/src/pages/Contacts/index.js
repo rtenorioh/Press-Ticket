@@ -1,10 +1,3 @@
-import { makeStyles } from "@material-ui/core/styles";
-import React, { useContext, useEffect, useReducer, useState } from "react";
-import { CSVLink } from "react-csv";
-import { useHistory } from "react-router-dom";
-import { toast } from "react-toastify";
-import openSocket from "../../services/socket-io";
-
 import {
   Avatar,
   Button,
@@ -17,7 +10,7 @@ import {
   TableRow,
   Tooltip
 } from "@material-ui/core";
-
+import { makeStyles } from "@material-ui/core/styles";
 import {
   AddCircleOutline,
   Archive,
@@ -27,10 +20,10 @@ import {
   ImportContacts,
   WhatsApp
 } from "@material-ui/icons";
-
-import api from "../../services/api";
-import { i18n } from "../../translate/i18n";
-
+import React, { useContext, useEffect, useReducer, useState } from "react";
+import { CSVLink } from "react-csv";
+import { useHistory } from "react-router-dom";
+import { toast } from "react-toastify";
 import { Can } from "../../components/Can";
 import ConfirmationModal from "../../components/ConfirmationModal/";
 import ContactChannels from "../../components/ContactChannels";
@@ -42,9 +35,11 @@ import NewTicketModalPageContact from "../../components/NewTicketModalPageContac
 import TableRowSkeleton from "../../components/TableRowSkeleton";
 import TagsFilter from "../../components/TagsFilter";
 import Title from "../../components/Title";
-
 import { AuthContext } from "../../context/Auth/AuthContext";
 import toastError from "../../errors/toastError";
+import api from "../../services/api";
+import openSocket from "../../services/socket-io";
+import { i18n } from "../../translate/i18n";
 
 const reducer = (state, action) => {
   if (action.type === "LOAD_CONTACTS") {

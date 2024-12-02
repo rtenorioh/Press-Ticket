@@ -13,6 +13,7 @@ import {
 } from "@material-ui/core";
 import { green } from "@material-ui/core/colors";
 import { makeStyles } from "@material-ui/core/styles";
+import Zoom from "@material-ui/core/Zoom";
 import {
 	CheckCircle,
 	CropFree,
@@ -29,11 +30,13 @@ import {
 	Telegram,
 	WhatsApp
 } from "@material-ui/icons";
+import PowerSettingsNewIcon from "@material-ui/icons/PowerSettingsNew";
+import RefreshIcon from "@material-ui/icons/Refresh";
+import VisibilityIcon from "@material-ui/icons/Visibility";
 import { format, parseISO } from "date-fns";
 import React, { useCallback, useContext, useState } from "react";
 import { useHistory } from "react-router-dom";
 import { toast } from "react-toastify";
-
 import ConfirmationModal from "../../components/ConfirmationModal";
 import MainContainer from "../../components/MainContainer";
 import MainHeader from "../../components/MainHeader";
@@ -42,7 +45,7 @@ import QrcodeModal from "../../components/QrcodeModal";
 import TableRowSkeleton from "../../components/TableRowSkeleton";
 import Title from "../../components/Title";
 import WhatsAppModal from "../../components/WhatsAppModal";
-
+import { AuthContext } from "../../context/Auth/AuthContext";
 import { WhatsAppsContext } from "../../context/WhatsApp/WhatsAppsContext";
 import toastError from "../../errors/toastError";
 import api from "../../services/api";
@@ -94,8 +97,11 @@ const CustomToolTip = ({ title, content, children }) => {
 					{content && <Typography>{content}</Typography>}
 				</React.Fragment>
 			}
+			TransitionComponent={Zoom}
 		>
-			{children}
+			<div>
+				{children}
+			</div>
 		</Tooltip>
 	);
 };
@@ -103,6 +109,7 @@ const CustomToolTip = ({ title, content, children }) => {
 const Connections = () => {
 	const classes = useStyles();
 	const history = useHistory();
+	const { user } = useContext(AuthContext);
 	const { whatsApps, loading } = useContext(WhatsAppsContext);
 	const [whatsAppModalOpen, setWhatsAppModalOpen] = useState(false);
 	const [qrModalOpen, setQrModalOpen] = useState(false);
@@ -204,6 +211,7 @@ const Connections = () => {
 		if (confirmModalInfo.action === "disconnect") {
 			try {
 				await api.delete(`/whatsappsession/${confirmModalInfo.whatsAppId}`);
+				toast.success('Sessão desconectada com sucesso!');
 			} catch (err) {
 				toastError(err);
 			}
@@ -218,6 +226,7 @@ const Connections = () => {
 			}
 		}
 
+		setConfirmModalOpen(false);
 		setConfirmModalInfo(confirmationModalInitialState);
 	};
 
@@ -243,93 +252,99 @@ const Connections = () => {
 		try {
 			await api.post(`/whatsapp/${whatsAppId}/shutdown`);
 			toast.success(i18n.t("connections.toasts.sessionShutdown"));
+			history.go(0);
 		} catch (err) {
 			toastError(err);
 		}
 	};
 
-	const renderActionButtons = whatsApp => {
+	const renderActionButtons = (whatsApp) => {
 		return (
 			<>
 				{whatsApp.status === "DISCONNECTED" && (
-					<Button
-						size="small"
-						variant="outlined"
-						color="primary"
-						onClick={() => handleStartSession(whatsApp?.id)}
-					>
-						{i18n.t("connections.buttons.start")}
-					</Button>
+					<Tooltip title={i18n.t("connections.buttons.start")}>
+						<IconButton
+							size="small"
+							color="primary"
+							onClick={() => handleStartSession(whatsApp?.id)}
+						>
+							<PowerSettingsNewIcon />
+						</IconButton>
+					</Tooltip>
+				)}
+				{(whatsApp.status === "qrcode" && whatsApp.status === "CONNECTED") && (
+					<Tooltip title={i18n.t("connections.buttons.shutdown")}>
+						<IconButton
+							size="small"
+							color="secondary"
+							onClick={() => handleShutdownSession(whatsApp?.id)}
+						>
+							<PowerSettingsNewIcon />
+						</IconButton>
+					</Tooltip>
 				)}
 				{whatsApp.status === "qrcode" && (
-					<Button
-						size="small"
-						variant="outlined"
-						color="secondary"
-						onClick={() => handleShutdownSession(whatsApp?.id)}
-					>
-						{i18n.t("connections.buttons.shutdown")}
-					</Button>
-				)}
-				{whatsApp.status === "qrcode" && (
-					<Button
-						size="small"
-						variant="contained"
-						color="primary"
-						onClick={() => handleOpenQrModal(whatsApp)}
-					>
-						{i18n.t("connections.buttons.qrcode")}
-					</Button>
+					<Tooltip title={i18n.t("connections.buttons.qrcode")}>
+						<IconButton
+							size="small"
+							color="primary"
+							onClick={() => handleOpenQrModal(whatsApp)}
+						>
+							<VisibilityIcon />
+						</IconButton>
+					</Tooltip>
 				)}
 				{whatsApp.status === "DISCONNECTED" && (
 					<>
-						<Button
-							size="small"
-							variant="outlined"
-							color="primary"
-							onClick={() => handleStartWhatsAppSession(whatsApp.id)}
-						>
-							{i18n.t("connections.buttons.tryAgain")}
-						</Button>{" "}
-						<Button
-							size="small"
-							variant="outlined"
-							color="secondary"
-							onClick={() => handleRequestNewQrCode(whatsApp.id)}
-						>
-							{i18n.t("connections.buttons.newQr")}
-						</Button>
+						<Tooltip title={i18n.t("connections.buttons.tryAgain")}>
+							<IconButton
+								size="small"
+								color="primary"
+								onClick={() => handleStartWhatsAppSession(whatsApp.id)}
+							>
+								<PowerSettingsNewIcon />
+							</IconButton>
+						</Tooltip>
+						<Tooltip title={i18n.t("connections.buttons.newQr")}>
+							<IconButton
+								size="small"
+								color="secondary"
+								onClick={() => handleRequestNewQrCode(whatsApp.id)}
+							>
+								<RefreshIcon />
+							</IconButton>
+						</Tooltip>
 					</>
 				)}
 				{(whatsApp.status === "CONNECTED" ||
 					whatsApp.status === "PAIRING" ||
 					whatsApp.status === "TIMEOUT") &&
 					whatsApp.type === null && (
-						<Button
-							size="small"
-							variant="outlined"
-							color="secondary"
-							onClick={() => {
-								handleOpenConfirmationModal("disconnect", whatsApp.id);
-							}}
-						>
-							{i18n.t("connections.buttons.disconnect")}
-						</Button>
+						<Tooltip title={i18n.t("connections.buttons.disconnect")}>
+							<IconButton
+								size="small"
+								color="secondary"
+								onClick={() => handleOpenConfirmationModal("disconnect", whatsApp.id)}
+							>
+								<PowerSettingsNewIcon />
+							</IconButton>
+						</Tooltip>
 					)}
 				{whatsApp.status === "OPENING" && (
-					<Button size="small" variant="outlined" disabled color="default">
-						{i18n.t("connections.buttons.connecting")}
-					</Button>
+					<IconButton size="small" disabled color="default">
+						<CircularProgress size={24} />
+					</IconButton>
 				)}
-				{whatsApp.status && (
-					<Button
-						size="small"
-						variant="outlined"
-						color="primary"
-						onClick={() => handleRestartSession(whatsApp?.id)}
-					>
-						{i18n.t("connections.buttons.restart")}
-					</Button>
+				{(!whatsApp.type && whatsApp.status === "CONNECTED") && (
+					<Tooltip title={i18n.t("connections.buttons.restart")}>
+						<IconButton
+							size="small"
+							color="primary"
+							onClick={() => handleRestartSession(whatsApp?.id)}
+						>
+							<RefreshIcon />
+						</IconButton>
+					</Tooltip>
 				)}
 			</>
 		);
@@ -509,18 +524,17 @@ const Connections = () => {
 												</div>
 											</TableCell>
 											<TableCell align="center">
-												{renderStatusToolTips(whatsApp)}
+												{whatsApp?.type === null || whatsApp?.type === undefined ? renderStatusToolTips(whatsApp) : "-"}
 											</TableCell>
 											<TableCell align="center">
 												{whatsApp.number ? (
 													<>
-														{formatPhoneNumber(whatsApp.number)}
+														{user.isTricked === "enabled" ? formatPhoneNumber(whatsApp.number) : formatPhoneNumber(whatsApp.number).slice(0, -4) + "****"}
 													</>
 												) : "-"}
-
 											</TableCell>
 											<TableCell align="center">
-												{renderActionButtons(whatsApp)}
+												{whatsApp?.type === null || whatsApp?.type === undefined ? renderActionButtons(whatsApp) : "-"}
 											</TableCell>
 											<TableCell align="center">
 												{format(parseISO(whatsApp.updatedAt), "dd/MM/yy HH:mm")}

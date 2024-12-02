@@ -9,7 +9,7 @@ const TabPanel = ({ children, value, name, ...rest }) => {
 				aria-labelledby={`simple-tab-${name}`}
 				{...rest}
 			>
-				<>{children}</>
+				{children}
 			</div>
 		);
 	} else return null;

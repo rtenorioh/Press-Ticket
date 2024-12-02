@@ -1,13 +1,3 @@
-import React, { useEffect, useReducer, useState } from "react";
-
-import openSocket from "../../services/socket-io";
-
-import { 
-  AddCircleOutline, 
-  DeleteOutline, 
-  Edit 
-} from "@material-ui/icons";
-
 import {
   Button,
   IconButton,
@@ -18,10 +8,16 @@ import {
   TableCell,
   TableHead,
   TableRow,
-  Typography,
-  Tooltip
+  Tooltip,
+  Typography
 } from "@material-ui/core";
-
+import {
+  AddCircleOutline,
+  DeleteOutline,
+  Edit
+} from "@material-ui/icons";
+import React, { useEffect, useReducer, useState } from "react";
+import { toast } from "react-toastify";
 import ConfirmationModal from "../../components/ConfirmationModal";
 import MainContainer from "../../components/MainContainer";
 import MainHeader from "../../components/MainHeader";
@@ -29,11 +25,10 @@ import MainHeaderButtonsWrapper from "../../components/MainHeaderButtonsWrapper"
 import QueueModal from "../../components/QueueModal";
 import TableRowSkeleton from "../../components/TableRowSkeleton";
 import Title from "../../components/Title";
-
-import { i18n } from "../../translate/i18n";
 import toastError from "../../errors/toastError";
 import api from "../../services/api";
-import { toast } from "react-toastify";
+import openSocket from "../../services/socket-io";
+import { i18n } from "../../translate/i18n";
 
 const useStyles = makeStyles((theme) => ({
   mainPaper: {
@@ -171,8 +166,7 @@ const Queues = () => {
       <ConfirmationModal
         title={
           selectedQueue &&
-          `${i18n.t("queues.confirmationModal.deleteTitle")} ${
-            selectedQueue.name
+          `${i18n.t("queues.confirmationModal.deleteTitle")} ${selectedQueue.name
           }?`
         }
         open={confirmModalOpen}
@@ -189,14 +183,16 @@ const Queues = () => {
       <MainHeader>
         <Title>{i18n.t("queues.title")} ({queues.length})</Title>
         <MainHeaderButtonsWrapper>
-        <Tooltip title={i18n.t("queues.buttons.add")}>
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={handleOpenQueueModal}
-            >
-              <AddCircleOutline />
-            </Button>
+          <Tooltip title={i18n.t("queues.buttons.add")}>
+            <div>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleOpenQueueModal}
+              >
+                <AddCircleOutline />
+              </Button>
+            </div>
           </Tooltip>
         </MainHeaderButtonsWrapper>
       </MainHeader>

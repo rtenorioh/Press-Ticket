@@ -1,25 +1,25 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
-import * as Yup from "yup";
-import { Formik, Form } from "formik";
+import { Form, Formik } from "formik";
 import { toast } from "react-toastify";
-import WithSkeleton from "../WithSkeleton";
-import MessageVariablesPicker from "../MessageVariablesPicker";
+import * as Yup from "yup";
 import ButtonWithSpinner from "../ButtonWithSpinner";
 import FormikTextField from "../FormikTextField";
+import MessageVariablesPicker from "../MessageVariablesPicker";
+import WithSkeleton from "../WithSkeleton";
 
 import {
-  makeStyles,
   Button,
   Dialog,
   DialogActions,
   DialogContent,
-  DialogTitle
+  DialogTitle,
+  makeStyles
 } from "@material-ui/core";
 import { i18n } from "../../translate/i18n";
 
-import api from "../../services/api";
 import toastError from "../../errors/toastError";
+import api from "../../services/api";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -63,38 +63,41 @@ const QuickAnswersModal = ({
 
   useEffect(() => {
     return () => {
-      isMounted.current = false; 
+      isMounted.current = false;
     };
   }, []);
 
   useEffect(() => {
-    if (initialValues && isMounted.current) {
-      setQuickAnswer(prevState => {
-        return { ...prevState, ...initialValues  };
-      });
+    if (initialValues) {
+      setQuickAnswer({ ...initialState, ...initialValues });
+    } else if (quickAnswerId) {
+      const fetchQuickAnswer = async () => {
+        setLoading(true);
+        try {
+          const { data } = await api.get(`/quickAnswers/${quickAnswerId}`);
+          if (isMounted.current) {
+            setQuickAnswer(data);
+          }
+          setLoading(false);
+        } catch (err) {
+          setLoading(false);
+          toastError(err);
+        }
+      };
+      fetchQuickAnswer();
     }
+  }, [quickAnswerId, initialValues, initialState]);
 
-(async () => {
-      if (!quickAnswerId) return ;
-      
-      setLoading(true);
-      try {
-        const { data } = await api.get(`/quickAnswers/${quickAnswerId}`);
-                if (!isMounted.current) return; 
+  useEffect(() => {
+    if (open && messageInputRef.current) {
+      messageInputRef.current.focus();
+    }
+  }, [open]);
 
-        setQuickAnswer(prevState => {
-          return { ...prevState, ...data };
-        });
-        
-        setLoading(false);
-      } catch (err) {
-        setLoading(false);
-        toastError(err);
-      }       
-    })();    
+  const handleClose = () => {
+    onClose();
     setQuickAnswer(initialState);
-    // eslint-disable-next-line
-  }, [quickAnswerId, open, initialValues]);
+  };
 
   const handleSaveQuickAnswer = async values => {
     try {
@@ -114,16 +117,18 @@ const QuickAnswersModal = ({
     }
   };
 
-  const handleClickMsgVar = async (msgVar, setValueFunc) => {
+  const handleClickMsgVar = (msgVar, setValueFunc) => {
     const el = messageInputRef.current;
     const firstHalfText = el.value.substring(0, el.selectionStart);
     const secondHalfText = el.value.substring(el.selectionEnd);
-    const newCursorPos = el.selectionStart + msgVar.length;
 
     setValueFunc("message", `${firstHalfText}${msgVar}${secondHalfText}`);
 
-    await new Promise(r => setTimeout(r, 100));
-    messageInputRef.current.setSelectionRange(newCursorPos, newCursorPos);
+    const newCursorPos = el.selectionStart + msgVar.length;
+    setTimeout(() => {
+      el.setSelectionRange(newCursorPos, newCursorPos);
+      el.focus();
+    }, 100);
   };
 
   return (
@@ -132,7 +137,7 @@ const QuickAnswersModal = ({
         maxWidth="sm"
         fullWidth
         open={open}
-        onClose={onClose}
+        onClose={handleClose}
         scroll="paper"
       >
         <DialogTitle>
@@ -185,8 +190,8 @@ const QuickAnswersModal = ({
               </DialogContent>
               <DialogActions>
                 <Button
-                onClick={onClose}
-                disabled={isSubmitting}
+                  onClick={handleClose}
+                  disabled={isSubmitting}
                 >
                   {i18n.t("quickAnswersModal.buttons.cancel")}
                 </Button>
@@ -199,7 +204,7 @@ const QuickAnswersModal = ({
                 >
                   {quickAnswerId
                     ? i18n.t("quickAnswersModal.buttons.okEdit")
-                    : i18n.t("quickAnswersModal.buttons.okAdd")}                  
+                    : i18n.t("quickAnswersModal.buttons.okAdd")}
                 </ButtonWithSpinner>
               </DialogActions>
             </Form>

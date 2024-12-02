@@ -319,6 +319,10 @@ const MessageInput = ({ ticketStatus }) => {
   };
 
   const handleUploadMedia = async (e) => {
+    if (!e || !e.preventDefault) {
+      console.error("Evento inválido ou não fornecido!");
+      return;
+    }
     setLoading(true);
     e.preventDefault();
     const formData = new FormData();
@@ -327,6 +331,7 @@ const MessageInput = ({ ticketStatus }) => {
       formData.append("medias", media);
       formData.append("body", media.name);
     });
+
     try {
       if (channelType !== null) {
         await api.post(`/hub-message/${ticketId}`, formData);
@@ -336,7 +341,6 @@ const MessageInput = ({ ticketStatus }) => {
     } catch (err) {
       toastError(err);
     }
-
     setLoading(false);
     setMedias([]);
   };
@@ -360,7 +364,6 @@ const MessageInput = ({ ticketStatus }) => {
         await api.post(`/messages/edit/${editingMessage.id}`, message);
       } else {
         await api.post(`/messages/${ticketId}`, message);
-
       }
     } catch (err) {
       toastError(err);
@@ -526,14 +529,14 @@ const MessageInput = ({ ticketStatus }) => {
             </List>
             <InputBase
               style={{ width: "0", height: "0" }}
-              inputRef={function (input) {
-                if (input != null) {
+              inputRef={(input) => {
+                if (input !== null) {
                   input.focus();
                 }
               }}
-              onKeyPress={(e) => {
+              onKeyDown={(e) => {
                 if (e.key === "Enter") {
-                  handleUploadMedia();
+                  handleUploadMedia(e);
                 }
               }}
               defaultValue={medias[0].name}
@@ -707,10 +710,10 @@ const MessageInput = ({ ticketStatus }) => {
               onPaste={(e) => {
                 ticketStatus === "open" && handleInputPaste(e);
               }}
-              onKeyPress={(e) => {
+              onKeyDown={(e) => {
                 if (loading || e.shiftKey) return;
                 else if (e.key === "Enter") {
-                  handleSendMessage();
+                  handleSendMessage(e);
                 }
               }}
             />

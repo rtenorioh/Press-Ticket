@@ -3,7 +3,9 @@
 #Variaveis
 @baseUrl = http://localhost:8080
 @token = 6175c0d0-acd5-4776-95a9-592c795da986
-@token2 = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IlByZXNzLVRpY2tldCIsInByb2ZpbGUiOiJhZG1pbiIsImlkIjoxLCJpYXQiOjE3MzEzNzIwNDksImV4cCI6MTczMTM3NTY0OX0.QwidYXoxONiHC7fsTF87IxLJ-nJ-aNrMFCK4habN2yQ
+@token2 = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IlByZXNzIFRpY2tldCIsInByb2ZpbGUiOiJhZG1pbiIsImlkIjoxLCJpYXQiOjE3MzI4ODUzMzQsImV4cCI6MTczMjg4ODkzNH0.4MSoKumH6IT2loUzdlm9OwKzy8BOohcAkMBv6j6Ho4o
+
+@refreshToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidG9rZW5WZXJzaW9uIjowLCJpYXQiOjE3MzI4ODUzMzQsImV4cCI6MTczMzQ5MDEzNH0.RwuRIufYUB9dQZQg0aeaVtnOryn-sESNL1mFlShmBM4
 
 ### (Login) Teste da Rota POST /auth/login
 POST {{baseUrl}}/auth/login
@@ -14,13 +16,18 @@ Content-Type: application/json
   "password": "admin"
 }
 
+### Teste da Rota POST /auth/refresh_token
+POST {{baseUrl}}/auth/refresh_token
+Authorization: Bearer {{refreshToken}}
+Content-Type: application/json
+
 ### (Enviar Mensagem) Teste da Rota POST /api/messages/send
 POST {{baseUrl}}/api/messages/send
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-  "number": "5522999999999",
+  "number": "5522992463080",
   "body": "Mensagem de Teste da API com user e queue atualizado",
   "userId": "1",
   "queueId": "2",
@@ -32,7 +39,7 @@ GET {{baseUrl}}/personalizations
 Content-Type: application/json
 
 ### (Criar ou Atualizar Personalização) Teste da Rota PUT /personalizations/:theme
-PUT {{baseUrl}}/personalizations/light
+PUT {{baseUrl}}/personalizations/dark
 Authorization: Bearer {{token2}}
 Content-Type: application/json
 

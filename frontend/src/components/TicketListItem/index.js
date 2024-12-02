@@ -106,7 +106,7 @@ const useStyles = makeStyles(theme => ({
 	closedBadge: {
 		alignSelf: "center",
 		justifySelf: "flex-end",
-		marginRight: 32,
+		marginRight: 70,
 		marginLeft: "auto",
 	},
 	contactLastMessage: {
@@ -413,14 +413,6 @@ const TicketListItem = ({ ticket, userId, filteredTags }) => {
 									</Typography>
 								)}
 							</div>
-							{ticket.status === "closed" && (
-								<Badge
-									className={classes.closedBadge}
-									overlap="rectangular"
-									badgeContent={"closed"}
-									color="primary"
-								/>
-							)}
 							{ticket.contact.telegramId && (
 								<Tooltip title="Telegram" arrow placement="right" >
 									<Telegram fontSize="small" style={{ color: "#85b2ff" }} className={classes.contactIcon} />
@@ -457,6 +449,14 @@ const TicketListItem = ({ ticket, userId, filteredTags }) => {
 							>
 								{ticket.contact.name}
 							</Typography>
+							{ticket.status === "closed" && (
+								<Badge
+									className={classes.closedBadge}
+									overlap="rectangular"
+									badgeContent={"closed"}
+									color="primary"
+								/>
+							)}
 						</span>
 					}
 					secondary={

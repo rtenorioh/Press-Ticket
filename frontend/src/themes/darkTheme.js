@@ -30,7 +30,7 @@ const getDarkTheme = (config, locale) =>
                 menuItens: { main: config?.menuItens || "#181D22" },
                 sub: { main: config?.sub || "#383850" },
                 toolbarIcon: { main: config?.toolbarIconColor || "#FFFFFF" },
-                divide: { main: config?.divide || "#383850" },
+                divide: { main: config?.divide || "#2E2E3A" },
                 background: {
                     default: config?.backgroundDefault || "#2E2E3A",
                     paper: config?.backgroundPaper || "#383850",

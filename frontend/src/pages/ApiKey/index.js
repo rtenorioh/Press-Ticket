@@ -45,7 +45,7 @@ const useStyles = makeStyles(theme => ({
 
 }));
 
-const Settings = () => {
+const ApiKey = () => {
     const classes = useStyles();
 
     const [settings, setSettings] = useState([]);
@@ -103,7 +103,13 @@ const Settings = () => {
                         fullWidth
                         value={settings && settings.length > 0 && getSettingValue("userApiToken")}
                     />
-                    <CopyToClipboard content={settings && settings.length > 0 && getSettingValue("userApiToken")} color="secondary" />
+                    <CopyToClipboard
+                        content={
+                            settings && settings.length > 0 ? getSettingValue("userApiToken") : ""
+                        }
+                        color="secondary"
+                    />
+
                 </Paper>
 
             </Container>
@@ -111,4 +117,4 @@ const Settings = () => {
     );
 };
 
-export default Settings;
+export default ApiKey;

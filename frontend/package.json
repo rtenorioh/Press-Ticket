@@ -1,7 +1,7 @@
 {
   "name": "frontend",
   "version": "1.0.0",
-  "systemVersion": "v1.9.0",
+  "systemVersion": "v1.10.0-beta",
   "private": true,
   "scripts": {
     "start": "react-scripts --openssl-legacy-provider start",
@@ -10,7 +10,7 @@
     "eject": "react-scripts eject"
   },
   "dependencies": {
-    "@material-ui/core": "^4.11.0",
+    "@material-ui/core": "^4.12.4",
     "@material-ui/icons": "^4.11.3",
     "@material-ui/lab": "^4.0.0-alpha.56",
     "@testing-library/jest-dom": "^5.11.4",
@@ -20,6 +20,7 @@
     "date-fns": "^2.16.1",
     "emoji-mart": "^3.0.1",
     "formik": "^2.2.0",
+    "helmet": "^8.0.0",
     "i18next": "^19.8.2",
     "i18next-browser-languagedetector": "^6.0.1",
     "markdown-to-jsx": "^7.1.0",

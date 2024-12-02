@@ -1,13 +1,29 @@
 import { IconButton } from '@material-ui/core';
 import { Brightness4, Brightness7 } from '@material-ui/icons';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 function ThemeSelector({ toggleTheme }) {
-    const themeStorage = localStorage.getItem('theme');
+    const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
+
+    useEffect(() => {
+        const storedTheme = localStorage.getItem('theme');
+        if (storedTheme) {
+            setTheme(storedTheme);
+        }
+    }, []);
+
+    const renderThemeIcon = theme === 'light' ? <Brightness7 /> : <Brightness4 />;
 
     return (
-        <IconButton color="inherit" onClick={toggleTheme} aria-label="Toggle theme">
-            {themeStorage === 'light' ? <Brightness7 /> : <Brightness4 />}
+        <IconButton
+            color="inherit"
+            onClick={() => {
+                toggleTheme();
+                setTheme(prevTheme => (prevTheme === 'light' ? 'dark' : 'light'));
+            }}
+            aria-label="Toggle theme"
+        >
+            {renderThemeIcon}
         </IconButton>
     );
 }
