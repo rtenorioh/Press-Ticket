@@ -16,35 +16,56 @@ class Personalization extends Model<Personalization> {
   @Column
   id: number;
 
-  @Column(DataType.STRING)
+  @Column({ type: DataType.STRING, allowNull: true })
   theme: string;
 
-  @Column(DataType.STRING)
-  company: string;
+  @Column({ type: DataType.STRING, allowNull: true })
+  company: string | null;
 
-  @Column(DataType.STRING)
-  url: string;
+  @Column({ type: DataType.STRING, allowNull: true })
+  url: string | null;
 
-  @Column(DataType.STRING)
-  primaryColor: string;
+  @Column({ type: DataType.STRING, allowNull: true })
+  primaryColor: string | null;
 
-  @Column(DataType.STRING)
-  secondaryColor: string;
+  @Column({ type: DataType.STRING, allowNull: true })
+  secondaryColor: string | null;
 
-  @Column(DataType.STRING)
-  backgroundDefault: string;
+  @Column({ type: DataType.STRING, allowNull: true })
+  backgroundDefault: string | null;
 
-  @Column(DataType.STRING)
-  backgroundPaper: string;
+  @Column({ type: DataType.STRING, allowNull: true })
+  backgroundPaper: string | null;
 
-  @Column(DataType.TEXT)
+  @Column({ type: DataType.TEXT, allowNull: true })
   favico: string | null;
 
-  @Column(DataType.TEXT)
+  @Column({ type: DataType.TEXT, allowNull: true })
   logo: string | null;
 
-  @Column(DataType.TEXT)
+  @Column({ type: DataType.TEXT, allowNull: true })
   logoTicket: string | null;
+
+  @Column({ type: DataType.STRING, allowNull: true })
+  toolbarColor: string | null;
+
+  @Column({ type: DataType.STRING, allowNull: true })
+  toolbarIconColor: string | null;
+
+  @Column({ type: DataType.STRING, allowNull: true })
+  menuItens: string | null;
+
+  @Column({ type: DataType.STRING, allowNull: true })
+  sub: string | null;
+
+  @Column({ type: DataType.STRING, allowNull: true })
+  textPrimary: string | null;
+
+  @Column({ type: DataType.STRING, allowNull: true })
+  textSecondary: string | null;
+
+  @Column({ type: DataType.STRING, allowNull: true })
+  divide: string | null;
 
   @CreatedAt
   @Column(DataType.DATE(6))

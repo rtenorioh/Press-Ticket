@@ -11,31 +11,31 @@ module.exports = {
       },
       theme: {
         type: DataTypes.STRING,
-        allowNull: false
+        allowNull: true
       },
       company: {
         type: DataTypes.STRING,
-        allowNull: false
+        allowNull: true
       },
       url: {
         type: DataTypes.STRING,
-        allowNull: false
+        allowNull: true
       },
       primaryColor: {
         type: DataTypes.STRING,
-        allowNull: false
+        allowNull: true
       },
       secondaryColor: {
         type: DataTypes.STRING,
-        allowNull: false
+        allowNull: true
       },
       backgroundDefault: {
         type: DataTypes.STRING,
-        allowNull: false
+        allowNull: true
       },
       backgroundPaper: {
         type: DataTypes.STRING,
-        allowNull: false
+        allowNull: true
       },
       favico: {
         type: DataTypes.TEXT,
@@ -47,6 +47,34 @@ module.exports = {
       },
       logoTicket: {
         type: DataTypes.TEXT,
+        allowNull: true
+      },
+      toolbarColor: {
+        type: DataTypes.STRING,
+        allowNull: true
+      },
+      toolbarIconColor: {
+        type: DataTypes.STRING,
+        allowNull: true
+      },
+      menuItens: {
+        type: DataTypes.STRING,
+        allowNull: true
+      },
+      sub: {
+        type: DataTypes.STRING,
+        allowNull: true
+      },
+      textPrimary: {
+        type: DataTypes.STRING,
+        allowNull: true
+      },
+      textSecondary: {
+        type: DataTypes.STRING,
+        allowNull: true
+      },
+      divide: {
+        type: DataTypes.STRING,
         allowNull: true
       },
       createdAt: {
