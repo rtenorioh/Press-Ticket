@@ -1,9 +1,13 @@
 import { Dialog } from "@material-ui/core";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { ChromePicker } from "react-color";
 
 const ColorPicker = ({ onChange, currentColor, handleClose, open, theme }) => {
   const [selectedColor, setSelectedColor] = useState(currentColor);
+
+  useEffect(() => {
+    setSelectedColor(currentColor);
+  }, [currentColor]);
 
   const handleChange = (color) => {
     setSelectedColor(color.hex);

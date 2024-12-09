@@ -156,7 +156,7 @@ const QueueModal = ({ open, onClose, queueId }) => {
 											as={TextField}
 											label={i18n.t("queueModal.form.color")}
 											name="color"
-											id="color"
+											value={values.color}
 											onFocus={() => setColorPickerModalOpen(true)}
 											error={touched.color && Boolean(errors.color)}
 											helperText={touched.color && errors.color}
@@ -164,7 +164,7 @@ const QueueModal = ({ open, onClose, queueId }) => {
 												startAdornment: (
 													<InputAdornment position="start">
 														<div
-															style={{ backgroundColor: values.color }}
+															style={{ backgroundColor: values.color || '#fff' }}
 															className={classes.colorAdorment}
 														></div>
 													</InputAdornment>
@@ -187,7 +187,9 @@ const QueueModal = ({ open, onClose, queueId }) => {
 									<ColorPicker
 										open={colorPickerModalOpen}
 										handleClose={() => setColorPickerModalOpen(false)}
-										onChange={(color) => setFieldValue("color", color)}
+										onChange={(color) => {
+											setFieldValue("color", color);
+										}}
 										theme={theme}
 									/>
 									<Grid item xs={12}>
