@@ -43,7 +43,6 @@ interface Session extends Client {
 const writeFileAsync = promisify(writeFile);
 
 const verifyContact = async (msgContact: WbotContact): Promise<Contact> => {
-
   const contactData = {
     name: msgContact.name || msgContact.pushname || msgContact.id.user,
     number: msgContact.id.user,
@@ -236,7 +235,7 @@ const verifyMediaMessage = async (
     id: msg.id.id,
     ticketId: ticket.id,
     contactId: msg.fromMe ? undefined : contact.id,
-    body: $strBody,
+    body: $strBody || media.filename,
     fromMe: msg.fromMe,
     read: msg.fromMe,
     mediaUrl: media.filename,
