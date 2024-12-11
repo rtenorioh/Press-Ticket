@@ -1,19 +1,21 @@
 import {
 	Badge,
-	Button,
 	IconButton,
 	List,
 	ListItem,
 	ListItemText,
 	Popover,
+	Tooltip
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import ChatIcon from "@material-ui/icons/Chat";
+import HelpOutlineIcon from "@material-ui/icons/HelpOutline";
 import VolumeOffIcon from "@material-ui/icons/VolumeOff";
 import VolumeUpIcon from "@material-ui/icons/VolumeUp";
 import { format } from "date-fns";
 import React, { useCallback, useContext, useEffect, useRef, useState } from "react";
 import { useHistory } from "react-router-dom";
+import { toast } from "react-toastify";
 import useSound from "use-sound";
 import alertSound from "../../assets/sound.mp3";
 import { AuthContext } from "../../context/Auth/AuthContext";
@@ -68,12 +70,28 @@ const NotificationsPopOver = () => {
 	}, [tickets]);
 
 	const requestNotificationPermission = () => {
-		Notification.requestPermission().then((permission) => {
-			if (permission === "granted") {
-				setNotificationsAllowed(true);
-			}
-		});
+		// Verifica se o navegador suporta notificações
+		if (!("Notification" in window)) {
+			alert(i18n.t("notifications.unsupported")); // Notificações não suportadas
+			return;
+		}
+
+		// Solicita permissão
+		Notification.requestPermission()
+			.then((permission) => {
+				if (permission === "granted") {
+					setNotificationsAllowed(true);
+					toast.success(i18n.t("notifications.permissionGranted"));
+				} else if (permission === "denied") {
+					toast.error(i18n.t("notifications.permissionDenied"));
+				}
+			})
+			.catch((error) => {
+				console.error("Erro ao solicitar permissão para notificações:", error);
+				toast.error(i18n.t("notifications.error"));
+			});
 	};
+
 
 	const handleNotifications = useCallback(
 		(data) => {
@@ -175,13 +193,15 @@ const NotificationsPopOver = () => {
 				{isAudioEnabled ? <VolumeUpIcon /> : <VolumeOffIcon />}
 			</IconButton>
 			{!notificationsAllowed && (
-				<Button
+				<IconButton
 					onClick={requestNotificationPermission}
-					color="primary"
+					color="inherit"
 					variant="contained"
 				>
-					{i18n.t("notifications.allow")}
-				</Button>
+					<Tooltip title={i18n.t("notifications.allow")} arrow>
+						<HelpOutlineIcon />
+					</Tooltip>
+				</IconButton>
 			)}
 			<IconButton
 				onClick={handleClick}

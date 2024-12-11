@@ -468,7 +468,10 @@ const messages = {
         },
       },
       notifications: {
+        allow: "Permitir as notificações no navegador?",
         noTickets: "Nenhuma notificação.",
+        permissionGranted: "Permissão concedida.",
+        permissionDenied: "Permissão negada.",
       },
       queues: {
         title: "Setores",
