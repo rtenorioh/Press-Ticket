@@ -1,13 +1,12 @@
 import { Box, Container, makeStyles, Tab, Tabs } from "@material-ui/core";
 import React, { useContext, useEffect, useState } from "react";
-import { useHistory } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 import ErrorBoundary from "../../components/ErrorBoundary";
 import { AuthContext } from "../../context/Auth/AuthContext";
 import toastError from "../../errors/toastError";
 import api from "../../services/api";
 import openSocket from "../../services/socket-io.js";
-import { i18n } from "../../translate/i18n.js";
 import ComponentSettings from "./ComponentSettings";
 import Personalize from "./Personalize.js";
 
@@ -30,7 +29,7 @@ const useStyles = makeStyles(theme => ({
 
 const Settings = ({ onThemeConfigUpdate }) => {
 	const classes = useStyles();
-	const history = useHistory();
+	const { t } = useTranslation();
 	const [settings, setSettings] = useState([]);
 	const [tabValue, setTabValue] = useState(0);
 	const { user } = useContext(AuthContext);
@@ -88,8 +87,7 @@ const Settings = ({ onThemeConfigUpdate }) => {
 			await api.put(`/settings/${settingKey}`, {
 				value: selectedValue,
 			});
-			toast.success("Configuração atualizada com sucesso");
-			history.go(0);
+			toast.success(t("settings.success"));
 		} catch (err) {
 			toastError(err);
 		}
@@ -103,7 +101,7 @@ const Settings = ({ onThemeConfigUpdate }) => {
 			await api.put(`/settings/${settingKey}`, {
 				value: selectedValue,
 			});
-			toast.success(i18n.t("settings.success"));
+			toast.success(t("settings.success"));
 		} catch (err) {
 			toastError(err);
 		}
@@ -128,9 +126,9 @@ const Settings = ({ onThemeConfigUpdate }) => {
 				className={classes.tabs}
 			>
 				{(!isMasterAdminEnabled || user.profile === "masteradmin") && (
-					<Tab label="Personalização" />
+					<Tab label={t("settings.tabs.personalize")} />
 				)}
-				<Tab label={i18n.t("settings.title")} />
+				<Tab label={t("settings.tabs.general")} />
 			</Tabs>
 			<Box p={3}>
 				{tabValue === 0 && (!isMasterAdminEnabled || user.profile === "masteradmin") && (

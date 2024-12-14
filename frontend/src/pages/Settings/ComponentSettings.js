@@ -1,7 +1,7 @@
 import { Checkbox, FormControlLabel, Grid, Paper, Select, Tooltip, Typography } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import React from "react";
-import { i18n } from "../../translate/i18n.js";
+import { useTranslation } from "react-i18next";
 
 const useStyles = makeStyles(theme => ({
     paper: {
@@ -20,17 +20,18 @@ const useStyles = makeStyles(theme => ({
 
 const ComponentSettings = ({ settings, getSettingValue, handleChangeBooleanSetting, handleChangeSetting }) => {
     const classes = useStyles();
+    const { t } = useTranslation();
 
     const booleanSettings = [
-        { key: "userCreation", label: i18n.t("settings.settings.userCreation.name"), note: i18n.t("settings.settings.userCreation.note") },
-        { key: "allTicket", label: i18n.t("settings.settings.allTicket.name"), note: i18n.t("settings.settings.allTicket.note") },
-        { key: "CheckMsgIsGroup", label: i18n.t("settings.settings.CheckMsgIsGroup.name"), note: i18n.t("settings.settings.CheckMsgIsGroup.note") },
-        { key: "call", label: i18n.t("settings.settings.call.name"), note: i18n.t("settings.settings.call.note") },
-        { key: "sideMenu", label: i18n.t("settings.settings.sideMenu.name"), note: i18n.t("settings.settings.sideMenu.note") },
-        { key: "quickAnswer", label: i18n.t("settings.settings.quickAnswer.name"), note: i18n.t("settings.settings.quickAnswer.note") },
-        { key: "closeTicketApi", label: i18n.t("settings.settings.closeTicketApi.name"), note: i18n.t("settings.settings.closeTicketApi.note") },
-        { key: "ASC", label: i18n.t("settings.settings.ASC.name"), note: i18n.t("settings.settings.ASC.note") },
-        { key: "created", label: i18n.t("settings.settings.created.name"), note: i18n.t("settings.settings.created.note") },
+        { key: "userCreation", label: t("settings.general.userCreation.name"), note: t("settings.general.userCreation.note") },
+        { key: "allTicket", label: t("settings.general.allTicket.name"), note: t("settings.general.allTicket.note") },
+        { key: "CheckMsgIsGroup", label: t("settings.general.CheckMsgIsGroup.name"), note: t("settings.general.CheckMsgIsGroup.note") },
+        { key: "call", label: t("settings.general.call.name"), note: t("settings.general.call.note") },
+        { key: "sideMenu", label: t("settings.general.sideMenu.name"), note: t("settings.general.sideMenu.note") },
+        { key: "quickAnswer", label: t("settings.general.quickAnswer.name"), note: t("settings.general.quickAnswer.note") },
+        { key: "closeTicketApi", label: t("settings.general.closeTicketApi.name"), note: t("settings.general.closeTicketApi.note") },
+        { key: "ASC", label: t("settings.general.ASC.name"), note: t("settings.general.ASC.note") },
+        { key: "created", label: t("settings.general.created.name"), note: t("settings.general.created.note") },
     ];
 
     const settingsChunks = [];
@@ -62,10 +63,10 @@ const ComponentSettings = ({ settings, getSettingValue, handleChangeBooleanSetti
                 </Grid>
             ))}
             <Grid item xs={12} sm={6} md={4}>
-                <Tooltip title={i18n.t("settings.settings.timeCreateNewTicket.note")}>
+                <Tooltip title={t("settings.general.timeCreateNewTicket.note")}>
                     <Paper className={classes.paper} elevation={3}>
                         <Typography variant="body1">
-                            {i18n.t("settings.settings.timeCreateNewTicket.name")}
+                            {t("settings.general.timeCreateNewTicket.name")}
                         </Typography>
                         <Select
                             margin="dense"
@@ -77,19 +78,19 @@ const ComponentSettings = ({ settings, getSettingValue, handleChangeBooleanSetti
                             className={classes.settingOption}
                             onChange={handleChangeSetting}
                         >
-                            <option value="10">{i18n.t("settings.settings.timeCreateNewTicket.options.10")}</option>
-                            <option value="30">{i18n.t("settings.settings.timeCreateNewTicket.options.30")}</option>
-                            <option value="60">{i18n.t("settings.settings.timeCreateNewTicket.options.60")}</option>
-                            <option value="300">{i18n.t("settings.settings.timeCreateNewTicket.options.300")}</option>
-                            <option value="1800">{i18n.t("settings.settings.timeCreateNewTicket.options.1800")}</option>
-                            <option value="3600">{i18n.t("settings.settings.timeCreateNewTicket.options.3600")}</option>
-                            <option value="7200">{i18n.t("settings.settings.timeCreateNewTicket.options.7200")}</option>
-                            <option value="21600">{i18n.t("settings.settings.timeCreateNewTicket.options.21600")}</option>
-                            <option value="43200">{i18n.t("settings.settings.timeCreateNewTicket.options.43200")}</option>
-                            <option value="86400">{i18n.t("settings.settings.timeCreateNewTicket.options.86400")}</option>
-                            <option value="604800">{i18n.t("settings.settings.timeCreateNewTicket.options.604800")}</option>
-                            <option value="1296000">{i18n.t("settings.settings.timeCreateNewTicket.options.1296000")}</option>
-                            <option value="2592000">{i18n.t("settings.settings.timeCreateNewTicket.options.2592000")}</option>
+                            <option value="10">{t("settings.general.timeCreateNewTicket.options.10")}</option>
+                            <option value="30">{t("settings.general.timeCreateNewTicket.options.30")}</option>
+                            <option value="60">{t("settings.general.timeCreateNewTicket.options.60")}</option>
+                            <option value="300">{t("settings.general.timeCreateNewTicket.options.300")}</option>
+                            <option value="1800">{t("settings.general.timeCreateNewTicket.options.1800")}</option>
+                            <option value="3600">{t("settings.general.timeCreateNewTicket.options.3600")}</option>
+                            <option value="7200">{t("settings.general.timeCreateNewTicket.options.7200")}</option>
+                            <option value="21600">{t("settings.general.timeCreateNewTicket.options.21600")}</option>
+                            <option value="43200">{t("settings.general.timeCreateNewTicket.options.43200")}</option>
+                            <option value="86400">{t("settings.general.timeCreateNewTicket.options.86400")}</option>
+                            <option value="604800">{t("settings.general.timeCreateNewTicket.options.604800")}</option>
+                            <option value="1296000">{t("settings.general.timeCreateNewTicket.options.1296000")}</option>
+                            <option value="2592000">{t("settings.general.timeCreateNewTicket.options.2592000")}</option>
                         </Select>
                     </Paper>
                 </Tooltip>

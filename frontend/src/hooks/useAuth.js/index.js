@@ -1,15 +1,14 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useHistory } from "react-router-dom";
-import openSocket from "../../services/socket-io";
-
 import { toast } from "react-toastify";
-
-import { i18n } from "../../translate/i18n";
-import api from "../../services/api";
 import toastError from "../../errors/toastError";
+import api from "../../services/api";
+import openSocket from "../../services/socket-io";
 
 const useAuth = () => {
 	const history = useHistory();
+	const { t } = useTranslation();
 	const [isAuth, setIsAuth] = useState(false);
 	const [loading, setLoading] = useState(true);
 	const [user, setUser] = useState({});
@@ -93,7 +92,7 @@ const useAuth = () => {
 			api.defaults.headers.Authorization = `Bearer ${data.token}`;
 			setUser(data.user);
 			setIsAuth(true);
-			toast.success(i18n.t("auth.toasts.success"));
+			toast.success(t("auth.toasts.success"));
 			history.push("/tickets");
 			setLoading(false);
 		} catch (err) {

@@ -1,5 +1,6 @@
 import { TextField, useTheme } from "@material-ui/core";
 import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
     Bar,
     BarChart,
@@ -12,12 +13,12 @@ import {
 } from "recharts";
 import useTickets from "../../hooks/useTickets";
 import api from "../../services/api";
-import { i18n } from "../../translate/i18n";
 import CustomTooltip from "./CustomTooltip";
 import Title from "./Title";
 
 const ChartPerUser = ({ searchParam, pageNumber, status, date, showAll, queueIds, withUnreadMessages }) => {
     const theme = useTheme();
+    const { t } = useTranslation();
     const { ticketsByUser } = useTickets({ searchParam, pageNumber, status, date, showAll, queueIds, withUnreadMessages });
     const [userChartData, setUserChartData] = useState([]);
     const [users, setUsers] = useState({});
@@ -74,9 +75,9 @@ const ChartPerUser = ({ searchParam, pageNumber, status, date, showAll, queueIds
 
     return (
         <React.Fragment>
-            <Title>{i18n.t("dashboard.chartPerUser.title")}</Title>
+            <Title>{t("dashboard.chartPerUser.title")}</Title>
             <TextField
-                label={i18n.t("dashboard.chartPerUser.date.title")}
+                label={t("dashboard.chartPerUser.date.title")}
                 type="date"
                 value={selectedDate}
                 onChange={handleDateChange}
@@ -106,7 +107,7 @@ const ChartPerUser = ({ searchParam, pageNumber, status, date, showAll, queueIds
                             position="left"
                             style={{ textAnchor: "middle", fill: theme.palette.text.primary }}
                         >
-                            {i18n.t("dashboard.chartPerUser.ticket")}
+                            {t("dashboard.chartPerUser.ticket")}
                         </Label>
                     </YAxis>
                     <Tooltip content={<CustomTooltip />} cursor={true} />

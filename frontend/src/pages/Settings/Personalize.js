@@ -2,6 +2,7 @@ import { AppBar, Box, Button, Card, CardMedia, Grid, IconButton, makeStyles, Tab
 import DeleteIcon from "@material-ui/icons/Delete";
 import PropTypes from "prop-types";
 import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 import api from "../../services/api";
 import openSocket from "../../services/socket-io";
@@ -91,6 +92,7 @@ TabPanel.propTypes = {
 
 const PersonalizeSettings = ({ onThemeConfigUpdate }) => {
     const classes = useStyles();
+    const { t } = useTranslation();
     const [tabValue, setTabValue] = useState(0);
     const [data, setData] = useState({ company: "", url: "" });
     const [logos, setLogos] = useState({
@@ -152,7 +154,7 @@ const PersonalizeSettings = ({ onThemeConfigUpdate }) => {
                     });
                 }
             } catch (err) {
-                toast.error("Erro ao buscar personalizações");
+                toast.error(t("settings.personalize.error.invalid"));
             }
         };
 
@@ -168,7 +170,7 @@ const PersonalizeSettings = ({ onThemeConfigUpdate }) => {
         return () => {
             socket.disconnect();
         };
-    }, []);
+    }, [t]);
 
 
     const handleTabChange = (event, newValue) => {
@@ -196,9 +198,9 @@ const PersonalizeSettings = ({ onThemeConfigUpdate }) => {
         };
         try {
             await api.put("/personalizations/light/company", payload);
-            toast.success("Dados da empresa salvos com sucesso!");
+            toast.success(t("settings.personalize.success.company"));
         } catch (err) {
-            toast.error("Erro ao salvar dados da empresa");
+            toast.error(t("settings.personalize.error.company"));
         }
     };
 
@@ -226,17 +228,17 @@ const PersonalizeSettings = ({ onThemeConfigUpdate }) => {
                 }));
 
                 if (response.status === 200) {
-                    toast.success(`Imagem ${type} atualizada com sucesso!`);
+                    toast.success(`${t("settings.personalize.success.logos")}`);
 
                     onThemeConfigUpdate(theme, {
                         [type]: updatedLogoUrl
                     });
                 } else {
-                    throw new Error(`Erro ao salvar a imagem ${type} para o tema ${theme}`);
+                    throw new Error(`${t("settings.personalize.error.logos")} ${theme}`);
                 }
             } catch (error) {
-                console.error("Erro ao enviar a imagem:", error);
-                toast.error("Erro ao atualizar a imagem");
+                console.error(`${t("settings.personalize.error.logs")}`, error);
+                toast.error(`${t("settings.personalize.error.logos")}`);
             }
         }
     };
@@ -279,11 +281,11 @@ const PersonalizeSettings = ({ onThemeConfigUpdate }) => {
                 toast.success(`Cores do tema ${theme} salvas com sucesso!`);
                 onThemeConfigUpdate(theme, colorsToSave);
             } else {
-                throw new Error(`Erro ao salvar cores do tema ${theme}`);
+                throw new Error(`${t("settings.personalize.error.colors")} ${theme}`);
             }
         } catch (err) {
-            console.error("Erro ao salvar as cores:", err);
-            toast.error(`Erro ao salvar cores do tema ${theme}`);
+            console.error(`${t("settings.personalize.error.logs")}`, err);
+            toast.error(`${t("settings.personalize.error.colors")} ${theme}`);
         }
     };
 
@@ -297,15 +299,15 @@ const PersonalizeSettings = ({ onThemeConfigUpdate }) => {
                     textColor="primary"
                     variant="fullWidth"
                 >
-                    <Tab label="Dados" />
-                    <Tab label="Logos" />
-                    <Tab label="Cores" />
+                    <Tab label={t("settings.personalize.tabs.data")} />
+                    <Tab label={t("settings.personalize.tabs.logos")} />
+                    <Tab label={t("settings.personalize.tabs.colors")} />
                 </Tabs>
             </AppBar>
             <TabPanel value={tabValue} index={0}>
                 <div className={classes.fullWidthContainer}>
                     <TextField
-                        label="Empresa"
+                        label={t("settings.personalize.tabpanel.company")}
                         variant="outlined"
                         fullWidth
                         className={classes.textField}
@@ -313,7 +315,7 @@ const PersonalizeSettings = ({ onThemeConfigUpdate }) => {
                         onChange={handleCompanyChange}
                     />
                     <TextField
-                        label="URL"
+                        label={t("settings.personalize.tabpanel.url")}
                         variant="outlined"
                         fullWidth
                         className={classes.textField}
@@ -326,7 +328,7 @@ const PersonalizeSettings = ({ onThemeConfigUpdate }) => {
                         className={classes.button}
                         onClick={handleSaveCompanyData}
                     >
-                        Salvar Dados
+                        {t("settings.personalize.tabpanel.button.save")}
                     </Button>
                 </div>
             </TabPanel>
@@ -334,7 +336,7 @@ const PersonalizeSettings = ({ onThemeConfigUpdate }) => {
                 <div className={classes.fullWidthContainer}>
                     <Grid container spacing={5}>
                         <Grid item xs={12}>
-                            <Typography variant="h6" className={classes.title}>Theme Light</Typography>
+                            <Typography variant="h6" className={classes.title}>{t("settings.personalize.tabpanel.light")}</Typography>
                             <Grid container spacing={3}>
                                 {Object.keys(logos.themeLight).map((key) => (
                                     <Grid item xs={12} sm={6} md={4} key={key} className={classes.cardContainer}>
@@ -373,7 +375,7 @@ const PersonalizeSettings = ({ onThemeConfigUpdate }) => {
                         </Grid>
 
                         <Grid item xs={12}>
-                            <Typography variant="h6" className={classes.title}>Theme Dark</Typography>
+                            <Typography variant="h6" className={classes.title}>{t("settings.personalize.tabpanel.dark")}</Typography>
                             <Grid container spacing={3}>
                                 {Object.keys(logos.themeDark).map((key) => (
                                     <Grid item xs={12} sm={6} md={4} key={key} className={classes.cardContainer}>
@@ -417,20 +419,20 @@ const PersonalizeSettings = ({ onThemeConfigUpdate }) => {
             <TabPanel value={tabValue} index={2}>
                 <div className={classes.fullWidthContainer}>
                     <div className={classes.titleContainer}>
-                        <Typography variant="h6">Theme Light</Typography>
+                        <Typography variant="h6">{t("settings.personalize.tabpanel.light")}</Typography>
                         <Button
                             variant="contained"
                             color="primary"
                             className={classes.button}
                             onClick={() => handleSaveColors("light")}
                         >
-                            Salvar Cores Light
+                            {t("settings.personalize.tabpanel.button.saveLight")}
                         </Button>
                     </div>
                     <Grid container spacing={5}>
                         <Grid item xs={12} md={3}>
                             <TextField
-                                label="Principal"
+                                label={t("settings.personalize.tabpanel.input.primary")}
                                 type="color"
                                 variant="outlined"
                                 fullWidth
@@ -441,7 +443,7 @@ const PersonalizeSettings = ({ onThemeConfigUpdate }) => {
                         </Grid>
                         <Grid item xs={12} md={3}>
                             <TextField
-                                label="Secundária"
+                                label={t("settings.personalize.tabpanel.input.secondary")}
                                 type="color"
                                 variant="outlined"
                                 fullWidth
@@ -452,7 +454,7 @@ const PersonalizeSettings = ({ onThemeConfigUpdate }) => {
                         </Grid>
                         <Grid item xs={12} md={3}>
                             <TextField
-                                label="Background Default"
+                                label={t("settings.personalize.tabpanel.input.default")}
                                 type="color"
                                 variant="outlined"
                                 fullWidth
@@ -463,7 +465,7 @@ const PersonalizeSettings = ({ onThemeConfigUpdate }) => {
                         </Grid>
                         <Grid item xs={12} md={3}>
                             <TextField
-                                label="Background Paper"
+                                label={t("settings.personalize.tabpanel.input.paper")}
                                 type="color"
                                 variant="outlined"
                                 fullWidth
@@ -474,20 +476,20 @@ const PersonalizeSettings = ({ onThemeConfigUpdate }) => {
                         </Grid>
                     </Grid>
                     <div className={classes.titleContainer}>
-                        <Typography variant="h6">Theme Dark</Typography>
+                        <Typography variant="h6">{t("settings.personalize.tabpanel.dark")}</Typography>
                         <Button
                             variant="contained"
                             color="primary"
                             className={classes.button}
                             onClick={() => handleSaveColors("dark")}
                         >
-                            Salvar Cores Dark
+                            {t("settings.personalize.tabpanel.button.saveDark")}
                         </Button>
                     </div>
                     <Grid container spacing={5}>
                         <Grid item xs={12} md={3}>
                             <TextField
-                                label="Principal"
+                                label={t("settings.personalize.tabpanel.input.primary")}
                                 type="color"
                                 variant="outlined"
                                 fullWidth
@@ -498,7 +500,7 @@ const PersonalizeSettings = ({ onThemeConfigUpdate }) => {
                         </Grid>
                         <Grid item xs={12} md={3}>
                             <TextField
-                                label="Secundária"
+                                label={t("settings.personalize.tabpanel.input.secondary")}
                                 type="color"
                                 variant="outlined"
                                 fullWidth
@@ -509,7 +511,7 @@ const PersonalizeSettings = ({ onThemeConfigUpdate }) => {
                         </Grid>
                         <Grid item xs={12} md={3}>
                             <TextField
-                                label="Background Default"
+                                label={t("settings.personalize.tabpanel.input.default")}
                                 type="color"
                                 variant="outlined"
                                 fullWidth
@@ -520,7 +522,7 @@ const PersonalizeSettings = ({ onThemeConfigUpdate }) => {
                         </Grid>
                         <Grid item xs={12} md={3}>
                             <TextField
-                                label="Background Paper"
+                                label={t("settings.personalize.tabpanel.input.paper")}
                                 type="color"
                                 variant="outlined"
                                 fullWidth

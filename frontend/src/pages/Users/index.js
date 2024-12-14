@@ -1,8 +1,3 @@
-import React, { useState, useEffect, useReducer } from "react";
-import { toast } from "react-toastify";
-import openSocket from "../../services/socket-io";
-import { makeStyles } from "@material-ui/core/styles";
-
 import {
   Button,
   IconButton,
@@ -16,24 +11,26 @@ import {
   TextField,
   Tooltip
 } from "@material-ui/core";
-
+import { makeStyles } from "@material-ui/core/styles";
 import {
   AddCircleOutline,
   DeleteOutline,
   Edit,
   Search
 } from "@material-ui/icons";
-
+import React, { useEffect, useReducer, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { toast } from "react-toastify";
+import ConfirmationModal from "../../components/ConfirmationModal";
 import MainContainer from "../../components/MainContainer";
 import MainHeader from "../../components/MainHeader";
 import MainHeaderButtonsWrapper from "../../components/MainHeaderButtonsWrapper";
-import Title from "../../components/Title";
 import TableRowSkeleton from "../../components/TableRowSkeleton";
+import Title from "../../components/Title";
 import UserModal from "../../components/UserModal";
-import ConfirmationModal from "../../components/ConfirmationModal";
-import api from "../../services/api";
-import { i18n } from "../../translate/i18n";
 import toastError from "../../errors/toastError";
+import api from "../../services/api";
+import openSocket from "../../services/socket-io";
 
 const reducer = (state, action) => {
   if (action.type === "LOAD_USERS") {
@@ -91,7 +88,7 @@ const useStyles = makeStyles((theme) => ({
 
 const Users = () => {
   const classes = useStyles();
-
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [pageNumber, setPageNumber] = useState(1);
   const [hasMore, setHasMore] = useState(false);
@@ -167,7 +164,7 @@ const Users = () => {
   const handleDeleteUser = async (userId) => {
     try {
       await api.delete(`/users/${userId}`);
-      toast.success(i18n.t("users.toasts.deleted"));
+      toast.success(t("users.toasts.deleted"));
     } catch (err) {
       toastError(err);
     }
@@ -193,14 +190,14 @@ const Users = () => {
       <ConfirmationModal
         title={
           deletingUser &&
-          `${i18n.t("users.confirmationModal.deleteTitle")} ${deletingUser.name
+          `${t("users.confirmationModal.deleteTitle")} ${deletingUser.name
           }?`
         }
         open={confirmModalOpen}
         onClose={setConfirmModalOpen}
         onConfirm={() => handleDeleteUser(deletingUser.id)}
       >
-        {i18n.t("users.confirmationModal.deleteMessage")}
+        {t("users.confirmationModal.deleteMessage")}
       </ConfirmationModal>
       <UserModal
         open={userModalOpen}
@@ -209,10 +206,10 @@ const Users = () => {
         userId={selectedUser && selectedUser.id}
       />
       <MainHeader>
-        <Title>{i18n.t("users.title")} ({users.length})</Title>
+        <Title>{t("users.title")} ({users.length})</Title>
         <MainHeaderButtonsWrapper>
           <TextField
-            placeholder={i18n.t("contacts.searchPlaceholder")}
+            placeholder={t("contacts.searchPlaceholder")}
             type="search"
             value={searchParam}
             onChange={handleSearch}
@@ -224,7 +221,7 @@ const Users = () => {
               ),
             }}
           />
-          <Tooltip title={i18n.t("users.buttons.add")}>
+          <Tooltip title={t("users.buttons.add")}>
             <Button
               variant="contained"
               color="primary"
@@ -244,28 +241,28 @@ const Users = () => {
           <TableHead>
             <TableRow>
               <TableCell align="center">
-                {i18n.t("users.table.id")}
+                {t("users.table.id")}
               </TableCell>
               <TableCell align="center">
-                {i18n.t("users.table.name")}
+                {t("users.table.name")}
               </TableCell>
               <TableCell align="center">
-                {i18n.t("users.table.email")}
+                {t("users.table.email")}
               </TableCell>
               <TableCell align="center">
-                {i18n.t("users.table.profile")}
+                {t("users.table.profile")}
               </TableCell>
               <TableCell align="center">
-                {i18n.t("users.table.whatsapp")}
+                {t("users.table.whatsapp")}
               </TableCell>
               <TableCell align="center">
-                {i18n.t("users.table.startWork")}
+                {t("users.table.startWork")}
               </TableCell>
               <TableCell align="center">
-                {i18n.t("users.table.endWork")}
+                {t("users.table.endWork")}
               </TableCell>
               <TableCell align="center">
-                {i18n.t("users.table.actions")}
+                {t("users.table.actions")}
               </TableCell>
             </TableRow>
           </TableHead>

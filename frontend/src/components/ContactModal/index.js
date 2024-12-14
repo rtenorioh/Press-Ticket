@@ -19,12 +19,12 @@ import {
 	Formik,
 } from "formik";
 import React, { useContext, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 import * as Yup from "yup";
 import { AuthContext } from "../../context/Auth/AuthContext";
 import toastError from "../../errors/toastError";
 import api from "../../services/api";
-import { i18n } from "../../translate/i18n";
 
 const useStyles = makeStyles((theme) => ({
 	root: {
@@ -68,6 +68,7 @@ const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
 	const classes = useStyles();
 	const { user } = useContext(AuthContext);
 	const [contact, setContact] = useState(initialState);
+	const { t } = useTranslation();
 
 	useEffect(() => {
 		const abortController = new AbortController();
@@ -108,7 +109,7 @@ const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
 				const { data } = await api.post("/contacts", values);
 				if (onSave) onSave(data);
 			}
-			toast.success(i18n.t("contactModal.success"));
+			toast.success(t("contactModal.success"));
 			handleClose();
 		} catch (err) {
 			toastError(err);
@@ -119,8 +120,8 @@ const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
 		<Dialog open={open} onClose={handleClose} maxWidth="lg" scroll="paper">
 			<DialogTitle>
 				{contactId
-					? i18n.t("contactModal.title.edit")
-					: i18n.t("contactModal.title.add")}
+					? t("contactModal.title.edit")
+					: t("contactModal.title.add")}
 			</DialogTitle>
 			<Formik
 				initialValues={contact}
@@ -135,11 +136,11 @@ const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
 					<Form>
 						<DialogContent dividers>
 							<Typography variant="subtitle1" gutterBottom>
-								{i18n.t("contactModal.form.mainInfo")}
+								{t("contactModal.form.mainInfo")}
 							</Typography>
 							<Field
 								as={TextField}
-								label={i18n.t("contactModal.form.name")}
+								label={t("contactModal.form.name")}
 								name="name"
 								autoFocus
 								error={touched.name && Boolean(errors.name)}
@@ -151,7 +152,7 @@ const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
 							{user.isTricked === "enabled" && (
 								<Field
 									as={TextField}
-									label={i18n.t("contactModal.form.number")}
+									label={t("contactModal.form.number")}
 									name="number"
 									error={touched.number && Boolean(errors.number)}
 									helperText={touched.number && errors.number}
@@ -162,7 +163,7 @@ const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
 							)}
 							<Field
 								as={TextField}
-								label={i18n.t("contactModal.form.email")}
+								label={t("contactModal.form.email")}
 								name="email"
 								error={touched.email && Boolean(errors.email)}
 								helperText={touched.email && errors.email}
@@ -175,7 +176,7 @@ const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
 								style={{ marginBottom: 8, marginTop: 12 }}
 								variant="subtitle1"
 							>
-								{i18n.t("contactModal.form.extraInfo")}
+								{t("contactModal.form.extraInfo")}
 							</Typography>
 							<FieldArray name="extraInfo">
 								{({ push, remove }) => (
@@ -188,7 +189,7 @@ const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
 												>
 													<Field
 														as={TextField}
-														label={i18n.t("contactModal.form.extraName")}
+														label={t("contactModal.form.extraName")}
 														name={`extraInfo[${index}].name`}
 														variant="outlined"
 														margin="dense"
@@ -196,7 +197,7 @@ const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
 													/>
 													<Field
 														as={TextField}
-														label={i18n.t("contactModal.form.extraValue")}
+														label={t("contactModal.form.extraValue")}
 														name={`extraInfo[${index}].value`}
 														variant="outlined"
 														margin="dense"
@@ -217,7 +218,7 @@ const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
 												color="primary"
 												onClick={() => push({ name: "", value: "" })}
 											>
-												+ {i18n.t("contactModal.buttons.addExtraInfo")}
+												+ {t("contactModal.buttons.addExtraInfo")}
 											</Button>
 										</div>
 									</>
@@ -231,7 +232,7 @@ const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
 								disabled={isSubmitting}
 								variant="outlined"
 							>
-								{i18n.t("contactModal.buttons.cancel")}
+								{t("contactModal.buttons.cancel")}
 							</Button>
 							<Button
 								type="submit"
@@ -241,8 +242,8 @@ const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
 								className={classes.btnWrapper}
 							>
 								{contactId
-									? i18n.t("contactModal.buttons.okEdit")
-									: i18n.t("contactModal.buttons.okAdd")}
+									? t("contactModal.buttons.okEdit")
+									: t("contactModal.buttons.okAdd")}
 								{isSubmitting && (
 									<CircularProgress
 										size={24}

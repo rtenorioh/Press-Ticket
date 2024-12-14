@@ -7,7 +7,7 @@ import DialogTitle from "@material-ui/core/DialogTitle";
 import { format, parseISO } from "date-fns";
 import PropTypes from "prop-types";
 import React from "react";
-import { i18n } from "../../translate/i18n";
+import { useTranslation } from "react-i18next";
 
 const useStyles = makeStyles((theme) => ({
     timestamp: {
@@ -20,6 +20,7 @@ const useStyles = makeStyles((theme) => ({
 
 const MessageHistoryModal = ({ open, onClose, oldMessages }) => {
     const classes = useStyles();
+    const { t } = useTranslation();
 
     return (
         <Dialog
@@ -28,7 +29,7 @@ const MessageHistoryModal = ({ open, onClose, oldMessages }) => {
             aria-labelledby="dialog-title"
         >
             <DialogTitle id="dialog-title">
-                {i18n.t("messageHistoryModal.title")}
+                {t("messageHistoryModal.title")}
             </DialogTitle>
             <DialogContent>
                 <TableContainer>
@@ -58,7 +59,7 @@ const MessageHistoryModal = ({ open, onClose, oldMessages }) => {
                     onClick={() => onClose(false)}
                     aria-label="Fechar histórico de mensagens"
                 >
-                    {i18n.t("messageHistoryModal.close")}
+                    {t("messageHistoryModal.close")}
                 </Button>
             </DialogActions>
         </Dialog>

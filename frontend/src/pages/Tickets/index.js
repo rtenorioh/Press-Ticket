@@ -1,19 +1,15 @@
 import Grid from "@material-ui/core/Grid";
+import Hidden from "@material-ui/core/Hidden";
 import Paper from "@material-ui/core/Paper";
 import { makeStyles } from "@material-ui/core/styles";
 import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
-
+import defaultLogoTicket from '../../assets/logoTicket.jpg';
 import Ticket from "../../components/Ticket/";
 import TicketsManager from "../../components/TicketsManager/";
-
-import Hidden from "@material-ui/core/Hidden";
-import { i18n } from "../../translate/i18n";
-
-import defaultLogoTicket from '../../assets/logoTicket.jpg';
 import toastError from "../../errors/toastError";
 import api from "../../services/api";
-
 const PUBLIC_ASSET_PATH = '/assets/';
 
 const useStyles = makeStyles((theme) => ({
@@ -25,13 +21,11 @@ const useStyles = makeStyles((theme) => ({
     overflowY: "hidden",
     margin: theme.spacing(1),
   },
-
   chatPapper: {
     // backgroundColor: "red",
     display: "flex",
     height: "100%",
   },
-
   contactsWrapper: {
     display: "flex",
     height: "100%",
@@ -70,6 +64,7 @@ const useStyles = makeStyles((theme) => ({
 
 const Chat = () => {
   const classes = useStyles();
+  const { t } = useTranslation();
   const { ticketId } = useParams();
   const [logo, setLogo] = useState(defaultLogoTicket);
   const themeStorage = localStorage.getItem("theme");
@@ -124,7 +119,7 @@ const Chat = () => {
                     <center>
                       <img src={logo} width="50%" alt="" />
                     </center>
-                    {i18n.t("chat.noTicketMessage")}
+                    {t("chat.noTicketMessage")}
                   </span>
                 </Paper>
               </Hidden>

@@ -22,6 +22,7 @@ import {
 } from "@material-ui/icons";
 import React, { useContext, useEffect, useReducer, useState } from "react";
 import { CSVLink } from "react-csv";
+import { useTranslation } from "react-i18next";
 import { useHistory } from "react-router-dom";
 import { toast } from "react-toastify";
 import { Can } from "../../components/Can";
@@ -39,7 +40,6 @@ import { AuthContext } from "../../context/Auth/AuthContext";
 import toastError from "../../errors/toastError";
 import api from "../../services/api";
 import openSocket from "../../services/socket-io";
-import { i18n } from "../../translate/i18n";
 
 const reducer = (state, action) => {
   if (action.type === "LOAD_CONTACTS") {
@@ -110,6 +110,7 @@ const useStyles = makeStyles((theme) => ({
 
 const Contacts = () => {
   const classes = useStyles();
+  const { t } = useTranslation();
   const history = useHistory();
   const { user } = useContext(AuthContext);
   const [loading, setLoading] = useState(false);
@@ -252,7 +253,7 @@ const Contacts = () => {
   const handleDeleteContact = async (contactId) => {
     try {
       await api.delete(`/contacts/${contactId}`);
-      toast.success(i18n.t("contacts.toasts.deleted"));
+      toast.success(t("contacts.toasts.deleted"));
     } catch (err) {
       toastError(err);
     }
@@ -264,7 +265,7 @@ const Contacts = () => {
   const handleDeleteAllContact = async () => {
     try {
       await api.delete("/contacts");
-      toast.success(i18n.t("contacts.toasts.deletedAll"));
+      toast.success(t("contacts.toasts.deletedAll"));
       history.go(0);
     } catch (err) {
       toastError(err);
@@ -329,9 +330,9 @@ const Contacts = () => {
       ></ContactModal>
       <ConfirmationModal
         title={
-          deletingContact ? `${i18n.t("contacts.confirmationModal.deleteTitle")} ${deletingContact.name}?`
-            : deletingAllContact ? `${i18n.t("contacts.confirmationModal.deleteAllTitle")}`
-              : `${i18n.t("contacts.confirmationModal.importTitle")}`
+          deletingContact ? `${t("contacts.confirmationModal.deleteTitle")} ${deletingContact.name}?`
+            : deletingAllContact ? `${t("contacts.confirmationModal.deleteAllTitle")}`
+              : `${t("contacts.confirmationModal.importTitle")}`
         }
         open={confirmOpen}
         onClose={setConfirmOpen}
@@ -342,20 +343,20 @@ const Contacts = () => {
         }
       >
         {
-          deletingContact ? `${i18n.t("contacts.confirmationModal.deleteMessage")}`
-            : deletingAllContact ? `${i18n.t("contacts.confirmationModal.deleteAllMessage")}`
-              : `${i18n.t("contacts.confirmationModal.importMessage")}`
+          deletingContact ? `${t("contacts.confirmationModal.deleteMessage")}`
+            : deletingAllContact ? `${t("contacts.confirmationModal.deleteAllMessage")}`
+              : `${t("contacts.confirmationModal.importMessage")}`
         }
       </ConfirmationModal>
       <MainHeader>
-        <Title>{i18n.t("contacts.title")} ({contacts.length})</Title>
+        <Title>{t("contacts.title")} ({contacts.length})</Title>
         <MainHeaderButtonsWrapper>
           <Can
             role={user.profile}
             perform="drawer-admin-items:view"
             yes={() => (
               <>
-                <Tooltip title={i18n.t("contacts.buttons.import")}>
+                <Tooltip title={t("contacts.buttons.import")}>
                   <Button
                     variant="contained"
                     color="primary"
@@ -368,7 +369,7 @@ const Contacts = () => {
               </>
             )}
           />
-          <Tooltip title={i18n.t("contacts.buttons.add")}>
+          <Tooltip title={t("contacts.buttons.add")}>
             <Button
               variant="contained"
               color="primary"
@@ -378,7 +379,7 @@ const Contacts = () => {
               <AddCircleOutline />
             </Button>
           </Tooltip>
-          <Tooltip title={i18n.t("contacts.buttons.export")}>
+          <Tooltip title={t("contacts.buttons.export")}>
             <CSVLink
               className={classes.csvbtn}
               separator=";"
@@ -402,7 +403,7 @@ const Contacts = () => {
             perform="drawer-admin-items:view"
             yes={() => (
               <>
-                <Tooltip title={i18n.t("contacts.buttons.delete")}>
+                <Tooltip title={t("contacts.buttons.delete")}>
                   <Button
                     variant="contained"
                     color="primary"
@@ -430,10 +431,10 @@ const Contacts = () => {
           <TableHead>
             <TableRow>
               <TableCell padding="checkbox"></TableCell>
-              <TableCell>{i18n.t("contacts.table.name")}</TableCell>
-              <TableCell align="center">{i18n.t("contacts.table.whatsapp")}</TableCell>
-              <TableCell align="center">{i18n.t("contacts.table.channels")}</TableCell>
-              <TableCell align="center">{i18n.t("contacts.table.actions")}</TableCell>
+              <TableCell>{t("contacts.table.name")}</TableCell>
+              <TableCell align="center">{t("contacts.table.whatsapp")}</TableCell>
+              <TableCell align="center">{t("contacts.table.channels")}</TableCell>
+              <TableCell align="center">{t("contacts.table.actions")}</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>

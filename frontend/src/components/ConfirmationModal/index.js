@@ -7,8 +7,7 @@ import Typography from "@material-ui/core/Typography";
 import { makeStyles } from "@material-ui/core/styles";
 import { Cancel, CheckCircle } from "@material-ui/icons";
 import React from "react";
-
-import { i18n } from "../../translate/i18n";
+import { useTranslation } from "react-i18next";
 
 const useStyles = makeStyles((theme) => ({
 	dialogTitle: {
@@ -33,6 +32,7 @@ const useStyles = makeStyles((theme) => ({
 
 const ConfirmationModal = ({ title, children, open, onClose, onConfirm }) => {
 	const classes = useStyles();
+	const { t } = useTranslation();
 
 	return (
 		<Dialog
@@ -55,7 +55,7 @@ const ConfirmationModal = ({ title, children, open, onClose, onConfirm }) => {
 					className={classes.cancelButton}
 					startIcon={<Cancel />}
 				>
-					{i18n.t("confirmationModal.buttons.cancel")}
+					{t("confirmationModal.buttons.cancel")}
 				</Button>
 				<Button
 					variant="contained"
@@ -66,7 +66,7 @@ const ConfirmationModal = ({ title, children, open, onClose, onConfirm }) => {
 					className={classes.confirmButton}
 					startIcon={<CheckCircle />}
 				>
-					{i18n.t("confirmationModal.buttons.confirm")}
+					{t("confirmationModal.buttons.confirm")}
 				</Button>
 			</DialogActions>
 		</Dialog>

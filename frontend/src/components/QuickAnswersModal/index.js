@@ -1,13 +1,3 @@
-import React, { useEffect, useRef, useState } from "react";
-
-import { Form, Formik } from "formik";
-import { toast } from "react-toastify";
-import * as Yup from "yup";
-import ButtonWithSpinner from "../ButtonWithSpinner";
-import FormikTextField from "../FormikTextField";
-import MessageVariablesPicker from "../MessageVariablesPicker";
-import WithSkeleton from "../WithSkeleton";
-
 import {
   Button,
   Dialog,
@@ -16,10 +6,17 @@ import {
   DialogTitle,
   makeStyles
 } from "@material-ui/core";
-import { i18n } from "../../translate/i18n";
-
+import { Form, Formik } from "formik";
+import React, { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { toast } from "react-toastify";
+import * as Yup from "yup";
 import toastError from "../../errors/toastError";
 import api from "../../services/api";
+import ButtonWithSpinner from "../ButtonWithSpinner";
+import FormikTextField from "../FormikTextField";
+import MessageVariablesPicker from "../MessageVariablesPicker";
+import WithSkeleton from "../WithSkeleton";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -55,7 +52,7 @@ const QuickAnswersModal = ({
     shortcut: "",
     message: "",
   };
-
+  const { t } = useTranslation();
   const isMounted = useRef(true);
   const messageInputRef = useRef();
   const [loading, setLoading] = useState(false);
@@ -111,7 +108,7 @@ const QuickAnswersModal = ({
         }
         onClose();
       }
-      toast.success(i18n.t("quickAnswersModal.success"));
+      toast.success(t("quickAnswersModal.success"));
     } catch (err) {
       toastError(err);
     }
@@ -142,8 +139,8 @@ const QuickAnswersModal = ({
       >
         <DialogTitle>
           {quickAnswerId
-            ? i18n.t("quickAnswersModal.title.edit")
-            : i18n.t("quickAnswersModal.title.add")}
+            ? t("quickAnswersModal.title.edit")
+            : t("quickAnswersModal.title.add")}
         </DialogTitle>
         <Formik
           initialValues={quickAnswer}
@@ -156,7 +153,7 @@ const QuickAnswersModal = ({
               <DialogContent dividers>
                 <WithSkeleton loading={loading}>
                   <FormikTextField
-                    label={i18n.t("quickAnswersModal.form.shortcut")}
+                    label={t("quickAnswersModal.form.shortcut")}
                     autoFocus
                     name="shortcut"
                     touched={touched}
@@ -168,7 +165,7 @@ const QuickAnswersModal = ({
                 </WithSkeleton>
                 <WithSkeleton fullWidth loading={loading}>
                   <FormikTextField
-                    label={i18n.t("quickAnswersModal.form.message")}
+                    label={t("quickAnswersModal.form.message")}
                     multiline
                     inputRef={messageInputRef}
                     minRows={5}
@@ -193,7 +190,7 @@ const QuickAnswersModal = ({
                   onClick={handleClose}
                   disabled={isSubmitting}
                 >
-                  {i18n.t("quickAnswersModal.buttons.cancel")}
+                  {t("quickAnswersModal.buttons.cancel")}
                 </Button>
                 <ButtonWithSpinner
                   type="submit"
@@ -203,8 +200,8 @@ const QuickAnswersModal = ({
                   variant="contained"
                 >
                   {quickAnswerId
-                    ? i18n.t("quickAnswersModal.buttons.okEdit")
-                    : i18n.t("quickAnswersModal.buttons.okAdd")}
+                    ? t("quickAnswersModal.buttons.okEdit")
+                    : t("quickAnswersModal.buttons.okAdd")}
                 </ButtonWithSpinner>
               </DialogActions>
             </Form>

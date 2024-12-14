@@ -9,11 +9,11 @@ import {
 } from "@material-ui/core";
 import { Visibility, VisibilityOff } from "@material-ui/icons";
 import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 import Title from "../../components/Title";
 import toastError from "../../errors/toastError";
 import api from "../../services/api";
-import { i18n } from "../../translate/i18n.js";
 
 const useStyles = makeStyles((theme) => ({
 	root: {
@@ -48,6 +48,7 @@ const useStyles = makeStyles((theme) => ({
 
 const Integrations = () => {
 	const classes = useStyles();
+	const { t } = useTranslation();
 
 	const [integrations, setIntegrations] = useState([]);
 	const [showKeys, setShowKeys] = useState({
@@ -91,7 +92,7 @@ const Integrations = () => {
 			await api.put(`/integrations/${integrationKey}`, {
 				value: selectedValue,
 			});
-			toast.success(i18n.t("integrations.success"));
+			toast.success(t("integrations.success"));
 			setMaskedValues((prevState) => ({
 				...prevState,
 				[integrationKey]: maskValue(selectedValue),
@@ -120,11 +121,11 @@ const Integrations = () => {
 	return (
 		<div className={classes.root}>
 			<Container className={classes.container}>
-				<Title>{i18n.t("integrations.title")}</Title>
+				<Title>{t("integrations.title")}</Title>
 				<Paper className={classes.paper}>
 					<div className={classes.integrationRow}>
 						<Typography align="left" variant="body1">
-							{i18n.t("integrations.integrations.openai.title")}
+							{t("integrations.integrations.openai.title")}
 						</Typography>
 
 						<div className={classes.textFieldContainer}>
@@ -133,7 +134,7 @@ const Integrations = () => {
 								id="organization"
 								name="organization"
 								margin="dense"
-								label={i18n.t("integrations.integrations.openai.organization")}
+								label={t("integrations.integrations.openai.organization")}
 								variant="outlined"
 								value={
 									showKeys["organization"]
@@ -157,7 +158,7 @@ const Integrations = () => {
 								className={classes.textField}
 								id="apikey"
 								name="apikey"
-								label={i18n.t("integrations.integrations.openai.apikey")}
+								label={t("integrations.integrations.openai.apikey")}
 								margin="dense"
 								variant="outlined"
 								onChange={handleChangeIntegration}
@@ -184,7 +185,7 @@ const Integrations = () => {
 						<Grid item xs={12} sm={6}>
 							<div className={classes.integrationRow}>
 								<Typography align="left" variant="body1">
-									{i18n.t("integrations.integrations.n8n.title")}
+									{t("integrations.integrations.n8n.title")}
 								</Typography>
 
 								<div className={classes.textFieldContainer}>
@@ -193,7 +194,7 @@ const Integrations = () => {
 										id="urlApiN8N"
 										name="urlApiN8N"
 										margin="dense"
-										label={i18n.t("integrations.integrations.n8n.urlApiN8N")}
+										label={t("integrations.integrations.n8n.urlApiN8N")}
 										variant="outlined"
 										onChange={handleChangeIntegration}
 										fullWidth
@@ -217,7 +218,7 @@ const Integrations = () => {
 						<Grid item xs={12} sm={6}>
 							<div className={classes.integrationRow}>
 								<Typography align="left" variant="body1">
-									{i18n.t("integrations.integrations.hub.title")}
+									{t("integrations.integrations.hub.title")}
 								</Typography>
 
 								<div className={classes.textFieldContainer}>
@@ -226,7 +227,7 @@ const Integrations = () => {
 										id="hubToken"
 										name="hubToken"
 										margin="dense"
-										label={i18n.t("integrations.integrations.hub.hubToken")}
+										label={t("integrations.integrations.hub.hubToken")}
 										variant="outlined"
 										onChange={handleChangeIntegration}
 										fullWidth
@@ -254,7 +255,7 @@ const Integrations = () => {
 						<Grid item xs={12}>
 							<div className={classes.integrationRow}>
 								<Typography align="left" variant="body1">
-									{i18n.t("integrations.integrations.maps.title")}
+									{t("integrations.integrations.maps.title")}
 								</Typography>
 
 								<div className={classes.textFieldContainer}>
@@ -263,7 +264,7 @@ const Integrations = () => {
 										id="apiMaps"
 										name="apiMaps"
 										margin="dense"
-										label={i18n.t("integrations.integrations.maps.apiMaps")}
+										label={t("integrations.integrations.maps.apiMaps")}
 										variant="outlined"
 										onChange={handleChangeIntegration}
 										fullWidth

@@ -1,25 +1,22 @@
-import React, { useState, useContext } from "react";
-
+import Drawer from "@material-ui/core/Drawer";
+import IconButton from "@material-ui/core/IconButton";
+import InputLabel from "@material-ui/core/InputLabel";
+import Link from "@material-ui/core/Link";
 import { makeStyles } from "@material-ui/core/styles";
 import Typography from "@material-ui/core/Typography";
-import IconButton from "@material-ui/core/IconButton";
 import CloseIcon from "@material-ui/icons/Close";
-import Drawer from "@material-ui/core/Drawer";
-import Link from "@material-ui/core/Link";
-import InputLabel from "@material-ui/core/InputLabel";
+import React, { useContext, useState } from "react";
 //import Avatar from "@material-ui/core/Avatar";
 import Button from "@material-ui/core/Button";
 import Paper from "@material-ui/core/Paper";
-
-import { i18n } from "../../translate/i18n";
-
-import ContactModal from "../ContactModal";
+import { useTranslation } from "react-i18next";
+import { AuthContext } from "../../context/Auth/AuthContext";
 import ContactDrawerSkeleton from "../ContactDrawerSkeleton";
+import ContactModal from "../ContactModal";
+import CopyToClipboard from "../CopyToClipboard";
 import MarkdownWrapper from "../MarkdownWrapper";
 import { TagsContainer } from "../TagsContainer";
 import ModalImageContatc from "./ModalImage";
-import CopyToClipboard from "../CopyToClipboard";
-import { AuthContext } from "../../context/Auth/AuthContext";
 
 const drawerWidth = 320;
 
@@ -55,14 +52,12 @@ const useStyles = makeStyles(theme => ({
 		overflowY: "scroll",
 		...theme.scrollbarStyles,
 	},
-
 	contactAvatar: {
 		margin: 15,
 		width: 160,
 		height: 160,
 		borderRadius: 10,
 	},
-
 	contactHeader: {
 		display: "flex",
 		padding: 8,
@@ -73,7 +68,6 @@ const useStyles = makeStyles(theme => ({
 			margin: 4,
 		},
 	},
-
 	contactDetails: {
 		marginTop: 8,
 		padding: 8,
@@ -90,6 +84,7 @@ const ContactDrawer = ({ open, handleDrawerClose, contact, loading }) => {
 	const classes = useStyles();
 	const { user } = useContext(AuthContext);
 	const [modalOpen, setModalOpen] = useState(false);
+	const { t } = useTranslation();
 
 	return (
 		<Drawer
@@ -114,7 +109,7 @@ const ContactDrawer = ({ open, handleDrawerClose, contact, loading }) => {
 					<CloseIcon />
 				</IconButton>
 				<Typography style={{ justifySelf: "center" }}>
-					{i18n.t("contactDrawer.header")}
+					{t("contactDrawer.header")}
 				</Typography>
 			</div>
 			{loading ? (
@@ -126,10 +121,10 @@ const ContactDrawer = ({ open, handleDrawerClose, contact, loading }) => {
 						<Typography>
 							{contact.name}
 							<CopyToClipboard content={contact.name} color="secondary" />
-							</Typography>
+						</Typography>
 						<Typography>
-							<Link href={`tel:${user.isTricked === "enabled" ? contact.number : contact.number.slice(0,-4) + "****"}`}>{user.isTricked === "enabled" ? contact.number : contact.number.slice(0,-4) + "****"}</Link>
-							<CopyToClipboard content={user.isTricked === "enabled" ? contact.number : contact.number.slice(0,-4) + "****"} color="secondary" />
+							<Link href={`tel:${user.isTricked === "enabled" ? contact.number : contact.number.slice(0, -4) + "****"}`}>{user.isTricked === "enabled" ? contact.number : contact.number.slice(0, -4) + "****"}</Link>
+							<CopyToClipboard content={user.isTricked === "enabled" ? contact.number : contact.number.slice(0, -4) + "****"} color="secondary" />
 						</Typography>
 						{contact.email && (
 							<Typography>
@@ -142,7 +137,7 @@ const ContactDrawer = ({ open, handleDrawerClose, contact, loading }) => {
 							color="primary"
 							onClick={() => setModalOpen(true)}
 						>
-							{i18n.t("contactDrawer.buttons.edit")}
+							{t("contactDrawer.buttons.edit")}
 						</Button>
 					</Paper>
 					<TagsContainer contact={contact} className={classes.contactTags} />
@@ -153,7 +148,7 @@ const ContactDrawer = ({ open, handleDrawerClose, contact, loading }) => {
 							contactId={contact.id}
 						></ContactModal>
 						<Typography variant="subtitle1">
-							{i18n.t("contactDrawer.extraInfo")}
+							{t("contactDrawer.extraInfo")}
 						</Typography>
 						{contact?.extraInfo?.map(info => (
 							<Paper

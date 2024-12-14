@@ -18,10 +18,12 @@ import ChevronLeftIcon from "@material-ui/icons/ChevronLeft";
 import MenuIcon from "@material-ui/icons/Menu";
 import clsx from "clsx";
 import React, { useContext, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useLocation } from "react-router-dom";
 import { systemVersion } from "../../package.json";
 import defaultLogo from '../assets/logo.jpg';
 import BackdropLoading from "../components/BackdropLoading";
+import LanguageSelector from "../components/LanguageSelector";
 import NotificationsPopOver from "../components/NotificationsPopOver";
 import ThemeSelector from '../components/ThemeSelector';
 import UserModal from "../components/UserModal";
@@ -29,7 +31,6 @@ import { AuthContext } from "../context/Auth/AuthContext";
 import toastError from "../errors/toastError";
 import api from "../services/api";
 import openSocket from "../services/socket-io";
-import { i18n } from "../translate/i18n";
 import MainListItems from "./MainListItems";
 
 const PUBLIC_ASSET_PATH = '/assets/';
@@ -127,6 +128,7 @@ const useStyles = makeStyles((theme) => ({
 
 const LoggedInLayout = ({ children, toggleTheme, onThemeConfigUpdate }) => {
   const classes = useStyles();
+  const { t } = useTranslation();
   const location = useLocation();
   const [userModalOpen, setUserModalOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
@@ -357,10 +359,12 @@ const LoggedInLayout = ({ children, toggleTheme, onThemeConfigUpdate }) => {
             noWrap
             className={classes.title}
           >
-            {i18n.t("mainDrawer.appBar.message.hi")} {user.name}, {i18n.t("mainDrawer.appBar.message.text")} {companyData.name || "Press Ticket"}
+            {t("mainDrawer.appBar.message.hi")} {user.name}, {t("mainDrawer.appBar.message.text")} {companyData.name || "Press Ticket"}
           </Typography>
 
           <ThemeSelector toggleTheme={toggleTheme} />
+
+          <LanguageSelector />
 
           {user.id && <NotificationsPopOver />}
 
@@ -390,10 +394,10 @@ const LoggedInLayout = ({ children, toggleTheme, onThemeConfigUpdate }) => {
               onClose={handleCloseMenu}
             >
               <MenuItem onClick={handleOpenUserModal}>
-                {i18n.t("mainDrawer.appBar.user.profile")}
+                {t("mainDrawer.appBar.user.profile")}
               </MenuItem>
               <MenuItem onClick={handleClickLogout}>
-                {i18n.t("mainDrawer.appBar.user.logout")}
+                {t("mainDrawer.appBar.user.logout")}
               </MenuItem>
               <Divider />
               <span className={classes.systemCss}>

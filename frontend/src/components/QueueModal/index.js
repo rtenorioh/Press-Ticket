@@ -16,11 +16,11 @@ import { useTheme } from "@material-ui/core/styles";
 import { Colorize } from "@material-ui/icons";
 import { Field, Form, Formik } from "formik";
 import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 import * as Yup from "yup";
 import toastError from "../../errors/toastError";
 import api from "../../services/api";
-import { i18n } from "../../translate/i18n";
 import ColorPicker from "../ColorPicker";
 
 const useStyles = makeStyles((theme) => ({
@@ -53,21 +53,22 @@ const useStyles = makeStyles((theme) => ({
 	},
 }));
 
-const QueueSchema = Yup.object().shape({
-	name: Yup.string()
-		.min(2, i18n.t("queueModal.validation.tooShort"))
-		.max(50, i18n.t("queueModal.validation.tooLong"))
-		.required(i18n.t("queueModal.validation.required")),
-	color: Yup.string().min(3, i18n.t("queueModal.validation.tooShort")).max(9, i18n.t("queueModal.validation.tooLong")).required(),
-	greetingMessage: Yup.string(),
-	startWork: Yup.string(),
-	endWork: Yup.string(),
-	absenceMessage: Yup.string(),
-});
-
 const QueueModal = ({ open, onClose, queueId }) => {
 	const classes = useStyles();
 	const theme = useTheme();
+	const { t } = useTranslation();
+
+	const QueueSchema = Yup.object().shape({
+		name: Yup.string()
+			.min(2, t("queueModal.validation.tooShort"))
+			.max(50, t("queueModal.validation.tooLong"))
+			.required(t("queueModal.validation.required")),
+		color: Yup.string().min(3, t("queueModal.validation.tooShort")).max(9, t("queueModal.validation.tooLong")).required(),
+		greetingMessage: Yup.string(),
+		startWork: Yup.string(),
+		endWork: Yup.string(),
+		absenceMessage: Yup.string(),
+	});
 
 	const initialState = {
 		name: "",
@@ -112,7 +113,7 @@ const QueueModal = ({ open, onClose, queueId }) => {
 			} else {
 				await api.post("/queue", values);
 			}
-			toast.success(i18n.t("queueModal.notification.title"));
+			toast.success(t("queueModal.notification.title"));
 			handleClose();
 		} catch (err) {
 			toastError(err);
@@ -123,7 +124,7 @@ const QueueModal = ({ open, onClose, queueId }) => {
 		<div className={classes.root}>
 			<Dialog open={open} onClose={handleClose} scroll="paper">
 				<DialogTitle>
-					{queueId ? i18n.t("queueModal.title.edit") : i18n.t("queueModal.title.add")}
+					{queueId ? t("queueModal.title.edit") : t("queueModal.title.add")}
 				</DialogTitle>
 				<Formik
 					initialValues={queue}
@@ -141,7 +142,7 @@ const QueueModal = ({ open, onClose, queueId }) => {
 									<Grid item xs={6}>
 										<Field
 											as={TextField}
-											label={i18n.t("queueModal.form.name")}
+											label={t("queueModal.form.name")}
 											autoFocus
 											name="name"
 											error={touched.name && Boolean(errors.name)}
@@ -154,7 +155,7 @@ const QueueModal = ({ open, onClose, queueId }) => {
 									<Grid item xs={6}>
 										<Field
 											as={TextField}
-											label={i18n.t("queueModal.form.color")}
+											label={t("queueModal.form.color")}
 											name="color"
 											value={values.color}
 											onFocus={() => setColorPickerModalOpen(true)}
@@ -195,7 +196,7 @@ const QueueModal = ({ open, onClose, queueId }) => {
 									<Grid item xs={12}>
 										<Field
 											as={TextField}
-											label={i18n.t("queueModal.form.greetingMessage")}
+											label={t("queueModal.form.greetingMessage")}
 											type="greetingMessage"
 											multiline
 											minRows={4}
@@ -210,7 +211,7 @@ const QueueModal = ({ open, onClose, queueId }) => {
 									<Grid item xs={6}>
 										<Field
 											as={TextField}
-											label={i18n.t("queueModal.form.startWork")}
+											label={t("queueModal.form.startWork")}
 											type="time"
 											InputLabelProps={{
 												shrink: true,
@@ -229,7 +230,7 @@ const QueueModal = ({ open, onClose, queueId }) => {
 									<Grid item xs={6}>
 										<Field
 											as={TextField}
-											label={i18n.t("queueModal.form.endWork")}
+											label={t("queueModal.form.endWork")}
 											type="time"
 											InputLabelProps={{
 												shrink: true,
@@ -248,7 +249,7 @@ const QueueModal = ({ open, onClose, queueId }) => {
 									<Grid item xs={12}>
 										<Field
 											as={TextField}
-											label={i18n.t("queueModal.form.absenceMessage")}
+											label={t("queueModal.form.absenceMessage")}
 											type="absenceMessage"
 											multiline
 											minRows={2}
@@ -270,7 +271,7 @@ const QueueModal = ({ open, onClose, queueId }) => {
 									disabled={isSubmitting}
 									variant="outlined"
 								>
-									{i18n.t("queueModal.buttons.cancel")}
+									{t("queueModal.buttons.cancel")}
 								</Button>
 								<Button
 									type="submit"
@@ -279,7 +280,7 @@ const QueueModal = ({ open, onClose, queueId }) => {
 									variant="contained"
 									className={classes.btnWrapper}
 								>
-									{queueId ? i18n.t("queueModal.buttons.okEdit") : i18n.t("queueModal.buttons.okAdd")}
+									{queueId ? t("queueModal.buttons.okEdit") : t("queueModal.buttons.okAdd")}
 									{isSubmitting && (
 										<CircularProgress size={24} className={classes.buttonProgress} />
 									)}

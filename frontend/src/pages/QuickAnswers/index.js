@@ -19,11 +19,10 @@ import {
   Edit,
   Search
 } from "@material-ui/icons";
-
 import React, { useContext, useEffect, useReducer, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useHistory } from "react-router-dom";
-import openSocket from "../../services/socket-io";
-
+import { toast } from "react-toastify";
 import ConfirmationModal from "../../components/ConfirmationModal";
 import MainContainer from "../../components/MainContainer";
 import MainHeader from "../../components/MainHeader";
@@ -32,11 +31,9 @@ import QuickAnswersModal from "../../components/QuickAnswersModal";
 import TableRowSkeleton from "../../components/TableRowSkeleton";
 import Title from "../../components/Title";
 import { AuthContext } from "../../context/Auth/AuthContext";
-import api from "../../services/api";
-import { i18n } from "../../translate/i18n";
-
-import { toast } from "react-toastify";
 import toastError from "../../errors/toastError";
+import api from "../../services/api";
+import openSocket from "../../services/socket-io";
 
 const reducer = (state, action) => {
   if (action.type === "LOAD_QUICK_ANSWERS") {
@@ -94,6 +91,7 @@ const useStyles = makeStyles((theme) => ({
 
 const QuickAnswers = () => {
   const classes = useStyles();
+  const { t } = useTranslation();
   const history = useHistory();
   const [loading, setLoading] = useState(false);
   const [pageNumber, setPageNumber] = useState(1);
@@ -194,7 +192,7 @@ const QuickAnswers = () => {
   const handleDeleteQuickAnswers = async (quickAnswerId) => {
     try {
       await api.delete(`/quickAnswers/${quickAnswerId}`);
-      toast.success(i18n.t("quickAnswers.toasts.deleted"));
+      toast.success(t("quickAnswers.toasts.deleted"));
     } catch (err) {
       toastError(err);
     }
@@ -206,7 +204,7 @@ const QuickAnswers = () => {
   const handleDeleteAllQuickAnswers = async () => {
     try {
       await api.delete("/quickAnswers");
-      toast.success(i18n.t("quickAnswers.toasts.deletedAll"));
+      toast.success(t("quickAnswers.toasts.deletedAll"));
       history.go(0);
     } catch (err) {
       toastError(err);
@@ -232,8 +230,8 @@ const QuickAnswers = () => {
     <MainContainer>
       <ConfirmationModal
         title={
-          deletingQuickAnswers ? `${i18n.t("quickAnswers.confirmationModal.deleteTitle")} ${deletingQuickAnswers.shortcut}?`
-            : `${i18n.t("quickAnswers.confirmationModal.deleteAllTitle")}`
+          deletingQuickAnswers ? `${t("quickAnswers.confirmationModal.deleteTitle")} ${deletingQuickAnswers.shortcut}?`
+            : `${t("quickAnswers.confirmationModal.deleteAllTitle")}`
         }
         open={confirmModalOpen}
         onClose={setConfirmModalOpen}
@@ -243,8 +241,8 @@ const QuickAnswers = () => {
         }
       >
         {
-          deletingQuickAnswers ? `${i18n.t("quickAnswers.confirmationModal.deleteMessage")}`
-            : `${i18n.t("quickAnswers.confirmationModal.deleteAllMessage")}`
+          deletingQuickAnswers ? `${t("quickAnswers.confirmationModal.deleteMessage")}`
+            : `${t("quickAnswers.confirmationModal.deleteAllMessage")}`
         }
       </ConfirmationModal>
       <QuickAnswersModal
@@ -254,10 +252,10 @@ const QuickAnswers = () => {
         quickAnswerId={selectedQuickAnswers && selectedQuickAnswers.id}
       ></QuickAnswersModal>
       <MainHeader>
-        <Title>{i18n.t("quickAnswers.title")} ({quickAnswers.length})</Title>
+        <Title>{t("quickAnswers.title")} ({quickAnswers.length})</Title>
         <MainHeaderButtonsWrapper>
           <TextField
-            placeholder={i18n.t("quickAnswers.searchPlaceholder")}
+            placeholder={t("quickAnswers.searchPlaceholder")}
             type="search"
             value={searchParam}
             onChange={handleSearch}
@@ -270,7 +268,7 @@ const QuickAnswers = () => {
             }}
           />
           {((settings && settings.length > 0 && getSettingValue("quickAnswer") === "enabled") || (isAdmin === "admin")) && (
-            <Tooltip title={i18n.t("quickAnswers.buttons.add")}>
+            <Tooltip title={t("quickAnswers.buttons.add")}>
               <Button
                 variant="contained"
                 color="primary"
@@ -281,7 +279,7 @@ const QuickAnswers = () => {
             </Tooltip>
           )}
           {((settings && settings.length > 0 && getSettingValue("quickAnswer") === "enabled") || (isAdmin === "admin")) && (
-            <Tooltip title={i18n.t("quickAnswers.buttons.deleteAll")}>
+            <Tooltip title={t("quickAnswers.buttons.deleteAll")}>
               <Button
                 variant="contained"
                 color="primary"
@@ -305,14 +303,14 @@ const QuickAnswers = () => {
           <TableHead>
             <TableRow>
               <TableCell align="center">
-                {i18n.t("quickAnswers.table.shortcut")}
+                {t("quickAnswers.table.shortcut")}
               </TableCell>
               <TableCell align="center">
-                {i18n.t("quickAnswers.table.message")}
+                {t("quickAnswers.table.message")}
               </TableCell>
               {((settings && settings.length > 0 && getSettingValue("quickAnswer") === "enabled") || (isAdmin === "admin")) && (
                 <TableCell align="center">
-                  {i18n.t("quickAnswers.table.actions")}
+                  {t("quickAnswers.table.actions")}
                 </TableCell>
               )}
             </TableRow>

@@ -12,11 +12,11 @@ import {
 } from "@material-ui/core";
 import PropTypes from "prop-types";
 import React, { useCallback, useContext, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useHistory } from "react-router-dom";
 import { AuthContext } from "../../context/Auth/AuthContext";
 import toastError from "../../errors/toastError";
 import api from "../../services/api";
-import { i18n } from "../../translate/i18n";
 import ButtonWithSpinner from "../ButtonWithSpinner";
 
 const useStyles = makeStyles((theme) => ({
@@ -40,7 +40,7 @@ const AcceptTicketWithouSelectQueue = ({ modalOpen, onClose, ticketId }) => {
 	const [selectedQueue, setSelectedQueue] = useState(INITIAL_QUEUE_VALUE);
 	const [loading, setLoading] = useState(false);
 	const { user } = useContext(AuthContext);
-
+	const { t } = useTranslation();
 	const userId = user?.id;
 
 	const handleClose = useCallback(() => {
@@ -74,16 +74,16 @@ const AcceptTicketWithouSelectQueue = ({ modalOpen, onClose, ticketId }) => {
 			aria-describedby="accept-ticket-dialog-description"
 		>
 			<DialogTitle id="accept-ticket-dialog-title">
-				{i18n.t("ticketsList.acceptModal.title")}
+				{t("ticketsList.acceptModal.title")}
 			</DialogTitle>
 			<DialogContent dividers>
 				<FormControl variant="outlined" className={classes.maxWidth}>
-					<InputLabel>{i18n.t("ticketsList.acceptModal.queue")}</InputLabel>
+					<InputLabel>{t("ticketsList.acceptModal.queue")}</InputLabel>
 					<Select
 						value={selectedQueue}
 						className={classes.autoComplete}
 						onChange={(e) => setSelectedQueue(e.target.value)}
-						label={i18n.t("ticketsList.acceptModal.queue")}
+						label={t("ticketsList.acceptModal.queue")}
 					>
 						<MenuItem value={''}>&nbsp;</MenuItem>
 						{user.queues.map((queue) => (
@@ -99,7 +99,7 @@ const AcceptTicketWithouSelectQueue = ({ modalOpen, onClose, ticketId }) => {
 					disabled={loading}
 					variant="outlined"
 				>
-					{i18n.t("ticketsList.buttons.cancel")}
+					{t("ticketsList.buttons.cancel")}
 				</Button>
 				<ButtonWithSpinner
 					variant="contained"
@@ -109,7 +109,7 @@ const AcceptTicketWithouSelectQueue = ({ modalOpen, onClose, ticketId }) => {
 					color="primary"
 					loading={loading}
 				>
-					{i18n.t("ticketsList.buttons.start")}
+					{t("ticketsList.buttons.start")}
 				</ButtonWithSpinner>
 			</DialogActions>
 		</Dialog>

@@ -31,6 +31,7 @@ import {
 	parseISO
 } from "date-fns";
 import React, { useContext, useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
 	useHistory,
 	useParams
@@ -40,7 +41,6 @@ import sendIcon from "../../assets/send.png";
 import { AuthContext } from "../../context/Auth/AuthContext";
 import toastError from "../../errors/toastError";
 import api from "../../services/api";
-import { i18n } from "../../translate/i18n";
 import AcceptTicketWithouSelectQueue from "../AcceptTicketWithoutQueueModal";
 import ContactTag from "../ContactTag";
 import MarkdownWrapper from "../MarkdownWrapper";
@@ -185,6 +185,7 @@ const useStyles = makeStyles(theme => ({
 
 const TicketListItem = ({ ticket, userId, filteredTags }) => {
 	const classes = useStyles();
+	const { t } = useTranslation();
 	const history = useHistory();
 	const [loading, setLoading] = useState(false);
 	const { ticketId } = useParams();
@@ -348,7 +349,7 @@ const TicketListItem = ({ ticket, userId, filteredTags }) => {
 				<Tooltip
 					arrow
 					placement="right"
-					title={ticket.queue?.name || (ticket)?.name || i18n.t("ticketsList.items.queueless")}
+					title={ticket.queue?.name || (ticket)?.name || t("ticketsList.items.queueless")}
 				>
 					<span
 						style={{ backgroundColor: ticket.queue?.color || queueName(ticket)?.color || "#7C7C7C" }}
@@ -493,7 +494,7 @@ const TicketListItem = ({ ticket, userId, filteredTags }) => {
 
 							<br></br>
 							{ticket.whatsappId && (
-								<Tooltip title={i18n.t("ticketsList.items.connection")}>
+								<Tooltip title={t("ticketsList.items.connection")}>
 									<Chip
 										className={classes.Radiusdot}
 										style={{
@@ -508,12 +509,12 @@ const TicketListItem = ({ ticket, userId, filteredTags }) => {
 											marginRight: "5px",
 											marginBottom: "3px",
 										}}
-										label={(ticket.whatsapp?.name || i18n.t("ticketsList.items.user")).toUpperCase()}
+										label={(ticket.whatsapp?.name || t("ticketsList.items.user")).toUpperCase()}
 									/>
 								</Tooltip>
 							)}
 							{ticket.status !== "pending" && ticket?.user?.name && (
-								<Tooltip title={i18n.t("ticketsList.items.user")}>
+								<Tooltip title={t("ticketsList.items.user")}>
 									<Chip
 										className={classes.Radiusdot}
 										style={{
@@ -534,7 +535,7 @@ const TicketListItem = ({ ticket, userId, filteredTags }) => {
 							)}
 
 							<br></br>
-							<Tooltip title={i18n.t("ticketsList.items.tags")}>
+							<Tooltip title={t("ticketsList.items.tags")}>
 								<span className={classes.secondaryContentSecond}>
 									{
 										tag?.map((tag) => {
@@ -550,7 +551,7 @@ const TicketListItem = ({ ticket, userId, filteredTags }) => {
 				/>
 				<div className={classes.buttonContainer}>
 					{(ticket.status === "pending" && (ticket.queue === null || ticket.queue === undefined)) && (
-						<Tooltip title={i18n.t("ticketsList.items.accept")}>
+						<Tooltip title={t("ticketsList.items.accept")}>
 							<IconButton
 								className={classes.bottomButton}
 								color="primary"
@@ -563,7 +564,7 @@ const TicketListItem = ({ ticket, userId, filteredTags }) => {
 					)}
 
 					{ticket.status === "pending" && ticket.queue !== null && (
-						<Tooltip title={i18n.t("ticketsList.items.accept")}>
+						<Tooltip title={t("ticketsList.items.accept")}>
 							<IconButton
 								className={classes.bottomButton}
 								color="primary"
@@ -574,7 +575,7 @@ const TicketListItem = ({ ticket, userId, filteredTags }) => {
 					)}
 
 					{ticket.status === "pending" && (
-						<Tooltip title={i18n.t("ticketsList.items.spy")}>
+						<Tooltip title={t("ticketsList.items.spy")}>
 							<IconButton
 								className={classes.bottomButton}
 								color="primary"
@@ -585,7 +586,7 @@ const TicketListItem = ({ ticket, userId, filteredTags }) => {
 					)}
 
 					{ticket.status === "pending" && (
-						<Tooltip title={i18n.t("ticketsList.items.close")}>
+						<Tooltip title={t("ticketsList.items.close")}>
 							<IconButton
 								className={classes.bottomButton}
 								color="primary"
@@ -596,7 +597,7 @@ const TicketListItem = ({ ticket, userId, filteredTags }) => {
 					)}
 
 					{ticket.status === "open" && (
-						<Tooltip title={i18n.t("ticketsList.items.return")}>
+						<Tooltip title={t("ticketsList.items.return")}>
 							<IconButton
 								className={classes.bottomButton}
 								color="primary"
@@ -607,7 +608,7 @@ const TicketListItem = ({ ticket, userId, filteredTags }) => {
 					)}
 
 					{ticket.status === "open" && (
-						<Tooltip title={i18n.t("ticketsList.items.close")}>
+						<Tooltip title={t("ticketsList.items.close")}>
 							<IconButton
 								className={classes.bottomButton}
 								color="primary"

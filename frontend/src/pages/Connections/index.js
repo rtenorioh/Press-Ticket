@@ -35,6 +35,7 @@ import RefreshIcon from "@material-ui/icons/Refresh";
 import VisibilityIcon from "@material-ui/icons/Visibility";
 import { format, parseISO } from "date-fns";
 import React, { useCallback, useContext, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useHistory } from "react-router-dom";
 import { toast } from "react-toastify";
 import ConfirmationModal from "../../components/ConfirmationModal";
@@ -49,7 +50,6 @@ import { AuthContext } from "../../context/Auth/AuthContext";
 import { WhatsAppsContext } from "../../context/WhatsApp/WhatsAppsContext";
 import toastError from "../../errors/toastError";
 import api from "../../services/api";
-import { i18n } from "../../translate/i18n";
 
 const useStyles = makeStyles(theme => ({
 	mainPaper: {
@@ -108,6 +108,7 @@ const CustomToolTip = ({ title, content, children }) => {
 
 const Connections = () => {
 	const classes = useStyles();
+	const { t } = useTranslation();
 	const history = useHistory();
 	const { user } = useContext(AuthContext);
 	const { whatsApps, loading } = useContext(WhatsAppsContext);
@@ -190,8 +191,8 @@ const Connections = () => {
 		if (action === "disconnect") {
 			setConfirmModalInfo({
 				action: action,
-				title: i18n.t("connections.confirmationModal.disconnectTitle"),
-				message: i18n.t("connections.confirmationModal.disconnectMessage"),
+				title: t("connections.confirmationModal.disconnectTitle"),
+				message: t("connections.confirmationModal.disconnectMessage"),
 				whatsAppId: whatsAppId,
 			});
 		}
@@ -199,8 +200,8 @@ const Connections = () => {
 		if (action === "delete") {
 			setConfirmModalInfo({
 				action: action,
-				title: i18n.t("connections.confirmationModal.deleteTitle"),
-				message: i18n.t("connections.confirmationModal.deleteMessage"),
+				title: t("connections.confirmationModal.deleteTitle"),
+				message: t("connections.confirmationModal.deleteMessage"),
 				whatsAppId: whatsAppId,
 			});
 		}
@@ -220,7 +221,7 @@ const Connections = () => {
 		if (confirmModalInfo.action === "delete") {
 			try {
 				await api.delete(`/whatsapp/${confirmModalInfo.whatsAppId}`);
-				toast.success(i18n.t("connections.toasts.deleted"));
+				toast.success(t("connections.toasts.deleted"));
 			} catch (err) {
 				toastError(err);
 			}
@@ -233,7 +234,7 @@ const Connections = () => {
 	const handleRestartSession = async (whatsAppId) => {
 		try {
 			await api.post(`/whatsapp/${whatsAppId}/restart`);
-			toast.success(i18n.t("connections.toasts.sessionRestarted"));
+			toast.success(t("connections.toasts.sessionRestarted"));
 		} catch (err) {
 			toastError(err);
 		}
@@ -242,7 +243,7 @@ const Connections = () => {
 	const handleStartSession = async (whatsAppId) => {
 		try {
 			await api.post(`/whatsapp/${whatsAppId}/start`);
-			toast.success(i18n.t("connections.toasts.sessionStarted"));
+			toast.success(t("connections.toasts.sessionStarted"));
 		} catch (err) {
 			toastError(err);
 		}
@@ -251,7 +252,7 @@ const Connections = () => {
 	const handleShutdownSession = async (whatsAppId) => {
 		try {
 			await api.post(`/whatsapp/${whatsAppId}/shutdown`);
-			toast.success(i18n.t("connections.toasts.sessionShutdown"));
+			toast.success(t("connections.toasts.sessionShutdown"));
 			history.go(0);
 		} catch (err) {
 			toastError(err);
@@ -262,7 +263,7 @@ const Connections = () => {
 		return (
 			<>
 				{whatsApp.status === "DISCONNECTED" && (
-					<Tooltip title={i18n.t("connections.buttons.start")}>
+					<Tooltip title={t("connections.buttons.start")}>
 						<IconButton
 							size="small"
 							color="primary"
@@ -273,7 +274,7 @@ const Connections = () => {
 					</Tooltip>
 				)}
 				{(whatsApp.status === "qrcode" && whatsApp.status === "CONNECTED") && (
-					<Tooltip title={i18n.t("connections.buttons.shutdown")}>
+					<Tooltip title={t("connections.buttons.shutdown")}>
 						<IconButton
 							size="small"
 							color="secondary"
@@ -284,7 +285,7 @@ const Connections = () => {
 					</Tooltip>
 				)}
 				{whatsApp.status === "qrcode" && (
-					<Tooltip title={i18n.t("connections.buttons.qrcode")}>
+					<Tooltip title={t("connections.buttons.qrcode")}>
 						<IconButton
 							size="small"
 							color="primary"
@@ -296,7 +297,7 @@ const Connections = () => {
 				)}
 				{whatsApp.status === "DISCONNECTED" && (
 					<>
-						<Tooltip title={i18n.t("connections.buttons.tryAgain")}>
+						<Tooltip title={t("connections.buttons.tryAgain")}>
 							<IconButton
 								size="small"
 								color="primary"
@@ -305,7 +306,7 @@ const Connections = () => {
 								<PowerSettingsNewIcon />
 							</IconButton>
 						</Tooltip>
-						<Tooltip title={i18n.t("connections.buttons.newQr")}>
+						<Tooltip title={t("connections.buttons.newQr")}>
 							<IconButton
 								size="small"
 								color="secondary"
@@ -320,7 +321,7 @@ const Connections = () => {
 					whatsApp.status === "PAIRING" ||
 					whatsApp.status === "TIMEOUT") &&
 					whatsApp.type === null && (
-						<Tooltip title={i18n.t("connections.buttons.disconnect")}>
+						<Tooltip title={t("connections.buttons.disconnect")}>
 							<IconButton
 								size="small"
 								color="secondary"
@@ -336,7 +337,7 @@ const Connections = () => {
 					</IconButton>
 				)}
 				{(!whatsApp.type && whatsApp.status === "CONNECTED") && (
-					<Tooltip title={i18n.t("connections.buttons.restart")}>
+					<Tooltip title={t("connections.buttons.restart")}>
 						<IconButton
 							size="small"
 							color="primary"
@@ -355,8 +356,8 @@ const Connections = () => {
 			<div className={classes.customTableCell}>
 				{whatsApp.status === "DISCONNECTED" && (
 					<CustomToolTip
-						title={i18n.t("connections.toolTips.disconnected.title")}
-						content={i18n.t("connections.toolTips.disconnected.content")}
+						title={t("connections.toolTips.disconnected.title")}
+						content={t("connections.toolTips.disconnected.content")}
 					>
 						<SignalCellularConnectedNoInternet0Bar color="secondary" />
 					</CustomToolTip>
@@ -366,21 +367,21 @@ const Connections = () => {
 				)}
 				{whatsApp.status === "qrcode" && (
 					<CustomToolTip
-						title={i18n.t("connections.toolTips.qrcode.title")}
-						content={i18n.t("connections.toolTips.qrcode.content")}
+						title={t("connections.toolTips.qrcode.title")}
+						content={t("connections.toolTips.qrcode.content")}
 					>
 						<CropFree />
 					</CustomToolTip>
 				)}
 				{whatsApp.status === "CONNECTED" && (
-					<CustomToolTip title={i18n.t("connections.toolTips.connected.title")}>
+					<CustomToolTip title={t("connections.toolTips.connected.title")}>
 						<SignalCellular4Bar style={{ color: green[500] }} />
 					</CustomToolTip>
 				)}
 				{(whatsApp.status === "TIMEOUT" || whatsApp.status === "PAIRING") && (
 					<CustomToolTip
-						title={i18n.t("connections.toolTips.timeout.title")}
-						content={i18n.t("connections.toolTips.timeout.content")}
+						title={t("connections.toolTips.timeout.title")}
+						content={t("connections.toolTips.timeout.content")}
 					>
 						<SignalCellularConnectedNoInternet2Bar color="secondary" />
 					</CustomToolTip>
@@ -435,9 +436,9 @@ const Connections = () => {
 				whatsAppId={!qrModalOpen && selectedWhatsApp?.id}
 			/>
 			<MainHeader>
-				<Title>{i18n.t("connections.title")} ({whatsApps.length})</Title>
+				<Title>{t("connections.title")} ({whatsApps.length})</Title>
 				<MainHeaderButtonsWrapper>
-					<Tooltip title={i18n.t("connections.buttons.restart")}>
+					<Tooltip title={t("connections.buttons.restart")}>
 						<Button
 							variant="contained"
 							color="primary"
@@ -446,7 +447,7 @@ const Connections = () => {
 							<SyncOutlined />
 						</Button>
 					</Tooltip>
-					<Tooltip title={i18n.t("connections.buttons.add")}>
+					<Tooltip title={t("connections.buttons.add")}>
 						<Button
 							variant="contained"
 							color="primary"
@@ -462,34 +463,34 @@ const Connections = () => {
 					<TableHead>
 						<TableRow>
 							<TableCell align="center">
-								{i18n.t("connections.table.id")}
+								{t("connections.table.id")}
 							</TableCell>
 							<TableCell align="center">
-								{i18n.t("connections.table.channel")}
+								{t("connections.table.channel")}
 							</TableCell>
 							<TableCell align="center">
-								{i18n.t("connections.table.name")}
+								{t("connections.table.name")}
 							</TableCell>
 							<TableCell align="center">
-								{i18n.t("connections.table.color")}
+								{t("connections.table.color")}
 							</TableCell>
 							<TableCell align="center">
-								{i18n.t("connections.table.status")}
+								{t("connections.table.status")}
 							</TableCell>
 							<TableCell align="center">
-								{i18n.t("connections.table.number")}
+								{t("connections.table.number")}
 							</TableCell>
 							<TableCell align="center">
-								{i18n.t("connections.table.session")}
+								{t("connections.table.session")}
 							</TableCell>
 							<TableCell align="center">
-								{i18n.t("connections.table.lastUpdate")}
+								{t("connections.table.lastUpdate")}
 							</TableCell>
 							<TableCell align="center">
-								{i18n.t("connections.table.default")}
+								{t("connections.table.default")}
 							</TableCell>
 							<TableCell align="center">
-								{i18n.t("connections.table.actions")}
+								{t("connections.table.actions")}
 							</TableCell>
 						</TableRow>
 					</TableHead>

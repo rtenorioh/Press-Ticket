@@ -1,6 +1,7 @@
 import { useTheme } from "@material-ui/core/styles";
 import TextField from "@material-ui/core/TextField";
 import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
     Area,
     AreaChart,
@@ -12,7 +13,6 @@ import {
     YAxis,
 } from "recharts";
 import useTickets from "../../hooks/useTickets";
-import { i18n } from "../../translate/i18n";
 import CustomTooltip from "./CustomTooltip";
 import Title from "./Title";
 
@@ -26,6 +26,7 @@ const NewContactsChart = ({
     withUnreadMessages,
 }) => {
     const theme = useTheme();
+    const { t } = useTranslation();
     const [startDate, setStartDate] = useState("");
     const [endDate, setEndDate] = useState("");
     const { newContactsByDay } = useTickets({
@@ -105,12 +106,12 @@ const NewContactsChart = ({
 
     return (
         <React.Fragment>
-            <Title>{i18n.t("dashboard.newContacts.title")}</Title>
+            <Title>{t("dashboard.newContacts.title")}</Title>
             <div
                 style={{ display: "flex", justifyContent: "space-between", marginBottom: "16px" }}
             >
                 <TextField
-                    label={i18n.t("dashboard.newContacts.date.start")}
+                    label={t("dashboard.newContacts.date.start")}
                     type="date"
                     value={startDate}
                     onChange={(e) => setStartDate(e.target.value)}
@@ -119,7 +120,7 @@ const NewContactsChart = ({
                     }}
                 />
                 <TextField
-                    label={i18n.t("dashboard.newContacts.date.end")}
+                    label={t("dashboard.newContacts.date.end")}
                     type="date"
                     value={endDate}
                     onChange={(e) => setEndDate(e.target.value)}
@@ -141,7 +142,7 @@ const NewContactsChart = ({
                             position="left"
                             style={{ textAnchor: "middle", fill: theme.palette.text.primary }}
                         >
-                            {i18n.t("dashboard.newContacts.contact")}
+                            {t("dashboard.newContacts.contact")}
                         </Label>
                     </YAxis>
                     <Tooltip content={<CustomTooltip />} />

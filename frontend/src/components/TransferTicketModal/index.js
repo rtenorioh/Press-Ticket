@@ -1,36 +1,33 @@
-import React, { useState, useEffect, useContext } from "react";
-import { useHistory } from "react-router-dom";
-
-import Button from "@material-ui/core/Button";
-import TextField from "@material-ui/core/TextField";
-import Dialog from "@material-ui/core/Dialog";
-import Select from "@material-ui/core/Select";
-import FormControl from "@material-ui/core/FormControl";
-import InputLabel from "@material-ui/core/InputLabel";
-import MenuItem from "@material-ui/core/MenuItem";
 import { makeStyles } from "@material-ui/core";
-
+import Button from "@material-ui/core/Button";
+import CircularProgress from "@material-ui/core/CircularProgress";
+import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogTitle from "@material-ui/core/DialogTitle";
+import FormControl from "@material-ui/core/FormControl";
+import InputLabel from "@material-ui/core/InputLabel";
+import MenuItem from "@material-ui/core/MenuItem";
+import Select from "@material-ui/core/Select";
+import TextField from "@material-ui/core/TextField";
 import Autocomplete, {
 	createFilterOptions,
 } from "@material-ui/lab/Autocomplete";
-import CircularProgress from "@material-ui/core/CircularProgress";
-
-import { i18n } from "../../translate/i18n";
-import api from "../../services/api";
-import ButtonWithSpinner from "../ButtonWithSpinner";
+import React, { useContext, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { useHistory } from "react-router-dom";
+import { AuthContext } from "../../context/Auth/AuthContext";
 import toastError from "../../errors/toastError";
 import useQueues from "../../hooks/useQueues";
 import useWhatsApps from "../../hooks/useWhatsApps";
-import { AuthContext } from "../../context/Auth/AuthContext";
+import api from "../../services/api";
+import ButtonWithSpinner from "../ButtonWithSpinner";
 import { Can } from "../Can";
 
 const useStyles = makeStyles((theme) => ({
-  maxWidth: {
-    width: "100%",
-  },
+	maxWidth: {
+		width: "100%",
+	},
 }));
 
 const filterOptions = createFilterOptions({
@@ -39,6 +36,7 @@ const filterOptions = createFilterOptions({
 
 const TransferTicketModal = ({ modalOpen, onClose, ticketid, ticketWhatsappId }) => {
 	const history = useHistory();
+	const { t } = useTranslation();
 	const [options, setOptions] = useState([]);
 	const [queues, setQueues] = useState([]);
 	const [allQueues, setAllQueues] = useState([]);
@@ -115,7 +113,7 @@ const TransferTicketModal = ({ modalOpen, onClose, ticketid, ticketWhatsappId })
 				}
 			}
 
-			if(selectedWhatsapp) {
+			if (selectedWhatsapp) {
 				data.whatsappId = selectedWhatsapp;
 			}
 
@@ -133,7 +131,7 @@ const TransferTicketModal = ({ modalOpen, onClose, ticketid, ticketWhatsappId })
 		<Dialog open={modalOpen} onClose={handleClose} maxWidth="lg" scroll="paper">
 			<form onSubmit={handleSaveTicket}>
 				<DialogTitle id="form-dialog-title">
-					{i18n.t("transferTicketModal.title")}
+					{t("transferTicketModal.title")}
 				</DialogTitle>
 				<DialogContent dividers>
 					<Autocomplete
@@ -152,12 +150,12 @@ const TransferTicketModal = ({ modalOpen, onClose, ticketid, ticketWhatsappId })
 						filterOptions={filterOptions}
 						freeSolo
 						autoHighlight
-						noOptionsText={i18n.t("transferTicketModal.noOptions")}
+						noOptionsText={t("transferTicketModal.noOptions")}
 						loading={loading}
 						renderInput={params => (
 							<TextField
 								{...params}
-								label={i18n.t("transferTicketModal.fieldLabel")}
+								label={t("transferTicketModal.fieldLabel")}
 								variant="outlined"
 								required
 								autoFocus
@@ -177,11 +175,11 @@ const TransferTicketModal = ({ modalOpen, onClose, ticketid, ticketWhatsappId })
 						)}
 					/>
 					<FormControl variant="outlined" className={classes.maxWidth}>
-						<InputLabel>{i18n.t("transferTicketModal.fieldQueueLabel")}</InputLabel>
+						<InputLabel>{t("transferTicketModal.fieldQueueLabel")}</InputLabel>
 						<Select
 							value={selectedQueue}
 							onChange={(e) => setSelectedQueue(e.target.value)}
-							label={i18n.t("transferTicketModal.fieldQueuePlaceholder")}
+							label={t("transferTicketModal.fieldQueuePlaceholder")}
 						>
 							<MenuItem value={''}>&nbsp;</MenuItem>
 							{queues.map((queue) => (
@@ -192,13 +190,13 @@ const TransferTicketModal = ({ modalOpen, onClose, ticketid, ticketWhatsappId })
 					<Can
 						role={loggedInUser.profile}
 						perform="ticket-options:transferWhatsapp"
-						yes={() => (!loadingWhatsapps && 
+						yes={() => (!loadingWhatsapps &&
 							<FormControl variant="outlined" className={classes.maxWidth} style={{ marginTop: 20 }}>
-								<InputLabel>{i18n.t("transferTicketModal.fieldConnectionLabel")}</InputLabel>
+								<InputLabel>{t("transferTicketModal.fieldConnectionLabel")}</InputLabel>
 								<Select
 									value={selectedWhatsapp}
 									onChange={(e) => setSelectedWhatsapp(e.target.value)}
-									label={i18n.t("transferTicketModal.fieldConnectionPlaceholder")}
+									label={t("transferTicketModal.fieldConnectionPlaceholder")}
 								>
 									{whatsApps.map((whasapp) => (
 										<MenuItem key={whasapp.id} value={whasapp.id}>{whasapp.name}</MenuItem>
@@ -215,7 +213,7 @@ const TransferTicketModal = ({ modalOpen, onClose, ticketid, ticketWhatsappId })
 						disabled={loading}
 						variant="outlined"
 					>
-						{i18n.t("transferTicketModal.buttons.cancel")}
+						{t("transferTicketModal.buttons.cancel")}
 					</Button>
 					<ButtonWithSpinner
 						variant="contained"
@@ -223,7 +221,7 @@ const TransferTicketModal = ({ modalOpen, onClose, ticketid, ticketWhatsappId })
 						color="primary"
 						loading={loading}
 					>
-						{i18n.t("transferTicketModal.buttons.ok")}
+						{t("transferTicketModal.buttons.ok")}
 					</ButtonWithSpinner>
 				</DialogActions>
 			</form>

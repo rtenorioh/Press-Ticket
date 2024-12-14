@@ -1,22 +1,18 @@
-import React, { useContext, useEffect, useReducer, useState } from "react";
-import openSocket from "../../services/socket-io";
-
 import {
 	List,
 	makeStyles,
 	Paper
 } from "@material-ui/core";
-
+import React, { useContext, useEffect, useReducer, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { AuthContext } from "../../context/Auth/AuthContext";
+import toastError from "../../errors/toastError";
+import useTickets from "../../hooks/useTickets";
+import api from "../../services/api";
+import openSocket from "../../services/socket-io";
 import TagsFilter from "../TagsFilter";
 import TicketListItem from "../TicketListItem";
 import TicketsListSkeleton from "../TicketsListSkeleton";
-
-import { AuthContext } from "../../context/Auth/AuthContext";
-import useTickets from "../../hooks/useTickets";
-import { i18n } from "../../translate/i18n";
-
-import toastError from "../../errors/toastError";
-import api from "../../services/api";
 
 const useStyles = makeStyles((theme) => ({
 	ticketsListWrapper: {
@@ -28,14 +24,12 @@ const useStyles = makeStyles((theme) => ({
 		borderTopRightRadius: 0,
 		borderBottomRightRadius: 0,
 	},
-
 	ticketsList: {
 		flex: 1,
 		overflowY: "scroll",
 		...theme.scrollbarStyles,
 		borderTop: "2px solid rgba(0, 0, 0, 0.12)",
 	},
-
 	ticketsListHeader: {
 		color: "rgb(67, 83, 105)",
 		zIndex: 2,
@@ -45,28 +39,24 @@ const useStyles = makeStyles((theme) => ({
 		alignItems: "center",
 		justifyContent: "space-between",
 	},
-
 	ticketsCount: {
 		fontWeight: "normal",
 		color: "rgb(104, 121, 146)",
 		marginLeft: "8px",
 		fontSize: "14px",
 	},
-
 	noTicketsText: {
 		textAlign: "center",
 		color: "rgb(104, 121, 146)",
 		fontSize: "14px",
 		lineHeight: "1.4",
 	},
-
 	noTicketsTitle: {
 		textAlign: "center",
 		fontSize: "16px",
 		fontWeight: "600",
 		margin: "0px",
 	},
-
 	noTicketsDiv: {
 		display: "flex",
 		height: "100px",
@@ -169,6 +159,7 @@ const TicketsList = (props) => {
 		tags,
 	} = props;
 	const classes = useStyles();
+	const { t } = useTranslation();
 	const [pageNumber, setPageNumber] = useState(1);
 	const [ticketsList, dispatch] = useReducer(reducer, []);
 	const { user } = useContext(AuthContext);
@@ -338,10 +329,10 @@ const TicketsList = (props) => {
 					{ticketsList.length === 0 && !loading ? (
 						<div className={classes.noTicketsDiv}>
 							<span className={classes.noTicketsTitle}>
-								{i18n.t("ticketsList.noTicketsTitle")}
+								{t("ticketsList.noTicketsTitle")}
 							</span>
 							<p className={classes.noTicketsText}>
-								{i18n.t("ticketsList.noTicketsMessage")}
+								{t("ticketsList.noTicketsMessage")}
 							</p>
 						</div>
 					) : (

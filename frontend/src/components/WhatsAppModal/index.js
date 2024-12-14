@@ -1,11 +1,3 @@
-import { Field, Form, Formik } from "formik";
-import React, { useEffect, useState } from "react";
-import { toast } from "react-toastify";
-import * as Yup from "yup";
-
-import { green } from "@material-ui/core/colors";
-import { makeStyles } from "@material-ui/core/styles";
-
 import {
 	Button,
 	CircularProgress,
@@ -22,13 +14,19 @@ import {
 	TextField,
 	Tooltip
 } from "@material-ui/core";
+import { green } from "@material-ui/core/colors";
+import { makeStyles } from "@material-ui/core/styles";
 import { FileCopyOutlined, InfoOutlined } from "@material-ui/icons";
 import ColorLensIcon from '@material-ui/icons/ColorLens';
+import { Field, Form, Formik } from "formik";
+import React, { useEffect, useState } from "react";
 import { SketchPicker } from 'react-color';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
+import { useTranslation } from "react-i18next";
+import { toast } from "react-toastify";
+import * as Yup from "yup";
 import toastError from "../../errors/toastError";
 import api from "../../services/api";
-import { i18n } from "../../translate/i18n";
 import QueueSelect from "../QueueSelect";
 
 const useStyles = makeStyles(theme => ({
@@ -128,6 +126,7 @@ const SessionSchema = Yup.object().shape({
 
 const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
 	const classes = useStyles();
+	const { t } = useTranslation();
 	const initialState = {
 		name: "",
 		greetingMessage: "",
@@ -208,7 +207,7 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
 					await api.post("/whatsapp", whatsappData);
 				}
 			}
-			toast.success(i18n.t("whatsappModal.success"));
+			toast.success(t("whatsappModal.success"));
 			handleClose();
 		} catch (err) {
 			toastError(err);
@@ -233,8 +232,8 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
 			>
 				<DialogTitle>
 					{whatsAppId
-						? i18n.t("whatsappModal.title.edit")
-						: i18n.t("whatsappModal.title.add")}
+						? t("whatsappModal.title.edit")
+						: t("whatsappModal.title.add")}
 				</DialogTitle>
 				<Formik
 					initialValues={whatsApp}
@@ -253,7 +252,7 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
 								<div className={classes.multiFieldLine}>
 									<Field
 										as={TextField}
-										label={i18n.t("whatsappModal.form.name")}
+										label={t("whatsappModal.form.name")}
 										autoFocus
 										name="name"
 										error={touched.name && Boolean(errors.name)}
@@ -273,7 +272,7 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
 														checked={values.isDefault}
 													/>
 												}
-												label={i18n.t("whatsappModal.form.default")}
+												label={t("whatsappModal.form.default")}
 											/>
 										</>
 									)}
@@ -360,7 +359,7 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
 										<div>
 											<Field
 												as={TextField}
-												label={i18n.t("queueModal.form.greetingMessage")}
+												label={t("queueModal.form.greetingMessage")}
 												type="greetingMessage"
 												multiline
 												minRows={5}
@@ -379,7 +378,7 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
 										<div>
 											<Field
 												as={TextField}
-												label={i18n.t("whatsappModal.form.farewellMessage")}
+												label={t("whatsappModal.form.farewellMessage")}
 												type="farewellMessage"
 												multiline
 												minRows={5}
@@ -435,7 +434,7 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
 													checked={values.isDisplay}
 												/>
 											}
-											label={i18n.t("whatsappModal.form.display")}
+											label={t("whatsappModal.form.display")}
 										/>
 									</>
 								)}
@@ -448,7 +447,7 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
 									disabled={isSubmitting}
 									variant="outlined"
 								>
-									{i18n.t("whatsappModal.buttons.cancel")}
+									{t("whatsappModal.buttons.cancel")}
 								</Button>
 								<Button
 									type="submit"
@@ -458,8 +457,8 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
 									className={classes.btnWrapper}
 								>
 									{whatsAppId
-										? i18n.t("whatsappModal.buttons.okEdit")
-										: i18n.t("whatsappModal.buttons.okAdd")}
+										? t("whatsappModal.buttons.okEdit")
+										: t("whatsappModal.buttons.okAdd")}
 									{isSubmitting && (
 										<CircularProgress
 											size={24}

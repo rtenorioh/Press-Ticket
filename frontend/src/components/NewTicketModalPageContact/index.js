@@ -1,38 +1,34 @@
-import React, { useState, useEffect, useContext } from "react";
-
 import {
-    Button,
-    CircularProgress,
-    Dialog,
-    DialogActions,
-    DialogContent,
-    DialogTitle,
-    Grid,
-    ListItemText,
-    MenuItem,
-    Select,
-    TextField
+	Button,
+	CircularProgress,
+	Dialog,
+	DialogActions,
+	DialogContent,
+	DialogTitle,
+	Grid,
+	ListItemText,
+	MenuItem,
+	Select,
+	TextField
 } from "@material-ui/core";
-
 import Autocomplete, {
 	createFilterOptions,
 } from "@material-ui/lab/Autocomplete";
-
+import React, { useContext, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { toast } from "react-toastify";
+import { AuthContext } from "../../context/Auth/AuthContext";
+import toastError from "../../errors/toastError";
+import api from "../../services/api";
 import ButtonWithSpinner from "../ButtonWithSpinner";
 import ContactModal from "../ContactModal";
-
-import { i18n } from "../../translate/i18n";
-import api from "../../services/api";
-import toastError from "../../errors/toastError";
-import { AuthContext } from "../../context/Auth/AuthContext";
-import { toast } from "react-toastify";
 
 const filter = createFilterOptions({
 	trim: true,
 });
 
 const NewTicketModalPageContact = ({ modalOpen, onClose, initialContact }) => {
-
+	const { t } = useTranslation();
 	const [options, setOptions] = useState([]);
 	const [loading, setLoading] = useState(false);
 	const [searchParam, setSearchParam] = useState("");
@@ -83,7 +79,7 @@ const NewTicketModalPageContact = ({ modalOpen, onClose, initialContact }) => {
 	const handleSaveTicket = async contactId => {
 		if (!contactId) return;
 		if (selectedQueue === "" && user.profile !== 'admin') {
-			toast.error(i18n.t("newTicketModalContactPage.queue"));
+			toast.error(t("newTicketModalContactPage.queue"));
 			return;
 		}
 		setLoading(true);
@@ -135,7 +131,7 @@ const NewTicketModalPageContact = ({ modalOpen, onClose, initialContact }) => {
 		if (option.number) {
 			return `${option.name} - ${option.number}`;
 		} else {
-			return `${i18n.t("newTicketModalContactPage.add")} ${option.name}`;
+			return `${t("newTicketModalContactPage.add")} ${option.name}`;
 		}
 	};
 
@@ -166,7 +162,7 @@ const NewTicketModalPageContact = ({ modalOpen, onClose, initialContact }) => {
 						renderInput={params => (
 							<TextField
 								{...params}
-								label={i18n.t("newTicketModalContactPage.fieldLabel")}
+								label={t("newTicketModalContactPage.fieldLabel")}
 								variant="outlined"
 								autoFocus
 								onChange={e => setSearchParam(e.target.value)}
@@ -206,7 +202,7 @@ const NewTicketModalPageContact = ({ modalOpen, onClose, initialContact }) => {
 			></ContactModal>
 			<Dialog open={modalOpen} onClose={handleClose}>
 				<DialogTitle id="form-dialog-title">
-					{i18n.t("newTicketModal.title")}
+					{t("newTicketModal.title")}
 				</DialogTitle>
 				<DialogContent dividers>
 					<Grid style={{ width: 300 }} container spacing={2}>
@@ -256,7 +252,7 @@ const NewTicketModalPageContact = ({ modalOpen, onClose, initialContact }) => {
 						disabled={loading}
 						variant="outlined"
 					>
-						{i18n.t("newTicketModal.buttons.cancel")}
+						{t("newTicketModal.buttons.cancel")}
 					</Button>
 					<ButtonWithSpinner
 						variant="contained"
@@ -266,7 +262,7 @@ const NewTicketModalPageContact = ({ modalOpen, onClose, initialContact }) => {
 						color="primary"
 						loading={loading}
 					>
-						{i18n.t("newTicketModal.buttons.ok")}
+						{t("newTicketModal.buttons.ok")}
 					</ButtonWithSpinner>
 				</DialogActions>
 			</Dialog>

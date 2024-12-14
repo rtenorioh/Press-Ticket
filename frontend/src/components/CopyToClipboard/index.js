@@ -2,28 +2,29 @@ import { IconButton, Tooltip } from "@material-ui/core";
 import { FileCopyOutlined } from "@material-ui/icons";
 import PropTypes from "prop-types";
 import React, { useState } from "react";
-import { i18n } from "../../translate/i18n";
+import { useTranslation } from "react-i18next";
 
 const CopyToClipboard = ({ content, color = "inherit" }) => {
+  const { t } = useTranslation();
   const [tooltipMessage, setTooltipMessage] = useState(
-    i18n.t("copyToClipboard.copy")
+    t("copyToClipboard.copy")
   );
 
   const handleCopyToClipboard = async () => {
     if (navigator.clipboard) {
       try {
         await navigator.clipboard.writeText(content);
-        setTooltipMessage(i18n.t("copyToClipboard.copied"));
+        setTooltipMessage(t("copyToClipboard.copied"));
       } catch (err) {
-        setTooltipMessage(i18n.t("copyToClipboard.failed"));
+        setTooltipMessage(t("copyToClipboard.failed"));
       }
     } else {
-      setTooltipMessage(i18n.t("copyToClipboard.notSupported"));
+      setTooltipMessage(t("copyToClipboard.notSupported"));
     }
   };
 
   const handleCloseTooltip = () => {
-    setTooltipMessage(i18n.t("copyToClipboard.copy"));
+    setTooltipMessage(t("copyToClipboard.copy"));
   };
 
   return (
@@ -36,7 +37,7 @@ const CopyToClipboard = ({ content, color = "inherit" }) => {
       <IconButton
         size="small"
         onClick={handleCopyToClipboard}
-        aria-label={i18n.t("copyToClipboard.ariaLabel")}
+        aria-label={t("copyToClipboard.ariaLabel")}
       >
         <FileCopyOutlined fontSize="small" color={color} />
       </IconButton>

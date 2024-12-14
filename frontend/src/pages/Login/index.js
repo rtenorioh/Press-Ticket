@@ -16,11 +16,11 @@ import {
 
 import { makeStyles } from "@material-ui/core/styles";
 import { Visibility, VisibilityOff } from '@material-ui/icons';
+import { useTranslation } from "react-i18next";
 import defaultLogo from '../../assets/logo.jpg';
 import { AuthContext } from "../../context/Auth/AuthContext";
 import toastError from "../../errors/toastError";
 import api from "../../services/api";
-import { i18n } from "../../translate/i18n";
 
 const PUBLIC_ASSET_PATH = '/assets/';
 
@@ -55,7 +55,7 @@ const useStyles = makeStyles((theme) => ({
 
 const Login = () => {
   const classes = useStyles();
-
+  const { t } = useTranslation();
   const [user, setUser] = useState({ email: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
   const { handleLogin } = useContext(AuthContext);
@@ -144,7 +144,7 @@ const Login = () => {
       <div className={classes.paper}>
         <img alt="logo" src={companyData.logo} style={{ height: 120, marginBottom: 20 }} />
         <Typography component="h1" variant="h5">
-          {i18n.t("login.title")}
+          {t("login.title")}
         </Typography>
         <form className={classes.form} noValidate onSubmit={handlSubmit}>
           <TextField
@@ -153,7 +153,7 @@ const Login = () => {
             required
             fullWidth
             id="email"
-            label={i18n.t("login.form.email")}
+            label={t("login.form.email")}
             name="email"
             value={user.email}
             onChange={handleChangeInput}
@@ -166,7 +166,7 @@ const Login = () => {
             required
             fullWidth
             name="password"
-            label={i18n.t("login.form.password")}
+            label={t("login.form.password")}
             id="password"
             value={user.password}
             onChange={handleChangeInput}
@@ -192,7 +192,7 @@ const Login = () => {
             color="primary"
             className={classes.submit}
           >
-            {i18n.t("login.buttons.submit")}
+            {t("login.buttons.submit")}
           </Button>
           <Grid container>
             <Grid item>
@@ -202,7 +202,7 @@ const Login = () => {
                 component={RouterLink}
                 to="/signup"
               >
-                {i18n.t("login.buttons.register")}
+                {t("login.buttons.register")}
               </Link>
             </Grid>
           </Grid>

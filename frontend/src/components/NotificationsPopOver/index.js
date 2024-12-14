@@ -14,6 +14,7 @@ import VolumeOffIcon from "@material-ui/icons/VolumeOff";
 import VolumeUpIcon from "@material-ui/icons/VolumeUp";
 import { format } from "date-fns";
 import React, { useCallback, useContext, useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useHistory } from "react-router-dom";
 import { toast } from "react-toastify";
 import useSound from "use-sound";
@@ -21,7 +22,6 @@ import alertSound from "../../assets/sound.mp3";
 import { AuthContext } from "../../context/Auth/AuthContext";
 import useTickets from "../../hooks/useTickets";
 import openSocket from "../../services/socket-io";
-import { i18n } from "../../translate/i18n";
 import TicketListItem from "../TicketListItem";
 
 const useStyles = makeStyles((theme) => ({
@@ -43,7 +43,7 @@ const useStyles = makeStyles((theme) => ({
 
 const NotificationsPopOver = () => {
 	const classes = useStyles();
-
+	const { t } = useTranslation();
 	const history = useHistory();
 	const { user } = useContext(AuthContext);
 	const ticketIdUrl = +history.location.pathname.split("/")[2];
@@ -72,7 +72,7 @@ const NotificationsPopOver = () => {
 	const requestNotificationPermission = () => {
 		// Verifica se o navegador suporta notificações
 		if (!("Notification" in window)) {
-			alert(i18n.t("notifications.unsupported")); // Notificações não suportadas
+			alert(t("notifications.unsupported")); // Notificações não suportadas
 			return;
 		}
 
@@ -81,14 +81,14 @@ const NotificationsPopOver = () => {
 			.then((permission) => {
 				if (permission === "granted") {
 					setNotificationsAllowed(true);
-					toast.success(i18n.t("notifications.permissionGranted"));
+					toast.success(t("notifications.permissionGranted"));
 				} else if (permission === "denied") {
-					toast.error(i18n.t("notifications.permissionDenied"));
+					toast.error(t("notifications.permissionDenied"));
 				}
 			})
 			.catch((error) => {
 				console.error("Erro ao solicitar permissão para notificações:", error);
-				toast.error(i18n.t("notifications.error"));
+				toast.error(t("notifications.error"));
 			});
 	};
 
@@ -107,7 +107,7 @@ const NotificationsPopOver = () => {
 			};
 
 			const notification = new Notification(
-				`${i18n.t("tickets.notification.message")} ${contact.name}`,
+				`${t("tickets.notification.message")} ${contact.name}`,
 				options
 			);
 
@@ -121,8 +121,9 @@ const NotificationsPopOver = () => {
 				soundAlertRef.current();
 			}
 		},
-		[isAudioEnabled, history, notificationsAllowed]
+		[isAudioEnabled, history, notificationsAllowed, t]
 	);
+
 
 	useEffect(() => {
 		const socket = openSocket();
@@ -198,7 +199,7 @@ const NotificationsPopOver = () => {
 					color="inherit"
 					variant="contained"
 				>
-					<Tooltip title={i18n.t("notifications.allow")} arrow>
+					<Tooltip title={t("notifications.allow")} arrow>
 						<HelpOutlineIcon />
 					</Tooltip>
 				</IconButton>
@@ -236,7 +237,7 @@ const NotificationsPopOver = () => {
 				<List dense className={classes.tabContainer}>
 					{notifications.length === 0 ? (
 						<ListItem>
-							<ListItemText>{i18n.t("notifications.noTickets")}</ListItemText>
+							<ListItemText>{t("notifications.noTickets")}</ListItemText>
 						</ListItem>
 					) : (
 						notifications.map((ticket) => (

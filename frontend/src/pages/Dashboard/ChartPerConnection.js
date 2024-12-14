@@ -1,6 +1,7 @@
 import { useTheme } from "@material-ui/core/styles";
 import TextField from '@material-ui/core/TextField';
 import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
     Cell,
     Legend,
@@ -10,12 +11,12 @@ import {
     Tooltip,
 } from "recharts";
 import useTickets from "../../hooks/useTickets";
-import { i18n } from "../../translate/i18n";
 import CustomTooltip from "./CustomTooltip";
 import Title from "./Title";
 
 const ChartPerConnection = ({ searchParam, pageNumber, status, date, showAll, queueIds, withUnreadMessages }) => {
     const theme = useTheme();
+    const { t } = useTranslation();
 
     const getCurrentDate = () => {
         const today = new Date();
@@ -68,9 +69,9 @@ const ChartPerConnection = ({ searchParam, pageNumber, status, date, showAll, qu
 
     return (
         <React.Fragment>
-            <Title>{i18n.t("dashboard.chartPerConnection.perConnection.title")}</Title>
+            <Title>{t("dashboard.chartPerConnection.perConnection.title")}</Title>
             <TextField
-                label={i18n.t("dashboard.chartPerConnection.date.title")}
+                label={t("dashboard.chartPerConnection.date.title")}
                 type="date"
                 value={selectedDate}
                 onChange={handleDateChange}

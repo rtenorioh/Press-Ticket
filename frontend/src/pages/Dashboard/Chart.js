@@ -2,6 +2,7 @@ import { useTheme } from "@material-ui/core";
 import TextField from "@material-ui/core/TextField";
 import { format, parseISO, startOfHour } from "date-fns";
 import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
 	Area,
 	AreaChart,
@@ -12,12 +13,12 @@ import {
 	YAxis
 } from "recharts";
 import useTickets from "../../hooks/useTickets";
-import { i18n } from "../../translate/i18n";
 import CustomTooltip from "./CustomTooltip";
 import Title from "./Title";
 
 const Chart = () => {
 	const theme = useTheme();
+	const { t } = useTranslation();
 	const [selectedDate, setSelectedDate] = useState(() => {
 		const today = new Date();
 		const year = today.getFullYear();
@@ -53,9 +54,9 @@ const Chart = () => {
 
 	return (
 		<React.Fragment>
-			<Title>{`${i18n.t("dashboard.charts.perDay.title")}${tickets.length}`}</Title>
+			<Title>{`${t("dashboard.charts.perDay.title")}${tickets.length}`}</Title>
 			<TextField
-				label={i18n.t("dashboard.charts.date.title")}
+				label={t("dashboard.charts.date.title")}
 				type="date"
 				value={selectedDate}
 				onChange={handleDateChange}

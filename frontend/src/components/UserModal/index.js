@@ -1,45 +1,40 @@
-import React, { useState, useEffect, useContext, useRef } from "react";
-import { useHistory } from "react-router-dom";
-import * as Yup from "yup";
-import {
-	Formik,
-	Form,
-	Field
-} from "formik";
-import { toast } from "react-toastify";
-
 import {
 	Button,
+	CircularProgress,
 	Dialog,
 	DialogActions,
 	DialogContent,
 	DialogTitle,
-	CircularProgress,
-	Select,
+	FormControl,
+	IconButton,
+	InputAdornment,
 	InputLabel,
 	makeStyles,
 	MenuItem,
-	FormControl,
-	TextField,
-	InputAdornment,
-	IconButton
+	Select,
+	TextField
 } from '@material-ui/core';
-
+import { green } from "@material-ui/core/colors";
 import {
 	Visibility,
 	VisibilityOff
 } from '@material-ui/icons';
-
-import { green } from "@material-ui/core/colors";
-
-import { i18n } from "../../translate/i18n";
-
-import api from "../../services/api";
-import toastError from "../../errors/toastError";
-import QueueSelect from "../QueueSelect";
+import {
+	Field,
+	Form,
+	Formik
+} from "formik";
+import React, { useContext, useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { useHistory } from "react-router-dom";
+import { toast } from "react-toastify";
+import * as Yup from "yup";
 import { AuthContext } from "../../context/Auth/AuthContext";
-import { Can } from "../Can";
+import toastError from "../../errors/toastError";
 import useWhatsApps from "../../hooks/useWhatsApps";
+import api from "../../services/api";
+import { Can } from "../Can";
+import QueueSelect from "../QueueSelect";
 
 const useStyles = makeStyles(theme => ({
 	root: {
@@ -89,7 +84,7 @@ const UserSchema = Yup.object().shape({
 
 const UserModal = ({ open, onClose, userId }) => {
 	const classes = useStyles();
-
+	const { t } = useTranslation();
 	const initialState = {
 		name: "",
 		email: "",
@@ -143,7 +138,7 @@ const UserModal = ({ open, onClose, userId }) => {
 			} else {
 				await api.post("/users", userData);
 			}
-			toast.success(i18n.t("userModal.success"));
+			toast.success(t("userModal.success"));
 			history.go(0);
 		} catch (err) {
 			toastError(err);
@@ -162,8 +157,8 @@ const UserModal = ({ open, onClose, userId }) => {
 			>
 				<DialogTitle id="form-dialog-title">
 					{userId
-						? `${i18n.t("userModal.title.edit")}`
-						: `${i18n.t("userModal.title.add")}`}
+						? `${t("userModal.title.edit")}`
+						: `${t("userModal.title.add")}`}
 				</DialogTitle>
 				<Formik
 					initialValues={user}
@@ -182,7 +177,7 @@ const UserModal = ({ open, onClose, userId }) => {
 								<div className={classes.multFieldLine}>
 									<Field
 										as={TextField}
-										label={i18n.t("userModal.form.name")}
+										label={t("userModal.form.name")}
 										autoFocus
 										name="name"
 										error={touched.name && Boolean(errors.name)}
@@ -196,7 +191,7 @@ const UserModal = ({ open, onClose, userId }) => {
 										name="password"
 										variant="outlined"
 										margin="dense"
-										label={i18n.t("userModal.form.password")}
+										label={t("userModal.form.password")}
 										error={touched.password && Boolean(errors.password)}
 										helperText={touched.password && errors.password}
 										type={showPassword ? 'text' : 'password'}
@@ -218,7 +213,7 @@ const UserModal = ({ open, onClose, userId }) => {
 								<div className={classes.multFieldLine}>
 									<Field
 										as={TextField}
-										label={i18n.t("userModal.form.email")}
+										label={t("userModal.form.email")}
 										name="email"
 										error={touched.email && Boolean(errors.email)}
 										helperText={touched.email && errors.email}
@@ -237,19 +232,19 @@ const UserModal = ({ open, onClose, userId }) => {
 											yes={() => (
 												<>
 													<InputLabel id="profile-selection-input-label">
-														{i18n.t("userModal.form.profile")}
+														{t("userModal.form.profile")}
 													</InputLabel>
 
 													<Field
 														as={Select}
-														label={i18n.t("userModal.form.profile")}
+														label={t("userModal.form.profile")}
 														name="profile"
 														labelId="profile-selection-label"
 														id="profile-selection"
 														required
 													>
-														<MenuItem value="admin">{i18n.t("userModal.form.admin")}</MenuItem>
-														<MenuItem value="user">{i18n.t("userModal.form.user")}</MenuItem>
+														<MenuItem value="admin">{t("userModal.form.admin")}</MenuItem>
+														<MenuItem value="user">{t("userModal.form.user")}</MenuItem>
 													</Field>
 												</>
 											)}
@@ -271,12 +266,12 @@ const UserModal = ({ open, onClose, userId }) => {
 									perform="user-modal:editQueues"
 									yes={() => (!loading &&
 										<FormControl variant="outlined" margin="dense" className={classes.maxWidth} fullWidth>
-											<InputLabel>{i18n.t("userModal.form.whatsapp")}</InputLabel>
+											<InputLabel>{t("userModal.form.whatsapp")}</InputLabel>
 											<Field
 												as={Select}
 												value={whatsappId}
 												onChange={(e) => setWhatsappId(e.target.value)}
-												label={i18n.t("userModal.form.whatsapp")}
+												label={t("userModal.form.whatsapp")}
 											>
 												<MenuItem value={''}>&nbsp;</MenuItem>
 												{whatsApps.map((whatsapp) => (
@@ -293,7 +288,7 @@ const UserModal = ({ open, onClose, userId }) => {
 										<form className={classes.container} noValidate>
 											<Field
 												as={TextField}
-												label={i18n.t("userModal.form.startWork")}
+												label={t("userModal.form.startWork")}
 												type="time"
 												ampm={false}
 												defaultValue="00:00"
@@ -318,7 +313,7 @@ const UserModal = ({ open, onClose, userId }) => {
 											/>
 											<Field
 												as={TextField}
-												label={i18n.t("userModal.form.endWork")}
+												label={t("userModal.form.endWork")}
 												type="time"
 												ampm={false}
 												defaultValue="23:59"
@@ -355,18 +350,18 @@ const UserModal = ({ open, onClose, userId }) => {
 										yes={() => (
 											<>
 												<InputLabel id="isTricked-selection-input-label">
-													{i18n.t("userModal.form.isTricked")}
+													{t("userModal.form.isTricked")}
 												</InputLabel>
 
 												<Field
 													as={Select}
-													label={i18n.t("userModal.form.isTricked")}
+													label={t("userModal.form.isTricked")}
 													name="isTricked"
 													labelId="isTricked-selection-label"
 													id="isTricked-selection"
 												>
-													<MenuItem value="enabled">{i18n.t("userModal.form.enabled")}</MenuItem>
-													<MenuItem value="disabled">{i18n.t("userModal.form.disabled")}</MenuItem>
+													<MenuItem value="enabled">{t("userModal.form.enabled")}</MenuItem>
+													<MenuItem value="disabled">{t("userModal.form.disabled")}</MenuItem>
 												</Field>
 											</>
 										)}
@@ -380,7 +375,7 @@ const UserModal = ({ open, onClose, userId }) => {
 									disabled={isSubmitting}
 									variant="outlined"
 								>
-									{i18n.t("userModal.buttons.cancel")}
+									{t("userModal.buttons.cancel")}
 								</Button>
 								<Button
 									type="submit"
@@ -390,8 +385,8 @@ const UserModal = ({ open, onClose, userId }) => {
 									className={classes.btnWrapper}
 								>
 									{userId
-										? `${i18n.t("userModal.buttons.okEdit")}`
-										: `${i18n.t("userModal.buttons.okAdd")}`}
+										? `${t("userModal.buttons.okEdit")}`
+										: `${t("userModal.buttons.okAdd")}`}
 									{isSubmitting && (
 										<CircularProgress
 											size={24}

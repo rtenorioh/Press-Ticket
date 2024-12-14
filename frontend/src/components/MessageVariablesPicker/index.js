@@ -1,7 +1,7 @@
 import { Chip, makeStyles } from "@material-ui/core";
 import React from "react";
+import { useTranslation } from "react-i18next";
 import useMessageVariables from "../../hooks/useMessageVariables";
-import { i18n } from "../../translate/i18n";
 import OutlinedDiv from "../OutlinedDiv";
 
 const useStyles = makeStyles((theme) => ({
@@ -14,6 +14,7 @@ const useStyles = makeStyles((theme) => ({
 const MessageVariablesPicker = ({ onClick, disabled, customVariables = [] }) => {
     const classes = useStyles();
     const msgVars = useMessageVariables(customVariables);
+    const { t } = useTranslation();
 
     const handleClick = (e, value) => {
         e.preventDefault();
@@ -25,7 +26,7 @@ const MessageVariablesPicker = ({ onClick, disabled, customVariables = [] }) => 
         <OutlinedDiv
             margin="dense"
             fullWidth
-            label={i18n.t("messageVariablesPicker.label")}
+            label={t("messageVariablesPicker.label")}
             disabled={disabled}
         >
             {msgVars.map((msgVar) => (

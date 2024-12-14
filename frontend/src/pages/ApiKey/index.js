@@ -1,6 +1,3 @@
-import React, { useEffect, useState } from "react";
-import connectToSocket from "../../services/socket-io";
-
 import {
     Container,
     makeStyles,
@@ -8,12 +5,12 @@ import {
     TextField,
     Typography
 } from "@material-ui/core";
-
+import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import CopyToClipboard from "../../components/CopyToClipboard";
-
 import toastError from "../../errors/toastError";
 import api from "../../services/api";
-import { i18n } from "../../translate/i18n.js";
+import connectToSocket from "../../services/socket-io";
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -21,13 +18,11 @@ const useStyles = makeStyles(theme => ({
         alignItems: "center",
         padding: theme.spacing(8, 8, 3),
     },
-
     typography: {
         subtitle6: {
             fontSize: 12,
         }
     },
-
     paper: {
         backgroundColor: theme.palette.background.paper,
         padding: theme.spacing(2),
@@ -35,19 +30,17 @@ const useStyles = makeStyles(theme => ({
         alignItems: "center",
         marginBottom: 12,
     },
-
     settingOption: {
         marginLeft: "auto",
     },
     margin: {
         margin: theme.spacing(1),
     },
-
 }));
 
 const ApiKey = () => {
     const classes = useStyles();
-
+    const { t } = useTranslation();
     const [settings, setSettings] = useState([]);
 
     useEffect(() => {
@@ -90,7 +83,7 @@ const ApiKey = () => {
         <div className={classes.root}>
             <Container className={classes.container} maxWidth="sm">
                 <Typography variant="body2" gutterBottom>
-                    {i18n.t("mainDrawer.listItems.token")}
+                    {t("mainDrawer.listItems.token")}
                 </Typography>
 
                 <Paper className={classes.paper}>

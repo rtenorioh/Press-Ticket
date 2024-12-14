@@ -1,17 +1,15 @@
-import React, { useContext, useState } from "react";
-import { useHistory } from "react-router-dom";
-
-import { makeStyles } from "@material-ui/core/styles";
 import { IconButton } from "@material-ui/core";
+import { makeStyles } from "@material-ui/core/styles";
 import { MoreVert, Replay } from "@material-ui/icons";
-
-import { i18n } from "../../translate/i18n";
-import api from "../../services/api";
-import TicketOptionsMenu from "../TicketOptionsMenu";
-import ButtonWithSpinner from "../ButtonWithSpinner";
-import toastError from "../../errors/toastError";
+import React, { useContext, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { useHistory } from "react-router-dom";
 import { AuthContext } from "../../context/Auth/AuthContext";
+import toastError from "../../errors/toastError";
+import api from "../../services/api";
+import ButtonWithSpinner from "../ButtonWithSpinner";
 import { Can } from "../Can";
+import TicketOptionsMenu from "../TicketOptionsMenu";
 
 const useStyles = makeStyles(theme => ({
 	actionButtons: {
@@ -27,6 +25,7 @@ const useStyles = makeStyles(theme => ({
 
 const TicketActionButtons = ({ ticket }) => {
 	const classes = useStyles();
+	const { t } = useTranslation();
 	const history = useHistory();
 	const [anchorEl, setAnchorEl] = useState(null);
 	const [loading, setLoading] = useState(false);
@@ -70,7 +69,7 @@ const TicketActionButtons = ({ ticket }) => {
 					size="small"
 					onClick={e => handleUpdateTicketStatus(e, "open", user?.id)}
 				>
-					{i18n.t("messagesList.header.buttons.reopen")}
+					{t("messagesList.header.buttons.reopen")}
 				</ButtonWithSpinner>
 			)}
 			{ticket.status === "open" && (
@@ -81,7 +80,7 @@ const TicketActionButtons = ({ ticket }) => {
 						size="small"
 						onClick={e => handleUpdateTicketStatus(e, "pending", null)}
 					>
-						{i18n.t("messagesList.header.buttons.return")}
+						{t("messagesList.header.buttons.return")}
 					</ButtonWithSpinner>
 					<ButtonWithSpinner
 						loading={loading}
@@ -90,7 +89,7 @@ const TicketActionButtons = ({ ticket }) => {
 						color="primary"
 						onClick={e => handleUpdateTicketStatus(e, "closed", user?.id)}
 					>
-						{i18n.t("messagesList.header.buttons.resolve")}
+						{t("messagesList.header.buttons.resolve")}
 					</ButtonWithSpinner>
 					<IconButton
 						color="primary"
@@ -118,7 +117,7 @@ const TicketActionButtons = ({ ticket }) => {
 								color="primary"
 								onClick={e => handleUpdateTicketStatus(e, "open", user?.id)}
 							>
-								{i18n.t("messagesList.header.buttons.accept")}
+								{t("messagesList.header.buttons.accept")}
 							</ButtonWithSpinner>
 						)}
 					</>
