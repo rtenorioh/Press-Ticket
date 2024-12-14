@@ -407,6 +407,7 @@ const messages = {
         tabs: {
           general: "Generales",
           personalize: "Personalizar",
+          integrations: "Integraciones"
         },
         general: {
           userCreation: {

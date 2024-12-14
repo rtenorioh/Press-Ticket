@@ -16,7 +16,6 @@ import {
   Code,
   ContactPhoneOutlined,
   DashboardOutlined,
-  DeveloperModeOutlined,
   LocalOffer,
   MenuBook,
   PeopleAltOutlined,
@@ -187,12 +186,6 @@ const MainListItems = (props) => {
               primary={t("mainDrawer.listItems.queues")}
               icon={<AccountTreeOutlined />}
               active={location.pathname === '/queues'}
-            />
-            <ListItemLink
-              to="/Integrations"
-              primary={t("mainDrawer.listItems.integrations")}
-              icon={<DeveloperModeOutlined />}
-              active={location.pathname === '/Integrations'}
             />
             <ListItemLink
               to="/settings"

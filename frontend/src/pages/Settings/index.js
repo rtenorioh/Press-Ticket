@@ -7,6 +7,7 @@ import { AuthContext } from "../../context/Auth/AuthContext";
 import toastError from "../../errors/toastError";
 import api from "../../services/api";
 import openSocket from "../../services/socket-io.js";
+import Integrations from "../Integrations";
 import ComponentSettings from "./ComponentSettings";
 import Personalize from "./Personalize.js";
 
@@ -129,6 +130,7 @@ const Settings = ({ onThemeConfigUpdate }) => {
 					<Tab label={t("settings.tabs.personalize")} />
 				)}
 				<Tab label={t("settings.tabs.general")} />
+				<Tab label={t("settings.tabs.integrations")} />
 			</Tabs>
 			<Box p={3}>
 				{tabValue === 0 && (!isMasterAdminEnabled || user.profile === "masteradmin") && (
@@ -147,6 +149,13 @@ const Settings = ({ onThemeConfigUpdate }) => {
 								handleChangeBooleanSetting={handleChangeBooleanSetting}
 								handleChangeSetting={handleChangeSetting}
 							/>
+						</ErrorBoundary>
+					</Container>
+				)}
+				{tabValue === 2 && (
+					<Container className={classes.container}>
+						<ErrorBoundary>
+							<Integrations />
 						</ErrorBoundary>
 					</Container>
 				)}

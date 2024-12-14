@@ -9,7 +9,6 @@ import ApiKey from "../pages/ApiKey/";
 import Connections from "../pages/Connections/";
 import Contacts from "../pages/Contacts/";
 import Dashboard from "../pages/Dashboard/";
-import Integrations from "../pages/Integrations";
 import Login from "../pages/Login/";
 import Queues from "../pages/Queues/";
 import QuickAnswers from "../pages/QuickAnswers/";
@@ -44,7 +43,6 @@ const Routes = ({ toggleTheme, onThemeConfigUpdate }) => {
               <Route exact path="/apikey" component={ApiKey} isPrivate />
               <Route exact path="/Queues" component={Queues} isPrivate />
               <Route exact path="/Tags" component={Tags} isPrivate />
-              <Route exact path="/Integrations" component={Integrations} isPrivate />
             </LoggedInLayout>
           </WhatsAppsProvider>
         </Switch>
