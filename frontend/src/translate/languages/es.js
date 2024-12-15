@@ -274,6 +274,22 @@ const messages = {
         close: "Cerrar",
         title: "Historial de edición del mensaje"
       },
+      messagesList: {
+        header: {
+          assignedTo: "Asignado:",
+          buttons: {
+            return: "Volver",
+            resolve: "Resolver",
+            reopen: "Reabrir",
+            accept: "Aceptar",
+          },
+        },
+      },
+      messagesInput: {
+        placeholderOpen: "Ingrese un mensaje",
+        placeholderClosed: "Reabrir o aceptar este ticket para enviar un mensaje.",
+        signMessage: "Suscribirse",
+      },
       messageVariablesPicker: {
         label: "Variables disponibles",
         vars: {

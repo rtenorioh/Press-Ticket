@@ -274,6 +274,22 @@ const messages = {
         close: "Close",
         title: "Message Edit History"
       },
+      messagesList: {
+        header: {
+          assignedTo: "Assignee:",
+          buttons: {
+            return: "Return",
+            resolve: "Solve",
+            reopen: "Reopen",
+            accept: "Accept",
+          },
+        },
+      },
+      messagesInput: {
+        placeholderOpen: "Enter a message",
+        placeholderClosed: "Reopen or accept this ticket to send a message.",
+        signMessage: "Subscribe",
+      },
       messageVariablesPicker: {
         label: "Available Variables",
         vars: {

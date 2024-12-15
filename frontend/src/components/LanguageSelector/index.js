@@ -51,7 +51,7 @@ const LanguageSelector = () => {
                     aria-haspopup="true"
                 >
                     <Flag
-                        code={languages.find((lang) => lang.code === currentLanguage)?.flag || "PT"}
+                        code={languages.find((lang) => lang.code === currentLanguage)?.flag || "BR"}
                         style={{ width: 24, height: 24, borderRadius: "50%" }}
                     />
                 </IconButton>
