@@ -361,7 +361,7 @@ sudo apt install nginx
 sudo nano /etc/nginx/sites-available/Press-Ticket-frontend
 ```
 
-Preencha com as informações abaixo:
+Preencha com as informações abaixo, atualizando as informações de acordo com o seu domínio:
 
 ```
 server {
@@ -386,7 +386,7 @@ server {
 sudo nano /etc/nginx/sites-available/Press-Ticket-backend
 ```
 
-Preencha com as informações abaixo:
+Preencha com as informações abaixo atualizando as informações de acordo com o seu domínio:
 
 ```
 server {
