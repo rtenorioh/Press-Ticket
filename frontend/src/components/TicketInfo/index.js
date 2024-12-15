@@ -1,8 +1,7 @@
-import React from "react";
-
 import { Avatar, CardHeader } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import { i18n } from "../../translate/i18n";
+import React from "react";
+import { useTranslation } from "react-i18next";
 
 const useStyles = makeStyles(() => ({
 	avatar: {
@@ -14,6 +13,8 @@ const useStyles = makeStyles(() => ({
 
 const TicketInfo = ({ contact, ticket, onClick }) => {
 	const classes = useStyles();
+	const { t } = useTranslation();
+
 	return (
 		<CardHeader
 			onClick={onClick}
@@ -24,7 +25,7 @@ const TicketInfo = ({ contact, ticket, onClick }) => {
 			title={`${contact.name} #${ticket.id}`}
 			subheader={
 				ticket.user &&
-				`${i18n.t("messagesList.header.assignedTo")} ${ticket.user.name} 
+				`${t("messagesList.header.assignedTo")} ${ticket.user.name} 
 				${ticket.queue ? ' | Setor: ' + ticket.queue.name : ' | Setor: Nenhum'}`
 			}
 		/>

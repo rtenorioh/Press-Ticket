@@ -1,16 +1,14 @@
-import React from "react";
-
+import { Button, CircularProgress } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import { green } from "@material-ui/core/colors";
-import { CircularProgress, Button } from "@material-ui/core";
+import PropTypes from "prop-types";
+import React from "react";
 
 const useStyles = makeStyles(theme => ({
 	button: {
 		position: "relative",
 	},
-
 	buttonProgress: {
-		color: green[500],
+		color: props => props.spinnerColor || theme.palette.primary.main,
 		position: "absolute",
 		top: "50%",
 		left: "50%",
@@ -19,17 +17,41 @@ const useStyles = makeStyles(theme => ({
 	},
 }));
 
-const ButtonWithSpinner = ({ loading, children, ...rest }) => {
-	const classes = useStyles();
+const ButtonWithSpinner = ({
+	loading,
+	children,
+	spinnerSize = 24,
+	spinnerColor = null,
+	ariaLabel = "Loading...",
+	...rest
+}) => {
+	const classes = useStyles({ spinnerColor });
 
 	return (
-		<Button className={classes.button} disabled={loading} {...rest}>
+		<Button
+			className={classes.button}
+			disabled={loading}
+			aria-busy={loading}
+			aria-label={loading ? ariaLabel : undefined}
+			{...rest}
+		>
 			{children}
 			{loading && (
-				<CircularProgress size={24} className={classes.buttonProgress} />
+				<CircularProgress
+					size={spinnerSize}
+					className={classes.buttonProgress}
+				/>
 			)}
 		</Button>
 	);
+};
+
+ButtonWithSpinner.propTypes = {
+	loading: PropTypes.bool.isRequired,
+	children: PropTypes.node.isRequired,
+	spinnerSize: PropTypes.number,
+	spinnerColor: PropTypes.string,
+	ariaLabel: PropTypes.string,
 };
 
 export default ButtonWithSpinner;

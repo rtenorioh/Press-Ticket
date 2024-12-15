@@ -1,43 +1,36 @@
-import React, { useState } from "react";
-
-import * as Yup from "yup";
-import { useHistory } from "react-router-dom";
-import { Link as RouterLink } from "react-router-dom";
-import { toast } from "react-toastify";
-import { Formik, Form, Field } from "formik";
-
 import {
-	Button,
-	CssBaseline,
-	TextField,
-	Grid,
 	Box,
-	Typography,
+	Button,
 	Container,
-	InputAdornment,
+	CssBaseline,
+	Grid,
 	IconButton,
-	Link
+	InputAdornment,
+	Link,
+	TextField,
+	Typography
 } from '@material-ui/core';
-
-import { Visibility, VisibilityOff } from '@material-ui/icons';
-
 import { makeStyles } from "@material-ui/core/styles";
-
-import { i18n } from "../../translate/i18n";
-
-import api from "../../services/api";
+import { Visibility, VisibilityOff } from '@material-ui/icons';
+import { Field, Form, Formik } from "formik";
+import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { Link as RouterLink, useHistory } from "react-router-dom";
+import { toast } from "react-toastify";
+import * as Yup from "yup";
+import defaultLogo from '../../assets/logo.jpg';
 import toastError from "../../errors/toastError";
+import api from "../../services/api";
 
-import { system } from "../../config.json";
-import logo from '../../assets/logo.png';
+const PUBLIC_ASSET_PATH = '/assets/';
 
-const Copyright = () => {
+const Copyright = ({ companyName, companyUrl }) => {
 	return (
 		<Typography variant="body2" color="textSecondary" align="center">
 			© {new Date().getFullYear()}
 			{" - "}
-			<Link color="inherit" href={system.url || "https://github.com/rtenorioh/Press-Ticket"}>
-				{system.name || "Press Ticket"}
+			<Link color="inherit" href={companyUrl || "https://github.com/rtenorioh/Press-Ticket"}>
+				{companyName || "Press Ticket"}
 			</Link>
 			{"."}
 		</Typography>
@@ -71,16 +64,85 @@ const UserSchema = Yup.object().shape({
 
 const SignUp = () => {
 	const classes = useStyles();
+	const { t } = useTranslation();
 	const history = useHistory();
-
 	const initialState = { name: "", email: "", password: "" };
 	const [showPassword, setShowPassword] = useState(false);
 	const [user] = useState(initialState);
+	const [theme, setTheme] = useState("light");
+	const [companyData, setCompanyData] = useState({
+		logo: defaultLogo,
+		name: "Press Ticket",
+		url: "https://github.com/rtenorioh/Press-Ticket"
+	});
+
+	useEffect(() => {
+		const fetchCompanyData = async () => {
+			try {
+				const { data } = await api.get("/personalizations");
+
+				if (data && data.length > 0) {
+
+					const lightConfig = data.find(themeConfig => themeConfig.theme === "light");
+
+					if (lightConfig) {
+						setCompanyData(prevData => ({
+							...prevData,
+							name: lightConfig.company || "Press Ticket",
+							url: lightConfig.url || "https://github.com/rtenorioh/Press-Ticket"
+						}));
+					}
+				}
+			} catch (err) {
+				toastError(err);
+			}
+		};
+
+		const savedTheme = localStorage.getItem("theme") || "light";
+		setTheme(savedTheme);
+
+		fetchCompanyData();
+	}, []);
+
+	useEffect(() => {
+		const fetchLogo = async () => {
+			try {
+				const { data } = await api.get("/personalizations");
+
+				if (data && data.length > 0) {
+					const lightConfig = data.find(themeConfig => themeConfig.theme === "light");
+					const darkConfig = data.find(themeConfig => themeConfig.theme === "dark");
+
+					if (theme === "light" && lightConfig && lightConfig.logo) {
+						setCompanyData(prevData => ({
+							...prevData,
+							logo: PUBLIC_ASSET_PATH + lightConfig.logo
+						}));
+					} else if (theme === "dark" && darkConfig && darkConfig.logo) {
+						setCompanyData(prevData => ({
+							...prevData,
+							logo: PUBLIC_ASSET_PATH + darkConfig.logo
+						}));
+					} else {
+						setCompanyData(prevData => ({
+							...prevData,
+							logo: defaultLogo
+						}));
+					}
+				}
+
+			} catch (err) {
+				toastError(err);
+			}
+		};
+
+		fetchLogo();
+	}, [theme]);
 
 	const handleSignUp = async values => {
 		try {
 			await api.post("/auth/signup", values);
-			toast.success(i18n.t("signup.toasts.success"));
+			toast.success(t("signup.toasts.success"));
 			history.push("/login");
 		} catch (err) {
 			toastError(err);
@@ -91,11 +153,10 @@ const SignUp = () => {
 		<Container component="main" maxWidth="xs">
 			<CssBaseline />
 			<div className={classes.paper}>
-				<img alt="logo" src={logo}></img>
+				<img alt="logo" src={companyData.logo} style={{ height: 120, marginBottom: 20 }} />
 				<Typography component="h1" variant="h5">
-					{i18n.t("signup.title")}
+					{t("signup.title")}
 				</Typography>
-				{/* <form className={classes.form} noValidate onSubmit={handleSignUp}> */}
 				<Formik
 					initialValues={user}
 					enableReinitialize={true}
@@ -120,7 +181,7 @@ const SignUp = () => {
 										variant="outlined"
 										fullWidth
 										id="name"
-										label={i18n.t("signup.form.name")}
+										label={t("signup.form.name")}
 										autoFocus
 									/>
 								</Grid>
@@ -131,7 +192,7 @@ const SignUp = () => {
 										variant="outlined"
 										fullWidth
 										id="email"
-										label={i18n.t("signup.form.email")}
+										label={t("signup.form.email")}
 										name="email"
 										error={touched.email && Boolean(errors.email)}
 										helperText={touched.email && errors.email}
@@ -148,7 +209,7 @@ const SignUp = () => {
 										autoComplete="current-password"
 										error={touched.password && Boolean(errors.password)}
 										helperText={touched.password && errors.password}
-										label={i18n.t("signup.form.password")}
+										label={t("signup.form.password")}
 										type={showPassword ? 'text' : 'password'}
 										InputProps={{
 											endAdornment: (
@@ -172,9 +233,9 @@ const SignUp = () => {
 								color="primary"
 								className={classes.submit}
 							>
-								{i18n.t("signup.buttons.submit")}
+								{t("signup.buttons.submit")}
 							</Button>
-							<Grid container justify="flex-end">
+							<Grid container justifyContent="flex-end">
 								<Grid item>
 									<Link
 										href="#"
@@ -182,7 +243,7 @@ const SignUp = () => {
 										component={RouterLink}
 										to="/login"
 									>
-										{i18n.t("signup.buttons.login")}
+										{t("signup.buttons.login")}
 									</Link>
 								</Grid>
 							</Grid>
@@ -190,7 +251,7 @@ const SignUp = () => {
 					)}
 				</Formik>
 			</div>
-			<Box mt={5}><Copyright /></Box>
+			<Box mt={5}><Copyright companyName={companyData.name} companyUrl={companyData.url} /></Box>
 		</Container>
 	);
 };

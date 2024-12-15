@@ -5,11 +5,13 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc",
+    "create": "npx sequelize-cli db:create",
     "migrate": "tsc && npx sequelize-cli db:migrate",
     "migrate:undo": "tsc && npx sequelize-cli db:migrate:undo",
+    "sequelize": "npx sequelize-cli db:migrate && npx sequelize-cli db:seed:all",
     "watch": "tsc -w",
     "start": "nodemon dist/server.js",
-    "dev:server": "ts-node-dev --respawn --transpile-only --ignore node_modules src/server.ts",
+    "dev": "ts-node-dev --respawn --transpile-only --ignore node_modules src/server.ts",
     "pretest": "NODE_ENV=test sequelize db:migrate && NODE_ENV=test sequelize db:seed:all",
     "test": "NODE_ENV=test jest",
     "posttest": "NODE_ENV=test sequelize db:migrate:undo:all"
@@ -19,10 +21,12 @@
   "dependencies": {
     "@ffmpeg-installer/ffmpeg": "^1.1.0",
     "@sentry/node": "^5.29.2",
+    "@types/body-parser": "^1.19.5",
     "@types/mime-types": "^2.1.4",
     "@types/pino": "^6.3.4",
     "axios": "^1.7.7",
     "bcryptjs": "^2.4.3",
+    "body-parser": "^1.20.3",
     "cookie-parser": "^1.4.5",
     "cors": "^2.8.5",
     "date-fns": "^2.16.1",
@@ -54,7 +58,7 @@
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^4.6.3",
     "uuid": "^8.3.2",
-    "whatsapp-web.js": "^1.26.0",
+    "whatsapp-web.js": "^v1.26.1-alpha.3",
     "yup": "^0.32.8"
   },
   "devDependencies": {

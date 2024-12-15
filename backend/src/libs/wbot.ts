@@ -1,4 +1,6 @@
+import fs from "fs/promises";
 import { Configuration, CreateImageRequestSizeEnum, OpenAIApi } from "openai";
+import path from "path";
 import qrCode from "qrcode-terminal";
 import { Client, LocalAuth, MessageMedia } from "whatsapp-web.js";
 import AppError from "../errors/AppError";
@@ -20,17 +22,14 @@ interface CreateImageRequest {
 }
 
 async function findIntegrationValue(key: string): Promise<string | null> {
-  // Encontre a instância de integração com base na chave fornecida
   const integration = await Integration.findOne({
     where: { key }
   });
 
-  // Se a instância for encontrada, retorne o valor
   if (integration) {
     return integration.value;
   }
 
-  // Caso contrário, retorne null
   return null as string | null;
 }
 
@@ -50,13 +49,12 @@ let openai: OpenAIApi;
   openai = new OpenAIApi(configuration);
 })();
 
-// gera resposta em texto
 const getDavinciResponse = async (clientText: string): Promise<string> => {
   const options = {
-    model: "text-davinci-003", // Modelo GPT a ser usado
-    prompt: clientText, // Texto enviado pelo usuário
-    temperature: 1, // Nível de variação das respostas geradas, 1 é o máximo
-    max_tokens: 4000 // Quantidade de tokens (palavras) a serem retornadas pelo bot, 4000 é o máximo
+    model: "text-davinci-003",
+    prompt: clientText,
+    temperature: 1,
+    max_tokens: 4000
   };
 
   try {
@@ -71,15 +69,14 @@ const getDavinciResponse = async (clientText: string): Promise<string> => {
   }
 };
 
-// gera a url da imagem
 const getDalleResponse = async (
   clientText: string
 ): Promise<string | undefined> => {
   const options: CreateImageRequest = {
-    prompt: clientText, // Descrição da imagem
-    n: 1, // Número de imagens a serem geradas
+    prompt: clientText,
+    n: 1,
     // eslint-disable-next-line no-underscore-dangle
-    size: CreateImageRequestSizeEnum._1024x1024 // Tamanho da imagem
+    size: CreateImageRequestSizeEnum._1024x1024
   };
 
   try {
@@ -238,7 +235,7 @@ export const initWbot = async (whatsapp: Whatsapp): Promise<Session> => {
 
       wbot.on("message", async msg => {
         const msgChatGPT: string = msg.body;
-        // mensagem de texto
+
         if (msgChatGPT.includes("/gpt ")) {
           const index = msgChatGPT.indexOf(" ");
           const question = msgChatGPT.substring(index + 1);
@@ -246,7 +243,7 @@ export const initWbot = async (whatsapp: Whatsapp): Promise<Session> => {
             wbot.sendMessage(msg.from, response);
           });
         }
-        // imagem
+
         if (msgChatGPT.includes("/gptM ")) {
           const index = msgChatGPT.indexOf(" ");
           const imgDescription = msgChatGPT.substring(index + 1);
@@ -283,5 +280,61 @@ export const removeWbot = (whatsappId: number): void => {
     }
   } catch (err: any) {
     logger.error(err);
+  }
+};
+
+export const restartWbot = async (whatsappId: number): Promise<Session> => {
+  const sessionIndex = sessions.findIndex(s => s.id === whatsappId);
+  if (sessionIndex !== -1) {
+    const whatsapp = await Whatsapp.findByPk(whatsappId);
+    if (!whatsapp) {
+      throw new AppError("WhatsApp not found.");
+    }
+    sessions[sessionIndex].destroy();
+    sessions.splice(sessionIndex, 1);
+
+    const newSession = await initWbot(whatsapp);
+    return newSession;
+  }
+  throw new AppError("WhatsApp session not initialized.");
+};
+
+export const shutdownWbot = async (whatsappId: string): Promise<void> => {
+  const whatsappIDNumber: number = parseInt(whatsappId, 10);
+
+  if (Number.isNaN(whatsappIDNumber)) {
+    throw new AppError("Invalid WhatsApp ID format.");
+  }
+
+  const sessionIndex = sessions.findIndex(s => s.id === whatsappIDNumber);
+  if (sessionIndex === -1) {
+    console.warn(`Sessão com ID ${whatsappIDNumber} não foi encontrada.`);
+    throw new AppError("WhatsApp session not initialized.");
+  }
+
+  const sessionPath = path.resolve(
+    __dirname,
+    `../../.wwebjs_auth/session-bd_${whatsappIDNumber}`
+  );
+
+  try {
+    console.log(`Desligando sessão para WhatsApp ID: ${whatsappIDNumber}`);
+    await sessions[sessionIndex].destroy();
+    console.log(`Sessão com ID ${whatsappIDNumber} desligada com sucesso.`);
+
+    console.log(`Removendo arquivos da sessão: ${sessionPath}`);
+    await fs.rm(sessionPath, { recursive: true, force: true });
+    console.log(`Arquivos da sessão removidos com sucesso: ${sessionPath}`);
+
+    sessions.splice(sessionIndex, 1);
+    console.log(
+      `Sessão com ID ${whatsappIDNumber} removida da lista de sessões.`
+    );
+  } catch (error) {
+    console.error(
+      `Erro ao desligar ou limpar a sessão com ID ${whatsappIDNumber}:`,
+      error
+    );
+    throw new AppError("Failed to destroy WhatsApp session.");
   }
 };

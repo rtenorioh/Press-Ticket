@@ -1,6 +1,3 @@
-import React, { useEffect, useState } from "react";
-import openSocket from "socket.io-client";
-
 import {
 	Container,
 	Grid,
@@ -8,17 +5,17 @@ import {
 	makeStyles,
 	Paper,
 	TextField,
-	Typography
+	Typography,
 } from "@material-ui/core";
 import { Visibility, VisibilityOff } from "@material-ui/icons";
-
+import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 import Title from "../../components/Title";
 import toastError from "../../errors/toastError";
 import api from "../../services/api";
-import { i18n } from "../../translate/i18n.js";
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
 	root: {
 		display: "flex",
 		alignItems: "center",
@@ -45,12 +42,13 @@ const useStyles = makeStyles(theme => ({
 		position: "absolute",
 		right: theme.spacing(1),
 		top: "50%",
-		transform: "translateY(-50%)"
-	}
+		transform: "translateY(-50%)",
+	},
 }));
 
 const Integrations = () => {
 	const classes = useStyles();
+	const { t } = useTranslation();
 
 	const [integrations, setIntegrations] = useState([]);
 	const [showKeys, setShowKeys] = useState({
@@ -60,12 +58,25 @@ const Integrations = () => {
 		hubToken: false,
 		apiMaps: false
 	});
+	const [maskedValues, setMaskedValues] = useState({
+		organization: "",
+		apikey: "",
+		urlApiN8N: "",
+		hubToken: "",
+		apiMaps: ""
+	});
 
 	useEffect(() => {
 		const fetchSession = async () => {
 			try {
 				const { data } = await api.get("/integrations");
 				setIntegrations(data);
+				setMaskedValues(
+					data.reduce((acc, integration) => {
+						acc[integration.key] = maskValue(integration.value);
+						return acc;
+					}, {})
+				);
 			} catch (err) {
 				toastError(err);
 			}
@@ -73,26 +84,7 @@ const Integrations = () => {
 		fetchSession();
 	}, []);
 
-	useEffect(() => {
-		const socket = openSocket(process.env.REACT_APP_BACKEND_URL);
-
-		socket.on("integrations", data => {
-			if (data.action === "update") {
-				setIntegrations(prevState => {
-					const aux = [...prevState];
-					const integrationIndex = aux.findIndex(s => s.key === data.integration.key);
-					aux[integrationIndex].value = data.integration.value;
-					return aux;
-				});
-			}
-		});
-
-		return () => {
-			socket.disconnect();
-		};
-	}, []);
-
-	const handleChangeIntegration = async e => {
+	const handleChangeIntegration = async (e) => {
 		const selectedValue = e.target.value;
 		const integrationKey = e.target.name;
 
@@ -100,33 +92,40 @@ const Integrations = () => {
 			await api.put(`/integrations/${integrationKey}`, {
 				value: selectedValue,
 			});
-			toast.success(i18n.t("integrations.success"));
+			toast.success(t("integrations.success"));
+			setMaskedValues((prevState) => ({
+				...prevState,
+				[integrationKey]: maskValue(selectedValue),
+			}));
 		} catch (err) {
 			toastError(err);
 		}
 	};
 
-	const handleToggleShowKey = key => {
-		setShowKeys(prevState => ({
+	const handleToggleShowKey = (key) => {
+		setShowKeys((prevState) => ({
 			...prevState,
-			[key]: !prevState[key]
+			[key]: !prevState[key],
 		}));
 	};
 
-	const getIntegrationValue = key => {
-		const integration = integrations.find(s => s.key === key);
+	const getIntegrationValue = (key) => {
+		const integration = integrations.find((s) => s.key === key);
 		return integration ? integration.value : "";
+	};
+
+	const maskValue = (value) => {
+		return value.replace(/./g, "•");
 	};
 
 	return (
 		<div className={classes.root}>
 			<Container className={classes.container}>
-				<Title>{i18n.t("integrations.title")}</Title>
-
+				<Title>{t("integrations.title")}</Title>
 				<Paper className={classes.paper}>
 					<div className={classes.integrationRow}>
 						<Typography align="left" variant="body1">
-							{i18n.t("integrations.integrations.openai.title")}
+							{t("integrations.integrations.openai.title")}
 						</Typography>
 
 						<div className={classes.textFieldContainer}>
@@ -135,14 +134,21 @@ const Integrations = () => {
 								id="organization"
 								name="organization"
 								margin="dense"
-								label={i18n.t("integrations.integrations.openai.organization")}
+								label={t("integrations.integrations.openai.organization")}
 								variant="outlined"
-								value={integrations && integrations.length > 0 && getIntegrationValue("organization")}
+								value={
+									showKeys["organization"]
+										? getIntegrationValue("organization")
+										: maskedValues["organization"]
+								}
 								onChange={handleChangeIntegration}
 								fullWidth
-								type={showKeys["organization"] ? "text" : "password"}
+								type="text"
 							/>
-							<IconButton className={classes.iconButton} onClick={() => handleToggleShowKey("organization")}>
+							<IconButton
+								className={classes.iconButton}
+								onClick={() => handleToggleShowKey("organization")}
+							>
 								{showKeys["organization"] ? <VisibilityOff /> : <Visibility />}
 							</IconButton>
 						</div>
@@ -152,15 +158,22 @@ const Integrations = () => {
 								className={classes.textField}
 								id="apikey"
 								name="apikey"
-								label={i18n.t("integrations.integrations.openai.apikey")}
+								label={t("integrations.integrations.openai.apikey")}
 								margin="dense"
 								variant="outlined"
 								onChange={handleChangeIntegration}
 								fullWidth
-								value={integrations && integrations.length > 0 && getIntegrationValue("apikey")}
-								type={showKeys["apikey"] ? "text" : "password"}
+								value={
+									showKeys["apikey"]
+										? getIntegrationValue("apikey")
+										: maskedValues["apikey"]
+								}
+								type="text"
 							/>
-							<IconButton className={classes.iconButton} onClick={() => handleToggleShowKey("apikey")}>
+							<IconButton
+								className={classes.iconButton}
+								onClick={() => handleToggleShowKey("apikey")}
+							>
 								{showKeys["apikey"] ? <VisibilityOff /> : <Visibility />}
 							</IconButton>
 						</div>
@@ -172,7 +185,7 @@ const Integrations = () => {
 						<Grid item xs={12} sm={6}>
 							<div className={classes.integrationRow}>
 								<Typography align="left" variant="body1">
-									{i18n.t("integrations.integrations.n8n.title")}
+									{t("integrations.integrations.n8n.title")}
 								</Typography>
 
 								<div className={classes.textFieldContainer}>
@@ -181,14 +194,21 @@ const Integrations = () => {
 										id="urlApiN8N"
 										name="urlApiN8N"
 										margin="dense"
-										label={i18n.t("integrations.integrations.n8n.urlApiN8N")}
+										label={t("integrations.integrations.n8n.urlApiN8N")}
 										variant="outlined"
-										value={integrations && integrations.length > 0 && getIntegrationValue("urlApiN8N")}
 										onChange={handleChangeIntegration}
 										fullWidth
-										type={showKeys["urlApiN8N"] ? "text" : "password"}
+										value={
+											showKeys["urlApiN8N"]
+												? getIntegrationValue("urlApiN8N")
+												: maskedValues["urlApiN8N"]
+										}
+										type="text"
 									/>
-									<IconButton className={classes.iconButton} onClick={() => handleToggleShowKey("urlApiN8N")}>
+									<IconButton
+										className={classes.iconButton}
+										onClick={() => handleToggleShowKey("urlApiN8N")}
+									>
 										{showKeys["urlApiN8N"] ? <VisibilityOff /> : <Visibility />}
 									</IconButton>
 								</div>
@@ -198,7 +218,7 @@ const Integrations = () => {
 						<Grid item xs={12} sm={6}>
 							<div className={classes.integrationRow}>
 								<Typography align="left" variant="body1">
-									{i18n.t("integrations.integrations.hub.title")}
+									{t("integrations.integrations.hub.title")}
 								</Typography>
 
 								<div className={classes.textFieldContainer}>
@@ -207,14 +227,21 @@ const Integrations = () => {
 										id="hubToken"
 										name="hubToken"
 										margin="dense"
-										label={i18n.t("integrations.integrations.hub.hubToken")}
+										label={t("integrations.integrations.hub.hubToken")}
 										variant="outlined"
-										value={integrations && integrations.length > 0 && getIntegrationValue("hubToken")}
 										onChange={handleChangeIntegration}
 										fullWidth
-										type={showKeys["hubToken"] ? "text" : "password"}
+										value={
+											showKeys["hubToken"]
+												? getIntegrationValue("hubToken")
+												: maskedValues["hubToken"]
+										}
+										type="text"
 									/>
-									<IconButton className={classes.iconButton} onClick={() => handleToggleShowKey("hubToken")}>
+									<IconButton
+										className={classes.iconButton}
+										onClick={() => handleToggleShowKey("hubToken")}
+									>
 										{showKeys["hubToken"] ? <VisibilityOff /> : <Visibility />}
 									</IconButton>
 								</div>
@@ -228,7 +255,7 @@ const Integrations = () => {
 						<Grid item xs={12}>
 							<div className={classes.integrationRow}>
 								<Typography align="left" variant="body1">
-									{i18n.t("integrations.integrations.maps.title")}
+									{t("integrations.integrations.maps.title")}
 								</Typography>
 
 								<div className={classes.textFieldContainer}>
@@ -237,14 +264,21 @@ const Integrations = () => {
 										id="apiMaps"
 										name="apiMaps"
 										margin="dense"
-										label={i18n.t("integrations.integrations.maps.apiMaps")}
+										label={t("integrations.integrations.maps.apiMaps")}
 										variant="outlined"
-										value={integrations && integrations.length > 0 && getIntegrationValue("apiMaps")}
 										onChange={handleChangeIntegration}
 										fullWidth
-										type={showKeys["apiMaps"] ? "text" : "password"}
+										value={
+											showKeys["apiMaps"]
+												? getIntegrationValue("apiMaps")
+												: maskedValues["apiMaps"]
+										}
+										type="text"
 									/>
-									<IconButton className={classes.iconButton} onClick={() => handleToggleShowKey("apiMaps")}>
+									<IconButton
+										className={classes.iconButton}
+										onClick={() => handleToggleShowKey("apiMaps")}
+									>
 										{showKeys["apiMaps"] ? <VisibilityOff /> : <Visibility />}
 									</IconButton>
 								</div>

@@ -32,7 +32,7 @@ class OldMessage extends Model<OldMessage> {
   updatedAt: Date;
 
   @ForeignKey(() => Message)
-  @Column
+  @Column(DataType.STRING)
   messageId: string;
 
   @BelongsTo(() => Message, "messageId")

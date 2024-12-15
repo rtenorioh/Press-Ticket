@@ -1,16 +1,13 @@
+import { Paper, makeStyles } from "@material-ui/core";
+import clsx from "clsx";
 import React, { useEffect, useState } from "react";
 import { useHistory, useParams } from "react-router-dom";
-
-import clsx from "clsx";
 import { toast } from "react-toastify";
-import openSocket from "../../services/socket-io";
-
-import { Paper, makeStyles } from "@material-ui/core";
-
 import { EditMessageProvider } from "../../context/EditingMessage/EditingMessageContext";
 import { ReplyMessageProvider } from "../../context/ReplyingMessage/ReplyingMessageContext";
 import toastError from "../../errors/toastError";
 import api from "../../services/api";
+import openSocket from "../../services/socket-io";
 import ContactDrawer from "../ContactDrawer";
 import MessageInput from "../MessageInput/";
 import MessagesList from "../MessagesList";
@@ -28,7 +25,6 @@ const useStyles = makeStyles((theme) => ({
     position: "relative",
     overflow: "hidden",
   },
-
   ticketInfo: {
     backgroundColor: theme.palette.background.default,
     maxWidth: "50%",
@@ -49,7 +45,6 @@ const useStyles = makeStyles((theme) => ({
       marginBottom: "5px",
     },
   },
-
   mainWrapper: {
     flex: 1,
     height: "100%",
@@ -65,7 +60,6 @@ const useStyles = makeStyles((theme) => ({
       duration: theme.transitions.duration.leavingScreen,
     }),
   },
-
   mainWrapperShift: {
     borderTopRightRadius: 0,
     borderBottomRightRadius: 0,

@@ -1,13 +1,13 @@
-import "./bootstrap";
-import "reflect-metadata";
-import "express-async-errors";
-import express, { Request, Response, NextFunction } from "express";
-import cors from "cors";
-import cookieParser from "cookie-parser";
 import * as Sentry from "@sentry/node";
-
-import "./database";
+import bodyParser from "body-parser";
+import cookieParser from "cookie-parser";
+import cors from "cors";
+import express, { NextFunction, Request, Response } from "express";
+import "express-async-errors";
+import "reflect-metadata";
+import "./bootstrap";
 import uploadConfig from "./config/upload";
+import "./database";
 import AppError from "./errors/AppError";
 import routes from "./routes";
 import { logger } from "./utils/logger";
@@ -27,6 +27,9 @@ app.use(express.json());
 app.use(Sentry.Handlers.requestHandler());
 app.use("/public", express.static(uploadConfig.directory));
 app.use(routes);
+
+app.use(bodyParser.json({ limit: "10mb" }));
+app.use(bodyParser.urlencoded({ limit: "10mb", extended: true }));
 
 app.use(Sentry.Handlers.errorHandler());
 

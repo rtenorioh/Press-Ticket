@@ -41,6 +41,7 @@ import React, {
   useRef,
   useState
 } from "react";
+import { useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
 import { AuthContext } from "../../context/Auth/AuthContext";
 import { EditMessageContext } from "../../context/EditingMessage/EditingMessageContext";
@@ -48,7 +49,6 @@ import { ReplyMessageContext } from "../../context/ReplyingMessage/ReplyingMessa
 import toastError from "../../errors/toastError";
 import { useLocalStorage } from "../../hooks/useLocalStorage";
 import api from "../../services/api";
-import { i18n } from "../../translate/i18n";
 import RecordingTimer from "./RecordingTimer";
 
 const Mp3Recorder = new MicRecorder({ bitRate: 128 });
@@ -240,6 +240,7 @@ const MessageInput = ({ ticketStatus }) => {
   const { user } = useContext(AuthContext);
   const [signMessage, setSignMessage] = useLocalStorage("signOption", true);
   const [channelType, setChannelType] = useState(null);
+  const { t } = useTranslation();
 
   useEffect(() => {
     inputRef.current.focus();
@@ -319,6 +320,10 @@ const MessageInput = ({ ticketStatus }) => {
   };
 
   const handleUploadMedia = async (e) => {
+    if (!e || !e.preventDefault) {
+      console.error("Evento inválido ou não fornecido!");
+      return;
+    }
     setLoading(true);
     e.preventDefault();
     const formData = new FormData();
@@ -327,6 +332,7 @@ const MessageInput = ({ ticketStatus }) => {
       formData.append("medias", media);
       formData.append("body", media.name);
     });
+
     try {
       if (channelType !== null) {
         await api.post(`/hub-message/${ticketId}`, formData);
@@ -336,7 +342,6 @@ const MessageInput = ({ ticketStatus }) => {
     } catch (err) {
       toastError(err);
     }
-
     setLoading(false);
     setMedias([]);
   };
@@ -360,7 +365,6 @@ const MessageInput = ({ ticketStatus }) => {
         await api.post(`/messages/edit/${editingMessage.id}`, message);
       } else {
         await api.post(`/messages/${ticketId}`, message);
-
       }
     } catch (err) {
       toastError(err);
@@ -507,7 +511,7 @@ const MessageInput = ({ ticketStatus }) => {
         ) : (
           <Grid item className={classes.gridFiles}>
             <Typography variant="h6" component="div">
-              {i18n.t("uploads.titles.titleFileList")} ({medias.length})
+              {t("uploads.titles.titleFileList")} ({medias.length})
             </Typography>
             <List>
               {medias.map((value, index) => {
@@ -526,14 +530,14 @@ const MessageInput = ({ ticketStatus }) => {
             </List>
             <InputBase
               style={{ width: "0", height: "0" }}
-              inputRef={function (input) {
-                if (input != null) {
+              inputRef={(input) => {
+                if (input !== null) {
                   input.focus();
                 }
               }}
-              onKeyPress={(e) => {
+              onKeyDown={(e) => {
                 if (e.key === "Enter") {
-                  handleUploadMedia();
+                  handleUploadMedia(e);
                 }
               }}
               defaultValue={medias[0].name}
@@ -560,7 +564,7 @@ const MessageInput = ({ ticketStatus }) => {
         onDrop={(e) => handleInputDrop(e)}
       >
         <div className={onDragEnter ? classes.dropInfo : classes.dropInfoOut}>
-          {i18n.t("uploads.titles.titleUploadMsgDragDrop")}
+          {t("uploads.titles.titleUploadMsgDragDrop")}
         </div>
         {(replyingMessage && renderReplyingMessage(replyingMessage)) || (editingMessage && renderReplyingMessage(editingMessage))}
         <div className={classes.newMessageBox}>
@@ -579,7 +583,7 @@ const MessageInput = ({ ticketStatus }) => {
                   <Picker
                     perLine={16}
                     theme={"dark"}
-                    i18n={i18n}
+                    i18n={t}
                     showPreview={true}
                     showSkinTones={false}
                     onSelect={handleAddEmoji}
@@ -608,7 +612,7 @@ const MessageInput = ({ ticketStatus }) => {
             </label>
             <FormControlLabel
               style={{ marginRight: 7, color: "primary" }}
-              label={i18n.t("messagesInput.signMessage")}
+              label={t("messagesInput.signMessage")}
               labelPlacement="start"
               control={
                 <Switch
@@ -670,7 +674,7 @@ const MessageInput = ({ ticketStatus }) => {
               <MenuItem onClick={handleMenuItemClick}>
                 <FormControlLabel
                   style={{ marginRight: 7, color: "gray" }}
-                  label={i18n.t("messagesInput.signMessage")}
+                  label={t("messagesInput.signMessage")}
                   labelPlacement="start"
                   control={
                     <Switch
@@ -696,8 +700,8 @@ const MessageInput = ({ ticketStatus }) => {
               className={classes.messageInput}
               placeholder={
                 ticketStatus === "open"
-                  ? i18n.t("messagesInput.placeholderOpen")
-                  : i18n.t("messagesInput.placeholderClosed")
+                  ? t("messagesInput.placeholderOpen")
+                  : t("messagesInput.placeholderClosed")
               }
               multiline
               maxRows={5}
@@ -707,10 +711,10 @@ const MessageInput = ({ ticketStatus }) => {
               onPaste={(e) => {
                 ticketStatus === "open" && handleInputPaste(e);
               }}
-              onKeyPress={(e) => {
+              onKeyDown={(e) => {
                 if (loading || e.shiftKey) return;
                 else if (e.key === "Enter") {
-                  handleSendMessage();
+                  handleSendMessage(e);
                 }
               }}
             />

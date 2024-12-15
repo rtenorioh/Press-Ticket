@@ -1,34 +1,36 @@
-import React, { useState, useContext } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { Link as RouterLink } from "react-router-dom";
 
 import {
-  Button,
-  CssBaseline,
-  TextField,
-  Grid,
   Box,
-  Typography,
+  Button,
   Container,
-  InputAdornment,
+  CssBaseline,
+  Grid,
   IconButton,
-  Link
+  InputAdornment,
+  Link,
+  TextField,
+  Typography
 } from '@material-ui/core';
 
-import { Visibility, VisibilityOff } from '@material-ui/icons';
 import { makeStyles } from "@material-ui/core/styles";
-import { i18n } from "../../translate/i18n";
-
+import { Visibility, VisibilityOff } from '@material-ui/icons';
+import { useTranslation } from "react-i18next";
+import defaultLogo from '../../assets/logo.jpg';
 import { AuthContext } from "../../context/Auth/AuthContext";
-import { system } from "../../config.json";
-import logo from '../../assets/logo.png';
+import toastError from "../../errors/toastError";
+import api from "../../services/api";
 
-const Copyright = () => {
+const PUBLIC_ASSET_PATH = '/assets/';
+
+const Copyright = ({ companyName, companyUrl }) => {
   return (
     <Typography variant="body2" color="textSecondary" align="center">
       © {new Date().getFullYear()}
       {" - "}
-      <Link color="inherit" href={system.url || "https://github.com/rtenorioh/Press-Ticket"}>
-        {system.name}
+      <Link color="inherit" href={companyUrl || "https://github.com/rtenorioh/Press-Ticket"}>
+        {companyName || "Press Ticket"}
       </Link>
       {"."}
     </Typography>
@@ -53,11 +55,79 @@ const useStyles = makeStyles((theme) => ({
 
 const Login = () => {
   const classes = useStyles();
-
+  const { t } = useTranslation();
   const [user, setUser] = useState({ email: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
-
   const { handleLogin } = useContext(AuthContext);
+  const [theme, setTheme] = useState("light");
+  const [companyData, setCompanyData] = useState({
+    logo: defaultLogo,
+    name: "Press Ticket",
+    url: "https://github.com/rtenorioh/Press-Ticket"
+  });
+
+  useEffect(() => {
+    const fetchCompanyData = async () => {
+      try {
+        const { data } = await api.get("/personalizations");
+
+        if (data && data.length > 0) {
+
+          const lightConfig = data.find(themeConfig => themeConfig.theme === "light");
+
+          if (lightConfig) {
+            setCompanyData(prevData => ({
+              ...prevData,
+              name: lightConfig.company || "Press Ticket",
+              url: lightConfig.url || "https://github.com/rtenorioh/Press-Ticket"
+            }));
+          }
+        }
+      } catch (err) {
+        toastError(err);
+      }
+    };
+
+    const savedTheme = localStorage.getItem("theme") || "light";
+    setTheme(savedTheme);
+
+    fetchCompanyData();
+  }, []);
+
+  useEffect(() => {
+    const fetchLogo = async () => {
+      try {
+        const { data } = await api.get("/personalizations");
+
+        if (data && data.length > 0) {
+          const lightConfig = data.find(themeConfig => themeConfig.theme === "light");
+          const darkConfig = data.find(themeConfig => themeConfig.theme === "dark");
+
+          if (theme === "light" && lightConfig && lightConfig.logo) {
+            setCompanyData(prevData => ({
+              ...prevData,
+              logo: PUBLIC_ASSET_PATH + lightConfig.logo
+            }));
+          } else if (theme === "dark" && darkConfig && darkConfig.logo) {
+            setCompanyData(prevData => ({
+              ...prevData,
+              logo: PUBLIC_ASSET_PATH + darkConfig.logo
+            }));
+          } else {
+            setCompanyData(prevData => ({
+              ...prevData,
+              logo: defaultLogo
+            }));
+          }
+        }
+
+      } catch (err) {
+        toastError(err);
+      }
+    };
+
+    fetchLogo();
+  }, [theme]);
 
   const handleChangeInput = (e) => {
     setUser({ ...user, [e.target.name]: e.target.value });
@@ -72,9 +142,9 @@ const Login = () => {
     <Container component="main" maxWidth="xs">
       <CssBaseline />
       <div className={classes.paper}>
-        <img alt="logo" src={logo}></img>
+        <img alt="logo" src={companyData.logo} style={{ height: 120, marginBottom: 20 }} />
         <Typography component="h1" variant="h5">
-          {i18n.t("login.title")}
+          {t("login.title")}
         </Typography>
         <form className={classes.form} noValidate onSubmit={handlSubmit}>
           <TextField
@@ -83,7 +153,7 @@ const Login = () => {
             required
             fullWidth
             id="email"
-            label={i18n.t("login.form.email")}
+            label={t("login.form.email")}
             name="email"
             value={user.email}
             onChange={handleChangeInput}
@@ -96,7 +166,7 @@ const Login = () => {
             required
             fullWidth
             name="password"
-            label={i18n.t("login.form.password")}
+            label={t("login.form.password")}
             id="password"
             value={user.password}
             onChange={handleChangeInput}
@@ -122,7 +192,7 @@ const Login = () => {
             color="primary"
             className={classes.submit}
           >
-            {i18n.t("login.buttons.submit")}
+            {t("login.buttons.submit")}
           </Button>
           <Grid container>
             <Grid item>
@@ -132,13 +202,13 @@ const Login = () => {
                 component={RouterLink}
                 to="/signup"
               >
-                {i18n.t("login.buttons.register")}
+                {t("login.buttons.register")}
               </Link>
             </Grid>
           </Grid>
         </form>
       </div>
-      <Box mt={8}><Copyright /></Box>
+      <Box mt={5}><Copyright companyName={companyData.name} companyUrl={companyData.url} /></Box>
     </Container>
   );
 };

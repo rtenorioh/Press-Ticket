@@ -1,26 +1,30 @@
-import React, { useCallback, useContext, useEffect, useRef, useState } from "react";
-
-import Badge from "@material-ui/core/Badge";
-import IconButton from "@material-ui/core/IconButton";
-import List from "@material-ui/core/List";
-import ListItem from "@material-ui/core/ListItem";
-import ListItemText from "@material-ui/core/ListItemText";
-import Popover from "@material-ui/core/Popover";
+import {
+	Badge,
+	IconButton,
+	List,
+	ListItem,
+	ListItemText,
+	Popover,
+	Tooltip
+} from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import ChatIcon from "@material-ui/icons/Chat";
+import HelpOutlineIcon from "@material-ui/icons/HelpOutline";
 import VolumeOffIcon from "@material-ui/icons/VolumeOff";
 import VolumeUpIcon from "@material-ui/icons/VolumeUp";
 import { format } from "date-fns";
+import React, { useCallback, useContext, useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useHistory } from "react-router-dom";
+import { toast } from "react-toastify";
 import useSound from "use-sound";
 import alertSound from "../../assets/sound.mp3";
 import { AuthContext } from "../../context/Auth/AuthContext";
 import useTickets from "../../hooks/useTickets";
 import openSocket from "../../services/socket-io";
-import { i18n } from "../../translate/i18n";
 import TicketListItem from "../TicketListItem";
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
 	tabContainer: {
 		overflowY: "auto",
 		maxHeight: 350,
@@ -35,127 +39,109 @@ const useStyles = makeStyles(theme => ({
 			maxWidth: 270,
 		},
 	},
-	noShadow: {
-		boxShadow: "none !important",
-	},
 }));
 
 const NotificationsPopOver = () => {
 	const classes = useStyles();
-
+	const { t } = useTranslation();
 	const history = useHistory();
 	const { user } = useContext(AuthContext);
 	const ticketIdUrl = +history.location.pathname.split("/")[2];
-	const ticketIdRef = useRef(ticketIdUrl);
 	const anchorEl = useRef();
 	const [isOpen, setIsOpen] = useState(false);
 	const [notifications, setNotifications] = useState([]);
 	const [isAudioEnabled, setIsAudioEnabled] = useState(
 		localStorage.getItem("userAudioEnabled") === "true"
 	);
-	const [, setDesktopNotifications] = useState([]);
+	const [notificationsAllowed, setNotificationsAllowed] = useState(
+		Notification.permission === "granted"
+	);
 
 	const { tickets } = useTickets({ withUnreadMessages: "true" });
 	const [play, { stop }] = useSound(alertSound, { soundEnabled: isAudioEnabled });
-	const soundAlertRef = useRef();
-
-	const historyRef = useRef(history);
+	const soundAlertRef = useRef(play);
 
 	useEffect(() => {
 		soundAlertRef.current = play;
-
-		if (!("Notification" in window)) {
-			console.log("This browser doesn't support notifications");
-		} else {
-			Notification.requestPermission();
-		}
 	}, [play]);
 
 	useEffect(() => {
 		setNotifications(tickets);
 	}, [tickets]);
 
-	useEffect(() => {
-		ticketIdRef.current = ticketIdUrl;
-	}, [ticketIdUrl]);
-
-	const handleNotifications = useCallback((data) => {
-		const { message, contact, ticket } = data;
-
-		const options = {
-			body: `${message.body} - ${format(new Date(), "HH:mm")}`,
-			icon: contact.profilePicUrl,
-			tag: ticket.id,
-			renotify: true,
-		};
-
-		const notification = new Notification(
-			`${i18n.t("tickets.notification.message")} ${contact.name}`,
-			options
-		);
-
-		notification.onclick = e => {
-			e.preventDefault();
-			window.focus();
-			historyRef.current.push(`/tickets/${ticket.id}`);
-		};
-
-		setDesktopNotifications(prevState => {
-			const notfiticationIndex = prevState.findIndex(
-				n => n.tag === notification.tag
-			);
-			if (notfiticationIndex !== -1) {
-				prevState[notfiticationIndex] = notification;
-				return [...prevState];
-			}
-			return [notification, ...prevState];
-		});
-
-		if (isAudioEnabled && soundAlertRef.current) {
-			soundAlertRef.current();
+	const requestNotificationPermission = () => {
+		// Verifica se o navegador suporta notificações
+		if (!("Notification" in window)) {
+			alert(t("notifications.unsupported")); // Notificações não suportadas
+			return;
 		}
-	}, [isAudioEnabled]);
+
+		// Solicita permissão
+		Notification.requestPermission()
+			.then((permission) => {
+				if (permission === "granted") {
+					setNotificationsAllowed(true);
+					toast.success(t("notifications.permissionGranted"));
+				} else if (permission === "denied") {
+					toast.error(t("notifications.permissionDenied"));
+				}
+			})
+			.catch((error) => {
+				console.error("Erro ao solicitar permissão para notificações:", error);
+				toast.error(t("notifications.error"));
+			});
+	};
+
+
+	const handleNotifications = useCallback(
+		(data) => {
+			if (!notificationsAllowed) return;
+
+			const { message, contact, ticket } = data;
+
+			const options = {
+				body: `${message.body} - ${format(new Date(), "HH:mm")}`,
+				icon: contact.profilePicUrl,
+				tag: ticket.id,
+				renotify: true,
+			};
+
+			const notification = new Notification(
+				`${t("tickets.notification.message")} ${contact.name}`,
+				options
+			);
+
+			notification.onclick = (e) => {
+				e.preventDefault();
+				window.focus();
+				history.push(`/tickets/${ticket.id}`);
+			};
+
+			if (isAudioEnabled && soundAlertRef.current) {
+				soundAlertRef.current();
+			}
+		},
+		[isAudioEnabled, history, notificationsAllowed, t]
+	);
+
 
 	useEffect(() => {
 		const socket = openSocket();
 
 		socket.on("connect", () => socket.emit("joinNotification"));
 
-		socket.on("ticket", data => {
-			if (data.action === "updateUnread" || data.action === "delete") {
-				setNotifications(prevState => {
-					const ticketIndex = prevState.findIndex(t => t.id === data.ticketId);
-					if (ticketIndex !== -1) {
-						prevState.splice(ticketIndex, 1);
-						return [...prevState];
-					}
-					return prevState;
-				});
-
-				setDesktopNotifications(prevState => {
-					const notfiticationIndex = prevState.findIndex(
-						n => n.tag === String(data.ticketId)
-					);
-					if (notfiticationIndex !== -1) {
-						prevState[notfiticationIndex].close();
-						prevState.splice(notfiticationIndex, 1);
-						return [...prevState];
-					}
-					return prevState;
-				});
-			}
-		});
-
-		socket.on("appMessage", data => {
-			const UserQueues = user.queues.findIndex((users) => (users.id === data.ticket.queueId));
+		socket.on("appMessage", (data) => {
+			const UserQueues = user.queues.findIndex(
+				(users) => users.id === data.ticket.queueId
+			);
 			if (
-				(data.action === "create" &&
-					!data.message.read &&
-					(data.ticket.userId === user?.id || !data.ticket.userId)
-					&& (UserQueues !== -1 || !data.ticket.queueId))
+				data.action === "create" &&
+				!data.message.read &&
+				(data.ticket.userId === user?.id || !data.ticket.userId) &&
+				(UserQueues !== -1 || !data.ticket.queueId)
 			) {
-				setNotifications(prevState => {
-					const ticketIndex = prevState.findIndex(t => t.id === data.ticket.id);
+				setNotifications((prevState) => {
+					const ticketIndex = prevState.findIndex((t) => t.id === data.ticket.id);
 					if (ticketIndex !== -1) {
 						prevState[ticketIndex] = data.ticket;
 						return [...prevState];
@@ -163,13 +149,13 @@ const NotificationsPopOver = () => {
 					return [data.ticket, ...prevState];
 				});
 
-				const shouldNotNotificate =
-					(data.message.ticketId === ticketIdRef.current &&
+				const shouldNotNotify =
+					(data.message.ticketId === ticketIdUrl &&
 						document.visibilityState === "visible") ||
 					(data.ticket.userId && data.ticket.userId !== user?.id) ||
 					data.ticket.isGroup;
 
-				if (shouldNotNotificate) return;
+				if (shouldNotNotify) return;
 
 				handleNotifications(data);
 			}
@@ -178,7 +164,7 @@ const NotificationsPopOver = () => {
 		return () => {
 			socket.disconnect();
 		};
-	}, [user, handleNotifications]);
+	}, [user, ticketIdUrl, handleNotifications]);
 
 	const toggleAudio = () => {
 		const newAudioStatus = !isAudioEnabled;
@@ -191,22 +177,33 @@ const NotificationsPopOver = () => {
 	};
 
 	const handleClick = () => {
-		setIsOpen(prevState => !prevState);
+		setIsOpen((prevState) => !prevState);
 	};
 
 	const handleClickAway = () => {
 		setIsOpen(false);
 	};
 
-	const NotificationTicket = ({ children }) => {
-		return <div onClick={handleClickAway}>{children}</div>;
-	};
+	const NotificationTicket = ({ children }) => (
+		<div onClick={handleClickAway}>{children}</div>
+	);
 
 	return (
 		<>
 			<IconButton onClick={toggleAudio} aria-label="Toggle Sound" color="inherit">
 				{isAudioEnabled ? <VolumeUpIcon /> : <VolumeOffIcon />}
 			</IconButton>
+			{!notificationsAllowed && (
+				<IconButton
+					onClick={requestNotificationPermission}
+					color="inherit"
+					variant="contained"
+				>
+					<Tooltip title={t("notifications.allow")} arrow>
+						<HelpOutlineIcon />
+					</Tooltip>
+				</IconButton>
+			)}
 			<IconButton
 				onClick={handleClick}
 				ref={anchorEl}
@@ -217,7 +214,8 @@ const NotificationsPopOver = () => {
 					badgeContent={notifications.length}
 					color="secondary"
 					overlap="rectangular"
-					max={9999} >
+					max={9999}
+				>
 					<ChatIcon />
 				</Badge>
 			</IconButton>
@@ -239,10 +237,10 @@ const NotificationsPopOver = () => {
 				<List dense className={classes.tabContainer}>
 					{notifications.length === 0 ? (
 						<ListItem>
-							<ListItemText>{i18n.t("notifications.noTickets")}</ListItemText>
+							<ListItemText>{t("notifications.noTickets")}</ListItemText>
 						</ListItem>
 					) : (
-						notifications.map(ticket => (
+						notifications.map((ticket) => (
 							<NotificationTicket key={ticket.id}>
 								<TicketListItem ticket={ticket} />
 							</NotificationTicket>

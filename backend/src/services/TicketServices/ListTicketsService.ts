@@ -1,10 +1,10 @@
 import { endOfDay, parseISO, startOfDay } from "date-fns";
 import { col, Filterable, fn, Includeable, Op, where } from "sequelize";
-
 import Contact from "../../models/Contact";
 import Message from "../../models/Message";
 import Queue from "../../models/Queue";
 import Ticket from "../../models/Ticket";
+import User from "../../models/User";
 import Whatsapp from "../../models/Whatsapp";
 import ListSettingsServiceOne from "../SettingServices/ListSettingsServiceOne";
 import ShowUserService from "../UserServices/ShowUserService";
@@ -67,7 +67,12 @@ const ListTicketsService = async ({
     {
       model: Whatsapp,
       as: "whatsapp",
-      attributes: ["name", "type", "color"]
+      attributes: ["id", "name", "type", "color"]
+    },
+    {
+      model: User,
+      as: "user",
+      attributes: ["id", "name"]
     }
   ];
 
@@ -144,7 +149,7 @@ const ListTicketsService = async ({
     };
   }
 
-  const limit = 100;
+  const limit = 20;
   const offset = limit * (+pageNumber - 1);
 
   const listSettingsService = await ListSettingsServiceOne({ key: "ASC" });

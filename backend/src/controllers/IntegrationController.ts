@@ -1,10 +1,10 @@
 import { Request, Response } from "express";
 
-import { getIO } from "../libs/socket";
 import AppError from "../errors/AppError";
+import { getIO } from "../libs/socket";
 
-import UpdateIntegrationService from "../services/IntegrationServices/UpdateIntegrationService";
 import ListIntegrationsService from "../services/IntegrationServices/ListIntegrationsService";
+import UpdateIntegrationService from "../services/IntegrationServices/UpdateIntegrationService";
 
 export const index = async (req: Request, res: Response): Promise<Response> => {
   if (req.user.profile === "") {
@@ -20,7 +20,7 @@ export const update = async (
   req: Request,
   res: Response
 ): Promise<Response> => {
-  if (req.user.profile !== "admin") {
+  if (req.user.profile !== "admin" && req.user.profile !== "masteradmin") {
     throw new AppError("ERR_NO_PERMISSION", 403);
   }
   const { integrationKey: key } = req.params;

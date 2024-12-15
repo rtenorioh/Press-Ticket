@@ -1,5 +1,3 @@
-import React, { useContext, useEffect, useState } from "react";
-
 import {
   Badge,
   Button,
@@ -10,22 +8,20 @@ import {
   Tab,
   Tabs
 } from "@material-ui/core";
-
 import {
   AllInboxRounded,
   HourglassEmptyRounded,
   MoveToInbox,
   Search
 } from "@material-ui/icons";
-
+import React, { useContext, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { AuthContext } from "../../context/Auth/AuthContext";
 import { Can } from "../Can";
 import NewTicketModal from "../NewTicketModal";
 import TabPanel from "../TabPanel";
 import TicketsList from "../TicketsList";
 import TicketsQueueSelect from "../TicketsQueueSelect";
-
-import { AuthContext } from "../../context/Auth/AuthContext";
-import { i18n } from "../../translate/i18n";
 
 const useStyles = makeStyles((theme) => ({
   ticketsWrapper: {
@@ -37,23 +33,19 @@ const useStyles = makeStyles((theme) => ({
     borderTopRightRadius: 0,
     borderBottomRightRadius: 0,
   },
-
   tabsHeader: {
     flex: "none",
     backgroundColor: theme.palette.background.default,
   },
-
   settingsIcon: {
     alignSelf: "center",
     marginLeft: "auto",
     padding: 8,
   },
-
   tab: {
     minWidth: 120,
     width: 120,
   },
-
   ticketOptionsBox: {
     display: "flex",
     justifyContent: "space-between",
@@ -61,7 +53,6 @@ const useStyles = makeStyles((theme) => ({
     backgroundColor: theme.palette.background.paper,
     padding: theme.spacing(1),
   },
-
   serachInputWrapper: {
     flex: 1,
     backgroundColor: theme.palette.background.default,
@@ -70,14 +61,12 @@ const useStyles = makeStyles((theme) => ({
     padding: 4,
     marginRight: theme.spacing(1),
   },
-
   searchIcon: {
     color: theme.palette.primary.main,
     marginLeft: 6,
     marginRight: 6,
     alignSelf: "center",
   },
-
   searchInput: {
     flex: 1,
     border: "none",
@@ -85,7 +74,6 @@ const useStyles = makeStyles((theme) => ({
     padding: "10px",
     outline: "none",
   },
-
   badge: {
     right: 0,
   },
@@ -104,17 +92,15 @@ const useStyles = makeStyles((theme) => ({
 
 const TicketsManager = () => {
   const classes = useStyles();
-
+  const { t } = useTranslation();
   const [searchParam, setSearchParam] = useState("");
   const [tab, setTab] = useState("open");
   const [tabOpen] = useState("open");
   const [newTicketModalOpen, setNewTicketModalOpen] = useState(false);
   const [showAllTickets, setShowAllTickets] = useState(false);
   const { user } = useContext(AuthContext);
-
   const [openCount, setOpenCount] = useState(0);
   const [pendingCount, setPendingCount] = useState(0);
-
   const userQueueIds = user.queues.map((q) => q.id);
   const [selectedQueueIds, setSelectedQueueIds] = useState(userQueueIds || []);
 
@@ -158,7 +144,7 @@ const TicketsManager = () => {
         <Search className={classes.searchIcon} />
         <input
           type="text"
-          placeholder={i18n.t("tickets.search.placeholder")}
+          placeholder={t("tickets.search.placeholder")}
           className={classes.searchInput}
           value={searchParam}
           onChange={handleSearch}
@@ -184,7 +170,7 @@ const TicketsManager = () => {
                 max={9999}
                 color="secondary"
               >
-                {i18n.t("tickets.tabs.open.title")}
+                {t("tickets.tabs.open.title")}
               </Badge>
             }
             classes={{ root: classes.tab }}
@@ -200,7 +186,7 @@ const TicketsManager = () => {
                 max={9999}
                 color="secondary"
               >
-                {i18n.t("ticketsList.pendingHeader")}
+                {t("ticketsList.pendingHeader")}
               </Badge>
             }
             classes={{ root: classes.tab }}
@@ -208,7 +194,7 @@ const TicketsManager = () => {
           <Tab
             value={"closed"}
             icon={<AllInboxRounded />}
-            label={i18n.t("tickets.tabs.closed.title")}
+            label={t("tickets.tabs.closed.title")}
             classes={{ root: classes.tab }}
           />
         </Tabs>
@@ -219,14 +205,14 @@ const TicketsManager = () => {
           color="primary"
           onClick={() => setNewTicketModalOpen(true)}
         >
-          {i18n.t("ticketsManager.buttons.newTicket")}
+          {t("ticketsManager.buttons.newTicket")}
         </Button>
         <Can
           role={user.profile}
           perform="tickets-manager:showall"
           yes={() => (
             <FormControlLabel
-              label={i18n.t("tickets.buttons.showAll")}
+              label={t("tickets.buttons.showAll")}
               labelPlacement="start"
               control={
                 <Switch

@@ -2,17 +2,18 @@ import { QueryInterface } from "sequelize";
 
 export default {
   up: async (queryInterface: QueryInterface) => {
-    const [results]: any = await queryInterface.sequelize.query(`
-      SELECT CONSTRAINT_NAME
-      FROM information_schema.KEY_COLUMN_USAGE
-      WHERE TABLE_NAME = 'Tickets' AND COLUMN_NAME = 'queueId';
-    `);
+    const [results]: any = await queryInterface.sequelize.query(
+      "SHOW CREATE TABLE Tickets;"
+    );
+    const createTableSql = results[0]["Create Table"];
 
-    if (results.length > 0) {
-      const constraintName = results[0].CONSTRAINT_NAME;
-      if (constraintName) {
-        await queryInterface.removeConstraint("Tickets", constraintName);
-      }
+    if (
+      createTableSql.includes("CONSTRAINT `Tickets_queueId_custom_foreign`")
+    ) {
+      await queryInterface.removeConstraint(
+        "Tickets",
+        "Tickets_queueId_custom_foreign"
+      );
     }
 
     await queryInterface.addConstraint("Tickets", ["queueId"], {
@@ -28,10 +29,19 @@ export default {
   },
 
   down: async (queryInterface: QueryInterface) => {
-    await queryInterface.removeConstraint(
-      "Tickets",
-      "Tickets_queueId_custom_foreign"
+    const [results]: any = await queryInterface.sequelize.query(
+      "SHOW CREATE TABLE Tickets;"
     );
+    const createTableSql = results[0]["Create Table"];
+
+    if (
+      createTableSql.includes("CONSTRAINT `Tickets_queueId_custom_foreign`")
+    ) {
+      await queryInterface.removeConstraint(
+        "Tickets",
+        "Tickets_queueId_custom_foreign"
+      );
+    }
 
     await queryInterface.addConstraint("Tickets", ["queueId"], {
       type: "foreign key",

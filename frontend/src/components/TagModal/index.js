@@ -1,13 +1,3 @@
-import React, { useContext, useEffect, useState } from "react";
-
-import {
-    Field,
-    Form,
-    Formik
-} from "formik";
-import { toast } from "react-toastify";
-import * as Yup from "yup";
-
 import {
     Button,
     CircularProgress,
@@ -20,13 +10,18 @@ import {
     makeStyles,
     TextField
 } from "@material-ui/core";
-
 import { green } from "@material-ui/core/colors";
 import { Colorize } from "@material-ui/icons";
+import {
+    Field,
+    Form,
+    Formik
+} from "formik";
 import { ColorBox } from 'material-ui-color';
-
-import { i18n } from "../../translate/i18n";
-
+import React, { useContext, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { toast } from "react-toastify";
+import * as Yup from "yup";
 import { AuthContext } from "../../context/Auth/AuthContext";
 import toastError from "../../errors/toastError";
 import api from "../../services/api";
@@ -71,6 +66,7 @@ const TagSchema = Yup.object().shape({
 
 const TagModal = ({ open, onClose, tagId, reload }) => {
     const classes = useStyles();
+    const { t } = useTranslation();
     const { user } = useContext(AuthContext);
     const [colorPickerModalOpen, setColorPickerModalOpen] = useState(false);
     const initialState = {
@@ -108,7 +104,7 @@ const TagModal = ({ open, onClose, tagId, reload }) => {
             } else {
                 await api.post("/tags", tagData);
             }
-            toast.success(i18n.t("tagModal.success"));
+            toast.success(t("tagModal.success"));
             if (typeof reload == 'function') {
                 reload();
             }
@@ -128,7 +124,7 @@ const TagModal = ({ open, onClose, tagId, reload }) => {
                 scroll="paper"
             >
                 <DialogTitle id="form-dialog-title">
-                    {(tagId ? `${i18n.t("tagModal.title.edit")}` : `${i18n.t("tagModal.title.add")}`)}
+                    {(tagId ? `${t("tagModal.title.edit")}` : `${t("tagModal.title.add")}`)}
                 </DialogTitle>
                 <Formik
                     initialValues={tag}
@@ -147,7 +143,7 @@ const TagModal = ({ open, onClose, tagId, reload }) => {
                                 <div className={classes.multFieldLine}>
                                     <Field
                                         as={TextField}
-                                        label={i18n.t("tagModal.form.name")}
+                                        label={t("tagModal.form.name")}
                                         name="name"
                                         error={touched.name && Boolean(errors.name)}
                                         helperText={touched.name && errors.name}
@@ -162,7 +158,7 @@ const TagModal = ({ open, onClose, tagId, reload }) => {
                                     <Field
                                         as={TextField}
                                         fullWidth
-                                        label={i18n.t("tagModal.form.color")}
+                                        label={t("tagModal.form.color")}
                                         name="color"
                                         id="color"
                                         error={touched.color && Boolean(errors.color)}
@@ -211,7 +207,7 @@ const TagModal = ({ open, onClose, tagId, reload }) => {
                                     disabled={isSubmitting}
                                     variant="outlined"
                                 >
-                                    {i18n.t("tagModal.buttons.cancel")}
+                                    {t("tagModal.buttons.cancel")}
                                 </Button>
                                 <Button
                                     type="submit"
@@ -221,8 +217,8 @@ const TagModal = ({ open, onClose, tagId, reload }) => {
                                     className={classes.btnWrapper}
                                 >
                                     {tagId
-                                        ? `${i18n.t("tagModal.buttons.okEdit")}`
-                                        : `${i18n.t("tagModal.buttons.okAdd")}`}
+                                        ? `${t("tagModal.buttons.okEdit")}`
+                                        : `${t("tagModal.buttons.okAdd")}`}
                                     {isSubmitting && (
                                         <CircularProgress
                                             size={24}

@@ -8,6 +8,7 @@ import hubMessageRoutes from "./hubMessageRoutes";
 import hubWebhookRoutes from "./hubWebhookRoutes";
 import integrationRoutes from "./integrationRoutes";
 import messageRoutes from "./messageRoutes";
+import personalizationRoutes from "./personalizationRoutes";
 import queueRoutes from "./queueRoutes";
 import quickAnswerRoutes from "./quickAnswerRoutes";
 import settingRoutes from "./settingRoutes";
@@ -37,5 +38,6 @@ routes.use(hubChannelRoutes);
 routes.use(hubMessageRoutes);
 routes.use(hubWebhookRoutes);
 routes.use(systemRoutes);
+routes.use(personalizationRoutes);
 
 export default routes;

@@ -307,14 +307,14 @@ npm install
 #URL BACKEND
 REACT_APP_BACKEND_URL=https://back.pressticket.com.br
 
-#Tempo de encerramento automático dos tickets
+#Tempo de encerramento automático dos tickets em horas
 REACT_APP_HOURS_CLOSE_TICKETS_AUTO=
-
-#Nome da Guia do navegador
-REACT_APP_PAGE_TITLE=PressTicket
 
 #PORTA do frontend
 PORT=3333
+
+#Para permitir acesso apenas do MasterAdmin (sempre ON)
+REACT_APP_MASTERADMIN=OFF
 ```
 
 ### 8.4 Editando o arquivo .env do frontend usando os dados do item 8.3
@@ -323,31 +323,25 @@ PORT=3333
 nano .env
 ```
 
-### 8.5 Criando o arquivo config.json baseado no exemplo
-
-```
-cp src/config.json.example src/config.json
-```
-
-### 8.6 Compilando o frontend
+### 8.5 Compilando o frontend
 
 ```
 npm run build
 ```
 
-### 8.7 Iniciando o frontend com PM2
+### 8.6 Iniciando o frontend com PM2
 
 ```
 pm2 start server.js --name Press-Ticket-frontend
 ```
 
-### 8.8 Salvando os serviços iniciados pelo PM2
+### 8.7 Salvando os serviços iniciados pelo PM2
 
 ```
 pm2 save
 ```
 
-### 8.9 Listar os serviços iniciados pelo PM2
+### 8.8 Listar os serviços iniciados pelo PM2
 
 ```
 pm2 list
@@ -367,7 +361,7 @@ sudo apt install nginx
 sudo nano /etc/nginx/sites-available/Press-Ticket-frontend
 ```
 
-Preencha com as informações abaixo:
+Preencha com as informações abaixo, atualizando as informações de acordo com o seu domínio:
 
 ```
 server {
@@ -392,7 +386,7 @@ server {
 sudo nano /etc/nginx/sites-available/Press-Ticket-backend
 ```
 
-Preencha com as informações abaixo:
+Preencha com as informações abaixo atualizando as informações de acordo com o seu domínio:
 
 ```
 server {
@@ -470,7 +464,7 @@ sudo nano /etc/nginx/nginx.conf
 ### 9.12 Incluir no arquivos de configuração do nginx dentro do http no item 9.11
 
 ```
-client_max_body_size 20M;
+client_max_body_size 50M;
 ```
 
 ### 9.13 Testando o Nginx
@@ -527,4 +521,18 @@ Senha:
 
 ```
 admin
+```
+
+# Seção 12: Usuário Master para Acesso
+
+Usuário:
+
+```
+masteradmin@pressticket.com.br
+```
+
+Senha:
+
+```
+masteradmin
 ```

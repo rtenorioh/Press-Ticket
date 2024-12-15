@@ -1,14 +1,14 @@
-import React, { useEffect, useState } from "react";
-import QRCode from "qrcode.react";
-import openSocket from "../../services/socket-io";
-import toastError from "../../errors/toastError";
-
 import { Dialog, DialogContent, Paper, Typography } from "@material-ui/core";
-import { i18n } from "../../translate/i18n";
+import QRCode from "qrcode.react";
+import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import toastError from "../../errors/toastError";
 import api from "../../services/api";
+import openSocket from "../../services/socket-io";
 
 const QrcodeModal = ({ open, onClose, whatsAppId }) => {
 	const [qrCode, setQrCode] = useState("");
+	const { t } = useTranslation();
 
 	useEffect(() => {
 		const fetchSession = async () => {
@@ -45,10 +45,10 @@ const QrcodeModal = ({ open, onClose, whatsAppId }) => {
 
 	return (
 		<Dialog open={open} onClose={onClose} maxWidth="lg" scroll="paper">
-			<DialogContent style={{background: '#ffffff'}}>
-				<Paper elevation={0} style={{background: '#ffffff'}}>
+			<DialogContent style={{ background: '#ffffff' }}>
+				<Paper elevation={0} style={{ background: '#ffffff' }}>
 					<Typography color="primary" gutterBottom>
-						{i18n.t("qrCode.message")}
+						{t("qrCode.message")}
 					</Typography>
 					{qrCode ? (
 						<QRCode value={qrCode} size={256} />

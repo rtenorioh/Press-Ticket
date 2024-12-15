@@ -18,7 +18,7 @@
 Execute o seguinte comando no seu terminal para criar o banco de dados:
 
 ```bash
-CREATE DATABASE press-ticket CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+CREATE DATABASE press_ticket CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
 ```
 
 #### 1.2. Se estiver usando XAMPP ou WAMPP, poderá criar o banco de dados via phpMyAdmin:
@@ -59,25 +59,35 @@ Crie ou edite o arquivo `.env` no diretório `backend` com as seguintes informa�
 
 ```bash
 NODE_ENV=
-WEBHOOK=https://true-melons-travel.loca.lt
+
+#URLs e Portas
+WEBHOOK=https://ninety-yaks-trade.loca.lt
 BACKEND_URL=http://localhost
 FRONTEND_URL=http://localhost:3333
 PORT=8080
 PROXY_PORT=8080
+
+#Caminho do Chrome
 CHROME_BIN=C:\Program Files\Google\Chrome\Application\chrome.exe
 
+#Dados de acesso ao Banco de dados
 DB_DIALECT=mysql
 DB_HOST=localhost
 DB_TIMEZONE=-03:00
 DB_USER=root
 DB_PASS=
-DB_NAME=press-ticket
+DB_NAME=press_ticket
 
+#Limitar Usuários e Conexões
 USER_LIMIT=3
-CONNECTIONS_LIMIT=1
+CONNECTIONS_LIMIT=5
 
-JWT_SECRET=5g1yk7pD9q3YL0iBEuUlPwOiWLj3I5tK+/rhHm+jgdE=
-JWT_REFRESH_SECRET=F2c8gag5nvqQkBOmOu5dWkK+gqZnjPUzHmx7S2tWkvs=
+#Modo DEMO que evita alterar algumas funções, para ativar: ON
+DEMO=OFF
+
+#Permitir a rotação de tokens
+JWT_SECRET=JYszCWFNE0kmbbb0w/dvMl66zDd1GZozzaC27dKOCDY=
+JWT_REFRESH_SECRET=FwJXkGgXv7ARfxPRb7/6RdNmtXJlR4PsQvvw8VIbOho=
 ```
 
 ---
@@ -153,10 +163,18 @@ cd Press-Ticket/frontend
 Crie ou edite o arquivo `.env` no diretório `frontend` com as seguintes informações:
 
 ```bash
+#URL BACKEND
 REACT_APP_BACKEND_URL=http://localhost:8080
+
+#Tempo de encerramento automático dos tickets em horas
 REACT_APP_HOURS_CLOSE_TICKETS_AUTO=
-REACT_APP_PAGE_TITLE=PressTicket
+
+#PORTA do frontend
 PORT=3333
+
+# Para permitir acesso apenas do MasterAdmin (sempre ON)
+REACT_APP_MASTERADMIN=ON
+
 ```
 
 ---
@@ -204,3 +222,17 @@ admin
 ```
 
 ---
+
+# Usuário Master para Acesso
+
+Usuário:
+
+```
+masteradmin@pressticket.com.br
+```
+
+Senha:
+
+```
+masteradmin
+```

@@ -1,13 +1,9 @@
-import React, { useEffect, useState } from "react";
+import { Chip, FormControl, InputLabel, MenuItem, Select } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import InputLabel from "@material-ui/core/InputLabel";
-import MenuItem from "@material-ui/core/MenuItem";
-import FormControl from "@material-ui/core/FormControl";
-import Select from "@material-ui/core/Select";
-import Chip from "@material-ui/core/Chip";
+import React, { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import toastError from "../../errors/toastError";
 import api from "../../services/api";
-import { i18n } from "../../translate/i18n";
 
 const useStyles = makeStyles(theme => ({
 	chips: {
@@ -22,12 +18,17 @@ const useStyles = makeStyles(theme => ({
 const QueueSelect = ({ selectedQueueIds, onChange }) => {
 	const classes = useStyles();
 	const [queues, setQueues] = useState([]);
+	const { t } = useTranslation();
+	const loaded = useRef(false);
 
 	useEffect(() => {
+		if (loaded.current) return;
+
 		(async () => {
 			try {
 				const { data } = await api.get("/queue");
 				setQueues(data);
+				loaded.current = true;
 			} catch (err) {
 				toastError(err);
 			}
@@ -41,12 +42,15 @@ const QueueSelect = ({ selectedQueueIds, onChange }) => {
 	return (
 		<div style={{ marginTop: 6 }}>
 			<FormControl fullWidth margin="dense" variant="outlined">
-				<InputLabel>{i18n.t("queueSelect.inputLabel")}</InputLabel>
+				<InputLabel>{t("queueSelect.inputLabel")}</InputLabel>
 				<Select
 					multiple
 					labelWidth={60}
 					value={selectedQueueIds}
 					onChange={handleChange}
+					inputProps={{
+						'aria-label': t("queueSelect.inputLabel"),
+					}}
 					MenuProps={{
 						anchorOrigin: {
 							vertical: "bottom",
@@ -66,7 +70,7 @@ const QueueSelect = ({ selectedQueueIds, onChange }) => {
 									return queue ? (
 										<Chip
 											key={id}
-											style={{ backgroundColor: queue.color }}
+											style={{ backgroundColor: queue.color || "#f0f0f0" }}
 											variant="outlined"
 											label={queue.name}
 											className={classes.chip}

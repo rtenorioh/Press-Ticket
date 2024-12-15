@@ -24,19 +24,17 @@ import {
   parseISO
 } from "date-fns";
 import React, { useEffect, useReducer, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { toast } from "react-toastify";
+import toastError from "../../errors/toastError";
+import api from "../../services/api";
 import openSocket from "../../services/socket-io";
-
 import Audio from "../Audio";
 import LocationPreview from "../LocationPreview";
 import MarkdownWrapper from "../MarkdownWrapper";
 import MessageOptionsMenu from "../MessageOptionsMenu";
 import ModalImageCors from "../ModalImageCors";
 import VcardPreview from "../VcardPreview";
-
-import { toast } from "react-toastify";
-import toastError from "../../errors/toastError";
-import api from "../../services/api";
-import { i18n } from "../../translate/i18n";
 
 const useStyles = makeStyles((theme) => ({
   messagesListWrapper: {
@@ -46,12 +44,10 @@ const useStyles = makeStyles((theme) => ({
     flexDirection: "column",
     flexGrow: 1,
   },
-
   ticketNumber: {
     color: theme.palette.secondary.main,
     padding: 8,
   },
-
   messagesList: {
     backgroundImage: theme.backgroundImage,
     display: "flex",
@@ -64,7 +60,6 @@ const useStyles = makeStyles((theme) => ({
     },
     ...theme.scrollbarStyles,
   },
-
   circleLoading: {
     color: blue[500],
     position: "absolute",
@@ -73,7 +68,6 @@ const useStyles = makeStyles((theme) => ({
     left: "50%",
     marginTop: 12,
   },
-
   messageLeft: {
     marginRight: 20,
     marginTop: 2,
@@ -88,7 +82,6 @@ const useStyles = makeStyles((theme) => ({
       top: 0,
       right: 0,
     },
-
     whiteSpace: "pre-wrap",
     backgroundColor: "#ffffff",
     color: "#303030",
@@ -103,7 +96,6 @@ const useStyles = makeStyles((theme) => ({
     paddingBottom: 0,
     boxShadow: "0 1px 1px #b3b3b3",
   },
-
   quotedContainerLeft: {
     margin: "-3px -80px 6px -6px",
     overflow: "hidden",
@@ -112,7 +104,6 @@ const useStyles = makeStyles((theme) => ({
     display: "flex",
     position: "relative",
   },
-
   quotedMsg: {
     padding: 10,
     maxWidth: 300,
@@ -121,13 +112,11 @@ const useStyles = makeStyles((theme) => ({
     whiteSpace: "pre-wrap",
     overflow: "hidden",
   },
-
   quotedSideColorLeft: {
     flex: "none",
     width: "4px",
     backgroundColor: "#6bcbef",
   },
-
   messageRight: {
     marginLeft: 20,
     marginTop: 2,
@@ -142,7 +131,6 @@ const useStyles = makeStyles((theme) => ({
       top: 0,
       right: 0,
     },
-
     whiteSpace: "pre-wrap",
     backgroundColor: "#dcf8c6",
     color: "#303030",
@@ -157,7 +145,6 @@ const useStyles = makeStyles((theme) => ({
     paddingBottom: 0,
     boxShadow: "0 1px 1px #b3b3b3",
   },
-
   quotedContainerRight: {
     margin: "-3px -80px 6px -6px",
     overflowY: "hidden",
@@ -166,20 +153,17 @@ const useStyles = makeStyles((theme) => ({
     display: "flex",
     position: "relative",
   },
-
   quotedMsgRight: {
     padding: 10,
     maxWidth: 300,
     height: "auto",
     whiteSpace: "pre-wrap",
   },
-
   quotedSideColorRight: {
     flex: "none",
     width: "4px",
     backgroundColor: "#35cd96",
   },
-
   messageActionsButton: {
     display: "none",
     position: "relative",
@@ -189,30 +173,25 @@ const useStyles = makeStyles((theme) => ({
     opacity: "90%",
     "&:hover, &.Mui-focusVisible": { backgroundColor: "inherit" },
   },
-
   messageContactName: {
     display: "flex",
     color: "#6bcbef",
     fontWeight: 500,
   },
-
   textContentItem: {
     overflowWrap: "break-word",
     padding: "3px 80px 6px 6px",
   },
-
   textContentItemDeleted: {
     fontStyle: "italic",
     color: "rgba(0, 0, 0, 0.36)",
     overflowWrap: "break-word",
     padding: "3px 80px 6px 6px",
   },
-
   textContentItemEdited: {
     overflowWrap: "break-word",
     padding: "3px 120px 6px 6px",
   },
-
   messageMedia: {
     objectFit: "cover",
     width: 250,
@@ -222,7 +201,6 @@ const useStyles = makeStyles((theme) => ({
     borderBottomLeftRadius: 8,
     borderBottomRightRadius: 8,
   },
-
   timestamp: {
     fontSize: 11,
     position: "absolute",
@@ -230,7 +208,6 @@ const useStyles = makeStyles((theme) => ({
     right: 5,
     color: "#999",
   },
-
   dailyTimestamp: {
     alignItems: "center",
     textAlign: "center",
@@ -241,38 +218,32 @@ const useStyles = makeStyles((theme) => ({
     borderRadius: "10px",
     boxShadow: "0 1px 1px #b3b3b3",
   },
-
   dailyTimestampText: {
     color: "#808888",
     padding: 8,
     alignSelf: "center",
     marginLeft: "0px",
   },
-
   ackIcons: {
     fontSize: 18,
     verticalAlign: "middle",
     marginLeft: 4,
   },
-
   deletedIcon: {
     fontSize: 18,
     verticalAlign: "middle",
     marginRight: 4,
     color: red[200]
   },
-
   deletedMsg: {
     color: red[200]
   },
-
   ackDoneAllIcon: {
     color: blue[500],
     fontSize: 18,
     verticalAlign: "middle",
     marginLeft: 4,
   },
-
   downloadMedia: {
     display: "flex",
     alignItems: "center",
@@ -280,7 +251,6 @@ const useStyles = makeStyles((theme) => ({
     backgroundColor: "inherit",
     padding: 10,
   },
-
   messageCenter: {
     marginTop: 5,
     alignItems: "center",
@@ -369,7 +339,7 @@ const MessagesList = ({ ticketId, isGroup }) => {
   const [hasMore, setHasMore] = useState(false);
   const [loading, setLoading] = useState(false);
   const lastMessageRef = useRef();
-
+  const { t } = useTranslation();
   const [selectedMessage, setSelectedMessage] = useState({});
   const [anchorEl, setAnchorEl] = useState(null);
   const messageOptionsMenuOpen = Boolean(anchorEl);
@@ -774,9 +744,12 @@ const MessagesList = ({ ticketId, isGroup }) => {
                   })}
                 >
                   {message.quotedMsg && renderQuotedMessage(message)}
-                  <MarkdownWrapper>{message.body}</MarkdownWrapper>
+                  {(message.mediaType === "image"
+                    ? ''
+                    : <MarkdownWrapper>{message.body}</MarkdownWrapper>
+                  )}
                   <span className={classes.timestamp}>
-                    {message.isEdited && <span>{i18n.t("message.edited")} </span>}
+                    {message.isEdited && <span>{t("message.edited")} </span>}
                     {format(parseISO(message.createdAt), "HH:mm")}
                   </span>
                 </div>
@@ -823,9 +796,12 @@ const MessagesList = ({ ticketId, isGroup }) => {
                     </div>
                   )}
                   {message.quotedMsg && renderQuotedMessage(message)}
-                  <MarkdownWrapper>{message.body}</MarkdownWrapper>
+                  {(message.mediaType === "image"
+                    ? ''
+                    : <MarkdownWrapper>{message.body}</MarkdownWrapper>
+                  )}
                   <span className={classes.timestamp}>
-                    {message.isEdited && <span>{i18n.t("message.edited")} </span>}
+                    {message.isEdited && <span>{t("message.edited")} </span>}
                     {format(parseISO(message.createdAt), "HH:mm")}
                     {renderMessageAck(message)}
                   </span>

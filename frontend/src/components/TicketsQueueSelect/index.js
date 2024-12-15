@@ -1,16 +1,17 @@
-import React from "react";
-
-import MenuItem from "@material-ui/core/MenuItem";
-import FormControl from "@material-ui/core/FormControl";
-import Select from "@material-ui/core/Select";
 import { Checkbox, ListItemText } from "@material-ui/core";
-import { i18n } from "../../translate/i18n";
+import FormControl from "@material-ui/core/FormControl";
+import MenuItem from "@material-ui/core/MenuItem";
+import Select from "@material-ui/core/Select";
+import React from "react";
+import { useTranslation } from "react-i18next";
 
 const TicketsQueueSelect = ({
 	userQueues,
 	selectedQueueIds = [],
 	onChange,
 }) => {
+	const { t } = useTranslation();
+
 	const handleChange = e => {
 		onChange(e.target.value);
 	};
@@ -35,7 +36,7 @@ const TicketsQueueSelect = ({
 						},
 						getContentAnchorEl: null,
 					}}
-					renderValue={() => i18n.t("ticketsQueueSelect.placeholder")}
+					renderValue={() => t("ticketsQueueSelect.placeholder")}
 				>
 					{userQueues?.length > 0 &&
 						userQueues.map(queue => (

@@ -9,9 +9,9 @@ import AssignmentIcon from "@material-ui/icons/Assignment";
 import CheckCircleIcon from "@material-ui/icons/CheckCircle";
 import HourglassEmptyIcon from "@material-ui/icons/HourglassEmpty";
 import React, { useContext, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { AuthContext } from "../../context/Auth/AuthContext";
 import useTickets from "../../hooks/useTickets";
-import { i18n } from "../../translate/i18n";
 import Chart from "./Chart";
 import ChartPerConnection from "./ChartPerConnection";
 import ChartPerUser from "./ChartPerUser";
@@ -78,6 +78,7 @@ const useStyles = makeStyles(theme => ({
 
 const Dashboard = () => {
 	const classes = useStyles();
+	const { t } = useTranslation();
 	const { user } = useContext(AuthContext);
 	const userQueueIds = user.queues.map(q => q.id) || [];
 	const [previousCounts, setPreviousCounts] = useState({
@@ -147,7 +148,7 @@ const Dashboard = () => {
 							</Typography>
 						</div>
 						<Typography component="h3" className={classes.cardTitle}>
-							{i18n.t("dashboard.messages.inAttendance.title")}
+							{t("dashboard.messages.inAttendance.title")}
 						</Typography>
 					</Paper>
 				</Grid>
@@ -162,7 +163,7 @@ const Dashboard = () => {
 							</Typography>
 						</div>
 						<Typography component="h3" className={classes.cardTitle}>
-							{i18n.t("dashboard.messages.waiting.title")}
+							{t("dashboard.messages.waiting.title")}
 						</Typography>
 					</Paper>
 				</Grid>
@@ -177,7 +178,7 @@ const Dashboard = () => {
 							</Typography>
 						</div>
 						<Typography component="h3" className={classes.cardTitle}>
-							{i18n.t("dashboard.messages.closed.title")}
+							{t("dashboard.messages.closed.title")}
 						</Typography>
 					</Paper>
 				</Grid>

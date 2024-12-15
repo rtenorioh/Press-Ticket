@@ -1,6 +1,3 @@
-import clsx from "clsx";
-import React, { useContext, useEffect, useState } from "react";
-
 import {
   AppBar,
   Divider,
@@ -15,24 +12,28 @@ import {
   Tooltip,
   Typography
 } from "@material-ui/core";
-
+import { CheckCircle, Info } from "@material-ui/icons";
 import AccountCircle from "@material-ui/icons/AccountCircle";
 import ChevronLeftIcon from "@material-ui/icons/ChevronLeft";
 import MenuIcon from "@material-ui/icons/Menu";
-
+import clsx from "clsx";
+import React, { useContext, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { useLocation } from "react-router-dom";
+import { systemVersion } from "../../package.json";
+import defaultLogo from '../assets/logo.jpg';
 import BackdropLoading from "../components/BackdropLoading";
+import LanguageSelector from "../components/LanguageSelector";
 import NotificationsPopOver from "../components/NotificationsPopOver";
+import ThemeSelector from '../components/ThemeSelector';
 import UserModal from "../components/UserModal";
 import { AuthContext } from "../context/Auth/AuthContext";
-import { i18n } from "../translate/i18n";
-import MainListItems from "./MainListItems";
-
-import { CheckCircle, Info } from "@material-ui/icons";
-import { systemVersion } from "../../package.json";
-import logodash from "../assets/logo-dash.png";
-import { system } from "../config.json";
 import toastError from "../errors/toastError";
 import api from "../services/api";
+import openSocket from "../services/socket-io";
+import MainListItems from "./MainListItems";
+
+const PUBLIC_ASSET_PATH = '/assets/';
 
 const drawerWidth = 240;
 
@@ -47,7 +48,7 @@ const useStyles = makeStyles((theme) => ({
   toolbar: {
     paddingRight: 24,
     color: "#ffffff",
-    background: theme.palette.toolbar.main
+    background: theme.palette?.toolbar?.main || "#6B62FE",
   },
   toolbarIcon: {
     display: "flex",
@@ -55,7 +56,7 @@ const useStyles = makeStyles((theme) => ({
     justifyContent: "flex-end",
     padding: "0 8px",
     minHeight: "48px",
-    backgroundColor: theme.palette.toolbarIcon.main
+    backgroundColor: theme.palette?.toolbarIcon?.main || "#ffffff",
   },
   appBar: {
     zIndex: theme.zIndex.drawer + 1,
@@ -121,12 +122,14 @@ const useStyles = makeStyles((theme) => ({
   systemCss: {
     display: "flex",
     justifyContent: "center",
-    fontSize: 12
-  }
+    fontSize: 12,
+  },
 }));
 
-const LoggedInLayout = ({ children }) => {
+const LoggedInLayout = ({ children, toggleTheme, onThemeConfigUpdate }) => {
   const classes = useStyles();
+  const { t } = useTranslation();
+  const location = useLocation();
   const [userModalOpen, setUserModalOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -135,6 +138,83 @@ const LoggedInLayout = ({ children }) => {
   const [drawerVariant, setDrawerVariant] = useState("permanent");
   const { user } = useContext(AuthContext);
   const [latestVersion, setLatestVersion] = useState("");
+  const themeStorage = localStorage.getItem("theme");
+  const [companyData, setCompanyData] = useState({
+    logo: defaultLogo,
+    name: "Press Ticket"
+  });
+
+  useEffect(() => {
+    const fetchCompanyData = async () => {
+      try {
+        const { data } = await api.get("/personalizations");
+
+        if (data && data.length > 0) {
+
+          const lightConfig = data.find(themeConfig => themeConfig.theme === "light");
+
+          if (lightConfig) {
+            setCompanyData(prevData => ({
+              ...prevData,
+              name: lightConfig.company || "Press Ticket"
+            }));
+          }
+        }
+      } catch (err) {
+        toastError(err);
+      }
+    };
+
+    const socket = openSocket();
+    socket.on("personalization", data => {
+      if (data.action === "update") {
+        fetchCompanyData();
+      }
+    });
+
+    fetchCompanyData();
+
+    return () => {
+      socket.disconnect();
+    };
+  }, []);
+
+  useEffect(() => {
+    const fetchLogo = async () => {
+      try {
+        const { data } = await api.get("/personalizations");
+
+        if (data && data.length > 0) {
+          const lightConfig = data.find(themeConfig => themeConfig.theme === "light");
+          const darkConfig = data.find(themeConfig => themeConfig.theme === "dark");
+
+          if (themeStorage === "light" && lightConfig && lightConfig.logo) {
+            setCompanyData(prevData => ({
+              ...prevData,
+              logo: PUBLIC_ASSET_PATH + lightConfig.logo
+            }));
+            onThemeConfigUpdate("light", { logo: PUBLIC_ASSET_PATH + lightConfig.logo });
+          } else if (themeStorage === "dark" && darkConfig && darkConfig.logo) {
+            setCompanyData(prevData => ({
+              ...prevData,
+              logo: PUBLIC_ASSET_PATH + darkConfig.logo
+            }));
+            onThemeConfigUpdate("dark", { logo: PUBLIC_ASSET_PATH + darkConfig.logo });
+          } else {
+            setCompanyData(prevData => ({
+              ...prevData,
+              logo: defaultLogo
+            }));
+          }
+        }
+
+      } catch (err) {
+        toastError(err);
+      }
+    };
+
+    fetchLogo();
+  }, [themeStorage, onThemeConfigUpdate]);
 
   useEffect(() => {
     const compareVersions = async () => {
@@ -174,8 +254,12 @@ const LoggedInLayout = ({ children }) => {
           setDrawerOpen(settingIndex[0].value === "disabled" ? false : true);
 
         } catch (err) {
-          setDrawerOpen(true);
-          toastError(err);
+          if (err.response && err.response.status === 403) {
+            toastError("Acesso negado. Você não tem permissão para acessar esta configuração.");
+          } else {
+            setDrawerOpen(true);
+            toastError(err);
+          }
         }
       };
       fetchDrawerState();
@@ -234,14 +318,14 @@ const LoggedInLayout = ({ children }) => {
         open={drawerOpen}
       >
         <div className={classes.toolbarIcon}>
-          <img src={logodash} alt="logo" />
+          <img alt="logo" src={companyData.logo} style={{ height: 50, marginBottom: 10, marginTop: 5 }} />
           <IconButton color="secondary" onClick={() => setDrawerOpen(!drawerOpen)}>
             <ChevronLeftIcon />
           </IconButton>
         </div>
         <Divider />
         <List>
-          <MainListItems drawerClose={drawerClose} />
+          <MainListItems drawerClose={drawerClose} location={location} />
         </List>
         <Divider />
       </Drawer>
@@ -275,8 +359,13 @@ const LoggedInLayout = ({ children }) => {
             noWrap
             className={classes.title}
           >
-            {i18n.t("mainDrawer.appBar.message.hi")} {user.name}, {i18n.t("mainDrawer.appBar.message.text")} {system.name || "Press Ticket"}
+            {t("mainDrawer.appBar.message.hi")} {user.name}, {t("mainDrawer.appBar.message.text")} {companyData.name || "Press Ticket"}
           </Typography>
+
+          <ThemeSelector toggleTheme={toggleTheme} />
+
+          <LanguageSelector />
+
           {user.id && <NotificationsPopOver />}
 
           <div>
@@ -305,16 +394,16 @@ const LoggedInLayout = ({ children }) => {
               onClose={handleCloseMenu}
             >
               <MenuItem onClick={handleOpenUserModal}>
-                {i18n.t("mainDrawer.appBar.user.profile")}
+                {t("mainDrawer.appBar.user.profile")}
               </MenuItem>
               <MenuItem onClick={handleClickLogout}>
-                {i18n.t("mainDrawer.appBar.user.logout")}
+                {t("mainDrawer.appBar.user.logout")}
               </MenuItem>
               <Divider />
               <span className={classes.systemCss}>
                 <Link
                   color="inherit"
-                  href={system.url || "https://github.com/rtenorioh/Press-Ticket"}
+                  href={"https://github.com/rtenorioh/Press-Ticket"}
                   style={{ display: "flex", alignItems: "center", marginTop: 10 }}
                 >
                   {latestVersion && latestVersion > systemVersion ? (

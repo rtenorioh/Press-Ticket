@@ -5,6 +5,7 @@ import ContactTag from "../models/ContactTag";
 import Integration from "../models/Integration";
 import Message from "../models/Message";
 import OldMessage from "../models/OldMessage";
+import Personalization from "../models/Personalization";
 import Queue from "../models/Queue";
 import QuickAnswer from "../models/QuickAnswer";
 import Setting from "../models/Setting";
@@ -36,7 +37,8 @@ const models = [
   Tag,
   ContactTag,
   Integration,
-  OldMessage
+  OldMessage,
+  Personalization
 ];
 
 sequelize.addModels(models);

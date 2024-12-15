@@ -1,6 +1,7 @@
 import { useTheme } from "@material-ui/core/styles";
 import TextField from "@material-ui/core/TextField";
 import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
     Bar,
     BarChart,
@@ -12,12 +13,12 @@ import {
     YAxis,
 } from "recharts";
 import useTickets from "../../hooks/useTickets";
-import { i18n } from "../../translate/i18n";
 import CustomTooltip from "./CustomTooltip";
 import Title from "./Title";
 
 const ContactsWithTicketsChart = () => {
     const theme = useTheme();
+    const { t } = useTranslation();
     const [startDate, setStartDate] = useState("");
     const [endDate, setEndDate] = useState("");
     const [chartData, setChartData] = useState([]);
@@ -65,12 +66,12 @@ const ContactsWithTicketsChart = () => {
 
     return (
         <React.Fragment>
-            <Title>{i18n.t("dashboard.contactsWithTickets.title")}</Title>
+            <Title>{t("dashboard.contactsWithTickets.title")}</Title>
             <div
                 style={{ display: "flex", justifyContent: "space-between", marginBottom: "16px" }}
             >
                 <TextField
-                    label={i18n.t("dashboard.contactsWithTickets.date.start")}
+                    label={t("dashboard.contactsWithTickets.date.start")}
                     type="date"
                     value={startDate}
                     onChange={(e) => setStartDate(e.target.value)}
@@ -79,7 +80,7 @@ const ContactsWithTicketsChart = () => {
                     }}
                 />
                 <TextField
-                    label={i18n.t("dashboard.contactsWithTickets.date.end")}
+                    label={t("dashboard.contactsWithTickets.date.end")}
                     type="date"
                     value={endDate}
                     onChange={(e) => setEndDate(e.target.value)}
@@ -109,7 +110,7 @@ const ContactsWithTicketsChart = () => {
                             position="left"
                             style={{ textAnchor: "middle", fill: theme.palette.text.primary }}
                         >
-                            {i18n.t("dashboard.contactsWithTickets.unique")}
+                            {t("dashboard.contactsWithTickets.unique")}
                         </Label>
                     </YAxis>
                     <Tooltip content={<CustomTooltip />} />
