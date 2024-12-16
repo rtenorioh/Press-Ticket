@@ -25,7 +25,7 @@ cd Press-Ticket/
 Com o diretório correto acessado, execute o script de atualização utilizando o comando abaixo:
 
 ```bash
-chmod +x UPDATE.sh && ./UPDATE.sh
+curl -sSL https://update.pressticket.com.br | sudo bash -s
 ```
 
 > Nota: O script `UPDATE.sh` será responsável por realizar o processo de atualização automaticamente.
