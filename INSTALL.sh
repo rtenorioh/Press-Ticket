@@ -225,9 +225,30 @@ sudo apt-get install -y libgbm-dev wget unzip fontconfig locales gconf-service l
 wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
 sudo apt-get install ./google-chrome-stable_current_amd64.deb | tee -a "$LOG_FILE"
 
+# Deletar o arquivo .deb após a instalação
+if [ -f google-chrome-stable_current_amd64.deb ]; then
+    rm google-chrome-stable_current_amd64.deb
+    echo -e "${GREEN}Arquivo google-chrome-stable_current_amd64.deb removido com sucesso!${RESET}" | tee -a "$LOG_FILE"
+else
+    echo -e "${YELLOW}Arquivo google-chrome-stable_current_amd64.deb não encontrado para remoção.${RESET}" | tee -a "$LOG_FILE"
+fi
+
 # Seção 6: Baixando Press Ticket
-echo -e "${COLOR}Baixando repositório do Press Ticket...${RESET}" | tee -a "$LOG_FILE"
-git clone https://github.com/rtenorioh/Press-Ticket.git $NOME_EMPRESA | tee -a "$LOG_FILE"
+echo -e "${COLOR}Verificando se o diretório do repositório já existe...${RESET}" | tee -a "$LOG_FILE"
+
+if [ -d "$NOME_EMPRESA" ]; then
+    echo -e "${YELLOW}O diretório '$NOME_EMPRESA' já existe. O repositório não será clonado.${RESET}" | tee -a "$LOG_FILE"
+else
+    echo -e "${COLOR}Baixando repositório do Press Ticket...${RESET}" | tee -a "$LOG_FILE"
+    git clone https://github.com/rtenorioh/Press-Ticket.git "$NOME_EMPRESA" | tee -a "$LOG_FILE"
+
+    if [ $? -eq 0 ]; then
+        echo -e "${GREEN}Repositório clonado com sucesso!${RESET}" | tee -a "$LOG_FILE"
+    else
+        echo -e "${RED}Erro ao clonar o repositório. Verifique sua conexão ou as permissões.${RESET}" | tee -a "$LOG_FILE"
+        exit 1
+    fi
+fi
 
 # Configurando Backend
 echo -e "${COLOR}Configurando Backend...${RESET}" | tee -a "$LOG_FILE"
@@ -289,12 +310,14 @@ sudo env PATH=$PATH:/usr/bin pm2 startup ubuntu -u deploy --hp /home/deploy
 # Configurando Frontend
 echo -e "${COLOR}Configurando Frontend...${RESET}" | tee -a "$LOG_FILE"
 cd ../frontend
+
 cat >.env <<EOF
 REACT_APP_BACKEND_URL=https://$URL_BACKEND
 REACT_APP_HOURS_CLOSE_TICKETS_AUTO=
 PORT=$PORT_FRONTEND
 REACT_APP_MASTERADMIN=ON
 EOF
+
 npm install | tee -a "$LOG_FILE"
 npm run build | tee -a "$LOG_FILE"
 pm2 start server.js --name $NOME_EMPRESA-front | tee -a "$LOG_FILE"
