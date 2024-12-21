@@ -201,6 +201,17 @@ echo -e "${COLOR}Instalando Node.js e dependências...${RESET}" | tee -a "$LOG_F
 curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
 sudo apt-get install -y nodejs apt-transport-https ca-certificates curl software-properties-common git ffmpeg | tee -a "$LOG_FILE"
 
+# Instalando a última versão do npm
+echo -e "${COLOR}Atualizando para a última versão do npm...${RESET}" | tee -a "$LOG_FILE"
+sudo npm install -g npm@latest | tee -a "$LOG_FILE"
+
+# Exibindo as versões instaladas
+NODE_VERSION=$(node -v)
+NPM_VERSION=$(npm -v)
+
+echo -e "${GREEN}Node.js instalado na versão:${RESET} $NODE_VERSION" | tee -a "$LOG_FILE"
+echo -e "${GREEN}npm atualizado para a versão:${RESET} $NPM_VERSION" | tee -a "$LOG_FILE"
+
 # Adicionando o usuário ao grupo mysql
 sudo usermod -aG mysql "${USER}"
 
@@ -257,8 +268,10 @@ BACKEND_DIR="$NOME_EMPRESA/backend"
 
 # Verifica se o diretório do backend existe
 if [ ! -d "$BACKEND_DIR" ]; then
-    echo "Erro: O diretório '$BACKEND_DIR' não existe." | tee -a "$LOG_FILE"
+    echo -e "${RED}Erro: O diretório '$BACKEND_DIR' não existe.${RESET}" | tee -a "$LOG_FILE"
     exit 1
+else
+    echo -e "${GREEN}Diretório '$BACKEND_DIR' encontrado. Prosseguindo com a instalação...${RESET}" | tee -a "$LOG_FILE"
 fi
 
 # Navega para o diretório do backend
@@ -303,7 +316,23 @@ npm install | tee -a "$LOG_FILE"
 npm run build | tee -a "$LOG_FILE"
 npx sequelize db:migrate | tee -a "$LOG_FILE"
 npx sequelize db:seed:all | tee -a "$LOG_FILE"
-sudo npm install -g pm2 | tee -a "$LOG_FILE"
+
+# Instalação do PM2
+echo -e "${COLOR}Verificando se o PM2 está instalado...${RESET}" | tee -a "$LOG_FILE"
+
+if command -v pm2 &>/dev/null; then
+    echo -e "${GREEN}PM2 já está instalado. Prosseguindo...${RESET}" | tee -a "$LOG_FILE"
+else
+    echo -e "${YELLOW}PM2 não encontrado. Instalando...${RESET}" | tee -a "$LOG_FILE"
+    sudo npm install -g pm2 | tee -a "$LOG_FILE"
+    if [ $? -eq 0 ]; then
+        echo -e "${GREEN}PM2 instalado com sucesso!${RESET}" | tee -a "$LOG_FILE"
+    else
+        echo -e "${RED}Erro ao instalar o PM2. Verifique os logs acima.${RESET}" | tee -a "$LOG_FILE"
+        exit 1
+    fi
+fi
+
 pm2 start dist/server.js --name $NOME_EMPRESA-back | tee -a "$LOG_FILE"
 sudo env PATH=$PATH:/usr/bin pm2 startup ubuntu -u deploy --hp /home/deploy
 
@@ -325,7 +354,23 @@ pm2 save | tee -a "$LOG_FILE"
 
 # Configurando Nginx
 echo -e "${COLOR}Configurando Nginx...${RESET}" | tee -a "$LOG_FILE"
-sudo apt-get install nginx -y | tee -a "$LOG_FILE"
+
+# Instalação do Nginx
+echo -e "${COLOR}Verificando se o Nginx está instalado...${RESET}" | tee -a "$LOG_FILE"
+
+if command -v nginx &>/dev/null; then
+    echo -e "${GREEN}Nginx já está instalado. Prosseguindo...${RESET}" | tee -a "$LOG_FILE"
+else
+    echo -e "${YELLOW}Nginx não encontrado. Instalando...${RESET}" | tee -a "$LOG_FILE"
+    sudo apt-get install nginx -y | tee -a "$LOG_FILE"
+    if [ $? -eq 0 ]; then
+        echo -e "${GREEN}Nginx instalado com sucesso!${RESET}" | tee -a "$LOG_FILE"
+    else
+        echo -e "${RED}Erro ao instalar o Nginx. Verifique os logs acima.${RESET}" | tee -a "$LOG_FILE"
+        exit 1
+    fi
+fi
+
 cat >/etc/nginx/sites-available/$NOME_EMPRESA-front <<EOF
 server {
   server_name $URL_FRONTEND;
@@ -366,8 +411,21 @@ sudo nginx -t | tee -a "$LOG_FILE"
 sudo service nginx restart | tee -a "$LOG_FILE"
 
 # Adiciona configuração no nginx.conf
-echo -e "${GREEN}Configurando client_max_body_size no Nginx...${RESET}" | tee -a "$LOG_FILE"
-sudo sed -i '/http {/a \    client_max_body_size 50M;' /etc/nginx/nginx.conf | tee -a "$LOG_FILE"
+echo -e "${GREEN}Verificando configuração 'client_max_body_size' no Nginx...${RESET}" | tee -a "$LOG_FILE"
+
+# Verifica se a configuração já existe no arquivo nginx.conf
+if grep -q "client_max_body_size 50M;" /etc/nginx/nginx.conf; then
+    echo -e "${GREEN}A configuração 'client_max_body_size 50M;' já está presente no arquivo nginx.conf.${RESET}" | tee -a "$LOG_FILE"
+else
+    echo -e "${YELLOW}A configuração 'client_max_body_size 50M;' não foi encontrada. Aplicando ajuste...${RESET}" | tee -a "$LOG_FILE"
+    sudo sed -i '/http {/a \    client_max_body_size 50M;' /etc/nginx/nginx.conf | tee -a "$LOG_FILE"
+    if [ $? -eq 0 ]; then
+        echo -e "${GREEN}A configuração 'client_max_body_size 50M;' foi adicionada com sucesso no arquivo nginx.conf.${RESET}" | tee -a "$LOG_FILE"
+    else
+        echo -e "${RED}Erro ao adicionar a configuração 'client_max_body_size 50M;' no arquivo nginx.conf.${RESET}" | tee -a "$LOG_FILE"
+        exit 1
+    fi
+fi
 
 # Testa e reinicia o Nginx
 sudo nginx -t | tee -a "$LOG_FILE"
@@ -380,14 +438,37 @@ else
 fi
 
 # Instalação de Certificado SSL
-echo -e "${COLOR}Instalando Certificado SSL...${RESET}" | tee -a "$LOG_FILE"
-sudo apt-get install snapd -y | tee -a "$LOG_FILE"
-sudo snap install --classic certbot | tee -a "$LOG_FILE"
-sudo certbot -m $EMAIL \
+echo -e "${COLOR}Verificando a instalação do Certbot...${RESET}" | tee -a "$LOG_FILE"
+
+# Verifica se o certbot está instalado
+if command -v certbot &>/dev/null; then
+    echo -e "${GREEN}Certbot já está instalado no sistema.${RESET}" | tee -a "$LOG_FILE"
+else
+    echo -e "${YELLOW}Certbot não encontrado. Instalando dependências e Certbot...${RESET}" | tee -a "$LOG_FILE"
+    sudo apt-get install snapd -y | tee -a "$LOG_FILE"
+    sudo snap install --classic certbot | tee -a "$LOG_FILE"
+    if command -v certbot &>/dev/null; then
+        echo -e "${GREEN}Certbot instalado com sucesso!${RESET}" | tee -a "$LOG_FILE"
+    else
+        echo -e "${RED}Erro ao instalar o Certbot. Verifique os logs para mais informações.${RESET}" | tee -a "$LOG_FILE"
+        exit 1
+    fi
+fi
+
+# Executa o comando para gerar o certificado SSL
+echo -e "${COLOR}Gerando o certificado SSL para os domínios: $URL_BACKEND e $URL_FRONTEND...${RESET}" | tee -a "$LOG_FILE"
+sudo certbot -m "$EMAIL" \
     --nginx \
     --agree-tos \
     --non-interactive \
-    --domains $URL_BACKEND,$URL_FRONTEND | tee -a "$LOG_FILE"
+    --domains "$URL_BACKEND,$URL_FRONTEND" | tee -a "$LOG_FILE"
+
+if [ $? -eq 0 ]; then
+    echo -e "${GREEN}Certificado SSL gerado e configurado com sucesso!${RESET}" | tee -a "$LOG_FILE"
+else
+    echo -e "${RED}Erro ao gerar o certificado SSL. Verifique os logs para mais detalhes.${RESET}" | tee -a "$LOG_FILE"
+    exit 1
+fi
 
 # Finalizando instalação
 echo -e "${COLOR}Instalação finalizada com sucesso para a empresa: $NOME_EMPRESA!${RESET}" | tee -a "$LOG_FILE"
