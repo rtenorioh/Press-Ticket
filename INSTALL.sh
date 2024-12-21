@@ -283,7 +283,7 @@ echo -e "${COLOR}Instalação finalizada com sucesso para a empresa: $NOME_EMPRE
 # Exibindo resumo da instalação
 echo -e "${BOLD}Resumo da Instalação:${RESET}" | tee -a "$LOG_FILE"
 echo -e "${GREEN}---------------------------------------${RESET}" | tee -a "$LOG_FILE"
-echo -e "${BOLD}URL de Acesso (Frontend):${RESET} https://$URL_FRONTEND" | tee -a "$LOG_FILE"
+echo -e "${BOLD}URL de Acesso:${RESET} https://$URL_FRONTEND" | tee -a "$LOG_FILE"
 echo -e "${BOLD}Nome da Instalação:${RESET} $NOME_EMPRESA" | tee -a "$LOG_FILE"
 echo -e "${BOLD}Quantidade de Usuários Permitidos:${RESET} $USER_LIMIT" | tee -a "$LOG_FILE"
 echo -e "${BOLD}Quantidade de Conexões Permitidas:${RESET} $CONNECTION_LIMIT" | tee -a "$LOG_FILE"
