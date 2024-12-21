@@ -46,6 +46,7 @@ fi
 
 COLOR="\e[38;5;92m"
 GREEN="\e[32m"
+RED="\e[31m"
 RESET="\e[0m"
 BOLD="\e[1m"
 
@@ -116,19 +117,56 @@ echo -e "${COLOR}Instalando MySQL...${RESET}" | tee -a "$LOG_FILE"
 sudo apt-get install -y mysql-server | tee -a "$LOG_FILE"
 
 # Configurando banco de dados
+echo -e "${COLOR}Configurando banco de dados...${RESET}" | tee -a "$LOG_FILE"
+
+echo -e "${BOLD}Criando banco de dados:${RESET} $NOME_EMPRESA" | tee -a "$LOG_FILE"
 sudo mysql -u root <<MYSQL_SCRIPT
 CREATE DATABASE $NOME_EMPRESA CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+MYSQL_SCRIPT
+if [ $? -eq 0 ]; then
+    echo -e "${GREEN}Banco de dados criado com sucesso!${RESET}" | tee -a "$LOG_FILE"
+else
+    echo -e "${RED}Erro ao criar o banco de dados.${RESET}" | tee -a "$LOG_FILE"
+    exit 1
+fi
+
+echo -e "${BOLD}Alterando configurações do plugin de autenticação do MySQL...${RESET}" | tee -a "$LOG_FILE"
+sudo mysql -u root <<MYSQL_SCRIPT
 USE mysql;
 UPDATE user SET plugin='mysql_native_password' WHERE User='root';
 FLUSH PRIVILEGES;
 MYSQL_SCRIPT
+
+if [ $? -eq 0 ]; then
+    echo -e "${GREEN}Configurações de autenticação atualizadas com sucesso!${RESET}" | tee -a "$LOG_FILE"
+else
+    echo -e "${RED}Erro ao atualizar as configurações de autenticação.${RESET}" | tee -a "$LOG_FILE"
+    exit 1
+fi
+
+echo -e "${BOLD}Reiniciando o serviço MySQL...${RESET}" | tee -a "$LOG_FILE"
 sudo service mysql restart | tee -a "$LOG_FILE"
+if [ $? -eq 0 ]; then
+    echo -e "${GREEN}Serviço MySQL reiniciado com sucesso!${RESET}" | tee -a "$LOG_FILE"
+else
+    echo -e "${RED}Erro ao reiniciar o serviço MySQL.${RESET}" | tee -a "$LOG_FILE"
+    exit 1
+fi
 
 # Seção 3: Configuração do Usuário
-echo -e "${GREEN}Criando usuário deploy...${RESET}" | tee -a "$LOG_FILE"
-sudo adduser deploy --gecos "" --disabled-password | tee -a "$LOG_FILE"
-echo "deploy:$SENHA_DEPLOY" | sudo chpasswd | tee -a "$LOG_FILE"
-sudo usermod -aG sudo deploy | tee -a "$LOG_FILE"
+echo -e "${GREEN}Verificando a existência do usuário 'deploy'...${RESET}" | tee -a "$LOG_FILE"
+
+if id "deploy" &>/dev/null; then
+    echo -e "${GREEN}Usuário 'deploy' já existe. Acessando como 'deploy'...${RESET}" | tee -a "$LOG_FILE"
+    sudo su - deploy
+else
+    echo -e "${GREEN}Usuário 'deploy' não encontrado. Criando o usuário 'deploy'...${RESET}" | tee -a "$LOG_FILE"
+    sudo adduser deploy --gecos "" --disabled-password | tee -a "$LOG_FILE"
+    echo "deploy:$SENHA_DEPLOY" | sudo chpasswd | tee -a "$LOG_FILE"
+    sudo usermod -aG sudo deploy | tee -a "$LOG_FILE"
+    echo -e "${GREEN}Usuário 'deploy' criado com sucesso. Acessando como 'deploy'...${RESET}" | tee -a "$LOG_FILE"
+    sudo su - deploy
+fi
 
 # Seção 4: Instalação do Node.js e Dependências
 echo -e "${COLOR}Instalando Node.js e dependências...${RESET}" | tee -a "$LOG_FILE"
