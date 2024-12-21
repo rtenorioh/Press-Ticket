@@ -16,6 +16,7 @@ if ! mkdir -p "$CURRENT_LOG_DIR" "$ARCHIVED_LOG_DIR"; then
 fi
 
 COLOR="\e[38;5;92m"
+GREEN="\e[32m"
 RESET="\e[0m"
 BOLD="\e[1m"
 
@@ -26,50 +27,71 @@ echo -e "${COLOR}██████╔╝██████╔╝█████
 echo -e "${COLOR}██╔═══╝ ██╔══██╗██╔══╝  ╚════██║╚════██║       ██║   ██║██║     ██╔═██╗ ██╔══╝     ██║   ${RESET}"
 echo -e "${COLOR}██║     ██║  ██║███████╗███████║███████║       ██║   ██║╚██████╗██║  ██╗███████╗   ██║   ${RESET}"
 echo -e "${COLOR}╚═╝     ╚═╝  ╚═╝╚══════╝╚══════╝╚══════╝       ╚═╝   ╚═╝ ╚═════╝╚═╝  ╚═╝╚══════╝   ╚═╝   ${RESET}"
-echo -e "${COLOR}ATUALIZANDO PARA A VERSÃO:${RESET} ${BOLD}$VERSION${RESET}"
+echo -e "${GREEN}ATUALIZANDO PARA A VERSÃO:${RESET} ${BOLD}$VERSION${RESET}"
 echo -e " "
 
-sleep 2
-# Lista de fusos horários
-declare -a TIMEZONES=(
-    "UTC"
-    "America/Sao_Paulo"
-    "America/New_York"
-    "Europe/London"
-    "Europe/Paris"
-    "Asia/Tokyo"
-    "Asia/Shanghai"
-    "Australia/Sydney"
-)
+sleep 3
 
-# Exibir a lista de fusos horários para o usuário
-echo " "
-echo "Por favor, escolha seu fuso horário:"
-echo " "
-for i in "${!TIMEZONES[@]}"; do
-    echo "[$i] ${TIMEZONES[$i]}"
-done
+# Exibir mensagem com a lista de fusos horários
+echo "O fuso horário padrão está definido como 'America/Sao_Paulo'."
+echo ""
+echo "Caso deseje usar outro fuso horário, utilize o comando abaixo para ver a lista completa:"
+echo ""
+echo "    timedatectl list-timezones"
+echo ""
+echo "Para parar a execução atual e rodar o comando acima, pressione 'CTRL + C'."
+echo "Depois de escolher o fuso horário desejado, execute novamente o script informando o fuso como parâmetro."
+echo ""
+echo "Por exemplo, para usar o fuso horário 'Asia/Kolkata', execute:"
+echo ""
+echo "    curl -sSL https://update.pressticket.com.br | sudo bash -s -- Asia/Kolkata"
+echo ""
 
-# Capturar a escolha do usuário
-echo " "
-read -p "Digite o número correspondente ao fuso horário: " TZ_INDEX
-echo " "
+# Pausa para o usuário ler a mensagem
+sleep 10
 
-# Validar entrada
-if [[ ! "$TZ_INDEX" =~ ^[0-9]+$ ]] || [[ "$TZ_INDEX" -ge "${#TIMEZONES[@]}" ]]; then
-    echo " "
-    echo "Escolha inválida. Usando o fuso horário padrão: UTC."
-    echo " "
-    SELECTED_TZ="UTC"
+# Compactação de logs antigos usando zip
+if find "$CURRENT_LOG_DIR" -type f -mtime +30 | grep -q .; then
+    zip -j "$ARCHIVED_LOG_DIR/logs_$(date +'%Y-%m-%d').zip" "$CURRENT_LOG_DIR"/* -x "*.zip"
+    if [ $? -eq 0 ]; then
+        echo "Logs antigos compactados com sucesso em $ARCHIVED_LOG_DIR/logs_$(date +'%Y-%m-%d').zip"
+        # Remove os arquivos compactados após o sucesso
+        find "$CURRENT_LOG_DIR" -type f -mtime +30 -exec rm {} \;
+    else
+        echo "Erro ao compactar os logs antigos."
+    fi
 else
-    SELECTED_TZ="${TIMEZONES[$TZ_INDEX]}"
-    echo " "
-    echo "Fuso horário escolhido: $SELECTED_TZ"
-    echo " "
+    echo "Nenhum log antigo encontrado para compactar."
 fi
 
+# Captura o fuso horário passado como argumento ou usa America/Sao_Paulo} como padrão
+SELECTED_TZ=${1:-America/Sao_Paulo}
+
 # Configuração do arquivo de log (ajustado para usar o fuso horário)
-LOG_FILE="$CURRENT_LOG_DIR/update_${VERSION}_$(TZ=$SELECTED_TZ date +"%Y-%m-%d_%H-%M-%S").log"
+LOG_FILE="$CURRENT_LOG_DIR/update_${VERSION}_$(TZ=$SELECTED_TZ date +"%d-%m-%Y_%H-%M-%S").log"
+
+# Verifica se o jq está instalado; se não, instala automaticamente
+if ! command -v jq &>/dev/null; then
+    echo "A ferramenta jq não está instalada. Instalando agora..."
+    if sudo apt-get install -y jq; then
+        echo "jq instalado com sucesso."
+    else
+        echo "Erro: Não foi possível instalar jq. Verifique as permissões ou instale manualmente."
+        exit 1
+    fi
+fi
+
+# Obtém a versão atual do sistema do arquivo frontend/package.json
+PACKAGE_JSON_PATH="$SCRIPT_DIR/frontend/package.json"
+
+if [ -f "$PACKAGE_JSON_PATH" ]; then
+    SYSTEM_VERSION=$(jq -r '.systemVersion' "$PACKAGE_JSON_PATH" 2>/dev/null)
+    if [ -z "$SYSTEM_VERSION" ] || [ "$SYSTEM_VERSION" == "null" ]; then
+        SYSTEM_VERSION="Não encontrado"
+    fi
+else
+    SYSTEM_VERSION="Arquivo package.json não encontrado"
+fi
 
 # Adicionar informações iniciais ao log
 {
@@ -77,9 +99,11 @@ LOG_FILE="$CURRENT_LOG_DIR/update_${VERSION}_$(TZ=$SELECTED_TZ date +"%Y-%m-%d_%
     echo "**************************************************************"
     echo "*               PRESS TICKET - LOG DE ATUALIZAÇÃO           *"
     echo "**************************************************************"
-    echo " Versão Atualizada: $VERSION                                "
+    echo " Versão Atual do Sistema: $SYSTEM_VERSION                   "
+    echo " Nova Versão Atualizada: $VERSION                           "
     echo " Fuso Horário: $SELECTED_TZ                                 "
-    echo " Hora Local: $(TZ=$SELECTED_TZ date)                       "
+    echo " Hora Local: $(TZ=$SELECTED_TZ date +"%d-%m-%Y %H:%M:%S")   "
+    echo " Local do log: $LOG_FILE                                    "
     echo "**************************************************************"
     echo " "
 } | tee -a "$LOG_FILE"
@@ -97,8 +121,31 @@ if ! touch "$LOG_FILE"; then
     exit 1
 fi
 
-# Compactação de logs antigos
-find "$CURRENT_LOG_DIR" -type f -mtime +30 -exec gzip {} \; -exec mv {}.gz "$ARCHIVED_LOG_DIR" \;
+sleep 2
+
+# Solicita confirmação do usuário para atualização do sistema operacional
+echo " "
+echo -e "${BOLD}${GREEN}Deseja atualizar os pacotes do sistema operacional antes de continuar? (s/n)${RESET}"
+read -r UPDATE_SYSTEM
+
+if [[ "$UPDATE_SYSTEM" =~ ^[sS]$ ]]; then
+    # Comandos de atualização
+    if sudo apt-get update -y | tee -a "$LOG_FILE"; then
+        echo "Lista de pacotes atualizada com sucesso." | tee -a "$LOG_FILE"
+    else
+        echo "Erro ao atualizar a lista de pacotes." | tee -a "$LOG_FILE"
+        exit 1
+    fi
+
+    if sudo apt-get upgrade -y | tee -a "$LOG_FILE"; then
+        echo "Pacotes atualizados com sucesso." | tee -a "$LOG_FILE"
+    else
+        echo "Erro ao atualizar os pacotes." | tee -a "$LOG_FILE"
+        exit 1
+    fi
+else
+    echo "Atualização do sistema operacional ignorada." | tee -a "$LOG_FILE"
+fi
 
 # Verificação de versão do Node.js
 {
@@ -137,15 +184,23 @@ version_less_than() {
 # Atualização do Node.js, se necessário
 if version_less_than "$CURRENT_NODE_VERSION" "18.0.0"; then
     {
-        echo "Versão do Node.js atual ($CURRENT_NODE_VERSION) é inferior a 18. Atualizando para a versão 20.x..."
-        curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
-        sudo apt-get install -y nodejs
-        sudo npm install -g npm
-        if [ $? -ne 0 ]; then
-            echo "Erro ao atualizar o Node.js ou o npm. Saindo..."
-            exit 1
+        echo "Versão do Node.js atual ($CURRENT_NODE_VERSION) é inferior a 18."
+        echo -e "${BOLD}${GREEN}Deseja atualizar o Node.js para a versão 20.x? (s/n)${RESET}"
+        read -r UPDATE_NODE
+
+        if [[ "$UPDATE_NODE" =~ ^[sS]$ ]]; then
+            echo "Atualizando Node.js para a versão 20.x..."
+            curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+            sudo apt-get install -y nodejs
+            sudo npm install -g npm
+            if [ $? -ne 0 ]; then
+                echo "Erro ao atualizar o Node.js ou o npm. Saindo..."
+                exit 1
+            fi
+            echo "Node.js atualizado com sucesso para a versão 20.x."
+        else
+            echo "Atualização do Node.js ignorada pelo usuário." | tee -a "$LOG_FILE"
         fi
-        echo "Node.js atualizado com sucesso para a versão 20.x."
     } | tee -a "$LOG_FILE"
 else
     echo "A versão do Node.js instalada ($CURRENT_NODE_VERSION) é igual ou superior a 18. Prosseguindo..." | tee -a "$LOG_FILE"
@@ -176,6 +231,39 @@ cd backend || {
     echo "Erro ao acessar o diretório do backend." | tee -a "$LOG_FILE"
     exit 1
 }
+
+# Caminho do arquivo sequelizeData.json
+SEQUELIZE_DATA_FILE="sequelizeData.json"
+
+{
+    echo " "
+    echo "VERIFICANDO O ARQUIVO sequelizeData.json"
+    echo " "
+} | tee -a "$LOG_FILE"
+
+# Verifica se o arquivo existe
+if [ ! -f "$SEQUELIZE_DATA_FILE" ]; then
+    echo "O arquivo $SEQUELIZE_DATA_FILE não foi encontrado. Criando o arquivo com dados padrão..." | tee -a "$LOG_FILE"
+
+    # Dados padrão para o arquivo
+    DEFAULT_DATA='[
+  "20200904070004-create-default-settings.js",
+  "20200904070004-create-default-users.js",
+  "20200904070006-create-apiToken-settings.js"
+]'
+
+    # Cria o arquivo com os dados padrão
+    echo "$DEFAULT_DATA" >"$SEQUELIZE_DATA_FILE"
+
+    if [ $? -eq 0 ]; then
+        echo "Arquivo $SEQUELIZE_DATA_FILE criado com sucesso." | tee -a "$LOG_FILE"
+    else
+        echo "Erro ao criar o arquivo $SEQUELIZE_DATA_FILE." | tee -a "$LOG_FILE"
+        exit 1
+    fi
+else
+    echo "O arquivo $SEQUELIZE_DATA_FILE já existe. Nenhuma ação necessária." | tee -a "$LOG_FILE"
+fi
 
 {
     echo " "
@@ -224,19 +312,42 @@ cd ../frontend || {
     exit 1
 }
 
-# Verifica o arquivo .env e adiciona REACT_APP_MASTERADMIN se necessário
-if [ -f .env ]; then
-    if grep -q "^REACT_APP_MASTERADMIN=" .env; then
+{
+    echo " "
+    echo "VERIFICANDO O ARQUIVO .ENV DO FRONTEND"
+    echo " "
+} | tee -a "$LOG_FILE"
+
+sleep 2
+
+ENV_FILE=".env"
+
+# Verifica se o arquivo .env existe
+if [ -f "$ENV_FILE" ]; then
+    # Verifica e altera SERVER_PORT para PORT, se necessário
+    if grep -q "^SERVER_PORT=" "$ENV_FILE"; then
+        echo "A variável SERVER_PORT foi encontrada no arquivo .env. Alterando para PORT..." | tee -a "$LOG_FILE"
+
+        # Substitui SERVER_PORT por PORT
+        sed -i 's/^SERVER_PORT=/PORT=/' "$ENV_FILE"
+
+        echo "Alteração concluída. A variável SERVER_PORT foi renomeada para PORT no arquivo .env." | tee -a "$LOG_FILE"
+    else
+        echo "A variável SERVER_PORT não foi encontrada no arquivo .env. Nenhuma alteração necessária." | tee -a "$LOG_FILE"
+    fi
+
+    # Verifica e adiciona REACT_APP_MASTERADMIN, se necessário
+    if grep -q "^REACT_APP_MASTERADMIN=" "$ENV_FILE"; then
         echo "A variável REACT_APP_MASTERADMIN já está presente no arquivo .env." | tee -a "$LOG_FILE"
     else
         echo "Adicionando a variável REACT_APP_MASTERADMIN ao final do arquivo .env." | tee -a "$LOG_FILE"
-        echo "" >>.env
-        echo "# Para permitir acesso apenas do MasterAdmin (sempre ON)" >>.env
-        echo "REACT_APP_MASTERADMIN=ON" >>.env
+        echo "" >>"$ENV_FILE"
+        echo "# Para permitir acesso apenas do MasterAdmin (sempre ON)" >>"$ENV_FILE"
+        echo "REACT_APP_MASTERADMIN=ON" >>"$ENV_FILE"
         echo "A variável REACT_APP_MASTERADMIN foi adicionada ao final do arquivo .env." | tee -a "$LOG_FILE"
     fi
 else
-    echo "O arquivo .env não foi encontrado. O processo de instalação precisa ser finalizado antes de prosseguir." | tee -a "$LOG_FILE"
+    echo "O arquivo .env do frontend não foi encontrado. Certifique-se de que a instalação foi concluída." | tee -a "$LOG_FILE"
     exit 1
 fi
 
