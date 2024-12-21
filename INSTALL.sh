@@ -97,7 +97,7 @@ fi
 SELECTED_TZ=${1:-America/Sao_Paulo}
 
 # Configuração do arquivo de log (ajustado para usar o fuso horário)
-LOG_FILE="$CURRENT_LOG_DIR/update_$NOME_EMPRESA_$(TZ=$SELECTED_TZ date +"%d-%m-%Y_%H-%M-%S").log"
+LOG_FILE="$CURRENT_LOG_DIR/install_$NOME_EMPRESA_$(TZ=$SELECTED_TZ date +"%d-%m-%Y_%H-%M-%S").log"
 
 # Função para verificar se um comando existe
 command_exists() {
@@ -109,11 +109,11 @@ echo -e "${COLOR}Preparação Inicial...${RESET}" | tee -a "$LOG_FILE"
 
 # Atualizando e fazendo upgrade da VPS
 echo "Atualizando pacotes do sistema..." | tee -a "$LOG_FILE"
-sudo apt update && sudo apt upgrade -y | tee -a "$LOG_FILE"
+sudo apt-get update && sudo apt-get upgrade -y | tee -a "$LOG_FILE"
 
 # Seção 2: Instalação do MySQL
 echo -e "${COLOR}Instalando MySQL...${RESET}" | tee -a "$LOG_FILE"
-sudo apt install -y mysql-server | tee -a "$LOG_FILE"
+sudo apt-get install -y mysql-server | tee -a "$LOG_FILE"
 
 # Configurando banco de dados
 sudo mysql -u root <<MYSQL_SCRIPT
@@ -133,7 +133,7 @@ sudo usermod -aG sudo deploy | tee -a "$LOG_FILE"
 # Seção 4: Instalação do Node.js e Dependências
 echo -e "${COLOR}Instalando Node.js e dependências...${RESET}" | tee -a "$LOG_FILE"
 curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
-sudo apt-get install -y nodejs apt-transport-https ca-certificates curl software-properties-common git ffmpeg | tee -a "$LOG_FILE"
+sudo apt-get install -y nodejs apt-get-transport-https ca-certificates curl software-properties-common git ffmpeg | tee -a "$LOG_FILE"
 
 # Adicionando o usuário ao grupo mysql
 sudo usermod -aG mysql "${USER}"
@@ -157,7 +157,7 @@ EOF
 echo -e "${COLOR}Instalando Google Chrome e dependências...${RESET}" | tee -a "$LOG_FILE"
 sudo apt-get install -y libgbm-dev wget unzip fontconfig locales gconf-service libasound2 libatk1.0-0 libc6 libcairo2 libcups2 libdbus-1-3 libexpat1 libfontconfig1 libgcc1 libgconf-2-4 libgdk-pixbuf2.0-0 libglib2.0-0 libgtk-3-0 libnspr4 libpango-1.0-0 libpangocairo-1.0-0 libstdc++6 libx11-6 libx11-xcb1 libxcb1 libxcomposite1 libxcursor1 libxdamage1 libxext6 libxfixes3 libxi6 libxrandr2 libxrender1 libxss1 libxtst6 ca-certificates fonts-liberation libappindicator1 libnss3 lsb-release xdg-utils | tee -a "$LOG_FILE"
 wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-sudo apt install ./google-chrome-stable_current_amd64.deb | tee -a "$LOG_FILE"
+sudo apt-get install ./google-chrome-stable_current_amd64.deb | tee -a "$LOG_FILE"
 
 # Seção 6: Baixando Press Ticket
 echo -e "${COLOR}Baixando repositório do Press Ticket...${RESET}" | tee -a "$LOG_FILE"
@@ -213,7 +213,7 @@ pm2 save | tee -a "$LOG_FILE"
 
 # Configurando Nginx
 echo -e "${COLOR}Configurando Nginx...${RESET}" | tee -a "$LOG_FILE"
-sudo apt install nginx -y | tee -a "$LOG_FILE"
+sudo apt-get install nginx -y | tee -a "$LOG_FILE"
 cat >/etc/nginx/sites-available/$NOME_EMPRESA-front <<EOF
 server {
   server_name $URL_FRONTEND;
