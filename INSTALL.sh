@@ -155,18 +155,22 @@ fi
 
 # Seção 3: Configuração do Usuário
 echo -e "${GREEN}Verificando a existência do usuário 'deploy'...${RESET}" | tee -a "$LOG_FILE"
-
 if id "deploy" &>/dev/null; then
     echo -e "${GREEN}Usuário 'deploy' já existe. Acessando como 'deploy'...${RESET}" | tee -a "$LOG_FILE"
-    sudo su - deploy
 else
-    echo -e "${GREEN}Usuário 'deploy' não encontrado. Criando o usuário 'deploy'...${RESET}" | tee -a "$LOG_FILE"
+    echo -e "${YELLOW}Usuário 'deploy' não encontrado. Criando o usuário 'deploy'...${RESET}" | tee -a "$LOG_FILE"
     sudo adduser deploy --gecos "" --disabled-password | tee -a "$LOG_FILE"
     echo "deploy:$SENHA_DEPLOY" | sudo chpasswd | tee -a "$LOG_FILE"
     sudo usermod -aG sudo deploy | tee -a "$LOG_FILE"
-    echo -e "${GREEN}Usuário 'deploy' criado com sucesso. Acessando como 'deploy'...${RESET}" | tee -a "$LOG_FILE"
-    sudo su - deploy
+    echo -e "${GREEN}Usuário 'deploy' criado com sucesso.${RESET}" | tee -a "$LOG_FILE"
 fi
+
+# Configurações para evitar interação durante o acesso
+echo -e "${GREEN}Acessando como 'deploy'...${RESET}" | tee -a "$LOG_FILE"
+sudo -u deploy -i <<EOF
+# Qualquer comando necessário para ser executado como 'deploy' pode ser inserido aqui
+exit
+EOF
 
 # Seção 4: Instalação do Node.js e Dependências
 echo -e "${COLOR}Instalando Node.js e dependências...${RESET}" | tee -a "$LOG_FILE"
