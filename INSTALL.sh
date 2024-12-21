@@ -1,29 +1,5 @@
 #!/bin/bash
 
-# Função para exibir uso correto do script
-show_usage() {
-    echo "Uso: curl -sSL https://install.pressticket.com.br | sudo bash -s <SENHA_DEPLOY> <NOME_EMPRESA> <URL_BACKEND> <URL_FRONTEND> <PORT_BACKEND> <PORT_FRONTEND> <USER_LIMIT> <CONNECTION_LIMIT> <EMAIL>"
-    echo "Exemplo: curl -sSL https://install.pressticket.com.br | sudo bash -s 'senha123' 'empresa' 'back.pressticket.com.br' 'front.pressticket.com.br' 8080 3333 3 10 'admin@pressticket.com.br'"
-    exit 1
-}
-
-# Verifica se todos os parâmetros foram fornecidos
-if [ "$#" -ne 9 ]; then
-    echo "Erro: Número insuficiente de parâmetros fornecidos."
-    show_usage
-fi
-
-# Recebe os parâmetros
-SENHA_DEPLOY="$1"
-NOME_EMPRESA="$2"
-URL_BACKEND="$3"
-URL_FRONTEND="$4"
-PORT_BACKEND="$5"
-PORT_FRONTEND="$6"
-USER_LIMIT="$7"
-CONNECTION_LIMIT="$8"
-EMAIL="$9"
-
 # Verifica se o script está sendo executado como root
 if [ "$(id -u)" -ne 0 ]; then
     echo -e "\e[31mErro: Este script precisa ser executado como root.\e[0m"
@@ -59,6 +35,34 @@ echo -e "${COLOR}██║     ██║  ██║███████╗█�
 echo -e "${COLOR}╚═╝     ╚═╝  ╚═╝╚══════╝╚══════╝╚══════╝       ╚═╝   ╚═╝ ╚═════╝╚═╝  ╚═╝╚══════╝   ╚═╝   ${RESET}"
 echo -e "${GREEN}INICIANDO INSTALAÇÃO PARA A EMPRESA:${RESET} ${BOLD}$NOME_EMPRESA${RESET}"
 echo -e " "
+
+sleep 3
+
+# Função para exibir uso correto do script
+show_usage() {
+    echo "Uso: curl -sSL https://install.pressticket.com.br | sudo bash -s <SENHA_DEPLOY> <NOME_EMPRESA> <URL_BACKEND> <URL_FRONTEND> <PORT_BACKEND> <PORT_FRONTEND> <USER_LIMIT> <CONNECTION_LIMIT> <EMAIL>"
+    echo "Exemplo: curl -sSL https://install.pressticket.com.br | sudo bash -s 'senha123' 'empresa' 'back.pressticket.com.br' 'front.pressticket.com.br' 8080 3333 3 10 'admin@pressticket.com.br'"
+    exit 1
+}
+
+sleep 2
+
+# Verifica se todos os parâmetros foram fornecidos
+if [ "$#" -ne 9 ]; then
+    echo "Erro: Número insuficiente de parâmetros fornecidos."
+    show_usage
+fi
+
+# Recebe os parâmetros
+SENHA_DEPLOY="$1"
+NOME_EMPRESA="$2"
+URL_BACKEND="$3"
+URL_FRONTEND="$4"
+PORT_BACKEND="$5"
+PORT_FRONTEND="$6"
+USER_LIMIT="$7"
+CONNECTION_LIMIT="$8"
+EMAIL="$9"
 
 sleep 3
 
@@ -117,19 +121,41 @@ echo -e "${COLOR}Instalando MySQL...${RESET}" | tee -a "$LOG_FILE"
 sudo apt-get install -y mysql-server | tee -a "$LOG_FILE"
 
 # Configurando banco de dados
-echo -e "${COLOR}Configurando banco de dados...${RESET}" | tee -a "$LOG_FILE"
-
-echo -e "${BOLD}Criando banco de dados:${RESET} $NOME_EMPRESA" | tee -a "$LOG_FILE"
-sudo mysql -u root <<MYSQL_SCRIPT
-CREATE DATABASE $NOME_EMPRESA CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
-MYSQL_SCRIPT
-if [ $? -eq 0 ]; then
-    echo -e "${GREEN}Banco de dados criado com sucesso!${RESET}" | tee -a "$LOG_FILE"
+# Verificando se o MySQL Server está instalado
+echo -e "${COLOR}Verificando a instalação do MySQL Server...${RESET}" | tee -a "$LOG_FILE"
+if ! command -v mysql &>/dev/null; then
+    echo -e "${RED}MySQL Server não encontrado. Instalando...${RESET}" | tee -a "$LOG_FILE"
+    sudo apt-get update && sudo apt-get install -y mysql-server | tee -a "$LOG_FILE"
+    if [ $? -eq 0 ]; then
+        echo -e "${GREEN}MySQL Server instalado com sucesso!${RESET}" | tee -a "$LOG_FILE"
+    else
+        echo -e "${RED}Erro ao instalar o MySQL Server.${RESET}" | tee -a "$LOG_FILE"
+        exit 1
+    fi
 else
-    echo -e "${RED}Erro ao criar o banco de dados.${RESET}" | tee -a "$LOG_FILE"
-    exit 1
+    echo -e "${GREEN}MySQL Server já está instalado.${RESET}" | tee -a "$LOG_FILE"
 fi
 
+# Verificando se o banco de dados já existe
+echo -e "${COLOR}Verificando existência do banco de dados: ${RESET}$NOME_EMPRESA" | tee -a "$LOG_FILE"
+DB_EXISTS=$(sudo mysql -u root -e "SHOW DATABASES LIKE '$NOME_EMPRESA';" | grep "$NOME_EMPRESA")
+
+if [ "$DB_EXISTS" ]; then
+    echo -e "${YELLOW}O banco de dados '$NOME_EMPRESA' já existe. Nenhuma ação necessária.${RESET}" | tee -a "$LOG_FILE"
+else
+    echo -e "${BOLD}Criando banco de dados:${RESET} $NOME_EMPRESA" | tee -a "$LOG_FILE"
+    sudo mysql -u root <<MYSQL_SCRIPT
+CREATE DATABASE $NOME_EMPRESA CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+MYSQL_SCRIPT
+    if [ $? -eq 0 ]; then
+        echo -e "${GREEN}Banco de dados criado com sucesso!${RESET}" | tee -a "$LOG_FILE"
+    else
+        echo -e "${RED}Erro ao criar o banco de dados.${RESET}" | tee -a "$LOG_FILE"
+        exit 1
+    fi
+fi
+
+# Alterando configurações do plugin de autenticação do MySQL
 echo -e "${BOLD}Alterando configurações do plugin de autenticação do MySQL...${RESET}" | tee -a "$LOG_FILE"
 sudo mysql -u root <<MYSQL_SCRIPT
 USE mysql;
@@ -144,6 +170,7 @@ else
     exit 1
 fi
 
+# Reiniciando o serviço MySQL
 echo -e "${BOLD}Reiniciando o serviço MySQL...${RESET}" | tee -a "$LOG_FILE"
 sudo service mysql restart | tee -a "$LOG_FILE"
 if [ $? -eq 0 ]; then
@@ -207,9 +234,29 @@ git clone https://github.com/rtenorioh/Press-Ticket.git $NOME_EMPRESA | tee -a "
 
 # Configurando Backend
 echo -e "${COLOR}Configurando Backend...${RESET}" | tee -a "$LOG_FILE"
-cd $NOME_EMPRESA/backend
 
-cat >.env <<EOF
+BACKEND_DIR="$NOME_EMPRESA/backend"
+
+# Verifica se o diretório do backend existe
+if [ ! -d "$BACKEND_DIR" ]; then
+    echo "Erro: O diretório '$BACKEND_DIR' não existe." | tee -a "$LOG_FILE"
+    exit 1
+fi
+
+# Navega para o diretório do backend
+cd $BACKEND_DIR
+
+# Gera os valores de JWT_SECRET e JWT_REFRESH_SECRET
+JWT_SECRET=$(openssl rand -base64 32)
+JWT_REFRESH_SECRET=$(openssl rand -base64 32)
+
+if [ -z "$JWT_SECRET" ] || [ -z "$JWT_REFRESH_SECRET" ]; then
+    echo "Erro: Não foi possível gerar os valores JWT_SECRET e JWT_REFRESH_SECRET." | tee -a "$LOG_FILE"
+    exit 1
+fi
+
+# Gera o arquivo .env
+cat >"$ENV_FILE" <<EOF
 NODE_ENV=production
 BACKEND_URL=https://$URL_BACKEND
 FRONTEND_URL=https://$URL_FRONTEND
@@ -228,9 +275,12 @@ CONNECTIONS_LIMIT=$CONNECTION_LIMIT
 PM2_FRONTEND=0
 PM2_BACKEND=1
 DEMO=OFF
-JWT_SECRET=$(openssl rand -base64 32)
-JWT_REFRESH_SECRET=$(openssl rand -base64 32)
+JWT_SECRET=$JWT_SECRET
+JWT_REFRESH_SECRET=$JWT_REFRESH_SECRET
 EOF
+
+echo -e "${GREEN}Arquivo .env criado com sucesso em: $ENV_FILE${RESET}" | tee -a "$LOG_FILE"
+
 npm install | tee -a "$LOG_FILE"
 npm run build | tee -a "$LOG_FILE"
 npx sequelize db:migrate | tee -a "$LOG_FILE"
@@ -246,7 +296,7 @@ cat >.env <<EOF
 REACT_APP_BACKEND_URL=https://$URL_BACKEND
 REACT_APP_HOURS_CLOSE_TICKETS_AUTO=
 PORT=$PORT_FRONTEND
-REACT_APP_MASTERADMIN=OFF
+REACT_APP_MASTERADMIN=ON
 EOF
 npm install | tee -a "$LOG_FILE"
 npm run build | tee -a "$LOG_FILE"
