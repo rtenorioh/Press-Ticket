@@ -1,7 +1,5 @@
 #!/bin/bash
 
-sleep 3
-
 # Função para exibir uso correto do script
 show_usage() {
     echo "Uso: curl -sSL https://install.pressticket.com.br | sudo bash -s <SENHA_DEPLOY> <NOME_EMPRESA> <URL_BACKEND> <URL_FRONTEND> <PORT_BACKEND> <PORT_FRONTEND> <USER_LIMIT> <CONNECTION_LIMIT> <EMAIL>"
@@ -9,11 +7,10 @@ show_usage() {
     exit 1
 }
 
-sleep 2
-
 # Verifica se todos os parâmetros foram fornecidos
 if [ "$#" -ne 9 ]; then
     echo "Erro: Número insuficiente de parâmetros fornecidos."
+    echo ""
     show_usage
 fi
 
@@ -202,7 +199,7 @@ EOF
 # Seção 4: Instalação do Node.js e Dependências
 echo -e "${COLOR}Instalando Node.js e dependências...${RESET}" | tee -a "$LOG_FILE"
 curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
-sudo apt-get install -y nodejs apt-get-transport-https ca-certificates curl software-properties-common git ffmpeg | tee -a "$LOG_FILE"
+sudo apt-get install -y nodejs apt-transport-https ca-certificates curl software-properties-common git ffmpeg | tee -a "$LOG_FILE"
 
 # Adicionando o usuário ao grupo mysql
 sudo usermod -aG mysql "${USER}"
