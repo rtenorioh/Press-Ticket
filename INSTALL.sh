@@ -1,5 +1,33 @@
 #!/bin/bash
 
+sleep 3
+
+# Função para exibir uso correto do script
+show_usage() {
+    echo "Uso: curl -sSL https://install.pressticket.com.br | sudo bash -s <SENHA_DEPLOY> <NOME_EMPRESA> <URL_BACKEND> <URL_FRONTEND> <PORT_BACKEND> <PORT_FRONTEND> <USER_LIMIT> <CONNECTION_LIMIT> <EMAIL>"
+    echo "Exemplo: curl -sSL https://install.pressticket.com.br | sudo bash -s 'senha123' 'empresa' 'back.pressticket.com.br' 'front.pressticket.com.br' 8080 3333 3 10 'admin@pressticket.com.br'"
+    exit 1
+}
+
+sleep 2
+
+# Verifica se todos os parâmetros foram fornecidos
+if [ "$#" -ne 9 ]; then
+    echo "Erro: Número insuficiente de parâmetros fornecidos."
+    show_usage
+fi
+
+# Recebe os parâmetros
+SENHA_DEPLOY="$1"
+NOME_EMPRESA="$2"
+URL_BACKEND="$3"
+URL_FRONTEND="$4"
+PORT_BACKEND="$5"
+PORT_FRONTEND="$6"
+USER_LIMIT="$7"
+CONNECTION_LIMIT="$8"
+EMAIL="$9"
+
 # Verifica se o script está sendo executado como root
 if [ "$(id -u)" -ne 0 ]; then
     echo -e "\e[31mErro: Este script precisa ser executado como root.\e[0m"
@@ -35,34 +63,6 @@ echo -e "${COLOR}██║     ██║  ██║███████╗█�
 echo -e "${COLOR}╚═╝     ╚═╝  ╚═╝╚══════╝╚══════╝╚══════╝       ╚═╝   ╚═╝ ╚═════╝╚═╝  ╚═╝╚══════╝   ╚═╝   ${RESET}"
 echo -e "${GREEN}INICIANDO INSTALAÇÃO PARA A EMPRESA:${RESET} ${BOLD}$NOME_EMPRESA${RESET}"
 echo -e " "
-
-sleep 3
-
-# Função para exibir uso correto do script
-show_usage() {
-    echo "Uso: curl -sSL https://install.pressticket.com.br | sudo bash -s <SENHA_DEPLOY> <NOME_EMPRESA> <URL_BACKEND> <URL_FRONTEND> <PORT_BACKEND> <PORT_FRONTEND> <USER_LIMIT> <CONNECTION_LIMIT> <EMAIL>"
-    echo "Exemplo: curl -sSL https://install.pressticket.com.br | sudo bash -s 'senha123' 'empresa' 'back.pressticket.com.br' 'front.pressticket.com.br' 8080 3333 3 10 'admin@pressticket.com.br'"
-    exit 1
-}
-
-sleep 2
-
-# Verifica se todos os parâmetros foram fornecidos
-if [ "$#" -ne 9 ]; then
-    echo "Erro: Número insuficiente de parâmetros fornecidos."
-    show_usage
-fi
-
-# Recebe os parâmetros
-SENHA_DEPLOY="$1"
-NOME_EMPRESA="$2"
-URL_BACKEND="$3"
-URL_FRONTEND="$4"
-PORT_BACKEND="$5"
-PORT_FRONTEND="$6"
-USER_LIMIT="$7"
-CONNECTION_LIMIT="$8"
-EMAIL="$9"
 
 sleep 3
 
