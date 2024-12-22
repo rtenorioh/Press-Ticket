@@ -247,17 +247,40 @@ else
     echo -e "${YELLOW}Arquivo google-chrome-stable_current_amd64.deb não encontrado para remoção.${RESET}" | tee -a "$LOG_FILE"
 fi
 
-# Seção 6: Baixando Press Ticket
-echo -e "${COLOR}Verificando se o diretório do repositório já existe...${RESET}" | tee -a "$LOG_FILE"
-
-if [ -d "$NOME_EMPRESA" ]; then
-    echo -e "${YELLOW}O diretório '$NOME_EMPRESA' já existe. O repositório não será clonado.${RESET}" | tee -a "$LOG_FILE"
+# Deletar o arquivo .deb após a instalação
+if [ -f google-chrome-stable_current_amd64.deb ]; then
+    rm google-chrome-stable_current_amd64.deb
+    echo -e "${GREEN}Arquivo google-chrome-stable_current_amd64.deb removido com sucesso!${RESET}" | tee -a "$LOG_FILE"
 else
-    echo -e "${COLOR}Baixando repositório do Press Ticket...${RESET}" | tee -a "$LOG_FILE"
-    git clone https://github.com/rtenorioh/Press-Ticket.git "$NOME_EMPRESA" | tee -a "$LOG_FILE"
+    echo -e "${YELLOW}Arquivo google-chrome-stable_current_amd64.deb não encontrado para remoção.${RESET}" | tee -a "$LOG_FILE"
+fi
+
+# Seção 6: Baixando Press Ticket
+# Garantir que o usuário deploy foi criado antes de prosseguir
+if ! id "deploy" &>/dev/null; then
+    echo -e "${RED}Usuário 'deploy' não existe. Verifique a criação do usuário antes de continuar.${RESET}" | tee -a "$LOG_FILE"
+    exit 1
+fi
+
+# Muda para o diretório home do usuário deploy
+DEPLOY_HOME=$(eval echo ~deploy)
+if [ -z "$DEPLOY_HOME" ]; then
+    echo -e "${RED}Erro ao localizar o diretório home do usuário 'deploy'.${RESET}" | tee -a "$LOG_FILE"
+    exit 1
+fi
+
+# Define o diretório de instalação no home do deploy
+INSTALL_DIR="$DEPLOY_HOME/$NOME_EMPRESA"
+
+# Verifica se o diretório já existe
+if [ -d "$INSTALL_DIR" ]; then
+    echo -e "${YELLOW}O diretório '$INSTALL_DIR' já existe. O repositório não será clonado.${RESET}" | tee -a "$LOG_FILE"
+else
+    echo -e "${COLOR}Baixando repositório do Press Ticket como o usuário 'deploy'...${RESET}" | tee -a "$LOG_FILE"
+    sudo -u deploy bash -c "cd $DEPLOY_HOME && git clone https://github.com/rtenorioh/Press-Ticket.git $NOME_EMPRESA" | tee -a "$LOG_FILE"
 
     if [ $? -eq 0 ]; then
-        echo -e "${GREEN}Repositório clonado com sucesso!${RESET}" | tee -a "$LOG_FILE"
+        echo -e "${GREEN}Repositório clonado com sucesso no diretório: $INSTALL_DIR${RESET}" | tee -a "$LOG_FILE"
     else
         echo -e "${RED}Erro ao clonar o repositório. Verifique sua conexão ou as permissões.${RESET}" | tee -a "$LOG_FILE"
         exit 1
@@ -319,7 +342,7 @@ JWT_SECRET=$JWT_SECRET
 JWT_REFRESH_SECRET=$JWT_REFRESH_SECRET
 EOF
 
-echo -e "${GREEN}Arquivo .env criado com sucesso em: $ENV_FILE${RESET}" | tee -a "$LOG_FILE"
+echo -e "${GREEN}Arquivo .env criado com sucesso.${RESET}" | tee -a "$LOG_FILE"
 
 npm install | tee -a "$LOG_FILE"
 npm run build | tee -a "$LOG_FILE"
@@ -360,6 +383,31 @@ npm install | tee -a "$LOG_FILE"
 npm run build | tee -a "$LOG_FILE"
 pm2 start server.js --name $NOME_EMPRESA-front | tee -a "$LOG_FILE"
 pm2 save | tee -a "$LOG_FILE"
+
+# Atualiza o .env do backend com os IDs do PM2
+echo -e "${COLOR}Atualizando o arquivo .env do backend com os IDs do PM2...${RESET}" | tee -a "$LOG_FILE"
+
+# Captura os IDs dos processos do PM2
+PM2_BACKEND_ID=$(pm2 id "$NOME_EMPRESA-back" | grep -o '[0-9]*')
+PM2_FRONTEND_ID=$(pm2 id "$NOME_EMPRESA-front" | grep -o '[0-9]*')
+
+# Verifica se os IDs foram capturados corretamente
+if [ -z "$PM2_BACKEND_ID" ] || [ -z "$PM2_FRONTEND_ID" ]; then
+    echo -e "${RED}Erro: Não foi possível capturar os IDs dos processos PM2.${RESET}" | tee -a "$LOG_FILE"
+    exit 1
+fi
+
+# Define o caminho do arquivo .env no backend
+ENV_FILE="$BACKEND_DIR/.env"
+
+# Atualiza o arquivo .env com os valores dos IDs
+sed -i "s/^PM2_BACKEND=.*/PM2_BACKEND=$PM2_BACKEND_ID/" "$ENV_FILE"
+sed -i "s/^PM2_FRONTEND=.*/PM2_FRONTEND=$PM2_FRONTEND_ID/" "$ENV_FILE"
+
+# Confirmação de sucesso
+echo -e "${GREEN}Arquivo .env no backend atualizado com os IDs do PM2:${RESET}" | tee -a "$LOG_FILE"
+echo -e "  PM2_BACKEND=$PM2_BACKEND_ID" | tee -a "$LOG_FILE"
+echo -e "  PM2_FRONTEND=$PM2_FRONTEND_ID" | tee -a "$LOG_FILE"
 
 # Configurando Nginx
 echo -e "${COLOR}Configurando Nginx...${RESET}" | tee -a "$LOG_FILE"
@@ -502,4 +550,5 @@ echo -e "${BOLD}Senha:${RESET} masteradmin" | tee -a "$LOG_FILE"
 echo -e "${GREEN}---------------------------------------${RESET}" | tee -a "$LOG_FILE"
 
 # Mensagem final
-echo -e "${COLOR}Acesse o sistema e configure conforme necessário. Obrigado por utilizar o Press Ticket!${RESET}" | tee -a "$LOG_FILE"
+echo "" | tee -a "$LOG_FILE"
+echo -e "${COLOR}Acesse o sistema e configure conforme necessário. Obrigado por utilizar o Sistema Press Ticket!${RESET}" | tee -a "$LOG_FILE"
