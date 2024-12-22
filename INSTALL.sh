@@ -106,8 +106,20 @@ command_exists() {
     command -v "$1" >/dev/null 2>&1
 }
 
-# Verificando se dpkg está em estado interrompido
+# Verificando e corrigindo problemas no dpkg
 echo -e "${COLOR}Verificando o estado do dpkg...${RESET}" | tee -a "$LOG_FILE"
+if [ -d /var/lib/dpkg/updates ]; then
+    for file in /var/lib/dpkg/updates/*; do
+        if [ -s "$file" ]; then
+            echo "Verificando $file..." | tee -a "$LOG_FILE"
+        else
+            echo "Arquivo vazio ou corrompido encontrado: $file. Removendo..." | tee -a "$LOG_FILE"
+            sudo rm -f "$file"
+        fi
+    done
+fi
+
+# Corrigindo problemas no dpkg, se necessário
 if sudo dpkg --audit | grep -q "packages were"; then
     echo -e "${YELLOW}O dpkg está em estado interrompido. Tentando corrigir...${RESET}" | tee -a "$LOG_FILE"
     sudo dpkg --configure -a | tee -a "$LOG_FILE"
