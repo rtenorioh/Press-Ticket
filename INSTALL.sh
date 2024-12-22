@@ -24,6 +24,97 @@ PORT_FRONTEND="$6"
 USER_LIMIT="$7"
 CONNECTION_LIMIT="$8"
 EMAIL="$9"
+BRANCH="${10:-main}"
+
+# Validações
+validate_input() {
+    if [[ -z "$1" ]]; then
+        echo -e "\e[31mErro: O parâmetro '$2' não pode estar vazio.\e[0m"
+        exit 1
+    fi
+}
+
+# Função para validar e ajustar o nome da empresa
+validate_company_name() {
+    local company_name="$1"
+    local formatted_name
+
+    # Remove espaços e converte para minúsculas
+    formatted_name=$(echo "$company_name" | tr '[:upper:]' '[:lower:]' | tr -d ' ')
+
+    # Verifica se o nome contém apenas letras e números após a formatação
+    if [[ ! "$formatted_name" =~ ^[a-z0-9]+$ ]]; then
+        echo -e "\e[31mErro: O nome da empresa deve conter apenas letras minúsculas e números, sem espaços ou caracteres especiais.\e[0m"
+        exit 1
+    fi
+
+    # Retorna o nome formatado
+    echo "$formatted_name"
+}
+
+validate_url() {
+    # Remove o prefixo http:// ou https://, se presente
+    local clean_url
+    clean_url=$(echo "$1" | sed -E 's|^(https?://)||')
+
+    # Verifica se a URL está no formato correto
+    if [[ ! "$clean_url" =~ ^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$ ]]; then
+        echo -e "\e[31mErro: O parâmetro '$2' não é uma URL válida: $1\e[0m"
+        exit 1
+    fi
+
+    # Retorna a URL limpa
+    echo "$clean_url"
+}
+
+validate_port() {
+    if [[ ! "$1" =~ ^[0-9]+$ ]] || [ "$1" -lt 1 ] || [ "$1" -gt 65535 ]; then
+        echo -e "\e[31mErro: O parâmetro '$2' não é uma porta válida: $1\e[0m"
+        exit 1
+    fi
+}
+
+validate_number() {
+    if [[ ! "$1" =~ ^[0-9]+$ ]]; then
+        echo -e "\e[31mErro: O parâmetro '$2' deve ser um número: $1\e[0m"
+        exit 1
+    fi
+}
+
+validate_email() {
+    if [[ ! "$1" =~ ^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$ ]]; then
+        echo -e "\e[31mErro: O parâmetro '$2' não é um e-mail válido: $1\e[0m"
+        exit 1
+    fi
+}
+
+# Validar senha
+validate_input "$SENHA_DEPLOY" "SENHA_DEPLOY"
+
+# Validar nome da empresa e ajustar
+NOME_EMPRESA=$(validate_company_name "$NOME_EMPRESA")
+echo -e "\e[32mNome da empresa formatado para: $NOME_EMPRESA\e[0m"
+
+# Validar e limpar URLs
+URL_BACKEND=$(validate_url "$URL_BACKEND" "URL_BACKEND")
+URL_FRONTEND=$(validate_url "$URL_FRONTEND" "URL_FRONTEND")
+
+# Validar portas
+validate_port "$PORT_BACKEND" "PORT_BACKEND"
+validate_port "$PORT_FRONTEND" "PORT_FRONTEND"
+
+# Validar limites de usuários e conexões
+validate_number "$USER_LIMIT" "USER_LIMIT"
+validate_number "$CONNECTION_LIMIT" "CONNECTION_LIMIT"
+
+# Validar e-mail
+validate_email "$EMAIL" "EMAIL"
+
+# Continuar com o restante do script
+echo -e "\e[32mTodas as validações foram concluídas com sucesso! Continuando a instalação...\e[0m"
+
+# Exibir branch que será usada
+echo -e "\e[32mBranch selecionada para o repositório: $BRANCH\e[0m"
 
 # Verifica se o script está sendo executado como root
 if [ "$(id -u)" -ne 0 ]; then
@@ -276,13 +367,13 @@ INSTALL_DIR="$DEPLOY_HOME/$NOME_EMPRESA"
 if [ -d "$INSTALL_DIR" ]; then
     echo -e "${YELLOW}O diretório '$INSTALL_DIR' já existe. O repositório não será clonado.${RESET}" | tee -a "$LOG_FILE"
 else
-    echo -e "${COLOR}Baixando repositório do Press Ticket como o usuário 'deploy'...${RESET}" | tee -a "$LOG_FILE"
-    sudo -u deploy bash -c "cd $DEPLOY_HOME && git clone https://github.com/rtenorioh/Press-Ticket.git $NOME_EMPRESA" | tee -a "$LOG_FILE"
+    echo -e "${COLOR}Baixando repositório do Press Ticket como o usuário 'deploy' na branch '$BRANCH'...${RESET}" | tee -a "$LOG_FILE"
+    sudo -u deploy bash -c "cd $DEPLOY_HOME && git clone -b $BRANCH https://github.com/rtenorioh/Press-Ticket.git $NOME_EMPRESA" | tee -a "$LOG_FILE"
 
     if [ $? -eq 0 ]; then
-        echo -e "${GREEN}Repositório clonado com sucesso no diretório: $INSTALL_DIR${RESET}" | tee -a "$LOG_FILE"
+        echo -e "${GREEN}Repositório clonado com sucesso na branch '$BRANCH' no diretório: $INSTALL_DIR${RESET}" | tee -a "$LOG_FILE"
     else
-        echo -e "${RED}Erro ao clonar o repositório. Verifique sua conexão ou as permissões.${RESET}" | tee -a "$LOG_FILE"
+        echo -e "${RED}Erro ao clonar o repositório na branch '$BRANCH'. Verifique a branch, sua conexão ou as permissões.${RESET}" | tee -a "$LOG_FILE"
         exit 1
     fi
 fi
