@@ -106,32 +106,8 @@ command_exists() {
     command -v "$1" >/dev/null 2>&1
 }
 
-# Verificando e corrigindo problemas no dpkg
-echo -e "${COLOR}Verificando o estado do dpkg...${RESET}" | tee -a "$LOG_FILE"
-if [ -d /var/lib/dpkg/updates ]; then
-    for file in /var/lib/dpkg/updates/*; do
-        if [ -s "$file" ]; then
-            echo "Verificando $file..." | tee -a "$LOG_FILE"
-        else
-            echo "Arquivo vazio ou corrompido encontrado: $file. Removendo..." | tee -a "$LOG_FILE"
-            sudo rm -f "$file"
-        fi
-    done
-fi
-
-# Corrigindo problemas no dpkg, se necessário
-if sudo dpkg --audit | grep -q "packages were"; then
-    echo -e "${YELLOW}O dpkg está em estado interrompido. Tentando corrigir...${RESET}" | tee -a "$LOG_FILE"
-    sudo dpkg --configure -a | tee -a "$LOG_FILE"
-    if [ $? -eq 0 ]; then
-        echo -e "${GREEN}O dpkg foi corrigido com sucesso.${RESET}" | tee -a "$LOG_FILE"
-    else
-        echo -e "${RED}Erro ao corrigir o dpkg. Por favor, verifique manualmente.${RESET}" | tee -a "$LOG_FILE"
-        exit 1
-    fi
-else
-    echo -e "${GREEN}O dpkg está funcionando corretamente.${RESET}" | tee -a "$LOG_FILE"
-fi
+sudo rm -f /var/lib/dpkg/updates/* | tee -a "$LOG_FILE"
+sudo dpkg --configure -a | tee -a "$LOG_FILE"
 
 # Seção 1: Preparação Inicial
 echo -e "${COLOR}Preparação Inicial...${RESET}" | tee -a "$LOG_FILE"
@@ -310,6 +286,12 @@ JWT_REFRESH_SECRET=$(openssl rand -base64 32)
 
 if [ -z "$JWT_SECRET" ] || [ -z "$JWT_REFRESH_SECRET" ]; then
     echo "Erro: Não foi possível gerar os valores JWT_SECRET e JWT_REFRESH_SECRET." | tee -a "$LOG_FILE"
+    exit 1
+fi
+
+# Validando variáveis antes do uso
+if [ -z "$ENV_FILE" ] || [ -z "$URL_BACKEND" ] || [ -z "$JWT_SECRET" ] || [ -z "$PORT_BACKEND" ]; then
+    echo "Erro: Uma ou mais variáveis obrigatórias estão vazias." | tee -a "$LOG_FILE"
     exit 1
 fi
 
