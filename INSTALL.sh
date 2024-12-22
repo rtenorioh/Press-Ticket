@@ -106,6 +106,21 @@ command_exists() {
     command -v "$1" >/dev/null 2>&1
 }
 
+# Verificando se dpkg está em estado interrompido
+echo -e "${COLOR}Verificando o estado do dpkg...${RESET}" | tee -a "$LOG_FILE"
+if sudo dpkg --audit | grep -q "packages were"; then
+    echo -e "${YELLOW}O dpkg está em estado interrompido. Tentando corrigir...${RESET}" | tee -a "$LOG_FILE"
+    sudo dpkg --configure -a | tee -a "$LOG_FILE"
+    if [ $? -eq 0 ]; then
+        echo -e "${GREEN}O dpkg foi corrigido com sucesso.${RESET}" | tee -a "$LOG_FILE"
+    else
+        echo -e "${RED}Erro ao corrigir o dpkg. Por favor, verifique manualmente.${RESET}" | tee -a "$LOG_FILE"
+        exit 1
+    fi
+else
+    echo -e "${GREEN}O dpkg está funcionando corretamente.${RESET}" | tee -a "$LOG_FILE"
+fi
+
 # Seção 1: Preparação Inicial
 echo -e "${COLOR}Preparação Inicial...${RESET}" | tee -a "$LOG_FILE"
 
@@ -123,7 +138,7 @@ echo -e "${COLOR}Verificando a instalação do MySQL Server...${RESET}" | tee -a
 if ! command -v mysql &>/dev/null; then
     echo -e "${RED}MySQL Server não encontrado. Instalando...${RESET}" | tee -a "$LOG_FILE"
     sudo apt-get update && sudo apt-get install -y mysql-server | tee -a "$LOG_FILE"
-    if [ $? -eq 0 ]; then
+    if [ $? -eq 0 ] && command -v mysql &>/dev/null; then
         echo -e "${GREEN}MySQL Server instalado com sucesso!${RESET}" | tee -a "$LOG_FILE"
     else
         echo -e "${RED}Erro ao instalar o MySQL Server.${RESET}" | tee -a "$LOG_FILE"
