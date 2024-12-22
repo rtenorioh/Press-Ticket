@@ -290,18 +290,20 @@ fi
 # Configurando Backend
 echo -e "${COLOR}Configurando Backend...${RESET}" | tee -a "$LOG_FILE"
 
-BACKEND_DIR="$NOME_EMPRESA/backend"
-
-# Verifica se o diretório do backend existe
-if [ ! -d "$BACKEND_DIR" ]; then
-    echo -e "${RED}Erro: O diretório '$BACKEND_DIR' não existe.${RESET}" | tee -a "$LOG_FILE"
-    exit 1
+# Verificar se o diretório do backend existe
+if [ -d "/home/deploy/dev/backend" ]; then
+    BACKEND_DIR="/home/deploy/dev/backend"
+elif [ -d "/home/deploy/dev" ]; then
+    BACKEND_DIR="/home/deploy/dev"
 else
-    echo -e "${GREEN}Diretório '$BACKEND_DIR' encontrado. Prosseguindo com a instalação...${RESET}" | tee -a "$LOG_FILE"
+    echo -e "${RED}Erro: O diretório 'dev/backend' ou 'dev' não existe.${RESET}" | tee -a "$LOG_FILE"
+    exit 1
 fi
 
+echo -e "${GREEN}Diretório '$BACKEND_DIR' encontrado. Prosseguindo com a instalação...${RESET}" | tee -a "$LOG_FILE"
+
 # Navega para o diretório do backend
-cd $BACKEND_DIR
+cd "$BACKEND_DIR"
 
 # Gera os valores de JWT_SECRET e JWT_REFRESH_SECRET
 JWT_SECRET=$(openssl rand -base64 32)
