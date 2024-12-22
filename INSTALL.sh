@@ -290,13 +290,13 @@ if [ -z "$JWT_SECRET" ] || [ -z "$JWT_REFRESH_SECRET" ]; then
 fi
 
 # Validando variáveis antes do uso
-if [ -z "$ENV_FILE" ] || [ -z "$URL_BACKEND" ] || [ -z "$JWT_SECRET" ] || [ -z "$PORT_BACKEND" ]; then
+if [ -z "$JWT_REFRESH_SECRET" ] || [ -z "$URL_BACKEND" ] || [ -z "$JWT_SECRET" ] || [ -z "$PORT_BACKEND" ]; then
     echo "Erro: Uma ou mais variáveis obrigatórias estão vazias." | tee -a "$LOG_FILE"
     exit 1
 fi
 
 # Gera o arquivo .env
-cat >"$ENV_FILE" <<EOF
+cat >.env <<EOF
 NODE_ENV=production
 BACKEND_URL=https://$URL_BACKEND
 FRONTEND_URL=https://$URL_FRONTEND
