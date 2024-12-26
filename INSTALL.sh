@@ -2,14 +2,18 @@
 
 # Função para exibir uso correto do script
 show_usage() {
-    echo "Uso: curl -sSL https://install.pressticket.com.br | sudo bash -s <SENHA_DEPLOY> <NOME_EMPRESA> <URL_BACKEND> <URL_FRONTEND> <PORT_BACKEND> <PORT_FRONTEND> <USER_LIMIT> <CONNECTION_LIMIT> <EMAIL>"
-    echo "Exemplo: curl -sSL https://install.pressticket.com.br | sudo bash -s 'senha123' 'empresa' 'back.pressticket.com.br' 'front.pressticket.com.br' 8080 3333 3 10 'admin@pressticket.com.br'"
+    echo -e "\n\033[1;33m=== USO DO SCRIPT ===\033[0m"
+    echo -e "\033[1mComando:\033[0m"
+    echo -e "  \033[1;32mcurl -sSL https://install.pressticket.com.br | sudo bash -s <SENHA_DEPLOY> <NOME_EMPRESA> <URL_BACKEND> <URL_FRONTEND> <PORT_BACKEND> <PORT_FRONTEND> <USER_LIMIT> <CONNECTION_LIMIT> <EMAIL>\033[0m"
+    echo -e "\n\033[1mExemplo:\033[0m"
+    echo -e "  \033[1;32mcurl -sSL https://install.pressticket.com.br | sudo bash -s 'senha123' 'empresa' 'back.pressticket.com.br' 'front.pressticket.com.br' 8080 3333 3 10 'admin@pressticket.com.br'\033[0m"
+    echo -e "\n\033[1;33m======================\033[0m"
     exit 1
 }
 
-# Verifica se todos os parâmetros foram fornecidos
-if [ "$#" -ne 9 ]; then
-    echo "Erro: Número insuficiente de parâmetros fornecidos."
+# Verifica se os parâmetros fornecidos são suficientes
+if [ "$#" -lt 9 ] || [ "$#" -gt 10 ]; then
+    echo -e "\033[1;31mErro: Número inválido de parâmetros fornecidos.\033[0m"
     echo ""
     show_usage
 fi
