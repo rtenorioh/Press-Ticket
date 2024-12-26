@@ -232,7 +232,8 @@ echo -e "${COLOR}Verificando existência do banco de dados: ${RESET}$NOME_EMPRES
 DB_EXISTS=$(sudo mysql -u root -e "SHOW DATABASES LIKE '$NOME_EMPRESA';" | grep "$NOME_EMPRESA")
 
 if [ "$DB_EXISTS" ]; then
-    echo -e "${YELLOW}O banco de dados '$NOME_EMPRESA' já existe. Nenhuma ação necessária.${RESET}" | tee -a "$LOG_FILE"
+    echo -e "${YELLOW}O banco de dados '$NOME_EMPRESA' já existe.${RESET}" | tee -a "$LOG_FILE"
+    exit 1
 else
     echo -e "${BOLD}Criando banco de dados:${RESET} $NOME_EMPRESA" | tee -a "$LOG_FILE"
     sudo mysql -u root <<MYSQL_SCRIPT
@@ -338,14 +339,6 @@ else
     echo -e "${YELLOW}Arquivo google-chrome-stable_current_amd64.deb não encontrado para remoção.${RESET}" | tee -a "$LOG_FILE"
 fi
 
-# Deletar o arquivo .deb após a instalação
-if [ -f google-chrome-stable_current_amd64.deb ]; then
-    rm google-chrome-stable_current_amd64.deb
-    echo -e "${GREEN}Arquivo google-chrome-stable_current_amd64.deb removido com sucesso!${RESET}" | tee -a "$LOG_FILE"
-else
-    echo -e "${YELLOW}Arquivo google-chrome-stable_current_amd64.deb não encontrado para remoção.${RESET}" | tee -a "$LOG_FILE"
-fi
-
 # Seção 6: Baixando Press Ticket
 # Garantir que o usuário deploy foi criado antes de prosseguir
 if ! id "deploy" &>/dev/null; then
@@ -366,6 +359,7 @@ INSTALL_DIR="$DEPLOY_HOME/$NOME_EMPRESA"
 # Verifica se o diretório já existe
 if [ -d "$INSTALL_DIR" ]; then
     echo -e "${YELLOW}O diretório '$INSTALL_DIR' já existe. O repositório não será clonado.${RESET}" | tee -a "$LOG_FILE"
+    exit 1
 else
     echo -e "${COLOR}Baixando repositório do Press Ticket como o usuário 'deploy' na branch '$BRANCH'...${RESET}" | tee -a "$LOG_FILE"
     sudo -u deploy bash -c "cd $DEPLOY_HOME && git clone -b $BRANCH https://github.com/rtenorioh/Press-Ticket.git $NOME_EMPRESA" | tee -a "$LOG_FILE"
@@ -442,24 +436,28 @@ npm run build | tee -a "$LOG_FILE"
 npx sequelize db:migrate | tee -a "$LOG_FILE"
 npx sequelize db:seed:all | tee -a "$LOG_FILE"
 
-# Instalação do PM2
-echo -e "${COLOR}Verificando se o PM2 está instalado...${RESET}" | tee -a "$LOG_FILE"
+# Verificando e Instalando o PM2 como usuário deploy
+echo -e "${COLOR}Verificando a instalação do PM2...${RESET}" | tee -a "$LOG_FILE"
 
-if command -v pm2 &>/dev/null; then
-    echo -e "${GREEN}PM2 já está instalado. Prosseguindo...${RESET}" | tee -a "$LOG_FILE"
+# Verifica se o PM2 já está instalado para o usuário deploy
+if sudo -u deploy bash -c "command -v pm2" >/dev/null 2>&1; then
+    echo -e "${GREEN}PM2 já está instalado globalmente para o usuário deploy.${RESET}" | tee -a "$LOG_FILE"
 else
-    echo -e "${YELLOW}PM2 não encontrado. Instalando...${RESET}" | tee -a "$LOG_FILE"
-    sudo npm install -g pm2 | tee -a "$LOG_FILE"
+    echo -e "${YELLOW}PM2 não encontrado. Instalando como usuário deploy...${RESET}" | tee -a "$LOG_FILE"
+    sudo -u deploy bash -c "npm install -g pm2"
     if [ $? -eq 0 ]; then
-        echo -e "${GREEN}PM2 instalado com sucesso!${RESET}" | tee -a "$LOG_FILE"
+        echo -e "${GREEN}PM2 instalado com sucesso para o usuário deploy!${RESET}" | tee -a "$LOG_FILE"
     else
-        echo -e "${RED}Erro ao instalar o PM2. Verifique os logs acima.${RESET}" | tee -a "$LOG_FILE"
+        echo -e "${RED}Erro ao instalar o PM2 para o usuário deploy. Verifique os logs acima.${RESET}" | tee -a "$LOG_FILE"
         exit 1
     fi
 fi
 
-pm2 start dist/server.js --name $NOME_EMPRESA-back | tee -a "$LOG_FILE"
-sudo env PATH=$PATH:/usr/bin pm2 startup ubuntu -u deploy --hp /home/deploy
+sudo -u deploy pm2 start dist/server.js --name $NOME_EMPRESA-back | tee -a "$LOG_FILE"
+
+# Configurando PM2 para inicializar no sistema como usuário deploy
+echo -e "${COLOR}Configurando PM2 para inicializar no boot como usuário deploy...${RESET}" | tee -a "$LOG_FILE"
+sudo -u deploy bash -c "env PATH=$PATH:/usr/bin pm2 startup ubuntu -u deploy --hp /home/deploy" | tee -a "$LOG_FILE"
 
 # Configurando Frontend
 echo -e "${COLOR}Configurando Frontend...${RESET}" | tee -a "$LOG_FILE"
@@ -474,8 +472,8 @@ EOF
 
 npm install | tee -a "$LOG_FILE"
 npm run build | tee -a "$LOG_FILE"
-pm2 start server.js --name $NOME_EMPRESA-front | tee -a "$LOG_FILE"
-pm2 save | tee -a "$LOG_FILE"
+sudo -u deploy pm2 start server.js --name $NOME_EMPRESA-front | tee -a "$LOG_FILE"
+sudo -u deploy pm2 save | tee -a "$LOG_FILE"
 
 # Atualiza o .env do backend com os IDs do PM2
 echo -e "${COLOR}Atualizando o arquivo .env do backend com os IDs do PM2...${RESET}" | tee -a "$LOG_FILE"
