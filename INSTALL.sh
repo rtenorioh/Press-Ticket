@@ -646,4 +646,10 @@ echo -e "${GREEN}---------------------------------------${RESET}" | tee -a "$LOG
 
 # Mensagem final
 echo "" | tee -a "$LOG_FILE"
-echo -e "${COLOR}Acesse o sistema e configure conforme necessário. Obrigado por utilizar o Sistema Press Ticket!${RESET}" | tee -a "$LOG_FILE"
+echo -e "${COLOR}Acesse o sistema e configure conforme necessário.${RESET}" | tee -a "$LOG_FILE"
+echo "" | tee -a "$LOG_FILE"
+echo -e "${COLOR}Obrigado por utilizar o Sistema Press Ticket!${RESET}" | tee -a "$LOG_FILE"
+echo -e "${COLOR}Desde de 2022${RESET}" | tee -a "$LOG_FILE"
+
+# Certifique-se de que a última linha termina corretamente:
+exit 0
