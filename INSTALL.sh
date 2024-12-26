@@ -388,12 +388,12 @@ fi
 echo -e "${COLOR}Configurando Backend...${RESET}" | tee -a "$LOG_FILE"
 
 # Verificar se o diretório do backend existe
-if [ -d "/home/deploy/dev/backend" ]; then
-    BACKEND_DIR="/home/deploy/dev/backend"
-elif [ -d "/home/deploy/dev" ]; then
-    BACKEND_DIR="/home/deploy/dev"
+if [ -d "/home/deploy/$NOME_EMPRESA/backend" ]; then
+    BACKEND_DIR="/home/deploy/$NOME_EMPRESA/backend"
+elif [ -d "/home/deploy/$NOME_EMPRESA" ]; then
+    BACKEND_DIR="/home/deploy/$NOME_EMPRESA"
 else
-    echo -e "${RED}Erro: O diretório 'dev/backend' ou 'dev' não existe.${RESET}" | tee -a "$LOG_FILE"
+    echo -e "${RED}Erro: O diretório '$NOME_EMPRESA/backend' ou '$NOME_EMPRESA' não existe.${RESET}" | tee -a "$LOG_FILE"
     exit 1
 fi
 
