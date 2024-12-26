@@ -170,7 +170,7 @@ echo "Depois de escolher o fuso horário desejado, execute novamente o script in
 echo ""
 echo "Por exemplo, para usar o fuso horário 'Asia/Kolkata', execute:"
 echo ""
-echo "    curl -sSL https://update.pressticket.com.br | sudo bash -s -- Asia/Kolkata"
+echo "    curl -sSL https://install.pressticket.com.br | sudo bash -s -- Asia/Kolkata"
 echo ""
 
 # Pausa para o usuário ler a mensagem
@@ -334,6 +334,14 @@ echo -e "${COLOR}Instalando Google Chrome e dependências...${RESET}" | tee -a "
 sudo apt-get install -y libgbm-dev wget unzip fontconfig locales gconf-service libasound2 libatk1.0-0 libc6 libcairo2 libcups2 libdbus-1-3 libexpat1 libfontconfig1 libgcc1 libgconf-2-4 libgdk-pixbuf2.0-0 libglib2.0-0 libgtk-3-0 libnspr4 libpango-1.0-0 libpangocairo-1.0-0 libstdc++6 libx11-6 libx11-xcb1 libxcb1 libxcomposite1 libxcursor1 libxdamage1 libxext6 libxfixes3 libxi6 libxrandr2 libxrender1 libxss1 libxtst6 ca-certificates fonts-liberation libappindicator1 libnss3 lsb-release xdg-utils | tee -a "$LOG_FILE"
 wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
 sudo apt-get install ./google-chrome-stable_current_amd64.deb | tee -a "$LOG_FILE"
+
+# Deletar o arquivo .deb após a instalação
+if [ -f google-chrome-stable_current_amd64.deb ]; then
+    rm google-chrome-stable_current_amd64.deb
+    echo -e "${GREEN}Arquivo google-chrome-stable_current_amd64.deb removido com sucesso!${RESET}" | tee -a "$LOG_FILE"
+else
+    echo -e "${YELLOW}Arquivo google-chrome-stable_current_amd64.deb não encontrado para remoção.${RESET}" | tee -a "$LOG_FILE"
+fi
 
 # Deletar o arquivo .deb após a instalação
 if [ -f google-chrome-stable_current_amd64.deb ]; then
