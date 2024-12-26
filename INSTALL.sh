@@ -456,8 +456,15 @@ if sudo -u deploy bash -c "command -v pm2" >/dev/null 2>&1; then
     echo -e "${GREEN}PM2 já está instalado globalmente para o usuário deploy.${RESET}" | tee -a "$LOG_FILE"
 else
     echo -e "${YELLOW}PM2 não encontrado. Instalando como usuário deploy...${RESET}" | tee -a "$LOG_FILE"
-    sudo -u deploy bash -c "npm install -g pm2"
-    if [ $? -eq 0 ]; then
+    sudo -u deploy bash -c "
+    mkdir -p ~/npm-global
+    npm config set prefix '~/npm-global'
+    echo 'export PATH=~/npm-global/bin:\$PATH' >> ~/.bashrc
+    source ~/.bashrc
+    npm install -g pm2
+    " | tee -a "$LOG_FILE"
+
+    if sudo -u deploy bash -c "command -v pm2" >/dev/null 2>&1; then
         echo -e "${GREEN}PM2 instalado com sucesso para o usuário deploy!${RESET}" | tee -a "$LOG_FILE"
     else
         echo -e "${RED}Erro ao instalar o PM2 para o usuário deploy. Verifique os logs acima.${RESET}" | tee -a "$LOG_FILE"
