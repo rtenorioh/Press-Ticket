@@ -175,7 +175,7 @@ echo -e " "
 sleep 3
 
 {
-    echo""
+    echo ""
     echo -e "${COLOR}Verificando logs..${RESET}"
     echo ""
 } | tee -a "$LOG_FILE"
