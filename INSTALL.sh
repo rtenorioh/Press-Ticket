@@ -343,14 +343,6 @@ else
     echo -e "${YELLOW}Arquivo google-chrome-stable_current_amd64.deb não encontrado para remoção.${RESET}" | tee -a "$LOG_FILE"
 fi
 
-# Deletar o arquivo .deb após a instalação
-if [ -f google-chrome-stable_current_amd64.deb ]; then
-    rm google-chrome-stable_current_amd64.deb
-    echo -e "${GREEN}Arquivo google-chrome-stable_current_amd64.deb removido com sucesso!${RESET}" | tee -a "$LOG_FILE"
-else
-    echo -e "${YELLOW}Arquivo google-chrome-stable_current_amd64.deb não encontrado para remoção.${RESET}" | tee -a "$LOG_FILE"
-fi
-
 # Seção 6: Baixando Press Ticket
 # Garantir que o usuário deploy foi criado antes de prosseguir
 if ! id "deploy" &>/dev/null; then
@@ -455,10 +447,10 @@ echo -e "${COLOR}Verificando a instalação do PM2...${RESET}" | tee -a "$LOG_FI
 sudo -u deploy bash -c "
 mkdir -p $DEPLOY_HOME/npm-global
 npm config set prefix '$DEPLOY_HOME/npm-global'
-echo 'export PATH=$DEPLOY_HOME/npm-global/bin:\$PATH' >> $DEPLOY_HOME/.bash_profile
+echo 'export PATH=$DEPLOY_HOME/npm-global/bin:\$PATH' >> $DEPLOY_HOME/.bashrc
 "
 
-# Agora, forçar a inclusão do PATH
+# Agora, exporta explicitamente o PATH para garantir que o diretório bin do npm-global está na variável de ambiente
 export PATH=$DEPLOY_HOME/npm-global/bin:$PATH
 
 # Tentar instalar o PM2
@@ -469,8 +461,8 @@ else
     exit 1
 fi
 
-# Validar se o PM2 está acessível
-if sudo -u deploy bash -c "command -v pm2"; then
+# Validar se o PM2 está acessível diretamente no PATH do usuário 'deploy'
+if sudo -u deploy bash -c "PATH=$DEPLOY_HOME/npm-global/bin:$PATH command -v pm2"; then
     echo -e "${GREEN}PM2 encontrado e pronto para uso.${RESET}" | tee -a "$LOG_FILE"
 else
     echo -e "${RED}PM2 não foi encontrado no PATH após a instalação. Verifique manualmente.${RESET}" | tee -a "$LOG_FILE"
