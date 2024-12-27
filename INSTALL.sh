@@ -43,6 +43,7 @@ show_params() {
     echo "CONNECTION_LIMIT: $CONNECTION_LIMIT"
     echo "EMAIL: $EMAIL"
     echo "BRANCH: $BRANCH"
+    echo "============================"
 }
 
 # Validações
@@ -173,23 +174,11 @@ echo -e " "
 
 sleep 3
 
-# Exibir mensagem com a lista de fusos horários
-echo "O fuso horário padrão está definido como 'America/Sao_Paulo'."
-echo ""
-echo "Caso deseje usar outro fuso horário, utilize o comando abaixo para ver a lista completa:"
-echo ""
-echo "    timedatectl list-timezones"
-echo ""
-echo "Para parar a execução atual e rodar o comando acima, pressione 'CTRL + C'."
-echo "Depois de escolher o fuso horário desejado, execute novamente o script informando o fuso como parâmetro."
-echo ""
-echo "Por exemplo, para usar o fuso horário 'Asia/Kolkata', execute:"
-echo ""
-echo "    curl -sSL https://install.pressticket.com.br | sudo bash -s -- Asia/Kolkata"
-echo ""
-
-# Pausa para o usuário ler a mensagem
-sleep 10
+{
+    echo""
+    echo -e "${COLOR}Verificando logs..${RESET}"
+    echo ""
+} | tee -a "$LOG_FILE"
 
 # Compactação de logs antigos usando zip
 if find "$CURRENT_LOG_DIR" -type f -mtime +30 | grep -q .; then
@@ -218,7 +207,11 @@ command_exists() {
 
 sleep 5
 
-show_params | tee -a "$LOG_FILE"
+{
+    echo ""
+    show_params
+    echo ""
+} | tee -a "$LOG_FILE"
 
 sudo rm -f /var/lib/dpkg/updates/* | tee -a "$LOG_FILE"
 sudo dpkg --configure -a | tee -a "$LOG_FILE"
@@ -464,15 +457,15 @@ echo -e "${COLOR}Verificando a instalação do PM2...${RESET}" | tee -a "$LOG_FI
 
 # Configura o npm para usar diretório local do deploy
 sudo -u deploy bash -c "
-mkdir -p $DEPLOY_HOME/npm-global
+mkdir -p "$DEPLOY_HOME/npm-global"
 npm config set prefix '$DEPLOY_HOME/npm-global'
 echo 'export PATH=$DEPLOY_HOME/npm-global/bin:\$PATH' >> $DEPLOY_HOME/.bashrc
 "
 
 # Agora, exporta explicitamente o PATH para garantir que o diretório bin do npm-global está na variável de ambiente
-export PATH=$DEPLOY_HOME/npm-global/bin:$PATH
+export PATH="$DEPLOY_HOME/npm-global/bin:$PATH"
 
-# Tentar instalar o PM2
+# instalar o PM2
 if sudo -u deploy bash -c "npm install -g pm2"; then
     echo -e "${GREEN}PM2 instalado com sucesso para o usuário deploy!${RESET}" | tee -a "$LOG_FILE"
 else
