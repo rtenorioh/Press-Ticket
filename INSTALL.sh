@@ -455,11 +455,11 @@ echo -e "${COLOR}Verificando a instalação do PM2...${RESET}" | tee -a "$LOG_FI
 sudo -u deploy bash -c "
 mkdir -p $DEPLOY_HOME/npm-global
 npm config set prefix '$DEPLOY_HOME/npm-global'
-if ! grep -q 'export PATH=$DEPLOY_HOME/npm-global/bin:\$PATH' $DEPLOY_HOME/.bashrc; then
-    echo 'export PATH=$DEPLOY_HOME/npm-global/bin:\$PATH' >> $DEPLOY_HOME/.bashrc
-fi
-source $DEPLOY_HOME/.bashrc
+echo 'export PATH=$DEPLOY_HOME/npm-global/bin:\$PATH' >> $DEPLOY_HOME/.bash_profile
 "
+
+# Agora, forçar a inclusão do PATH
+export PATH=$DEPLOY_HOME/npm-global/bin:$PATH
 
 # Tentar instalar o PM2
 if sudo -u deploy bash -c "npm install -g pm2"; then
