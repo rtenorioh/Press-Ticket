@@ -358,7 +358,7 @@ if ! id "deploy" &>/dev/null; then
     exit 1
 fi
 
-# Muda para o diretório home do usuário deploy
+# Define o diretório home do usuário deploy
 DEPLOY_HOME=$(eval echo ~deploy)
 if [ -z "$DEPLOY_HOME" ]; then
     echo -e "${RED}Erro ao localizar o diretório home do usuário 'deploy'.${RESET}" | tee -a "$LOG_FILE"
@@ -448,28 +448,33 @@ npm run build | tee -a "$LOG_FILE"
 npx sequelize db:migrate | tee -a "$LOG_FILE"
 npx sequelize db:seed:all | tee -a "$LOG_FILE"
 
-# Verificando e Instalando o PM2 como usuário deploy
+# Seção: Instalação do PM2
 echo -e "${COLOR}Verificando a instalação do PM2...${RESET}" | tee -a "$LOG_FILE"
 
-# Verifica se o PM2 já está instalado para o usuário deploy
-if sudo -u deploy bash -c "command -v pm2" >/dev/null 2>&1; then
-    echo -e "${GREEN}PM2 já está instalado globalmente para o usuário deploy.${RESET}" | tee -a "$LOG_FILE"
-else
-    echo -e "${YELLOW}PM2 não encontrado. Instalando como usuário deploy...${RESET}" | tee -a "$LOG_FILE"
-    sudo -u deploy bash -c "
-    mkdir -p ~/npm-global
-    npm config set prefix '~/npm-global'
-    echo 'export PATH=~/npm-global/bin:\$PATH' >> ~/.bashrc
-    source ~/.bashrc
-    npm install -g pm2
-    " | tee -a "$LOG_FILE"
+# Configura o npm para usar diretório local do deploy
+sudo -u deploy bash -c "
+mkdir -p $DEPLOY_HOME/npm-global
+npm config set prefix '$DEPLOY_HOME/npm-global'
+if ! grep -q 'export PATH=$DEPLOY_HOME/npm-global/bin:\$PATH' $DEPLOY_HOME/.bashrc; then
+    echo 'export PATH=$DEPLOY_HOME/npm-global/bin:\$PATH' >> $DEPLOY_HOME/.bashrc
+fi
+source $DEPLOY_HOME/.bashrc
+"
 
-    if sudo -u deploy bash -c "command -v pm2" >/dev/null 2>&1; then
-        echo -e "${GREEN}PM2 instalado com sucesso para o usuário deploy!${RESET}" | tee -a "$LOG_FILE"
-    else
-        echo -e "${RED}Erro ao instalar o PM2 para o usuário deploy. Verifique os logs acima.${RESET}" | tee -a "$LOG_FILE"
-        exit 1
-    fi
+# Tentar instalar o PM2
+if sudo -u deploy bash -c "npm install -g pm2"; then
+    echo -e "${GREEN}PM2 instalado com sucesso para o usuário deploy!${RESET}" | tee -a "$LOG_FILE"
+else
+    echo -e "${RED}Erro ao instalar o PM2 para o usuário deploy. Verifique os logs acima.${RESET}" | tee -a "$LOG_FILE"
+    exit 1
+fi
+
+# Validar se o PM2 está acessível
+if sudo -u deploy bash -c "command -v pm2"; then
+    echo -e "${GREEN}PM2 encontrado e pronto para uso.${RESET}" | tee -a "$LOG_FILE"
+else
+    echo -e "${RED}PM2 não foi encontrado no PATH após a instalação. Verifique manualmente.${RESET}" | tee -a "$LOG_FILE"
+    exit 1
 fi
 
 sudo -u deploy pm2 start dist/server.js --name $NOME_EMPRESA-back | tee -a "$LOG_FILE"
