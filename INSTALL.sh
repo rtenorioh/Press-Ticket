@@ -495,8 +495,8 @@ sudo -u deploy pm2 save | tee -a "$LOG_FILE"
 echo -e "${COLOR}Atualizando o arquivo .env do backend com os IDs do PM2...${RESET}" | tee -a "$LOG_FILE"
 
 # Captura os IDs dos processos do PM2
-PM2_BACKEND_ID=$(pm2 id "$NOME_EMPRESA-back" | grep -o '[0-9]*')
-PM2_FRONTEND_ID=$(pm2 id "$NOME_EMPRESA-front" | grep -o '[0-9]*')
+PM2_BACKEND_ID=$(sudo -u deploy bash -c "PATH=$DEPLOY_HOME/npm-global/bin:$PATH pm2 id \"$NOME_EMPRESA-back\"" | grep -o '[0-9]*')
+PM2_FRONTEND_ID=$(sudo -u deploy bash -c "PATH=$DEPLOY_HOME/npm-global/bin:$PATH pm2 id \"$NOME_EMPRESA-front\"" | grep -o '[0-9]*')
 
 # Verifica se os IDs foram capturados corretamente
 if [ -z "$PM2_BACKEND_ID" ] || [ -z "$PM2_FRONTEND_ID" ]; then
