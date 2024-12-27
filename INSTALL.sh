@@ -175,9 +175,9 @@ echo -e " "
 sleep 3
 
 {
-    echo ""
+    echo " "
     echo -e "${COLOR}Verificando logs..${RESET}"
-    echo ""
+    echo " "
 } | tee -a "$LOG_FILE"
 
 # Compactação de logs antigos usando zip
@@ -208,9 +208,9 @@ command_exists() {
 sleep 5
 
 {
-    echo ""
+    echo " "
     show_params
-    echo ""
+    echo " "
 } | tee -a "$LOG_FILE"
 
 sudo rm -f /var/lib/dpkg/updates/* | tee -a "$LOG_FILE"
@@ -525,8 +525,8 @@ sed -i "s/^PM2_FRONTEND=.*/PM2_FRONTEND=$PM2_FRONTEND_ID/" "$ENV_FILE"
 
 # Confirmação de sucesso
 echo -e "${GREEN}Arquivo .env no backend atualizado com os IDs do PM2:${RESET}" | tee -a "$LOG_FILE"
-echo -e "  PM2_BACKEND=$PM2_BACKEND_ID" | tee -a "$LOG_FILE"
-echo -e "  PM2_FRONTEND=$PM2_FRONTEND_ID" | tee -a "$LOG_FILE"
+echo -e "PM2_BACKEND=$PM2_BACKEND_ID" | tee -a "$LOG_FILE"
+echo -e "PM2_FRONTEND=$PM2_FRONTEND_ID" | tee -a "$LOG_FILE"
 
 # Configurando Nginx
 echo -e "${COLOR}Configurando Nginx...${RESET}" | tee -a "$LOG_FILE"
@@ -648,9 +648,9 @@ fi
 
 # Finalizando instalação
 {
-    echo ""
+    echo " "
     echo -e "${COLOR}Instalação finalizada com sucesso para a empresa: $NOME_EMPRESA!${RESET}"
-    echo ""
+    echo " "
 } | tee -a "$LOG_FILE"
 
 # Exibindo resumo da instalação
@@ -673,12 +673,12 @@ echo -e "${BOLD}Senha:${RESET} masteradmin" | tee -a "$LOG_FILE"
 echo -e "${GREEN}---------------------------------------${RESET}" | tee -a "$LOG_FILE"
 
 # Mensagem final
-echo "" | tee -a "$LOG_FILE"
+echo " " | tee -a "$LOG_FILE"
 echo -e "${COLOR}Acesse o sistema e configure conforme necessário.${RESET}" | tee -a "$LOG_FILE"
-echo "" | tee -a "$LOG_FILE"
+echo " " | tee -a "$LOG_FILE"
 echo -e "${COLOR}Obrigado por utilizar o Sistema Press Ticket!${RESET}" | tee -a "$LOG_FILE"
 echo -e "${COLOR}************** Desde de 2022 ****************${RESET}" | tee -a "$LOG_FILE"
-echo "" | tee -a "$LOG_FILE"
+echo " " | tee -a "$LOG_FILE"
 
 # Certifique-se de que a última linha termina corretamente:
 exit 0
