@@ -647,10 +647,14 @@ else
 fi
 
 # Finalizando instalação
-echo -e "${COLOR}Instalação finalizada com sucesso para a empresa: $NOME_EMPRESA!${RESET}" | tee -a "$LOG_FILE"
+{
+    echo ""
+    echo -e "${COLOR}Instalação finalizada com sucesso para a empresa: $NOME_EMPRESA!${RESET}"
+    echo ""
+} | tee -a "$LOG_FILE"
 
 # Exibindo resumo da instalação
-echo -e "${BOLD}Resumo da Instalação:${RESET}" | tee -a "$LOG_FILE"
+echo -e "${BOLD}======== Resumo da Instalação: ========${RESET}" | tee -a "$LOG_FILE"
 echo -e "${GREEN}---------------------------------------${RESET}" | tee -a "$LOG_FILE"
 echo -e "${BOLD}URL de Acesso:${RESET} https://$URL_FRONTEND" | tee -a "$LOG_FILE"
 echo -e "${BOLD}Nome da Instalação:${RESET} $NOME_EMPRESA" | tee -a "$LOG_FILE"
@@ -673,7 +677,8 @@ echo "" | tee -a "$LOG_FILE"
 echo -e "${COLOR}Acesse o sistema e configure conforme necessário.${RESET}" | tee -a "$LOG_FILE"
 echo "" | tee -a "$LOG_FILE"
 echo -e "${COLOR}Obrigado por utilizar o Sistema Press Ticket!${RESET}" | tee -a "$LOG_FILE"
-echo -e "${COLOR}Desde de 2022${RESET}" | tee -a "$LOG_FILE"
+echo -e "${COLOR}************** Desde de 2022 ****************${RESET}" | tee -a "$LOG_FILE"
+echo "" | tee -a "$LOG_FILE"
 
 # Certifique-se de que a última linha termina corretamente:
 exit 0
