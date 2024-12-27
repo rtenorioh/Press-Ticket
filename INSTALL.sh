@@ -30,6 +30,21 @@ CONNECTION_LIMIT="$8"
 EMAIL="$9"
 BRANCH="${10:-main}"
 
+show_params() {
+    # Exibe os valores recebidos
+    echo "=== Parâmetros Recebidos ==="
+    echo "SENHA_DEPLOY: $SENHA_DEPLOY"
+    echo "NOME_EMPRESA: $NOME_EMPRESA"
+    echo "URL_BACKEND: $URL_BACKEND"
+    echo "URL_FRONTEND: $URL_FRONTEND"
+    echo "PORT_BACKEND: $PORT_BACKEND"
+    echo "PORT_FRONTEND: $PORT_FRONTEND"
+    echo "USER_LIMIT: $USER_LIMIT"
+    echo "CONNECTION_LIMIT: $CONNECTION_LIMIT"
+    echo "EMAIL: $EMAIL"
+    echo "BRANCH: $BRANCH"
+}
+
 # Validações
 validate_input() {
     if [[ -z "$1" ]]; then
@@ -191,7 +206,7 @@ else
 fi
 
 # Captura o fuso horário passado como argumento ou usa America/Sao_Paulo} como padrão
-SELECTED_TZ=${1:-America/Sao_Paulo}
+SELECTED_TZ=${11:-America/Sao_Paulo}
 
 # Configuração do arquivo de log (ajustado para usar o fuso horário)
 LOG_FILE="$CURRENT_LOG_DIR/install_$NOME_EMPRESA_$(TZ=$SELECTED_TZ date +"%d-%m-%Y_%H-%M-%S").log"
@@ -200,6 +215,10 @@ LOG_FILE="$CURRENT_LOG_DIR/install_$NOME_EMPRESA_$(TZ=$SELECTED_TZ date +"%d-%m-
 command_exists() {
     command -v "$1" >/dev/null 2>&1
 }
+
+sleep 5
+
+show_params | tee -a "$LOG_FILE"
 
 sudo rm -f /var/lib/dpkg/updates/* | tee -a "$LOG_FILE"
 sudo dpkg --configure -a | tee -a "$LOG_FILE"
