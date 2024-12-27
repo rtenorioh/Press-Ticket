@@ -469,7 +469,7 @@ else
     exit 1
 fi
 
-sudo -u deploy pm2 start dist/server.js --name $NOME_EMPRESA-back | tee -a "$LOG_FILE"
+sudo -u deploy bash -c "PATH=$DEPLOY_HOME/npm-global/bin:$PATH pm2 start dist/server.js --name $NOME_EMPRESA-back" | tee -a "$LOG_FILE"
 
 # Configurando PM2 para inicializar no sistema como usuário deploy
 echo -e "${COLOR}Configurando PM2 para inicializar no boot como usuário deploy...${RESET}" | tee -a "$LOG_FILE"
@@ -488,8 +488,8 @@ EOF
 
 npm install | tee -a "$LOG_FILE"
 npm run build | tee -a "$LOG_FILE"
-sudo -u deploy pm2 start server.js --name $NOME_EMPRESA-front | tee -a "$LOG_FILE"
-sudo -u deploy pm2 save | tee -a "$LOG_FILE"
+sudo -u deploy bash -c "PATH=$DEPLOY_HOME/npm-global/bin:$PATH pm2 start server.js --name $NOME_EMPRESA-front | tee -a "$LOG_FILE"
+sudo -u deploy bash -c "PATH=$DEPLOY_HOME/npm-global/bin:$PATH pm2 save | tee -a "$LOG_FILE"
 
 # Atualiza o .env do backend com os IDs do PM2
 echo -e "${COLOR}Atualizando o arquivo .env do backend com os IDs do PM2...${RESET}" | tee -a "$LOG_FILE"
