@@ -35,6 +35,11 @@ class Contact extends Model<Contact> {
   @AllowNull(true)
   @Default("")
   @Column
+  address: string;
+
+  @AllowNull(true)
+  @Default("")
+  @Column
   email: string;
 
   @Column

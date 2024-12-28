@@ -15,6 +15,7 @@ const ShowTicketService = async (id: string | number): Promise<Ticket> => {
           "id",
           "name",
           "number",
+          "address",
           "email",
           "profilePicUrl",
           "messengerId",

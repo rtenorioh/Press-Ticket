@@ -388,6 +388,7 @@ const Contacts = () => {
                 contacts.map((contact) => ({
                   name: contact.name,
                   number: contact.number,
+                  address: contact.address,
                   email: contact.email
                 }))
               }>
@@ -433,6 +434,7 @@ const Contacts = () => {
               <TableCell padding="checkbox"></TableCell>
               <TableCell>{t("contacts.table.name")}</TableCell>
               <TableCell align="center">{t("contacts.table.whatsapp")}</TableCell>
+              <TableCell align="center">{t("contacts.table.address")}</TableCell>
               <TableCell align="center">{t("contacts.table.channels")}</TableCell>
               <TableCell align="center">{t("contacts.table.actions")}</TableCell>
             </TableRow>
@@ -468,6 +470,7 @@ const Contacts = () => {
                         "-"
                       )}
                     </TableCell>
+                    <TableCell>{contact.address}</TableCell>
                     <TableCell align="center">
                       <ContactChannels
                         contact={contact}

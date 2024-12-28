@@ -56,6 +56,7 @@ const initialState = {
 	name: "",
 	number: "",
 	email: "",
+	address: "",
 	extraInfo: [],
 };
 
@@ -167,7 +168,16 @@ const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
 								name="email"
 								error={touched.email && Boolean(errors.email)}
 								helperText={touched.email && errors.email}
-								placeholder="Email address"
+								fullWidth
+								margin="dense"
+								variant="outlined"
+							/>
+							<Field
+								as={TextField}
+								label={t("contactModal.form.address")}
+								name="address"
+								error={touched.address && Boolean(errors.address)}
+								helperText={touched.address && errors.address}
 								fullWidth
 								margin="dense"
 								variant="outlined"

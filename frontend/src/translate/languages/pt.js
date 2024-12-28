@@ -77,6 +77,7 @@ const messages = {
           name: "Nome",
           number: "Número do Whatsapp",
           email: "Email",
+          address: "Endereço",
           extraName: "Nome do campo",
           extraValue: "Valor",
         },
@@ -112,6 +113,7 @@ const messages = {
         table: {
           name: "Nome",
           whatsapp: "WhatsApp",
+          address: "Endereço",
           channels: "Canais",
           actions: "Ações",
         },
