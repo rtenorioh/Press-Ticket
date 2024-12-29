@@ -508,6 +508,14 @@ const messages = {
               disabled: "Desativado",
             },
           },
+          openTickets: {
+            name: "Impedir multi-tickets para mesmo contato",
+            note: "Ao ativar irá impedir de abrir tickets de contatos que já tenham ticket aberto",
+            options: {
+              enabled: "Ativado",
+              disabled: "Desativado",
+            },
+          },
           timeCreateNewTicket: {
             name: "Novo Ticket em:",
             note: "Selecione o tempo que será necessário para abrir um novo ticket, caso o cliente entre em contatos novamente",
@@ -687,6 +695,9 @@ const messages = {
           title: "Aceitar Chat",
           queue: "Selecionar setor"
         },
+        errors: {
+          ticketAlreadyOpen: "Já existe um ticket aberto para este contato com o atendente {{atendente}}."
+        }
       },
       ticketOptionsMenu: {
         delete: "Deletar",
