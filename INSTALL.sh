@@ -286,9 +286,7 @@ fi
 echo -e "${GREEN}Realizando a troca de login para o usuário atual sem interação...${RESET}" | tee -a "$LOG_FILE"
 
 {
-    echo "$SENHA_DEPLOY" | sudo -S su - ${USER} <<EOF
-source ~/.bashrc
-EOF
+    echo "$SENHA_DEPLOY" | sudo -S -u deploy bash -c "source ~/.bashrc"
 } | tee -a "$LOG_FILE"
 
 if [ $? -eq 0 ]; then
