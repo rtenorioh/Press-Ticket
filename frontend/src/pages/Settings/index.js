@@ -140,7 +140,7 @@ const Settings = ({ onThemeConfigUpdate }) => {
 						</ErrorBoundary>
 					</Container>
 				)}
-				{tabValue === 1 && (
+				{tabValue === (user.profile === "masteradmin" ? 1 : 0) && (
 					<Container className={classes.container}>
 						<ErrorBoundary>
 							<ComponentSettings
@@ -152,7 +152,7 @@ const Settings = ({ onThemeConfigUpdate }) => {
 						</ErrorBoundary>
 					</Container>
 				)}
-				{tabValue === 2 && (
+				{tabValue === (user.profile === "masteradmin" ? 2 : 1) && (
 					<Container className={classes.container}>
 						<ErrorBoundary>
 							<Integrations />
