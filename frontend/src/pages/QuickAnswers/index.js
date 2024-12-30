@@ -226,6 +226,13 @@ const QuickAnswers = () => {
     }
   };
 
+  const canEditQuickAnswers = () => {
+    return (
+      settings.some(s => s.key === "quickAnswer" && s.value === "enabled") ||
+      user.profile === "admin"
+    );
+  };
+
   return (
     <MainContainer>
       <ConfirmationModal
@@ -267,7 +274,7 @@ const QuickAnswers = () => {
               ),
             }}
           />
-          {((settings && settings.length > 0 && getSettingValue("quickAnswer") === "enabled") || (isAdmin === "admin")) && (
+          {canEditQuickAnswers() && (
             <Tooltip title={t("quickAnswers.buttons.add")}>
               <Button
                 variant="contained"
@@ -278,7 +285,7 @@ const QuickAnswers = () => {
               </Button>
             </Tooltip>
           )}
-          {((settings && settings.length > 0 && getSettingValue("quickAnswer") === "enabled") || (isAdmin === "admin")) && (
+          {canEditQuickAnswers() && (
             <Tooltip title={t("quickAnswers.buttons.deleteAll")}>
               <Button
                 variant="contained"
@@ -308,7 +315,7 @@ const QuickAnswers = () => {
               <TableCell align="center">
                 {t("quickAnswers.table.message")}
               </TableCell>
-              {((settings && settings.length > 0 && getSettingValue("quickAnswer") === "enabled") || (isAdmin === "admin")) && (
+              {canEditQuickAnswers() && (
                 <TableCell align="center">
                   {t("quickAnswers.table.actions")}
                 </TableCell>
@@ -321,7 +328,7 @@ const QuickAnswers = () => {
                 <TableRow key={quickAnswer.id}>
                   <TableCell align="center">{quickAnswer.shortcut}</TableCell>
                   <TableCell align="center">{quickAnswer.message}</TableCell>
-                  {((settings && settings.length > 0 && getSettingValue("quickAnswer") === "enabled") || (isAdmin === "admin")) && (
+                  {canEditQuickAnswers() && (
                     <TableCell align="center">
                       <IconButton
                         size="small"
