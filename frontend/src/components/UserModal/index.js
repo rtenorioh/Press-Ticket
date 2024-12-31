@@ -31,9 +31,9 @@ import { toast } from "react-toastify";
 import * as Yup from "yup";
 import { AuthContext } from "../../context/Auth/AuthContext";
 import toastError from "../../errors/toastError";
-import useWhatsApps from "../../hooks/useWhatsApps";
 import api from "../../services/api";
 import { Can } from "../Can";
+import ConectionSelect from "../ConectionSelect";
 import QueueSelect from "../QueueSelect";
 
 const useStyles = makeStyles(theme => ({
@@ -94,14 +94,11 @@ const UserModal = ({ open, onClose, userId }) => {
 		endWork: "",
 		isTricked: "enabled"
 	};
-
 	const { user: loggedInUser } = useContext(AuthContext);
-
 	const [user, setUser] = useState(initialState);
 	const [selectedQueueIds, setSelectedQueueIds] = useState([]);
+	const [selectedWhatsappIds, setSelectedWhatsappIds] = useState([]);
 	const [showPassword, setShowPassword] = useState(false);
-	const [whatsappId, setWhatsappId] = useState(false);
-	const { loading, whatsApps } = useWhatsApps();
 	const startWorkRef = useRef();
 	const endWorkRef = useRef();
 	const history = useHistory();
@@ -116,7 +113,8 @@ const UserModal = ({ open, onClose, userId }) => {
 				});
 				const userQueueIds = data.queues?.map(queue => queue.id);
 				setSelectedQueueIds(userQueueIds);
-				setWhatsappId(data.whatsappId ? data.whatsappId : '');
+				const userWhatsappIds = data.whatsapps?.map(whatsapp => whatsapp.id);
+				setSelectedWhatsappIds(userWhatsappIds);
 			} catch (err) {
 				toastError(err);
 			}
@@ -131,7 +129,7 @@ const UserModal = ({ open, onClose, userId }) => {
 	};
 
 	const handleSaveUser = async values => {
-		const userData = { ...values, whatsappId, queueIds: selectedQueueIds };
+		const userData = { ...values, whatsappIds: selectedWhatsappIds, queueIds: selectedQueueIds };
 		try {
 			if (userId) {
 				await api.put(`/users/${userId}`, userData);
@@ -253,6 +251,16 @@ const UserModal = ({ open, onClose, userId }) => {
 								</div>
 								<Can
 									role={loggedInUser.profile}
+									perform="user-modal:editWhatsapps"
+									yes={() => (
+										<ConectionSelect
+											selectedWhatsappIds={selectedWhatsappIds}
+											onChange={values => setSelectedWhatsappIds(values)}
+										/>
+									)}
+								/>
+								<Can
+									role={loggedInUser.profile}
 									perform="user-modal:editQueues"
 									yes={() => (
 										<QueueSelect
@@ -263,28 +271,8 @@ const UserModal = ({ open, onClose, userId }) => {
 								/>
 								<Can
 									role={loggedInUser.profile}
-									perform="user-modal:editQueues"
-									yes={() => (!loading &&
-										<FormControl variant="outlined" margin="dense" className={classes.maxWidth} fullWidth>
-											<InputLabel>{t("userModal.form.whatsapp")}</InputLabel>
-											<Field
-												as={Select}
-												value={whatsappId}
-												onChange={(e) => setWhatsappId(e.target.value)}
-												label={t("userModal.form.whatsapp")}
-											>
-												<MenuItem value={''}>&nbsp;</MenuItem>
-												{whatsApps.map((whatsapp) => (
-													<MenuItem key={whatsapp.id} value={whatsapp.id}>{whatsapp.name}</MenuItem>
-												))}
-											</Field>
-										</FormControl>
-									)}
-								/>
-								<Can
-									role={loggedInUser.profile}
 									perform="user-modal:editProfile"
-									yes={() => (!loading &&
+									yes={() => (
 										<form className={classes.container} noValidate>
 											<Field
 												as={TextField}
@@ -355,6 +343,7 @@ const UserModal = ({ open, onClose, userId }) => {
 
 												<Field
 													as={Select}
+													fullWidth
 													label={t("userModal.form.isTricked")}
 													name="isTricked"
 													labelId="isTricked-selection-label"

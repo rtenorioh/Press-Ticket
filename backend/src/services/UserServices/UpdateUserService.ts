@@ -11,7 +11,7 @@ interface UserData {
   profile?: string;
   isTricked?: boolean;
   queueIds?: number[];
-  whatsappId?: number;
+  whatsappIds?: number[];
   startWork?: string;
   endWork?: string;
 }
@@ -48,7 +48,7 @@ const UpdateUserService = async ({
     isTricked,
     name,
     queueIds = [],
-    whatsappId,
+    whatsappIds = [],
     startWork,
     endWork
   } = userData;
@@ -65,12 +65,12 @@ const UpdateUserService = async ({
     profile,
     isTricked,
     name,
-    whatsappId: whatsappId || null,
     startWork,
     endWork
   });
 
   await user.$set("queues", queueIds);
+  await user.$set("whatsapps", whatsappIds);
 
   await user.reload();
 

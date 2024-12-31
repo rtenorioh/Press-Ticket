@@ -5,16 +5,18 @@ import { logger } from "../utils/logger";
 const GetDefaultWhatsAppByUser = async (
   userId: number
 ): Promise<Whatsapp | null> => {
-  const user = await User.findByPk(userId, {include: ["whatsapp"]});
-  if( user === null ) {
+  const user = await User.findByPk(userId, { include: ["whatsapps"] });
+  if (!user || !user.whatsapps || user.whatsapps.length === 0) {
     return null;
   }
 
-  if(user.whatsapp !== null) {
-    logger.info(`Found whatsapp linked to user '${user.name}' is '${user.whatsapp.name}'.`);
-  }
+  const defaultWhatsapp = user.whatsapps[0];
 
-  return user.whatsapp;
+  logger.info(
+    `Found WhatsApp linked to user '${user.name}' is '${defaultWhatsapp.name}'.`
+  );
+
+  return defaultWhatsapp;
 };
 
 export default GetDefaultWhatsAppByUser;
