@@ -392,7 +392,7 @@ const Connections = () => {
 
 	const restartpm2 = async () => {
 		const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
-		let secondsRemaining = 10;
+		let secondsRemaining = 15;
 
 		const countdownToastId = toast.info(`O sistema será reiniciado em ${secondsRemaining} segundos...`, {
 			autoClose: false,
