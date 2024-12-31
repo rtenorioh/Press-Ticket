@@ -417,7 +417,7 @@ const Connections = () => {
 				}
 			}, 1000);
 
-			await delay(10000);
+			await delay(secondsRemaining * 1000);
 			history.go(0);
 		} catch (err) {
 			toast.dismiss(countdownToastId);
