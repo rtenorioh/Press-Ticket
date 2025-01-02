@@ -175,7 +175,8 @@ export const initWbot = async (whatsapp: Whatsapp): Promise<Session> => {
 
         io.emit("whatsappSession", {
           action: "update",
-          session: whatsapp
+          session: whatsapp,
+          number: ""
         });
       });
 
@@ -195,7 +196,8 @@ export const initWbot = async (whatsapp: Whatsapp): Promise<Session> => {
         const retry = whatsapp.retries;
         await whatsapp.update({
           status: "DISCONNECTED",
-          retries: retry + 1
+          retries: retry + 1,
+          number: ""
         });
 
         io.emit("whatsappSession", {
