@@ -11,7 +11,7 @@ import {
 	Select,
 } from "@material-ui/core";
 import PropTypes from "prop-types";
-import React, { useCallback, useContext, useState } from "react";
+import React, { useCallback, useContext, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useHistory } from "react-router-dom";
 import { AuthContext } from "../../context/Auth/AuthContext";
@@ -42,15 +42,81 @@ const AcceptTicketWithouSelectQueue = ({ modalOpen, onClose, ticketId }) => {
 	const { user } = useContext(AuthContext);
 	const { t } = useTranslation();
 	const userId = user?.id;
+	const [settings, setSettings] = useState([]);
+
+	useEffect(() => {
+		const fetchSettings = async () => {
+			try {
+				const { data } = await api.get("/settings");
+				setSettings(data);
+			} catch (err) {
+				toastError(err);
+			}
+		};
+		fetchSettings();
+	}, []);
+
+	const getSettingValue = (key) => {
+		const setting = settings.find((s) => s.key === key);
+		return setting?.value || null;
+	};
 
 	const handleClose = useCallback(() => {
 		onClose();
 		setSelectedQueue(INITIAL_QUEUE_VALUE);
 	}, [onClose]);
 
+	const checkOpenTickets = useCallback(async (contactId) => {
+		try {
+			const response = await api.get(`/tickets/contact/${contactId}/open`);
+
+			if (response?.data?.hasOpenTicket) {
+				return response.data.ticket;
+			}
+
+			return null;
+		} catch (err) {
+			console.error("Erro ao verificar tickets abertos:", err);
+			toastError(err, t);
+			return null;
+		}
+	}, []);
+
 	const handleUpdateTicketStatus = useCallback(async (queueId) => {
 		setLoading(true);
+
 		try {
+
+			const openTicketsSetting = getSettingValue("openTickets");
+			console.log("openTicketsSetting", openTicketsSetting)
+			if (openTicketsSetting === "disabled") {
+				await api.put(`/tickets/${ticketId}`, {
+					status: "open",
+					userId: userId || null,
+					queueId,
+				});
+				setLoading(false);
+				history.push(`/tickets/${ticketId}`);
+				handleClose();
+				return;
+			}
+
+			const { data: ticketData } = await api.get(`/tickets/${ticketId}`);
+			const contactId = ticketData.contact.id;
+
+			const openTicket = await checkOpenTickets(contactId);
+			if (openTicket) {
+				const assignedUserName = openTicket.user?.name || "Atendente desconhecido";
+
+				setLoading(false);
+				toastError({
+					message: t("ticketsList.errors.ticketAlreadyOpen", {
+						atendente: assignedUserName,
+					}),
+				});
+				return;
+			}
+
 			await api.put(`/tickets/${ticketId}`, {
 				status: "open",
 				userId: userId || null,
@@ -62,9 +128,9 @@ const AcceptTicketWithouSelectQueue = ({ modalOpen, onClose, ticketId }) => {
 			handleClose();
 		} catch (err) {
 			setLoading(false);
-			toastError(err);
+			toastError(err, t);
 		}
-	}, [ticketId, userId, history, handleClose]);
+	}, [ticketId, userId, history, handleClose, checkOpenTickets, t, getSettingValue]);
 
 	return (
 		<Dialog
