@@ -65,25 +65,22 @@ const QuickAnswersModal = ({
   }, []);
 
   useEffect(() => {
-    if (initialValues) {
-      setQuickAnswer({ ...initialState, ...initialValues });
-    } else if (quickAnswerId) {
+    if (quickAnswerId) {
       const fetchQuickAnswer = async () => {
         setLoading(true);
         try {
           const { data } = await api.get(`/quickAnswers/${quickAnswerId}`);
-          if (isMounted.current) {
-            setQuickAnswer(data);
-          }
-          setLoading(false);
+          if (isMounted.current) setQuickAnswer(data);
         } catch (err) {
-          setLoading(false);
           toastError(err);
+        } finally {
+          setLoading(false);
         }
       };
+
       fetchQuickAnswer();
     }
-  }, [quickAnswerId, initialValues, initialState]);
+  }, [quickAnswerId]);
 
   useEffect(() => {
     if (open && messageInputRef.current) {
@@ -94,6 +91,7 @@ const QuickAnswersModal = ({
   const handleClose = () => {
     onClose();
     setQuickAnswer(initialState);
+    setLoading(false);
   };
 
   const handleSaveQuickAnswer = async values => {
@@ -143,12 +141,12 @@ const QuickAnswersModal = ({
             : t("quickAnswersModal.title.add")}
         </DialogTitle>
         <Formik
-          initialValues={quickAnswer}
+          initialValues={quickAnswer || initialState}
           enableReinitialize={true}
           validationSchema={QuickAnswerSchema}
           onSubmit={handleSaveQuickAnswer}
         >
-          {({ touched, errors, isSubmitting, setFieldValue }) => (
+          {({ touched, errors, isSubmitting, setFieldValue, values }) => (
             <Form>
               <DialogContent dividers>
                 <WithSkeleton loading={loading}>
@@ -160,6 +158,8 @@ const QuickAnswersModal = ({
                     errors={errors}
                     variant="outlined"
                     margin="dense"
+                    value={values.shortcut || ""}
+                    onChange={(e) => setFieldValue("shortcut", e.target.value)}
                     disabled={isSubmitting}
                   />
                 </WithSkeleton>
@@ -175,21 +175,20 @@ const QuickAnswersModal = ({
                     errors={errors}
                     variant="outlined"
                     margin="dense"
+                    value={values.message || ""}
+                    onChange={(e) => setFieldValue("message", e.target.value)}
                     disabled={isSubmitting}
                   />
                 </WithSkeleton>
                 <WithSkeleton loading={loading}>
                   <MessageVariablesPicker
                     disabled={isSubmitting}
-                    onClick={value => handleClickMsgVar(value, setFieldValue)}
+                    onClick={(value) => handleClickMsgVar(value, setFieldValue)}
                   />
                 </WithSkeleton>
               </DialogContent>
               <DialogActions>
-                <Button
-                  onClick={handleClose}
-                  disabled={isSubmitting}
-                >
+                <Button onClick={handleClose} disabled={isSubmitting}>
                   {t("quickAnswersModal.buttons.cancel")}
                 </Button>
                 <ButtonWithSpinner
