@@ -50,6 +50,7 @@ const ListTicketsService = async ({
         "id",
         "name",
         "number",
+        "address",
         "email",
         "profilePicUrl",
         "messengerId",

@@ -126,6 +126,12 @@ const ContactDrawer = ({ open, handleDrawerClose, contact, loading }) => {
 							<Link href={`tel:${user.isTricked === "enabled" ? contact.number : contact.number.slice(0, -4) + "****"}`}>{user.isTricked === "enabled" ? contact.number : contact.number.slice(0, -4) + "****"}</Link>
 							<CopyToClipboard content={user.isTricked === "enabled" ? contact.number : contact.number.slice(0, -4) + "****"} color="secondary" />
 						</Typography>
+						{contact.address && (
+							<Typography>
+								{contact.address}
+								<CopyToClipboard content={contact.address} color="secondary" />
+							</Typography>
+						)}
 						{contact.email && (
 							<Typography>
 								<Link href={`mailto:${contact.email}`}>{contact.email}</Link>
