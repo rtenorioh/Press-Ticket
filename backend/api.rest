@@ -2,9 +2,9 @@
 
 #Variaveis
 @baseUrl = http://localhost:8080
-# @baseUrl = https://apidev.pressticket.com.br
-@token = 6175c0d0-acd5-4776-95a9-592c795da986
-@token2 = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Ik1hc3RlckFkbWluIiwicHJvZmlsZSI6Im1hc3RlcmFkbWluIiwiaWQiOjIsImlhdCI6MTczMzY4OTk2NiwiZXhwIjoxNzMzNjkzNTY2fQ.g_jJs3vovlU5i9sS0IUoJ3Ew_m7W8GzqjWd-kieFFpc
+# @baseUrl = https://apidemo.pressticket.com.br
+@token = 480fda6c-f597-4ed1-98b1-3d2ca6618e13
+@token2 = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Ik1hc3RlckFkbWluIiwicHJvZmlsZSI6Im1hc3RlcmFkbWluIiwiaWQiOjIsImlhdCI6MTczNjAyNjE2OCwiZXhwIjoxNzM2MDI5NzY4fQ.ba8-Ed234-2KeLawtjxF0JTlrPXhk12kDrJmmrJO6s4
 
 @refreshToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidG9rZW5WZXJzaW9uIjowLCJpYXQiOjE3MzI4ODUzMzQsImV4cCI6MTczMzQ5MDEzNH0.RwuRIufYUB9dQZQg0aeaVtnOryn-sESNL1mFlShmBM4
 
@@ -28,7 +28,7 @@ Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-  "number": "5522992463080",
+  "number": "5522999999999",
   "body": "Mensagem de Teste da API com user e queue atualizado",
   "userId": "1",
   "queueId": "2",
@@ -74,5 +74,10 @@ Content-Type: application/json
 
 ### (Remover Personalização) Teste da Rota DELETE /personalizations/:theme
 DELETE {{baseUrl}}/personalizations/light
+Authorization: Bearer {{token2}}
+Content-Type: application/json
+
+### (Listar Tickets Abertos) Teste da Rota GET /tickets/contact/${contactId}/open
+GET {{baseUrl}}/tickets/contact/6/open
 Authorization: Bearer {{token2}}
 Content-Type: application/json
