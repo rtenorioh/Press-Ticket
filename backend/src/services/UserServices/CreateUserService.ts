@@ -11,7 +11,7 @@ interface Request {
   queueIds?: number[];
   profile?: string;
   isTricked?: boolean;
-  whatsappId?: number;
+  whatsappIds?: number[];
   startWork?: string;
   endWork?: string;
 }
@@ -30,7 +30,7 @@ const CreateUserService = async ({
   queueIds = [],
   profile = "admin",
   isTricked,
-  whatsappId,
+  whatsappIds = [],
   startWork,
   endWork
 }: Request): Promise<Response> => {
@@ -66,14 +66,14 @@ const CreateUserService = async ({
       name,
       profile,
       isTricked,
-      whatsappId: whatsappId || null,
       startWork,
       endWork
     },
-    { include: ["queues", "whatsapp"] }
+    { include: ["queues", "whatsapps"] }
   );
 
   await user.$set("queues", queueIds);
+  await user.$set("whatsapps", whatsappIds);
 
   await user.reload();
 

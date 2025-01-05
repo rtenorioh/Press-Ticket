@@ -16,9 +16,9 @@ const messages = {
         },
       },
       connections: {
-        title: "Conexões",
+        title: "Canais",
         toasts: {
-          deleted: "Conexão com o WhatsApp excluída com sucesso!",
+          deleted: "Canal excluído com sucesso!",
         },
         confirmationModal: {
           deleteTitle: "Deletar",
@@ -27,7 +27,7 @@ const messages = {
           disconnectMessage: "Tem certeza? Você precisará ler o QR Code novamente.",
         },
         buttons: {
-          add: "Adicionar WhatsApp",
+          add: "Adicionar",
           shutdown: "Excluir",
           restart: "Restart",
           disconnect: "Desconectar",
@@ -76,8 +76,8 @@ const messages = {
           extraInfo: "Informações adicionais",
           name: "Nome",
           number: "Número do Whatsapp",
-          address: "Endereço",
           email: "Email",
+          address: "Endereço",
           extraName: "Nome do campo",
           extraValue: "Valor",
         },
@@ -94,6 +94,9 @@ const messages = {
         toasts: {
           deleted: "Contato excluído com sucesso!",
           deletedAll: "Todos contatos excluídos com sucesso!",
+        },
+        errors: {
+          "ticketAlreadyOpen": "Já existe um ticket aberto para este contato, atribuído a {{atendente}}."
         },
         searchPlaceholder: "Pesquisar...",
         confirmationModal: {
@@ -161,7 +164,7 @@ const messages = {
             title: "Filtrar"
           },
           perConnection: {
-            title: "Tickets por conexão"
+            title: "Tickets por Canais"
           }
         },
         chartPerQueue: {
@@ -232,7 +235,7 @@ const messages = {
         listItems: {
           general: "Geral",
           dashboard: "Dashboard",
-          connections: "Conexões",
+          connections: "Canais",
           tickets: "Tickets",
           contacts: "Contatos",
           quickAnswers: "Respostas Rápidas",
@@ -303,13 +306,18 @@ const messages = {
           hour: "Hora",
           ticket_id: "Ticked ID",
           queue: "Setor",
-          connection: "Conexão"
+          connection: "Canal"
         }
       },
       newTicketModal: {
         title: "Criar Ticket",
         fieldLabel: "Digite para pesquisar o contato",
         add: "Adicionar",
+        select: {
+          none: "Selecione",
+          queue: "Selecionar Setor",
+          channel: "Selecionar Canal"
+        },
         buttons: {
           ok: "Salvar",
           cancel: "Cancelar",
@@ -658,9 +666,9 @@ const messages = {
       transferTicketModal: {
         title: "Transferir Ticket",
         fieldLabel: "Digite para buscar um atendente",
-        fieldConnectionLabel: "Transferir para conexão",
+        fieldConnectionLabel: "Selecionar Canal",
         fieldQueueLabel: "Transferir para o Setor",
-        fieldConnectionPlaceholder: "Selecione uma conexão",
+        fieldConnectionPlaceholder: "Selecione um Canal",
         noOptions: "Nenhum atendente encontrado com esse nome",
         buttons: {
           ok: "Transferir",
@@ -672,7 +680,7 @@ const messages = {
         assignedHeader: "Atendendo",
         noTicketsTitle: "Nada aqui!",
         noTicketsMessage: "Nenhum ticket encontrado com esse status ou termo pesquisado",
-        connectionTitle: "Conexão que está sendo utilizada atualmente.",
+        connectionTitle: "Canal que está sendo utilizada atualmente.",
         items: {
           queueless: "Sem Setor",
           accept: "Aceitar",
@@ -680,7 +688,7 @@ const messages = {
           close: "Encerrar",
           reopen: "Reabrir",
           return: "Mover para aguardando",
-          connection: "Conexão",
+          connection: "Canal",
           user: "Atendente",
           queue: "Setor",
           tags: "Tags"
@@ -725,13 +733,22 @@ const messages = {
           name: "Nome",
           email: "E-mail",
           profile: "Perfil",
-          whatsapp: "Conexão Padrão",
+          whatsapp: "Canal",
+          queue: "Setor",
           startWork: "Horário inicial",
           endWork: "Horário final",
           actions: "Ações",
         },
         buttons: {
           add: "Adicionar atendente",
+        },
+        modalTitle: {
+          channel: "Canais",
+          queue: "Setores"
+        },
+        modalTable: {
+          id: "ID",
+          name: "Nome"
         },
         toasts: {
           deleted: "Atendente excluído com sucesso.",
@@ -753,7 +770,6 @@ const messages = {
           password: "Senha",
           profile: "Perfil",
           admin: "Administrador",
-          whatsapp: "Conexão Padrão",
           user: "Atendente",
           startWork: "Inicio",
           endWork: "Termino",
@@ -786,17 +802,20 @@ const messages = {
         },
         success: "WhatsApp salvo com sucesso.",
       },
+      whatsappSelect: {
+        inputLabel: "Canais",
+      },
       backendErrors: {
         ERR_CREATING_MESSAGE: "Erro ao criar mensagem no banco de dados.",
         ERR_CREATING_TICKET: "Erro ao criar ticket no banco de dados.",
-        ERR_CONNECTION_CREATION_COUNT: "Limite de conexões atingido, para alterar entre em contato com o suporte.",
+        ERR_CONNECTION_CREATION_COUNT: "Limite de canais atingido, para alterar entre em contato com o suporte.",
         ERR_DELETE_WAPP_MSG: "Não foi possível excluir a mensagem do WhatsApp.",
         ERR_DUPLICATED_CONTACT: "Já existe um contato com este número.",
         ERR_EDITING_WAPP_MSG: "Não foi possível editar a mensagem do WhatsApp.",
         ERR_FETCH_WAPP_MSG: "Erro ao buscar a mensagem no WhatsApp, talvez ela seja muito antiga.",
         ERR_INVALID_CREDENTIALS: "Erro de autenticação. Por favor, tente novamente.",
         ERR_NO_CONTACT_FOUND: "Nenhum contato encontrado com este ID.",
-        ERR_NO_DEF_WAPP_FOUND: "Nenhum WhatsApp padrão encontrado. Verifique a página de conexões.",
+        ERR_NO_DEF_WAPP_FOUND: "Nenhum WhatsApp padrão encontrado. Verifique a página de canais.",
         ERR_NO_INTEGRATION_FOUND: "Integração não encontrada.",
         ERR_NO_PERMISSION: "Você não tem permissão para acessar este recurso.",
         ERR_NO_SETTING_FOUND: "Nenhuma configuração encontrada com este ID.",
@@ -809,14 +828,14 @@ const messages = {
         ERR_OPEN_USER_TICKET: "Já existe um ticket aberto para este contato com ",
         ERR_OTHER_OPEN_TICKET: "Já existe um ticket aberto para este contato.",
         ERR_SESSION_EXPIRED: "Sessão expirada. Por favor entre.",
-        ERR_SENDING_WAPP_MSG: "Erro ao enviar mensagem do WhatsApp. Verifique a página de conexões.",
+        ERR_SENDING_WAPP_MSG: "Erro ao enviar mensagem do WhatsApp. Verifique a página de canais.",
         ERR_USER_CREATION_COUNT: "Limite de atendentes atingido, para alterar entre em contato com o suporte.",
         ERR_USER_CREATION_DISABLED: "A criação do atendente foi desabilitada pelo administrador.",
-        ERR_WAPP_CHECK_CONTACT: "Não foi possível verificar o contato do WhatsApp. Verifique a página de conexões",
-        ERR_WAPP_DOWNLOAD_MEDIA: "Não foi possível baixar mídia do WhatsApp. Verifique a página de conexões.",
+        ERR_WAPP_CHECK_CONTACT: "Não foi possível verificar o contato do WhatsApp. Verifique a página de canais",
+        ERR_WAPP_DOWNLOAD_MEDIA: "Não foi possível baixar mídia do WhatsApp. Verifique a página de canais.",
         ERR_WAPP_GREETING_REQUIRED: "A mensagem de saudação é obrigatório quando há mais de um Setor.",
         ERR_WAPP_INVALID_CONTACT: "Este não é um número de Whatsapp válido.",
-        ERR_WAPP_NOT_INITIALIZED: "Esta sessão do WhatsApp não foi inicializada. Verifique a página de conexões.",
+        ERR_WAPP_NOT_INITIALIZED: "Esta sessão do WhatsApp não foi inicializada. Verifique a página de canais.",
         ERR_WAPP_SESSION_EXPIRED: "Sessão do WhatsApp expirada.",
       },
     },

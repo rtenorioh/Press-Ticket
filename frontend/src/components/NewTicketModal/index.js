@@ -11,11 +11,12 @@ import Dialog from "@material-ui/core/Dialog";
 import DialogActions from "@material-ui/core/DialogActions";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogTitle from "@material-ui/core/DialogTitle";
+import Grid from "@material-ui/core/Grid";
 import TextField from "@material-ui/core/TextField";
 import Autocomplete, {
 	createFilterOptions,
 } from "@material-ui/lab/Autocomplete";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useCallback, useContext, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useHistory } from "react-router-dom";
 import { AuthContext } from "../../context/Auth/AuthContext";
@@ -27,7 +28,6 @@ import ContactModal from "../ContactModal";
 const useStyles = makeStyles((theme) => ({
 	autoComplete: {
 		width: 300,
-		// marginBottom: 20 
 	},
 	maxWidth: {
 		width: "100%",
@@ -52,8 +52,29 @@ const NewTicketModal = ({ modalOpen, onClose }) => {
 	const [newContact, setNewContact] = useState({});
 	const [contactModalOpen, setContactModalOpen] = useState(false);
 	const { user } = useContext(AuthContext);
-	const [selectedQueue, setSelectedQueue] = useState('');
+	const [selectedQueue, setSelectedQueue] = useState("");
+	const [selectedWhatsapp, setSelectedWhatsapp] = useState("");
+	const [settings, setSettings] = useState([]);
 	const classes = useStyles();
+
+	console.log("USER: ", user)
+
+	useEffect(() => {
+		const fetchSettings = async () => {
+			try {
+				const { data } = await api.get("/settings");
+				setSettings(data);
+			} catch (err) {
+				toastError(err);
+			}
+		};
+		fetchSettings();
+	}, []);
+
+	const getSettingValue = (key) => {
+		const setting = settings.find((s) => s.key === key);
+		return setting?.value || null;
+	};
 
 	useEffect(() => {
 		if (!modalOpen || searchParam.length < 3) {
@@ -86,15 +107,52 @@ const NewTicketModal = ({ modalOpen, onClose }) => {
 		setSelectedContact(null);
 	};
 
-	const handleSaveTicket = async contactId => {
-		if (!contactId) return;
-		setLoading(true);
+	const checkOpenTickets = useCallback(async (contactId) => {
 		try {
+			const response = await api.get(`/tickets/contact/${contactId}/open`);
+
+			if (response?.data?.hasOpenTicket) {
+				return response.data.ticket;
+			}
+
+			return null;
+		} catch (err) {
+			console.error("Erro ao verificar tickets abertos:", err);
+			toastError(err);
+			return null;
+		}
+	}, []);
+
+	const handleSaveTicket = async (contactId) => {
+		if (!contactId) return;
+
+		setLoading(true);
+
+		try {
+			const openTicketsSetting = getSettingValue("openTickets");
+
+			if (openTicketsSetting !== "disabled") {
+				const openTicket = await checkOpenTickets(contactId);
+
+				if (openTicket) {
+					const assignedUserName = openTicket.user?.name || "Atendente desconhecido";
+
+					setLoading(false);
+					toastError({
+						message: t("ticketsList.errors.ticketAlreadyOpen", {
+							atendente: assignedUserName,
+						}),
+					});
+					return;
+				}
+			}
+
 			const { data: ticket } = await api.post("/tickets", {
 				contactId: contactId,
 				userId: user.id,
 				status: "open",
-				queueId: selectedQueue
+				queueId: selectedQueue,
+				whatsappId: selectedWhatsapp
 			});
 			history.push(`/tickets/${ticket.id}`);
 		} catch (err) {
@@ -117,7 +175,7 @@ const NewTicketModal = ({ modalOpen, onClose }) => {
 		setContactModalOpen(false);
 	};
 
-	const handleAddNewContactTicket = contact => {
+	const handleAddNewContactTicket = (contact) => {
 		handleSaveTicket(contact.id);
 	};
 
@@ -133,7 +191,7 @@ const NewTicketModal = ({ modalOpen, onClose }) => {
 		return filtered;
 	};
 
-	const renderOption = option => {
+	const renderOption = (option) => {
 		if (option.number) {
 			return `${option.name} - ${option.number}`;
 		} else {
@@ -141,7 +199,7 @@ const NewTicketModal = ({ modalOpen, onClose }) => {
 		}
 	};
 
-	const renderOptionLabel = option => {
+	const renderOptionLabel = (option) => {
 		if (option.number) {
 			return `${option.name} - ${option.number}`;
 		} else {
@@ -161,74 +219,90 @@ const NewTicketModal = ({ modalOpen, onClose }) => {
 				<DialogTitle id="form-dialog-title">
 					{t("newTicketModal.title")}
 				</DialogTitle>
-				<FormControl>
-					<DialogContent dividers>
-
-
-
-
-						<Autocomplete
-							options={options}
-							loading={loading}
-							style={{ width: 300 }}
-							clearOnBlur
-							autoHighlight
-							freeSolo
-							clearOnEscape
-							getOptionLabel={renderOptionLabel}
-							renderOption={renderOption}
-							filterOptions={createAddContactOption}
-							onChange={(e, newValue) => handleSelectOption(e, newValue)}
-							renderInput={params => (
-								<TextField
-									{...params}
-									label={t("newTicketModal.fieldLabel")}
-									variant="outlined"
-									autoFocus
-									required
-									onChange={e => setSearchParam(e.target.value)}
-									onKeyPress={e => {
-										if (loading || !selectedContact) return;
-										else if (e.key === "Enter") {
-											handleSaveTicket(selectedContact.id);
-										}
-									}}
-									InputProps={{
-										...params.InputProps,
-										endAdornment: (
-											<React.Fragment>
-												{loading ? (
-													<CircularProgress color="inherit" size={20} />
-												) : null}
-												{params.InputProps.endAdornment}
-											</React.Fragment>
-										),
-									}}
-								/>
-							)}
-						/>
-						<DialogContent />
-
-						<FormControl variant="outlined" className={classes.maxWidth}>
-							<InputLabel>{t("ticketsList.acceptModal.queue")}</InputLabel>
-							<Select
+				<DialogContent dividers>
+					<Grid container spacing={3}>
+						<Grid item xs={12}>
+							<Autocomplete
+								options={options}
+								loading={loading}
+								fullWidth
+								clearOnBlur
 								autoHighlight
-								required
-								value={selectedQueue}
-								className={classes.autoComplete}
-								onChange={(e) => setSelectedQueue(e.target.value)}
-								label={t("ticketsList.acceptModal.queue")}
-							>
-								<MenuItem value={''}>&nbsp;</MenuItem>
-								{user.queues.map((queue) => (
-									<MenuItem key={queue.id} value={queue.id}>{queue.name}</MenuItem>
-								))}
-							</Select>
-						</FormControl>
-
-
-					</DialogContent>
-				</FormControl>
+								freeSolo
+								clearOnEscape
+								getOptionLabel={renderOptionLabel}
+								renderOption={renderOption}
+								filterOptions={createAddContactOption}
+								onChange={(e, newValue) => handleSelectOption(e, newValue)}
+								renderInput={(params) => (
+									<TextField
+										{...params}
+										label={t("newTicketModal.fieldLabel")}
+										variant="outlined"
+										required
+										onChange={(e) => setSearchParam(e.target.value)}
+										onKeyDown={(e) => {
+											if (loading || !selectedContact) return;
+											else if (e.key === "Enter") {
+												handleSaveTicket(selectedContact.id);
+											}
+										}}
+										InputProps={{
+											...params.InputProps,
+											endAdornment: (
+												<>
+													{loading ? (
+														<CircularProgress color="inherit" size={20} />
+													) : null}
+													{params.InputProps.endAdornment}
+												</>
+											),
+										}}
+									/>
+								)}
+							/>
+						</Grid>
+						<Grid item xs={12}>
+							<FormControl variant="outlined" fullWidth>
+								<InputLabel>{t("newTicketModal.select.channel")}</InputLabel>
+								<Select
+									value={selectedWhatsapp}
+									onChange={(e) => setSelectedWhatsapp(e.target.value)}
+									label={t("newTicketModal.select.channel")}
+								>
+									<MenuItem value="">
+										{t("newTicketModal.select.none")}
+									</MenuItem>
+									{Array.isArray(user.whatsapps) &&
+										user.whatsapps.map((whatsapp) => (
+											<MenuItem key={whatsapp.id} value={whatsapp.id}>
+												{whatsapp.name}
+											</MenuItem>
+										))}
+								</Select>
+							</FormControl>
+						</Grid>
+						<Grid item xs={12}>
+							<FormControl variant="outlined" fullWidth>
+								<InputLabel>{t("newTicketModal.select.queue")}</InputLabel>
+								<Select
+									value={selectedQueue}
+									onChange={(e) => setSelectedQueue(e.target.value)}
+									label={t("newTicketModal.select.queue")}
+								>
+									<MenuItem value="">
+										{t("newTicketModal.select.none")}
+									</MenuItem>
+									{user.queues.map((queue) => (
+										<MenuItem key={queue.id} value={queue.id}>
+											{queue.name}
+										</MenuItem>
+									))}
+								</Select>
+							</FormControl>
+						</Grid>
+					</Grid>
+				</DialogContent>
 				<DialogActions>
 					<Button
 						onClick={handleClose}

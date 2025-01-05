@@ -1,24 +1,23 @@
+import { compare, hash } from "bcryptjs";
 import {
-  Table,
-  Column,
-  CreatedAt,
-  UpdatedAt,
-  Model,
-  DataType,
+  AutoIncrement,
   BeforeCreate,
   BeforeUpdate,
-  PrimaryKey,
-  AutoIncrement,
+  BelongsToMany,
+  Column,
+  CreatedAt,
+  DataType,
   Default,
   HasMany,
-  BelongsToMany,
-  ForeignKey,
-  BelongsTo
+  Model,
+  PrimaryKey,
+  Table,
+  UpdatedAt
 } from "sequelize-typescript";
-import { hash, compare } from "bcryptjs";
-import Ticket from "./Ticket";
 import Queue from "./Queue";
+import Ticket from "./Ticket";
 import UserQueue from "./UserQueue";
+import UserWhatsapp from "./UserWhatsapp";
 import Whatsapp from "./Whatsapp";
 
 @Table
@@ -52,13 +51,6 @@ class User extends Model<User> {
   @Column
   isTricked: string;
 
-  @ForeignKey(() => Whatsapp)
-  @Column
-  whatsappId: number;
-
-  @BelongsTo(() => Whatsapp)
-  whatsapp: Whatsapp;
-
   @Default("00:00")
   @Column
   startWork: string;
@@ -78,6 +70,9 @@ class User extends Model<User> {
 
   @BelongsToMany(() => Queue, () => UserQueue)
   queues: Queue[];
+
+  @BelongsToMany(() => Whatsapp, () => UserWhatsapp)
+  whatsapps: Whatsapp[];
 
   @BeforeUpdate
   @BeforeCreate

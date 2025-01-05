@@ -1,7 +1,10 @@
 import {
+  Backdrop,
   Button,
+  Fade,
   IconButton,
   InputAdornment,
+  Modal,
   Paper,
   Table,
   TableBody,
@@ -16,6 +19,7 @@ import {
   AddCircleOutline,
   DeleteOutline,
   Edit,
+  Info,
   Search
 } from "@material-ui/icons";
 import React, { useEffect, useReducer, useState } from "react";
@@ -84,6 +88,15 @@ const useStyles = makeStyles((theme) => ({
     overflowY: "scroll",
     ...theme.scrollbarStyles,
   },
+  modalPaper: {
+    backgroundColor: "white",
+    padding: theme.spacing(2),
+    borderRadius: "8px",
+    boxShadow: theme.shadows[5],
+    width: "400px",
+    maxHeight: "80%",
+    overflowY: "auto",
+  },
 }));
 
 const Users = () => {
@@ -96,6 +109,9 @@ const Users = () => {
   const [deletingUser, setDeletingUser] = useState(null);
   const [userModalOpen, setUserModalOpen] = useState(false);
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalContent, setModalContent] = useState([]);
+  const [modalTitle, setModalTitle] = useState("");
   const [searchParam, setSearchParam] = useState("");
   const [users, dispatch] = useReducer(reducer, []);
 
@@ -185,8 +201,48 @@ const Users = () => {
     }
   };
 
+  const handleOpenModal = (content, title) => {
+    setModalContent(content);
+    setModalTitle(title);
+    setModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setModalContent([]);
+    setModalOpen(false);
+  };
+
   return (
     <MainContainer>
+      <Modal
+        open={modalOpen}
+        onClose={handleCloseModal}
+        BackdropComponent={Backdrop}
+        BackdropProps={{ timeout: 500 }}
+        style={{ display: "flex", alignItems: "center", justifyContent: "center" }}
+      >
+        <Fade in={modalOpen}>
+          <div className={classes.modalPaper}>
+            <h2>{modalTitle}</h2>
+            <Table size="small">
+              <TableHead>
+                <TableRow>
+                  <TableCell>{t("users.modalTable.id")}</TableCell>
+                  <TableCell>{t("users.modalTable.name")}</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {modalContent.map((item, index) => (
+                  <TableRow key={index}>
+                    <TableCell>{item.id}</TableCell>
+                    <TableCell>{item.name}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </Fade>
+      </Modal>
       <ConfirmationModal
         title={
           deletingUser &&
@@ -256,6 +312,9 @@ const Users = () => {
                 {t("users.table.whatsapp")}
               </TableCell>
               <TableCell align="center">
+                {t("users.table.queue")}
+              </TableCell>
+              <TableCell align="center">
                 {t("users.table.startWork")}
               </TableCell>
               <TableCell align="center">
@@ -274,7 +333,22 @@ const Users = () => {
                   <TableCell align="center">{user.name}</TableCell>
                   <TableCell align="center">{user.email}</TableCell>
                   <TableCell align="center">{user.profile}</TableCell>
-                  <TableCell align="center">{user.whatsapp?.name}</TableCell>
+                  <TableCell align="center">
+                    <IconButton
+                      size="small"
+                      onClick={() => handleOpenModal(user.whatsapps, t("users.modalTitle.channel"))}
+                    >
+                      <Info color="secondary" />
+                    </IconButton>
+                  </TableCell>
+                  <TableCell align="center">
+                    <IconButton
+                      size="small"
+                      onClick={() => handleOpenModal(user.queues, t("users.modalTitle.queue"))}
+                    >
+                      <Info color="secondary" />
+                    </IconButton>
+                  </TableCell>
                   <TableCell align="center">{user.startWork}</TableCell>
                   <TableCell align="center">{user.endWork}</TableCell>
                   <TableCell align="center">

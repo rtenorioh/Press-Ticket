@@ -1,4 +1,3 @@
-import User from "../../models/User";
 import AppError from "../../errors/AppError";
 import {
   createAccessToken,
@@ -6,6 +5,8 @@ import {
 } from "../../helpers/CreateTokens";
 import { SerializeUser } from "../../helpers/SerializeUser";
 import Queue from "../../models/Queue";
+import User from "../../models/User";
+import Whatsapp from "../../models/Whatsapp";
 
 interface SerializedUser {
   id: number;
@@ -13,6 +14,7 @@ interface SerializedUser {
   email: string;
   profile: string;
   queues: Queue[];
+  whatsapps: Whatsapp[];
 }
 
 interface Request {
@@ -32,7 +34,7 @@ const AuthUserService = async ({
 }: Request): Promise<Response> => {
   const user = await User.findOne({
     where: { email },
-    include: ["queues"]
+    include: ["queues", "whatsapps"]
   });
 
   if (!user) {

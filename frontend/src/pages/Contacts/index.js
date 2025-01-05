@@ -113,6 +113,7 @@ const Contacts = () => {
   const { t } = useTranslation();
   const history = useHistory();
   const { user } = useContext(AuthContext);
+  const [settings, setSettings] = useState([]);
   const [loading, setLoading] = useState(false);
   const [pageNumber, setPageNumber] = useState(1);
   const [searchParam, setSearchParam] = useState("");
@@ -126,6 +127,19 @@ const Contacts = () => {
   const [newTicketModalOpen, setNewTicketModalOpen] = useState(false);
   const [contactTicket, setContactTicket] = useState({});
   const [filteredTags, setFilteredTags] = useState([]);
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const { data } = await api.get("/settings");
+        setSettings(data);
+      } catch (err) {
+        toastError(err);
+      }
+    };
+
+    fetchSettings();
+  }, []);
 
   useEffect(() => {
     dispatch({ type: "RESET" });
@@ -204,45 +218,41 @@ const Contacts = () => {
 
   const handleSaveTicket = async (contactId) => {
     if (!contactId) return;
-    const { data } = await api.get(`/contacts/${contactId}`);
+
     setLoading(true);
-    if (data.number) {
-      try {
-        const { data: ticket } = await api.post("/tickets", {
-          contactId: contactId,
-          userId: user?.id,
-          status: "open",
-        });
-        history.push(`/tickets/${ticket.id}`);
-      } catch (err) {
-        toastError(err);
+
+    try {
+      const { data: settingsData } = await api.get("/settings");
+      const openTicketsSetting = settingsData.find(s => s.key === "openTickets")?.value;
+
+      if (openTicketsSetting === "enabled") {
+        const { data: ticketData } = await api.get(`/tickets/contact/${contactId}/open`);
+
+        if (ticketData.hasOpenTicket) {
+          const assignedUserName = ticketData.ticket?.user?.name || "Atendente desconhecido";
+
+          setLoading(false);
+          toastError({
+            message: t("contacts.errors.ticketAlreadyOpen", {
+              atendente: assignedUserName,
+            }),
+          });
+          return;
+        }
       }
-    } else if (!data.number && data.instagramId && !data.messengerId) {
-      try {
-        const { data: ticket } = await api.post("/hub-ticket", {
-          contactId: contactId,
-          userId: user?.id,
-          status: "open",
-          channel: "instagram"
-        });
-        history.push(`/tickets/${ticket.id}`);
-      } catch (err) {
-        toastError(err);
-      }
-    } else if (!data.number && data.messengerId && !data.instagramId) {
-      try {
-        const { data: ticket } = await api.post("/hub-ticket", {
-          contactId: contactId,
-          userId: user?.id,
-          status: "open",
-          channel: "facebook"
-        });
-        history.push(`/tickets/${ticket.id}`);
-      } catch (err) {
-        toastError(err);
-      }
+
+      const { data } = await api.post("/tickets", {
+        contactId,
+        userId: user?.id,
+        status: "open",
+      });
+
+      history.push(`/tickets/${data.id}`);
+    } catch (err) {
+      toastError(err);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const hadleEditContact = (contactId) => {

@@ -57,7 +57,7 @@ const ListUsersService = async ({
       { model: Queue, as: "queues", attributes: ["id", "name", "color"] },
       {
         model: Whatsapp,
-        as: "whatsapp",
+        as: "whatsapps",
         attributes: ["id", "name", "type", "color"]
       }
     ]

@@ -13,6 +13,7 @@ import Tag from "../models/Tag";
 import Ticket from "../models/Ticket";
 import User from "../models/User";
 import UserQueue from "../models/UserQueue";
+import UserWhatsapp from "../models/UserWhatsapp";
 import Whatsapp from "../models/Whatsapp";
 import WhatsappQueue from "../models/WhatsappQueue";
 
@@ -33,6 +34,7 @@ const models = [
   Queue,
   WhatsappQueue,
   UserQueue,
+  UserWhatsapp,
   QuickAnswer,
   Tag,
   ContactTag,
