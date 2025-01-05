@@ -188,6 +188,7 @@ const QueueModal = ({ open, onClose, queueId }) => {
 									<ColorPicker
 										open={colorPickerModalOpen}
 										handleClose={() => setColorPickerModalOpen(false)}
+										currentColor={values.color}
 										onChange={(color) => {
 											setFieldValue("color", color);
 										}}

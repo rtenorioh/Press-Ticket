@@ -15,6 +15,7 @@ const ColorPicker = ({ onChange, currentColor, handleClose, open, theme }) => {
   };
 
   const handleSave = () => {
+    onChange(selectedColor);
     handleClose();
   };
 
