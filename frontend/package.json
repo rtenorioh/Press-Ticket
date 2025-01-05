@@ -1,7 +1,7 @@
 {
   "name": "frontend",
   "version": "1.0.0",
-  "systemVersion": "v1.10.0",
+  "systemVersion": "v1.10.1",
   "private": true,
   "scripts": {
     "start": "react-scripts --openssl-legacy-provider start",
