@@ -391,13 +391,39 @@ const Connections = () => {
 	};
 
 	const restartpm2 = async () => {
+		const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+		let secondsRemaining = 15;
+
+		const countdownToastId = toast.info(`O sistema será reiniciado em ${secondsRemaining} segundos...`, {
+			autoClose: false,
+		});
+
+		const updateToast = () => {
+			toast.update(countdownToastId, {
+				render: `O sistema será reiniciado em ${secondsRemaining} segundos...`,
+			});
+		};
+
 		try {
 			await api.post('/restartpm2');
+
+			const intervalId = setInterval(() => {
+				secondsRemaining -= 1;
+				updateToast();
+
+				if (secondsRemaining <= 0) {
+					clearInterval(intervalId);
+					toast.dismiss(countdownToastId);
+				}
+			}, 1000);
+
+			await delay(secondsRemaining * 1000);
 			history.go(0);
 		} catch (err) {
+			toast.dismiss(countdownToastId);
 			toastError(err);
 		}
-	}
+	};
 
 	const formatPhoneNumber = (number) => {
 		if (number.startsWith('55') && number.length === 13) {
