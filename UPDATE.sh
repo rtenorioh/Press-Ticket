@@ -435,10 +435,6 @@ if [ -f "$ENV_FILE" ]; then
     echo "PM2_FRONTEND: $PM2_FRONTEND" | tee -a "$LOG_FILE"
     echo "PM2_BACKEND: $PM2_BACKEND" | tee -a "$LOG_FILE"
 
-    # Verifica e restaura os processos do PM2
-    sudo -u deploy pm2 resurrect | tee -a "$LOG_FILE"
-    sudo -u deploy pm2 list | tee -a "$LOG_FILE"
-
     # Reinicia os processos especificados no .env
     sudo -u deploy pm2 restart "$PM2_FRONTEND" --update-env | tee -a "$LOG_FILE" || finalizar "Erro ao reiniciar $PM2_FRONTEND." 1
     sudo -u deploy pm2 restart "$PM2_BACKEND" --update-env | tee -a "$LOG_FILE" || finalizar "Erro ao reiniciar $PM2_BACKEND." 1
