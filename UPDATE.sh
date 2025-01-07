@@ -1,5 +1,29 @@
 #!/bin/bash
-VERSION="v1.10.0"
+# Obter a versão automaticamente
+VERSION=$(git describe --tags --abbrev=0 2>/dev/null || echo "unknown")
+
+# Registro do início da execução
+START_TIME=$(date +%s)
+
+# Função para finalizar o script exibindo o tempo total
+finalizar() {
+    local END_TIME=$(date +%s)
+    local ELAPSED_TIME=$((END_TIME - START_TIME))
+    local MINUTES=$((ELAPSED_TIME / 60))
+    local SECONDS=$((ELAPSED_TIME % 60))
+
+    local RED="\e[31m"
+    local GREEN="\e[32m"
+    local RESET="\e[0m"
+    local BOLD="\e[1m"
+
+    if [ -n "$1" ]; then
+        echo -e "${RED}Erro:${RESET} $1" | tee -a "$LOG_FILE"
+    fi
+
+    echo -e "${GREEN}Tempo total de execução até agora:${RESET} ${BOLD}${MINUTES} minutos e ${SECONDS} segundos${RESET}" | tee -a "$LOG_FILE"
+    exit "${2:-1}"
+}
 
 # Define o diretório base absoluto
 SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
@@ -12,7 +36,7 @@ ARCHIVED_LOG_DIR="$LOG_DIR/arquivos"
 # Cria os diretórios de log
 if ! mkdir -p "$CURRENT_LOG_DIR" "$ARCHIVED_LOG_DIR"; then
     echo "Erro: Não foi possível criar os diretórios de log. Verifique as permissões."
-    exit 1
+    finalizar "Erro: Não foi possível criar os diretórios de log. Verifique as permissões." 1
 fi
 
 COLOR="\e[38;5;92m"
@@ -77,7 +101,7 @@ if ! command -v jq &>/dev/null; then
         echo "jq instalado com sucesso."
     else
         echo "Erro: Não foi possível instalar jq. Verifique as permissões ou instale manualmente."
-        exit 1
+        finalizar "Erro: Não foi possível instalar jq. Verifique as permissões ou instale manualmente." 1
     fi
 fi
 
@@ -118,7 +142,7 @@ echo "Hora ajustada para o log: $(TZ=$SELECTED_TZ date)" | tee -a "$LOG_FILE"
 # Verifica se o arquivo de log pode ser criado
 if ! touch "$LOG_FILE"; then
     echo "Erro: Não foi possível criar o arquivo de log $LOG_FILE. Verifique as permissões."
-    exit 1
+    finalizar "Erro: Não foi possível criar o arquivo de log $LOG_FILE. Verifique as permissões." 1
 fi
 
 sleep 2
@@ -133,15 +157,15 @@ if [[ "$UPDATE_SYSTEM" =~ ^[sS]$ ]]; then
     if sudo apt-get update -y | tee -a "$LOG_FILE"; then
         echo "Lista de pacotes atualizada com sucesso." | tee -a "$LOG_FILE"
     else
-        echo "Erro ao atualizar a lista de pacotes." | tee -a "$LOG_FILE"
-        exit 1
+        echo "Erro ao atualizar a lista de pacotes."
+        finalizar "Erro ao atualizar a lista de pacotes." 1
     fi
 
     if sudo apt-get upgrade -y | tee -a "$LOG_FILE"; then
         echo "Pacotes atualizados com sucesso." | tee -a "$LOG_FILE"
     else
-        echo "Erro ao atualizar os pacotes." | tee -a "$LOG_FILE"
-        exit 1
+        echo "Erro ao atualizar os pacotes."
+        finalizar "Erro ao atualizar os pacotes." 1
     fi
 else
     echo "Atualização do sistema operacional ignorada." | tee -a "$LOG_FILE"
@@ -167,10 +191,10 @@ if [ ! -x "$NODE_PATH" ]; then
         sudo npm install -g npm
         if [ $? -ne 0 ]; then
             echo "Erro ao instalar o Node.js ou o npm. Saindo..."
-            exit 1
+            finalizar "Erro ao instalar o Node.js ou o npm. Saindo..." 1
         fi
         echo "Node.js instalado com sucesso."
-        exit 0
+        finalizar "Node.js instalado com sucesso." 0
     } | tee -a "$LOG_FILE"
 fi
 
@@ -195,7 +219,7 @@ if version_less_than "$CURRENT_NODE_VERSION" "18.0.0"; then
             sudo npm install -g npm
             if [ $? -ne 0 ]; then
                 echo "Erro ao atualizar o Node.js ou o npm. Saindo..."
-                exit 1
+                finalizar "Erro ao atualizar o Node.js ou o npm. Saindo..." 1
             fi
             echo "Node.js atualizado com sucesso para a versão 20.x."
         else
@@ -228,8 +252,8 @@ git pull | tee -a "$LOG_FILE"
 sleep 2
 
 cd backend || {
-    echo "Erro ao acessar o diretório do backend." | tee -a "$LOG_FILE"
-    exit 1
+    echo "Erro ao acessar o diretório do backend."
+    finalizar "Erro ao acessar o diretório do backend." 1
 }
 
 # Caminho do arquivo sequelizeData.json
@@ -258,8 +282,8 @@ if [ ! -f "$SEQUELIZE_DATA_FILE" ]; then
     if [ $? -eq 0 ]; then
         echo "Arquivo $SEQUELIZE_DATA_FILE criado com sucesso." | tee -a "$LOG_FILE"
     else
-        echo "Erro ao criar o arquivo $SEQUELIZE_DATA_FILE." | tee -a "$LOG_FILE"
-        exit 1
+        echo "Erro ao criar o arquivo $SEQUELIZE_DATA_FILE."
+        finalizar "Erro ao criar o arquivo $SEQUELIZE_DATA_FILE." 1
     fi
 else
     echo "O arquivo $SEQUELIZE_DATA_FILE já existe. Nenhuma ação necessária." | tee -a "$LOG_FILE"
@@ -308,8 +332,8 @@ npx sequelize db:seed:all | tee -a "$LOG_FILE"
 sleep 2
 
 cd ../frontend || {
-    echo "Erro ao acessar o diretório do frontend." | tee -a "$LOG_FILE"
-    exit 1
+    echo "Erro ao acessar o diretório do frontend."
+    finalizar "Erro ao acessar o diretório do frontend." 1
 }
 
 {
@@ -347,8 +371,8 @@ if [ -f "$ENV_FILE" ]; then
         echo "A variável REACT_APP_MASTERADMIN foi adicionada ao final do arquivo .env." | tee -a "$LOG_FILE"
     fi
 else
-    echo "O arquivo .env do frontend não foi encontrado. Certifique-se de que a instalação foi concluída." | tee -a "$LOG_FILE"
-    exit 1
+    echo "O arquivo .env do frontend não foi encontrado. Certifique-se de que a instalação foi concluída."
+    finalizar "O arquivo .env do frontend não foi encontrado. Certifique-se de que a instalação foi concluída." 1
 fi
 
 {
@@ -402,12 +426,12 @@ if [ -f "$ENV_FILE" ]; then
         pm2 restart "$PM2_FRONTEND" | tee -a "$LOG_FILE"
         pm2 restart "$PM2_BACKEND" | tee -a "$LOG_FILE"
     else
-        echo "Erro: IDs PM2_FRONTEND ou PM2_BACKEND não encontrados." | tee -a "$LOG_FILE"
-        exit 1
+        echo "Erro: IDs PM2_FRONTEND ou PM2_BACKEND não encontrados."
+        finalizar "Erro: IDs PM2_FRONTEND ou PM2_BACKEND não encontrados." 1
     fi
 else
-    echo "Erro: Arquivo .env não encontrado no backend." | tee -a "$LOG_FILE"
-    exit 1
+    echo "Erro: Arquivo .env não encontrado no backend."
+    finalizar "Erro: Arquivo .env não encontrado no backend." 1
 fi
 
 {
@@ -415,3 +439,6 @@ fi
     echo "PRESS TICKET ATUALIZADO COM SUCESSO!!!"
     echo "Log de atualização salvo em: $LOG_FILE"
 } | tee -a "$LOG_FILE"
+
+# Caso o script finalize corretamente
+finalizar "Atualização concluída com sucesso!" 0
