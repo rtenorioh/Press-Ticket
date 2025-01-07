@@ -419,50 +419,31 @@ sleep 2
     echo " "
 } | tee -a "$LOG_FILE"
 
-sleep 2
-
 SCRIPT_DIR=$(cd "$(dirname "$0")/.." && pwd)
 ENV_FILE="$SCRIPT_DIR/backend/.env"
 
-# Adiciona depuração para garantir o caminho correto
-echo "Caminho calculado para o arquivo .env: $ENV_FILE" | tee -a "$LOG_FILE"
-echo "Diretório atual: $(pwd)" | tee -a "$LOG_FILE"
-
-# Verifica se o arquivo .env existe
+# Verifica se o arquivo .env existe e extrai os valores necessários
 if [ -f "$ENV_FILE" ]; then
     PM2_FRONTEND=$(grep "^PM2_FRONTEND=" "$ENV_FILE" | cut -d '=' -f2 | tr -d '[:space:]')
     PM2_BACKEND=$(grep "^PM2_BACKEND=" "$ENV_FILE" | cut -d '=' -f2 | tr -d '[:space:]')
 
+    # Finaliza se as variáveis não forem definidas
+    [ -z "$PM2_FRONTEND" ] && finalizar "PM2_FRONTEND não definido no .env." 1
+    [ -z "$PM2_BACKEND" ] && finalizar "PM2_BACKEND não definido no .env." 1
+
+    echo "Caminho calculado para o arquivo .env: $ENV_FILE" | tee -a "$LOG_FILE"
     echo "PM2_FRONTEND: $PM2_FRONTEND" | tee -a "$LOG_FILE"
     echo "PM2_BACKEND: $PM2_BACKEND" | tee -a "$LOG_FILE"
 
-    # Valida se os valores foram extraídos
-    if [[ -z "$PM2_FRONTEND" || -z "$PM2_BACKEND" ]]; then
-        echo "Erro: PM2_FRONTEND ou PM2_BACKEND não definido corretamente no .env." | tee -a "$LOG_FILE"
-        finalizar "Erro: PM2_FRONTEND ou PM2_BACKEND não definido corretamente no .env." 1
-    fi
-
-    echo "Checando status do PM2..." | tee -a "$LOG_FILE"
+    # Verifica e restaura os processos do PM2
     sudo -u deploy pm2 resurrect | tee -a "$LOG_FILE"
     sudo -u deploy pm2 list | tee -a "$LOG_FILE"
 
-    # Verifica se os processos existem
-    if ! sudo -u deploy pm2 describe "$PM2_FRONTEND" >/dev/null 2>&1; then
-        echo "Erro: Processo $PM2_FRONTEND não encontrado no PM2." | tee -a "$LOG_FILE"
-        finalizar "Erro: Processo $PM2_FRONTEND não encontrado no PM2." 1
-    fi
-
-    if ! sudo -u deploy pm2 describe "$PM2_BACKEND" >/dev/null 2>&1; then
-        echo "Erro: Processo $PM2_BACKEND não encontrado no PM2." | tee -a "$LOG_FILE"
-        finalizar "Erro: Processo $PM2_BACKEND não encontrado no PM2." 1
-    fi
-
-    echo "Reiniciando PM2 com os nomes especificados no contexto do usuário deploy..." | tee -a "$LOG_FILE"
-    sudo -u deploy pm2 restart "$PM2_FRONTEND" --update-env | tee -a "$LOG_FILE" || finalizar "Erro ao reiniciar o processo PM2_FRONTEND ($PM2_FRONTEND)." 1
-    sudo -u deploy pm2 restart "$PM2_BACKEND" --update-env | tee -a "$LOG_FILE" || finalizar "Erro ao reiniciar o processo PM2_BACKEND ($PM2_BACKEND)." 1
+    # Reinicia os processos especificados no .env
+    sudo -u deploy pm2 restart "$PM2_FRONTEND" --update-env | tee -a "$LOG_FILE" || finalizar "Erro ao reiniciar $PM2_FRONTEND." 1
+    sudo -u deploy pm2 restart "$PM2_BACKEND" --update-env | tee -a "$LOG_FILE" || finalizar "Erro ao reiniciar $PM2_BACKEND." 1
 
 else
-    echo "Erro: Arquivo .env não encontrado no backend." | tee -a "$LOG_FILE"
     finalizar "Erro: Arquivo .env não encontrado no backend." 1
 fi
 
