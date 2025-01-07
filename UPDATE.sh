@@ -421,12 +421,15 @@ sleep 2
 
 sleep 2
 
-# Corrige o diretório base para o nível do diretório "main"
-SCRIPT_DIR=$(cd "$(dirname "$0")/.." && pwd)
+SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
 ENV_FILE="$SCRIPT_DIR/backend/.env"
 
-# Adiciona depuração do caminho
 echo "Caminho calculado para o arquivo .env: $ENV_FILE" | tee -a "$LOG_FILE"
+
+# Checa se o PM2 está ativo e restaurado
+echo "Checando o status do PM2..." | tee -a "$LOG_FILE"
+pm2 status | tee -a "$LOG_FILE"
+pm2 resurrect | tee -a "$LOG_FILE"
 
 if [ -f "$ENV_FILE" ]; then
     echo "Verificando lista de processos PM2 antes de reiniciar:" | tee -a "$LOG_FILE"
