@@ -154,7 +154,7 @@ sleep 2
 
 if [ -t 0 ]; then
     echo -e "${BOLD}${GREEN}Deseja atualizar os pacotes do sistema operacional antes de continuar? (s/n)${RESET}"
-    read -r UPDATE_SYSTEM
+    read -r UPDATE_SYSTEM </dev/tty
     UPDATE_SYSTEM=${UPDATE_SYSTEM:-n} # Define 'n' como valor padrão se vazio
 else
     echo "Execução não interativa detectada. Atualização de pacotes será ignorada."
