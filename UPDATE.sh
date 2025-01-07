@@ -303,11 +303,11 @@ fi
 
 sleep 2
 
-sudo rm -rf node_modules | tee -a "$LOG_FILE"
-npm install | tee -a "$LOG_FILE"
+# sudo rm -rf node_modules | tee -a "$LOG_FILE"
+# npm install | tee -a "$LOG_FILE"
 
-sudo rm -rf dist | tee -a "$LOG_FILE"
-npm run build | tee -a "$LOG_FILE"
+# sudo rm -rf dist | tee -a "$LOG_FILE"
+# npm run build | tee -a "$LOG_FILE"
 
 {
     echo " "
@@ -407,11 +407,11 @@ sleep 2
 
 sleep 2
 
-sudo rm -rf node_modules | tee -a "$LOG_FILE"
-npm install | tee -a "$LOG_FILE"
+# sudo rm -rf node_modules | tee -a "$LOG_FILE"
+# npm install | tee -a "$LOG_FILE"
 
-sudo rm -rf build | tee -a "$LOG_FILE"
-npm run build | tee -a "$LOG_FILE"
+# sudo rm -rf build | tee -a "$LOG_FILE"
+# npm run build | tee -a "$LOG_FILE"
 
 {
     echo " "
@@ -454,8 +454,9 @@ if [ -f "$ENV_FILE" ]; then
 
     # Reinicia os processos do PM2
     echo "Reiniciando PM2 com os nomes especificados..." | tee -a "$LOG_FILE"
-    pm2 restart "$PM2_FRONTEND" --update-env | tee -a "$LOG_FILE" || finalizar "Erro ao reiniciar o processo PM2_FRONTEND ($PM2_FRONTEND)." 1
-    pm2 restart "$PM2_BACKEND" --update-env | tee -a "$LOG_FILE" || finalizar "Erro ao reiniciar o processo PM2_BACKEND ($PM2_BACKEND)." 1
+    su - deploy -c "pm2 restart $PM2_FRONTEND --update-env" | tee -a "$LOG_FILE" || finalizar "Erro ao reiniciar o processo PM2_FRONTEND ($PM2_FRONTEND)." 1
+    su - deploy -c "pm2 restart $PM2_BACKEND --update-env" | tee -a "$LOG_FILE" || finalizar "Erro ao reiniciar o processo PM2_BACKEND ($PM2_BACKEND)." 1
+
 else
     echo "Erro: Arquivo .env não encontrado no backend." | tee -a "$LOG_FILE"
     finalizar "Erro: Arquivo .env não encontrado no backend." 1
