@@ -432,16 +432,32 @@ if [ -f "$ENV_FILE" ]; then
     PM2_FRONTEND=$(grep "^PM2_FRONTEND=" "$ENV_FILE" | cut -d '=' -f2 | tr -d '[:space:]')
     PM2_BACKEND=$(grep "^PM2_BACKEND=" "$ENV_FILE" | cut -d '=' -f2 | tr -d '[:space:]')
 
+    # Depuração dos valores extraídos
+    echo "PM2_FRONTEND: $PM2_FRONTEND" | tee -a "$LOG_FILE"
+    echo "PM2_BACKEND: $PM2_BACKEND" | tee -a "$LOG_FILE"
+
     if [[ -z "$PM2_FRONTEND" || -z "$PM2_BACKEND" ]]; then
         echo "Erro: PM2_FRONTEND ou PM2_BACKEND não está definido corretamente no arquivo .env." | tee -a "$LOG_FILE"
         finalizar "Erro: PM2_FRONTEND ou PM2_BACKEND ausentes ou inválidos no arquivo .env." 1
     fi
 
+    # Valida se os processos existem no PM2
+    if ! pm2 describe "$PM2_FRONTEND" >/dev/null 2>&1; then
+        echo "Erro: Processo $PM2_FRONTEND não encontrado no PM2." | tee -a "$LOG_FILE"
+        finalizar "Erro: Processo $PM2_FRONTEND não encontrado no PM2." 1
+    fi
+
+    if ! pm2 describe "$PM2_BACKEND" >/dev/null 2>&1; then
+        echo "Erro: Processo $PM2_BACKEND não encontrado no PM2." | tee -a "$LOG_FILE"
+        finalizar "Erro: Processo $PM2_BACKEND não encontrado no PM2." 1
+    fi
+
+    # Reinicia os processos do PM2
     echo "Reiniciando PM2 com os nomes especificados..." | tee -a "$LOG_FILE"
     pm2 restart "$PM2_FRONTEND" --update-env | tee -a "$LOG_FILE" || finalizar "Erro ao reiniciar o processo PM2_FRONTEND ($PM2_FRONTEND)." 1
     pm2 restart "$PM2_BACKEND" --update-env | tee -a "$LOG_FILE" || finalizar "Erro ao reiniciar o processo PM2_BACKEND ($PM2_BACKEND)." 1
 else
-    echo "Erro: Arquivo .env não encontrado no backend."
+    echo "Erro: Arquivo .env não encontrado no backend." | tee -a "$LOG_FILE"
     finalizar "Erro: Arquivo .env não encontrado no backend." 1
 fi
 
