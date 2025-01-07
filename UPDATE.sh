@@ -429,6 +429,8 @@ ENV_FILE="$SCRIPT_DIR/backend/.env"
 echo "Caminho calculado para o arquivo .env: $ENV_FILE" | tee -a "$LOG_FILE"
 
 if [ -f "$ENV_FILE" ]; then
+    echo "Verificando lista de processos PM2 antes de reiniciar:" | tee -a "$LOG_FILE"
+    pm2 list | tee -a "$LOG_FILE"
     PM2_FRONTEND=$(grep "^PM2_FRONTEND=" "$ENV_FILE" | cut -d '=' -f2 | tr -d '[:space:]')
     PM2_BACKEND=$(grep "^PM2_BACKEND=" "$ENV_FILE" | cut -d '=' -f2 | tr -d '[:space:]')
 
