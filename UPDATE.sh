@@ -422,22 +422,22 @@ sleep 2
 SCRIPT_DIR=$(cd "$(dirname "$0")/.." && pwd)
 ENV_FILE="$SCRIPT_DIR/backend/.env"
 
-# Verifica se o arquivo .env existe e extrai os valores necessários
+# Verifica se o arquivo .env existe e extrai os IDs necessários
 if [ -f "$ENV_FILE" ]; then
-    PM2_FRONTEND=$(grep "^PM2_FRONTEND=" "$ENV_FILE" | cut -d '=' -f2 | tr -d '[:space:]')
-    PM2_BACKEND=$(grep "^PM2_BACKEND=" "$ENV_FILE" | cut -d '=' -f2 | tr -d '[:space:]')
+    PM2_FRONTEND_ID=$(grep "^PM2_FRONTEND=" "$ENV_FILE" | cut -d '=' -f2 | tr -d '[:space:]')
+    PM2_BACKEND_ID=$(grep "^PM2_BACKEND=" "$ENV_FILE" | cut -d '=' -f2 | tr -d '[:space:]')
 
-    # Finaliza se as variáveis não forem definidas
-    [ -z "$PM2_FRONTEND" ] && finalizar "PM2_FRONTEND não definido no .env." 1
-    [ -z "$PM2_BACKEND" ] && finalizar "PM2_BACKEND não definido no .env." 1
+    # Finaliza se os IDs não forem definidos
+    [ -z "$PM2_FRONTEND_ID" ] && finalizar "PM2_FRONTEND não definido no .env." 1
+    [ -z "$PM2_BACKEND_ID" ] && finalizar "PM2_BACKEND não definido no .env." 1
 
     echo "Caminho calculado para o arquivo .env: $ENV_FILE" | tee -a "$LOG_FILE"
-    echo "PM2_FRONTEND: $PM2_FRONTEND" | tee -a "$LOG_FILE"
-    echo "PM2_BACKEND: $PM2_BACKEND" | tee -a "$LOG_FILE"
+    echo "PM2_FRONTEND_ID: $PM2_FRONTEND_ID" | tee -a "$LOG_FILE"
+    echo "PM2_BACKEND_ID: $PM2_BACKEND_ID" | tee -a "$LOG_FILE"
 
-    # Reinicia os processos especificados no .env
-    sudo -u deploy pm2 restart "$PM2_FRONTEND" --update-env | tee -a "$LOG_FILE" || finalizar "Erro ao reiniciar $PM2_FRONTEND." 1
-    sudo -u deploy pm2 restart "$PM2_BACKEND" --update-env | tee -a "$LOG_FILE" || finalizar "Erro ao reiniciar $PM2_BACKEND." 1
+    # Reinicia os processos especificados usando os IDs
+    sudo -u deploy pm2 restart "$PM2_FRONTEND_ID" --update-env | tee -a "$LOG_FILE" || finalizar "Erro ao reiniciar PM2_FRONTEND com ID $PM2_FRONTEND_ID." 1
+    sudo -u deploy pm2 restart "$PM2_BACKEND_ID" --update-env | tee -a "$LOG_FILE" || finalizar "Erro ao reiniciar PM2_BACKEND com ID $PM2_BACKEND_ID." 1
 
 else
     finalizar "Erro: Arquivo .env não encontrado no backend." 1
