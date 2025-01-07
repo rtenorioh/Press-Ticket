@@ -421,8 +421,7 @@ npm run build | tee -a "$LOG_FILE"
 
 sleep 2
 
-SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
-ENV_FILE="$SCRIPT_DIR/backend/.env"
+ENV_FILE="./backend/.env"
 
 if [ -f "$ENV_FILE" ]; then
     PM2_FRONTEND=$(grep "^PM2_FRONTEND=" "$ENV_FILE" | cut -d '=' -f2 | tr -d '[:space:]')
