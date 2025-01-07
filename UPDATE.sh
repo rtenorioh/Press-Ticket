@@ -21,7 +21,7 @@ finalizar() {
         echo -e "${RED}Erro:${RESET} $1" | tee -a "$LOG_FILE"
     fi
 
-    echo -e "${GREEN}Tempo total de execução até agora:${RESET} ${BOLD}${MINUTES} minutos e ${SECONDS} segundos${RESET}" | tee -a "$LOG_FILE"
+    echo -e "${GREEN}Tempo total de execução do script:${RESET} ${BOLD}${MINUTES} minutos e ${SECONDS} segundos${RESET}" | tee -a "$LOG_FILE"
     exit "${2:-1}"
 }
 
@@ -148,20 +148,20 @@ fi
 sleep 2
 
 # Solicita confirmação do usuário para atualização do sistema operacional
-# echo " "
-# echo -e "${BOLD}${GREEN}Deseja atualizar os pacotes do sistema operacional antes de continuar? (s/n)${RESET}"
-# read -r UPDATE_SYSTEM
+echo " "
+echo -e "${BOLD}${GREEN}Deseja atualizar os pacotes do sistema operacional antes de continuar? (s/n)${RESET}"
+read -r UPDATE_SYSTEM
 
-if [ -t 0 ]; then
-    echo -e "${BOLD}${GREEN}Deseja atualizar os pacotes do sistema operacional antes de continuar? (s/n)${RESET}"
-    read -r UPDATE_SYSTEM
-    UPDATE_SYSTEM=${UPDATE_SYSTEM:-n} # Define 'n' como valor padrão se vazio
-else
-    # Abre um subshell para capturar entrada interativa
-    UPDATE_SYSTEM=$(bash -c 'read -p "Deseja atualizar os pacotes do sistema operacional antes de continuar? (s/n): " REPLY; echo $REPLY' </dev/tty)
-    UPDATE_SYSTEM=${UPDATE_SYSTEM:-n} # Define 'n' como valor padrão se vazio
-    echo "DEBUG: Entrada capturada em modo não interativo: $UPDATE_SYSTEM"
-fi
+# if [ -t 0 ]; then
+#     echo -e "${BOLD}${GREEN}Deseja atualizar os pacotes do sistema operacional antes de continuar? (s/n)${RESET}"
+#     read -r UPDATE_SYSTEM
+#     UPDATE_SYSTEM=${UPDATE_SYSTEM:-n} # Define 'n' como valor padrão se vazio
+# else
+#     # Abre um subshell para capturar entrada interativa
+#     UPDATE_SYSTEM=$(bash -c 'read -p "Deseja atualizar os pacotes do sistema operacional antes de continuar? (s/n): " REPLY; echo $REPLY' </dev/tty)
+#     UPDATE_SYSTEM=${UPDATE_SYSTEM:-n} # Define 'n' como valor padrão se vazio
+#     echo "DEBUG: Entrada capturada em modo não interativo: $UPDATE_SYSTEM"
+# fi
 
 if [[ "$UPDATE_SYSTEM" == "s" || "$UPDATE_SYSTEM" == "S" ]]; then
     # Comandos de atualização
@@ -426,7 +426,7 @@ npm run build | tee -a "$LOG_FILE"
 
 sleep 2
 
-ENV_FILE="../backend/.env"
+ENV_FILE="cd ../backend/.env"
 
 if [ -f "$ENV_FILE" ]; then
     PM2_FRONTEND=$(grep "^PM2_FRONTEND=" "$ENV_FILE" | cut -d '=' -f2)
