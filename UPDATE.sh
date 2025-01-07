@@ -424,7 +424,9 @@ sleep 2
 SCRIPT_DIR=$(cd "$(dirname "$0")/.." && pwd)
 ENV_FILE="$SCRIPT_DIR/backend/.env"
 
+# Adiciona depuração para garantir o caminho correto
 echo "Caminho calculado para o arquivo .env: $ENV_FILE" | tee -a "$LOG_FILE"
+echo "Diretório atual: $(pwd)" | tee -a "$LOG_FILE"
 
 # Checa se o PM2 está ativo e restaurado
 echo "Checando o status do PM2..." | tee -a "$LOG_FILE"
@@ -459,8 +461,8 @@ if [ -f "$ENV_FILE" ]; then
 
     # Reinicia os processos do PM2
     echo "Reiniciando PM2 com os nomes especificados..." | tee -a "$LOG_FILE"
-    su - deploy -c "pm2 restart $PM2_FRONTEND --update-env" | tee -a "$LOG_FILE" || finalizar "Erro ao reiniciar o processo PM2_FRONTEND ($PM2_FRONTEND)." 1
-    su - deploy -c "pm2 restart $PM2_BACKEND --update-env" | tee -a "$LOG_FILE" || finalizar "Erro ao reiniciar o processo PM2_BACKEND ($PM2_BACKEND)." 1
+    pm2 restart "$PM2_FRONTEND" --update-env | tee -a "$LOG_FILE" || finalizar "Erro ao reiniciar o processo PM2_FRONTEND ($PM2_FRONTEND)." 1
+    pm2 restart "$PM2_BACKEND" --update-env | tee -a "$LOG_FILE" || finalizar "Erro ao reiniciar o processo PM2_BACKEND ($PM2_BACKEND)." 1
 
 else
     echo "Erro: Arquivo .env não encontrado no backend." | tee -a "$LOG_FILE"
