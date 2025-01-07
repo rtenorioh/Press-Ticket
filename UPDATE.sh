@@ -421,8 +421,9 @@ npm run build | tee -a "$LOG_FILE"
 
 sleep 2
 
-SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
-ENV_FILE="$SCRIPT_DIR/../backend/.env"
+# Corrige o diretório base para o nível do diretório "main"
+SCRIPT_DIR=$(cd "$(dirname "$0")/.." && pwd)
+ENV_FILE="$SCRIPT_DIR/backend/.env"
 
 # Adiciona depuração do caminho
 echo "Caminho calculado para o arquivo .env: $ENV_FILE" | tee -a "$LOG_FILE"
