@@ -152,7 +152,7 @@ echo " "
 echo -e "${BOLD}${GREEN}Deseja atualizar os pacotes do sistema operacional antes de continuar? (s/n)${RESET}"
 read -r UPDATE_SYSTEM
 
-if [[ "$UPDATE_SYSTEM" =~ ^[sS]$ ]]; then
+if [[ "$UPDATE_SYSTEM" == "s" || "$UPDATE_SYSTEM" == "S" ]]; then
     # Comandos de atualização
     if sudo apt-get update -y | tee -a "$LOG_FILE"; then
         echo "Lista de pacotes atualizada com sucesso." | tee -a "$LOG_FILE"
