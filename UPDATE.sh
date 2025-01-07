@@ -148,10 +148,6 @@ fi
 sleep 2
 
 # Solicita confirmação do usuário para atualização do sistema operacional
-# echo " "
-# echo -e "${BOLD}${GREEN}Deseja atualizar os pacotes do sistema operacional antes de continuar? (s/n)${RESET}"
-# read -r UPDATE_SYSTEM
-
 if [ -t 0 ]; then
     echo -e "${BOLD}${GREEN}Deseja atualizar os pacotes do sistema operacional antes de continuar? (s/n)${RESET}"
     read -r UPDATE_SYSTEM
@@ -160,7 +156,6 @@ else
     # Abre um subshell para capturar entrada interativa
     UPDATE_SYSTEM=$(bash -c 'read -p "Deseja atualizar os pacotes do sistema operacional antes de continuar? (s/n): " REPLY; echo $REPLY' </dev/tty)
     UPDATE_SYSTEM=${UPDATE_SYSTEM:-n} # Define 'n' como valor padrão se vazio
-    echo "DEBUG: Entrada capturada em modo não interativo: $UPDATE_SYSTEM"
 fi
 
 if [[ "$UPDATE_SYSTEM" == "s" || "$UPDATE_SYSTEM" == "S" ]]; then
@@ -426,7 +421,8 @@ npm run build | tee -a "$LOG_FILE"
 
 sleep 2
 
-ENV_FILE="../backend/.env"
+SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
+ENV_FILE="$SCRIPT_DIR/backend/.env"
 
 if [ -f "$ENV_FILE" ]; then
     PM2_FRONTEND=$(grep "^PM2_FRONTEND=" "$ENV_FILE" | cut -d '=' -f2 | tr -d '[:space:]')
