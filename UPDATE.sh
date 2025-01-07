@@ -154,11 +154,13 @@ sleep 2
 
 if [ -t 0 ]; then
     echo -e "${BOLD}${GREEN}Deseja atualizar os pacotes do sistema operacional antes de continuar? (s/n)${RESET}"
-    read -r UPDATE_SYSTEM </dev/tty
+    read -r UPDATE_SYSTEM
     UPDATE_SYSTEM=${UPDATE_SYSTEM:-n} # Define 'n' como valor padrão se vazio
 else
-    echo "Execução não interativa detectada. Atualização de pacotes será ignorada."
-    UPDATE_SYSTEM="n"
+    # Abre um subshell para capturar entrada interativa
+    UPDATE_SYSTEM=$(bash -c 'read -p "Deseja atualizar os pacotes do sistema operacional antes de continuar? (s/n): " REPLY; echo $REPLY' </dev/tty)
+    UPDATE_SYSTEM=${UPDATE_SYSTEM:-n} # Define 'n' como valor padrão se vazio
+    echo "DEBUG: Entrada capturada em modo não interativo: $UPDATE_SYSTEM"
 fi
 
 if [[ "$UPDATE_SYSTEM" == "s" || "$UPDATE_SYSTEM" == "S" ]]; then
