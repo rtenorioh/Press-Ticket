@@ -421,7 +421,7 @@ sleep 2
 
 sleep 2
 
-SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
+SCRIPT_DIR=$(cd "$(dirname "$0")/.." && pwd)
 ENV_FILE="$SCRIPT_DIR/backend/.env"
 
 echo "Caminho calculado para o arquivo .env: $ENV_FILE" | tee -a "$LOG_FILE"
