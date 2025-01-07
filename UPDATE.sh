@@ -426,7 +426,7 @@ npm run build | tee -a "$LOG_FILE"
 
 sleep 2
 
-ENV_FILE="cd ../backend/.env"
+ENV_FILE="../backend/.env"
 
 if [ -f "$ENV_FILE" ]; then
     PM2_FRONTEND=$(grep "^PM2_FRONTEND=" "$ENV_FILE" | cut -d '=' -f2)
