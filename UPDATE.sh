@@ -421,7 +421,11 @@ npm run build | tee -a "$LOG_FILE"
 
 sleep 2
 
-ENV_FILE="./backend/.env"
+SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
+ENV_FILE="$SCRIPT_DIR/backend/.env"
+
+# Adiciona depuração do caminho
+echo "Caminho calculado para o arquivo .env: $ENV_FILE" | tee -a "$LOG_FILE"
 
 if [ -f "$ENV_FILE" ]; then
     PM2_FRONTEND=$(grep "^PM2_FRONTEND=" "$ENV_FILE" | cut -d '=' -f2 | tr -d '[:space:]')
