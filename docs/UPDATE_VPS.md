@@ -20,16 +20,16 @@ Uma vez conectado à VPS, vá até o diretório onde o sistema está instalado:
 cd Press-Ticket/
 ```
 
-### 3. Executar o script de atualização
+### 3. Executar o comando para atualização
 
-Com o diretório correto acessado, execute o script de atualização utilizando o comando abaixo:
+Com o diretório correto acessado, execute o comando para atualização abaixo:
 
 ```bash
-chmod +x UPDATE.sh && ./UPDATE.sh
+curl -sSL https://update.pressticket.com.br | sudo bash -s
 ```
 
 > Nota: O script `UPDATE.sh` será responsável por realizar o processo de atualização automaticamente.
 
 ### 4. Finalização
 
-Após a execução do script, verifique se a atualização foi concluída sem erros. Caso ocorra algum problema, revise os logs ou entre em contato para suporte.
+Após a execução do comando, verifique se a atualização foi concluída com sucesso e sem erros. Caso ocorra algum problema, revise os logs ou entre em contato para suporte.
