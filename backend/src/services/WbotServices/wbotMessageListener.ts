@@ -134,10 +134,12 @@ const verifyMediaMessage = async (
 
   if (!media.filename) {
     const ext = media.mimetype.split("/")[1].split(";")[0];
-    media.filename = `${new Date().getTime()}.${ext}`;
+    const shortTime = new Date().getTime().toString().slice(-6);
+    media.filename = `${contact.name}_${shortTime}.${ext}`;
   } else {
     const originalFilename = media.filename ? `-${media.filename}` : "";
-    media.filename = `${new Date().getTime()}${originalFilename}`;
+    const shortTime = new Date().getTime().toString().slice(-6);
+    media.filename = `${shortTime}_${originalFilename}`;
   }
 
   try {
@@ -155,7 +157,6 @@ const verifyMediaMessage = async (
         } else if (inputFile.endsWith(".ogg")) {
           outputFile = inputFile.replace(".ogg", ".mp3");
         } else {
-          console.warn("Formato de arquivo não é .mpeg ou .ogg:", inputFile);
           return;
         }
 
@@ -218,8 +219,9 @@ const verifyMediaMessage = async (
     case "revoked":
       $tipoArquivo = "❌ Apagado";
       break;
+
     default:
-      $tipoArquivo = "📎 Arquivo";
+      $tipoArquivo = "🤷‍♂️ Tipo Desconhecido";
       break;
   }
 

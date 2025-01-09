@@ -744,10 +744,8 @@ const MessagesList = ({ ticketId, isGroup }) => {
                   })}
                 >
                   {message.quotedMsg && renderQuotedMessage(message)}
-                  {(message.mediaType === "image"
-                    ? ''
-                    : <MarkdownWrapper>{message.body}</MarkdownWrapper>
-                  )}
+
+                  <MarkdownWrapper>{message.body}</MarkdownWrapper>
                   <span className={classes.timestamp}>
                     {message.isEdited && <span>{t("message.edited")} </span>}
                     {format(parseISO(message.createdAt), "HH:mm")}
@@ -796,10 +794,7 @@ const MessagesList = ({ ticketId, isGroup }) => {
                     </div>
                   )}
                   {message.quotedMsg && renderQuotedMessage(message)}
-                  {(message.mediaType === "image"
-                    ? ''
-                    : <MarkdownWrapper>{message.body}</MarkdownWrapper>
-                  )}
+                  <MarkdownWrapper>{message.body}</MarkdownWrapper>
                   <span className={classes.timestamp}>
                     {message.isEdited && <span>{t("message.edited")} </span>}
                     {format(parseISO(message.createdAt), "HH:mm")}
