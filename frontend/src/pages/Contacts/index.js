@@ -113,7 +113,6 @@ const Contacts = () => {
   const { t } = useTranslation();
   const history = useHistory();
   const { user } = useContext(AuthContext);
-  const [settings, setSettings] = useState([]);
   const [loading, setLoading] = useState(false);
   const [pageNumber, setPageNumber] = useState(1);
   const [searchParam, setSearchParam] = useState("");
@@ -127,19 +126,6 @@ const Contacts = () => {
   const [newTicketModalOpen, setNewTicketModalOpen] = useState(false);
   const [contactTicket, setContactTicket] = useState({});
   const [filteredTags, setFilteredTags] = useState([]);
-
-  useEffect(() => {
-    const fetchSettings = async () => {
-      try {
-        const { data } = await api.get("/settings");
-        setSettings(data);
-      } catch (err) {
-        toastError(err);
-      }
-    };
-
-    fetchSettings();
-  }, []);
 
   useEffect(() => {
     dispatch({ type: "RESET" });

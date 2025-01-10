@@ -39,7 +39,7 @@ const VcardPreview = ({ contact, numbers }) => {
                     setContact(data)
 
                 } catch (err) {
-                    console.log(err)
+                    console.warn(err)
                     toastError(err);
                 }
             };
@@ -69,7 +69,7 @@ const VcardPreview = ({ contact, numbers }) => {
     };
 
     return (
-		<>
+        <>
             <div style={{
                 minWidth: "250px",
             }}>

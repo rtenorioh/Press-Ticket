@@ -23,12 +23,12 @@ const storage = multer.diskStorage({
       "public",
       "assets"
     );
-    console.log(`Destino do upload: ${dest}`);
+
     cb(null, dest);
   },
   filename: (req: Request, file, cb) => {
     const { theme } = req.params;
-    console.log(`Tema recebido: ${theme}`);
+
     let fileName = "";
 
     if (theme === "light") {
@@ -59,7 +59,6 @@ const storage = multer.diskStorage({
       "assets",
       fileName
     );
-    console.log(`Nome do arquivo gerado: ${fileName}`);
     deleteIfExists(filePath);
     cb(null, fileName);
   }

@@ -1,7 +1,6 @@
 import {
 	FormControl,
 	InputLabel,
-	makeStyles,
 	MenuItem,
 	Select
 } from "@material-ui/core";
@@ -25,19 +24,6 @@ import api from "../../services/api";
 import ButtonWithSpinner from "../ButtonWithSpinner";
 import ContactModal from "../ContactModal";
 
-const useStyles = makeStyles((theme) => ({
-	autoComplete: {
-		width: 300,
-	},
-	maxWidth: {
-		width: "100%",
-	},
-	buttonColorError: {
-		color: theme.palette.error.main,
-		borderColor: theme.palette.error.main,
-	},
-}));
-
 const filter = createFilterOptions({
 	trim: true,
 });
@@ -55,9 +41,6 @@ const NewTicketModal = ({ modalOpen, onClose }) => {
 	const [selectedQueue, setSelectedQueue] = useState("");
 	const [selectedWhatsapp, setSelectedWhatsapp] = useState("");
 	const [settings, setSettings] = useState([]);
-	const classes = useStyles();
-
-	console.log("USER: ", user)
 
 	useEffect(() => {
 		const fetchSettings = async () => {

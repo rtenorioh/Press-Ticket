@@ -104,8 +104,6 @@ const HubMessageListener = async (
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   medias: Express.Multer.File[]
 ) => {
-  console.log("HubMessageListener", message);
-  console.log("contents", message.message.contents);
 
   if (message.direction === "IN") {
     message.fromMe = false;

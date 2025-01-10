@@ -14,8 +14,6 @@ const CreateOrUpdateTicketService = async (
 ): Promise<Ticket> => {
   const { contactId, channel, contents, connection } = ticketData;
 
-  console.log("TICKETDATA:", ticketData);
-  console.log("CONTENTS:", contents);
   const ticketExists = await Ticket.findOne({
     where: {
       contactId,

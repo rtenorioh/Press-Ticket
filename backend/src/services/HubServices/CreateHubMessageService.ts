@@ -18,10 +18,6 @@ interface MessageData {
 const CreateMessageService = async (
   messageData: MessageData
 ): Promise<Message | any> => {
-  // console.log("creating message");
-  // console.log({
-  //   messageData
-  // });
 
   const {
     id,

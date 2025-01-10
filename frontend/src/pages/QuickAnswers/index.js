@@ -105,7 +105,6 @@ const QuickAnswers = () => {
   const [hasMore, setHasMore] = useState(false);
   const [settings, setSettings] = useState([]);
   const { user } = useContext(AuthContext);
-  const isAdmin = user.profile;
 
   useEffect(() => {
     dispatch({ type: "RESET" });
@@ -164,11 +163,6 @@ const QuickAnswers = () => {
     };
     fetchSettings();
   }, []);
-
-  const getSettingValue = key => {
-    const { value } = settings.find(s => s.key === key);
-    return value;
-  };
 
   const handleSearch = (event) => {
     setSearchParam(event.target.value.toLowerCase());

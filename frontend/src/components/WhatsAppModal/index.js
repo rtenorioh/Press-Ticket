@@ -157,10 +157,6 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
 	};
 
 	useEffect(() => {
-		console.log("selectedChannel has changed:", selectedChannel);
-	}, [selectedChannel]);
-
-	useEffect(() => {
 		const fetchSession = async () => {
 			if (!whatsAppId) return;
 

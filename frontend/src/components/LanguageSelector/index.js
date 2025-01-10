@@ -16,7 +16,6 @@ const LanguageSelector = () => {
     };
 
     const handleLanguageChange = (language) => {
-        console.log("Idioma selecionado:", language);
         i18n.changeLanguage(language)
             .then(() => console.log("Idioma alterado com sucesso:", language))
             .catch((err) => console.error("Erro ao alterar idioma:", err));

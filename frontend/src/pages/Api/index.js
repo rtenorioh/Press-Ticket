@@ -154,14 +154,13 @@ const Api = () => {
         }
 
         try {
-            const response = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/api/messages/send`, payload, {
+            await axios.post(`${process.env.REACT_APP_BACKEND_URL}/api/messages/send`, payload, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                     "Content-Type": media ? "multipart/form-data" : "application/json"
                 }
             });
 
-            console.log("Mensagem enviada com sucesso:", response.data);
         } catch (error) {
             console.error("Erro ao enviar mensagem:", error);
         }
@@ -239,7 +238,6 @@ const Api = () => {
                                         fullWidth
                                         value={userId || ""}
                                         onChange={(e) => setUserId(e.target.value)}
-                                        required
                                     >
                                         {users.map((user) => (
                                             <option key={user.id} value={user.id}>
@@ -257,7 +255,6 @@ const Api = () => {
                                         fullWidth
                                         value={queueId || ""}
                                         onChange={(e) => setQueueId(e.target.value)}
-                                        required
                                     >
                                         {queues.map((queue) => (
                                             <option key={queue.id} value={queue.id}>
@@ -275,7 +272,6 @@ const Api = () => {
                                         fullWidth
                                         value={whatsappId || ""}
                                         onChange={(e) => setWhatsappId(e.target.value)}
-                                        required
                                     >
                                         {whatsapps
                                             .filter(whatsapp => whatsapp.type === null)

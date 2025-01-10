@@ -56,11 +56,6 @@ const AcceptTicketWithouSelectQueue = ({ modalOpen, onClose, ticketId }) => {
 		fetchSettings();
 	}, []);
 
-	const getSettingValue = (key) => {
-		const setting = settings.find((s) => s.key === key);
-		return setting?.value || null;
-	};
-
 	const handleClose = useCallback(() => {
 		onClose();
 		setSelectedQueue(INITIAL_QUEUE_VALUE);
@@ -80,15 +75,19 @@ const AcceptTicketWithouSelectQueue = ({ modalOpen, onClose, ticketId }) => {
 			toastError(err, t);
 			return null;
 		}
-	}, []);
+	}, [t]);
 
 	const handleUpdateTicketStatus = useCallback(async (queueId) => {
 		setLoading(true);
 
 		try {
+			const getSettingValue = (key) => {
+				const setting = settings.find((s) => s.key === key);
+				return setting?.value || null;
+			};
 
 			const openTicketsSetting = getSettingValue("openTickets");
-			console.log("openTicketsSetting", openTicketsSetting)
+
 			if (openTicketsSetting === "disabled") {
 				await api.put(`/tickets/${ticketId}`, {
 					status: "open",
@@ -130,7 +129,7 @@ const AcceptTicketWithouSelectQueue = ({ modalOpen, onClose, ticketId }) => {
 			setLoading(false);
 			toastError(err, t);
 		}
-	}, [ticketId, userId, history, handleClose, checkOpenTickets, t, getSettingValue]);
+	}, [ticketId, userId, history, handleClose, checkOpenTickets, t, settings]);
 
 	return (
 		<Dialog
