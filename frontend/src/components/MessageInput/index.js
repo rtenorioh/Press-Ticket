@@ -247,6 +247,14 @@ const MessageInput = ({ ticketStatus }) => {
   }, [replyingMessage, editingMessage]);
 
   useEffect(() => {
+    if (editingMessage) {
+      setInputMessage(editingMessage.body || "");
+    } else {
+      setInputMessage("");
+    }
+  }, [editingMessage]);
+
+  useEffect(() => {
     const fetchChannelType = async () => {
       try {
         const { data } = await api.get(`/tickets/${ticketId}`);
@@ -359,12 +367,14 @@ const MessageInput = ({ ticketStatus }) => {
       quotedMsg: replyingMessage,
     };
     try {
-      if (channelType !== null) {
-        await api.post(`/hub-message/${ticketId}`, message);
-      } else if (editingMessage !== null) {
+      if (editingMessage !== null) {
         await api.post(`/messages/edit/${editingMessage.id}`, message);
       } else {
-        await api.post(`/messages/${ticketId}`, message);
+        if (channelType !== null) {
+          await api.post(`/hub-message/${ticketId}`, message);
+        } else {
+          await api.post(`/messages/${ticketId}`, message);
+        }
       }
     } catch (err) {
       toastError(err);
