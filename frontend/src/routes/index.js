@@ -1,7 +1,8 @@
 import React from "react";
 import { BrowserRouter, Switch } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
-
+import { AuthProvider } from "../context/Auth/AuthContext";
+import { WhatsAppsProvider } from "../context/WhatsApp/WhatsAppsContext";
 import LoggedInLayout from "../layout";
 import Api from "../pages/Api/";
 import ApiDocs from "../pages/ApiDocs/";
@@ -9,17 +10,16 @@ import ApiKey from "../pages/ApiKey/";
 import Connections from "../pages/Connections/";
 import Contacts from "../pages/Contacts/";
 import Dashboard from "../pages/Dashboard/";
+import ForgotPassword from "../pages/ForgotPassword";
 import Login from "../pages/Login/";
 import Queues from "../pages/Queues/";
 import QuickAnswers from "../pages/QuickAnswers/";
+import ResetPassword from "../pages/ResetPassword";
 import Settings from "../pages/Settings/";
 import Signup from "../pages/Signup/";
 import Tags from "../pages/Tags";
 import Tickets from "../pages/Tickets/";
 import Users from "../pages/Users";
-
-import { AuthProvider } from "../context/Auth/AuthContext";
-import { WhatsAppsProvider } from "../context/WhatsApp/WhatsAppsContext";
 import Route from "./Route";
 
 const Routes = ({ toggleTheme, onThemeConfigUpdate }) => {
@@ -29,6 +29,8 @@ const Routes = ({ toggleTheme, onThemeConfigUpdate }) => {
         <Switch>
           <Route exact path="/login" component={Login} />
           <Route exact path="/signup" component={Signup} />
+          <Route exact path="/forgot-password" component={ForgotPassword} />
+          <Route exact path="/reset-password" component={ResetPassword} />
           <WhatsAppsProvider>
             <LoggedInLayout toggleTheme={toggleTheme} onThemeConfigUpdate={onThemeConfigUpdate}>
               <Route exact path="/" component={Dashboard} isPrivate />

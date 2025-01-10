@@ -197,6 +197,21 @@ const messages = {
           noTags: "Sem tags no momento!"
         }
       },
+      forgotPassword: {
+        title: "Esqueceu a Senha?",
+        form: {
+          email: "Digite seu e-mail"
+        },
+        buttons: {
+          submit: "Enviar Link de Redefinição",
+          backToLogin: "Voltar ao Login"
+        },
+        success: "Se um e-mail válido foi encontrado, um link para redefinição de senha foi enviado!",
+        error: {
+          invalidEmail: "Por favor, insira um e-mail válido.",
+          generic: "Erro ao solicitar redefinição de senha. Tente novamente mais tarde."
+        }
+      },
       integrations: {
         success: "Integração salva com sucesso.",
         title: "Integrações",
@@ -227,6 +242,7 @@ const messages = {
           password: "Coloque a sua senha",
         },
         buttons: {
+          forgotPassword: "Esqueceu a Senha?",
           submit: "Fazer login",
           register: "Não tem um conta? Cadastre-se!",
         },
@@ -427,6 +443,22 @@ const messages = {
           cancel: "Cancelar",
         },
         success: "Resposta Rápida salva com sucesso.",
+      },
+      resetPassword: {
+        title: "Redefinir Senha",
+        form: {
+          password: "Nova Senha",
+          confirmPassword: "Confirme a Nova Senha"
+        },
+        buttons: {
+          submit: "Redefinir Senha",
+          backToLogin: "Voltar ao Login"
+        },
+        success: "Senha redefinida com sucesso!",
+        error: {
+          passwordMismatch: "As senhas não coincidem.",
+          generic: "Erro ao redefinir senha. Tente novamente."
+        }
       },
       settings: {
         success: "Configurações salvas com sucesso.",

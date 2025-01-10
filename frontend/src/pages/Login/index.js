@@ -202,6 +202,16 @@ const Login = () => {
             {t("login.buttons.submit")}
           </Button>
           <Grid container>
+            <Grid item xs>
+              <Link
+                href="#"
+                variant="body2"
+                component={RouterLink}
+                to="/forgot-password"
+              >
+                {t("login.buttons.forgotPassword")}
+              </Link>
+            </Grid>
             <Grid item>
               <Link
                 href="#"

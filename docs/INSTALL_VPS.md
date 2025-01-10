@@ -213,6 +213,10 @@ DB_NAME=press_ticket
 USER_LIMIT=3
 CONNECTIONS_LIMIT=1
 
+#Credenciais do Email para o Nodemailer
+EMAIL_USER=seu.email@gmail.com
+EMAIL_PASS=suasenha
+
 #ID do PM2 do Frontend e Backend para poder ser restartado na tela de Conexões
 PM2_FRONTEND=0
 PM2_BACKEND=1
