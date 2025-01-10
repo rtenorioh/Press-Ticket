@@ -28,45 +28,50 @@ const useAuth = () => {
 	);
 
 	api.interceptors.response.use(
-		response => {
-			return response;
-		},
-		async error => {
+		(response) => response,
+		async (error) => {
 			const originalRequest = error.config;
-			if (error?.response?.status === 403 && !originalRequest._retry) {
+			if (
+				error.response?.status === 401 &&
+				!originalRequest._retry &&
+				error.response?.data?.error === "ERR_SESSION_EXPIRED"
+			) {
 				originalRequest._retry = true;
-
-				const { data } = await api.post("/auth/refresh_token");
-				if (data) {
+				try {
+					const { data } = await api.post("/auth/refresh_token");
 					localStorage.setItem("token", JSON.stringify(data.token));
 					api.defaults.headers.Authorization = `Bearer ${data.token}`;
+					return api(originalRequest);
+				} catch (err) {
+					localStorage.removeItem("token");
+					setIsAuth(false);
+					toastError("Sessão expirada. Faça login novamente.");
 				}
-				return api(originalRequest);
-			}
-			if (error?.response?.status === 401) {
-				localStorage.removeItem("token");
-				api.defaults.headers.Authorization = undefined;
-				setIsAuth(false);
 			}
 			return Promise.reject(error);
 		}
 	);
 
 	useEffect(() => {
-		const token = localStorage.getItem("token");
-		(async () => {
+		const fetchToken = async () => {
+			const token = localStorage.getItem("token");
 			if (token) {
 				try {
 					const { data } = await api.post("/auth/refresh_token");
+					localStorage.setItem("token", JSON.stringify(data.token));
 					api.defaults.headers.Authorization = `Bearer ${data.token}`;
 					setIsAuth(true);
 					setUser(data.user);
 				} catch (err) {
-					toastError(err);
+					setIsAuth(false);
+					localStorage.removeItem("token");
+					toastError("Sessão expirada. Faça login novamente.");
 				}
 			}
 			setLoading(false);
-		})();
+		};
+
+		fetchToken();
 	}, []);
 
 	useEffect(() => {
@@ -96,7 +101,7 @@ const useAuth = () => {
 			history.push("/tickets");
 			setLoading(false);
 		} catch (err) {
-			toastError(err);
+			toastError(err, t);
 			setLoading(false);
 		}
 	};
@@ -113,7 +118,7 @@ const useAuth = () => {
 			setLoading(false);
 			history.push("/login");
 		} catch (err) {
-			toastError(err);
+			toastError(err, t);
 			setLoading(false);
 		}
 	};

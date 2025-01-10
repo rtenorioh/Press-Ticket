@@ -1,6 +1,3 @@
-import React, { useContext, useEffect, useState } from "react";
-import { Link as RouterLink } from "react-router-dom";
-
 import {
   Box,
   Button,
@@ -13,10 +10,12 @@ import {
   TextField,
   Typography
 } from '@material-ui/core';
-
 import { makeStyles } from "@material-ui/core/styles";
 import { Visibility, VisibilityOff } from '@material-ui/icons';
+import React, { useContext, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { Link as RouterLink } from "react-router-dom";
+import { toast } from "react-toastify";
 import defaultLogo from '../../assets/logo.jpg';
 import { AuthContext } from "../../context/Auth/AuthContext";
 import toastError from "../../errors/toastError";
@@ -133,9 +132,17 @@ const Login = () => {
     setUser({ ...user, [e.target.name]: e.target.value });
   };
 
-  const handlSubmit = (e) => {
+  const handlSubmit = async (e) => {
     e.preventDefault();
-    handleLogin(user);
+    try {
+      await handleLogin(user);
+    } catch (err) {
+      if (err.response?.data?.error) {
+        toast.error(err.response.data.error);
+      } else {
+        toast.error("Erro ao realizar login. Tente novamente.");
+      }
+    }
   };
 
   return (
