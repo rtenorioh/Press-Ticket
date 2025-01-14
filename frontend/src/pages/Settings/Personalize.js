@@ -1,4 +1,4 @@
-import { AppBar, Box, Button, Card, CardMedia, Grid, IconButton, makeStyles, Tab, Tabs, TextField, Typography } from "@material-ui/core";
+import { AppBar, Box, Button, Card, Grid, IconButton, makeStyles, Tab, Tabs, TextField, Typography } from "@material-ui/core";
 import DeleteIcon from "@material-ui/icons/Delete";
 import PropTypes from "prop-types";
 import React, { useEffect, useState } from "react";
@@ -6,8 +6,7 @@ import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 import api from "../../services/api";
 import openSocket from "../../services/socket-io";
-
-const PUBLIC_ASSET_PATH = '/assets/';
+import { getImageUrl } from '../../helpers/imageHelper';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -35,17 +34,32 @@ const useStyles = makeStyles((theme) => ({
         position: "relative",
         border: "1px solid #ddd",
         cursor: "pointer",
+        backgroundColor: "#f5f5f5",
+        "&:hover": {
+            backgroundColor: "#eeeeee",
+        },
     },
     cardMedia: {
         width: "100%",
         height: "100%",
-        objectFit: "contain",
+        backgroundSize: "contain",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
+        position: "absolute",
+        top: 0,
+        left: 0,
     },
     deleteIcon: {
         position: "absolute",
-        top: 0,
-        right: 0,
+        top: 4,
+        right: 4,
         color: theme.palette.error.main,
+        backgroundColor: "rgba(255, 255, 255, 0.8)",
+        padding: 4,
+        borderRadius: "50%",
+        "&:hover": {
+            backgroundColor: "rgba(255, 255, 255, 1)",
+        },
     },
     textField: {
         marginBottom: theme.spacing(2),
@@ -62,6 +76,15 @@ const useStyles = makeStyles((theme) => ({
     button: {
         marginLeft: theme.spacing(2),
     },
+    cardLabel: {
+        position: "absolute",
+        bottom: 4,
+        width: "100%",
+        textAlign: "center",
+        backgroundColor: "rgba(255, 255, 255, 0.8)",
+        padding: "2px 0",
+        fontSize: "0.75rem",
+    }
 }));
 
 const TabPanel = (props) => {
@@ -127,14 +150,14 @@ const PersonalizeSettings = ({ onThemeConfigUpdate }) => {
 
                     setLogos({
                         themeLight: {
-                            favico: lightTheme.favico ? `${PUBLIC_ASSET_PATH}${lightTheme.favico}` : null,
-                            logo: lightTheme.logo ? `${PUBLIC_ASSET_PATH}${lightTheme.logo}` : null,
-                            logoTicket: lightTheme.logoTicket ? `${PUBLIC_ASSET_PATH}${lightTheme.logoTicket} ` : null,
+                            favico: lightTheme.favico ? getImageUrl(lightTheme.favico) : null,
+                            logo: lightTheme.logo ? getImageUrl(lightTheme.logo) : null,
+                            logoTicket: lightTheme.logoTicket ? getImageUrl(lightTheme.logoTicket) : null,
                         },
                         themeDark: {
-                            favico: darkTheme.favico ? `${PUBLIC_ASSET_PATH}${darkTheme.favico}` : null,
-                            logo: darkTheme.logo ? `${PUBLIC_ASSET_PATH}${darkTheme.logo}` : null,
-                            logoTicket: darkTheme.logoTicket ? `${PUBLIC_ASSET_PATH}${darkTheme.logoTicket}` : null,
+                            favico: darkTheme.favico ? getImageUrl(darkTheme.favico) : null,
+                            logo: darkTheme.logo ? getImageUrl(darkTheme.logo) : null,
+                            logoTicket: darkTheme.logoTicket ? getImageUrl(darkTheme.logoTicket) : null,
                         }
                     });
 
@@ -172,7 +195,6 @@ const PersonalizeSettings = ({ onThemeConfigUpdate }) => {
         };
     }, [t]);
 
-
     const handleTabChange = (event, newValue) => {
         setTabValue(newValue);
     };
@@ -206,53 +228,88 @@ const PersonalizeSettings = ({ onThemeConfigUpdate }) => {
 
     const handleLogoChange = async (event, theme, type) => {
         const file = event.target.files[0];
-        if (file) {
-            const formData = new FormData();
-            formData.append("theme", theme);
-            formData.append(type, file);
+        if (!file) return;
 
-            try {
-                const response = await api.put(`/personalizations/${theme}/logos`, formData, {
-                    headers: { "Content-Type": "multipart/form-data" },
-                });
+        const formData = new FormData();
+        formData.append("theme", theme);
+        formData.append(type, file);
 
-                const updatedLogoName = response.data[type];
-                const updatedLogoUrl = `${PUBLIC_ASSET_PATH}${updatedLogoName}`;
+        try {
+            toast.info("Enviando imagem...", {
+                autoClose: false,
+                toastId: "uploadingLogo"
+            });
 
-                setLogos((prevState) => ({
+            const response = await api.put(`/personalizations/${theme}/logos`, formData, {
+                headers: { 
+                    "Content-Type": "multipart/form-data"
+                },
+            });
+
+            if (response.data && response.data[type]) {
+                const fileName = response.data[type];
+                
+                setLogos(prevState => ({
                     ...prevState,
                     [theme === "light" ? "themeLight" : "themeDark"]: {
                         ...prevState[theme === "light" ? "themeLight" : "themeDark"],
-                        [type]: updatedLogoUrl,
+                        [type]: getImageUrl(fileName),
                     },
                 }));
 
-                if (response.status === 200) {
-                    toast.success(`${t("settings.personalize.success.logos")}`);
+                onThemeConfigUpdate(theme, {
+                    [type]: fileName
+                });
 
-                    onThemeConfigUpdate(theme, {
-                        [type]: updatedLogoUrl
-                    });
-                } else {
-                    throw new Error(`${t("settings.personalize.error.logos")} ${theme}`);
-                }
-            } catch (error) {
-                console.error(`${t("settings.personalize.error.logs")}`, error);
-                toast.error(`${t("settings.personalize.error.logos")}`);
+                toast.dismiss("uploadingLogo");
+                toast.success("Imagem atualizada com sucesso!");
+            }
+        } catch (error) {
+            console.error("Erro ao fazer upload da imagem:", error);
+            toast.dismiss("uploadingLogo");
+            toast.error(
+                error.response?.data?.message || 
+                "Erro ao fazer upload da imagem. Tente novamente."
+            );
+        } finally {
+            if (event.target) {
+                event.target.value = '';
             }
         }
     };
 
-    const handleDeleteImage = (theme, type) => {
-        setLogos((prevState) => ({
-            ...prevState,
-            [theme === "light" ? "themeLight" : "themeDark"]: {
-                ...prevState[theme === "light" ? "themeLight" : "themeDark"],
-                [type]: null
-            }
-        }));
-    };
+    const handleDeleteLogo = async (theme, type) => {
+        try {
+            toast.info("Removendo logo...", {
+                autoClose: false,
+                toastId: "deletingLogo"
+            });
 
+            await api.delete(`/personalizations/${theme}/logos/${type}`);
+
+            setLogos(prevState => ({
+                ...prevState,
+                [theme === "light" ? "themeLight" : "themeDark"]: {
+                    ...prevState[theme === "light" ? "themeLight" : "themeDark"],
+                    [type]: null,
+                },
+            }));
+
+            onThemeConfigUpdate(theme, {
+                [type]: null
+            });
+
+            toast.dismiss("deletingLogo");
+            toast.success("Logo removida com sucesso!");
+        } catch (error) {
+            console.error("Erro ao remover logo:", error);
+            toast.dismiss("deletingLogo");
+            toast.error(
+                error.response?.data?.message || 
+                "Erro ao remover logo. Tente novamente."
+            );
+        }
+    };
 
     const handleColorChange = (event, theme, field) => {
         const newColor = event.target.value;
@@ -338,82 +395,248 @@ const PersonalizeSettings = ({ onThemeConfigUpdate }) => {
                         <Grid item xs={12}>
                             <Typography variant="h6" className={classes.title}>{t("settings.personalize.tabpanel.light")}</Typography>
                             <Grid container spacing={3}>
-                                {Object.keys(logos.themeLight).map((key) => (
-                                    <Grid item xs={12} sm={6} md={4} key={key} className={classes.cardContainer}>
-                                        <Card className={classes.card}>
-                                            <CardMedia
-                                                className={classes.cardMedia}
-                                                image={logos.themeLight[key] || "https://via.placeholder.com/150"}
-                                                title={key}
-                                                onClick={() => !logos.themeLight[key] && handleCardClick("light", key)}
-                                            />
-                                            <Typography variant="caption" component="div" style={{ position: "absolute", bottom: 0 }}>
-                                                {key.charAt(0).toUpperCase() + key.slice(1)}
-                                            </Typography>
-                                            {logos.themeLight[key] && (
-                                                <IconButton
-                                                    className={classes.deleteIcon}
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        handleDeleteImage("light", key);
-                                                    }}
-                                                >
-                                                    <DeleteIcon />
-                                                </IconButton>
-                                            )}
-                                        </Card>
-                                        <input
-                                            accept="image/*"
-                                            style={{ display: "none" }}
-                                            id={`light-${key}-input`}
-                                            type="file"
-                                            onChange={(e) => handleLogoChange(e, "light", key)}
+                                <Grid item xs={12} sm={6} md={4} className={classes.cardContainer}>
+                                    <Card className={classes.card} onClick={() => !logos.themeLight.favico && handleCardClick("light", "favico")}>
+                                        <div
+                                            className={classes.cardMedia}
+                                            style={{
+                                                backgroundImage: `url("${logos.themeLight.favico}")`,
+                                                backgroundPosition: 'center',
+                                                backgroundRepeat: 'no-repeat',
+                                                backgroundSize: 'contain'
+                                            }}
+                                            onError={(e) => {
+                                                console.error("Erro ao carregar imagem:", logos.themeLight.favico);
+                                                e.target.style.backgroundImage = '';
+                                            }}
                                         />
-                                    </Grid>
-                                ))}
+                                        <Typography className={classes.cardLabel}>
+                                            Favicon
+                                        </Typography>
+                                        {logos.themeLight.favico && (
+                                            <IconButton
+                                                className={classes.deleteIcon}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleDeleteLogo("light", "favico");
+                                                }}
+                                                size="small"
+                                            >
+                                                <DeleteIcon fontSize="small" />
+                                            </IconButton>
+                                        )}
+                                    </Card>
+                                    <input
+                                        accept="image/*"
+                                        style={{ display: "none" }}
+                                        id="light-favico-input"
+                                        type="file"
+                                        onChange={(e) => handleLogoChange(e, "light", "favico")}
+                                    />
+                                </Grid>
+                                <Grid item xs={12} sm={6} md={4} className={classes.cardContainer}>
+                                    <Card className={classes.card} onClick={() => !logos.themeLight.logo && handleCardClick("light", "logo")}>
+                                        <div
+                                            className={classes.cardMedia}
+                                            style={{
+                                                backgroundImage: `url("${logos.themeLight.logo}")`,
+                                                backgroundPosition: 'center',
+                                                backgroundRepeat: 'no-repeat',
+                                                backgroundSize: 'contain'
+                                            }}
+                                            onError={(e) => {
+                                                console.error("Erro ao carregar imagem:", logos.themeLight.logo);
+                                                e.target.style.backgroundImage = '';
+                                            }}
+                                        />
+                                        <Typography className={classes.cardLabel}>
+                                            Logo
+                                        </Typography>
+                                        {logos.themeLight.logo && (
+                                            <IconButton
+                                                className={classes.deleteIcon}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleDeleteLogo("light", "logo");
+                                                }}
+                                                size="small"
+                                            >
+                                                <DeleteIcon fontSize="small" />
+                                            </IconButton>
+                                        )}
+                                    </Card>
+                                    <input
+                                        accept="image/*"
+                                        style={{ display: "none" }}
+                                        id="light-logo-input"
+                                        type="file"
+                                        onChange={(e) => handleLogoChange(e, "light", "logo")}
+                                    />
+                                </Grid>
+                                <Grid item xs={12} sm={6} md={4} className={classes.cardContainer}>
+                                    <Card className={classes.card} onClick={() => !logos.themeLight.logoTicket && handleCardClick("light", "logoTicket")}>
+                                        <div
+                                            className={classes.cardMedia}
+                                            style={{
+                                                backgroundImage: `url("${logos.themeLight.logoTicket}")`,
+                                                backgroundPosition: 'center',
+                                                backgroundRepeat: 'no-repeat',
+                                                backgroundSize: 'contain'
+                                            }}
+                                            onError={(e) => {
+                                                console.error("Erro ao carregar imagem:", logos.themeLight.logoTicket);
+                                                e.target.style.backgroundImage = '';
+                                            }}
+                                        />
+                                        <Typography className={classes.cardLabel}>
+                                            Logo Ticket
+                                        </Typography>
+                                        {logos.themeLight.logoTicket && (
+                                            <IconButton
+                                                className={classes.deleteIcon}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleDeleteLogo("light", "logoTicket");
+                                                }}
+                                                size="small"
+                                            >
+                                                <DeleteIcon fontSize="small" />
+                                            </IconButton>
+                                        )}
+                                    </Card>
+                                    <input
+                                        accept="image/*"
+                                        style={{ display: "none" }}
+                                        id="light-logoTicket-input"
+                                        type="file"
+                                        onChange={(e) => handleLogoChange(e, "light", "logoTicket")}
+                                    />
+                                </Grid>
                             </Grid>
                         </Grid>
-
                         <Grid item xs={12}>
                             <Typography variant="h6" className={classes.title}>{t("settings.personalize.tabpanel.dark")}</Typography>
                             <Grid container spacing={3}>
-                                {Object.keys(logos.themeDark).map((key) => (
-                                    <Grid item xs={12} sm={6} md={4} key={key} className={classes.cardContainer}>
-                                        <Card className={classes.card}>
-                                            <CardMedia
-                                                className={classes.cardMedia}
-                                                image={logos.themeDark[key] || "https://via.placeholder.com/150"}
-                                                title={key}
-                                                onClick={() => !logos.themeDark[key] && handleCardClick("dark", key)}
-                                            />
-                                            <Typography variant="caption" component="div" style={{ position: "absolute", bottom: 0 }}>
-                                                {key.charAt(0).toUpperCase() + key.slice(1)}
-                                            </Typography>
-                                            {logos.themeDark[key] && (
-                                                <IconButton
-                                                    className={classes.deleteIcon}
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        handleDeleteImage("dark", key);
-                                                    }}
-                                                >
-                                                    <DeleteIcon />
-                                                </IconButton>
-                                            )}
-                                        </Card>
-                                        <input
-                                            accept="image/*"
-                                            style={{ display: "none" }}
-                                            id={`dark-${key}-input`}
-                                            type="file"
-                                            onChange={(e) => handleLogoChange(e, "dark", key)}
+                                <Grid item xs={12} sm={6} md={4} className={classes.cardContainer}>
+                                    <Card className={classes.card} onClick={() => !logos.themeDark.favico && handleCardClick("dark", "favico")}>
+                                        <div
+                                            className={classes.cardMedia}
+                                            style={{
+                                                backgroundImage: `url("${logos.themeDark.favico}")`,
+                                                backgroundPosition: 'center',
+                                                backgroundRepeat: 'no-repeat',
+                                                backgroundSize: 'contain'
+                                            }}
+                                            onError={(e) => {
+                                                console.error("Erro ao carregar imagem:", logos.themeDark.favico);
+                                                e.target.style.backgroundImage = '';
+                                            }}
                                         />
-                                    </Grid>
-                                ))}
+                                        <Typography className={classes.cardLabel}>
+                                            Favicon
+                                        </Typography>
+                                        {logos.themeDark.favico && (
+                                            <IconButton
+                                                className={classes.deleteIcon}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleDeleteLogo("dark", "favico");
+                                                }}
+                                                size="small"
+                                            >
+                                                <DeleteIcon fontSize="small" />
+                                            </IconButton>
+                                        )}
+                                    </Card>
+                                    <input
+                                        accept="image/*"
+                                        style={{ display: "none" }}
+                                        id="dark-favico-input"
+                                        type="file"
+                                        onChange={(e) => handleLogoChange(e, "dark", "favico")}
+                                    />
+                                </Grid>
+                                <Grid item xs={12} sm={6} md={4} className={classes.cardContainer}>
+                                    <Card className={classes.card} onClick={() => !logos.themeDark.logo && handleCardClick("dark", "logo")}>
+                                        <div
+                                            className={classes.cardMedia}
+                                            style={{
+                                                backgroundImage: `url("${logos.themeDark.logo}")`,
+                                                backgroundPosition: 'center',
+                                                backgroundRepeat: 'no-repeat',
+                                                backgroundSize: 'contain'
+                                            }}
+                                            onError={(e) => {
+                                                console.error("Erro ao carregar imagem:", logos.themeDark.logo);
+                                                e.target.style.backgroundImage = '';
+                                            }}
+                                        />
+                                        <Typography className={classes.cardLabel}>
+                                            Logo
+                                        </Typography>
+                                        {logos.themeDark.logo && (
+                                            <IconButton
+                                                className={classes.deleteIcon}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleDeleteLogo("dark", "logo");
+                                                }}
+                                                size="small"
+                                            >
+                                                <DeleteIcon fontSize="small" />
+                                            </IconButton>
+                                        )}
+                                    </Card>
+                                    <input
+                                        accept="image/*"
+                                        style={{ display: "none" }}
+                                        id="dark-logo-input"
+                                        type="file"
+                                        onChange={(e) => handleLogoChange(e, "dark", "logo")}
+                                    />
+                                </Grid>
+                                <Grid item xs={12} sm={6} md={4} className={classes.cardContainer}>
+                                    <Card className={classes.card} onClick={() => !logos.themeDark.logoTicket && handleCardClick("dark", "logoTicket")}>
+                                        <div
+                                            className={classes.cardMedia}
+                                            style={{
+                                                backgroundImage: `url("${logos.themeDark.logoTicket}")`,
+                                                backgroundPosition: 'center',
+                                                backgroundRepeat: 'no-repeat',
+                                                backgroundSize: 'contain'
+                                            }}
+                                            onError={(e) => {
+                                                console.error("Erro ao carregar imagem:", logos.themeDark.logoTicket);
+                                                e.target.style.backgroundImage = '';
+                                            }}
+                                        />
+                                        <Typography className={classes.cardLabel}>
+                                            Logo Ticket
+                                        </Typography>
+                                        {logos.themeDark.logoTicket && (
+                                            <IconButton
+                                                className={classes.deleteIcon}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleDeleteLogo("dark", "logoTicket");
+                                                }}
+                                                size="small"
+                                            >
+                                                <DeleteIcon fontSize="small" />
+                                            </IconButton>
+                                        )}
+                                    </Card>
+                                    <input
+                                        accept="image/*"
+                                        style={{ display: "none" }}
+                                        id="dark-logoTicket-input"
+                                        type="file"
+                                        onChange={(e) => handleLogoChange(e, "dark", "logoTicket")}
+                                    />
+                                </Grid>
                             </Grid>
                         </Grid>
                     </Grid>
-
                 </div>
             </TabPanel>
             <TabPanel value={tabValue} index={2}>

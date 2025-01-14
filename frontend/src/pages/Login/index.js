@@ -16,17 +16,15 @@ import React, { useContext, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link as RouterLink } from "react-router-dom";
 import { toast } from "react-toastify";
-import defaultLogo from '../../assets/logo.jpg';
+import { getImageUrl } from '../../helpers/imageHelper';
 import { AuthContext } from "../../context/Auth/AuthContext";
 import toastError from "../../errors/toastError";
 import api from "../../services/api";
 
-const PUBLIC_ASSET_PATH = '/assets/';
-
 const Copyright = ({ companyName, companyUrl }) => {
   return (
     <Typography variant="body2" color="textSecondary" align="center">
-      © {new Date().getFullYear()}
+      {new Date().getFullYear()}
       {" - "}
       <Link color="inherit" href={companyUrl || "https://github.com/rtenorioh/Press-Ticket"}>
         {companyName || "Press Ticket"}
@@ -60,7 +58,7 @@ const Login = () => {
   const { handleLogin } = useContext(AuthContext);
   const [theme, setTheme] = useState("light");
   const [companyData, setCompanyData] = useState({
-    logo: defaultLogo,
+    logo: null,
     name: "Press Ticket",
     url: "https://github.com/rtenorioh/Press-Ticket"
   });
@@ -105,17 +103,17 @@ const Login = () => {
           if (theme === "light" && lightConfig && lightConfig.logo) {
             setCompanyData(prevData => ({
               ...prevData,
-              logo: PUBLIC_ASSET_PATH + lightConfig.logo
+              logo: lightConfig.logo
             }));
           } else if (theme === "dark" && darkConfig && darkConfig.logo) {
             setCompanyData(prevData => ({
               ...prevData,
-              logo: PUBLIC_ASSET_PATH + darkConfig.logo
+              logo: darkConfig.logo
             }));
           } else {
             setCompanyData(prevData => ({
               ...prevData,
-              logo: defaultLogo
+              logo: null
             }));
           }
         }
@@ -149,7 +147,7 @@ const Login = () => {
     <Container component="main" maxWidth="xs">
       <CssBaseline />
       <div className={classes.paper}>
-        <img alt="logo" src={companyData.logo} style={{ height: 120, marginBottom: 20 }} />
+        <img src={getImageUrl(companyData.logo)} alt="logo" style={{ height: 120, marginBottom: 20 }} />
         <Typography component="h1" variant="h5">
           {t("login.title")}
         </Typography>

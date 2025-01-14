@@ -1,66 +1,52 @@
 import { Request } from "express";
-import fs from "fs";
 import multer, { FileFilterCallback } from "multer";
 import path from "path";
+import fs from "fs";
 
-const deleteIfExists = (filePath: string) => {
-  if (fs.existsSync(filePath)) {
-    fs.unlinkSync(filePath);
-    console.log(`Arquivo ${filePath} deletado com sucesso.`);
-  } else {
-    console.log(`Arquivo ${filePath} não encontrado para exclusão.`);
-  }
-};
+const UPLOAD_PATH = path.resolve(__dirname, "..", "..", "public", "logos");
+
+// Garantir que o diretório existe
+if (!fs.existsSync(UPLOAD_PATH)) {
+  fs.mkdirSync(UPLOAD_PATH, { recursive: true });
+}
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    const dest = path.resolve(
-      __dirname,
-      "..",
-      "..",
-      "..",
-      "frontend",
-      "public",
-      "assets"
-    );
-
-    cb(null, dest);
+    cb(null, UPLOAD_PATH);
   },
   filename: (req: Request, file, cb) => {
-    const { theme } = req.params;
-
-    let fileName = "";
-
-    if (theme === "light") {
-      if (file.fieldname === "favico") {
-        fileName = "favico.ico";
-      } else if (file.fieldname === "logo") {
-        fileName = "logo.jpg";
-      } else if (file.fieldname === "logoTicket") {
-        fileName = "logoTicket.jpg";
+    try {
+      const { theme } = req.params;
+      if (!theme || (theme !== 'light' && theme !== 'dark')) {
+        return cb(new Error("Theme parameter must be 'light' or 'dark'"), "");
       }
-    } else if (theme === "dark") {
+
+      const timestamp = Date.now();
+      const ext = path.extname(file.originalname).toLowerCase() || '.jpg';
+      let fileName = "";
+
+      // Manter o padrão de nomeação original
       if (file.fieldname === "favico") {
-        fileName = "favicoDark.ico";
+        fileName = theme === "dark" ? `favicoDark${ext}` : `favico${ext}`;
       } else if (file.fieldname === "logo") {
-        fileName = "logoDark.jpg";
+        fileName = theme === "dark" ? `logoDark${ext}` : `logo${ext}`;
       } else if (file.fieldname === "logoTicket") {
-        fileName = "logoTicketDark.jpg";
+        fileName = theme === "dark" ? `logoTicketDark${ext}` : `logoTicket${ext}`;
+      } else {
+        return cb(new Error(`Invalid field name: ${file.fieldname}`), "");
       }
+
+      // Se já existe um arquivo com esse nome, deletar
+      const filePath = path.join(UPLOAD_PATH, fileName);
+      if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
+      }
+
+      cb(null, fileName);
+    } catch (error) {
+      console.error("Error in filename generation:", error);
+      cb(error, "");
     }
-
-    const filePath = path.resolve(
-      __dirname,
-      "..",
-      "..",
-      "..",
-      "frontend",
-      "public",
-      "assets",
-      fileName
-    );
-    deleteIfExists(filePath);
-    cb(null, fileName);
   }
 });
 
@@ -69,21 +55,27 @@ const fileFilter = (
   file: Express.Multer.File,
   cb: FileFilterCallback
 ) => {
-  const allowedMimeTypes = ["image/jpeg", "image/png", "image/x-icon"];
-  if (allowedMimeTypes.includes(file.mimetype)) {
+  const allowedMimes = [
+    "image/jpeg",
+    "image/png",
+    "image/gif",
+    "image/x-icon",
+    "image/vnd.microsoft.icon"
+  ];
+
+  if (allowedMimes.includes(file.mimetype)) {
     cb(null, true);
   } else {
-    cb(
-      new Error(
-        "Formato de arquivo inválido. Apenas .jpg, .png e .ico são permitidos."
-      )
-    );
+    cb(new Error("Invalid file type."));
   }
 };
 
 const uploadConfig = multer({
   storage,
-  fileFilter
+  fileFilter,
+  limits: {
+    fileSize: 5 * 1024 * 1024 // 5MB
+  }
 });
 
 export default uploadConfig;

@@ -2,7 +2,6 @@ import { Box, Container, makeStyles, Tab, Tabs } from "@material-ui/core";
 import React, { useContext, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
-import ErrorBoundary from "../../components/ErrorBoundary";
 import { AuthContext } from "../../context/Auth/AuthContext";
 import toastError from "../../errors/toastError";
 import api from "../../services/api";
@@ -34,7 +33,8 @@ const Settings = ({ onThemeConfigUpdate }) => {
 	const [settings, setSettings] = useState([]);
 	const [tabValue, setTabValue] = useState(0);
 	const { user } = useContext(AuthContext);
-	const isMasterAdminEnabled = process.env.REACT_APP_MASTERADMIN === "ON";
+	const isMasterAdmin = process.env.REACT_APP_MASTERADMIN === 'ON';
+	const isUserMaster = user?.profile === 'masteradmin';
 
 	useEffect(() => {
 		let isMounted = true;
@@ -80,6 +80,10 @@ const Settings = ({ onThemeConfigUpdate }) => {
 		};
 	}, []);
 
+	if (!t) {
+		return <div>Loading...</div>;
+	}
+
 	const handleChangeBooleanSetting = async (e) => {
 		const selectedValue = e.target.checked ? "enabled" : "disabled";
 		const settingKey = e.target.name;
@@ -117,6 +121,33 @@ const Settings = ({ onThemeConfigUpdate }) => {
 		setTabValue(newValue);
 	};
 
+	const shouldShowTab = (tabName) => {
+		const restrictedTabs = ['personalize'];
+			
+		if (!isMasterAdmin) {
+			return true;
+		}
+
+		if (isUserMaster) {
+			return true;
+		}
+			
+		return !restrictedTabs.includes(tabName);
+	};
+
+	const tabList = [
+		{ key: "personalize", label: t("settings.tabs.personalize"), component: <Personalize onThemeConfigUpdate={onThemeConfigUpdate} /> },
+		{ key: "general", label: t("settings.tabs.general"), component: <ComponentSettings settings={settings} getSettingValue={getSettingValue} handleChangeBooleanSetting={handleChangeBooleanSetting} handleChangeSetting={handleChangeSetting} /> },
+		{ key: "integrations", label: t("settings.tabs.integrations"), component: <Integrations /> }
+	];
+
+	const visibleTabs = tabList.filter(tab => shouldShowTab(tab.key));
+
+	console.log("Settings component loaded");
+	console.log("AuthContext user:", user);
+	console.log("isUserMaster:", isUserMaster);
+	console.log("visibleTabs:", visibleTabs);
+	
 	return (
 		<div className={classes.root}>
 			<Tabs
@@ -126,39 +157,18 @@ const Settings = ({ onThemeConfigUpdate }) => {
 				onChange={handleTabChange}
 				className={classes.tabs}
 			>
-				{(!isMasterAdminEnabled || user.profile === "masteradmin") && (
-					<Tab label={t("settings.tabs.personalize")} />
-				)}
-				<Tab label={t("settings.tabs.general")} />
-				<Tab label={t("settings.tabs.integrations")} />
+				{visibleTabs.map((tab, index) => (
+				<Tab key={tab.key} label={tab.label} />
+			))}
 			</Tabs>
 			<Box p={3}>
-				{tabValue === 0 && (!isMasterAdminEnabled || user.profile === "masteradmin") && (
-					<Container className={classes.container}>
-						<ErrorBoundary>
-							<Personalize onThemeConfigUpdate={onThemeConfigUpdate} />
-						</ErrorBoundary>
+			{visibleTabs.map((tab, index) => (
+				tabValue === index && (
+					<Container key={tab.key} className={classes.container}>
+						{tab.component}
 					</Container>
-				)}
-				{tabValue === (user.profile === "masteradmin" ? 1 : 0) && (
-					<Container className={classes.container}>
-						<ErrorBoundary>
-							<ComponentSettings
-								settings={settings}
-								getSettingValue={getSettingValue}
-								handleChangeBooleanSetting={handleChangeBooleanSetting}
-								handleChangeSetting={handleChangeSetting}
-							/>
-						</ErrorBoundary>
-					</Container>
-				)}
-				{tabValue === (user.profile === "masteradmin" ? 2 : 1) && (
-					<Container className={classes.container}>
-						<ErrorBoundary>
-							<Integrations />
-						</ErrorBoundary>
-					</Container>
-				)}
+				)
+			))}
 			</Box>
 		</div>
 	);

@@ -1,9 +1,9 @@
-import * as Sentry from "@sentry/node";
-import bodyParser from "body-parser";
-import cookieParser from "cookie-parser";
-import cors from "cors";
-import express, { NextFunction, Request, Response } from "express";
 import "express-async-errors";
+import express, { Request, Response, NextFunction } from "express";
+import * as Sentry from "@sentry/node";
+import cors from "cors";
+import cookieParser from "cookie-parser";
+import path from "path";
 import "reflect-metadata";
 import "./bootstrap";
 import uploadConfig from "./config/upload";
@@ -12,9 +12,11 @@ import AppError from "./errors/AppError";
 import routes from "./routes";
 import { logger } from "./utils/logger";
 
-Sentry.init({ dsn: process.env.SENTRY_DSN });
-
 const app = express();
+
+if (process.env.NODE_ENV === "production") {
+  Sentry.init({ dsn: process.env.SENTRY_DSN });
+}
 
 app.use(
   cors({
@@ -25,11 +27,19 @@ app.use(
 app.use(cookieParser());
 app.use(express.json());
 app.use(Sentry.Handlers.requestHandler());
-app.use("/public", express.static(uploadConfig.directory));
-app.use(routes);
 
-app.use(bodyParser.json({ limit: "10mb" }));
-app.use(bodyParser.urlencoded({ limit: "10mb", extended: true }));
+// Configurar diretório de uploads
+app.use("/public", express.static(uploadConfig.directory, {
+  setHeaders: (res) => {
+    res.set('Access-Control-Allow-Origin', '*');
+    res.set('Access-Control-Allow-Methods', 'GET');
+    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    res.set('Pragma', 'no-cache');
+    res.set('Expires', '0');
+  }
+}));
+
+app.use(routes);
 
 app.use(Sentry.Handlers.errorHandler());
 
@@ -43,4 +53,4 @@ app.use(async (err: Error, req: Request, res: Response, _: NextFunction) => {
   return res.status(500).json({ error: "Internal server error" });
 });
 
-export default app;
+export { app };

@@ -34,4 +34,10 @@ personalizationRoutes.put(
   PersonalizationController.createOrUpdateColors
 );
 
+personalizationRoutes.delete(
+  "/personalizations/:theme/logos/:logoType",
+  isAuth,
+  PersonalizationController.deleteLogo
+);
+
 export default personalizationRoutes;

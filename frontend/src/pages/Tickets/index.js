@@ -5,12 +5,11 @@ import { makeStyles } from "@material-ui/core/styles";
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
-import defaultLogoTicket from '../../assets/logoTicket.jpg';
+import { getImageUrl } from '../../helpers/imageHelper';
 import Ticket from "../../components/Ticket/";
 import TicketsManager from "../../components/TicketsManager/";
 import toastError from "../../errors/toastError";
 import api from "../../services/api";
-const PUBLIC_ASSET_PATH = '/assets/';
 
 const useStyles = makeStyles((theme) => ({
   chatContainer: {
@@ -66,7 +65,7 @@ const Chat = () => {
   const classes = useStyles();
   const { t } = useTranslation();
   const { ticketId } = useParams();
-  const [logo, setLogo] = useState(defaultLogoTicket);
+  const [logo, setLogo] = useState(null);
   const themeStorage = localStorage.getItem("theme");
 
   useEffect(() => {
@@ -78,11 +77,11 @@ const Chat = () => {
           const darkConfig = data.find(themeConfig => themeConfig.theme === "dark");
 
           if (themeStorage === "light" && lightConfig?.logoTicket) {
-            setLogo(PUBLIC_ASSET_PATH + lightConfig.logoTicket);
+            setLogo(lightConfig.logoTicket);
           } else if (themeStorage === "dark" && darkConfig?.logoTicket) {
-            setLogo(PUBLIC_ASSET_PATH + darkConfig.logoTicket);
+            setLogo(darkConfig.logoTicket);
           } else {
-            setLogo(defaultLogoTicket);
+            setLogo(null);
           }
         }
       } catch (err) {
@@ -117,7 +116,7 @@ const Chat = () => {
                 <Paper className={classes.welcomeMsg}>
                   <span>
                     <center>
-                      <img src={logo} width="50%" alt="" />
+                      <img src={getImageUrl(logo)} width="50%" alt="logo" />
                     </center>
                     {t("chat.noTicketMessage")}
                   </span>

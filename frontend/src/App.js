@@ -8,6 +8,7 @@ import Routes from "./routes";
 import api from "./services/api";
 import openSocket from "./services/socket-io";
 import loadThemeConfig from "./themes/themeConfig";
+import { getImageUrl } from './helpers/imageHelper';
 
 const App = () => {
   const [locale, setLocale] = useState(ptBR);
@@ -81,8 +82,8 @@ const App = () => {
     favicon.type = "image/x-icon";
     favicon.rel = "shortcut icon";
 
-    const faviconPath = theme === "dark" ? "/assets/favicoDark.ico" : "/assets/favico.ico";
-    favicon.href = faviconPath;
+    const favico = theme === "dark" ? "favicoDark.ico" : "favico.ico";
+    favicon.href = getImageUrl(favico);
     document.head.appendChild(favicon);
   }, [theme]);
 

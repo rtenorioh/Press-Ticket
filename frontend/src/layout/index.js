@@ -22,6 +22,7 @@ import { useTranslation } from "react-i18next";
 import { useLocation } from "react-router-dom";
 import { systemVersion } from "../../package.json";
 import defaultLogo from '../assets/logo.jpg';
+import { getImageUrl } from '../helpers/imageHelper';
 import BackdropLoading from "../components/BackdropLoading";
 import LanguageSelector from "../components/LanguageSelector";
 import NotificationsPopOver from "../components/NotificationsPopOver";
@@ -32,8 +33,6 @@ import toastError from "../errors/toastError";
 import api from "../services/api";
 import openSocket from "../services/socket-io";
 import MainListItems from "./MainListItems";
-
-const PUBLIC_ASSET_PATH = '/assets/';
 
 const drawerWidth = 240;
 
@@ -191,15 +190,15 @@ const LoggedInLayout = ({ children, toggleTheme, onThemeConfigUpdate }) => {
           if (themeStorage === "light" && lightConfig && lightConfig.logo) {
             setCompanyData(prevData => ({
               ...prevData,
-              logo: PUBLIC_ASSET_PATH + lightConfig.logo
+              logo: lightConfig.logo
             }));
-            onThemeConfigUpdate("light", { logo: PUBLIC_ASSET_PATH + lightConfig.logo });
+            onThemeConfigUpdate("light", { logo: lightConfig.logo });
           } else if (themeStorage === "dark" && darkConfig && darkConfig.logo) {
             setCompanyData(prevData => ({
               ...prevData,
-              logo: PUBLIC_ASSET_PATH + darkConfig.logo
+              logo: darkConfig.logo
             }));
-            onThemeConfigUpdate("dark", { logo: PUBLIC_ASSET_PATH + darkConfig.logo });
+            onThemeConfigUpdate("dark", { logo: darkConfig.logo });
           } else {
             setCompanyData(prevData => ({
               ...prevData,
@@ -318,7 +317,7 @@ const LoggedInLayout = ({ children, toggleTheme, onThemeConfigUpdate }) => {
         open={drawerOpen}
       >
         <div className={classes.toolbarIcon}>
-          <img alt="logo" src={companyData.logo} style={{ height: 50, marginBottom: 10, marginTop: 5 }} />
+          <img alt="logo" src={getImageUrl(companyData.logo)} style={{ height: 50, marginBottom: 10, marginTop: 5 }} />
           <IconButton color="secondary" onClick={() => setDrawerOpen(!drawerOpen)}>
             <ChevronLeftIcon />
           </IconButton>

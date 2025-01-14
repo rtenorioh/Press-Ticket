@@ -18,16 +18,14 @@ import { useTranslation } from "react-i18next";
 import { Link as RouterLink, useHistory } from "react-router-dom";
 import { toast } from "react-toastify";
 import * as Yup from "yup";
-import defaultLogo from '../../assets/logo.jpg';
+import { getImageUrl } from '../../helpers/imageHelper';
 import toastError from "../../errors/toastError";
 import api from "../../services/api";
-
-const PUBLIC_ASSET_PATH = '/assets/';
 
 const Copyright = ({ companyName, companyUrl }) => {
 	return (
 		<Typography variant="body2" color="textSecondary" align="center">
-			© {new Date().getFullYear()}
+			{new Date().getFullYear()}
 			{" - "}
 			<Link color="inherit" href={companyUrl || "https://github.com/rtenorioh/Press-Ticket"}>
 				{companyName || "Press Ticket"}
@@ -71,7 +69,7 @@ const SignUp = () => {
 	const [user] = useState(initialState);
 	const [theme, setTheme] = useState("light");
 	const [companyData, setCompanyData] = useState({
-		logo: defaultLogo,
+		logo: 'logo.jpg',
 		name: "Press Ticket",
 		url: "https://github.com/rtenorioh/Press-Ticket"
 	});
@@ -116,17 +114,17 @@ const SignUp = () => {
 					if (theme === "light" && lightConfig && lightConfig.logo) {
 						setCompanyData(prevData => ({
 							...prevData,
-							logo: PUBLIC_ASSET_PATH + lightConfig.logo
+							logo: lightConfig.logo
 						}));
 					} else if (theme === "dark" && darkConfig && darkConfig.logo) {
 						setCompanyData(prevData => ({
 							...prevData,
-							logo: PUBLIC_ASSET_PATH + darkConfig.logo
+							logo: darkConfig.logo
 						}));
 					} else {
 						setCompanyData(prevData => ({
 							...prevData,
-							logo: defaultLogo
+							logo: 'logo.jpg'
 						}));
 					}
 				}
@@ -153,7 +151,7 @@ const SignUp = () => {
 		<Container component="main" maxWidth="xs">
 			<CssBaseline />
 			<div className={classes.paper}>
-				<img alt="logo" src={companyData.logo} style={{ height: 120, marginBottom: 20 }} />
+				<img src={getImageUrl(companyData.logo)} alt="logo" style={{ height: 120, marginBottom: 20 }} />
 				<Typography component="h1" variant="h5">
 					{t("signup.title")}
 				</Typography>
