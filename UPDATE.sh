@@ -212,11 +212,18 @@ version_less_than() {
 }
 
 # Atualização do Node.js, se necessário
-if version_less_than "$CURRENT_NODE_VERSION" "18.0.0"; then
+if version_less_than "$CURRENT_NODE_VERSION" "24.0.0"; then
     {
         echo "Versão do Node.js atual ($CURRENT_NODE_VERSION) é inferior a 18."
-        echo -e "${BOLD}${GREEN}Deseja atualizar o Node.js para a versão 20.x? (s/n)${RESET}"
-        read -r UPDATE_NODE
+
+        if [ -t 0 ]; then
+            echo -e "${BOLD}${GREEN}Deseja atualizar o Node.js para a versão 20.x? (s/n)${RESET}"
+            read -r UPDATE_NODE
+        else
+            UPDATE_NODE=$(bash -c 'read -p "Deseja atualizar o Node.js para a versão 20.x? (s/n): " REPLY; echo $REPLY' </dev/tty)
+        fi
+
+        UPDATE_NODE=${UPDATE_NODE:-n} # Define 'n' como padrão se vazio
 
         if [[ "$UPDATE_NODE" =~ ^[sS]$ ]]; then
             echo "Atualizando Node.js para a versão 20.x..."
