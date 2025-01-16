@@ -135,7 +135,8 @@ const verifyMediaMessage = async (
   if (!media.filename) {
     const ext = media.mimetype.split("/")[1].split(";")[0];
     const shortTime = new Date().getTime().toString().slice(-6);
-    media.filename = `${contact.name}_${shortTime}.${ext}`;
+    const sanitizedName = contact.name.replace(/\s+/g, "_");
+    media.filename = `${sanitizedName}_${shortTime}.${ext}`;
   } else {
     const originalFilename = media.filename ? `-${media.filename}` : "";
     const shortTime = new Date().getTime().toString().slice(-6);
