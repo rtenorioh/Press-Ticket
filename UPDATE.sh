@@ -212,7 +212,7 @@ version_less_than() {
 }
 
 # Atualização do Node.js, se necessário
-if version_less_than "$CURRENT_NODE_VERSION" "24.0.0"; then
+if version_less_than "$CURRENT_NODE_VERSION" "18.0.0"; then
     {
         echo "Versão do Node.js atual ($CURRENT_NODE_VERSION) é inferior a 18."
 
