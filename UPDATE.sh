@@ -489,5 +489,23 @@ fi
     echo "Log de atualização salvo em: $LOG_FILE"
 } | tee -a "$LOG_FILE"
 
+# Adicionar informações finais ao log
+{
+    echo " "
+    echo "**************************************************************"
+    echo "*                 PRESS TICKET - ATUALIZAÇÃO                *"
+    echo "**************************************************************"
+    echo " Versão Atual do Sistema: $SYSTEM_VERSION                   "
+    echo " Nova Versão Atualizada: $VERSION                           "
+    echo " Fuso Horário: $SELECTED_TZ                                 "
+    echo " Hora Local: $(TZ=$SELECTED_TZ date +"%d-%m-%Y %H:%M:%S")   "
+    echo " Local do log: $LOG_FILE                                    "
+    echo " Tempo Total: ${MINUTES} minutos e ${SECONDS} segundos       "
+    echo "**************************************************************"
+    echo " "
+    echo -e "${GREEN}${BOLD}Atualização concluída com sucesso!${RESET}" | tee -a "$LOG_FILE"
+    echo " "
+} | tee -a "$LOG_FILE"
+
 # Caso o script finalize corretamente
-finalizar "Atualização concluída com sucesso!" 0
+exit 0
