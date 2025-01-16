@@ -21,7 +21,24 @@ finalizar() {
         echo -e "${RED}Erro:${RESET} $1" | tee -a "$LOG_FILE"
     fi
 
-    echo -e "${GREEN}Tempo total de execução do script:${RESET} ${BOLD}${MINUTES} minutos e ${SECONDS} segundos${RESET}" | tee -a "$LOG_FILE"
+    # Resumo Final com Tempo Formatado
+    {
+        echo " "
+        echo "**************************************************************"
+        echo "*                 PRESS TICKET - ATUALIZAÇÃO                *"
+        echo "**************************************************************"
+        echo " Versão Atual do Sistema: $SYSTEM_VERSION                   "
+        echo " Nova Versão Atualizada: $VERSION                           "
+        echo " Fuso Horário: $SELECTED_TZ                                 "
+        echo " Hora Local: $(TZ=$SELECTED_TZ date +"%d-%m-%Y %H:%M:%S")   "
+        echo " Local do log: $LOG_FILE                                    "
+        echo " Tempo Total: ${MINUTES} minutos e ${SECONDS} segundos       "
+        echo "**************************************************************"
+        echo " "
+        echo -e "${GREEN}${BOLD}Atualização concluída com sucesso!${RESET}" | tee -a "$LOG_FILE"
+        echo " "
+    } | tee -a "$LOG_FILE"
+
     exit "${2:-1}"
 }
 
@@ -343,11 +360,11 @@ fi
 
 sleep 2
 
-sudo rm -rf node_modules | tee -a "$LOG_FILE"
-npm install | tee -a "$LOG_FILE"
+# sudo rm -rf node_modules | tee -a "$LOG_FILE"
+# npm install | tee -a "$LOG_FILE"
 
-sudo rm -rf dist | tee -a "$LOG_FILE"
-npm run build | tee -a "$LOG_FILE"
+# sudo rm -rf dist | tee -a "$LOG_FILE"
+# npm run build | tee -a "$LOG_FILE"
 
 {
     echo " "
@@ -447,11 +464,11 @@ sleep 2
 
 sleep 2
 
-sudo rm -rf node_modules | tee -a "$LOG_FILE"
-npm install | tee -a "$LOG_FILE"
+# sudo rm -rf node_modules | tee -a "$LOG_FILE"
+# npm install | tee -a "$LOG_FILE"
 
-sudo rm -rf build | tee -a "$LOG_FILE"
-npm run build | tee -a "$LOG_FILE"
+# sudo rm -rf build | tee -a "$LOG_FILE"
+# npm run build | tee -a "$LOG_FILE"
 
 {
     echo " "
@@ -483,29 +500,5 @@ else
     finalizar "Erro: Arquivo .env não encontrado no backend." 1
 fi
 
-{
-    echo " "
-    echo "PRESS TICKET ATUALIZADO COM SUCESSO!!!"
-    echo "Log de atualização salvo em: $LOG_FILE"
-} | tee -a "$LOG_FILE"
-
-# Adicionar informações finais ao log
-{
-    echo " "
-    echo "**************************************************************"
-    echo "*                 PRESS TICKET - ATUALIZAÇÃO                *"
-    echo "**************************************************************"
-    echo " Versão Atual do Sistema: $SYSTEM_VERSION                   "
-    echo " Nova Versão Atualizada: $VERSION                           "
-    echo " Fuso Horário: $SELECTED_TZ                                 "
-    echo " Hora Local: $(TZ=$SELECTED_TZ date +"%d-%m-%Y %H:%M:%S")   "
-    echo " Local do log: $LOG_FILE                                    "
-    echo " Tempo Total: ${MINUTES} minutos e ${SECONDS} segundos       "
-    echo "**************************************************************"
-    echo " "
-    echo -e "${GREEN}${BOLD}Atualização concluída com sucesso!${RESET}" | tee -a "$LOG_FILE"
-    echo " "
-} | tee -a "$LOG_FILE"
-
 # Caso o script finalize corretamente
-exit 0
+finalizar "Atualização concluída com sucesso!" 0
