@@ -17,8 +17,12 @@ finalizar() {
     local RESET="\e[0m"
     local BOLD="\e[1m"
 
-    if [ -n "$1" ]; then
+    if [ "$2" -ne 0 ]; then
+        # Exibir mensagem de erro, se o código de saída for diferente de 0
         echo -e "${RED}Erro:${RESET} $1" | tee -a "$LOG_FILE"
+    else
+        # Exibir mensagem de sucesso
+        echo -e "${GREEN}$1${RESET}" | tee -a "$LOG_FILE"
     fi
 
     # Resumo Final com Tempo Formatado
@@ -34,8 +38,6 @@ finalizar() {
         echo " Local do log: $LOG_FILE                                    "
         echo " Tempo Total: ${MINUTES} minutos e ${SECONDS} segundos       "
         echo "**************************************************************"
-        echo " "
-        echo -e "${GREEN}${BOLD}Atualização concluída com sucesso!${RESET}" | tee -a "$LOG_FILE"
         echo " "
     } | tee -a "$LOG_FILE"
 
