@@ -17,11 +17,30 @@ finalizar() {
     local RESET="\e[0m"
     local BOLD="\e[1m"
 
-    if [ -n "$1" ]; then
+    if [ "$2" -ne 0 ]; then
+        # Exibir mensagem de erro, se o código de saída for diferente de 0
         echo -e "${RED}Erro:${RESET} $1" | tee -a "$LOG_FILE"
+    else
+        # Exibir mensagem de sucesso
+        echo -e "${GREEN}$1${RESET}" | tee -a "$LOG_FILE"
     fi
 
-    echo -e "${GREEN}Tempo total de execução do script:${RESET} ${BOLD}${MINUTES} minutos e ${SECONDS} segundos${RESET}" | tee -a "$LOG_FILE"
+    # Resumo Final com Tempo Formatado
+    {
+        echo " "
+        echo "**************************************************************"
+        echo "*                 PRESS TICKET - ATUALIZAÇÃO                *"
+        echo "**************************************************************"
+        echo " Versão Atual do Sistema: $SYSTEM_VERSION                   "
+        echo " Nova Versão Atualizada: $VERSION                           "
+        echo " Fuso Horário: $SELECTED_TZ                                 "
+        echo " Hora Local: $(TZ=$SELECTED_TZ date +"%d-%m-%Y %H:%M:%S")   "
+        echo " Local do log: $LOG_FILE                                    "
+        echo " Tempo Total: ${MINUTES} minutos e ${SECONDS} segundos       "
+        echo "**************************************************************"
+        echo " "
+    } | tee -a "$LOG_FILE"
+
     exit "${2:-1}"
 }
 
@@ -482,12 +501,6 @@ if [ -f "$ENV_FILE" ]; then
 else
     finalizar "Erro: Arquivo .env não encontrado no backend." 1
 fi
-
-{
-    echo " "
-    echo "PRESS TICKET ATUALIZADO COM SUCESSO!!!"
-    echo "Log de atualização salvo em: $LOG_FILE"
-} | tee -a "$LOG_FILE"
 
 # Caso o script finalize corretamente
 finalizar "Atualização concluída com sucesso!" 0
