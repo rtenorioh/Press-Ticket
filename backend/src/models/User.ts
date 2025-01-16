@@ -65,6 +65,12 @@ class User extends Model<User> {
   @Column
   endWork: string;
 
+  @Column(DataType.STRING)
+  currentSessionId: string;
+
+  @Column(DataType.DATE)
+  lastLoginAt: Date;
+
   @CreatedAt
   createdAt: Date;
 

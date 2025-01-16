@@ -142,11 +142,6 @@ const Settings = ({ onThemeConfigUpdate }) => {
 	];
 
 	const visibleTabs = tabList.filter(tab => shouldShowTab(tab.key));
-
-	console.log("Settings component loaded");
-	console.log("AuthContext user:", user);
-	console.log("isUserMaster:", isUserMaster);
-	console.log("visibleTabs:", visibleTabs);
 	
 	return (
 		<div className={classes.root}>

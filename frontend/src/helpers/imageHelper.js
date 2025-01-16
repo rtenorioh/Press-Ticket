@@ -14,7 +14,6 @@ export const getImageUrl = (imagePath) => {
     const finalPath = cleanPath.startsWith('logos/') ? cleanPath : `logos/${cleanPath}`;
 
     const backendUrl = process.env.REACT_APP_BACKEND_URL || window.location.origin;
-    console.log('URL final da imagem:', `${backendUrl}/public/${finalPath}`);
-    
+        
     return `${backendUrl}/public/${finalPath}`;
 };

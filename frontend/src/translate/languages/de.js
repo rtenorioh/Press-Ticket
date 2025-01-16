@@ -4,6 +4,8 @@ const messages = {
       auth: {
         toasts: {
           success: "Anmeldung erfolgreich!",
+          session_expired: "Ihre Sitzung ist abgelaufen, da sie auf einem anderen Gerät gestartet wurde."
+
         },
       },
       chat: {

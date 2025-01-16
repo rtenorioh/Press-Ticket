@@ -4,6 +4,7 @@ const messages = {
       auth: {
         toasts: {
           success: "¡Inicio de sesión exitoso!",
+          session_expired: "Tu sesión ha expirado porque se inició en otro dispositivo." 
         },
       },
       chat: {

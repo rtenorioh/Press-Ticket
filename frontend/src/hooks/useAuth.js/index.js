@@ -83,10 +83,19 @@ const useAuth = () => {
 			}
 		});
 
+		socket.on("userSessionExpired", data => {
+			if (data.userId === user.id && localStorage.getItem("sessionId") !== data.newSessionId) {
+				localStorage.removeItem("token");
+				setIsAuth(false);
+				toast.error(t("auth.toasts.session_expired"));
+				history.push("/login");
+			}
+		});
+
 		return () => {
 			socket.disconnect();
 		};
-	}, [user]);
+	}, [user, history, t]);
 
 	const handleLogin = async userData => {
 		setLoading(true);
@@ -94,6 +103,7 @@ const useAuth = () => {
 		try {
 			const { data } = await api.post("/auth/login", userData);
 			localStorage.setItem("token", JSON.stringify(data.token));
+			localStorage.setItem("sessionId", data.user.currentSessionId);
 			api.defaults.headers.Authorization = `Bearer ${data.token}`;
 			setUser(data.user);
 			setIsAuth(true);
@@ -114,6 +124,7 @@ const useAuth = () => {
 			setIsAuth(false);
 			setUser({});
 			localStorage.removeItem("token");
+			localStorage.removeItem("sessionId");
 			api.defaults.headers.Authorization = undefined;
 			setLoading(false);
 			history.push("/login");

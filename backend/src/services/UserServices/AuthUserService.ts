@@ -7,6 +7,7 @@ import { SerializeUser } from "../../helpers/SerializeUser";
 import Queue from "../../models/Queue";
 import User from "../../models/User";
 import Whatsapp from "../../models/Whatsapp";
+import { v4 as uuidv4 } from "uuid";
 
 interface SerializedUser {
   id: number;
@@ -65,10 +66,27 @@ const AuthUserService = async ({
     throw new AppError("ERR_INVALID_CREDENTIALS", 401);
   }
 
+  const newSessionId = uuidv4();
+  
+  const hadPreviousSession = !!user.currentSessionId;
+  
+  await user.update({
+    currentSessionId: newSessionId,
+    lastLoginAt: new Date()
+  });
+
   const token = createAccessToken(user);
   const refreshToken = createRefreshToken(user);
 
   const serializedUser = SerializeUser(user);
+  
+  if (hadPreviousSession) {
+    const io = require("../../libs/socket").getIO();
+    io.emit("userSessionExpired", {
+      userId: user.id,
+      newSessionId
+    });
+  }
 
   return {
     serializedUser,
