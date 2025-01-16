@@ -38,7 +38,7 @@ const LanguageSelector = () => {
         { code: "id", label: "Bahasa Indonesia", flag: "ID" },
     ];
 
-    const disabledLanguages = ["fr", "de", "it", "zh", "ja", "ru", "ar", "hi", "id"];
+    const disabledLanguages = ["it", "zh", "ja", "ru", "ar", "hi", "id"];
 
     return (
         <>

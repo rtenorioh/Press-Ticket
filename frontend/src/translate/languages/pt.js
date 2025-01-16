@@ -141,7 +141,7 @@ const messages = {
             title: "Aguardando"
           },
           closed: {
-            title: "Resolvido"
+            title: "Finalizado"
           }
         },
         charts: {
@@ -259,11 +259,7 @@ const messages = {
           queues: "Setores",
           administration: "Administração",
           users: "Atendentes",
-          company: "Empresa",
-          integrations: "Integrações",
           settings: "Configurações",
-          sendMsg: "Envio de Mensagens",
-          sendMedia: "Envio de Mídia",
           api: "Uso da API",
           apidocs: "Documentação",
           apititle: "API",
@@ -273,7 +269,7 @@ const messages = {
         appBar: {
           message: {
             hi: "Olá",
-            text: "Seja bem-vindo ao Sistema"
+            text: "Seja bem-vindo ao Sistema."
           },
           user: {
             profile: "Perfil",
@@ -300,11 +296,18 @@ const messages = {
           assignedTo: "Responsável:",
           buttons: {
             return: "Retornar",
-            resolve: "Resolver",
+            resolve: "Finalizar",
             reopen: "Reabrir",
-            accept: "Aceitar",
+            accept: "Aceitar"
           },
         },
+        message: {
+          download: "Baixar",
+          ticketNumber: "#ticket:",
+          voiceVideoLost: "Mensagem de voz ou video perdida às",
+          deleted: "Mensagem apagada",
+          edited: "Editada",
+        }
       },
       messagesInput: {
         placeholderOpen: "Digite uma mensagem",
@@ -477,7 +480,7 @@ const messages = {
             },
           },
           allTicket: {
-            name: "Todos podem ver o chamado sem departamento",
+            name: "Todos podem ver o chamado sem setor",
             note: "Ative essa função para deixar todos os usuários verem os chamados sem setor",
             options: {
               enabled: "Ativado",
@@ -685,7 +688,7 @@ const messages = {
         },
         tabs: {
           open: { title: "Inbox" },
-          closed: { title: "Resolvidos" },
+          closed: { title: "Finalizados" },
           search: { title: "Busca" },
         },
         search: {
@@ -875,4 +878,3 @@ const messages = {
 };
 
 export { messages };
-

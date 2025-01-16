@@ -16,9 +16,9 @@ const messages = {
         },
       },
       connections: {
-        title: "Connections",
+        title: "Channels",
         toasts: {
-          deleted: "WhatsApp connection deleted successfully!",
+          deleted: "Channel deleted successfully!",
         },
         confirmationModal: {
           deleteTitle: "Delete",
@@ -27,11 +27,11 @@ const messages = {
           disconnectMessage: "Are you sure? You will need to scan the QR Code again.",
         },
         buttons: {
-          add: "Add WhatsApp",
+          add: "Add",
           shutdown: "Delete",
           restart: "Restart",
           disconnect: "Disconnect",
-          tryAgain: "Try Again",
+          tryAgain: "Try again",
           qrcode: "QR CODE",
           newQr: "New QR CODE",
           connecting: "Connecting",
@@ -49,7 +49,7 @@ const messages = {
             title: "Connection established!",
           },
           timeout: {
-            title: "Connection with phone lost",
+            title: "The connection to the phone was lost",
             content: "Make sure your phone is connected to the internet and WhatsApp is open, or click the 'Disconnect' button to get a new QR Code",
           },
         },
@@ -60,7 +60,7 @@ const messages = {
           color: "Color",
           number: "Number",
           status: "Status",
-          lastUpdate: "Last Update",
+          lastUpdate: "Last update",
           default: "Default",
           actions: "Actions",
           session: "Session",
@@ -68,20 +68,21 @@ const messages = {
       },
       contactModal: {
         title: {
-          add: "Add Contact",
-          edit: "Edit Contact",
+          add: "Add contact",
+          edit: "Edit contact",
         },
         form: {
-          mainInfo: "Contact Details",
-          extraInfo: "Additional Information",
+          mainInfo: "Contact details",
+          extraInfo: "Additional information",
           name: "Name",
           number: "WhatsApp Number",
           email: "Email",
-          extraName: "Field Name",
+          address: "Address",
+          extraName: "Field name",
           extraValue: "Value",
         },
         buttons: {
-          addExtraInfo: "Add Information",
+          addExtraInfo: "Add information",
           okAdd: "Add",
           okEdit: "Save",
           cancel: "Cancel",
@@ -94,14 +95,17 @@ const messages = {
           deleted: "Contact deleted successfully!",
           deletedAll: "All contacts deleted successfully!",
         },
+        errors: {
+          "ticketAlreadyOpen": "There is already an open ticket for this contact, assigned to {{atendente}}."
+        },
         searchPlaceholder: "Search...",
         confirmationModal: {
           deleteTitle: "Delete",
           deleteAllTitle: "Delete All",
-          importTitle: "Import Contacts",
+          importTitle: "Import contacts",
           deleteMessage: "Are you sure you want to delete this contact? All related tickets will be lost.",
           deleteAllMessage: "Are you sure you want to delete all contacts? All related tickets will be lost.",
-          importMessage: "Do you want to import all contacts from your phone?",
+          importMessage: "Do you want to import all contacts from the phone?",
         },
         buttons: {
           import: "Import Contacts",
@@ -112,16 +116,17 @@ const messages = {
         table: {
           name: "Name",
           whatsapp: "WhatsApp",
+          address: "Address",
           channels: "Channels",
           actions: "Actions",
         },
       },
       contactDrawer: {
-        header: "Contact Details",
+        header: "Contact details",
         buttons: {
-          edit: "Edit Contact",
+          edit: "Edit contact",
         },
-        extraInfo: "Other Information",
+        extraInfo: "Other information",
       },
       copyToClipboard: {
         copy: "Copy",
@@ -136,7 +141,7 @@ const messages = {
             title: "Waiting"
           },
           closed: {
-            title: "Resolved"
+            title: "Closed"
           }
         },
         charts: {
@@ -148,7 +153,7 @@ const messages = {
           }
         },
         chartPerUser: {
-          title: "Tickets per user",
+          title: "Tickets by user",
           ticket: "Ticket",
           date: {
             title: "Filter"
@@ -159,7 +164,7 @@ const messages = {
             title: "Filter"
           },
           perConnection: {
-            title: "Tickets per connection"
+            title: "Tickets by Channels"
           }
         },
         chartPerQueue: {
@@ -167,29 +172,44 @@ const messages = {
             title: "Filter"
           },
           perQueue: {
-            title: "Tickets per Department"
+            title: "Tickets by Sector"
           }
         },
         newContacts: {
           contact: "Contacts",
           date: {
-            start: "Start Date",
-            end: "End Date"
+            start: "Start date",
+            end: "End date"
           },
           title: "New contacts per day"
         },
         contactsWithTickets: {
-          message: "No contacts found for this date.",
-          unique: "Unique Contact",
+          message: "No contact found for this date.",
+          unique: "Unique contact",
           date: {
-            start: "Start Date",
-            end: "End Date"
+            start: "Start date",
+            end: "End date"
           },
-          title: "Contacts that opened tickets in the period"
+          title: "Contacts who opened tickets in the period"
         },
         tags: {
           cloudTitle: "Tags: ",
           noTags: "No tags at the moment!"
+        }
+      },
+      forgotPassword: {
+        title: "Forgot Password?",
+        form: {
+          email: "Enter your email"
+        },
+        buttons: {
+          submit: "Send Reset Link",
+          backToLogin: "Back to Login"
+        },
+        success: "If a valid email was found, a password reset link has been sent!",
+        error: {
+          invalidEmail: "Please enter a valid email.",
+          generic: "Error requesting password reset. Try again later."
         }
       },
       integrations: {
@@ -203,7 +223,7 @@ const messages = {
           },
           n8n: {
             title: "N8N",
-            urlApiN8N: "N8N API URL"
+            urlApiN8N: "API URL N8N"
           },
           hub: {
             title: "Notificame Hub",
@@ -216,13 +236,14 @@ const messages = {
         },
       },
       login: {
-        title: "Log in now",
+        title: "Login now",
         form: {
           email: "Enter your email",
           password: "Enter your password",
         },
         buttons: {
-          submit: "Log in",
+          forgotPassword: "Forgot Password?",
+          submit: "Login",
           register: "Don't have an account? Sign up!",
         },
       },
@@ -230,19 +251,15 @@ const messages = {
         listItems: {
           general: "General",
           dashboard: "Dashboard",
-          connections: "Connections",
+          connections: "Channels",
           tickets: "Tickets",
           contacts: "Contacts",
           quickAnswers: "Quick Answers",
           tags: "Tags",
-          queues: "Departments",
+          queues: "Sectors",
           administration: "Administration",
-          users: "Agents",
-          company: "Company",
-          integrations: "Integrations",
+          users: "Users",
           settings: "Settings",
-          sendMsg: "Send Messages",
-          sendMedia: "Send Media",
           api: "API Usage",
           apidocs: "Documentation",
           apititle: "API",
@@ -252,11 +269,11 @@ const messages = {
         appBar: {
           message: {
             hi: "Hello",
-            text: "Welcome to the System"
+            text: "Welcome to the System."
           },
           user: {
             profile: "Profile",
-            logout: "Log out",
+            logout: "Logout",
           },
         },
       },
@@ -272,42 +289,54 @@ const messages = {
       },
       messageHistoryModal: {
         close: "Close",
-        title: "Message Edit History"
+        title: "Message edit history"
       },
       messagesList: {
         header: {
-          assignedTo: "Assignee:",
+          assignedTo: "Responsible:",
           buttons: {
             return: "Return",
-            resolve: "Solve",
+            resolve: "Close",
             reopen: "Reopen",
-            accept: "Accept",
+            accept: "Accept"
           },
         },
+        message: {
+          download: "Download",
+          ticketNumber: "#ticket:",
+          voiceVideoLost: "Voice or video message lost at",
+          deleted: "Message deleted",
+          edited: "Edited",
+        }
       },
       messagesInput: {
-        placeholderOpen: "Enter a message",
+        placeholderOpen: "Type a message",
         placeholderClosed: "Reopen or accept this ticket to send a message.",
-        signMessage: "Subscribe",
+        signMessage: "Sign",
       },
       messageVariablesPicker: {
-        label: "Available Variables",
+        label: "Available variables",
         vars: {
           contactName: "Name",
-          user: "Agent",
+          user: "User",
           greeting: "Greeting",
           protocolNumber: "Protocol",
           date: "Date",
-          hour: "Time",
+          hour: "Hour",
           ticket_id: "Ticket ID",
-          queue: "Department",
-          connection: "Connection"
+          queue: "Sector",
+          connection: "Channel"
         }
       },
       newTicketModal: {
         title: "Create Ticket",
-        fieldLabel: "Type to search for contact",
+        fieldLabel: "Type to search for the contact",
         add: "Add",
+        select: {
+          none: "Select",
+          queue: "Select Sector",
+          channel: "Select Channel"
+        },
         buttons: {
           ok: "Save",
           cancel: "Cancel",
@@ -315,8 +344,8 @@ const messages = {
       },
       newTicketModalContactPage: {
         title: "Create Ticket",
-        queue: "Select a Department",
-        fieldLabel: "Type to search for contact",
+        queue: "Select a Sector",
+        fieldLabel: "Type to search for the contact",
         add: "Add",
         buttons: {
           ok: "Save",
@@ -324,7 +353,7 @@ const messages = {
         },
       },
       notifications: {
-        allow: "Allow notifications in the browser?",
+        allow: "Allow browser notifications?",
         noTickets: "No notifications.",
         permissionGranted: "Permission granted.",
         permissionDenied: "Permission denied.",
@@ -334,19 +363,19 @@ const messages = {
       },
       queueModal: {
         title: {
-          add: "Add Department",
-          edit: "Edit Department",
+          add: "Add Sector",
+          edit: "Edit Sector",
         },
         notification: {
-          title: "Department saved successfully!",
+          title: "Sector saved successfully!",
         },
         form: {
           name: "Name",
           color: "Color",
-          greetingMessage: "Greeting Message",
-          startWork: "Opening Time",
-          endWork: "Closing Time",
-          absenceMessage: "Absence Message",
+          greetingMessage: "Greeting message",
+          startWork: "Start",
+          endWork: "End",
+          absenceMessage: "Absence message",
         },
         buttons: {
           okAdd: "Add",
@@ -355,29 +384,29 @@ const messages = {
         },
       },
       queues: {
-        title: "Queues",
+        title: "Sectors",
         notifications: {
-          queueDeleted: "The queue has been deleted.",
+          queueDeleted: "The sector has been deleted.",
         },
         table: {
           id: "ID",
           name: "Name",
           color: "Color",
-          greeting: "Greeting Message",
+          greeting: "Greeting message",
           actions: "Actions",
-          startWork: "Opening",
-          endWork: "Closing",
+          startWork: "Start",
+          endWork: "End",
         },
         buttons: {
-          add: "Add Queue",
+          add: "Add sector",
         },
         confirmationModal: {
           deleteTitle: "Delete",
-          deleteMessage: "Are you sure? This action cannot be undone! Tickets in this queue will still exist but will no longer have any queue assigned.",
+          deleteMessage: "Are you sure? This action cannot be undone! Tickets in this sector will remain but will not have a sector assigned anymore.",
         },
       },
       queueSelect: {
-        inputLabel: "Queues",
+        inputLabel: "Sectors",
       },
       quickAnswers: {
         title: "Quick Answers",
@@ -391,8 +420,8 @@ const messages = {
           deleteAll: "Delete All Quick Answers",
         },
         toasts: {
-          deleted: "Quick Answer successfully deleted.",
-          deletedAll: "All Quick Answers successfully deleted.",
+          deleted: "Quick Answer deleted successfully.",
+          deletedAll: "All Quick Answers deleted.",
         },
         searchPlaceholder: "Search...",
         confirmationModal: {
@@ -416,7 +445,23 @@ const messages = {
           okEdit: "Save",
           cancel: "Cancel",
         },
-        success: "Quick Answer successfully saved.",
+        success: "Quick Answer saved successfully.",
+      },
+      resetPassword: {
+        title: "Reset Password",
+        form: {
+          password: "New Password",
+          confirmPassword: "Confirm New Password"
+        },
+        buttons: {
+          submit: "Reset Password",
+          backToLogin: "Back to Login"
+        },
+        success: "Password reset successfully!",
+        error: {
+          passwordMismatch: "Passwords do not match.",
+          generic: "Error resetting password. Try again."
+        }
       },
       settings: {
         success: "Settings saved successfully.",
@@ -424,20 +469,19 @@ const messages = {
           general: "General",
           personalize: "Personalize",
           integrations: "Integrations"
-
         },
         general: {
           userCreation: {
-            name: "Agent Creation",
-            note: "Allow agent creation",
+            name: "User creation",
+            note: "Allow user creation",
             options: {
               enabled: "Enabled",
               disabled: "Disabled",
             },
           },
           allTicket: {
-            name: "Everyone can see tickets without a department",
-            note: "Enable this feature to allow all users to see tickets without an assigned department",
+            name: "Everyone can see tickets without sectors",
+            note: "Enable this feature to let all users see tickets without sectors",
             options: {
               enabled: "Enabled",
               disabled: "Disabled",
@@ -452,8 +496,8 @@ const messages = {
             },
           },
           call: {
-            name: "Accept Calls",
-            note: "If disabled, the customer will receive a message saying that voice/video calls are not accepted.",
+            name: "Accept calls",
+            note: "If disabled, the customer will receive a message stating that calls are not accepted",
             options: {
               enabled: "Enabled",
               disabled: "Disabled",
@@ -468,15 +512,15 @@ const messages = {
             },
           },
           quickAnswer: {
-            name: "Quick Responses",
-            note: "If enabled, you will be able to edit quick responses",
+            name: "Quick Answers",
+            note: "If enabled, quick answers can be edited",
             options: {
               enabled: "Enabled",
               disabled: "Disabled",
             },
           },
           closeTicketApi: {
-            name: "Close Ticket via API",
+            name: "Close Ticket sent via API",
             note: "Automatically closes the ticket when sent via API",
             options: {
               enabled: "Enabled",
@@ -485,7 +529,7 @@ const messages = {
           },
           darkMode: {
             name: "Enable Dark Mode",
-            note: "Toggle between light mode and dark mode",
+            note: "Switch between light and dark mode",
             options: {
               enabled: "Enabled",
               disabled: "Disabled",
@@ -493,7 +537,7 @@ const messages = {
           },
           ASC: {
             name: "Ticket Sorting (ASC or DESC)",
-            note: "When enabled, it will sort in ascending (ASC) order, and disabling will sort in descending (DESC) order.",
+            note: "When enabled, it will sort ascending (ASC), disabling will sort descending (DESC)",
             options: {
               enabled: "Enabled",
               disabled: "Disabled",
@@ -501,7 +545,15 @@ const messages = {
           },
           created: {
             name: "Ticket Sorting (createdAt or updateAt)",
-            note: "When enabled, it will sort by creation date (createdAt), and disabling will sort by update date (updateAt).",
+            note: "When enabled, it will sort by creation date (createdAt), disabling will sort by update date (updateAt)",
+            options: {
+              enabled: "Enabled",
+              disabled: "Disabled",
+            },
+          },
+          openTickets: {
+            name: "Prevent multi-tickets for the same contact",
+            note: "When enabled, it will prevent opening tickets for contacts who already have an open ticket",
             options: {
               enabled: "Enabled",
               disabled: "Disabled",
@@ -509,23 +561,23 @@ const messages = {
           },
           timeCreateNewTicket: {
             name: "New Ticket in:",
-            note: "Select the time required to open a new ticket if the customer contacts again.",
+            note: "Select the time required to open a new ticket if the customer contacts again",
             options: {
               "10": "10 Seconds",
               "30": "30 Seconds",
-              "60": "1 Minute",
-              "300": "5 Minutes",
-              "1800": "30 Minutes",
-              "3600": "1 Hour",
-              "7200": "2 Hours",
-              "21600": "6 Hours",
-              "43200": "12 Hours",
-              "86400": "24 Hours",
-              "604800": "7 Days",
-              "1296000": "15 Days",
-              "2592000": "30 Days"
-            }
-          }
+              "60": "1 minute",
+              "300": "5 minutes",
+              "1800": "30 minutes",
+              "3600": "1 hour",
+              "7200": "2 hours",
+              "21600": "6 hours",
+              "43200": "12 hours",
+              "86400": "24 hours",
+              "604800": "7 days",
+              "1296000": "15 days",
+              "2592000": "30 days",
+            },
+          },
         },
         personalize: {
           success: {
@@ -534,11 +586,11 @@ const messages = {
             colors: "Colors saved successfully!",
           },
           error: {
-            invalid: "Error retrieving customizations.",
+            invalid: "Error fetching customizations.",
             company: "Error saving company data.",
             logos: "Error saving the logo.",
             logs: "Error saving customization:",
-            colors: "Error saving theme colors:"
+            colors: "Error saving theme colors: "
           },
           tabs: {
             data: "Data",
@@ -553,22 +605,22 @@ const messages = {
             input: {
               primary: "Primary Color",
               secondary: "Secondary Color",
-              default: "Default Background",
-              paper: "Paper Background",
+              default: "Background Default",
+              paper: "Background Paper",
             },
             button: {
               save: "Save",
-              saveLight: "Save Light Theme",
-              saveDark: "Save Dark Theme",
+              saveLight: "Save light theme",
+              saveDark: "Save dark theme",
             }
           },
         }
       },
       signup: {
-        title: "Sign Up",
+        title: "Sign up",
         toasts: {
-          success: "Attendant created successfully! Please log in!!!",
-          fail: "Error creating attendant. Please check the information provided.",
+          success: "User created successfully! Log in now!",
+          fail: "Error creating user. Check the entered data.",
         },
         form: {
           name: "Name",
@@ -576,7 +628,7 @@ const messages = {
           password: "Password",
         },
         buttons: {
-          submit: "Sign Up",
+          submit: "Sign up",
           login: "Already have an account? Log in!",
         },
       },
@@ -590,7 +642,7 @@ const messages = {
         },
         toasts: {
           deleted: "Tag deleted successfully!",
-          deletedAll: "All tags deleted successfully!",
+          deletedAll: "All Tags deleted successfully!",
         },
         buttons: {
           add: "Add",
@@ -599,8 +651,8 @@ const messages = {
         confirmationModal: {
           deleteTitle: "Delete ",
           deleteAllTitle: "Delete All",
-          deleteMessage: "Are you sure you want to delete this tag?",
-          deleteAllMessage: "Are you sure you want to delete all tags?",
+          deleteMessage: "Are you sure you want to delete this Tag?",
+          deleteAllMessage: "Are you sure you want to delete all Tags?",
         },
       },
       tagModal: {
@@ -625,18 +677,18 @@ const messages = {
         },
       },
       ticketsQueueSelect: {
-        placeholder: "Departments",
+        placeholder: "Sectors",
       },
       tickets: {
         toasts: {
-          deleted: "The ticket you were viewing has been deleted.",
+          deleted: "The ticket you were in has been deleted.",
         },
         notification: {
           message: "Message from",
         },
         tabs: {
           open: { title: "Inbox" },
-          closed: { title: "Resolved" },
+          closed: { title: "Closed" },
           search: { title: "Search" },
         },
         search: {
@@ -648,44 +700,47 @@ const messages = {
       },
       transferTicketModal: {
         title: "Transfer Ticket",
-        fieldLabel: "Type to search for an attendant",
-        fieldConnectionLabel: "Transfer to connection",
-        fieldQueueLabel: "Transfer to Department",
-        fieldConnectionPlaceholder: "Select a connection",
-        noOptions: "No attendant found with this name",
+        fieldLabel: "Enter to search for an agent",
+        fieldConnectionLabel: "Select Channel",
+        fieldQueueLabel: "Transfer to Sector",
+        fieldConnectionPlaceholder: "Select a Channel",
+        noOptions: "No agent found with that name",
         buttons: {
           ok: "Transfer",
           cancel: "Cancel",
         },
       },
       ticketsList: {
-        pendingHeader: "Waiting",
-        assignedHeader: "Attending",
+        pendingHeader: "Pending",
+        assignedHeader: "In Attendance",
         noTicketsTitle: "Nothing here!",
-        noTicketsMessage: "No ticket found with this status or search term",
-        connectionTitle: "The connection currently being used.",
+        noTicketsMessage: "No tickets found with this status or search term",
+        connectionTitle: "Currently used channel.",
         items: {
-          queueless: "No Department",
+          queueless: "No Sector",
           accept: "Accept",
           spy: "Spy",
           close: "Close",
           reopen: "Reopen",
-          return: "Move to waiting",
-          connection: "Connection",
-          user: "Attendant",
-          queue: "Department",
+          return: "Move to pending",
+          connection: "Channel",
+          user: "Agent",
+          queue: "Sector",
           tags: "Tags"
         },
         buttons: {
-          accept: "Reply",
+          accept: "Respond",
           acceptBeforeBot: "Accept",
           start: "Start",
           cancel: "Cancel"
         },
         acceptModal: {
           title: "Accept Chat",
-          queue: "Select department"
+          queue: "Select sector"
         },
+        errors: {
+          ticketAlreadyOpen: "There is already an open ticket for this contact with agent {{atendente}}."
+        }
       },
       ticketOptionsMenu: {
         delete: "Delete",
@@ -703,37 +758,46 @@ const messages = {
       uploads: {
         titles: {
           titleUploadMsgDragDrop: "⬇️ DRAG AND DROP FILES BELOW ⬇️",
-          titleFileList: "File(s) List"
+          titleFileList: "File list"
         },
       },
       users: {
-        title: "Attendants",
+        title: "Agents",
         table: {
           id: "ID",
           name: "Name",
           email: "Email",
           profile: "Profile",
-          whatsapp: "Default Connection",
-          startWork: "Start Time",
-          endWork: "End Time",
+          whatsapp: "Channel",
+          queue: "Sector",
+          startWork: "Start time",
+          endWork: "End time",
           actions: "Actions",
         },
         buttons: {
-          add: "Add Attendant",
+          add: "Add agent",
+        },
+        modalTitle: {
+          channel: "Channels",
+          queue: "Sectors"
+        },
+        modalTable: {
+          id: "ID",
+          name: "Name"
         },
         toasts: {
-          deleted: "Attendant deleted successfully.",
-          updated: "Attendant updated successfully."
+          deleted: "Agent successfully deleted.",
+          updated: "Agent successfully updated."
         },
         confirmationModal: {
           deleteTitle: "Delete",
-          deleteMessage: "All the attendant's data will be lost. Open tickets from this attendant will be moved to waiting.",
+          deleteMessage: "All data for this agent will be lost. Tickets opened by this agent will be moved to pending.",
         },
       },
       userModal: {
         title: {
-          add: "Add Attendant",
-          edit: "Edit Attendant",
+          add: "Add agent",
+          edit: "Edit agent",
         },
         form: {
           name: "Name",
@@ -741,8 +805,7 @@ const messages = {
           password: "Password",
           profile: "Profile",
           admin: "Administrator",
-          whatsapp: "Default Connection",
-          user: "Attendant",
+          user: "Agent",
           startWork: "Start",
           endWork: "End",
           isTricked: "View Contacts",
@@ -754,7 +817,7 @@ const messages = {
           okEdit: "Save",
           cancel: "Cancel",
         },
-        success: "Attendant saved successfully.",
+        success: "Agent saved successfully.",
       },
       whatsappModal: {
         title: {
@@ -764,7 +827,7 @@ const messages = {
         form: {
           name: "Name",
           default: "Default",
-          display: "Show department times",
+          display: "Show sector schedules",
           farewellMessage: "Farewell message"
         },
         buttons: {
@@ -774,42 +837,44 @@ const messages = {
         },
         success: "WhatsApp saved successfully.",
       },
+      whatsappSelect: {
+        inputLabel: "Channels",
+      },
       backendErrors: {
-        ERR_CONNECTION_CREATION_COUNT: "Connection limit reached, contact support to modify.",
         ERR_CREATING_MESSAGE: "Error creating message in the database.",
         ERR_CREATING_TICKET: "Error creating ticket in the database.",
-        ERR_DELETE_WAPP_MSG: "Unable to delete WhatsApp message.",
+        ERR_CONNECTION_CREATION_COUNT: "Channel limit reached, contact support to modify.",
+        ERR_DELETE_WAPP_MSG: "Could not delete WhatsApp message.",
         ERR_DUPLICATED_CONTACT: "A contact with this number already exists.",
-        ERR_EDITING_WAPP_MSG: "Unable to edit WhatsApp message.",
+        ERR_EDITING_WAPP_MSG: "Could not edit WhatsApp message.",
         ERR_FETCH_WAPP_MSG: "Error fetching message from WhatsApp, it may be too old.",
         ERR_INVALID_CREDENTIALS: "Authentication error. Please try again.",
         ERR_NO_CONTACT_FOUND: "No contact found with this ID.",
-        ERR_NO_DEF_WAPP_FOUND: "No default WhatsApp found. Check the connections page.",
+        ERR_NO_DEF_WAPP_FOUND: "No default WhatsApp found. Check the channels page.",
         ERR_NO_INTEGRATION_FOUND: "Integration not found.",
-        ERR_NO_OTHER_WHATSAPP: "There must be at least one default WhatsApp.",
         ERR_NO_PERMISSION: "You do not have permission to access this resource.",
-        ERR_NO_SETTING_FOUND: "No configuration found with this ID.",
+        ERR_NO_SETTING_FOUND: "No settings found with this ID.",
         ERR_NO_TAG_FOUND: "Tag not found.",
         ERR_NO_TICKET_FOUND: "No ticket found with this ID.",
         ERR_NO_USER_FOUND: "No agent found with this ID.",
         ERR_NO_WAPP_FOUND: "No WhatsApp found with this ID.",
-        ERR_OPEN_USER_TICKET: "An open ticket already exists for this contact with ",
-        ERR_OTHER_OPEN_TICKET: "An open ticket already exists for this contact.",
-        ERR_OUT_OF_HOURS: "Out of working hours!",
-        ERR_QUEUE_COLOR_ALREADY_EXISTS: "This color is already in use, please choose another.",
-        ERR_SENDING_WAPP_MSG: "Error sending WhatsApp message. Check the connections page.",
+        ERR_NO_OTHER_WHATSAPP: "There must be at least one default WhatsApp.",
+        ERR_OUT_OF_HOURS: "Out of operating hours!",
+        ERR_OPEN_USER_TICKET: "There is already an open ticket for this contact with ",
+        ERR_OTHER_OPEN_TICKET: "There is already an open ticket for this contact.",
         ERR_SESSION_EXPIRED: "Session expired. Please log in.",
-        ERR_USER_CREATION_COUNT: "Agent limit reached, contact support to modify.",
+        ERR_SENDING_WAPP_MSG: "Error sending WhatsApp message. Check the channels page.",
+        ERR_USER_CREATION_COUNT: "Agent creation limit reached, contact support to modify.",
         ERR_USER_CREATION_DISABLED: "Agent creation has been disabled by the administrator.",
-        ERR_WAPP_CHECK_CONTACT: "Unable to verify WhatsApp contact. Check the connections page.",
-        ERR_WAPP_DOWNLOAD_MEDIA: "Unable to download WhatsApp media. Check the connections page.",
-        ERR_WAPP_GREETING_REQUIRED: "Greeting message is mandatory when there is more than one sector.",
+        ERR_WAPP_CHECK_CONTACT: "Could not verify WhatsApp contact. Check the channels page.",
+        ERR_WAPP_DOWNLOAD_MEDIA: "Could not download media from WhatsApp. Check the channels page.",
+        ERR_WAPP_GREETING_REQUIRED: "A greeting message is required when there is more than one sector.",
         ERR_WAPP_INVALID_CONTACT: "This is not a valid WhatsApp number.",
-        ERR_WAPP_NOT_INITIALIZED: "This WhatsApp session was not initialized. Check the connections page.",
+        ERR_WAPP_NOT_INITIALIZED: "This WhatsApp session has not been initialized. Check the channels page.",
+        ERR_WAPP_SESSION_EXPIRED: "WhatsApp session expired."
       },
     },
   },
 };
 
 export { messages };
-
