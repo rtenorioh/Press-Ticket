@@ -140,7 +140,8 @@ const LoggedInLayout = ({ children, toggleTheme, onThemeConfigUpdate }) => {
   const themeStorage = localStorage.getItem("theme");
   const [companyData, setCompanyData] = useState({
     logo: defaultLogo,
-    name: "Press Ticket"
+    name: "Press Ticket",
+    url: "https://github.com/rtenorioh/Press-Ticket"
   });
 
   useEffect(() => {
@@ -155,7 +156,8 @@ const LoggedInLayout = ({ children, toggleTheme, onThemeConfigUpdate }) => {
           if (lightConfig) {
             setCompanyData(prevData => ({
               ...prevData,
-              name: lightConfig.company || "Press Ticket"
+              name: lightConfig.company || "Press Ticket",
+              url: lightConfig.url || "https://github.com/rtenorioh/Press-Ticket"
             }));
           }
         }
@@ -402,7 +404,7 @@ const LoggedInLayout = ({ children, toggleTheme, onThemeConfigUpdate }) => {
               <span className={classes.systemCss}>
                 <Link
                   color="inherit"
-                  href={"https://github.com/rtenorioh/Press-Ticket"}
+                  href={companyData.url || "https://github.com/rtenorioh/Press-Ticket"}
                   style={{ display: "flex", alignItems: "center", marginTop: 10 }}
                 >
                   {latestVersion && latestVersion > systemVersion ? (
