@@ -302,6 +302,39 @@ else
     echo "O arquivo $SEQUELIZE_DATA_FILE já existe. Nenhuma ação necessária." | tee -a "$LOG_FILE"
 fi
 
+# Verificação do arquivo .env
+ENV_FILE=".env"
+
+{
+    echo " "
+    echo "VERIFICANDO O ARQUIVO .env"
+    echo " "
+} | tee -a "$LOG_FILE"
+
+# Verifica se o arquivo .env existe
+if [ -f "$ENV_FILE" ]; then
+    # Verifica se a variável WEBHOOK existe no arquivo .env
+    if grep -q "^WEBHOOK=" "$ENV_FILE"; then
+        echo "A variável WEBHOOK já existe no arquivo .env. Nenhuma alteração necessária." | tee -a "$LOG_FILE"
+    else
+        # Obtém o valor da variável BACKEND_URL
+        BACKEND_URL=$(grep "^BACKEND_URL=" "$ENV_FILE" | cut -d '=' -f2- | tr -d '[:space:]')
+
+        # Adiciona a variável WEBHOOK ao arquivo .env
+        if [ -n "$BACKEND_URL" ]; then
+            echo "A variável WEBHOOK não foi encontrada. Adicionando com o valor de BACKEND_URL..." | tee -a "$LOG_FILE"
+            echo "WEBHOOK=$BACKEND_URL" >>"$ENV_FILE"
+            echo "A variável WEBHOOK foi adicionada ao arquivo .env com sucesso." | tee -a "$LOG_FILE"
+        else
+            echo "Erro: Não foi possível encontrar a variável BACKEND_URL no arquivo .env." | tee -a "$LOG_FILE"
+            finalizar "Erro ao configurar a variável WEBHOOK devido à ausência de BACKEND_URL." 1
+        fi
+    fi
+else
+    echo "Erro: O arquivo .env não foi encontrado no diretório backend." | tee -a "$LOG_FILE"
+    finalizar "Erro ao localizar o arquivo .env no backend." 1
+fi
+
 {
     echo " "
     echo "ATUALIZANDO OS ARQUIVOS DO BACKEND"
