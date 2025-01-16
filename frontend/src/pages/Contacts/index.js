@@ -8,7 +8,9 @@ import {
   TableCell,
   TableHead,
   TableRow,
-  Tooltip
+  Tooltip,
+  InputAdornment,
+  TextField
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import {
@@ -18,7 +20,8 @@ import {
   DeleteOutline,
   Edit,
   ImportContacts,
-  WhatsApp
+  WhatsApp,
+  Search
 } from "@material-ui/icons";
 import React, { useContext, useEffect, useReducer, useState } from "react";
 import { CSVLink } from "react-csv";
@@ -180,9 +183,9 @@ const Contacts = () => {
     setFilteredTags(tags);
   };
 
-  // const handleSearch = (event) => {
-  //   setSearchParam(event.target.value.toLowerCase());
-  // };
+  const handleSearch = (event) => {
+    setSearchParam(event.target.value.toLowerCase());
+  };
 
   const handleOpenContactModal = () => {
     setSelectedContactId(null);
@@ -347,6 +350,19 @@ const Contacts = () => {
       <MainHeader>
         <Title>{t("contacts.title")} ({contacts.length})</Title>
         <MainHeaderButtonsWrapper>
+        <TextField
+            placeholder={t("contacts.searchPlaceholder")}
+            type="search"
+            value={searchParam}
+            onChange={handleSearch}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <Search color="secondary" />
+                </InputAdornment>
+              ),
+            }}
+          />
           <Can
             role={user.profile}
             perform="drawer-admin-items:view"
