@@ -362,11 +362,11 @@ fi
 
 sleep 2
 
-# sudo rm -rf node_modules | tee -a "$LOG_FILE"
-# npm install | tee -a "$LOG_FILE"
+sudo rm -rf node_modules | tee -a "$LOG_FILE"
+npm install | tee -a "$LOG_FILE"
 
-# sudo rm -rf dist | tee -a "$LOG_FILE"
-# npm run build | tee -a "$LOG_FILE"
+sudo rm -rf dist | tee -a "$LOG_FILE"
+npm run build | tee -a "$LOG_FILE"
 
 {
     echo " "
@@ -466,11 +466,11 @@ sleep 2
 
 sleep 2
 
-# sudo rm -rf node_modules | tee -a "$LOG_FILE"
-# npm install | tee -a "$LOG_FILE"
+sudo rm -rf node_modules | tee -a "$LOG_FILE"
+npm install | tee -a "$LOG_FILE"
 
-# sudo rm -rf build | tee -a "$LOG_FILE"
-# npm run build | tee -a "$LOG_FILE"
+sudo rm -rf build | tee -a "$LOG_FILE"
+npm run build | tee -a "$LOG_FILE"
 
 {
     echo " "
