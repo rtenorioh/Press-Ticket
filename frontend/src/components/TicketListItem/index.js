@@ -44,6 +44,7 @@ import api from "../../services/api";
 import AcceptTicketWithouSelectQueue from "../AcceptTicketWithoutQueueModal";
 import ContactTag from "../ContactTag";
 import MarkdownWrapper from "../MarkdownWrapper";
+import ConfirmationModal from "../ConfirmationModal";
 
 const useStyles = makeStyles(theme => ({
 	ticket: {
@@ -192,6 +193,7 @@ const TicketListItem = ({ ticket, filteredTags }) => {
 	const isMounted = useRef(true);
 	const { user } = useContext(AuthContext);
 	const [acceptTicketWithouSelectQueueOpen, setAcceptTicketWithouSelectQueueOpen] = useState(false);
+	const [confirmationOpen, setConfirmationOpen] = useState(false);
 	const [tag, setTag] = useState([]);
 
 	useEffect(() => {
@@ -326,6 +328,14 @@ const TicketListItem = ({ ticket, filteredTags }) => {
 
 	const handleSelectTicket = id => {
 		history.push(`/tickets/${id}`);
+	};
+
+	const handleOpenConfirmationModal = () => {
+		setConfirmationOpen(true);
+	};
+
+	const handleConfirmClose = () => {
+		handleClosedTicket(ticket.id);
 	};
 
 	return (
@@ -591,7 +601,7 @@ const TicketListItem = ({ ticket, filteredTags }) => {
 							<IconButton
 								className={classes.bottomButton}
 								color="primary"
-								onClick={e => handleClosedTicket(ticket.id)} >
+								onClick={handleOpenConfirmationModal} >
 								<ClearOutlined />
 							</IconButton>
 						</Tooltip>
@@ -613,7 +623,7 @@ const TicketListItem = ({ ticket, filteredTags }) => {
 							<IconButton
 								className={classes.bottomButton}
 								color="primary"
-								onClick={e => handleClosedTicket(ticket.id)} >
+								onClick={handleOpenConfirmationModal} >
 								<ClearOutlined />
 							</IconButton>
 						</Tooltip>
@@ -637,6 +647,14 @@ const TicketListItem = ({ ticket, filteredTags }) => {
 				</div>
 			</ListItem>
 			<Divider variant="inset" component="li" />
+			<ConfirmationModal
+				title={t("tickets.confirmationModal.closeTicket.title")}
+				open={confirmationOpen}
+				onClose={() => setConfirmationOpen(false)}
+				onConfirm={handleConfirmClose}
+			>
+				{t("tickets.confirmationModal.closeTicket.message")}
+			</ConfirmationModal>
 		</React.Fragment>
 	);
 };

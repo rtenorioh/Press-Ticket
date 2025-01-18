@@ -698,6 +698,12 @@ const messages = {
         buttons: {
           showAll: "All",
         },
+        confirmationModal: {
+          closeTicket: {
+              title: "Close Ticket",
+              message: "Are you sure you want to close this ticket?",
+          },
+        },
       },
       transferTicketModal: {
         title: "Transfer Ticket",

@@ -10,6 +10,7 @@ import api from "../../services/api";
 import ButtonWithSpinner from "../ButtonWithSpinner";
 import { Can } from "../Can";
 import TicketOptionsMenu from "../TicketOptionsMenu";
+import ConfirmationModal from "../ConfirmationModal";
 
 const useStyles = makeStyles(theme => ({
 	actionButtons: {
@@ -29,6 +30,7 @@ const TicketActionButtons = ({ ticket }) => {
 	const history = useHistory();
 	const [anchorEl, setAnchorEl] = useState(null);
 	const [loading, setLoading] = useState(false);
+	const [confirmationOpen, setConfirmationOpen] = useState(false);
 	const ticketOptionsMenuOpen = Boolean(anchorEl);
 	const { user } = useContext(AuthContext);
 
@@ -67,6 +69,14 @@ const TicketActionButtons = ({ ticket }) => {
 		}
 	};
 
+	const handleCloseTicket = () => {
+		setConfirmationOpen(true);
+	};
+
+	const handleConfirmClose = () => {
+		handleUpdateTicketStatus(null, "closed", user?.id);
+	};
+
 	return (
 		<div className={classes.actionButtons}>
 			{ticket.status === "closed" && (
@@ -94,10 +104,18 @@ const TicketActionButtons = ({ ticket }) => {
 						size="small"
 						variant="contained"
 						color="primary"
-						onClick={e => handleUpdateTicketStatus(e, "closed", user?.id)}
+						onClick={handleCloseTicket}
 					>
 						{t("messagesList.header.buttons.resolve")}
 					</ButtonWithSpinner>
+					<ConfirmationModal
+						title={t("tickets.confirmationModal.closeTicket.title")}
+						open={confirmationOpen}
+						onClose={() => setConfirmationOpen(false)}
+						onConfirm={handleConfirmClose}
+					>
+						{t("tickets.confirmationModal.closeTicket.message")}
+					</ConfirmationModal>
 					<IconButton
 						color="primary"
 						onClick={handleOpenTicketOptionsMenu}>
