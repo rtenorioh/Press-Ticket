@@ -183,7 +183,7 @@ const useStyles = makeStyles(theme => ({
 	},
 }));
 
-const TicketListItem = ({ ticket, userId, filteredTags }) => {
+const TicketListItem = ({ ticket, filteredTags }) => {
 	const classes = useStyles();
 	const { t } = useTranslation();
 	const history = useHistory();
@@ -312,6 +312,7 @@ const TicketListItem = ({ ticket, userId, filteredTags }) => {
 			await api.put(`/tickets/${id}`, {
 				status: "closed",
 				userId: user?.id,
+				queueId: null,
 			});
 		} catch (err) {
 			setLoading(false);

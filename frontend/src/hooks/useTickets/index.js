@@ -142,6 +142,7 @@ const useTickets = ({
                 await api.put(`/tickets/${ticket.id}`, {
                     status: "closed",
                     userId: ticket.userId || null,
+                    queueId: null,
                 });
             };
 

@@ -43,11 +43,18 @@ const TicketActionButtons = ({ ticket }) => {
 	const handleUpdateTicketStatus = async (e, status, userId) => {
 		setLoading(true);
 		try {
-			await api.put(`/tickets/${ticket.id}`, {
-				status: status,
-				userId: userId || null,
-			});
-
+			if (status === "closed") {
+				await api.put(`/tickets/${ticket.id}`, {
+					status: status,
+					userId: userId || null,
+					queueId: null,
+				});
+			} else {
+				await api.put(`/tickets/${ticket.id}`, {
+					status: status,
+					userId: userId || null,
+				});
+			}
 			setLoading(false);
 			if (status === "open") {
 				history.push(`/tickets/${ticket.id}`);
