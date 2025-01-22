@@ -18,7 +18,7 @@ const ListQuickAnswerService = async ({
 }: Request): Promise<Response> => {
   const whereCondition = {
     message: Sequelize.where(
-      Sequelize.fn("LOWER", Sequelize.col("message")),
+      Sequelize.fn("LOWER", Sequelize.col("shortcut")),
       "LIKE",
       `%${searchParam.toLowerCase().trim()}%`
     )

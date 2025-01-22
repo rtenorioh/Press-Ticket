@@ -402,8 +402,9 @@ const MessageInput = ({ ticketStatus }) => {
   const handleLoadQuickAnswer = async (value) => {
     if (value && value.indexOf("/") === 0) {
       try {
+        const shortcut = value.substring(1).trim();
         const { data } = await api.get("/quickAnswers/", {
-          params: { searchParam: inputMessage.substring(1) },
+          params: { searchParam: shortcut },
         });
         setQuickAnswer(data.quickAnswers);
         if (data.quickAnswers.length > 0) {
