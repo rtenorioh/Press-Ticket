@@ -172,8 +172,8 @@ verificar_e_instalar() {
         if [ $? -eq 0 ]; then
             echo -e "${GREEN}$pacote instalado com sucesso.${RESET}" | tee -a "$LOG_FILE"
         else
-            echo -e "${RED}Erro ao instalar $pacote.${RESET}" | tee -a "$LOG_FILE"
-            exit 1
+            echo -e "${RED}Erro ao instalar $pacote. Verifique sua conexão e repositórios.${RESET}" | tee -a "$LOG_FILE"
+            finalizar "Erro ao instalar $pacote." 1 # Usando a função finalizar
         fi
     else
         echo -e "${GREEN}$pacote já está instalado.${RESET}" | tee -a "$LOG_FILE"
@@ -708,7 +708,7 @@ pm2 list | tee -a "$LOG_FILE"
 # Capturando os IDs do PM2 para frontend e backend
 echo -e "${COLOR}Capturando os IDs dos serviços do PM2...${RESET}" | tee -a "$LOG_FILE"
 PM2_FRONTEND_ID=$(pm2 list | grep ${NOME_EMPRESA}-front | awk '{print $2}')
-PM2_BACKEND_ID=$(pm2 list | grep Press-Ticket-backend | awk '{print $2}')
+PM2_BACKEND_ID=$(pm2 list | grep ${NOME_EMPRESA}-back | awk '{print $2}')
 
 if [ -z "$PM2_FRONTEND_ID" ] || [ -z "$PM2_BACKEND_ID" ]; then
     echo -e "${RED}Erro ao capturar os IDs do PM2.${RESET}" | tee -a "$LOG_FILE"
@@ -824,15 +824,9 @@ echo -e "${COLOR}Testando e reiniciando o Nginx...${RESET}" | tee -a "$LOG_FILE"
 sudo nginx -t | tee -a "$LOG_FILE"
 if [ $? -eq 0 ]; then
     sudo service nginx restart | tee -a "$LOG_FILE"
-    if [ $? -eq 0 ]; then
-        echo -e "${GREEN}Nginx reiniciado com sucesso.${RESET}" | tee -a "$LOG_FILE"
-    else
-        echo -e "${RED}Erro ao reiniciar o Nginx.${RESET}" | tee -a "$LOG_FILE"
-        exit 1
-    fi
+    echo -e "${GREEN}Nginx reiniciado com sucesso.${RESET}" | tee -a "$LOG_FILE"
 else
-    echo -e "${RED}Erro na configuração do Nginx.${RESET}" | tee -a "$LOG_FILE"
-    exit 1
+    finalizar "Erro na configuração do Nginx. Verifique o arquivo de configuração." 1
 fi
 
 ## Seção 10: Instalação de Certificado SSL
