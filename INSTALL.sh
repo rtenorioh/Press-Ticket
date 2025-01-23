@@ -6,6 +6,12 @@ if [ "$EUID" -ne 0 ]; then
     exit 1
 fi
 
+COLOR="\e[38;5;92m"
+GREEN="\e[32m"
+RED="\e[31m"
+RESET="\e[0m"
+BOLD="\e[1m"
+
 # Obter a versão automaticamente
 VERSION=$(git ls-remote --tags https://github.com/rtenorioh/Press-Ticket.git | awk -F/ '{print $NF}' | sort -V | tail -n1 || echo "unknown")
 
@@ -67,42 +73,6 @@ errors=()
 [[ ! "$CONNECTION_LIMIT" =~ ^[0-9]+$ ]] && errors+=("CONNECTION_LIMIT deve ser numérico.")
 [[ ! "$EMAIL" =~ ^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$ ]] && errors+=("EMAIL inválido.")
 
-if [ ${#errors[@]} -gt 0 ]; then
-    echo "\nForam encontrados os seguintes erros:"
-    for error in "${errors[@]}"; do
-        echo "- $error"
-    done
-    usage
-fi
-
-# Verificar se as portas já estão em uso
-if netstat -tuln | grep -q ":$PORT_BACKEND\b"; then
-    echo "Erro: A porta $PORT_BACKEND já está em uso."
-    exit 1
-fi
-
-if netstat -tuln | grep -q ":$PORT_FRONTEND\b"; then
-    echo "Erro: A porta $PORT_FRONTEND já está em uso."
-    exit 1
-fi
-
-# Exibir as variáveis validadas
-echo -e " "
-cat <<EOM
-*** Parâmetros recebidos e validados com sucesso: **
-- SENHA_DEPLOY: NÃO ESQUECER!
-- NOME_EMPRESA: $NOME_EMPRESA
-- URL_BACKEND: $URL_BACKEND
-- URL_FRONTEND: $URL_FRONTEND
-- PORT_BACKEND: $PORT_BACKEND
-- PORT_FRONTEND: $PORT_FRONTEND
-- USER_LIMIT: $USER_LIMIT
-- CONNECTION_LIMIT: $CONNECTION_LIMIT
-- EMAIL: $EMAIL
-- BRANCH: $BRANCH
-EOM
-echo -e " "
-
 # Função para finalizar o script exibindo o tempo total
 finalizar() {
     local END_TIME=$(date +%s)
@@ -155,30 +125,6 @@ if ! mkdir -p "$CURRENT_LOG_DIR" "$ARCHIVED_LOG_DIR"; then
     finalizar "Erro: Não foi possível criar os diretórios de log. Verifique as permissões." 1
 fi
 
-COLOR="\e[38;5;92m"
-GREEN="\e[32m"
-RED="\e[31m"
-RESET="\e[0m"
-BOLD="\e[1m"
-
-echo -e " "
-echo -e "${COLOR}██████╗ ██████╗ ███████╗███████╗███████╗    ████████╗██╗ ██████╗██╗  ██╗███████╗████████╗${RESET}"
-echo -e "${COLOR}██╔══██╗██╔══██╗██╔════╝██╔════╝██╔════╝    ╚══██╔══╝██║██╔════╝██║ ██╔╝██╔════╝╚══██╔══╝${RESET}"
-echo -e "${COLOR}██████╔╝██████╔╝█████╗  ███████╗███████╗       ██║   ██║██║     █████╔╝ █████╗     ██║   ${RESET}"
-echo -e "${COLOR}██╔═══╝ ██╔══██╗██╔══╝  ╚════██║╚════██║       ██║   ██║██║     ██╔═██╗ ██╔══╝     ██║   ${RESET}"
-echo -e "${COLOR}██║     ██║  ██║███████╗███████║███████║       ██║   ██║╚██████╗██║  ██╗███████╗   ██║   ${RESET}"
-echo -e "${COLOR}╚═╝     ╚═╝  ╚═╝╚══════╝╚══════╝╚══════╝       ╚═╝   ╚═╝ ╚═════╝╚═╝  ╚═╝╚══════╝   ╚═╝   ${RESET}"
-echo -e "${GREEN}INSTALANDO A VERSÃO:${RESET} ${BOLD}$VERSION${RESET}"
-echo -e " "
-
-sleep 3
-
-# Exibir mensagem com a lista de fusos horários
-echo "O fuso horário padrão está definido como 'America/Sao_Paulo'."
-
-# Pausa para o usuário ler a mensagem
-sleep 3
-
 # Compactação de logs antigos usando zip
 if find "$CURRENT_LOG_DIR" -type f -mtime +30 | grep -q .; then
     zip -j "$ARCHIVED_LOG_DIR/logs_$(date +'%Y-%m-%d').zip" "$CURRENT_LOG_DIR"/* -x "*.zip"
@@ -199,23 +145,103 @@ SELECTED_TZ=${11:-America/Sao_Paulo}
 # Configuração do arquivo de log (ajustado para usar o fuso horário)
 LOG_FILE="$CURRENT_LOG_DIR/install_${NOME_EMPRESA}_$(TZ=$SELECTED_TZ date +"%d-%m-%Y_%H-%M-%S").log"
 
+# Verifica se o arquivo de log pode ser criado
+if ! touch "$LOG_FILE"; then
+    echo "Erro: Não foi possível criar o arquivo de log $LOG_FILE. Verifique as permissões."
+    finalizar "Erro: Não foi possível criar o arquivo de log $LOG_FILE. Verifique as permissões." 1
+fi
+
+{
+    if [ ${#errors[@]} -gt 0 ]; then
+    echo "\nForam encontrados os seguintes erros:"
+    for error in "${errors[@]}"; do
+        echo "- $error"
+    done
+    usage
+    fi
+} | tee -a "$LOG_FILE"
+
+# Função para verificar e instalar um pacote
+verificar_e_instalar() {
+    local pacote="$1"
+    echo -e "${COLOR}Verificando se $pacote está instalado...${RESET}" | tee -a "$LOG_FILE"
+    if ! dpkg -s "$pacote" &>/dev/null; then # Verifica se o pacote está instalado
+        echo -e "${COLOR}$pacote não encontrado. Tentando instalar...${RESET}" | tee -a "$LOG_FILE"
+        sudo apt-get update &>/dev/null | tee -a "$LOG_FILE" # Redireciona a saída de update para o log também
+        sudo apt-get install -y "$pacote" &>/dev/null | tee -a "$LOG_FILE"
+        if [ $? -eq 0 ]; then
+            echo -e "${GREEN}$pacote instalado com sucesso.${RESET}" | tee -a "$LOG_FILE"
+        else
+            echo -e "${RED}Erro ao instalar $pacote.${RESET}" | tee -a "$LOG_FILE"
+            exit 1
+        fi
+    else
+        echo -e "${GREEN}$pacote já está instalado.${RESET}" | tee -a "$LOG_FILE"
+    fi
+}
+
+# Verifica e instala o iproute2 (que contém o ss)
+verificar_e_instalar iproute2
+
+# Verificar se as portas já estão em uso (usando ss)
+echo -e "${COLOR}Verificando portas ${PORT_BACKEND} e ${PORT_FRONTEND}...${RESET}" | tee -a "$LOG_FILE"
+
+if ss -tuln | grep -q ":$PORT_BACKEND\b"; then
+    echo -e "${RED}Erro: A porta $PORT_BACKEND já está em uso.${RESET}" | tee -a "$LOG_FILE"
+    exit 1
+fi
+
+if ss -tuln | grep -q ":$PORT_FRONTEND\b"; then
+    echo -e "${RED}Erro: A porta $PORT_FRONTEND já está em uso.${RESET}" | tee -a "$LOG_FILE"
+    exit 1
+fi
+
+echo -e "${GREEN}Portas ${PORT_BACKEND} e ${PORT_FRONTEND} disponíveis.${RESET}" | tee -a "$LOG_FILE"
+
+# Exibir as variáveis validadas
+echo -e " "
+cat <<EOM
+*** Parâmetros recebidos e validados com sucesso: ***
+* SENHA_DEPLOY: NÃO ESQUECER!
+* NOME_EMPRESA: $NOME_EMPRESA
+* URL_BACKEND: $URL_BACKEND
+* URL_FRONTEND: $URL_FRONTEND
+* PORT_BACKEND: $PORT_BACKEND
+* PORT_FRONTEND: $PORT_FRONTEND
+* USER_LIMIT: $USER_LIMIT
+* CONNECTION_LIMIT: $CONNECTION_LIMIT
+* EMAIL: $EMAIL
+* BRANCH: $BRANCH
+*****************************************************
+EOM
+echo -e " "
+
+echo -e " "
+echo -e "${COLOR}Iniciando a instalação...${RESET}" | tee -a "$LOG_FILE"
+echo -e " "
+
+echo -e " "
+echo -e "${COLOR}██████╗ ██████╗ ███████╗███████╗███████╗    ████████╗██╗ ██████╗██╗  ██╗███████╗████████╗${RESET}"
+echo -e "${COLOR}██╔══██╗██╔══██╗██╔════╝██╔════╝██╔════╝    ╚══██╔══╝██║██╔════╝██║ ██╔╝██╔════╝╚══██╔══╝${RESET}"
+echo -e "${COLOR}██████╔╝██████╔╝█████╗  ███████╗███████╗       ██║   ██║██║     █████╔╝ █████╗     ██║   ${RESET}"
+echo -e "${COLOR}██╔═══╝ ██╔══██╗██╔══╝  ╚════██║╚════██║       ██║   ██║██║     ██╔═██╗ ██╔══╝     ██║   ${RESET}"
+echo -e "${COLOR}██║     ██║  ██║███████╗███████║███████║       ██║   ██║╚██████╗██║  ██╗███████╗   ██║   ${RESET}"
+echo -e "${COLOR}╚═╝     ╚═╝  ╚═╝╚══════╝╚══════╝╚══════╝       ╚═╝   ╚═╝ ╚═════╝╚═╝  ╚═╝╚══════╝   ╚═╝   ${RESET}"
+echo -e "${GREEN}INSTALANDO A VERSÃO:${RESET} ${BOLD}$VERSION${RESET}"
+echo -e " "
+
+sleep 3
+
+# Exibir mensagem com a lista de fusos horários
+echo "O fuso horário padrão está definido como 'America/Sao_Paulo'."
+
+# Pausa para o usuário ler a mensagem
+sleep 3
+
 # sleep 5
 
 # sudo rm -f /var/lib/dpkg/updates/* | tee -a "$LOG_FILE"
 # sudo dpkg --configure -a | tee -a "$LOG_FILE"
-
-sleep 3
-
-# Verifica se o jq está instalado; se não, instala automaticamente
-if ! command -v jq &>/dev/null; then
-    echo "A ferramenta jq não está instalada. Instalando agora..."
-    if sudo apt-get install -y jq; then
-        echo "jq instalado com sucesso."
-    else
-        echo "Erro: Não foi possível instalar jq. Verifique as permissões ou instale manualmente."
-        finalizar "Erro: Não foi possível instalar jq. Verifique as permissões ou instale manualmente." 1
-    fi
-fi
 
 # Adicionar informações iniciais ao log
 {
@@ -237,12 +263,6 @@ echo " "
 # Exibir a hora ajustada e salvar no log
 echo "Fuso horário ajustado para: $SELECTED_TZ" | tee -a "$LOG_FILE"
 echo "Hora ajustada para o log: $(TZ=$SELECTED_TZ date)" | tee -a "$LOG_FILE"
-
-# Verifica se o arquivo de log pode ser criado
-if ! touch "$LOG_FILE"; then
-    echo "Erro: Não foi possível criar o arquivo de log $LOG_FILE. Verifique as permissões."
-    finalizar "Erro: Não foi possível criar o arquivo de log $LOG_FILE. Verifique as permissões." 1
-fi
 
 sleep 2
 
