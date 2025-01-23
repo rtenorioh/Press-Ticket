@@ -347,8 +347,11 @@ fi
 echo -e "${COLOR}Instalando Node.js e NPM...${RESET}" | tee -a "$LOG_FILE"
 sudo apt-get install -y nodejs | tee -a "$LOG_FILE"
 sudo npm install -g npm@latest | tee -a "$LOG_FILE"
+
 if [ $? -eq 0 ]; then
-    echo -e "${GREEN}Node.js e NPMinstalados com sucesso.${RESET}" | tee -a "$LOG_FILE"
+    NODE_VERSION=$(node -v)
+    NPM_VERSION=$(npm -v)
+    echo -e "${GREEN}Node.js (${NODE_VERSION}) e NPM (${NPM_VERSION}) instalados com sucesso.${RESET}" | tee -a "$LOG_FILE"
 else
     echo -e "${RED}Erro ao instalar Node.js ou NPM.${RESET}" | tee -a "$LOG_FILE"
     exit 1
@@ -479,7 +482,7 @@ fi
 
 # Editando o arquivo .env
 echo -e "${COLOR}Criando o arquivo .env com as configurações...${RESET}" | tee -a "$LOG_FILE"
-cat <<EOF >"$NOME_EMPRESA/backend/.env"
+cat <<EOF >"$DEPLOY_HOME/$NOME_EMPRESA/backend/.env"
 NODE_ENV=production
 
 # URLs e Portas
@@ -525,7 +528,7 @@ fi
 
 # Acessando o diretório do backend
 echo -e "${COLOR}Acessando o diretório do backend...${RESET}" | tee -a "$LOG_FILE"
-cd "$NOME_EMPRESA/backend" | tee -a "$LOG_FILE"
+cd "$DEPLOY_HOME/$NOME_EMPRESA/backend" | tee -a "$LOG_FILE"
 if [ $? -eq 0 ]; then
     echo -e "${GREEN}Diretório do backend acessado com sucesso.${RESET}" | tee -a "$LOG_FILE"
 else
