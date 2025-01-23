@@ -146,14 +146,20 @@ fi
 if find "$CURRENT_LOG_DIR" -type f -mtime +30 | grep -q .; then
     zip -j "$ARCHIVED_LOG_DIR/logs_$(date +'%Y-%m-%d').zip" "$CURRENT_LOG_DIR"/* -x "*.zip"
     if [ $? -eq 0 ]; then
+        echo " "
         echo "Logs antigos compactados com sucesso em $ARCHIVED_LOG_DIR/logs_$(date +'%Y-%m-%d').zip"
+        echo " "
         # Remove os arquivos compactados após o sucesso
         find "$CURRENT_LOG_DIR" -type f -mtime +30 -exec rm {} \;
     else
+        echo " "
         echo "Erro ao compactar os logs antigos."
+        echo " "
     fi
 else
+    echo " "
     echo "Nenhum log antigo encontrado para compactar."
+    echo " "
 fi
 
 # Captura o fuso horário passado como argumento ou usa America/Sao_Paulo} como padrão
@@ -164,13 +170,17 @@ LOG_FILE="$CURRENT_LOG_DIR/install_${NOME_EMPRESA}_$(TZ=$SELECTED_TZ date +"%d-%
 
 # Verifica se o arquivo de log pode ser criado
 if ! touch "$LOG_FILE"; then
+    echo " "
     echo "Erro: Não foi possível criar o arquivo de log $LOG_FILE. Verifique as permissões."
+    echo " "
     finalizar "Erro: Não foi possível criar o arquivo de log $LOG_FILE. Verifique as permissões." 1
 fi
 
 {
     if [ ${#errors[@]} -gt 0 ]; then
+    echo " "
     echo "\nForam encontrados os seguintes erros:"
+    echo " "
     for error in "${errors[@]}"; do
         echo "- $error"
     done
@@ -181,7 +191,9 @@ fi
 # Função para verificar e instalar um pacote
 verificar_e_instalar() {
     local pacote="$1"
+    echo " "
     echo -e "${COLOR}Verificando se $pacote está instalado...${RESET}" | tee -a "$LOG_FILE"
+    echo " "
     if ! dpkg -s "$pacote" &>/dev/null; then # Verifica se o pacote está instalado
         echo -e "${COLOR}$pacote não encontrado. Tentando instalar...${RESET}" | tee -a "$LOG_FILE"
         sudo apt-get update &>/dev/null | tee -a "$LOG_FILE" # Redireciona a saída de update para o log também
@@ -201,19 +213,27 @@ verificar_e_instalar() {
 verificar_e_instalar iproute2
 
 # Verificar se as portas já estão em uso (usando ss)
+echo " "
 echo -e "${COLOR}Verificando portas ${PORT_BACKEND} e ${PORT_FRONTEND}...${RESET}" | tee -a "$LOG_FILE"
+echo " "
 
 if ss -tuln | grep -q ":$PORT_BACKEND\b"; then
+    echo " "
     echo -e "${RED}Erro: A porta $PORT_BACKEND já está em uso.${RESET}" | tee -a "$LOG_FILE"
+    echo " "
     exit 1
 fi
 
 if ss -tuln | grep -q ":$PORT_FRONTEND\b"; then
+    echo " "
     echo -e "${RED}Erro: A porta $PORT_FRONTEND já está em uso.${RESET}" | tee -a "$LOG_FILE"
+    echo " "
     exit 1
 fi
 
+echo " "
 echo -e "${GREEN}Portas ${PORT_BACKEND} e ${PORT_FRONTEND} disponíveis.${RESET}" | tee -a "$LOG_FILE"
+echo " "
 
 # Exibir as variáveis validadas
 echo -e " "
@@ -727,17 +747,24 @@ echo -e "${GREEN}Lista de processos do PM2 salva com sucesso.${RESET}" | tee -a 
 # Instalando o jq (caso ainda não esteja instalado)
 verificar_e_instalar jq
 
-# Listando os serviços iniciados pelo PM2 (usando pm2 jlist e jq)
+# Listando os serviços iniciados pelo PM2 (usando pm2 jlist e jq no contexto do usuário deploy)
 echo -e "${COLOR}Listando os serviços iniciados pelo PM2 (formato JSON)...${RESET}" | tee -a "$LOG_FILE"
-pm2 jlist | tee -a "$LOG_FILE" # Registra a saída JSON no log
+sudo -u deploy -H bash -c "pm2 jlist" | tee -a "$LOG_FILE" # Registra a saída JSON no log
 
-echo -e "${COLOR}Capturando os IDs dos serviços do PM2...${RESET}" | tee -a "$LOG_FILE"
+# Capturando os IDs dos serviços do PM2 no contexto do usuário deploy
+PM2_FRONTEND_ID=$(sudo -u deploy -H bash -c "pm2 jlist | jq -r '.[] | select(.name == \"${NOME_EMPRESA}-front\") | .pm_id'")
+PM2_BACKEND_ID=$(sudo -u deploy -H bash -c "pm2 jlist | jq -r '.[] | select(.name == \"${NOME_EMPRESA}-back\") | .pm_id'")
 
-PM2_FRONTEND_ID=$(pm2 jlist | jq -r '.[] | select(.name == "'${NOME_EMPRESA}-front'") | .pm_id')
-PM2_BACKEND_ID=$(pm2 jlist | jq -r '.[] | select(.name == "'${NOME_EMPRESA}-back'") | .pm_id')
+if [[ -z "$PM2_FRONTEND_ID" || "$PM2_FRONTEND_ID" == "null" ]]; then
+    echo "Erro: ID do PM2 para o frontend não encontrado. Verifique se o processo foi iniciado corretamente."
+    sudo -u deploy -H bash -c "pm2 list"
+    exit 1
+fi
 
-if [[ -z "$PM2_FRONTEND_ID" || "$PM2_FRONTEND_ID" == "null" ]] || [[ -z "$PM2_BACKEND_ID" || "$PM2_BACKEND_ID" == "null" ]]; then
-    finalizar "Erro ao capturar os IDs do PM2. Verifique se os processos foram iniciados corretamente." 1
+if [[ -z "$PM2_BACKEND_ID" || "$PM2_BACKEND_ID" == "null" ]]; then
+    echo "Erro: ID do PM2 para o backend não encontrado. Verifique se o processo foi iniciado corretamente."
+    sudo -u deploy -H bash -c "pm2 list"
+    exit 1
 fi
 
 echo -e "${GREEN}IDs do PM2 capturados com sucesso: Frontend: $PM2_FRONTEND_ID, Backend: $PM2_BACKEND_ID.${RESET}" | tee -a "$LOG_FILE"
