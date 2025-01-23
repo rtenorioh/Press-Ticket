@@ -278,7 +278,6 @@ CREATE DATABASE $NOME_EMPRESA CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
 USE mysql;
 UPDATE user SET plugin='mysql_native_password' WHERE User='root';
 FLUSH PRIVILEGES;
-exit;
 EOF
     echo -e "${GREEN}Banco de dados criado e configuração do MySQL concluída com sucesso.${RESET}"
 } | tee -a "$LOG_FILE"
