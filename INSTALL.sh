@@ -6,7 +6,10 @@ if [ "$EUID" -ne 0 ]; then
     exit 1
 fi
 
-# Registrar início da instalação
+# Obter a versão automaticamente
+VERSION=$(git ls-remote --tags https://github.com/rtenorioh/Press-Ticket.git | awk -F/ '{print $NF}' | sort -V | tail -n1 || echo "unknown")
+
+# Registro do início da execução
 START_TIME=$(date +%s)
 
 # Exibir uso correto do comando
@@ -75,7 +78,7 @@ fi
 # Exibir as variáveis validadas
 cat <<EOM
 \nParâmetros recebidos e validados com sucesso:
-- SENHA_DEPLOY: $SENHA_DEPLOY
+- SENHA_DEPLOY: NÃO ESQUECER!
 - NOME_EMPRESA: $NOME_EMPRESA
 - URL_BACKEND: $URL_BACKEND
 - URL_FRONTEND: $URL_FRONTEND
@@ -86,6 +89,44 @@ cat <<EOM
 - EMAIL: $EMAIL
 - BRANCH: $BRANCH
 EOM
+
+# Função para finalizar o script exibindo o tempo total
+finalizar() {
+    local END_TIME=$(date +%s)
+    local ELAPSED_TIME=$((END_TIME - START_TIME))
+    local MINUTES=$((ELAPSED_TIME / 60))
+    local SECONDS=$((ELAPSED_TIME % 60))
+
+    local RED="\e[31m"
+    local GREEN="\e[32m"
+    local RESET="\e[0m"
+    local BOLD="\e[1m"
+
+    if [ "$2" -ne 0 ]; then
+        # Exibir mensagem de erro, se o código de saída for diferente de 0
+        echo -e "${RED}Erro:${RESET} $1" | tee -a "$LOG_FILE"
+    else
+        # Exibir mensagem de sucesso
+        echo -e "${GREEN}$1${RESET}" | tee -a "$LOG_FILE"
+    fi
+
+    # Resumo Final com Tempo Formatado
+    {
+        echo " "
+        echo "**************************************************************"
+        echo "*                 PRESS TICKET - INSTALAÇÃO                *"
+        echo "**************************************************************"
+        echo " Versão Instalada: $VERSION                           "
+        echo " Fuso Horário: $SELECTED_TZ                                 "
+        echo " Hora Local: $(TZ=$SELECTED_TZ date +"%d-%m-%Y %H:%M:%S")   "
+        echo " Local do log: $LOG_FILE                                    "
+        echo " Tempo Total: ${MINUTES} minutos e ${SECONDS} segundos.       "
+        echo "**************************************************************"
+        echo " "
+    } | tee -a "$LOG_FILE"
+
+    exit "${2:-1}"
+}
 
 # Define o diretório base absoluto
 SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
@@ -98,7 +139,7 @@ ARCHIVED_LOG_DIR="$LOG_DIR/arquivos"
 # Cria os diretórios de log
 if ! mkdir -p "$CURRENT_LOG_DIR" "$ARCHIVED_LOG_DIR"; then
     echo "Erro: Não foi possível criar os diretórios de log. Verifique as permissões."
-    exit 1
+    finalizar "Erro: Não foi possível criar os diretórios de log. Verifique as permissões." 1
 fi
 
 COLOR="\e[38;5;92m"
@@ -114,22 +155,22 @@ echo -e "${COLOR}██████╔╝██████╔╝█████
 echo -e "${COLOR}██╔═══╝ ██╔══██╗██╔══╝  ╚════██║╚════██║       ██║   ██║██║     ██╔═██╗ ██╔══╝     ██║   ${RESET}"
 echo -e "${COLOR}██║     ██║  ██║███████╗███████║███████║       ██║   ██║╚██████╗██║  ██╗███████╗   ██║   ${RESET}"
 echo -e "${COLOR}╚═╝     ╚═╝  ╚═╝╚══════╝╚══════╝╚══════╝       ╚═╝   ╚═╝ ╚═════╝╚═╝  ╚═╝╚══════╝   ╚═╝   ${RESET}"
-echo -e "${GREEN}INICIANDO INSTALAÇÃO PARA A EMPRESA:${RESET} ${BOLD}$NOME_EMPRESA${RESET}"
+echo -e "${GREEN}INSTALANDO A VERSÃO:${RESET} ${BOLD}$VERSION${RESET}"
 echo -e " "
 
 sleep 3
 
-{
-    echo " "
-    echo -e "${COLOR}Verificando logs..${RESET}"
-    echo " "
-} | tee -a "$LOG_FILE"
+# Exibir mensagem com a lista de fusos horários
+echo "O fuso horário padrão está definido como 'America/Sao_Paulo'."
+
+# Pausa para o usuário ler a mensagem
+sleep 10
 
 # Compactação de logs antigos usando zip
 if find "$CURRENT_LOG_DIR" -type f -mtime +30 | grep -q .; then
-    zip -j "$ARCHIVED_LOG_DIR/logs_$(date +'%d-%m-%Y').zip" "$CURRENT_LOG_DIR"/* -x "*.zip"
+    zip -j "$ARCHIVED_LOG_DIR/logs_$(date +'%Y-%m-%d').zip" "$CURRENT_LOG_DIR"/* -x "*.zip"
     if [ $? -eq 0 ]; then
-        echo "Logs antigos compactados com sucesso em $ARCHIVED_LOG_DIR/logs_$(date +'%d-%m-%Y').zip"
+        echo "Logs antigos compactados com sucesso em $ARCHIVED_LOG_DIR/logs_$(date +'%Y-%m-%d').zip"
         # Remove os arquivos compactados após o sucesso
         find "$CURRENT_LOG_DIR" -type f -mtime +30 -exec rm {} \;
     else
@@ -143,12 +184,7 @@ fi
 SELECTED_TZ=${11:-America/Sao_Paulo}
 
 # Configuração do arquivo de log (ajustado para usar o fuso horário)
-LOG_FILE="$CURRENT_LOG_DIR/install_$NOME_EMPRESA_$(TZ=$SELECTED_TZ date +"%d-%m-%Y_%H-%M-%S").log"
-
-# Função para verificar se um comando existe
-command_exists() {
-    command -v "$1" >/dev/null 2>&1
-}
+LOG_FILE="$CURRENT_LOG_DIR/install_${NOME_EMPRESA}_$(TZ=$SELECTED_TZ date +"%d-%m-%Y_%H-%M-%S").log"
 
 sleep 5
 
@@ -156,6 +192,46 @@ sudo rm -f /var/lib/dpkg/updates/* | tee -a "$LOG_FILE"
 sudo dpkg --configure -a | tee -a "$LOG_FILE"
 
 sleep 3
+
+# Verifica se o jq está instalado; se não, instala automaticamente
+if ! command -v jq &>/dev/null; then
+    echo "A ferramenta jq não está instalada. Instalando agora..."
+    if sudo apt-get install -y jq; then
+        echo "jq instalado com sucesso."
+    else
+        echo "Erro: Não foi possível instalar jq. Verifique as permissões ou instale manualmente."
+        finalizar "Erro: Não foi possível instalar jq. Verifique as permissões ou instale manualmente." 1
+    fi
+fi
+
+# Adicionar informações iniciais ao log
+{
+    echo " "
+    echo "**************************************************************"
+    echo "*               PRESS TICKET - LOG DE INSTALAÇÃO           *"
+    echo "**************************************************************"
+    echo " Versão Instalada: $VERSION                           "
+    echo " Fuso Horário: $SELECTED_TZ                                 "
+    echo " Hora Local: $(TZ=$SELECTED_TZ date +"%d-%m-%Y %H:%M:%S")   "
+    echo " Local do log: $LOG_FILE                                    "
+    echo "**************************************************************"
+    echo " "
+} | tee -a "$LOG_FILE"
+
+echo " "
+echo "Arquivo de de log criado com sucesso: $LOG_FILE"
+echo " "
+# Exibir a hora ajustada e salvar no log
+echo "Fuso horário ajustado para: $SELECTED_TZ" | tee -a "$LOG_FILE"
+echo "Hora ajustada para o log: $(TZ=$SELECTED_TZ date)" | tee -a "$LOG_FILE"
+
+# Verifica se o arquivo de log pode ser criado
+if ! touch "$LOG_FILE"; then
+    echo "Erro: Não foi possível criar o arquivo de log $LOG_FILE. Verifique as permissões."
+    finalizar "Erro: Não foi possível criar o arquivo de log $LOG_FILE. Verifique as permissões." 1
+fi
+
+sleep 2
 
 # Seção 1: Preparação Inicial
 echo -e "${COLOR}Preparação Inicial...${RESET}" | tee -a "$LOG_FILE"
@@ -243,12 +319,13 @@ else
 fi
 
 # Instalando Node.js
-echo -e "${COLOR}Instalando Node.js...${RESET}" | tee -a "$LOG_FILE"
+echo -e "${COLOR}Instalando Node.js e NPM...${RESET}" | tee -a "$LOG_FILE"
 sudo apt-get install -y nodejs | tee -a "$LOG_FILE"
+sudo npm install -g npm@latest | tee -a "$LOG_FILE"
 if [ $? -eq 0 ]; then
-    echo -e "${GREEN}Node.js instalado com sucesso.${RESET}" | tee -a "$LOG_FILE"
+    echo -e "${GREEN}Node.js e NPMinstalados com sucesso.${RESET}" | tee -a "$LOG_FILE"
 else
-    echo -e "${RED}Erro ao instalar Node.js.${RESET}" | tee -a "$LOG_FILE"
+    echo -e "${RED}Erro ao instalar Node.js ou NPM.${RESET}" | tee -a "$LOG_FILE"
     exit 1
 fi
 
@@ -396,8 +473,8 @@ USER_LIMIT=$USER_LIMIT
 CONNECTIONS_LIMIT=$CONNECTION_LIMIT
 
 # ID do PM2 do Frontend e Backend para poder ser restartado na tela de Conexões
-PM2_FRONTEND=0
-PM2_BACKEND=1
+PM2_FRONTEND=1
+PM2_BACKEND=0
 
 # Modo DEMO que evita alterar algumas funções, para ativar: ON
 DEMO=OFF
@@ -609,186 +686,51 @@ else
     exit 1
 fi
 
-# Criando e configurando o arquivo do frontend
-echo -e "${COLOR}Configurando o arquivo do frontend no Nginx...${RESET}" | tee -a "$LOG_FILE"
-cat <<EOF | sudo tee /etc/nginx/sites-available/$NOME_EMPRESA-front
+
+sudo tee /etc/nginx/sites-available/Press-Ticket-backend > /dev/null <<EOF
 server {
-  server_name $URL_FRONTEND;
-  location / {
-    proxy_pass http://127.0.0.1:$PORT_FRONTEND;
-    proxy_http_version 1.1;
-    proxy_set_header Upgrade \$http_upgrade;
-    proxy_set_header Connection 'upgrade';
-    proxy_set_header Host \$host;
-    proxy_set_header X-Real-IP \$remote_addr;
-    proxy_set_header X-Forwarded-Proto \$scheme;
-    proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-    proxy_cache_bypass \$http_upgrade;
-  }
+    server_name ${BACKEND_URL};
+    location / {
+        proxy_pass http://127.0.0.1:8080;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade \$http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_cache_bypass \$http_upgrade;
+    }
 }
 EOF
 
-if [ $? -eq 0 ]; then
-    echo -e "${GREEN}Arquivo de configuração do frontend criado com sucesso.${RESET}" | tee -a "$LOG_FILE"
-else
-    echo -e "${RED}Erro ao criar o arquivo de configuração do frontend.${RESET}" | tee -a "$LOG_FILE"
-    exit 1
-fi
-
-# Criando e configurando o arquivo do backend
-echo -e "${COLOR}Configurando o arquivo do backend no Nginx...${RESET}" | tee -a "$LOG_FILE"
-cat <<EOF | sudo tee /etc/nginx/sites-available/$NOME_EMPRESA-back
+sudo tee /etc/nginx/sites-available/Press-Ticket-frontend > /dev/null <<EOF
 server {
-  server_name $URL_BACKEND;
-  location / {
-    proxy_pass http://127.0.0.1:$PORT_BACKEND;
-    proxy_http_version 1.1;
-    proxy_set_header Upgrade \$http_upgrade;
-    proxy_set_header Connection 'upgrade';
-    proxy_set_header Host \$host;
-    proxy_set_header X-Real-IP \$remote_addr;
-    proxy_set_header X-Forwarded-Proto \$scheme;
-    proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-    proxy_cache_bypass \$http_upgrade;
-  }
+    server_name ${FRONTEND_URL};
+    location / {
+        proxy_pass http://127.0.0.1:3333;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade \$http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_cache_bypass \$http_upgrade;
+    }
 }
 EOF
 
-if [ $? -eq 0 ]; then
-    echo -e "${GREEN}Arquivo de configuração do backend criado com sucesso.${RESET}" | tee -a "$LOG_FILE"
-else
-    echo -e "${RED}Erro ao criar o arquivo de configuração do backend.${RESET}" | tee -a "$LOG_FILE"
-    exit 1
-fi
+sudo ln -s /etc/nginx/sites-available/Press-Ticket-backend /etc/nginx/sites-enabled
+sudo ln -s /etc/nginx/sites-available/Press-Ticket-frontend /etc/nginx/sites-enabled
 
-# Criando links simbólicos para os arquivos de configuração
-echo -e "${COLOR}Criando links simbólicos para o Nginx...${RESET}" | tee -a "$LOG_FILE"
-sudo ln -s /etc/nginx/sites-available/$NOME_EMPRESA-front /etc/nginx/sites-enabled | tee -a "$LOG_FILE"
-sudo ln -s /etc/nginx/sites-available/$NOME_EMPRESA-back /etc/nginx/sites-enabled | tee -a "$LOG_FILE"
+sudo nginx -t >> "$LOG_FILE" 2>&1
+sudo systemctl restart nginx >> "$LOG_FILE" 2>&1
 
-if [ $? -eq 0 ]; then
-    echo -e "${GREEN}Links simbólicos criados com sucesso.${RESET}" | tee -a "$LOG_FILE"
-else
-    echo -e "${RED}Erro ao criar links simbólicos.${RESET}" | tee -a "$LOG_FILE"
-    exit 1
-fi
+# Instalação e configuração do Certbot
+log "Instalando Certbot e configurando HTTPS..."
+sudo apt install -y certbot python3-certbot-nginx >> "$LOG_FILE" 2>&1
+sudo certbot --nginx -d ${FRONTEND_URL} -d ${BACKEND_URL} --redirect --agree-tos --email admin@${FRONTEND_URL} >> "$LOG_FILE" 2>&1
+log "Instalação concluída com HTTPS configurado!"
 
-# Adicionando configuração ao nginx.conf
-echo -e "${COLOR}Adicionando configuração ao nginx.conf...${RESET}" | tee -a "$LOG_FILE"
-
-# Verificar se client_max_body_size já existe
-if grep -q "client_max_body_size" /etc/nginx/nginx.conf; then
-    echo -e "${COLOR}client_max_body_size já existe. Atualizando para 50M...${RESET}" | tee -a "$LOG_FILE"
-    sudo sed -i 's/client_max_body_size [0-9]*M;/client_max_body_size 50M;/' /etc/nginx/nginx.conf | tee -a "$LOG_FILE"
-    echo -e "${GREEN}Configuração de client_max_body_size atualizada para 50M.${RESET}" | tee -a "$LOG_FILE"
-else
-    echo -e "${COLOR}client_max_body_size não encontrado. Adicionando configuração para 50M...${RESET}" | tee -a "$LOG_FILE"
-    sudo sed -i '/http {/a \    client_max_body_size 50M;' /etc/nginx/nginx.conf | tee -a "$LOG_FILE"
-    echo -e "${GREEN}Configuração de client_max_body_size adicionada com sucesso.${RESET}" | tee -a "$LOG_FILE"
-fi
-
-# Testando e reiniciando o Nginx
-echo -e "${COLOR}Testando e reiniciando o Nginx...${RESET}" | tee -a "$LOG_FILE"
-sudo nginx -t | tee -a "$LOG_FILE"
-if [ $? -eq 0 ]; then
-    sudo service nginx restart | tee -a "$LOG_FILE"
-    if [ $? -eq 0 ]; then
-        echo -e "${GREEN}Nginx reiniciado com sucesso.${RESET}" | tee -a "$LOG_FILE"
-    else
-        echo -e "${RED}Erro ao reiniciar o Nginx.${RESET}" | tee -a "$LOG_FILE"
-        exit 1
-    fi
-else
-    echo -e "${RED}Erro na configuração do Nginx.${RESET}" | tee -a "$LOG_FILE"
-    exit 1
-fi
-
-## Seção 10: Instalação de Certificado SSL
-
-# Instalando suporte a Snap e Certbot
-echo -e "${COLOR}Verificando se Certbot já está instalado...${RESET}" | tee -a "$LOG_FILE"
-if certbot --version &>/dev/null; then
-    echo -e "${GREEN}Certbot já está instalado. Prosseguindo...${RESET}" | tee -a "$LOG_FILE"
-else
-    echo -e "${COLOR}Certbot não encontrado. Instalando Snap e Certbot...${RESET}" | tee -a "$LOG_FILE"
-    sudo apt-get install -y snapd | tee -a "$LOG_FILE"
-    sudo snap install --classic certbot | tee -a "$LOG_FILE"
-    if [ $? -eq 0 ]; then
-        echo -e "${GREEN}Certbot instalado com sucesso.${RESET}" | tee -a "$LOG_FILE"
-    else
-        echo -e "${RED}Erro ao instalar Certbot.${RESET}" | tee -a "$LOG_FILE"
-        exit 1
-    fi
-fi
-
-# Gerando certificado SSL para backend e frontend
-echo -e "${COLOR}Gerando certificado SSL para o backend...${RESET}" | tee -a "$LOG_FILE"
-sudo certbot --nginx -d $URL_BACKEND -m $EMAIL --agree-tos --non-interactive | tee -a "$LOG_FILE"
-if [ $? -eq 0 ]; then
-    echo -e "${GREEN}Certificado SSL gerado com sucesso para o backend.${RESET}" | tee -a "$LOG_FILE"
-else
-    echo -e "${RED}Erro ao gerar o certificado SSL para o backend.${RESET}" | tee -a "$LOG_FILE"
-    exit 1
-fi
-
-# Gerando certificado SSL para frontend
-echo -e "${COLOR}Gerando certificado SSL para o frontend...${RESET}" | tee -a "$LOG_FILE"
-sudo certbot --nginx -d $URL_FRONTEND -m $EMAIL --agree-tos --non-interactive | tee -a "$LOG_FILE"
-if [ $? -eq 0 ]; then
-    echo -e "${GREEN}Certificado SSL gerado com sucesso para o frontend.${RESET}" | tee -a "$LOG_FILE"
-else
-    echo -e "${RED}Erro ao gerar o certificado SSL para o frontend.${RESET}" | tee -a "$LOG_FILE"
-    exit 1
-fi
-
-# Finalizando instalação
-{
-    echo " "
-    echo -e "${COLOR}Instalação finalizada com sucesso para a empresa: $NOME_EMPRESA!${RESET}"
-    echo " "
-} | tee -a "$LOG_FILE"
-
-# Registrar fim da instalação
-END_TIME=$(date +%s)
-
-# Calcular o tempo total de execução
-TOTAL_TIME=$((END_TIME - START_TIME))
-TOTAL_MINUTES=$((TOTAL_TIME / 60))
-TOTAL_SECONDS=$((TOTAL_TIME % 60))
-
-# Exibir o tempo de execução
-{
-    echo -e "${BOLD}======== Tempo de Instalação: ========${RESET}" | tee -a "$LOG_FILE"
-    echo -e "${BOLD}Total:${RESET} ${TOTAL_MINUTES} minuto(s) e ${TOTAL_SECONDS} segundo(s)." | tee -a "$LOG_FILE"
-    echo -e "${GREEN}-----------------------------------${RESET}" | tee -a "$LOG_FILE"
-} | tee -a "$LOG_FILE"
-
-# Exibindo resumo da instalação
-echo -e "${BOLD}======== Resumo da Instalação: ========${RESET}" | tee -a "$LOG_FILE"
-echo -e "${GREEN}---------------------------------------${RESET}" | tee -a "$LOG_FILE"
-echo -e "${BOLD}URL de Acesso:${RESET} https://$URL_FRONTEND" | tee -a "$LOG_FILE"
-echo -e "${BOLD}Nome da Instalação:${RESET} $NOME_EMPRESA" | tee -a "$LOG_FILE"
-echo -e "${BOLD}Quantidade de Usuários Permitidos:${RESET} $USER_LIMIT" | tee -a "$LOG_FILE"
-echo -e "${BOLD}Quantidade de Conexões Permitidas:${RESET} $CONNECTION_LIMIT" | tee -a "$LOG_FILE"
-echo -e "${BOLD}---------------------------------------${RESET}" | tee -a "$LOG_FILE"
-
-# Informações de Usuários
-echo -e "${BOLD}Usuário Padrão para Acesso${RESET}" | tee -a "$LOG_FILE"
-echo -e "${BOLD}Usuário:${RESET} admin@pressticket.com.br" | tee -a "$LOG_FILE"
-echo -e "${BOLD}Senha:${RESET} admin" | tee -a "$LOG_FILE"
-echo -e "${BOLD}---------------------------------------${RESET}" | tee -a "$LOG_FILE"
-echo -e "${BOLD}Usuário Master para Acesso${RESET}" | tee -a "$LOG_FILE"
-echo -e "${BOLD}Usuário:${RESET} masteradmin@pressticket.com.br" | tee -a "$LOG_FILE"
-echo -e "${BOLD}Senha:${RESET} masteradmin" | tee -a "$LOG_FILE"
-echo -e "${GREEN}---------------------------------------${RESET}" | tee -a "$LOG_FILE"
-
-# Mensagem final
-echo " " | tee -a "$LOG_FILE"
-echo -e "${COLOR}Acesse o sistema e configure conforme necessário.${RESET}" | tee -a "$LOG_FILE"
-echo " " | tee -a "$LOG_FILE"
-echo -e "${COLOR}Obrigado por utilizar o Sistema Press Ticket!${RESET}" | tee -a "$LOG_FILE"
-echo -e "${COLOR}************** Desde de 2022 ****************${RESET}" | tee -a "$LOG_FILE"
-echo " " | tee -a "$LOG_FILE"
-
-# Certifique-se de que a última linha termina corretamente:
-exit 0
+finalizar "Instalação concluída com sucesso!" 0
