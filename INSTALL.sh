@@ -301,12 +301,12 @@ else
     adduser --disabled-password --gecos "" deploy
     echo "deploy:$SENHA_DEPLOY" | chpasswd
     echo -e "${GREEN}Usuário deploy criado com sucesso.${RESET}" | tee -a "$LOG_FILE"
-fi
 
-# Conceder privilégios de superusuário ao usuário deploy
-echo -e "${COLOR}Concedendo privilégios de superusuário ao usuário deploy...${RESET}" | tee -a "$LOG_FILE"
-usermod -aG sudo deploy
-echo -e "${GREEN}Privilégios de superusuário concedidos ao usuário deploy.${RESET}" | tee -a "$LOG_FILE"
+    # Conceder privilégios de superusuário ao usuário deploy
+    echo -e "${COLOR}Concedendo privilégios de superusuário ao usuário deploy...${RESET}" | tee -a "$LOG_FILE"
+    usermod -aG sudo deploy
+    echo -e "${GREEN}Privilégios de superusuário concedidos ao usuário deploy.${RESET}" | tee -a "$LOG_FILE"
+fi
 
 # Alternar para o usuário deploy
 echo -e "${COLOR}Alternando para o usuário deploy...${RESET}" | tee -a "$LOG_FILE"
