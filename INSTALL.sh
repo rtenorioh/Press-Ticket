@@ -164,7 +164,7 @@ sleep 3
 echo "O fuso horário padrão está definido como 'America/Sao_Paulo'."
 
 # Pausa para o usuário ler a mensagem
-sleep 10
+sleep 3
 
 # Compactação de logs antigos usando zip
 if find "$CURRENT_LOG_DIR" -type f -mtime +30 | grep -q .; then
@@ -186,10 +186,10 @@ SELECTED_TZ=${11:-America/Sao_Paulo}
 # Configuração do arquivo de log (ajustado para usar o fuso horário)
 LOG_FILE="$CURRENT_LOG_DIR/install_${NOME_EMPRESA}_$(TZ=$SELECTED_TZ date +"%d-%m-%Y_%H-%M-%S").log"
 
-sleep 5
+# sleep 5
 
-sudo rm -f /var/lib/dpkg/updates/* | tee -a "$LOG_FILE"
-sudo dpkg --configure -a | tee -a "$LOG_FILE"
+# sudo rm -f /var/lib/dpkg/updates/* | tee -a "$LOG_FILE"
+# sudo dpkg --configure -a | tee -a "$LOG_FILE"
 
 sleep 3
 
