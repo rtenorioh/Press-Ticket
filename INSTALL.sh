@@ -45,6 +45,15 @@ validate_url() {
     return 0
 }
 
+validar_dns() {
+    local url="$1"
+    if ! host "$url" &>/dev/null; then
+        return 1 # DNS não resolvido
+    else
+        return 0 # DNS resolvido
+    fi
+}
+
 # Validar parâmetros
 if [ $# -lt 9 ] || [ $# -gt 10 ]; then
     echo "Erro: Número incorreto de argumentos fornecido."
@@ -72,6 +81,14 @@ errors=()
 [[ ! "$USER_LIMIT" =~ ^[0-9]+$ ]] && errors+=("USER_LIMIT deve ser numérico.")
 [[ ! "$CONNECTION_LIMIT" =~ ^[0-9]+$ ]] && errors+=("CONNECTION_LIMIT deve ser numérico.")
 [[ ! "$EMAIL" =~ ^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$ ]] && errors+=("EMAIL inválido.")
+
+if ! validar_dns "$URL_BACKEND"; then
+    errors+=("Domínio $URL_BACKEND não possui entradas DNS propagadas.")
+fi
+
+if ! validar_dns "$URL_FRONTEND"; then
+    errors+=("Domínio $URL_FRONTEND não possui entradas DNS propagadas.")
+fi
 
 # Função para finalizar o script exibindo o tempo total
 finalizar() {
@@ -469,15 +486,15 @@ DEPLOY_HOME=$(eval echo ~deploy)
 
 # Trocar para o usuário deploy e clonar o repositório
 echo -e "${COLOR}Clonando o repositório como o usuário deploy...${RESET}" | tee -a "$LOG_FILE"
-sudo -u deploy bash -c "cd $DEPLOY_HOME && git clone --branch $BRANCH https://github.com/rtenorioh/Press-Ticket.git $NOME_EMPRESA" | tee -a "$LOG_FILE"
+sudo -u deploy -H bash -c "cd $DEPLOY_HOME && git clone --branch $BRANCH https://github.com/rtenorioh/Press-Ticket.git $NOME_EMPRESA" || finalizar "Erro ao clonar o repositório." 1 # Tratamento de erro
+
 sudo chown -R deploy:deploy "$DEPLOY_HOME/$NOME_EMPRESA" | tee -a "$LOG_FILE"
 
 # Verificar se o repositório foi clonado com sucesso
 if [ -d "$DEPLOY_HOME/$NOME_EMPRESA" ]; then
     echo -e "${GREEN}Repositório clonado com sucesso no diretório do usuário deploy.${RESET}" | tee -a "$LOG_FILE"
 else
-    echo -e "${RED}Erro ao clonar o repositório no diretório do usuário deploy.${RESET}" | tee -a "$LOG_FILE"
-    exit 1
+    finalizar "Erro: Diretório do repositório não encontrado após a clonagem." 1
 fi
 
 ## Seção 7: Configuração do Backend
@@ -488,16 +505,14 @@ JWT_SECRET=$(openssl rand -base64 32)
 if [ $? -eq 0 ]; then
     echo -e "${GREEN}JWT_SECRET gerado com sucesso.${RESET}" | tee -a "$LOG_FILE"
 else
-    echo -e "${RED}Erro ao gerar JWT_SECRET.${RESET}" | tee -a "$LOG_FILE"
-    exit 1
+    finalizar "${RED}Erro ao gerar JWT_SECRET.${RESET}" 1
 fi
 
 JWT_REFRESH_SECRET=$(openssl rand -base64 32)
 if [ $? -eq 0 ]; then
     echo -e "${GREEN}JWT_REFRESH_SECRET gerado com sucesso.${RESET}" | tee -a "$LOG_FILE"
 else
-    echo -e "${RED}Erro ao gerar JWT_REFRESH_SECRET.${RESET}" | tee -a "$LOG_FILE"
-    exit 1
+    finalizar "${RED}Erro ao gerar JWT_REFRESH_SECRET.${RESET}" 1
 fi
 
 # Editando o arquivo .env
@@ -550,7 +565,7 @@ fi
 echo -e "${COLOR}Acessando o diretório do backend...${RESET}" | tee -a "$LOG_FILE"
 cd "$DEPLOY_HOME/$NOME_EMPRESA/backend" | tee -a "$LOG_FILE"
 if [ $? -eq 0 ]; then
-    echo -e "${GREEN}Diretório do backend acessado com sucesso.${RESET}" | tee -a "$LOG_FILE"
+    echo -e "${GREEN}Diretório do backend acessado com sucesso em: ${DEPLOY_HOME}/${NOME_EMPRESA}/backend.${RESET}" | tee -a "$LOG_FILE"
 else
     echo -e "${RED}Erro ao acessar o diretório do backend.${RESET}" | tee -a "$LOG_FILE"
     exit 1
@@ -558,99 +573,64 @@ fi
 
 # Instalando as dependências
 echo -e "${COLOR}Instalando dependências do backend...${RESET}" | tee -a "$LOG_FILE"
-npm install | tee -a "$LOG_FILE"
-if [ $? -eq 0 ]; then
-    echo -e "${GREEN}Dependências instaladas com sucesso.${RESET}" | tee -a "$LOG_FILE"
-else
-    echo -e "${RED}Erro ao instalar dependências.${RESET}" | tee -a "$LOG_FILE"
-    exit 1
+
+if ! sudo -u deploy -H bash -c "cd $DEPLOY_HOME/$NOME_EMPRESA/backend && npm install"; then
+    finalizar "Erro ao instalar dependências ou compilar o backend." 1
 fi
+
+echo -e "${GREEN}Dependências do backend instaladas com sucesso.${RESET}" | tee -a "$LOG_FILE"
 
 # Compilando o backend
 echo -e "${COLOR}Compilando o backend...${RESET}" | tee -a "$LOG_FILE"
-npm run build | tee -a "$LOG_FILE"
-if [ $? -eq 0 ]; then
-    echo -e "${GREEN}Backend compilado com sucesso.${RESET}" | tee -a "$LOG_FILE"
-else
-    echo -e "${RED}Erro ao compilar o backend.${RESET}" | tee -a "$LOG_FILE"
-    exit 1
+
+if ! sudo -u deploy -H bash -c "cd $DEPLOY_HOME/$NOME_EMPRESA/backend && npm run build"; then
+    finalizar "Erro ao instalar dependências ou compilar o backend." 1
 fi
+
+echo -e "${GREEN}Backend compilado com sucesso.${RESET}" | tee -a "$LOG_FILE"
 
 # Criando as tabelas no banco de dados
 echo -e "${COLOR}Criando tabelas no banco de dados...${RESET}" | tee -a "$LOG_FILE"
-npx sequelize db:migrate | tee -a "$LOG_FILE"
-if [ $? -eq 0 ]; then
-    echo -e "${GREEN}Tabelas criadas com sucesso.${RESET}" | tee -a "$LOG_FILE"
-else
-    echo -e "${RED}Erro ao criar tabelas no banco de dados.${RESET}" | tee -a "$LOG_FILE"
-    exit 1
-fi
+
+sudo -u deploy -H bash -c "cd $DEPLOY_HOME/$NOME_EMPRESA/backend && npx sequelize db:migrate" || finalizar "Erro ao executar as migrações do banco de dados." 1
+
+echo -e "${GREEN}Tabelas criadas com sucesso.${RESET}" | tee -a "$LOG_FILE"
 
 # Inserindo dados nas tabelas
 echo -e "${COLOR}Inserindo dados nas tabelas...${RESET}" | tee -a "$LOG_FILE"
-npx sequelize db:seed:all | tee -a "$LOG_FILE"
-if [ $? -eq 0 ]; then
-    echo -e "${GREEN}Dados inseridos com sucesso nas tabelas.${RESET}" | tee -a "$LOG_FILE"
-else
-    echo -e "${RED}Erro ao inserir dados nas tabelas.${RESET}" | tee -a "$LOG_FILE"
-    exit 1
-fi
 
-# Instalando o PM2
+sudo -u deploy -H bash -c "cd $DEPLOY_HOME/$NOME_EMPRESA/backend && npx sequelize db:seed:all" || finalizar "Erro ao inserir dados nas tabelas." 1
+
+echo -e "${GREEN}Dados inseridos com sucesso nas tabelas.${RESET}" | tee -a "$LOG_FILE"
+
+# Instalando o PM2 (globalmente como root)
 echo -e "${COLOR}Instalando o PM2...${RESET}" | tee -a "$LOG_FILE"
-sudo npm install -g pm2 | tee -a "$LOG_FILE"
-if [ $? -eq 0 ]; then
-    echo -e "${GREEN}PM2 instalado com sucesso.${RESET}" | tee -a "$LOG_FILE"
-else
-    echo -e "${RED}Erro ao instalar o PM2.${RESET}" | tee -a "$LOG_FILE"
-    exit 1
-fi
+sudo npm install -g pm2 | tee -a "$LOG_FILE" || finalizar "Erro ao instalar o PM2 globalmente." 1
 
-# Iniciando o backend com PM2
+echo -e "${GREEN}PM2 instalado globalmente com sucesso.${RESET}" | tee -a "$LOG_FILE"
+
+# Iniciando o backend com PM2 (como usuário deploy)
 echo -e "${COLOR}Iniciando o backend usando PM2...${RESET}" | tee -a "$LOG_FILE"
-pm2 start dist/server.js --name $NOME_EMPRESA-back | tee -a "$LOG_FILE"
-if [ $? -eq 0 ]; then
-    echo -e "${GREEN}Backend iniciado com sucesso pelo PM2.${RESET}" | tee -a "$LOG_FILE"
-else
-    echo -e "${RED}Erro ao iniciar o backend pelo PM2.${RESET}" | tee -a "$LOG_FILE"
-    exit 1
+
+if ! sudo -u deploy -H bash -c "cd $DEPLOY_HOME/$NOME_EMPRESA/backend && pm2 start dist/server.js --name $NOME_EMPRESA-back"; then
+    finalizar "Erro ao iniciar o backend com PM2." 1
 fi
 
-# Configurando o PM2 para inicialização automática
+echo -e "${GREEN}Backend iniciado com sucesso pelo PM2.${RESET}" | tee -a "$LOG_FILE"
+
+# Configurando o PM2 para inicialização automática (para o usuário deploy)
 echo -e "${COLOR}Configurando o PM2 para inicialização automática...${RESET}" | tee -a "$LOG_FILE"
-sudo env PATH=$PATH:/usr/bin pm2 startup ubuntu -u deploy --hp /home/deploy | tee -a "$LOG_FILE"
-if [ $? -eq 0 ]; then
-    echo -e "${GREEN}PM2 configurado para inicialização automática com sucesso.${RESET}" | tee -a "$LOG_FILE"
-else
-    echo -e "${RED}Erro ao configurar o PM2 para inicialização automática.${RESET}" | tee -a "$LOG_FILE"
-    exit 1
-fi
+
+# Executando como root, mas especificando o usuário deploy
+sudo env PATH=$PATH:/usr/bin pm2 startup systemd -u deploy --hp /home/deploy | tee -a "$LOG_FILE" || finalizar "Erro ao configurar o PM2 para inicialização automática." 1
+
+echo -e "${GREEN}PM2 configurado para inicialização automática com sucesso para o usuário deploy.${RESET}" | tee -a "$LOG_FILE"
 
 ## Seção 8: Configuração do Frontend
 
-# Acessando o diretório do frontend
-echo -e "${COLOR}Acessando o diretório do frontend...${RESET}" | tee -a "$LOG_FILE"
-cd ../frontend | tee -a "$LOG_FILE"
-if [ $? -eq 0 ]; then
-    echo -e "${GREEN}Diretório do frontend acessado com sucesso.${RESET}" | tee -a "$LOG_FILE"
-else
-    echo -e "${RED}Erro ao acessar o diretório do frontend.${RESET}" | tee -a "$LOG_FILE"
-    exit 1
-fi
-
-# Instalando as dependências
-echo -e "${COLOR}Instalando dependências do frontend...${RESET}" | tee -a "$LOG_FILE"
-npm install | tee -a "$LOG_FILE"
-if [ $? -eq 0 ]; then
-    echo -e "${GREEN}Dependências do frontend instaladas com sucesso.${RESET}" | tee -a "$LOG_FILE"
-else
-    echo -e "${RED}Erro ao instalar dependências do frontend.${RESET}" | tee -a "$LOG_FILE"
-    exit 1
-fi
-
 # Criando o arquivo .env para o frontend
 echo -e "${COLOR}Criando o arquivo .env para o frontend...${RESET}" | tee -a "$LOG_FILE"
-cat <<EOF >.env
+sudo -u deploy -H bash -c "cd $DEPLOY_HOME/$NOME_EMPRESA/frontend && cat <<EOF >.env
 # URL BACKEND
 REACT_APP_BACKEND_URL=$URL_BACKEND
 
@@ -662,171 +642,170 @@ PORT=$PORT_FRONTEND
 
 # Para permitir acesso apenas do MasterAdmin (sempre ON)
 REACT_APP_MASTERADMIN=ON
-EOF
+EOF" || finalizar "Erro ao criar o arquivo .env do frontend." 1
 
-if [ $? -eq 0 ]; then
-    echo -e "${GREEN}Arquivo .env do frontend criado com sucesso.${RESET}" | tee -a "$LOG_FILE"
-else
-    echo -e "${RED}Erro ao criar o arquivo .env do frontend.${RESET}" | tee -a "$LOG_FILE"
-    exit 1
+echo -e "${GREEN}Arquivo .env do frontend criado com sucesso.${RESET}" | tee -a "$LOG_FILE"
+
+# Instalando as dependências
+echo -e "${COLOR}Instalando dependências do frontend...${RESET}" | tee -a "$LOG_FILE"
+
+if ! sudo -u deploy -H bash -c "cd $DEPLOY_HOME/$NOME_EMPRESA/frontend && npm install"; then
+    finalizar "Erro ao instalar dependências ou compilar o backend." 1
 fi
+
+echo -e "${GREEN}Dependências do frontend instaladas com sucesso.${RESET}" | tee -a "$LOG_FILE"
 
 # Compilando o frontend
 echo -e "${COLOR}Compilando o frontend...${RESET}" | tee -a "$LOG_FILE"
-npm run build | tee -a "$LOG_FILE"
-if [ $? -eq 0 ]; then
-    echo -e "${GREEN}Frontend compilado com sucesso.${RESET}" | tee -a "$LOG_FILE"
-else
-    echo -e "${RED}Erro ao compilar o frontend.${RESET}" | tee -a "$LOG_FILE"
-    exit 1
+
+if ! sudo -u deploy -H bash -c "cd $DEPLOY_HOME/$NOME_EMPRESA/frontend && npm run build"; then
+    finalizar "Erro ao instalar dependências ou compilar o frontend." 1
 fi
+
+echo -e "${GREEN}Frontend compilado com sucesso.${RESET}" | tee -a "$LOG_FILE"
 
 # Iniciando o frontend com PM2
 echo -e "${COLOR}Iniciando o frontend com PM2...${RESET}" | tee -a "$LOG_FILE"
-pm2 start server.js --name ${NOME_EMPRESA}-front | tee -a "$LOG_FILE"
-if [ $? -eq 0 ]; then
-    echo -e "${GREEN}Frontend iniciado com sucesso pelo PM2.${RESET}" | tee -a "$LOG_FILE"
-else
-    echo -e "${RED}Erro ao iniciar o frontend pelo PM2.${RESET}" | tee -a "$LOG_FILE"
-    exit 1
+
+if ! sudo -u deploy -H bash -c "cd $DEPLOY_HOME/$NOME_EMPRESA/frontend && pm2 start server.js --name ${NOME_EMPRESA}-front"; then
+    finalizar "Erro ao iniciar o frontend com PM2." 1
 fi
 
-# Salvando os serviços iniciados pelo PM2
-echo -e "${COLOR}Salvando os serviços iniciados pelo PM2...${RESET}" | tee -a "$LOG_FILE"
-pm2 save | tee -a "$LOG_FILE"
-if [ $? -eq 0 ]; then
-    echo -e "${GREEN}Serviços do PM2 salvos com sucesso.${RESET}" | tee -a "$LOG_FILE"
-else
-    echo -e "${RED}Erro ao salvar os serviços do PM2.${RESET}" | tee -a "$LOG_FILE"
-    exit 1
-fi
+echo -e "${GREEN}Frontend iniciado com sucesso pelo PM2.${RESET}" | tee -a "$LOG_FILE"
 
-# Listando os serviços iniciados pelo PM2
-echo -e "${COLOR}Listando os serviços iniciados pelo PM2...${RESET}" | tee -a "$LOG_FILE"
-pm2 list | tee -a "$LOG_FILE"
+# Salvando a lista de processos do PM2
+echo -e "${COLOR}Salvando a lista de processos do PM2...${RESET}" | tee -a "$LOG_FILE"
 
-# Capturando os IDs do PM2 para frontend e backend
+sudo -u deploy -H bash -c "pm2 save" || finalizar "Erro ao salvar a lista de processos do PM2." 1
+
+echo -e "${GREEN}Lista de processos do PM2 salva com sucesso.${RESET}" | tee -a "$LOG_FILE"
+
+# Instalando o jq (caso ainda não esteja instalado)
+verificar_e_instalar jq
+
+# Listando os serviços iniciados pelo PM2 (usando pm2 jlist e jq)
+echo -e "${COLOR}Listando os serviços iniciados pelo PM2 (formato JSON)...${RESET}" | tee -a "$LOG_FILE"
+pm2 jlist | tee -a "$LOG_FILE" # Registra a saída JSON no log
+
 echo -e "${COLOR}Capturando os IDs dos serviços do PM2...${RESET}" | tee -a "$LOG_FILE"
-PM2_FRONTEND_ID=$(pm2 list | grep ${NOME_EMPRESA}-front | awk '{print $2}')
-PM2_BACKEND_ID=$(pm2 list | grep ${NOME_EMPRESA}-back | awk '{print $2}')
 
-if [ -z "$PM2_FRONTEND_ID" ] || [ -z "$PM2_BACKEND_ID" ]; then
-    echo -e "${RED}Erro ao capturar os IDs do PM2.${RESET}" | tee -a "$LOG_FILE"
-    exit 1
-else
-    echo -e "${GREEN}IDs do PM2 capturados com sucesso: Frontend: $PM2_FRONTEND_ID, Backend: $PM2_BACKEND_ID.${RESET}" | tee -a "$LOG_FILE"
+PM2_FRONTEND_ID=$(pm2 jlist | jq -r '.[] | select(.name == "'${NOME_EMPRESA}-front'") | .pm_id')
+PM2_BACKEND_ID=$(pm2 jlist | jq -r '.[] | select(.name == "'${NOME_EMPRESA}-back'") | .pm_id')
+
+if [[ -z "$PM2_FRONTEND_ID" || "$PM2_FRONTEND_ID" == "null" ]] || [[ -z "$PM2_BACKEND_ID" || "$PM2_BACKEND_ID" == "null" ]]; then
+    finalizar "Erro ao capturar os IDs do PM2. Verifique se os processos foram iniciados corretamente." 1
 fi
+
+echo -e "${GREEN}IDs do PM2 capturados com sucesso: Frontend: $PM2_FRONTEND_ID, Backend: $PM2_BACKEND_ID.${RESET}" | tee -a "$LOG_FILE"
 
 # Atualizando o arquivo .env do backend com os IDs do PM2
 echo -e "${COLOR}Atualizando o arquivo .env do backend com os IDs do PM2...${RESET}" | tee -a "$LOG_FILE"
-sed -i "s/^PM2_FRONTEND=.*/PM2_FRONTEND=$PM2_FRONTEND_ID/" "$NOME_EMPRESA/backend/.env"
-sed -i "s/^PM2_BACKEND=.*/PM2_BACKEND=$PM2_BACKEND_ID/" "$NOME_EMPRESA/backend/.env"
 
-if [ $? -eq 0 ]; then
-    echo -e "${GREEN}Arquivo .env do backend atualizado com os IDs do PM2 com sucesso.${RESET}" | tee -a "$LOG_FILE"
-else
-    echo -e "${RED}Erro ao atualizar o arquivo .env do backend com os IDs do PM2.${RESET}" | tee -a "$LOG_FILE"
-    exit 1
+# Usando sudo -u deploy -H bash -c para executar os comandos sed no contexto correto
+if ! sudo -u deploy -H bash -c "cd $DEPLOY_HOME/$NOME_EMPRESA/backend && \
+    sed -i -e \"s/^PM2_FRONTEND=.*/PM2_FRONTEND=$PM2_FRONTEND_ID/\" -e \"s/^PM2_BACKEND=.*/PM2_BACKEND=$PM2_BACKEND_ID/\" .env"; then
+    finalizar "Erro ao atualizar o arquivo .env do backend com os IDs do PM2." 1
 fi
+
+echo -e "${GREEN}Arquivo .env do backend atualizado com os IDs do PM2 com sucesso.${RESET}" | tee -a "$LOG_FILE"
 
 ## Seção 9: Configuração do Nginx
 
 # Instalando o Nginx
 echo -e "${COLOR}Instalando o Nginx...${RESET}" | tee -a "$LOG_FILE"
-sudo apt install -y nginx | tee -a "$LOG_FILE"
-if [ $? -eq 0 ]; then
-    echo -e "${GREEN}Nginx instalado com sucesso.${RESET}" | tee -a "$LOG_FILE"
-else
-    echo -e "${RED}Erro ao instalar o Nginx.${RESET}" | tee -a "$LOG_FILE"
-    exit 1
-fi
+sudo apt-get install -y nginx | tee -a "$LOG_FILE" || finalizar "Erro ao instalar o Nginx." 1
+
+echo -e "${GREEN}Nginx instalado com sucesso.${RESET}" | tee -a "$LOG_FILE"
 
 # Criando e configurando o arquivo do frontend
 echo -e "${COLOR}Configurando o arquivo do frontend no Nginx...${RESET}" | tee -a "$LOG_FILE"
-cat <<EOF | sudo tee /etc/nginx/sites-available/$NOME_EMPRESA-front
-server {
-  server_name $URL_FRONTEND;
-  location / {
-    proxy_pass http://127.0.0.1:$PORT_FRONTEND;
-    proxy_http_version 1.1;
-    proxy_set_header Upgrade \$http_upgrade;
-    proxy_set_header Connection 'upgrade';
-    proxy_set_header Host \$host;
-    proxy_set_header X-Real-IP \$remote_addr;
-    proxy_set_header X-Forwarded-Proto \$scheme;
-    proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-    proxy_cache_bypass \$http_upgrade;
-  }
-}
-EOF
 
-if [ $? -eq 0 ]; then
-    echo -e "${GREEN}Arquivo de configuração do frontend criado com sucesso.${RESET}" | tee -a "$LOG_FILE"
-else
-    echo -e "${RED}Erro ao criar o arquivo de configuração do frontend.${RESET}" | tee -a "$LOG_FILE"
-    exit 1
+if ! sudo tee /etc/nginx/sites-available/$NOME_EMPRESA-front <<EOF
+server {
+    server_name $URL_FRONTEND;
+    location / {
+        proxy_pass http://127.0.0.1:$PORT_FRONTEND;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade \$http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_cache_bypass \$http_upgrade;
+    }
+}
+EOF; then
+    finalizar "Erro ao criar o arquivo de configuração do frontend." 1
 fi
+
+echo -e "${GREEN}Arquivo de configuração do frontend criado com sucesso.${RESET}" | tee -a "$LOG_FILE"
 
 # Criando e configurando o arquivo do backend
 echo -e "${COLOR}Configurando o arquivo do backend no Nginx...${RESET}" | tee -a "$LOG_FILE"
-cat <<EOF | sudo tee /etc/nginx/sites-available/$NOME_EMPRESA-back
-server {
-  server_name $URL_BACKEND;
-  location / {
-    proxy_pass http://127.0.0.1:$PORT_BACKEND;
-    proxy_http_version 1.1;
-    proxy_set_header Upgrade \$http_upgrade;
-    proxy_set_header Connection 'upgrade';
-    proxy_set_header Host \$host;
-    proxy_set_header X-Real-IP \$remote_addr;
-    proxy_set_header X-Forwarded-Proto \$scheme;
-    proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-    proxy_cache_bypass \$http_upgrade;
-  }
-}
-EOF
 
-if [ $? -eq 0 ]; then
-    echo -e "${GREEN}Arquivo de configuração do backend criado com sucesso.${RESET}" | tee -a "$LOG_FILE"
-else
-    echo -e "${RED}Erro ao criar o arquivo de configuração do backend.${RESET}" | tee -a "$LOG_FILE"
-    exit 1
+if ! sudo tee /etc/nginx/sites-available/$NOME_EMPRESA-back <<EOF
+server {
+    server_name $URL_BACKEND;
+    location / {
+        proxy_pass http://127.0.0.1:$PORT_BACKEND;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade \$http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_cache_bypass \$http_upgrade;
+    }
+}
+EOF; then
+    finalizar "Erro ao criar o arquivo de configuração do backend." 1
 fi
+
+echo -e "${GREEN}Arquivo de configuração do backend criado com sucesso.${RESET}" | tee -a "$LOG_FILE"
 
 # Criando links simbólicos para os arquivos de configuração
 echo -e "${COLOR}Criando links simbólicos para o Nginx...${RESET}" | tee -a "$LOG_FILE"
-sudo ln -s /etc/nginx/sites-available/$NOME_EMPRESA-front /etc/nginx/sites-enabled | tee -a "$LOG_FILE"
-sudo ln -s /etc/nginx/sites-available/$NOME_EMPRESA-back /etc/nginx/sites-enabled | tee -a "$LOG_FILE"
 
-if [ $? -eq 0 ]; then
-    echo -e "${GREEN}Links simbólicos criados com sucesso.${RESET}" | tee -a "$LOG_FILE"
-else
-    echo -e "${RED}Erro ao criar links simbólicos.${RESET}" | tee -a "$LOG_FILE"
-    exit 1
+if ! sudo ln -s /etc/nginx/sites-available/$NOME_EMPRESA-front /etc/nginx/sites-enabled; then
+    finalizar "Erro ao criar link simbólico para o frontend." 1
 fi
 
-# Adicionando configuração ao nginx.conf
+if ! sudo ln -s /etc/nginx/sites-available/$NOME_EMPRESA-back /etc/nginx/sites-enabled; then
+    finalizar "Erro ao criar link simbólico para o backend." 1
+fi
+
+echo -e "${GREEN}Links simbólicos criados com sucesso.${RESET}" | tee -a "$LOG_FILE"
+
+# Adicionando configuração ao nginx.conf (com verificação de existência)
 echo -e "${COLOR}Adicionando configuração ao nginx.conf...${RESET}" | tee -a "$LOG_FILE"
 
-# Verificar se client_max_body_size já existe
-if grep -q "client_max_body_size" /etc/nginx/nginx.conf; then
-    echo -e "${COLOR}client_max_body_size já existe. Atualizando para 50M...${RESET}" | tee -a "$LOG_FILE"
-    sudo sed -i 's/client_max_body_size [0-9]*M;/client_max_body_size 50M;/' /etc/nginx/nginx.conf | tee -a "$LOG_FILE"
-    echo -e "${GREEN}Configuração de client_max_body_size atualizada para 50M.${RESET}" | tee -a "$LOG_FILE"
+# Verifica se a linha client_max_body_size já existe
+if ! grep -q "client_max_body_size" /etc/nginx/nginx.conf; then
+    # Adiciona a linha se não existir
+    if ! sudo sed -i '/http {/a \    client_max_body_size 50M;' /etc/nginx/nginx.conf; then
+        finalizar "Erro ao adicionar client_max_body_size ao nginx.conf." 1
+    fi
+    echo -e "${GREEN}Configuração client_max_body_size adicionada com sucesso.${RESET}" | tee -a "$LOG_FILE"
 else
-    echo -e "${COLOR}client_max_body_size não encontrado. Adicionando configuração para 50M...${RESET}" | tee -a "$LOG_FILE"
-    sudo sed -i '/http {/a \    client_max_body_size 50M;' /etc/nginx/nginx.conf | tee -a "$LOG_FILE"
-    echo -e "${GREEN}Configuração de client_max_body_size adicionada com sucesso.${RESET}" | tee -a "$LOG_FILE"
+    echo -e "${COLOR}Configuração client_max_body_size já existe no nginx.conf. Ignorando adição.${RESET}" | tee -a "$LOG_FILE"
 fi
 
 # Testando e reiniciando o Nginx
-echo -e "${COLOR}Testando e reiniciando o Nginx...${RESET}" | tee -a "$LOG_FILE"
+echo -e "${COLOR}Testando a configuração do Nginx...${RESET}" | tee -a "$LOG_FILE"
 sudo nginx -t | tee -a "$LOG_FILE"
+
 if [ $? -eq 0 ]; then
+    echo -e "${COLOR}Reiniciando o Nginx...${RESET}" | tee -a "$LOG_FILE" # Mensagem antes do reinício
     sudo service nginx restart | tee -a "$LOG_FILE"
-    echo -e "${GREEN}Nginx reiniciado com sucesso.${RESET}" | tee -a "$LOG_FILE"
+    if [ $? -eq 0 ]; then # Verifica se o reinicio foi bem sucedido
+        echo -e "${GREEN}Nginx reiniciado com sucesso.${RESET}" | tee -a "$LOG_FILE"
+    else
+        finalizar "Erro ao reiniciar o Nginx após teste de configuração bem-sucedido. Verifique os logs do sistema." 1
+    fi
 else
-    finalizar "Erro na configuração do Nginx. Verifique o arquivo de configuração." 1
+    finalizar "Erro na configuração do Nginx. Verifique o arquivo de configuração e a saída do teste (acima)." 1 # Mensagem mais específica
 fi
 
 ## Seção 10: Instalação de Certificado SSL
@@ -837,40 +816,29 @@ if certbot --version &>/dev/null; then
     echo -e "${GREEN}Certbot já está instalado. Prosseguindo...${RESET}" | tee -a "$LOG_FILE"
 else
     echo -e "${COLOR}Certbot não encontrado. Instalando Snap e Certbot...${RESET}" | tee -a "$LOG_FILE"
-    sudo apt-get install -y snapd | tee -a "$LOG_FILE"
-    sudo snap install --classic certbot | tee -a "$LOG_FILE"
-    if [ $? -eq 0 ]; then
-        echo -e "${GREEN}Certbot instalado com sucesso.${RESET}" | tee -a "$LOG_FILE"
-    else
-        echo -e "${RED}Erro ao instalar Certbot.${RESET}" | tee -a "$LOG_FILE"
-        exit 1
-    fi
+    sudo apt-get update | tee -a "$LOG_FILE" || finalizar "Erro ao atualizar lista de pacotes." 1
+    sudo apt-get install -y snapd | tee -a "$LOG_FILE" || finalizar "Erro ao instalar o snapd." 1
+    sudo snap install --classic certbot | tee -a "$LOG_FILE" || finalizar "Erro ao instalar o Certbot via snap." 1
+
+    # Criando link simbólico para o certbot (recomendado pelo Certbot)
+    sudo ln -s /snap/bin/certbot /usr/bin/certbot | tee -a "$LOG_FILE" || finalizar "Erro ao criar link simbólico para o Certbot." 1
+
+    echo -e "${GREEN}Certbot instalado com sucesso.${RESET}" | tee -a "$LOG_FILE"
 fi
 
-if ! host "$URL_BACKEND" &>/dev/null || ! host "$URL_FRONTEND" &>/dev/null; then
-    echo "Erro: Domínios $URL_BACKEND ou $URL_FRONTEND não possuem entradas DNS propagadas."
-    exit 1
-fi
-
-# Gerando certificado SSL para backend e frontend
+# Gerando certificado SSL para backend
 echo -e "${COLOR}Gerando certificado SSL para o backend...${RESET}" | tee -a "$LOG_FILE"
-sudo certbot --nginx -d $URL_BACKEND -m $EMAIL --agree-tos --non-interactive | tee -a "$LOG_FILE"
-if [ $? -eq 0 ]; then
-    echo -e "${GREEN}Certificado SSL gerado com sucesso para o backend.${RESET}" | tee -a "$LOG_FILE"
-else
-    echo -e "${RED}Erro ao gerar o certificado SSL para o backend.${RESET}" | tee -a "$LOG_FILE"
-    exit 1
+if ! certbot --nginx -d "$URL_BACKEND" -m "$EMAIL" --agree-tos --non-interactive; then
+    finalizar "Erro ao gerar o certificado SSL para o backend. Verifique os logs do Certbot e a configuração do Nginx." 1
 fi
+echo -e "${GREEN}Certificado SSL gerado com sucesso para o backend.${RESET}" | tee -a "$LOG_FILE"
 
 # Gerando certificado SSL para frontend
 echo -e "${COLOR}Gerando certificado SSL para o frontend...${RESET}" | tee -a "$LOG_FILE"
-sudo certbot --nginx -d $URL_FRONTEND -m $EMAIL --agree-tos --non-interactive | tee -a "$LOG_FILE"
-if [ $? -eq 0 ]; then
-    echo -e "${GREEN}Certificado SSL gerado com sucesso para o frontend.${RESET}" | tee -a "$LOG_FILE"
-else
-    echo -e "${RED}Erro ao gerar o certificado SSL para o frontend.${RESET}" | tee -a "$LOG_FILE"
-    exit 1
+if ! certbot --nginx -d "$URL_FRONTEND" -m "$EMAIL" --agree-tos --non-interactive; then
+    finalizar "Erro ao gerar o certificado SSL para o frontend. Verifique os logs do Certbot e a configuração do Nginx." 1
 fi
+echo -e "${GREEN}Certificado SSL gerado com sucesso para o frontend.${RESET}" | tee -a "$LOG_FILE"
 
 # Finalizando instalação
 {
@@ -922,4 +890,4 @@ echo -e "${COLOR}************** Desde de 2022 ****************${RESET}" | tee -a
 echo " " | tee -a "$LOG_FILE"
 
 # Certifique-se de que a última linha termina corretamente:
-exit 0
+finalizar "Instalação finalizada com sucesso para a empresa: $NOME_EMPRESA!" 0
