@@ -75,9 +75,21 @@ if [ ${#errors[@]} -gt 0 ]; then
     usage
 fi
 
+# Verificar se as portas já estão em uso
+if netstat -tuln | grep -q ":$PORT_BACKEND\b"; then
+    echo "Erro: A porta $PORT_BACKEND já está em uso."
+    exit 1
+fi
+
+if netstat -tuln | grep -q ":$PORT_FRONTEND\b"; then
+    echo "Erro: A porta $PORT_FRONTEND já está em uso."
+    exit 1
+fi
+
 # Exibir as variáveis validadas
+echo -e " "
 cat <<EOM
-\nParâmetros recebidos e validados com sucesso:
+*** Parâmetros recebidos e validados com sucesso: **
 - SENHA_DEPLOY: NÃO ESQUECER!
 - NOME_EMPRESA: $NOME_EMPRESA
 - URL_BACKEND: $URL_BACKEND
@@ -89,6 +101,7 @@ cat <<EOM
 - EMAIL: $EMAIL
 - BRANCH: $BRANCH
 EOM
+echo -e " "
 
 # Função para finalizar o script exibindo o tempo total
 finalizar() {
@@ -428,12 +441,19 @@ fi
 
 ## Seção 6: Instalação do Press Ticket
 
-# Baixando o repositório do Press Ticket
-echo -e "${COLOR}Clonando o repositório do Press Ticket...${RESET}" | tee -a "$LOG_FILE"
-if git clone --branch "$BRANCH" https://github.com/rtenorioh/Press-Ticket.git "$NOME_EMPRESA" | tee -a "$LOG_FILE"; then
-    echo -e "${GREEN}Repositório do Press Ticket clonado com sucesso na branch: ${BOLD}$BRANCH${RESET}${GREEN}.${RESET}" | tee -a "$LOG_FILE"
+# Garantir que o diretório home do usuário deploy seja usado
+DEPLOY_HOME=$(eval echo ~deploy)
+
+# Trocar para o usuário deploy e clonar o repositório
+echo -e "${COLOR}Clonando o repositório como o usuário deploy...${RESET}" | tee -a "$LOG_FILE"
+sudo -u deploy bash -c "cd $DEPLOY_HOME && git clone --branch $BRANCH https://github.com/rtenorioh/Press-Ticket.git $NOME_EMPRESA" | tee -a "$LOG_FILE"
+sudo chown -R deploy:deploy "$DEPLOY_HOME/$NOME_EMPRESA" | tee -a "$LOG_FILE"
+
+# Verificar se o repositório foi clonado com sucesso
+if [ -d "$DEPLOY_HOME/$NOME_EMPRESA" ]; then
+    echo -e "${GREEN}Repositório clonado com sucesso no diretório do usuário deploy.${RESET}" | tee -a "$LOG_FILE"
 else
-    echo -e "${RED}Erro ao clonar o repositório do Press Ticket. Verifique o nome da branch e sua conexão com a internet.${RESET}" | tee -a "$LOG_FILE"
+    echo -e "${RED}Erro ao clonar o repositório no diretório do usuário deploy.${RESET}" | tee -a "$LOG_FILE"
     exit 1
 fi
 
@@ -808,6 +828,11 @@ else
         echo -e "${RED}Erro ao instalar Certbot.${RESET}" | tee -a "$LOG_FILE"
         exit 1
     fi
+fi
+
+if ! host "$URL_BACKEND" &>/dev/null || ! host "$URL_FRONTEND" &>/dev/null; then
+    echo "Erro: Domínios $URL_BACKEND ou $URL_FRONTEND não possuem entradas DNS propagadas."
+    exit 1
 fi
 
 # Gerando certificado SSL para backend e frontend
