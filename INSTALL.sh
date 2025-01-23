@@ -238,13 +238,13 @@ echo -e "${COLOR}Preparação Inicial...${RESET}" | tee -a "$LOG_FILE"
 {
     cd ~
     echo "Atualizando pacotes do sistema..."
-    sudo apt update && sudo apt upgrade -y
+    sudo apt-get update && sudo apt-get upgrade -y
     echo -e "${GREEN}Atualização de pacotes concluída com sucesso.${RESET}" | tee -a "$LOG_FILE"
 } | tee -a "$LOG_FILE"
 
 # Seção 2: Instalação do MySQL
 echo -e "${COLOR}Instalando MySQL...${RESET}" | tee -a "$LOG_FILE"
-apt install -y mysql-server
+sudo apt-get install -y mysql-server | tee -a "$LOG_FILE"
 
 # Verificar a versão do MySQL
 echo -e "${COLOR}Verificar a versão do MySQL...${RESET}" | tee -a "$LOG_FILE"
@@ -331,7 +331,7 @@ fi
 
 # Instalando bibliotecas adicionais
 echo -e "${COLOR}Instalando bibliotecas adicionais...${RESET}" | tee -a "$LOG_FILE"
-sudo apt install -y apt-transport-https ca-certificates curl software-properties-common git ffmpeg | tee -a "$LOG_FILE"
+sudo apt-get install -y apt-transport-https ca-certificates curl software-properties-common git ffmpeg | tee -a "$LOG_FILE"
 if [ $? -eq 0 ]; then
     echo -e "${GREEN}Bibliotecas adicionais instaladas com sucesso.${RESET}" | tee -a "$LOG_FILE"
 else
@@ -341,7 +341,7 @@ fi
 
 # Atualizando pacotes
 echo -e "${COLOR}Atualizando pacotes...${RESET}" | tee -a "$LOG_FILE"
-sudo apt update | tee -a "$LOG_FILE"
+sudo apt-get update | tee -a "$LOG_FILE"
 if [ $? -eq 0 ]; then
     echo -e "${GREEN}Pacotes atualizados com sucesso.${RESET}" | tee -a "$LOG_FILE"
 else
@@ -397,7 +397,7 @@ fi
 
 # Instalando o Google Chrome
 echo -e "${COLOR}Instalando o Google Chrome...${RESET}" | tee -a "$LOG_FILE"
-sudo apt install -y ./google-chrome-stable_current_amd64.deb | tee -a "$LOG_FILE"
+sudo apt-get install -y ./google-chrome-stable_current_amd64.deb | tee -a "$LOG_FILE"
 if [ $? -eq 0 ]; then
     echo -e "${GREEN}Google Chrome instalado com sucesso.${RESET}" | tee -a "$LOG_FILE"
 else
@@ -686,51 +686,186 @@ else
     exit 1
 fi
 
-
-sudo tee /etc/nginx/sites-available/Press-Ticket-backend > /dev/null <<EOF
+# Criando e configurando o arquivo do frontend
+echo -e "${COLOR}Configurando o arquivo do frontend no Nginx...${RESET}" | tee -a "$LOG_FILE"
+cat <<EOF | sudo tee /etc/nginx/sites-available/$NOME_EMPRESA-front
 server {
-    server_name ${BACKEND_URL};
-    location / {
-        proxy_pass http://127.0.0.1:8080;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade \$http_upgrade;
-        proxy_set_header Connection 'upgrade';
-        proxy_set_header Host \$host;
-        proxy_set_header X-Real-IP \$remote_addr;
-        proxy_set_header X-Forwarded-Proto \$scheme;
-        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-        proxy_cache_bypass \$http_upgrade;
-    }
+  server_name $URL_FRONTEND;
+  location / {
+    proxy_pass http://127.0.0.1:$PORT_FRONTEND;
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade \$http_upgrade;
+    proxy_set_header Connection 'upgrade';
+    proxy_set_header Host \$host;
+    proxy_set_header X-Real-IP \$remote_addr;
+    proxy_set_header X-Forwarded-Proto \$scheme;
+    proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+    proxy_cache_bypass \$http_upgrade;
+  }
 }
 EOF
 
-sudo tee /etc/nginx/sites-available/Press-Ticket-frontend > /dev/null <<EOF
+if [ $? -eq 0 ]; then
+    echo -e "${GREEN}Arquivo de configuração do frontend criado com sucesso.${RESET}" | tee -a "$LOG_FILE"
+else
+    echo -e "${RED}Erro ao criar o arquivo de configuração do frontend.${RESET}" | tee -a "$LOG_FILE"
+    exit 1
+fi
+
+# Criando e configurando o arquivo do backend
+echo -e "${COLOR}Configurando o arquivo do backend no Nginx...${RESET}" | tee -a "$LOG_FILE"
+cat <<EOF | sudo tee /etc/nginx/sites-available/$NOME_EMPRESA-back
 server {
-    server_name ${FRONTEND_URL};
-    location / {
-        proxy_pass http://127.0.0.1:3333;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade \$http_upgrade;
-        proxy_set_header Connection 'upgrade';
-        proxy_set_header Host \$host;
-        proxy_set_header X-Real-IP \$remote_addr;
-        proxy_set_header X-Forwarded-Proto \$scheme;
-        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-        proxy_cache_bypass \$http_upgrade;
-    }
+  server_name $URL_BACKEND;
+  location / {
+    proxy_pass http://127.0.0.1:$PORT_BACKEND;
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade \$http_upgrade;
+    proxy_set_header Connection 'upgrade';
+    proxy_set_header Host \$host;
+    proxy_set_header X-Real-IP \$remote_addr;
+    proxy_set_header X-Forwarded-Proto \$scheme;
+    proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+    proxy_cache_bypass \$http_upgrade;
+  }
 }
 EOF
 
-sudo ln -s /etc/nginx/sites-available/Press-Ticket-backend /etc/nginx/sites-enabled
-sudo ln -s /etc/nginx/sites-available/Press-Ticket-frontend /etc/nginx/sites-enabled
+if [ $? -eq 0 ]; then
+    echo -e "${GREEN}Arquivo de configuração do backend criado com sucesso.${RESET}" | tee -a "$LOG_FILE"
+else
+    echo -e "${RED}Erro ao criar o arquivo de configuração do backend.${RESET}" | tee -a "$LOG_FILE"
+    exit 1
+fi
 
-sudo nginx -t >> "$LOG_FILE" 2>&1
-sudo systemctl restart nginx >> "$LOG_FILE" 2>&1
+# Criando links simbólicos para os arquivos de configuração
+echo -e "${COLOR}Criando links simbólicos para o Nginx...${RESET}" | tee -a "$LOG_FILE"
+sudo ln -s /etc/nginx/sites-available/$NOME_EMPRESA-front /etc/nginx/sites-enabled | tee -a "$LOG_FILE"
+sudo ln -s /etc/nginx/sites-available/$NOME_EMPRESA-back /etc/nginx/sites-enabled | tee -a "$LOG_FILE"
 
-# Instalação e configuração do Certbot
-log "Instalando Certbot e configurando HTTPS..."
-sudo apt install -y certbot python3-certbot-nginx >> "$LOG_FILE" 2>&1
-sudo certbot --nginx -d ${FRONTEND_URL} -d ${BACKEND_URL} --redirect --agree-tos --email admin@${FRONTEND_URL} >> "$LOG_FILE" 2>&1
-log "Instalação concluída com HTTPS configurado!"
+if [ $? -eq 0 ]; then
+    echo -e "${GREEN}Links simbólicos criados com sucesso.${RESET}" | tee -a "$LOG_FILE"
+else
+    echo -e "${RED}Erro ao criar links simbólicos.${RESET}" | tee -a "$LOG_FILE"
+    exit 1
+fi
 
-finalizar "Instalação concluída com sucesso!" 0
+# Adicionando configuração ao nginx.conf
+echo -e "${COLOR}Adicionando configuração ao nginx.conf...${RESET}" | tee -a "$LOG_FILE"
+
+# Verificar se client_max_body_size já existe
+if grep -q "client_max_body_size" /etc/nginx/nginx.conf; then
+    echo -e "${COLOR}client_max_body_size já existe. Atualizando para 50M...${RESET}" | tee -a "$LOG_FILE"
+    sudo sed -i 's/client_max_body_size [0-9]*M;/client_max_body_size 50M;/' /etc/nginx/nginx.conf | tee -a "$LOG_FILE"
+    echo -e "${GREEN}Configuração de client_max_body_size atualizada para 50M.${RESET}" | tee -a "$LOG_FILE"
+else
+    echo -e "${COLOR}client_max_body_size não encontrado. Adicionando configuração para 50M...${RESET}" | tee -a "$LOG_FILE"
+    sudo sed -i '/http {/a \    client_max_body_size 50M;' /etc/nginx/nginx.conf | tee -a "$LOG_FILE"
+    echo -e "${GREEN}Configuração de client_max_body_size adicionada com sucesso.${RESET}" | tee -a "$LOG_FILE"
+fi
+
+# Testando e reiniciando o Nginx
+echo -e "${COLOR}Testando e reiniciando o Nginx...${RESET}" | tee -a "$LOG_FILE"
+sudo nginx -t | tee -a "$LOG_FILE"
+if [ $? -eq 0 ]; then
+    sudo service nginx restart | tee -a "$LOG_FILE"
+    if [ $? -eq 0 ]; then
+        echo -e "${GREEN}Nginx reiniciado com sucesso.${RESET}" | tee -a "$LOG_FILE"
+    else
+        echo -e "${RED}Erro ao reiniciar o Nginx.${RESET}" | tee -a "$LOG_FILE"
+        exit 1
+    fi
+else
+    echo -e "${RED}Erro na configuração do Nginx.${RESET}" | tee -a "$LOG_FILE"
+    exit 1
+fi
+
+## Seção 10: Instalação de Certificado SSL
+
+# Instalando suporte a Snap e Certbot
+echo -e "${COLOR}Verificando se Certbot já está instalado...${RESET}" | tee -a "$LOG_FILE"
+if certbot --version &>/dev/null; then
+    echo -e "${GREEN}Certbot já está instalado. Prosseguindo...${RESET}" | tee -a "$LOG_FILE"
+else
+    echo -e "${COLOR}Certbot não encontrado. Instalando Snap e Certbot...${RESET}" | tee -a "$LOG_FILE"
+    sudo apt-get install -y snapd | tee -a "$LOG_FILE"
+    sudo snap install --classic certbot | tee -a "$LOG_FILE"
+    if [ $? -eq 0 ]; then
+        echo -e "${GREEN}Certbot instalado com sucesso.${RESET}" | tee -a "$LOG_FILE"
+    else
+        echo -e "${RED}Erro ao instalar Certbot.${RESET}" | tee -a "$LOG_FILE"
+        exit 1
+    fi
+fi
+
+# Gerando certificado SSL para backend e frontend
+echo -e "${COLOR}Gerando certificado SSL para o backend...${RESET}" | tee -a "$LOG_FILE"
+sudo certbot --nginx -d $URL_BACKEND -m $EMAIL --agree-tos --non-interactive | tee -a "$LOG_FILE"
+if [ $? -eq 0 ]; then
+    echo -e "${GREEN}Certificado SSL gerado com sucesso para o backend.${RESET}" | tee -a "$LOG_FILE"
+else
+    echo -e "${RED}Erro ao gerar o certificado SSL para o backend.${RESET}" | tee -a "$LOG_FILE"
+    exit 1
+fi
+
+# Gerando certificado SSL para frontend
+echo -e "${COLOR}Gerando certificado SSL para o frontend...${RESET}" | tee -a "$LOG_FILE"
+sudo certbot --nginx -d $URL_FRONTEND -m $EMAIL --agree-tos --non-interactive | tee -a "$LOG_FILE"
+if [ $? -eq 0 ]; then
+    echo -e "${GREEN}Certificado SSL gerado com sucesso para o frontend.${RESET}" | tee -a "$LOG_FILE"
+else
+    echo -e "${RED}Erro ao gerar o certificado SSL para o frontend.${RESET}" | tee -a "$LOG_FILE"
+    exit 1
+fi
+
+# Finalizando instalação
+{
+    echo " "
+    echo -e "${COLOR}Instalação finalizada com sucesso para a empresa: $NOME_EMPRESA!${RESET}"
+    echo " "
+} | tee -a "$LOG_FILE"
+
+# Registrar fim da instalação
+END_TIME=$(date +%s)
+
+# Calcular o tempo total de execução
+TOTAL_TIME=$((END_TIME - START_TIME))
+TOTAL_MINUTES=$((TOTAL_TIME / 60))
+TOTAL_SECONDS=$((TOTAL_TIME % 60))
+
+# Exibir o tempo de execução
+{
+    echo -e "${BOLD}======== Tempo de Instalação: ========${RESET}" | tee -a "$LOG_FILE"
+    echo -e "${BOLD}Total:${RESET} ${TOTAL_MINUTES} minuto(s) e ${TOTAL_SECONDS} segundo(s)." | tee -a "$LOG_FILE"
+    echo -e "${GREEN}-----------------------------------${RESET}" | tee -a "$LOG_FILE"
+} | tee -a "$LOG_FILE"
+
+# Exibindo resumo da instalação
+echo -e "${BOLD}======== Resumo da Instalação: ========${RESET}" | tee -a "$LOG_FILE"
+echo -e "${GREEN}---------------------------------------${RESET}" | tee -a "$LOG_FILE"
+echo -e "${BOLD}URL de Acesso:${RESET} https://$URL_FRONTEND" | tee -a "$LOG_FILE"
+echo -e "${BOLD}Nome da Instalação:${RESET} $NOME_EMPRESA" | tee -a "$LOG_FILE"
+echo -e "${BOLD}Quantidade de Usuários Permitidos:${RESET} $USER_LIMIT" | tee -a "$LOG_FILE"
+echo -e "${BOLD}Quantidade de Conexões Permitidas:${RESET} $CONNECTION_LIMIT" | tee -a "$LOG_FILE"
+echo -e "${BOLD}---------------------------------------${RESET}" | tee -a "$LOG_FILE"
+
+# Informações de Usuários
+echo -e "${BOLD}Usuário Padrão para Acesso${RESET}" | tee -a "$LOG_FILE"
+echo -e "${BOLD}Usuário:${RESET} admin@pressticket.com.br" | tee -a "$LOG_FILE"
+echo -e "${BOLD}Senha:${RESET} admin" | tee -a "$LOG_FILE"
+echo -e "${BOLD}---------------------------------------${RESET}" | tee -a "$LOG_FILE"
+echo -e "${BOLD}Usuário Master para Acesso${RESET}" | tee -a "$LOG_FILE"
+echo -e "${BOLD}Usuário:${RESET} masteradmin@pressticket.com.br" | tee -a "$LOG_FILE"
+echo -e "${BOLD}Senha:${RESET} masteradmin" | tee -a "$LOG_FILE"
+echo -e "${GREEN}---------------------------------------${RESET}" | tee -a "$LOG_FILE"
+
+# Mensagem final
+echo " " | tee -a "$LOG_FILE"
+echo -e "${COLOR}Acesse o sistema e configure conforme necessário.${RESET}" | tee -a "$LOG_FILE"
+echo " " | tee -a "$LOG_FILE"
+echo -e "${COLOR}Obrigado por utilizar o Sistema Press Ticket!${RESET}" | tee -a "$LOG_FILE"
+echo -e "${COLOR}************** Desde de 2022 ****************${RESET}" | tee -a "$LOG_FILE"
+echo " " | tee -a "$LOG_FILE"
+
+# Certifique-se de que a última linha termina corretamente:
+exit 0
