@@ -290,22 +290,35 @@ EOF
 } | tee -a "$LOG_FILE"
 
 # Seção 3: Configuração do Usuário
-echo -e "${COLOR}Criando usuário deploy...${RESET}" | tee -a "$LOG_FILE"
+echo -e "${COLOR}Configurando o usuário deploy...${RESET}" | tee -a "$LOG_FILE"
 
-{
+# Verificar se o usuário já existe
+if id "deploy" &>/dev/null; then
+    echo -e "${GREEN}Usuário deploy já existe. Alternando para o usuário deploy...${RESET}" | tee -a "$LOG_FILE"
+else
+    # Criar usuário caso não exista
+    echo -e "${COLOR}Criando usuário deploy...${RESET}" | tee -a "$LOG_FILE"
     adduser --disabled-password --gecos "" deploy
     echo "deploy:$SENHA_DEPLOY" | chpasswd
     echo -e "${GREEN}Usuário deploy criado com sucesso.${RESET}" | tee -a "$LOG_FILE"
-} | tee -a "$LOG_FILE"
+fi
 
-echo -e "${COLOR}Dar privilégios de superusuário ao usuário deploy...${RESET}" | tee -a "$LOG_FILE"
-usermod -aG sudo deploy | tee -a "$LOG_FILE"
-echo -e "${GREEN}Privilégios concedidos ao usuário deploy com sucesso.${RESET}" | tee -a "$LOG_FILE"
+# Conceder privilégios de superusuário ao usuário deploy
+echo -e "${COLOR}Concedendo privilégios de superusuário ao usuário deploy...${RESET}" | tee -a "$LOG_FILE"
+usermod -aG sudo deploy
+echo -e "${GREEN}Privilégios de superusuário concedidos ao usuário deploy.${RESET}" | tee -a "$LOG_FILE"
 
-echo -e "${COLOR}Alterando para o usuário deploy...${RESET}" | tee -a "$LOG_FILE"
-su deploy | tee -a "$LOG_FILE"
+# Alternar para o usuário deploy
+echo -e "${COLOR}Alternando para o usuário deploy...${RESET}" | tee -a "$LOG_FILE"
+sudo -u deploy -H bash -c "echo 'Usuário deploy configurado e pronto para uso.'"
+if [ $? -eq 0 ]; then
+    echo -e "${GREEN}Alternância para o usuário deploy bem-sucedida.${RESET}" | tee -a "$LOG_FILE"
+else
+    echo -e "${RED}Erro ao alternar para o usuário deploy.${RESET}" | tee -a "$LOG_FILE"
+    exit 1
+fi
 
-## Seção 4: Instalação do Node.js e Dependências
+# Seção 4: Instalação do Node.js e Dependências
 
 # Baixando Node.js 20.x
 echo -e "${COLOR}Baixando Node.js 20.x...${RESET}" | tee -a "$LOG_FILE"
