@@ -561,15 +561,59 @@ else
     exit 1
 fi
 
-# Acessando o diretório do backend
-echo -e "${COLOR}Acessando o diretório do backend...${RESET}" | tee -a "$LOG_FILE"
-cd "$DEPLOY_HOME/$NOME_EMPRESA/backend" | tee -a "$LOG_FILE"
-if [ $? -eq 0 ]; then
+# Acessando o diretório do backend e atualizando o email do seed
+echo -e "${COLOR}Acessando o diretório do backend e atualizando o email do seed...${RESET}" | tee -a "$LOG_FILE"
+
+if cd "$DEPLOY_HOME/$NOME_EMPRESA/backend"; then
     echo -e "${GREEN}Diretório do backend acessado com sucesso em: ${DEPLOY_HOME}/${NOME_EMPRESA}/backend.${RESET}" | tee -a "$LOG_FILE"
+
+    SEED_FILE="src/database/seeds/20241118200400-create-masteradmin-user.ts"
+    BACKUP_FILE="$SEED_FILE.bak"
+
+    # Verifica se o arquivo existe
+    if [ ! -f "$SEED_FILE" ]; then
+        finalizar "Erro: Arquivo de seed não encontrado: $SEED_FILE" 1
+    fi
+
+    # Realiza um backup do arquivo
+    if ! cp "$SEED_FILE" "$BACKUP_FILE"; then
+        finalizar "Erro ao criar backup do arquivo de seed." 1
+    fi
+
+    # Substitui o email no arquivo usando sed (com tratamento de erros)
+    if ! sed -i "s/masteradmin@pressticket.com.br/$EMAIL/g" "$SEED_FILE"; then
+        # Restaura o backup em caso de erro
+        if ! mv "$BACKUP_FILE" "$SEED_FILE"; then
+            echo "Atenção: Falha ao restaurar o backup do arquivo de seed após erro na substituição do email." | tee -a "$LOG_FILE"
+        fi
+        finalizar "Erro ao substituir o email no arquivo de seed." 1
+    fi
+
+    # Verifica se a substituição foi bem-sucedida (com tratamento de erros)
+    if grep -q "masteradmin@pressticket.com.br" "$SEED_FILE"; then
+        # Restaura o backup
+        if ! mv "$BACKUP_FILE" "$SEED_FILE"; then
+            echo "Atenção: Falha ao restaurar o backup do arquivo de seed após falha na verificação da substituição." | tee -a "$LOG_FILE"
+        fi
+        finalizar "Erro: Substituição do email falhou." 1
+    fi
+
+    echo -e "${GREEN}Email do usuário MasterAdmin atualizado com sucesso para: $EMAIL.${RESET}" | tee -a "$LOG_FILE"
+
 else
-    echo -e "${RED}Erro ao acessar o diretório do backend.${RESET}" | tee -a "$LOG_FILE"
-    exit 1
+    finalizar "Erro ao acessar o diretório do backend." 1
 fi
+
+# Obtendo o email do MasterAdmin (após a modificação do arquivo)
+echo -e "${COLOR}Obtendo o email do MasterAdmin do arquivo de seed...${RESET}" | tee -a "$LOG_FILE"
+
+MASTERADMIN_EMAIL=$(grep "email:" "$SEED_FILE" | awk '{print $2}' | sed 's/[",]//g')
+
+if [ -z "$MASTERADMIN_EMAIL" ]; then
+    finalizar "Erro ao obter o email do MasterAdmin do arquivo de seed. Verifique o formato do arquivo." 1
+fi
+
+echo -e "${GREEN}Email do MasterAdmin obtido com sucesso: $MASTERADMIN_EMAIL.${RESET}" | tee -a "$LOG_FILE"
 
 # Instalando as dependências
 echo -e "${COLOR}Instalando dependências do backend...${RESET}" | tee -a "$LOG_FILE"
@@ -877,7 +921,7 @@ echo -e "${BOLD}Usuário:${RESET} admin@pressticket.com.br" | tee -a "$LOG_FILE"
 echo -e "${BOLD}Senha:${RESET} admin" | tee -a "$LOG_FILE"
 echo -e "${BOLD}---------------------------------------${RESET}" | tee -a "$LOG_FILE"
 echo -e "${BOLD}Usuário Master para Acesso${RESET}" | tee -a "$LOG_FILE"
-echo -e "${BOLD}Usuário:${RESET} masteradmin@pressticket.com.br" | tee -a "$LOG_FILE"
+echo -e "${BOLD}Usuário:${RESET} ${MASTERADMIN_EMAIL}" | tee -a "$LOG_FILE"
 echo -e "${BOLD}Senha:${RESET} masteradmin" | tee -a "$LOG_FILE"
 echo -e "${GREEN}---------------------------------------${RESET}" | tee -a "$LOG_FILE"
 
