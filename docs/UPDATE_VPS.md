@@ -1,6 +1,6 @@
-# Manual de Atualização do Press Ticket na VPS
+# Manual de Atualização Automática do Press Ticket na VPS
 
-Este manual descreve os passos necessários para realizar a atualização do sistema **Press Ticket** em sua VPS.
+Este manual descreve os passos necessários para realizar a atualização automática do sistema **Press Ticket** em sua VPS.
 
 ## Passos para Atualização
 
@@ -28,7 +28,7 @@ Com o diretório correto acessado, execute o comando para atualização abaixo:
 curl -sSL https://update.pressticket.com.br | sudo bash -s
 ```
 
-> Nota: O script `UPDATE.sh` será responsável por realizar o processo de atualização automaticamente.
+> Nota: O script executado será responsável por realizar o processo de atualização automaticamente.
 
 ### 4. Finalização
 

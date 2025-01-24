@@ -189,7 +189,7 @@ openssl rand -base64 32
 ### 7.3 Editar os dados abaixo usando suas informações e os valores gerados pelo comando anterior.
 
 ```bash
-NODE_ENV=
+NODE_ENV=production
 
 #URLs e Portas
 BACKEND_URL=https://back.pressticket.com.br
@@ -308,6 +308,8 @@ npm install
 ### 8.3 Editar os dados abaixo usando suas informações
 
 ```bash
+NODE_ENV=production
+
 #URL BACKEND
 REACT_APP_BACKEND_URL=https://back.pressticket.com.br
 
