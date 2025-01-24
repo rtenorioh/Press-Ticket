@@ -695,6 +695,8 @@ echo -e "${GREEN}PM2 configurado para inicialização automática com sucesso pa
 # Criando o arquivo .env para o frontend
 echo -e "${COLOR}Criando o arquivo .env para o frontend...${RESET}" | tee -a "$LOG_FILE"
 sudo -u deploy -H bash -c "cd $DEPLOY_HOME/$NOME_EMPRESA/frontend && cat <<EOF >.env
+NODE_ENV=production
+
 # URL BACKEND
 REACT_APP_BACKEND_URL=https://$URL_BACKEND
 
