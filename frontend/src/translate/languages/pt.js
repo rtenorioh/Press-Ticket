@@ -270,7 +270,7 @@ const messages = {
         appBar: {
           message: {
             hi: "Olá",
-            text: "Seja bem-vindo ao Sistema."
+            text: "Seja bem-vindo ao Sistema"
           },
           user: {
             profile: "Perfil",

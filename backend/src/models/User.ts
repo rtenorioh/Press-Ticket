@@ -1,24 +1,24 @@
-import { compare, hash } from "bcryptjs";
 import {
-  AutoIncrement,
-  BeforeCreate,
-  BeforeUpdate,
-  BelongsToMany,
+  Table,
   Column,
   CreatedAt,
+  UpdatedAt,
+  Model,
   DataType,
+  BeforeCreate,
+  BeforeUpdate,
+  PrimaryKey,
+  AutoIncrement,
   Default,
   HasMany,
-  Model,
-  PrimaryKey,
-  Table,
-  UpdatedAt
+  BelongsToMany
 } from "sequelize-typescript";
-import Queue from "./Queue";
+import { hash, compare } from "bcryptjs";
 import Ticket from "./Ticket";
+import Queue from "./Queue";
 import UserQueue from "./UserQueue";
-import UserWhatsapp from "./UserWhatsapp";
 import Whatsapp from "./Whatsapp";
+import UserWhatsapp from "./UserWhatsapp";
 
 @Table
 class User extends Model<User> {
@@ -39,23 +39,21 @@ class User extends Model<User> {
   @Column
   passwordHash: string;
 
-  @Default(0)
-  @Column
-  tokenVersion: number;
-
-  @Column(DataType.STRING)
-  passwordResetToken: string | null;
-
-  @Column(DataType.DATE)
-  passwordResetExpires: Date | null;
-
   @Default("admin")
   @Column
   profile: string;
 
-  @Default("enabled")
+  @Default(false)
   @Column
-  isTricked: string;
+  online: boolean;
+
+  @Default(false)
+  @Column
+  isTricked: boolean;
+
+  @Default(0)
+  @Column
+  tokenVersion: number;
 
   @Default("00:00")
   @Column
@@ -65,9 +63,11 @@ class User extends Model<User> {
   @Column
   endWork: string;
 
-  @Default(false)
-  @Column
-  online: boolean;
+  @Column(DataType.STRING)
+  passwordResetToken: string | null;
+
+  @Column(DataType.DATE)
+  passwordResetExpires: Date | null;
 
   @Column(DataType.STRING)
   currentSessionId: string;
@@ -99,7 +99,7 @@ class User extends Model<User> {
   };
 
   public checkPassword = async (password: string): Promise<boolean> => {
-    return compare(password, this.getDataValue("passwordHash"));
+    return compare(password, this.passwordHash);
   };
 }
 

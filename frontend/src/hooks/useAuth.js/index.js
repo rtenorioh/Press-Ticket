@@ -1,9 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { useHistory } from "react-router-dom";
 import { toast } from "react-toastify";
 import api from "../../services/api";
-import openSocket from "../../services/socket-io";
+import connectToSocket, { disconnectSocket } from "../../services/socket-io";
 
 const useAuth = () => {
 	const history = useHistory();
@@ -12,12 +12,14 @@ const useAuth = () => {
 	const [loading, setLoading] = useState(true);
 	const [user, setUser] = useState({});
 
-	const handleLogout = () => {
+	const handleLogout = useCallback(() => {
+		disconnectSocket();
 		localStorage.removeItem("token");
+		localStorage.removeItem("user");
 		setIsAuth(false);
 		setUser({});
 		history.push("/login");
-	};
+	}, [history]);
 
 	useEffect(() => {
 		const checkAuth = async () => {
@@ -27,6 +29,7 @@ const useAuth = () => {
 					const { data } = await api.post("/auth/refresh_token");
 					api.defaults.headers.Authorization = `Bearer ${data.token}`;
 					localStorage.setItem("token", JSON.stringify(data.token));
+					localStorage.setItem("user", JSON.stringify(data.user));
 					setIsAuth(true);
 					setUser(data.user);
 				} catch (err) {
@@ -37,55 +40,45 @@ const useAuth = () => {
 		};
 
 		checkAuth();
-	}, []);
+	}, [handleLogout]);
 
 	useEffect(() => {
 		let socket;
 
-		const connectSocket = () => {
-			socket = openSocket();
+		if (isAuth && user.id) {
+			socket = connectToSocket();
 
-			socket.on("connect", () => {
-				console.log("Socket connected");
-			});
+			if (socket) {
+				socket.on("userSessionExpired", data => {
+					if (data.userId === user.id && localStorage.getItem("token")) {
+						handleLogout();
+						toast.error(data.message || t("auth.toasts.session_expired"));
+					}
+				});
 
-			socket.on("disconnect", () => {
-				console.log("Socket disconnected");
-				setTimeout(connectSocket, 5000);
-			});
-
-			socket.on("userSessionExpired", data => {
-				if (data.userId === user.id && localStorage.getItem("token")) {
-					handleLogout();
-					toast.error(data.message || t("auth.toasts.session_expired"));
-				}
-			});
-
-			socket.on("userSessionUpdate", data => {
-				if (data.userId === user.id) {
-					setUser(prevUser => ({
-						...prevUser,
-						online: data.online
-					}));
-				}
-			});
-		};
-
-		if (isAuth) {
-			connectSocket();
+				socket.on("userSessionUpdate", data => {
+					if (data.userId === user.id) {
+						setUser(prevUser => ({
+							...prevUser,
+							online: data.online
+						}));
+					}
+				});
+			}
 		}
 
 		return () => {
-			if (socket) {
-				socket.disconnect();
+			if (!isAuth) {
+				disconnectSocket();
 			}
 		};
-	}, [user.id, isAuth, t]);
+	}, [user.id, isAuth, t, handleLogout]);
 
 	const handleLogin = async (userData) => {
 		try {
 			const { data } = await api.post("/auth/login", userData);
 			localStorage.setItem("token", JSON.stringify(data.token));
+			localStorage.setItem("user", JSON.stringify(data.user));
 			api.defaults.headers.Authorization = `Bearer ${data.token}`;
 			setUser(data.user);
 			setIsAuth(true);

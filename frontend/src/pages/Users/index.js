@@ -126,7 +126,7 @@ const Users = () => {
   const [deletingUser, setDeletingUser] = useState(null);
   const [userModalOpen, setUserModalOpen] = useState(false);
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
-  const [showOnlyActive, setShowOnlyActive] = useState(false);
+  const [showOnlyActive] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [modalContent, setModalContent] = useState([]);
   const [modalTitle, setModalTitle] = useState("");

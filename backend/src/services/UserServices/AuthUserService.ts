@@ -1,24 +1,14 @@
+import User from "../../models/User";
 import AppError from "../../errors/AppError";
 import {
   createAccessToken,
   createRefreshToken
 } from "../../helpers/CreateTokens";
-import { SerializeUser } from "../../helpers/SerializeUser";
 import Queue from "../../models/Queue";
-import User from "../../models/User";
-import UserSession from "../../models/UserSession";
-import Whatsapp from "../../models/Whatsapp";
+import { getIO } from "../../libs/socket";
 import { v4 as uuidv4 } from "uuid";
-
-interface SerializedUser {
-  id: number;
-  name: string;
-  online?: boolean;
-  email: string;
-  profile: string;
-  queues: Queue[];
-  whatsapps: Whatsapp[];
-}
+import UserSession from "../../models/UserSession";
+import { SerializeUser } from "../../helpers/SerializeUser";
 
 interface Request {
   email: string;
@@ -26,7 +16,18 @@ interface Request {
 }
 
 interface Response {
-  serializedUser: SerializedUser;
+  serializedUser: {
+    id: number;
+    name: string;
+    email: string;
+    profile: string;
+    online: boolean;
+    isTricked: boolean;
+    startWork: string;
+    endWork: string;
+    createdAt: Date;
+    queues: Queue[];
+  };
   token: string;
   refreshToken: string;
 }
@@ -37,7 +38,7 @@ const AuthUserService = async ({
 }: Request): Promise<Response> => {
   const user = await User.findOne({
     where: { email },
-    include: ["queues", "whatsapps"]
+    include: ["queues"]
   });
 
   if (!user) {
@@ -68,6 +69,16 @@ const AuthUserService = async ({
     throw new AppError("ERR_INVALID_CREDENTIALS", 401);
   }
 
+  // Atualiza o status online do usuário
+  await user.update({ online: true });
+  
+  // Emite evento de atualização de status
+  const io = getIO();
+  io.emit("userSessionUpdate", {
+    userId: user.id,
+    online: true
+  });
+
   const lastSession = await UserSession.findOne({
     where: {
       userId: user.id,
@@ -90,7 +101,6 @@ const AuthUserService = async ({
         currentSessionId: null
       });
 
-      const io = require("../../libs/socket").getIO();
       io.emit("userSessionExpired", {
         userId: user.id,
         expired: true,
@@ -104,42 +114,25 @@ const AuthUserService = async ({
     await lastSession.update({
       lastActivity: new Date()
     });
+  } else {
+    const newSessionId = uuidv4();
 
-    const token = createAccessToken(user);
-    const refreshToken = createRefreshToken(user);
-    const serializedUser = await SerializeUser(user);
+    await UserSession.create({
+      userId: user.id,
+      sessionId: newSessionId,
+      loginAt: new Date(),
+      lastActivity: new Date()
+    });
 
-    return {
-      serializedUser,
-      token,
-      refreshToken
-    };
+    await user.update({
+      online: true,
+      currentSessionId: newSessionId
+    });
   }
-
-  const newSessionId = uuidv4();
-
-  await UserSession.create({
-    userId: user.id,
-    sessionId: newSessionId,
-    loginAt: new Date(),
-    lastActivity: new Date()
-  });
-
-  await user.update({
-    online: true,
-    currentSessionId: newSessionId
-  });
 
   const token = createAccessToken(user);
   const refreshToken = createRefreshToken(user);
-
   const serializedUser = await SerializeUser(user);
-
-  const io = require("../../libs/socket").getIO();
-  io.emit("userSessionUpdate", {
-    userId: user.id,
-    online: true
-  });
 
   return {
     serializedUser,

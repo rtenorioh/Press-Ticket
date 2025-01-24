@@ -1,5 +1,5 @@
-import Queue from "../models/Queue";
 import User from "../models/User";
+import Queue from "../models/Queue";
 import Whatsapp from "../models/Whatsapp";
 
 interface SerializedUser {
@@ -7,25 +7,28 @@ interface SerializedUser {
   name: string;
   email: string;
   profile: string;
-  queues: Queue[];
-  whatsapps: Whatsapp[];
+  online: boolean;
+  isTricked: boolean;
   startWork: string;
   endWork: string;
-  isTricked: string;
-  currentSessionId: string;
+  createdAt: Date;
+  whatsapps: Whatsapp[];
+  queues: Queue[];
 }
 
-export const SerializeUser = (user: User): SerializedUser => {
+export const SerializeUser = async (user: User): Promise<SerializedUser> => {
+
   return {
     id: user.id,
     name: user.name,
     email: user.email,
     profile: user.profile,
-    queues: user.queues,
-    whatsapps: user.whatsapps,
+    online: user.online,
+    isTricked: user.isTricked,
     startWork: user.startWork,
     endWork: user.endWork,
-    isTricked: user.isTricked,
-    currentSessionId: user.currentSessionId
+    createdAt: user.createdAt,
+    whatsapps: user.whatsapps,
+    queues: user.queues,
   };
 };
