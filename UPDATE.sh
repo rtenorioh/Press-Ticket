@@ -174,7 +174,7 @@ if [ -t 0 ]; then
 else
     # Abre um subshell para capturar entrada interativa
     UPDATE_SYSTEM=$(bash -c 'read -p "Deseja atualizar os pacotes do sistema operacional antes de continuar? (s/n): " REPLY; echo $REPLY' </dev/tty)
-    UPDATE_SYSTEM=${UPDATE_SYSTEM:-n} # Define 'n' como valor padrão se vazio
+    UPDATE_SYSTEM=${UPDATE_SYSTEM:-n} # Define 'n' como padrão se vazio
 fi
 
 if [[ "$UPDATE_SYSTEM" == "s" || "$UPDATE_SYSTEM" == "S" ]]; then
@@ -332,6 +332,22 @@ ENV_FILE=".env"
 
 # Verifica se o arquivo .env existe
 if [ -f "$ENV_FILE" ]; then
+    # Verifica se NODE_ENV=production existe no arquivo .env
+    if grep -q "^NODE_ENV=production" "$ENV_FILE"; then
+        echo "A variável NODE_ENV já está configurada como production no arquivo .env." | tee -a "$LOG_FILE"
+    else
+        # Verifica se existe NODE_ENV vazio ou se não existe
+        if grep -q "^NODE_ENV=" "$ENV_FILE"; then
+            # Substitui a linha existente
+            sed -i 's/^NODE_ENV=.*/NODE_ENV=production/' "$ENV_FILE"
+            echo "A variável NODE_ENV foi atualizada para production no arquivo .env." | tee -a "$LOG_FILE"
+        else
+            # Adiciona NODE_ENV=production no início do arquivo
+            sed -i '1iNODE_ENV=production' "$ENV_FILE"
+            echo "A variável NODE_ENV=production foi adicionada no início do arquivo .env." | tee -a "$LOG_FILE"
+        fi
+    fi
+
     # Verifica se a variável WEBHOOK existe no arquivo .env
     if grep -q "^WEBHOOK=" "$ENV_FILE"; then
         echo "A variável WEBHOOK já existe no arquivo .env. Nenhuma alteração necessária." | tee -a "$LOG_FILE"
@@ -413,6 +429,22 @@ ENV_FILE=".env"
 
 # Verifica se o arquivo .env existe
 if [ -f "$ENV_FILE" ]; then
+# Verifica se NODE_ENV=production existe no arquivo .env
+    if grep -q "^NODE_ENV=production" "$ENV_FILE"; then
+        echo "A variável NODE_ENV já está configurada como production no arquivo .env." | tee -a "$LOG_FILE"
+    else
+        # Verifica se existe NODE_ENV vazio ou se não existe
+        if grep -q "^NODE_ENV=" "$ENV_FILE"; then
+            # Substitui a linha existente
+            sed -i 's/^NODE_ENV=.*/NODE_ENV=production/' "$ENV_FILE"
+            echo "A variável NODE_ENV foi atualizada para production no arquivo .env." | tee -a "$LOG_FILE"
+        else
+            # Adiciona NODE_ENV=production no início do arquivo
+            sed -i '1iNODE_ENV=production' "$ENV_FILE"
+            echo "A variável NODE_ENV=production foi adicionada no início do arquivo .env." | tee -a "$LOG_FILE"
+        fi
+    fi
+    
     # Verifica e altera SERVER_PORT para PORT, se necessário
     if grep -q "^SERVER_PORT=" "$ENV_FILE"; then
         echo "A variável SERVER_PORT foi encontrada no arquivo .env. Alterando para PORT..." | tee -a "$LOG_FILE"
