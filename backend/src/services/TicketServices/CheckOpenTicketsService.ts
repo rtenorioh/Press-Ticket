@@ -12,7 +12,7 @@ const CheckOpenTicketsService = async (contactId: number): Promise<Ticket | null
                 {
                     model: User,
                     as: "user",
-                    attributes: ["id", "name", "email"]
+                    attributes: ["id", "name", "email", "online"]
                 }
             ]
         });

@@ -773,6 +773,7 @@ const messages = {
         table: {
           id: "ID",
           name: "Nome",
+          status: "Status",
           email: "E-mail",
           profile: "Perfil",
           whatsapp: "Canal",

@@ -21,7 +21,6 @@ export const downloadFiles = async (url: string) => {
       "base64"
     );
 
-    // const fileTypeResult = await fileType.fromBuffer(data);
     const mimeType = mime.lookup(filePath);
     const extension = extname(filePath);
     const originalname = url.split("/").pop();

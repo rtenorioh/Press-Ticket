@@ -9,6 +9,7 @@ import {
   createAccessToken,
   createRefreshToken
 } from "../../helpers/CreateTokens";
+import UserSession from "../../models/UserSession";
 
 interface RefreshTokenPayload {
   id: string;
@@ -35,6 +36,50 @@ export const RefreshTokenService = async (
       res.clearCookie("jrt");
       throw new AppError("ERR_SESSION_EXPIRED", 401);
     }
+
+    // Verifica se existe uma sessão ativa
+    const session = await UserSession.findOne({
+      where: {
+        userId: user.id,
+        logoutAt: null
+      }
+    });
+
+    if (!session) {
+      res.clearCookie("jrt");
+      throw new AppError("ERR_SESSION_EXPIRED", 401);
+    }
+
+    // Verifica se passou 8 horas desde a última atividade
+    const lastActivity = new Date(session.lastActivity).getTime();
+    const currentTime = new Date().getTime();
+    const diffHours = (currentTime - lastActivity) / (1000 * 60 * 60);
+
+    if (diffHours >= 8) {
+      await session.update({
+        logoutAt: new Date()
+      });
+
+      await user.update({
+        online: false,
+        currentSessionId: null
+      });
+
+      const io = require("../../libs/socket").getIO();
+      io.emit("userSessionExpired", {
+        userId: user.id,
+        expired: true,
+        message: "ERR_SESSION_EXPIRED"
+      });
+
+      res.clearCookie("jrt");
+      throw new AppError("ERR_SESSION_EXPIRED", 401);
+    }
+
+    // Atualiza a última atividade
+    await session.update({
+      lastActivity: new Date()
+    });
 
     const newToken = createAccessToken(user);
     const refreshToken = createRefreshToken(user);

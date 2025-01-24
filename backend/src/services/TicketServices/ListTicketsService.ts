@@ -58,7 +58,6 @@ const ListTicketsService = async ({
         "telegramId",
         "webchatId"
       ]
-      // include: ["extraInfo", "contactTags", "tags"]
     },
     {
       model: Queue,
@@ -73,7 +72,7 @@ const ListTicketsService = async ({
     {
       model: User,
       as: "user",
-      attributes: ["id", "name"]
+      attributes: ["id", "name", "online"]
     }
   ];
 

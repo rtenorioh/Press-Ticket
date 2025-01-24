@@ -8,6 +8,7 @@ interface Request {
   email: string;
   password: string;
   name: string;
+  online?: boolean;
   queueIds?: number[];
   profile?: string;
   isTricked?: boolean;
@@ -21,6 +22,7 @@ interface Response {
   name: string;
   id: number;
   profile: string;
+  online?: boolean;
 }
 
 const CreateUserService = async ({
@@ -32,7 +34,8 @@ const CreateUserService = async ({
   isTricked,
   whatsappIds = [],
   startWork,
-  endWork
+  endWork,
+  online
 }: Request): Promise<Response> => {
   const schema = Yup.object().shape({
     name: Yup.string().required().min(2),
@@ -64,6 +67,7 @@ const CreateUserService = async ({
       email,
       password,
       name,
+      online,
       profile,
       isTricked,
       startWork,

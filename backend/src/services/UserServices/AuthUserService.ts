@@ -6,12 +6,14 @@ import {
 import { SerializeUser } from "../../helpers/SerializeUser";
 import Queue from "../../models/Queue";
 import User from "../../models/User";
+import UserSession from "../../models/UserSession";
 import Whatsapp from "../../models/Whatsapp";
 import { v4 as uuidv4 } from "uuid";
 
 interface SerializedUser {
   id: number;
   name: string;
+  online?: boolean;
   email: string;
   profile: string;
   queues: Queue[];
@@ -66,27 +68,78 @@ const AuthUserService = async ({
     throw new AppError("ERR_INVALID_CREDENTIALS", 401);
   }
 
+  const lastSession = await UserSession.findOne({
+    where: {
+      userId: user.id,
+      logoutAt: null
+    }
+  });
+
+  if (lastSession) {
+    const lastActivity = new Date(lastSession.lastActivity).getTime();
+    const currentTime = new Date().getTime();
+    const diffHours = (currentTime - lastActivity) / (1000 * 60 * 60);
+
+    if (diffHours >= 8) {
+      await lastSession.update({
+        logoutAt: new Date()
+      });
+
+      await user.update({
+        online: false,
+        currentSessionId: null
+      });
+
+      const io = require("../../libs/socket").getIO();
+      io.emit("userSessionExpired", {
+        userId: user.id,
+        expired: true,
+        message: "ERR_SESSION_EXPIRED"
+      });
+
+      throw new AppError("ERR_SESSION_EXPIRED", 401);
+    }
+
+    // Se já existe uma sessão ativa, atualiza em vez de criar nova
+    await lastSession.update({
+      lastActivity: new Date()
+    });
+
+    const token = createAccessToken(user);
+    const refreshToken = createRefreshToken(user);
+    const serializedUser = await SerializeUser(user);
+
+    return {
+      serializedUser,
+      token,
+      refreshToken
+    };
+  }
+
   const newSessionId = uuidv4();
-  
-  const hadPreviousSession = !!user.currentSessionId;
-  
+
+  await UserSession.create({
+    userId: user.id,
+    sessionId: newSessionId,
+    loginAt: new Date(),
+    lastActivity: new Date()
+  });
+
   await user.update({
-    currentSessionId: newSessionId,
-    lastLoginAt: new Date()
+    online: true,
+    currentSessionId: newSessionId
   });
 
   const token = createAccessToken(user);
   const refreshToken = createRefreshToken(user);
 
-  const serializedUser = SerializeUser(user);
-  
-  if (hadPreviousSession) {
-    const io = require("../../libs/socket").getIO();
-    io.emit("userSessionExpired", {
-      userId: user.id,
-      newSessionId
-    });
-  }
+  const serializedUser = await SerializeUser(user);
+
+  const io = require("../../libs/socket").getIO();
+  io.emit("userSessionUpdate", {
+    userId: user.id,
+    online: true
+  });
 
   return {
     serializedUser,

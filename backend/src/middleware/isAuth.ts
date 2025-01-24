@@ -1,8 +1,10 @@
 import { verify } from "jsonwebtoken";
 import { Request, Response, NextFunction } from "express";
-
+import { TokenExpiredError } from "jsonwebtoken";
 import AppError from "../errors/AppError";
 import authConfig from "../config/auth";
+import UserSession from "../models/UserSession";
+import User from "../models/User";
 
 interface TokenPayload {
   id: string;
@@ -12,7 +14,7 @@ interface TokenPayload {
   exp: number;
 }
 
-const isAuth = (req: Request, res: Response, next: NextFunction): void => {
+const isAuth = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   const authHeader = req.headers.authorization;
 
   if (!authHeader) {
@@ -25,18 +27,60 @@ const isAuth = (req: Request, res: Response, next: NextFunction): void => {
     const decoded = verify(token, authConfig.secret);
     const { id, profile } = decoded as TokenPayload;
 
+    // Verifica se a sessão ainda está ativa
+    const session = await UserSession.findOne({
+      where: {
+        userId: id,
+        logoutAt: null
+      }
+    });
+
+    if (!session) {
+      throw new AppError("ERR_SESSION_EXPIRED", 401);
+    }
+
+    // Verifica se passou 8 horas desde a última atividade
+    const lastActivity = new Date(session.lastActivity).getTime();
+    const currentTime = new Date().getTime();
+    const diffHours = (currentTime - lastActivity) / (1000 * 60 * 60);
+
+    if (diffHours >= 8) {
+      await session.update({
+        logoutAt: new Date()
+      });
+
+      await User.update(
+        { online: false, currentSessionId: null },
+        { where: { id } }
+      );
+
+      const io = require("../libs/socket").getIO();
+      io.emit("userSessionExpired", {
+        userId: id,
+        expired: true,
+        message: "ERR_SESSION_EXPIRED"
+      });
+
+      throw new AppError("ERR_SESSION_EXPIRED", 401);
+    }
+
+    // Atualiza a última atividade
+    await session.update({
+      lastActivity: new Date()
+    });
+
     req.user = {
       id,
       profile
     };
-  } catch (err) {
-    throw new AppError(
-      "Invalid token. We'll try to assign a new one on next request",
-      403
-    );
-  }
 
-  return next();
+    return next();
+  } catch (err) {
+    if (err instanceof TokenExpiredError) {
+      throw new AppError("ERR_SESSION_EXPIRED", 401);
+    }
+    throw new AppError("ERR_INVALID_TOKEN", 401);
+  }
 };
 
 export default isAuth;

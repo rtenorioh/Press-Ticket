@@ -6,8 +6,6 @@ import createOrUpdatePersonalization from "../services/PersonalizationServices/C
 import deletePersonalization from "../services/PersonalizationServices/DeletePersonalizationService";
 import listPersonalizations from "../services/PersonalizationServices/ListPersonalizationsService";
 
-type LogoType = 'favico' | 'logo' | 'logoTicket';
-
 interface PersonalizationData {
   theme: string;
   company?: string;
@@ -20,15 +18,6 @@ interface PersonalizationData {
   logo?: string | null;
   logoTicket?: string | null;
 }
-
-// Definir o caminho absoluto para o diretório de uploads
-const UPLOAD_PATH = path.resolve(__dirname, "..", "..", "public", "logos");
-
-const ensureUploadPath = () => {
-  if (!fs.existsSync(UPLOAD_PATH)) {
-    fs.mkdirSync(UPLOAD_PATH, { recursive: true });
-  }
-};
 
 export const createOrUpdateCompany = async (
   req: Request,

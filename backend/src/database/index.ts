@@ -13,13 +13,13 @@ import Tag from "../models/Tag";
 import Ticket from "../models/Ticket";
 import User from "../models/User";
 import UserQueue from "../models/UserQueue";
+import UserSession from "../models/UserSession";
 import UserWhatsapp from "../models/UserWhatsapp";
 import Whatsapp from "../models/Whatsapp";
 import WhatsappQueue from "../models/WhatsappQueue";
 
 // eslint-disable-next-line
 const dbConfig = require("../config/database");
-// import dbConfig from "../config/database";
 
 const sequelize = new Sequelize(dbConfig);
 
@@ -40,7 +40,8 @@ const models = [
   ContactTag,
   Integration,
   OldMessage,
-  Personalization
+  Personalization,
+  UserSession
 ];
 
 sequelize.addModels(models);

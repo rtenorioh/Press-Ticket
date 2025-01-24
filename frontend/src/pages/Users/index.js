@@ -24,6 +24,7 @@ import {
 } from "@material-ui/icons";
 import React, { useEffect, useReducer, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useLocation, useHistory } from "react-router-dom";
 import { toast } from "react-toastify";
 import ConfirmationModal from "../../components/ConfirmationModal";
 import MainContainer from "../../components/MainContainer";
@@ -65,6 +66,17 @@ const reducer = (state, action) => {
     }
   }
 
+  if (action.type === "UPDATE_USER_STATUS") {
+    const { userId, online } = action.payload;
+    const userIndex = state.findIndex((u) => u.id === userId);
+
+    if (userIndex !== -1) {
+      state[userIndex] = { ...state[userIndex], online };
+      return [...state];
+    }
+    return state;
+  }
+
   if (action.type === "DELETE_USER") {
     const userId = action.payload;
 
@@ -102,23 +114,27 @@ const useStyles = makeStyles((theme) => ({
 const Users = () => {
   const classes = useStyles();
   const { t } = useTranslation();
+  const history = useHistory();
+  const location = useLocation();
+  const user = location.state?.user;
   const [loading, setLoading] = useState(false);
   const [pageNumber, setPageNumber] = useState(1);
   const [hasMore, setHasMore] = useState(false);
-  const [selectedUser, setSelectedUser] = useState(null);
+  const [searchParam, setSearchParam] = useState("");
+  const [users, dispatch] = useReducer(reducer, []);
+  const [selectedUsers, setSelectedUsers] = useState([]);
   const [deletingUser, setDeletingUser] = useState(null);
   const [userModalOpen, setUserModalOpen] = useState(false);
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
+  const [showOnlyActive, setShowOnlyActive] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [modalContent, setModalContent] = useState([]);
   const [modalTitle, setModalTitle] = useState("");
-  const [searchParam, setSearchParam] = useState("");
-  const [users, dispatch] = useReducer(reducer, []);
 
   useEffect(() => {
     dispatch({ type: "RESET" });
     setPageNumber(1);
-  }, [searchParam]);
+  }, [searchParam, showOnlyActive]);
 
   useEffect(() => {
     setLoading(true);
@@ -126,7 +142,7 @@ const Users = () => {
       const fetchUsers = async () => {
         try {
           const { data } = await api.get("/users/", {
-            params: { searchParam, pageNumber },
+            params: { searchParam, pageNumber, showOnlyActive },
           });
           dispatch({ type: "LOAD_USERS", payload: data.users });
           setHasMore(data.hasMore);
@@ -138,7 +154,7 @@ const Users = () => {
       fetchUsers();
     }, 500);
     return () => clearTimeout(delayDebounceFn);
-  }, [searchParam, pageNumber]);
+  }, [searchParam, pageNumber, showOnlyActive]);
 
   useEffect(() => {
     const socket = openSocket();
@@ -153,18 +169,32 @@ const Users = () => {
       }
     });
 
+    socket.on("userSessionUpdate", (data) => {
+      dispatch({ type: "UPDATE_USER_STATUS", payload: data });
+    });
+
+    socket.on("userSessionExpired", (data) => {
+      if (data.userId === user?.id) {
+        localStorage.removeItem("token");
+        toast.error(data.message || "Sua sessão foi encerrada.");
+        setTimeout(() => {
+          history.push("/login");
+        }, 1000);
+      }
+    });
+
     return () => {
       socket.disconnect();
     };
-  }, []);
+  }, [history, user]);
 
   const handleOpenUserModal = () => {
-    setSelectedUser(null);
+    setSelectedUsers([]);
     setUserModalOpen(true);
   };
 
   const handleCloseUserModal = () => {
-    setSelectedUser(null);
+    setSelectedUsers([]);
     setUserModalOpen(false);
   };
 
@@ -172,14 +202,14 @@ const Users = () => {
     setSearchParam(event.target.value.toLowerCase());
   };
 
-  const handleEditUser = (user) => {
-    setSelectedUser(user);
+  const handleEditUser = (userId) => {
+    setSelectedUsers([userId]);
     setUserModalOpen(true);
   };
 
-  const handleDeleteUser = async (userId) => {
+  const handleDeleteUser = async (user) => {
     try {
-      await api.delete(`/users/${userId}`);
+      await api.delete(`/users/${user.id}`);
       toast.success(t("users.toasts.deleted"));
     } catch (err) {
       toastError(err);
@@ -211,7 +241,7 @@ const Users = () => {
     setModalContent([]);
     setModalOpen(false);
   };
-
+  
   return (
     <MainContainer>
       <Modal
@@ -251,7 +281,7 @@ const Users = () => {
         }
         open={confirmModalOpen}
         onClose={setConfirmModalOpen}
-        onConfirm={() => handleDeleteUser(deletingUser.id)}
+        onConfirm={() => handleDeleteUser(deletingUser)}
       >
         {t("users.confirmationModal.deleteMessage")}
       </ConfirmationModal>
@@ -259,7 +289,7 @@ const Users = () => {
         open={userModalOpen}
         onClose={handleCloseUserModal}
         aria-labelledby="form-dialog-title"
-        userId={selectedUser && selectedUser.id}
+        userId={selectedUsers.length === 1 ? selectedUsers[0] : null}
       />
       <MainHeader>
         <Title>{t("users.title")} ({users.length})</Title>
@@ -278,13 +308,13 @@ const Users = () => {
             }}
           />
           <Tooltip title={t("users.buttons.add")}>
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={handleOpenUserModal}
-            >
-              <AddCircleOutline />
-            </Button>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleOpenUserModal}
+          >
+            <AddCircleOutline />
+          </Button>
           </Tooltip>
         </MainHeaderButtonsWrapper>
       </MainHeader>
@@ -296,11 +326,14 @@ const Users = () => {
         <Table size="small">
           <TableHead>
             <TableRow>
-              <TableCell align="center">
+            <TableCell align="center">
                 {t("users.table.id")}
               </TableCell>
               <TableCell align="center">
                 {t("users.table.name")}
+              </TableCell>
+              <TableCell align="center">
+                {t("users.table.status")}
               </TableCell>
               <TableCell align="center">
                 {t("users.table.email")}
@@ -326,14 +359,18 @@ const Users = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            <>
-              {users.map((user) => (
-                <TableRow key={user.id}>
-                  <TableCell align="center">{user.id}</TableCell>
-                  <TableCell align="center">{user.name}</TableCell>
-                  <TableCell align="center">{user.email}</TableCell>
-                  <TableCell align="center">{user.profile}</TableCell>
-                  <TableCell align="center">
+            {loading ? (
+              <TableRowSkeleton columns={10} />
+            ) : (
+              <>
+                {users.map((user) => (
+                  <TableRow key={user.id}>
+                    <TableCell align="center">{user.id}</TableCell>
+                    <TableCell align="center">{user.name}</TableCell>
+                    <TableCell align="center">{user.online ? "🟢" : "🔴"}</TableCell>
+                    <TableCell align="center">{user.email}</TableCell>
+                    <TableCell align="center">{user.profile}</TableCell>
+                    <TableCell align="center">
                     <IconButton
                       size="small"
                       onClick={() => handleOpenModal(user.whatsapps, t("users.modalTitle.channel"))}
@@ -351,28 +388,27 @@ const Users = () => {
                   </TableCell>
                   <TableCell align="center">{user.startWork}</TableCell>
                   <TableCell align="center">{user.endWork}</TableCell>
-                  <TableCell align="center">
-                    <IconButton
-                      size="small"
-                      onClick={() => handleEditUser(user)}
-                    >
+                    <TableCell align="center">
+                      <IconButton
+                        size="small"
+                        onClick={() => handleEditUser(user.id)}
+                      >
                       <Edit color="secondary" />
-                    </IconButton>
-
-                    <IconButton
-                      size="small"
-                      onClick={(e) => {
-                        setConfirmModalOpen(true);
-                        setDeletingUser(user);
-                      }}
-                    >
+                      </IconButton>
+                      <IconButton
+                        size="small"
+                        onClick={() => {
+                          setConfirmModalOpen(true);
+                          setDeletingUser(user);
+                        }}
+                      >
                       <DeleteOutline color="secondary" />
-                    </IconButton>
-                  </TableCell>
-                </TableRow>
-              ))}
-              {loading && <TableRowSkeleton columns={8} />}
-            </>
+                      </IconButton>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </>
+            )}
           </TableBody>
         </Table>
       </Paper>

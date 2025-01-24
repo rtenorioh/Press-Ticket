@@ -48,8 +48,22 @@ export const remove = async (
   req: Request,
   res: Response
 ): Promise<Response> => {
+  const { id } = req.user;
+  
+  if (id) {
+    const user = await User.findByPk(id);
+    if (user) {
+      await user.update({ online: false });
+      
+      const io = require("../libs/socket").getIO();
+      io.emit("userSessionUpdate", {
+        userId: user.id,
+        online: false
+      });
+    }
+  }
+  
   res.clearCookie("jrt");
-
   return res.send();
 };
 

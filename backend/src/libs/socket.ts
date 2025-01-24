@@ -7,7 +7,11 @@ import { logger } from "../utils/logger";
 
 let io: SocketIO;
 
-export const initIO = (httpServer: Server): SocketIO => {
+export const setIO = (io: SocketIO): void => {
+  io = io;
+};
+
+export const initIO = (httpServer: Server): void => {
   io = new SocketIO(httpServer, {
     cors: {
       origin: process.env.FRONTEND_URL
@@ -23,7 +27,7 @@ export const initIO = (httpServer: Server): SocketIO => {
     } catch (error) {
       logger.error(JSON.stringify(error), "Error decoding token");
       socket.disconnect();
-      return io;
+      return;
     }
     logger.info("Client Connected");
     socket.on("joinChatBox", (ticketId: string) => {
@@ -44,9 +48,7 @@ export const initIO = (httpServer: Server): SocketIO => {
     socket.on("disconnect", () => {
       logger.info("Client disconnected");
     });
-    return socket;
   });
-  return io;
 };
 
 export const getIO = (): SocketIO => {

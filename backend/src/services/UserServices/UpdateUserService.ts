@@ -8,6 +8,7 @@ interface UserData {
   email?: string;
   password?: string;
   name?: string;
+  online?: boolean;
   profile?: string;
   isTricked?: boolean;
   queueIds?: number[];
@@ -26,6 +27,7 @@ interface Response {
   name: string;
   email: string;
   profile: string;
+  online?: boolean;
 }
 
 const UpdateUserService = async ({
@@ -38,7 +40,8 @@ const UpdateUserService = async ({
     name: Yup.string().min(2),
     email: Yup.string().email(),
     profile: Yup.string(),
-    password: Yup.string()
+    password: Yup.string(),
+    online: Yup.boolean(),
   });
 
   const {
@@ -50,11 +53,12 @@ const UpdateUserService = async ({
     queueIds = [],
     whatsappIds = [],
     startWork,
-    endWork
+    endWork,
+    online
   } = userData;
 
   try {
-    await schema.validate({ email, password, profile, name });
+    await schema.validate({ email, password, profile, name, online });
   } catch (err) {
     throw new AppError(err.message);
   }
@@ -66,7 +70,8 @@ const UpdateUserService = async ({
     isTricked,
     name,
     startWork,
-    endWork
+    endWork,
+    online
   });
 
   await user.$set("queues", queueIds);

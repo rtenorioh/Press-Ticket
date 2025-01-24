@@ -43,6 +43,7 @@ const ListUsersService = async ({
     attributes: [
       "name",
       "id",
+      "online",
       "email",
       "profile",
       "isTricked",

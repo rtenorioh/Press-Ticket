@@ -38,14 +38,14 @@ const EditWhatsAppMessage = async (
     throw new AppError("ERR_EDITING_WAPP_MSG");
   }
 
-  // const mostRecentMessage = await Message.findOne({
-  //   where: { ticketId: ticket.id },
-  //   order: [["updatedAt", "DESC"]]
-  // });
+  const mostRecentMessage = await Message.findOne({
+    where: { ticketId: ticket.id },
+    order: [["updatedAt", "DESC"]]
+  });
 
-  // if (mostRecentMessage && mostRecentMessage.id === messageId) {
-  //   await ticket.update({ lastMessage: newBody });
-  // }
+  if (mostRecentMessage && mostRecentMessage.id === messageId) {
+    await ticket.update({ lastMessage: newBody });
+  }
 
   return message;
 };

@@ -65,6 +65,10 @@ class User extends Model<User> {
   @Column
   endWork: string;
 
+  @Default(false)
+  @Column
+  online: boolean;
+
   @Column(DataType.STRING)
   currentSessionId: string;
 

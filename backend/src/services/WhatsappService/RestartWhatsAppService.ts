@@ -1,4 +1,3 @@
-// src/services/WhatsappService/RestartWhatsAppService.ts
 import { getWbot, restartWbot } from "../../libs/wbot";
 import { logger } from "../../utils/logger";
 

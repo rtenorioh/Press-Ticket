@@ -154,7 +154,6 @@ const MarkdownWrapper = ({ children }) => {
 	const tildaRegex = /~(.*?)~/g;
 	
 	if(children && children.includes('BEGIN:VCARD'))
-		//children = "Diga olá ao seu novo contato clicando em *conversar*!";
 		children = null;
 	
 	if(children && children.includes('data:image/'))

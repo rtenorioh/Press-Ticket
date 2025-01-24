@@ -5,7 +5,6 @@ import fs from "fs";
 
 const UPLOAD_PATH = path.resolve(__dirname, "..", "..", "public", "logos");
 
-// Garantir que o diretório existe
 if (!fs.existsSync(UPLOAD_PATH)) {
   fs.mkdirSync(UPLOAD_PATH, { recursive: true });
 }
@@ -25,7 +24,6 @@ const storage = multer.diskStorage({
       const ext = path.extname(file.originalname).toLowerCase() || '.jpg';
       let fileName = "";
 
-      // Manter o padrão de nomeação original
       if (file.fieldname === "favico") {
         fileName = theme === "dark" ? `favicoDark${ext}` : `favico${ext}`;
       } else if (file.fieldname === "logo") {
@@ -36,7 +34,6 @@ const storage = multer.diskStorage({
         return cb(new Error(`Invalid field name: ${file.fieldname}`), "");
       }
 
-      // Se já existe um arquivo com esse nome, deletar
       const filePath = path.join(UPLOAD_PATH, fileName);
       if (fs.existsSync(filePath)) {
         fs.unlinkSync(filePath);
@@ -74,7 +71,7 @@ const uploadConfig = multer({
   storage,
   fileFilter,
   limits: {
-    fileSize: 5 * 1024 * 1024 // 5MB
+    fileSize: 5 * 1024 * 1024
   }
 });
 

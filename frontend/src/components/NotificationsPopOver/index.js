@@ -70,13 +70,11 @@ const NotificationsPopOver = () => {
 	}, [tickets]);
 
 	const requestNotificationPermission = () => {
-		// Verifica se o navegador suporta notificações
 		if (!("Notification" in window)) {
-			alert(t("notifications.unsupported")); // Notificações não suportadas
+			alert(t("notifications.unsupported"));
 			return;
 		}
-
-		// Solicita permissão
+		
 		Notification.requestPermission()
 			.then((permission) => {
 				if (permission === "granted") {
@@ -91,7 +89,6 @@ const NotificationsPopOver = () => {
 				toast.error(t("notifications.error"));
 			});
 	};
-
 
 	const handleNotifications = useCallback(
 		(data) => {
@@ -123,7 +120,6 @@ const NotificationsPopOver = () => {
 		},
 		[isAudioEnabled, history, notificationsAllowed, t]
 	);
-
 
 	useEffect(() => {
 		const socket = openSocket();
