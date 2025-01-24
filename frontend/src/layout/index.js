@@ -47,7 +47,7 @@ const useStyles = makeStyles((theme) => ({
   toolbar: {
     paddingRight: 24,
     color: "#ffffff",
-    background: theme.palette?.toolbar?.main || "#6B62FE",
+    background: theme.palette?.primary?.main || "#6B62FE",
   },
   toolbarIcon: {
     display: "flex",
@@ -55,7 +55,7 @@ const useStyles = makeStyles((theme) => ({
     justifyContent: "flex-end",
     padding: "0 8px",
     minHeight: "48px",
-    backgroundColor: theme.palette?.toolbarIcon?.main || "#ffffff",
+    backgroundColor: theme.palette.background.paper,
   },
   appBar: {
     zIndex: theme.zIndex.drawer + 1,
@@ -360,7 +360,7 @@ const LoggedInLayout = ({ children, toggleTheme, onThemeConfigUpdate }) => {
             noWrap
             className={classes.title}
           >
-            {t("mainDrawer.appBar.message.hi")} {user.name}, {t("mainDrawer.appBar.message.text")} {companyData.name || "Press Ticket"}
+            {t("mainDrawer.appBar.message.hi")} {user.name}, {t("mainDrawer.appBar.message.text")} {companyData.name || "Press Ticket"}.
           </Typography>
 
           <ThemeSelector toggleTheme={toggleTheme} />
