@@ -1,14 +1,14 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: process.env.REACT_APP_BACKEND_URL || "http://localhost:8080",
+  baseURL: process.env.REACT_APP_BACKEND_URL,
   withCredentials: true
 });
 
 let isRefreshing = false;
 let failedQueue = [];
 let lastRefreshTime = 0;
-const REFRESH_THRESHOLD = 4 * 60 * 1000; // 4 minutos em milissegundos
+const REFRESH_THRESHOLD = 25 * 60 * 1000; // 25 minutos em milissegundos
 
 const processQueue = (error, token = null) => {
   failedQueue.forEach(prom => {
@@ -22,7 +22,7 @@ const processQueue = (error, token = null) => {
 };
 
 const handleLogout = () => {
-  api.delete("/auth/logout").catch(() => {}); // Tenta fazer logout no backend
+  api.delete("/auth/logout").catch(() => {});
   localStorage.removeItem("token");
   window.location.href = "/login";
 };
@@ -48,7 +48,6 @@ api.interceptors.request.use(
 
     const token = localStorage.getItem("token");
     if (token) {
-      // Verifica se precisa renovar o token antes de fazer a requisição
       const now = Date.now();
       if (now - lastRefreshTime > REFRESH_THRESHOLD) {
         try {
@@ -74,13 +73,11 @@ api.interceptors.response.use(
   async error => {
     const originalRequest = error.config;
 
-    // Se o erro for de sessão expirada, faz logout
     if (error?.response?.data?.error === "ERR_SESSION_EXPIRED") {
       handleLogout();
       return Promise.reject(error);
     }
 
-    // Se o erro for de token inválido ou expirado
     if (error?.response?.status === 401 && !originalRequest._retry) {
       if (isRefreshing) {
         try {
