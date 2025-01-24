@@ -178,13 +178,13 @@ fi
 
 {
     if [ ${#errors[@]} -gt 0 ]; then
-    echo " "
-    echo "\nForam encontrados os seguintes erros:"
-    echo " "
-    for error in "${errors[@]}"; do
-        echo "- $error"
-    done
-    usage
+        echo " "
+        echo "\nForam encontrados os seguintes erros:"
+        echo " "
+        for error in "${errors[@]}"; do
+            echo "- $error"
+        done
+        usage
     fi
 } | tee -a "$LOG_FILE"
 
@@ -541,9 +541,9 @@ cat <<EOF >"$DEPLOY_HOME/$NOME_EMPRESA/backend/.env"
 NODE_ENV=production
 
 # URLs e Portas
-BACKEND_URL=$URL_BACKEND
-FRONTEND_URL=$URL_FRONTEND
-WEBHOOK=$URL_BACKEND
+BACKEND_URL=https://$URL_BACKEND
+FRONTEND_URL=https://$URL_FRONTEND
+WEBHOOK=https://$URL_BACKEND
 PORT=$PORT_BACKEND
 PROXY_PORT=443
 
@@ -696,7 +696,7 @@ echo -e "${GREEN}PM2 configurado para inicialização automática com sucesso pa
 echo -e "${COLOR}Criando o arquivo .env para o frontend...${RESET}" | tee -a "$LOG_FILE"
 sudo -u deploy -H bash -c "cd $DEPLOY_HOME/$NOME_EMPRESA/frontend && cat <<EOF >.env
 # URL BACKEND
-REACT_APP_BACKEND_URL=$URL_BACKEND
+REACT_APP_BACKEND_URL=https://$URL_BACKEND
 
 # Tempo de encerramento automático dos tickets em horas
 REACT_APP_HOURS_CLOSE_TICKETS_AUTO=
