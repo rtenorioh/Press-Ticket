@@ -13,6 +13,10 @@ const useAuth = () => {
 	const [user, setUser] = useState({});
 
 	const handleLogout = useCallback(() => {
+		const socket = connectToSocket();
+		if (socket) {
+			socket.emit("logout");
+		}
 		disconnectSocket();
 		localStorage.removeItem("token");
 		localStorage.removeItem("user");
@@ -68,7 +72,8 @@ const useAuth = () => {
 		}
 
 		return () => {
-			if (!isAuth) {
+			if (!isAuth && socket) {
+				socket.emit("logout");
 				disconnectSocket();
 			}
 		};

@@ -69,10 +69,8 @@ const AuthUserService = async ({
     throw new AppError("ERR_INVALID_CREDENTIALS", 401);
   }
 
-  // Atualiza o status online do usuário
   await user.update({ online: true });
   
-  // Emite evento de atualização de status
   const io = getIO();
   io.emit("userSessionUpdate", {
     userId: user.id,
@@ -110,7 +108,6 @@ const AuthUserService = async ({
       throw new AppError("ERR_SESSION_EXPIRED", 401);
     }
 
-    // Se já existe uma sessão ativa, atualiza em vez de criar nova
     await lastSession.update({
       lastActivity: new Date()
     });

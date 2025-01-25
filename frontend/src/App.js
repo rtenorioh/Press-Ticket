@@ -54,16 +54,37 @@ const App = () => {
       }
     };
 
-    const socket = openSocket();
-    socket.on("personalization", () => {
-      fetchPersonalizations();
-    });
+    let socket = null;
 
-    fetchPersonalizations();
+    const initSocket = () => {
+      try {
+        socket = openSocket();
+        if (socket) {
+          socket.on("personalization", fetchPersonalizations);
+          fetchPersonalizations();
+        } else {
+          console.warn("Socket não inicializado, carregando personalizações sem socket");
+          fetchPersonalizations();
+        }
+      } catch (err) {
+        console.error("Erro ao conectar socket:", err);
+        toastError(err);
+        fetchPersonalizations();
+      }
+    };
+
+    const token = localStorage.getItem("token");
+    if (token) {
+      initSocket();
+    } else {
+      fetchPersonalizations();
+    }
 
     return () => {
-      socket.off("personalization");
-      socket.disconnect();
+      if (socket) {
+        socket.off("personalization");
+        socket.disconnect();
+      }
     };
   }, []);
 

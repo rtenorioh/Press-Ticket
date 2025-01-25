@@ -37,7 +37,6 @@ export const RefreshTokenService = async (
       throw new AppError("ERR_SESSION_EXPIRED", 401);
     }
 
-    // Verifica se existe uma sessão ativa
     const session = await UserSession.findOne({
       where: {
         userId: user.id,
@@ -50,7 +49,6 @@ export const RefreshTokenService = async (
       throw new AppError("ERR_SESSION_EXPIRED", 401);
     }
 
-    // Verifica se passou 8 horas desde a última atividade
     const lastActivity = new Date(session.lastActivity).getTime();
     const currentTime = new Date().getTime();
     const diffHours = (currentTime - lastActivity) / (1000 * 60 * 60);
@@ -76,7 +74,6 @@ export const RefreshTokenService = async (
       throw new AppError("ERR_SESSION_EXPIRED", 401);
     }
 
-    // Atualiza a última atividade
     await session.update({
       lastActivity: new Date()
     });

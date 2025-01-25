@@ -45,11 +45,9 @@ export const initIO = (httpServer: Server): void => {
         logger.debug(JSON.stringify(tokenData), "io-onConnection: tokenData");
         userId = parseInt(tokenData.id);
 
-        // Atualiza o status do usuário para online ao conectar
         if (userId) {
           const user = await User.findByPk(userId);
           if (user) {
-            // Verifica se já existe outro socket para este usuário
             const userRoom = io.sockets.adapter.rooms.get(userId.toString());
             const hasConnectedSockets = userRoom && userRoom.size > 0;
             
@@ -61,7 +59,6 @@ export const initIO = (httpServer: Server): void => {
               });
               logger.info(`User ${userId} is now online`);
             }
-            // Adiciona o socket à sala do usuário
             socket.join(userId.toString());
           }
         }
@@ -90,6 +87,48 @@ export const initIO = (httpServer: Server): void => {
       }
     });
 
+    socket.on("disconnect", async () => {
+      try {
+        if (userId) {
+          const userRoom = io.sockets.adapter.rooms.get(userId.toString());
+          const hasConnectedSockets = userRoom && userRoom.size > 0;
+
+          if (!hasConnectedSockets) {
+            const user = await User.findByPk(userId);
+            if (user) {
+              await user.update({ online: false });
+              io.emit("userSessionUpdate", {
+                userId: user.id,
+                online: false
+              });
+              logger.info(`User ${userId} is now offline (disconnected)`);
+            }
+          }
+        }
+      } catch (err) {
+        logger.error("Error on disconnect:", err);
+      }
+    });
+
+    socket.on("logout", async () => {
+      try {
+        if (userId) {
+          const user = await User.findByPk(userId);
+          if (user) {
+            await user.update({ online: false });
+            io.emit("userSessionUpdate", {
+              userId: user.id,
+              online: false
+            });
+            logger.info(`User ${userId} logged out`);
+          }
+          socket.leave(userId.toString());
+        }
+      } catch (err) {
+        logger.error("Error on logout:", err);
+      }
+    });
+
     socket.on("joinChatBox", (ticketId: string) => {
       logger.info("A client joined a ticket channel");
       socket.join(ticketId);
@@ -103,32 +142,6 @@ export const initIO = (httpServer: Server): void => {
     socket.on("joinTickets", (status: string) => {
       logger.info(`A client joined to ${status} tickets channel.`);
       socket.join(status);
-    });
-
-    socket.on("disconnect", async () => {
-      logger.info("Client disconnected");
-      if (userId) {
-        try {
-          // Verifica se ainda existem outros sockets do mesmo usuário
-          const userRoom = io.sockets.adapter.rooms.get(userId.toString());
-          const hasConnectedSockets = userRoom && userRoom.size > 0;
-
-          // Se não houver outros sockets, marca como offline
-          if (!hasConnectedSockets) {
-            const user = await User.findByPk(userId);
-            if (user) {
-              await user.update({ online: false });
-              io.emit("userSessionUpdate", {
-                userId: user.id,
-                online: false
-              });
-              logger.info(`User ${userId} is now offline`);
-            }
-          }
-        } catch (err) {
-          logger.error(err);
-        }
-      }
     });
   });
 };

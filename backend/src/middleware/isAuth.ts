@@ -27,7 +27,6 @@ const isAuth = async (req: Request, res: Response, next: NextFunction): Promise<
     const decoded = verify(token, authConfig.secret);
     const { id, profile } = decoded as TokenPayload;
 
-    // Verifica se a sessão ainda está ativa
     const session = await UserSession.findOne({
       where: {
         userId: id,
@@ -39,7 +38,6 @@ const isAuth = async (req: Request, res: Response, next: NextFunction): Promise<
       throw new AppError("ERR_SESSION_EXPIRED", 401);
     }
 
-    // Verifica se passou 8 horas desde a última atividade
     const lastActivity = new Date(session.lastActivity).getTime();
     const currentTime = new Date().getTime();
     const diffHours = (currentTime - lastActivity) / (1000 * 60 * 60);
@@ -64,7 +62,6 @@ const isAuth = async (req: Request, res: Response, next: NextFunction): Promise<
       throw new AppError("ERR_SESSION_EXPIRED", 401);
     }
 
-    // Atualiza a última atividade
     await session.update({
       lastActivity: new Date()
     });

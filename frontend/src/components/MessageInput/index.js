@@ -255,7 +255,6 @@ const MessageInput = ({ ticketStatus }) => {
       } catch (err) {
         console.error(err);
         toastError(err);
-        // Set default settings to prevent blank screen
         setSettings([]);
       }
     };

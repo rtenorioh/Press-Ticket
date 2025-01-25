@@ -5,61 +5,100 @@ let socket = null;
 let reconnectTimer = null;
 
 const connectToSocket = () => {
-    // Se já existe uma conexão, retorna ela
-    if (socket && socket.connected) {
-        return socket;
-    }
-
-    // Se existe um socket mas não está conectado, tenta reconectar
-    if (socket) {
-        socket.connect();
-        return socket;
-    }
-
-    // Limpa timer de reconexão anterior se existir
-    if (reconnectTimer) {
-        clearTimeout(reconnectTimer);
-        reconnectTimer = null;
-    }
-
-    const token = localStorage.getItem("token");
-    if (!token) return null;
-
-    socket = openSocket(getBackendUrl(), {
-        transports: ["websocket"],
-        query: {
-            token: JSON.parse(token),
-        },
-        reconnection: false,
-        timeout: 20000
-    });
-
-    socket.on("connect", () => {
-        console.log("Socket Connected");
-        const user = JSON.parse(localStorage.getItem("user"));
-        if (user && user.id) {
-            socket.emit("userStatus", {
-                userId: user.id,
-                online: true
-            });
+    try {
+        if (socket && socket.connected) {
+            return socket;
         }
-    });
 
-    socket.on("disconnect", (reason) => {
-        console.log("Socket Disconnected:", reason);
-    });
+        if (socket) {
+            return socket;  
+        }
 
-    socket.on("connect_error", (error) => {
-        console.error("Socket Connect Error:", error);
-    });
+        if (reconnectTimer) {
+            clearTimeout(reconnectTimer);
+            reconnectTimer = null;
+        }
 
-    return socket;
+        const token = localStorage.getItem("token");
+        if (!token) {
+            console.warn("Token não encontrado, socket não será inicializado");
+            return null;
+        }
+
+        let parsedToken;
+        try {
+            parsedToken = JSON.parse(token);
+        } catch (err) {
+            console.error("Erro ao fazer parse do token:", err);
+            return null;
+        }
+
+        socket = openSocket(getBackendUrl(), {
+            transports: ["websocket"],
+            query: {
+                token: parsedToken,
+            },
+            reconnection: true,
+            reconnectionDelay: 10000,       
+            reconnectionDelayMax: 30000,     
+            reconnectionAttempts: 3,         
+            timeout: 20000
+        });
+
+        socket.on("connect", () => {
+            console.log("Socket Connected");
+            if (reconnectTimer) {
+                clearTimeout(reconnectTimer);
+                reconnectTimer = null;
+            }
+            
+            try {
+                const userStr = localStorage.getItem("user");
+                if (!userStr) return;
+                
+                const user = JSON.parse(userStr);
+                if (user && user.id) {
+                    socket.emit("userStatus", {
+                        userId: user.id,
+                        online: true
+                    });
+                }
+            } catch (err) {
+                console.error("Erro ao processar dados do usuário:", err);
+            }
+        });
+
+        socket.on("connect_error", (error) => {
+            console.error("Erro na conexão do socket:", error);
+            if (socket) {
+                socket.disconnect();
+            }
+        });
+
+        socket.on("disconnect", (reason) => {
+            console.log("Socket Disconnected:", reason);
+            if (reason === "io server disconnect" || reason === "forced close") {
+                if (socket) {
+                    socket.disconnect();
+                }
+            }
+        });
+
+        return socket;
+    } catch (err) {
+        console.error("Erro ao conectar socket:", err);
+        return null;
+    }
 };
 
 export const disconnectSocket = () => {
     if (socket) {
         socket.disconnect();
         socket = null;
+    }
+    if (reconnectTimer) {
+        clearTimeout(reconnectTimer);
+        reconnectTimer = null;
     }
 };
 
