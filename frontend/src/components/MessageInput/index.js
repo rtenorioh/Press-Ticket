@@ -237,7 +237,8 @@ const MessageInput = ({ ticketStatus }) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const { setReplyingMessage, replyingMessage } = useContext(ReplyMessageContext);
   const { setEditingMessage, editingMessage } = useContext(EditMessageContext);
-  const { user } = useContext(AuthContext);
+  const { user = {} } = useContext(AuthContext);
+  const [settings, setSettings] = useState([]);
   const [signMessage, setSignMessage] = useLocalStorage("signOption", true);
   const [channelType, setChannelType] = useState(null);
   const { t } = useTranslation();
@@ -245,6 +246,21 @@ const MessageInput = ({ ticketStatus }) => {
   useEffect(() => {
     inputRef.current.focus();
   }, [replyingMessage, editingMessage]);
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const { data } = await api.get("/settings");
+        setSettings(data);
+      } catch (err) {
+        console.error(err);
+        toastError(err);
+        // Set default settings to prevent blank screen
+        setSettings([]);
+      }
+    };
+    fetchSettings();
+  }, []);
 
   useEffect(() => {
     if (editingMessage) {
@@ -465,6 +481,13 @@ const MessageInput = ({ ticketStatus }) => {
     setAnchorEl(null);
   };
 
+  const canSignMessage = () => {
+    return (
+      (settings && settings.some(s => s.key === "signOption" && s.value === "enabled")) ||
+      (user && user.profile === "admin")
+    );
+  };
+
   const renderReplyingMessage = (message) => {
     return (
       <div className={classes.replyginMsgWrapper}>
@@ -621,6 +644,7 @@ const MessageInput = ({ ticketStatus }) => {
                 <AttachFile className={classes.sendMessageIcons} />
               </IconButton>
             </label>
+            {canSignMessage() && (
             <FormControlLabel
               style={{ marginRight: 7, color: "primary" }}
               label={t("messagesInput.signMessage")}
@@ -628,15 +652,21 @@ const MessageInput = ({ ticketStatus }) => {
               control={
                 <Switch
                   size="small"
-                  checked={signMessage}
+                  checked={signMessage || false}
                   onChange={(e) => {
-                    setSignMessage(e.target.checked);
+                    try {
+                      setSignMessage(e.target.checked);
+                    } catch (err) {
+                      console.error(err);
+                      toastError(err);
+                    }
                   }}
                   name="showAllTickets"
                   color="secondary"
                 />
               }
             />
+            )}
           </Hidden>
           <Hidden only={["md", "lg", "xl"]}>
             <IconButton
@@ -683,6 +713,7 @@ const MessageInput = ({ ticketStatus }) => {
                 </label>
               </MenuItem>
               <MenuItem onClick={handleMenuItemClick}>
+                {canSignMessage() && (
                 <FormControlLabel
                   style={{ marginRight: 7, color: "gray" }}
                   label={t("messagesInput.signMessage")}
@@ -690,15 +721,21 @@ const MessageInput = ({ ticketStatus }) => {
                   control={
                     <Switch
                       size="small"
-                      checked={signMessage}
+                      checked={signMessage || false}
                       onChange={(e) => {
-                        setSignMessage(e.target.checked);
+                        try {
+                          setSignMessage(e.target.checked);
+                        } catch (err) {
+                          console.error(err);
+                          toastError(err);
+                        }
                       }}
                       name="showAllTickets"
                       color="primary"
                     />
                   }
                 />
+                )}
               </MenuItem>
             </Menu>
           </Hidden>

@@ -560,6 +560,14 @@ const messages = {
               disabled: "Desativado",
             },
           },
+          signOption: {
+            name: "Assinar Mensagem",
+            note: "Ative essa função para permitir que o usuário possa desativar a assinatura de mensagens",
+            options: {
+              enabled: "Ativado",
+              disabled: "Desativado",
+            },
+          },
           timeCreateNewTicket: {
             name: "Novo Ticket em:",
             note: "Selecione o tempo que será necessário para abrir um novo ticket, caso o cliente entre em contatos novamente",

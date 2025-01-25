@@ -32,7 +32,8 @@ const ComponentSettings = ({ settings, getSettingValue, handleChangeBooleanSetti
         { key: "closeTicketApi", label: t("settings.general.closeTicketApi.name"), note: t("settings.general.closeTicketApi.note") },
         { key: "ASC", label: t("settings.general.ASC.name"), note: t("settings.general.ASC.note") },
         { key: "created", label: t("settings.general.created.name"), note: t("settings.general.created.note") },
-        { key: "openTickets", label: t("settings.general.openTickets.name"), note: t("settings.general.openTickets.note") }
+        { key: "openTickets", label: t("settings.general.openTickets.name"), note: t("settings.general.openTickets.note") },
+        { key: "signOption", label: t("settings.general.signOption.name"), note: t("settings.general.signOption.note") },
     ];
 
     const settingsChunks = [];
