@@ -318,6 +318,7 @@ const TicketsList = (props) => {
 
 	return (
 		<Paper className={classes.ticketsListWrapper} style={style}>
+			<TagsFilter onFiltered={handleTagFilter} />
 			<Paper
 				square
 				name="closed"
@@ -337,7 +338,6 @@ const TicketsList = (props) => {
 						</div>
 					) : (
 						<>
-							<TagsFilter onFiltered={handleTagFilter} />
 							{ticketsList.map((ticket) => (
 								<TicketListItem key={ticket.id} ticket={ticket} filteredTags={filteredTags} />
 							))}
