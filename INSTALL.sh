@@ -38,20 +38,14 @@ validate_url() {
         return 1
     fi
     if ! host "$url" &>/dev/null; then
-        echo "Erro: DNS da URL $url ainda não foi propagado."
+        echo -e "\e[31mErro: O domínio $url não possui DNS resolvido.\e[0m"
         return 1
+    else
+        echo -e "\e[32mSucesso: O domínio $url foi resolvido corretamente.\e[0m"
+        return 0
     fi
     echo "$url"
     return 0
-}
-
-validar_dns() {
-    local url="$1"
-    if ! host "$url" &>/dev/null; then
-        return 1 # DNS não resolvido
-    else
-        return 0 # DNS resolvido
-    fi
 }
 
 # Validar parâmetros
@@ -81,14 +75,6 @@ errors=()
 [[ ! "$USER_LIMIT" =~ ^[0-9]+$ ]] && errors+=("USER_LIMIT deve ser numérico.")
 [[ ! "$CONNECTION_LIMIT" =~ ^[0-9]+$ ]] && errors+=("CONNECTION_LIMIT deve ser numérico.")
 [[ ! "$EMAIL" =~ ^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$ ]] && errors+=("EMAIL inválido.")
-
-if ! validar_dns "$URL_BACKEND"; then
-    errors+=("Domínio $URL_BACKEND não possui entradas DNS propagadas.")
-fi
-
-if ! validar_dns "$URL_FRONTEND"; then
-    errors+=("Domínio $URL_FRONTEND não possui entradas DNS propagadas.")
-fi
 
 # Função para finalizar o script exibindo o tempo total
 finalizar() {
@@ -219,16 +205,16 @@ echo " "
 
 if ss -tuln | grep -q ":$PORT_BACKEND\b"; then
     echo " "
-    echo -e "${RED}Erro: A porta $PORT_BACKEND já está em uso.${RESET}" | tee -a "$LOG_FILE"
+    echo -e "${RED}Erro: A porta $PORT_BACKEND já está em uso.${RESET}"
     echo " "
-    exit 1
+    finalizar "${RED}Erro: A porta $PORT_BACKEND já está em uso.${RESET}" 1
 fi
 
 if ss -tuln | grep -q ":$PORT_FRONTEND\b"; then
     echo " "
-    echo -e "${RED}Erro: A porta $PORT_FRONTEND já está em uso.${RESET}" | tee -a "$LOG_FILE"
+    echo -e "${RED}Erro: A porta $PORT_FRONTEND já está em uso.${RESET}"
     echo " "
-    exit 1
+    finalizar "${RED}Erro: A porta $PORT_FRONTEND já está em uso.${RESET}" 1
 fi
 
 echo " "
@@ -256,6 +242,8 @@ echo -e " "
 echo -e " "
 echo -e "${COLOR}Iniciando a instalação...${RESET}" | tee -a "$LOG_FILE"
 echo -e " "
+
+clear
 
 echo -e " "
 echo -e "${COLOR}██████╗ ██████╗ ███████╗███████╗███████╗    ████████╗██╗ ██████╗██╗  ██╗███████╗████████╗${RESET}"
@@ -303,18 +291,31 @@ echo "Hora ajustada para o log: $(TZ=$SELECTED_TZ date)" | tee -a "$LOG_FILE"
 
 sleep 2
 
-# Seção 1: Preparação Inicial
 echo -e "${COLOR}Preparação Inicial...${RESET}" | tee -a "$LOG_FILE"
 {
     cd ~
-    echo "Atualizando pacotes do sistema..."
-    sudo apt-get update && sudo apt-get upgrade -y
+    echo "Atualizando pacotes do sistema sem intervenção..."
+    sudo DEBIAN_FRONTEND=noninteractive apt-get update -yq
+    sudo DEBIAN_FRONTEND=noninteractive apt-get upgrade -yq
     echo -e "${GREEN}Atualização de pacotes concluída com sucesso.${RESET}" | tee -a "$LOG_FILE"
+    
+    # Reiniciar serviços que utilizam bibliotecas desatualizadas
+    echo "Reiniciando serviços para aplicar as atualizações..."
+    sudo systemctl daemon-reexec
+    echo -e "${GREEN}Reinício de serviços concluído.${RESET}" | tee -a "$LOG_FILE"
 } | tee -a "$LOG_FILE"
 
 # Seção 2: Instalação do MySQL
 echo -e "${COLOR}Instalando MySQL...${RESET}" | tee -a "$LOG_FILE"
 sudo apt-get install -y mysql-server | tee -a "$LOG_FILE"
+
+# Verifica se o comando foi executado com sucesso
+if [ $? -eq 0 ]; then
+    echo -e "${GREEN}MySQL instalado com sucesso!${RESET}" | tee -a "$LOG_FILE"
+else
+    echo -e "${RED}Erro: A instalação do MySQL falhou. Verifique o log para mais detalhes.${RESET}"
+    finalizar "${RED}Erro: A instalação do MySQL falhou. Verifique o log para mais detalhes.${RESET}" 1
+fi
 
 # Verificar a versão do MySQL
 echo -e "${COLOR}Verificar a versão do MySQL...${RESET}" | tee -a "$LOG_FILE"
@@ -325,8 +326,8 @@ echo -e "${COLOR}Verificar o status do serviço MySQL...${RESET}" | tee -a "$LOG
 if systemctl is-active --quiet mysql; then
     echo -e "${GREEN}O serviço MySQL está ativo.${RESET}" | tee -a "$LOG_FILE"
 else
-    echo -e "${RED}Erro: O serviço MySQL não está ativo.${RESET}" | tee -a "$LOG_FILE"
-    exit 1
+    echo -e "${RED}Erro: O serviço MySQL não está ativo.${RESET}"
+    finalizar "${RED}Erro: O serviço MySQL não está ativo.${RESET}" 1
 fi
 
 # Criar banco de dados e configurar MySQL
@@ -336,8 +337,8 @@ echo -e "${COLOR}Criar banco de dados e configurar MySQL...${RESET}" | tee -a "$
 echo -e "${COLOR}Verificando se o banco de dados $NOME_EMPRESA já existe...${RESET}" | tee -a "$LOG_FILE"
 DB_EXISTS=$(sudo mysql -u root -e "SHOW DATABASES LIKE '$NOME_EMPRESA';" | grep "$NOME_EMPRESA")
 if [ "$DB_EXISTS" ]; then
-    echo -e "${RED}Erro: O banco de dados $NOME_EMPRESA já existe. Instalação interrompida.${RESET}" | tee -a "$LOG_FILE"
-    exit 1
+    echo -e "${RED}Erro: O banco de dados $NOME_EMPRESA já existe. Instalação interrompida.${RESET}"
+    finalizar "${RED}Erro: O banco de dados $NOME_EMPRESA já existe. Instalação interrompida.${RESET}" 1
 fi
 
 # Criar o banco de dados
@@ -384,8 +385,8 @@ sudo -u deploy -H bash -c "echo 'Usuário deploy configurado e pronto para uso.'
 if [ $? -eq 0 ]; then
     echo -e "${GREEN}Alternância para o usuário deploy bem-sucedida.${RESET}" | tee -a "$LOG_FILE"
 else
-    echo -e "${RED}Erro ao alternar para o usuário deploy.${RESET}" | tee -a "$LOG_FILE"
-    exit 1
+    echo -e "${RED}Erro ao alternar para o usuário deploy.${RESET}"
+    finalizar "${RED}Erro ao alternar para o usuário deploy.${RESET}" 1
 fi
 
 # Seção 4: Instalação do Node.js e Dependências
@@ -396,8 +397,8 @@ curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash - | tee -a "$LOG
 if [ $? -eq 0 ]; then
     echo -e "${GREEN}Node.js 20.x baixado com sucesso.${RESET}" | tee -a "$LOG_FILE"
 else
-    echo -e "${RED}Erro ao baixar Node.js 20.x. Verifique sua conexão com a internet.${RESET}" | tee -a "$LOG_FILE"
-    exit 1
+    echo -e "${RED}Erro ao baixar Node.js 20.x. Verifique sua conexão com a internet.${RESET}"
+    finalizar "${RED}Erro ao baixar Node.js 20.x. Verifique sua conexão com a internet.${RESET}" 1
 fi
 
 # Instalando Node.js
@@ -410,8 +411,8 @@ if [ $? -eq 0 ]; then
     NPM_VERSION=$(npm -v)
     echo -e "${GREEN}Node.js (${NODE_VERSION}) e NPM (${NPM_VERSION}) instalados com sucesso.${RESET}" | tee -a "$LOG_FILE"
 else
-    echo -e "${RED}Erro ao instalar Node.js ou NPM.${RESET}" | tee -a "$LOG_FILE"
-    exit 1
+    echo -e "${RED}Erro ao instalar Node.js ou NPM.${RESET}"
+    finalizar "${RED}Erro ao instalar Node.js ou NPM.${RESET}" 1
 fi
 
 # Instalando bibliotecas adicionais
@@ -420,8 +421,8 @@ sudo apt-get install -y apt-transport-https ca-certificates curl software-proper
 if [ $? -eq 0 ]; then
     echo -e "${GREEN}Bibliotecas adicionais instaladas com sucesso.${RESET}" | tee -a "$LOG_FILE"
 else
-    echo -e "${RED}Erro ao instalar bibliotecas adicionais.${RESET}" | tee -a "$LOG_FILE"
-    exit 1
+    echo -e "${RED}Erro ao instalar bibliotecas adicionais.${RESET}"
+    finalizar "${RED}Erro ao instalar bibliotecas adicionais.${RESET}" 1
 fi
 
 # Atualizando pacotes
@@ -430,18 +431,18 @@ sudo apt-get update | tee -a "$LOG_FILE"
 if [ $? -eq 0 ]; then
     echo -e "${GREEN}Pacotes atualizados com sucesso.${RESET}" | tee -a "$LOG_FILE"
 else
-    echo -e "${RED}Erro ao atualizar pacotes.${RESET}" | tee -a "$LOG_FILE"
-    exit 1
+    echo -e "${RED}Erro ao atualizar pacotes.${RESET}"
+    finalizar "${RED}Erro ao atualizar pacotes.${RESET}" 1
 fi
 
 # Adicionando o usuário atual ao grupo MySQL
-echo -e "\e[32mAdicionando o usuário atual ao grupo mysql...${RESET}" | tee -a "$LOG_FILE"
+echo -e "${COLOR}Adicionando o usuário atual ao grupo mysql...${RESET}" | tee -a "$LOG_FILE"
 sudo usermod -aG mysql ${USER} | tee -a "$LOG_FILE"
 if [ $? -eq 0 ]; then
     echo -e "${GREEN}Usuário adicionado ao grupo mysql com sucesso.${RESET}" | tee -a "$LOG_FILE"
 else
-    echo -e "${RED}Erro ao adicionar o usuário ao grupo mysql.${RESET}" | tee -a "$LOG_FILE"
-    exit 1
+    echo -e "${RED}Erro ao adicionar o usuário ao grupo mysql.${RESET}"
+    finalizar "${RED}Erro ao adicionar o usuário ao grupo mysql.${RESET}" 1
 fi
 
 # Realizando a troca de login para carregar as variáveis de ambiente
@@ -454,8 +455,8 @@ echo -e "${GREEN}Realizando a troca de login para o usuário atual sem interaç�
 if [ $? -eq 0 ]; then
     echo -e "${GREEN}Troca de login realizada com sucesso.${RESET}" | tee -a "$LOG_FILE"
 else
-    echo -e "${RED}Erro ao realizar a troca de login.${RESET}" | tee -a "$LOG_FILE"
-    exit 1
+    echo -e "${RED}Erro ao realizar a troca de login.${RESET}"
+    finalizar "${RED}Erro ao realizar a troca de login.${RESET}" 1
 fi
 
 ## Seção 5: Instalação do Chrome e Dependências
@@ -466,8 +467,8 @@ sudo apt-get install -y libgbm-dev wget unzip fontconfig locales gconf-service l
 if [ $? -eq 0 ]; then
     echo -e "${GREEN}Bibliotecas necessárias instaladas com sucesso.${RESET}" | tee -a "$LOG_FILE"
 else
-    echo -e "${RED}Erro ao instalar bibliotecas necessárias para o Chrome.${RESET}" | tee -a "$LOG_FILE"
-    exit 1
+    echo -e "${RED}Erro ao instalar bibliotecas necessárias para o Chrome.${RESET}"
+    finalizar "${RED}Erro ao instalar bibliotecas necessárias para o Chrome.${RESET}" 1
 fi
 
 # Baixando o Google Chrome
@@ -476,8 +477,8 @@ wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb |
 if [ $? -eq 0 ]; then
     echo -e "${GREEN}Google Chrome baixado com sucesso.${RESET}" | tee -a "$LOG_FILE"
 else
-    echo -e "${RED}Erro ao baixar o Google Chrome.${RESET}" | tee -a "$LOG_FILE"
-    exit 1
+    echo -e "${RED}Erro ao baixar o Google Chrome.${RESET}"
+    finalizar "${RED}Erro ao baixar o Google Chrome.${RESET}" 1
 fi
 
 # Instalando o Google Chrome
@@ -486,8 +487,8 @@ sudo apt-get install -y ./google-chrome-stable_current_amd64.deb | tee -a "$LOG_
 if [ $? -eq 0 ]; then
     echo -e "${GREEN}Google Chrome instalado com sucesso.${RESET}" | tee -a "$LOG_FILE"
 else
-    echo -e "${RED}Erro ao instalar o Google Chrome.${RESET}" | tee -a "$LOG_FILE"
-    exit 1
+    echo -e "${RED}Erro ao instalar o Google Chrome.${RESET}"
+    finalizar "${RED}Erro ao instalar o Google Chrome.${RESET}" 1
 fi
 
 # Excluindo o pacote de instalação do Google Chrome
@@ -508,7 +509,27 @@ DEPLOY_HOME=$(eval echo ~deploy)
 echo -e "${COLOR}Clonando o repositório como o usuário deploy...${RESET}" | tee -a "$LOG_FILE"
 sudo -u deploy -H bash -c "cd $DEPLOY_HOME && git clone --branch $BRANCH https://github.com/rtenorioh/Press-Ticket.git $NOME_EMPRESA" || finalizar "Erro ao clonar o repositório." 1 # Tratamento de erro
 
+echo -e "${COLOR}Alterando proprietário e permissões dos arquivos...${RESET}" | tee -a "$LOG_FILE"
+
+# Alterar o proprietário dos arquivos
 sudo chown -R deploy:deploy "$DEPLOY_HOME/$NOME_EMPRESA" | tee -a "$LOG_FILE"
+if [ $? -eq 0 ]; then
+    echo -e "${GREEN}Proprietário dos arquivos alterado com sucesso para o usuário 'deploy'.${RESET}" | tee -a "$LOG_FILE"
+else
+    echo -e "${RED}Erro: Falha ao alterar o proprietário dos arquivos. Verifique as permissões.${RESET}"
+    finalizar ${RED}Erro: Falha ao alterar o proprietário dos arquivos. Verifique as permissões.${RESET} 1
+fi
+
+# Alterar as permissões dos arquivos
+sudo chmod -R u+rwX "$DEPLOY_HOME/$NOME_EMPRESA" | tee -a "$LOG_FILE"
+if [ $? -eq 0 ]; then
+    echo -e "${GREEN}Permissões dos arquivos ajustadas com sucesso.${RESET}" | tee -a "$LOG_FILE"
+else
+    echo -e "${RED}Erro: Falha ao ajustar as permissões dos arquivos. Verifique as permissões.${RESET}"
+    finalizar "${RED}Erro: Falha ao ajustar as permissões dos arquivos. Verifique as permissões.${RESET}" 1
+fi
+
+echo -e "${GREEN}Proprietário e permissões configurados corretamente para o diretório: $DEPLOY_HOME/$NOME_EMPRESA.${RESET}" | tee -a "$LOG_FILE"
 
 # Verificar se o repositório foi clonado com sucesso
 if [ -d "$DEPLOY_HOME/$NOME_EMPRESA" ]; then
@@ -525,6 +546,7 @@ JWT_SECRET=$(openssl rand -base64 32)
 if [ $? -eq 0 ]; then
     echo -e "${GREEN}JWT_SECRET gerado com sucesso.${RESET}" | tee -a "$LOG_FILE"
 else
+    echo -e "${RED}Erro ao gerar JWT_SECRET.${RESET}"
     finalizar "${RED}Erro ao gerar JWT_SECRET.${RESET}" 1
 fi
 
@@ -532,6 +554,7 @@ JWT_REFRESH_SECRET=$(openssl rand -base64 32)
 if [ $? -eq 0 ]; then
     echo -e "${GREEN}JWT_REFRESH_SECRET gerado com sucesso.${RESET}" | tee -a "$LOG_FILE"
 else
+    echo -e "${RED}Erro ao gerar JWT_REFRESH_SECRET.${RESET}"
     finalizar "${RED}Erro ao gerar JWT_REFRESH_SECRET.${RESET}" 1
 fi
 
@@ -577,8 +600,8 @@ EOF
 if [ $? -eq 0 ]; then
     echo -e "${GREEN}Arquivo .env criado com sucesso.${RESET}" | tee -a "$LOG_FILE"
 else
-    echo -e "${RED}Erro ao criar o arquivo .env.${RESET}" | tee -a "$LOG_FILE"
-    exit 1
+    echo -e "${RED}Erro ao criar o arquivo .env.${RESET}"
+    finalizar "${RED}Erro ao criar o arquivo .env.${RESET}" 1
 fi
 
 # Acessando o diretório do backend e atualizando o email do seed
@@ -914,6 +937,22 @@ if ! certbot --nginx -d "$URL_FRONTEND" -m "$EMAIL" --agree-tos --non-interactiv
     finalizar "Erro ao gerar o certificado SSL para o frontend. Verifique os logs do Certbot e a configuração do Nginx." 1
 fi
 echo -e "${GREEN}Certificado SSL gerado com sucesso para o frontend.${RESET}" | tee -a "$LOG_FILE"
+
+# Configurando a renovação automática dos certificados SSL
+echo -e "${COLOR}Configurando a renovação automática de certificados SSL...${RESET}" | tee -a "$LOG_FILE"
+
+# Adiciona a tarefa ao cron, caso não esteja configurada
+if ! crontab -l | grep -q "certbot renew"; then
+    (crontab -l 2>/dev/null; echo "0 3 */30 * * certbot renew --quiet --nginx") | crontab -
+    if [ $? -eq 0 ]; then
+        echo -e "${GREEN}Renovação automática configurada com sucesso no cron para execução a cada 30 dias.${RESET}" | tee -a "$LOG_FILE"
+    else
+        echo -e "${RED}Erro ao configurar a renovação automática no cron.${RESET}"
+        finalizar "${RED}Erro ao configurar a renovação automática no cron.${RESET}" 1
+    fi
+else
+    echo -e "${GREEN}Renovação automática já configurada no cron.${RESET}" | tee -a "$LOG_FILE"
+fi
 
 # Finalizando instalação
 {
