@@ -126,21 +126,21 @@ export const initWbot = async (whatsapp: Whatsapp): Promise<Session> => {
         authStrategy: new LocalAuth({ clientId: `bd_${whatsapp.id}` }),
         puppeteer: {
           args: [
-            "--no-sandbox",
-            "--disable-setuid-sandbox",
-            "--log-level=3",
+            "--no-sandbox", // Desativa a sandbox de segurança
+            "--disable-setuid-sandbox", // Desativa setuid
+            "--disable-dev-shm-usage", // Usa disco em vez de /dev/shm
+            // "--single-process", // Força um único processo
+            "--log-level=3", // Reduz a verbosidade dos logs
             "--no-default-browser-check",
             "--disable-site-isolation-trials",
             "--no-experiments",
             "--ignore-gpu-blacklist",
             "--ignore-certificate-errors",
             "--ignore-certificate-errors-spki-list",
-            "--disable-gpu",
+            "--disable-gpu", // Desativa a GPU (não necessária em headless)
             "--disable-extensions",
             "--disable-default-apps",
             "--enable-features=NetworkService",
-            "--disable-setuid-sandbox",
-            "--no-sandbox",
             "--disable-webgl",
             "--disable-threaded-animation",
             "--disable-threaded-scrolling",
@@ -154,11 +154,15 @@ export const initWbot = async (whatsapp: Whatsapp): Promise<Session> => {
             "--disable-accelerated-jpeg-decoding",
             "--disable-accelerated-mjpeg-decode",
             "--disable-app-list-dismiss-on-blur",
-            "--disable-accelerated-video-decode"
+            "--disable-accelerated-video-decode",
+            "--disable-background-timer-throttling", // Reduz o uso de timers em segundo plano
+            "--disable-features=IsolateOrigins,site-per-process", // Otimiza o isolamento de sites
+            // "--renderer-process-limit=2", // Limita o número de processos de renderização
           ],
-          executablePath: process.env.CHROME_BIN || undefined
-        }
+          executablePath: process.env.CHROME_BIN || undefined,
+        },
       });
+      
 
       wbot.initialize();
 
