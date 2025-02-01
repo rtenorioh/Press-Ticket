@@ -28,121 +28,192 @@ export const setIO = (io: SocketIO): void => {
 export const initIO = (httpServer: Server): void => {
   io = new SocketIO(httpServer, {
     cors: {
-      origin: process.env.FRONTEND_URL
+      origin: process.env.FRONTEND_URL || "http://localhost:3000",
+      methods: ["GET", "POST"],
+      allowedHeaders: ["Authorization"],
+      credentials: true
     },
-    pingTimeout: 30000,
-    pingInterval: 15000
+    transports: ['websocket', 'polling'],
+    path: '/socket.io'
+  });
+
+  logger.info("Servidor Socket.IO iniciado", {
+    corsOrigin: process.env.FRONTEND_URL || "http://localhost:3000",
+    transports: ['websocket', 'polling']
   });
 
   io.on("connection", async socket => {
-    logger.info("Client Connected");
-    let userId: number | undefined;
+    logger.info("Tentativa de conexão socket", { 
+      socketId: socket.id,
+      transport: socket.conn.transport.name
+    });
 
     const { token } = socket.handshake.query;
-    try {
-      if (typeof token === "string") {
-        const tokenData = verify(token, authConfig.secret) as TokenPayload;
-        logger.debug(JSON.stringify(tokenData), "io-onConnection: tokenData");
-        userId = parseInt(tokenData.id);
 
-        if (userId) {
-          const user = await User.findByPk(userId);
-          if (user) {
-            const userRoom = io.sockets.adapter.rooms.get(userId.toString());
-            const hasConnectedSockets = userRoom && userRoom.size > 0;
-            
-            if (!hasConnectedSockets) {
-              await user.update({ online: true });
-              io.emit("userSessionUpdate", {
-                userId: user.id,
-                online: true
-              });
-              logger.info(`User ${userId} is now online`);
-            }
-            socket.join(userId.toString());
-          }
-        }
-      }
-    } catch (error) {
-      logger.error(JSON.stringify(error), "Error decoding token");
+    if (!token || typeof token !== "string") {
+      logger.warn("Conexão rejeitada: Token não fornecido ou inválido", { socketId: socket.id });
       socket.disconnect();
       return;
     }
 
-    socket.on("userStatus", async ({ userId, online }: UserStatus) => {
+    try {
+      const decoded = verify(token, authConfig.secret) as TokenPayload;
+      const { id: userId } = decoded;
+
+      // Validação adicional do token
+      if (!userId) {
+        logger.warn("Conexão rejeitada: Token sem userId", { socketId: socket.id });
+        socket.disconnect();
+        return;
+      }
+
       try {
-        if (!userId) return;
-        
         const user = await User.findByPk(userId);
-        if (user) {
-          await user.update({ online });
-          io.emit("userSessionUpdate", {
-            userId: user.id,
-            online
+        if (!user) {
+          logger.warn("Conexão rejeitada: Usuário não encontrado", { 
+            socketId: socket.id,
+            userId 
           });
-          logger.info(`User ${userId} status updated to ${online ? "online" : "offline"}`);
+          socket.disconnect();
+          return;
         }
+
+        const userRoom = io.sockets.adapter.rooms.get(userId.toString());
+        const hasConnectedSockets = userRoom && userRoom.size > 0;
+
+        if (!hasConnectedSockets) {
+          await User.update({ online: true }, { where: { id: userId } });
+        }
+
+        socket.join(userId.toString());
+        logger.info("Conexão socket estabelecida", { 
+          userId,
+          socketId: socket.id
+        });
+
       } catch (err) {
-        logger.error(err);
+        logger.error("Erro ao processar usuário do socket", {
+          error: err.message,
+          socketId: socket.id,
+          userId
+        });
+        socket.disconnect();
+      }
+    } catch (err) {
+      if (err.name === "JsonWebTokenError") {
+        logger.warn("Conexão rejeitada: Token inválido", {
+          error: err.message,
+          socketId: socket.id
+        });
+      } else if (err.name === "TokenExpiredError") {
+        logger.warn("Conexão rejeitada: Token expirado", {
+          error: err.message,
+          socketId: socket.id
+        });
+      } else {
+        logger.error("Erro na validação do token", {
+          error: err.message,
+          socketId: socket.id
+        });
+      }
+      socket.disconnect();
+    }
+
+    socket.onAny((eventName: string, ...args: unknown[]) => {
+      logger.debug("Evento recebido", {
+        event: eventName,
+        socketId: socket.id,
+        args
+      });
+    });
+
+    socket.on("userStatus", async ({ userId, online }: UserStatus) => {
+      logger.info("Alteração de status do usuário", {
+        userId,
+        online,
+        socketId: socket.id
+      });
+
+      try {
+        await User.update({ online }, { where: { id: userId } });
+      } catch (err) {
+        logger.error("Erro ao atualizar status do usuário", {
+          error: err.message,
+          userId,
+          online
+        });
       }
     });
 
     socket.on("disconnect", async () => {
-      try {
-        if (userId) {
-          const userRoom = io.sockets.adapter.rooms.get(userId.toString());
-          const hasConnectedSockets = userRoom && userRoom.size > 0;
+      logger.info("Cliente desconectado", { socketId: socket.id });
 
-          if (!hasConnectedSockets) {
-            const user = await User.findByPk(userId);
-            if (user) {
-              await user.update({ online: false });
-              io.emit("userSessionUpdate", {
-                userId: user.id,
-                online: false
-              });
-              logger.info(`User ${userId} is now offline (disconnected)`);
-            }
-          }
+      try {
+        const { id: userId } = verify(token as string, authConfig.secret) as TokenPayload;
+        const userRoom = io.sockets.adapter.rooms.get(userId.toString());
+        const hasConnectedSockets = userRoom && userRoom.size > 0;
+
+        if (!hasConnectedSockets) {
+          await User.update({ online: false }, { where: { id: userId } });
         }
       } catch (err) {
-        logger.error("Error on disconnect:", err);
+        logger.error("Erro ao processar desconexão", {
+          error: err.message,
+          socketId: socket.id
+        });
       }
     });
 
     socket.on("logout", async () => {
+      logger.info("Logout solicitado", { socketId: socket.id });
+
       try {
-        if (userId) {
-          const user = await User.findByPk(userId);
-          if (user) {
-            await user.update({ online: false });
-            io.emit("userSessionUpdate", {
-              userId: user.id,
-              online: false
-            });
-            logger.info(`User ${userId} logged out`);
-          }
-          socket.leave(userId.toString());
-        }
+        const { id: userId } = verify(token as string, authConfig.secret) as TokenPayload;
+        await User.update(
+          { online: false },
+          { where: { id: userId } }
+        );
+
+        socket.leave(userId.toString());
+        logger.info("Usuário removido da sala após logout", {
+          userId,
+          socketId: socket.id
+        });
       } catch (err) {
-        logger.error("Error on logout:", err);
+        logger.error("Erro ao processar logout", {
+          error: err.message,
+          socketId: socket.id
+        });
       }
     });
 
     socket.on("joinChatBox", (ticketId: string) => {
-      logger.info("A client joined a ticket channel");
+      logger.info("Usuário entrou no chat", {
+        ticketId,
+        socketId: socket.id
+      });
       socket.join(ticketId);
     });
 
     socket.on("joinNotification", () => {
-      logger.info("A client joined notification channel");
+      logger.info("Usuário entrou no canal de notificações", {
+        socketId: socket.id
+      });
       socket.join("notification");
     });
 
     socket.on("joinTickets", (status: string) => {
-      logger.info(`A client joined to ${status} tickets channel.`);
+      logger.info("Usuário entrou no canal de tickets", {
+        status,
+        socketId: socket.id
+      });
       socket.join(status);
     });
+  });
+
+  // Log socket.io errors
+  io.on("connect_error", (err: Error) => {
+    logger.error("Connection error:", err);
   });
 };
 
