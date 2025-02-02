@@ -90,22 +90,28 @@ const getDalleResponse = async (
 const sessions: Session[] = [];
 
 const syncUnreadMessages = async (wbot: Session) => {
-  const chats = await wbot.getChats();
+  try {
+    await new Promise((resolve) => setTimeout(resolve, 5000));
+    const chats = await wbot.getChats();
+    console.log(`Total de chats carregados: ${chats.length}`);
 
-  /* eslint-disable no-restricted-syntax */
-  /* eslint-disable no-await-in-loop */
-  for (const chat of chats) {
-    if (chat.unreadCount > 0) {
-      const unreadMessages = await chat.fetchMessages({
-        limit: chat.unreadCount
-      });
+    /* eslint-disable no-restricted-syntax */
+    /* eslint-disable no-await-in-loop */
+    for (const chat of chats) {
+      if (chat.unreadCount > 0) {
+        const unreadMessages = await chat.fetchMessages({
+          limit: chat.unreadCount
+        });
 
-      for (const msg of unreadMessages) {
-        await handleMessage(msg, wbot);
+        for (const msg of unreadMessages) {
+          await handleMessage(msg, wbot);
+        }
+
+        await chat.sendSeen();
       }
-
-      await chat.sendSeen();
     }
+  } catch (error) {
+    console.error("Erro ao carregar os chats:", error);
   }
 };
 
