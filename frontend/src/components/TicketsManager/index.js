@@ -6,10 +6,12 @@ import {
   Paper,
   Switch,
   Tab,
-  Tabs
+  Tabs,
+  Tooltip
 } from "@material-ui/core";
 import {
-  AllInboxRounded,
+  AddCircleOutline,
+  CheckCircle,
   HourglassEmptyRounded,
   MoveToInbox,
   Search
@@ -22,6 +24,7 @@ import NewTicketModal from "../NewTicketModal";
 import TabPanel from "../TabPanel";
 import TicketsList from "../TicketsList";
 import TicketsQueueSelect from "../TicketsQueueSelect";
+import useTickets from "../../hooks/useTickets";
 
 const useStyles = makeStyles((theme) => ({
   ticketsWrapper: {
@@ -99,10 +102,48 @@ const TicketsManager = () => {
   const [newTicketModalOpen, setNewTicketModalOpen] = useState(false);
   const [showAllTickets, setShowAllTickets] = useState(false);
   const { user } = useContext(AuthContext);
-  const [openCount, setOpenCount] = useState(0);
-  const [pendingCount, setPendingCount] = useState(0);
+  const [, setOpenCount] = useState(0);
   const userQueueIds = user.queues.map((q) => q.id);
   const [selectedQueueIds, setSelectedQueueIds] = useState(userQueueIds || []);
+  const [previousCounts, setPreviousCounts] = useState({
+		inAttendance: 0,
+		waiting: 0,
+		closed: 0,
+	});
+
+	const ticketsInAttendance = useTickets({
+		status: "open",
+		showAll: showAllTickets,
+		withUnreadMessages: "false",
+		queueIds: JSON.stringify(userQueueIds),
+	});
+
+	const ticketsWaiting = useTickets({
+		status: "pending",
+		showAll: "true",
+		withUnreadMessages: "false",
+		queueIds: JSON.stringify(userQueueIds),
+	});
+	const ticketsClosed = useTickets({
+		status: "closed",
+		showAll: "true",
+		withUnreadMessages: "false",
+		queueIds: JSON.stringify(userQueueIds),
+	});
+
+  useEffect(() => {
+		if (
+			ticketsInAttendance.count !== previousCounts.inAttendance ||
+			ticketsWaiting.count !== previousCounts.waiting ||
+			ticketsClosed.count !== previousCounts.closed
+		) {
+			setPreviousCounts({
+				inAttendance: ticketsInAttendance.count,
+				waiting: ticketsWaiting.count,
+				closed: ticketsClosed.count,
+			});
+		}
+	}, [ticketsInAttendance.count, ticketsWaiting.count, ticketsClosed.count, previousCounts]);
 
   useEffect(() => {
     if (user.profile.toUpperCase() === "ADMIN") {
@@ -113,7 +154,6 @@ const TicketsManager = () => {
 
   const handleSearch = (e) => {
     const searchedTerm = e.target.value.toLowerCase();
-
 
     setSearchParam(searchedTerm);
     if (searchedTerm === "") {
@@ -158,55 +198,70 @@ const TicketsManager = () => {
           indicatorColor="primary"
           textColor="primary"
           aria-label="icon label tabs example"
-        >
+        >          
           <Tab
             value={"open"}
-            icon={<MoveToInbox />}
-            label={
+            icon={
               <Badge
                 className={classes.badge}
-                badgeContent={openCount}
+                badgeContent={ticketsInAttendance.count}
                 overlap="rectangular"
                 max={9999}
                 color="secondary"
               >
-                {t("tickets.tabs.open.title")}
+                <Tooltip title={t("tickets.tabs.open.title")} placement="top" arrow>
+                  <MoveToInbox className={classes.tabIcon}/>
+                </Tooltip>
               </Badge>
             }
             classes={{ root: classes.tab }}
-          />
+          />          
           <Tab
             value={"pending"}
-            icon={<HourglassEmptyRounded />}
-            label={
+            icon={
               <Badge
                 className={classes.badge}
-                badgeContent={pendingCount}
+                badgeContent={ticketsWaiting.count}
                 overlap="rectangular"
                 max={9999}
                 color="secondary"
               >
-                {t("ticketsList.pendingHeader")}
+                <Tooltip title={t("tickets.tabs.pending.title")} placement="top" arrow>
+                  <HourglassEmptyRounded className={classes.tabIcon}/>
+                </Tooltip>
               </Badge>
             }
             classes={{ root: classes.tab }}
           />
           <Tab
             value={"closed"}
-            icon={<AllInboxRounded />}
-            label={t("tickets.tabs.closed.title")}
+            icon={
+              <Badge
+                className={classes.badge}
+                badgeContent={ticketsClosed.count}
+                overlap="rectangular"
+                max={9999}
+                color="secondary"
+              >
+                <Tooltip title={t("tickets.tabs.closed.title")} placement="top" arrow>
+                  <CheckCircle className={classes.tabIcon} />
+                </Tooltip>
+              </Badge>
+            }  
             classes={{ root: classes.tab }}
           />
         </Tabs>
       </Paper>
       <Paper square elevation={0} className={classes.ticketOptionsBox}>
-        <Button
-          variant="outlined"
-          color="primary"
-          onClick={() => setNewTicketModalOpen(true)}
-        >
-          {t("ticketsManager.buttons.newTicket")}
-        </Button>
+        <Tooltip title={t("ticketsManager.buttons.newTicket")} placement="top" arrow>
+          <Button
+            variant="outlined"
+            color="primary"
+            onClick={() => setNewTicketModalOpen(true)}
+          >
+            <AddCircleOutline className={classes.tabIcon}/>
+          </Button>
+        </Tooltip>
         <Can
           role={user.profile}
           perform="tickets-manager:showall"
@@ -243,12 +298,6 @@ const TicketsManager = () => {
             selectedQueueIds={selectedQueueIds}
             updateCount={(val) => setOpenCount(val)}
             style={applyPanelStyle("open")}
-          />
-          <TicketsList
-            status="pending"
-            selectedQueueIds={selectedQueueIds}
-            updateCount={(val) => setPendingCount(val)}
-            style={applyPanelStyle("pending")}
           />
         </Paper>
       </TabPanel>
