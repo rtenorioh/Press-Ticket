@@ -752,7 +752,9 @@ const handleMsgAck = async (msg: WbotMessage, ack: MessageAck) => {
     if (!messageToUpdate) {
       return;
     }
-    await messageToUpdate.update({ ack });
+
+    const ackToUpdate = ack || 0;
+    await messageToUpdate.update({ ack: ackToUpdate });
 
     io.to(messageToUpdate.ticketId.toString()).emit("appMessage", {
       action: "update",
