@@ -682,8 +682,14 @@ const messages = {
       },
       ticketsManager: {
         buttons: {
-          newTicket: "Novo",
+          newTicket: "Novo Ticket",
+          closed: "Finalizar",
         },
+        menu: {
+          all: "Todos",
+          open: "Inbox",
+          pending: "Aguardando",
+        }
       },
       ticketsQueueSelect: {
         placeholder: "Setores",
@@ -695,8 +701,16 @@ const messages = {
         notification: {
           message: "Mensagem de",
         },
+        notifications: {
+          closed: {
+            success: "Tickets finalizados com sucesso!",
+            error: "Erro ao finalizar tickets. Tente novamente.",
+            tickets: "tickets finalizados"
+          }
+        },
         tabs: {
           open: { title: "Inbox" },
+          pending: { title: "Aguardando" },
           closed: { title: "Finalizados" },
           search: { title: "Busca" },
         },
@@ -708,7 +722,7 @@ const messages = {
         },
         confirmationModal: {
           closeTicket: {
-            title: "Finaliza Ticket ",
+            title: "Finalizar Ticket ",
             message: "Tem certeza que deseja finalizar este ticket?",
           },
         },
@@ -735,7 +749,7 @@ const messages = {
           queueless: "Sem Setor",
           accept: "Aceitar",
           spy: "Espiar",
-          close: "Encerrar",
+          close: "Finalizar",
           reopen: "Reabrir",
           return: "Mover para aguardando",
           connection: "Canal",
@@ -772,7 +786,7 @@ const messages = {
       },
       uploads: {
         titles: {
-          titleUploadMsgDragDrop: "⬇️ ARRASTE E SOLTE ARQUIVOS NO CAMPO ABAIXO ⬇️",
+          titleUploadMsgDragDrop: " ARRASTE E SOLTE ARQUIVOS NO CAMPO ABAIXO ",
           titleFileList: "Lista de arquivo(s)"
         },
       },

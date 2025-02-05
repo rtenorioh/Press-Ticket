@@ -7,11 +7,14 @@ import {
   Switch,
   Tab,
   Tabs,
-  Tooltip
+  Tooltip,
+  Menu,
+  MenuItem
 } from "@material-ui/core";
 import {
   AddCircleOutline,
   CheckCircle,
+  HighlightOffRounded,
   HourglassEmptyRounded,
   MoveToInbox,
   Search
@@ -25,6 +28,8 @@ import TabPanel from "../TabPanel";
 import TicketsList from "../TicketsList";
 import TicketsQueueSelect from "../TicketsQueueSelect";
 import useTickets from "../../hooks/useTickets";
+import api from "../../services/api";
+import { toast } from "react-toastify";
 
 const useStyles = makeStyles((theme) => ({
   ticketsWrapper: {
@@ -91,6 +96,21 @@ const useStyles = makeStyles((theme) => ({
     padding: "10px",
     borderBottom: "2px solid rgba(0, 0, 0, .12)",
   },
+  selectFilter: {
+    minWidth: 120,
+    margin: theme.spacing(1),
+    "& .MuiOutlinedInput-root": {
+      "& fieldset": {
+        borderColor: theme.palette.primary.main,
+      },
+      "&:hover fieldset": {
+        borderColor: theme.palette.primary.dark,
+      },
+    },
+    "& .MuiSelect-select": {
+      padding: theme.spacing(1),
+    },
+  },
 }));
 
 const TicketsManager = () => {
@@ -101,49 +121,51 @@ const TicketsManager = () => {
   const [tabOpen] = useState("open");
   const [newTicketModalOpen, setNewTicketModalOpen] = useState(false);
   const [showAllTickets, setShowAllTickets] = useState(false);
+  const [anchorEl, setAnchorEl] = useState(null);
   const { user } = useContext(AuthContext);
   const [, setOpenCount] = useState(0);
   const userQueueIds = user.queues.map((q) => q.id);
   const [selectedQueueIds, setSelectedQueueIds] = useState(userQueueIds || []);
   const [previousCounts, setPreviousCounts] = useState({
-		inAttendance: 0,
-		waiting: 0,
-		closed: 0,
-	});
+    inAttendance: 0,
+    waiting: 0,
+    closed: 0,
+  });
 
-	const ticketsInAttendance = useTickets({
-		status: "open",
-		showAll: showAllTickets,
-		withUnreadMessages: "false",
-		queueIds: JSON.stringify(userQueueIds),
-	});
+  const ticketsInAttendance = useTickets({
+    status: "open",
+    showAll: showAllTickets,
+    withUnreadMessages: "false",
+    queueIds: JSON.stringify(userQueueIds),
+  });
 
-	const ticketsWaiting = useTickets({
-		status: "pending",
-		showAll: "true",
-		withUnreadMessages: "false",
-		queueIds: JSON.stringify(userQueueIds),
-	});
-	const ticketsClosed = useTickets({
-		status: "closed",
-		showAll: "true",
-		withUnreadMessages: "false",
-		queueIds: JSON.stringify(userQueueIds),
-	});
+  const ticketsWaiting = useTickets({
+    status: "pending",
+    showAll: "true",
+    withUnreadMessages: "false",
+    queueIds: JSON.stringify(userQueueIds),
+  });
+
+  const ticketsClosed = useTickets({
+    status: "closed",
+    showAll: "true",
+    withUnreadMessages: "false",
+    queueIds: JSON.stringify(userQueueIds),
+  });
 
   useEffect(() => {
-		if (
-			ticketsInAttendance.count !== previousCounts.inAttendance ||
-			ticketsWaiting.count !== previousCounts.waiting ||
-			ticketsClosed.count !== previousCounts.closed
-		) {
-			setPreviousCounts({
-				inAttendance: ticketsInAttendance.count,
-				waiting: ticketsWaiting.count,
-				closed: ticketsClosed.count,
-			});
-		}
-	}, [ticketsInAttendance.count, ticketsWaiting.count, ticketsClosed.count, previousCounts]);
+    if (
+      ticketsInAttendance.count !== previousCounts.inAttendance ||
+      ticketsWaiting.count !== previousCounts.waiting ||
+      ticketsClosed.count !== previousCounts.closed
+    ) {
+      setPreviousCounts({
+        inAttendance: ticketsInAttendance.count,
+        waiting: ticketsWaiting.count,
+        closed: ticketsClosed.count,
+      });
+    }
+  }, [ticketsInAttendance.count, ticketsWaiting.count, ticketsClosed.count, previousCounts]);
 
   useEffect(() => {
     if (user.profile.toUpperCase() === "ADMIN") {
@@ -171,6 +193,41 @@ const TicketsManager = () => {
   const applyPanelStyle = (status) => {
     if (tabOpen !== status) {
       return { width: 0, height: 0 };
+    }
+  };
+
+  const handleCloseTickets = async (status) => {
+    try {
+      const { data } = await api.put(`/tickets/close-all?status=${status}`);
+      setAnchorEl(null);
+      
+      if (status === "open") {
+        setTab(tab => tab === "open" ? "pending" : "open");
+        setTimeout(() => setTab("open"), 100);
+      } else if (status === "pending") {
+        setTab(tab => tab === "pending" ? "open" : "pending");
+        setTimeout(() => setTab("pending"), 100);
+      } else if (status === "all") {
+        setTab(tab => tab === "open" ? "pending" : "open");
+        setTimeout(() => setTab("open"), 100);
+      }
+
+      setPreviousCounts({
+        inAttendance: ticketsInAttendance.count,
+        waiting: ticketsWaiting.count,
+        closed: ticketsClosed.count,
+      });
+
+      toast.success(
+        t("tickets.notifications.closed.success") + 
+        (data.count ? ` (${data.count} ${t("tickets.notifications.closed.tickets")})` : "")
+      );
+    } catch (err) {
+      console.error(err);
+      toast.error(
+        err.response?.data?.error || 
+        t("tickets.notifications.closed.error")
+      );
     }
   };
 
@@ -204,7 +261,7 @@ const TicketsManager = () => {
             icon={
               <Badge
                 className={classes.badge}
-                badgeContent={ticketsInAttendance.count}
+                badgeContent={previousCounts.inAttendance}
                 overlap="rectangular"
                 max={9999}
                 color="secondary"
@@ -221,7 +278,7 @@ const TicketsManager = () => {
             icon={
               <Badge
                 className={classes.badge}
-                badgeContent={ticketsWaiting.count}
+                badgeContent={previousCounts.waiting}
                 overlap="rectangular"
                 max={9999}
                 color="secondary"
@@ -238,7 +295,7 @@ const TicketsManager = () => {
             icon={
               <Badge
                 className={classes.badge}
-                badgeContent={ticketsClosed.count}
+                badgeContent={previousCounts.closed}
                 overlap="rectangular"
                 max={9999}
                 color="secondary"
@@ -262,6 +319,25 @@ const TicketsManager = () => {
             <AddCircleOutline className={classes.tabIcon}/>
           </Button>
         </Tooltip>
+        <Tooltip title={t("ticketsManager.buttons.closed")} placement="top" arrow>
+          <Button
+            variant="outlined"
+            color="primary"
+            onClick={(event) => setAnchorEl(event.currentTarget)}
+          >
+            <HighlightOffRounded className={classes.tabIcon}/>
+          </Button>
+        </Tooltip>
+        <Menu
+          anchorEl={anchorEl}
+          keepMounted
+          open={Boolean(anchorEl)}
+          onClose={() => setAnchorEl(null)}
+        >
+          <MenuItem onClick={() => handleCloseTickets("all")}>{t("ticketsManager.menu.all")}</MenuItem>
+          <MenuItem onClick={() => handleCloseTickets("open")}>{t("ticketsManager.menu.open")}</MenuItem>
+          <MenuItem onClick={() => handleCloseTickets("pending")}>{t("ticketsManager.menu.pending")}</MenuItem>
+        </Menu>
         <Can
           role={user.profile}
           perform="tickets-manager:showall"

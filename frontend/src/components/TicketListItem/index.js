@@ -70,8 +70,8 @@ const useStyles = makeStyles(theme => ({
 		backgroundColor: "#5D5699",
 		color: "white",
 		position: "absolute",
-		bottom: 0,
-		left: 0,
+		bottom: -4,
+		left: -2,
 		transform: "translate(0, -320%)",
 	},
 	pendingTicket: {

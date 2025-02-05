@@ -8,8 +8,12 @@ import DeleteTicketService from "../services/TicketServices/DeleteTicketService"
 import ListTicketsService from "../services/TicketServices/ListTicketsService";
 import ShowTicketService from "../services/TicketServices/ShowTicketService";
 import UpdateTicketService from "../services/TicketServices/UpdateTicketService";
+import CloseTicketsService from "../services/TicketServices/CloseTicketsService";
 import SendWhatsAppMessage from "../services/WbotServices/SendWhatsAppMessage";
 import ShowWhatsAppService from "../services/WhatsappService/ShowWhatsAppService";
+import Ticket from "../models/Ticket";
+import Contact from "../models/Contact";
+import { Op } from "sequelize";
 
 type IndexQuery = {
   searchParam: string;
@@ -182,5 +186,62 @@ export const checkOpenTickets = async (
     return res
       .status(500)
       .json({ error: "Erro ao verificar tickets abertos." });
+  }
+};
+
+export const closeTickets = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  const { status } = req.query;
+  const userId = parseInt(req.user.id);
+
+  try {
+    let whereCondition = {};
+    
+    if (status === "open") {
+      whereCondition = { status: "open" };
+    } else if (status === "pending") {
+      whereCondition = { status: "pending" };
+    } else if (status === "all") {
+      whereCondition = {
+        status: {
+          [Op.or]: ["open", "pending"]
+        }
+      };
+    }
+
+    const tickets = await Ticket.findAll({
+      where: whereCondition,
+      include: [
+        {
+          model: Contact,
+          as: "contact"
+        }
+      ]
+    });
+
+    if (!tickets.length) {
+      return res.status(400).json({ error: "No tickets found to close" });
+    }
+
+    await CloseTicketsService({
+      status: "closed",
+      userId,
+      tickets
+    });
+
+    const io = getIO();
+    io.emit("ticket:update", {
+      action: "update",
+      tickets: tickets.map(ticket => ticket.id)
+    });
+
+    return res.status(200).json({ 
+      message: "Tickets closed successfully",
+      count: tickets.length
+    });
+  } catch (err) {
+    return res.status(400).json({ error: err.message });
   }
 };
