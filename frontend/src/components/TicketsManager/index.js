@@ -30,6 +30,7 @@ import TicketsQueueSelect from "../TicketsQueueSelect";
 import useTickets from "../../hooks/useTickets";
 import api from "../../services/api";
 import { toast } from "react-toastify";
+import ConfirmationModal from "../ConfirmationModal";
 
 const useStyles = makeStyles((theme) => ({
   ticketsWrapper: {
@@ -122,6 +123,8 @@ const TicketsManager = () => {
   const [newTicketModalOpen, setNewTicketModalOpen] = useState(false);
   const [showAllTickets, setShowAllTickets] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
+  const [confirmationOpen, setConfirmationOpen] = useState(false);
+  const [closeAction, setCloseAction] = useState(null);
   const { user } = useContext(AuthContext);
   const [, setOpenCount] = useState(0);
   const userQueueIds = user.queues.map((q) => q.id);
@@ -231,12 +234,42 @@ const TicketsManager = () => {
     }
   };
 
+  const handleOpenConfirmation = (status) => {
+    setCloseAction(status);
+    setConfirmationOpen(true);
+    setAnchorEl(null);
+  };
+
+  const handleConfirmClose = async () => {
+    await handleCloseTickets(closeAction);
+    setConfirmationOpen(false);
+    setCloseAction(null);
+  };
+
   return (
     <Paper elevation={0} variant="outlined" className={classes.ticketsWrapper}>
       <NewTicketModal
         modalOpen={newTicketModalOpen}
         onClose={(e) => setNewTicketModalOpen(false)}
       />
+      <ConfirmationModal
+        title={
+          closeAction === "all"
+            ? t("ticketsManager.confirmationModal.closeAllTitle")
+            : closeAction === "open"
+            ? t("ticketsManager.confirmationModal.closeOpenTitle")
+            : t("ticketsManager.confirmationModal.closePendingTitle")
+        }
+        open={confirmationOpen}
+        onClose={() => setConfirmationOpen(false)}
+        onConfirm={handleConfirmClose}
+      >
+        {closeAction === "all"
+          ? t("ticketsManager.confirmationModal.closeAllMessage")
+          : closeAction === "open"
+          ? t("ticketsManager.confirmationModal.closeOpenMessage")
+          : t("ticketsManager.confirmationModal.closePendingMessage")}
+      </ConfirmationModal>
       <Paper elevation={0} square className={classes.searchContainer}>
         <Search className={classes.searchIcon} />
         <input
@@ -334,9 +367,9 @@ const TicketsManager = () => {
           open={Boolean(anchorEl)}
           onClose={() => setAnchorEl(null)}
         >
-          <MenuItem onClick={() => handleCloseTickets("all")}>{t("ticketsManager.menu.all")}</MenuItem>
-          <MenuItem onClick={() => handleCloseTickets("open")}>{t("ticketsManager.menu.open")}</MenuItem>
-          <MenuItem onClick={() => handleCloseTickets("pending")}>{t("ticketsManager.menu.pending")}</MenuItem>
+          <MenuItem onClick={() => handleOpenConfirmation("all")}>{t("ticketsManager.menu.all")}</MenuItem>
+          <MenuItem onClick={() => handleOpenConfirmation("open")}>{t("ticketsManager.menu.open")}</MenuItem>
+          <MenuItem onClick={() => handleOpenConfirmation("pending")}>{t("ticketsManager.menu.pending")}</MenuItem>
         </Menu>
         <Can
           role={user.profile}

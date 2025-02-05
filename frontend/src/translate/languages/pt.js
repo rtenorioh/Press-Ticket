@@ -686,9 +686,17 @@ const messages = {
           closed: "Finalizar",
         },
         menu: {
-          all: "Todos",
-          open: "Inbox",
-          pending: "Aguardando",
+          all: "Todos os Tickets",
+          open: "Todos no Inbox",
+          pending: "Todos no Aguardando"
+        },
+        confirmationModal: {
+          closeAllTitle: "Fechar Todos os Tickets",
+          closeOpenTitle: "Fechar Tickets no Inbox",
+          closePendingTitle: "Fechar Tickets no Aguardando",
+          closeAllMessage: "Tem certeza que deseja fechar todos os Tickets?",
+          closeOpenMessage: "Tem certeza que deseja fechar todos os Tickets no Inbox?",
+          closePendingMessage: "Tem certeza que deseja fechar todos os Tickets no Aguardando?"
         }
       },
       ticketsQueueSelect: {
