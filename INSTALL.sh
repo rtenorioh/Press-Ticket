@@ -239,10 +239,13 @@ cat <<EOM
 EOM
 echo -e " "
 
+sleep 3
+
 echo -e " "
 echo -e "${COLOR}Iniciando a instalação...${RESET}" | tee -a "$LOG_FILE"
 echo -e " "
 
+sleep 2
 clear
 
 echo -e " "
@@ -265,8 +268,8 @@ sleep 3
 
 # sleep 5
 
-sudo rm -f /var/lib/dpkg/updates/* | tee -a "$LOG_FILE"
-sudo dpkg --configure -a | tee -a "$LOG_FILE"
+# sudo rm -f /var/lib/dpkg/updates/* | tee -a "$LOG_FILE"
+# sudo dpkg --configure -a | tee -a "$LOG_FILE"
 
 # Adicionar informações iniciais ao log
 {
@@ -295,8 +298,9 @@ echo -e "${COLOR}Preparação Inicial...${RESET}" | tee -a "$LOG_FILE"
 {
     cd ~
     echo "Atualizando pacotes do sistema sem intervenção..."
-    sudo DEBIAN_FRONTEND=noninteractive apt-get update -yq
-    sudo DEBIAN_FRONTEND=noninteractive apt-get upgrade -yq
+    sudo apt-get update && sudo apt-get upgrade -y
+    # sudo DEBIAN_FRONTEND=noninteractive apt-get update -yq
+    # sudo DEBIAN_FRONTEND=noninteractive apt-get upgrade -yq
     echo -e "${GREEN}Atualização de pacotes concluída com sucesso.${RESET}" | tee -a "$LOG_FILE"
 
     # Reiniciar serviços que utilizam bibliotecas desatualizadas
