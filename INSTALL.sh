@@ -61,7 +61,8 @@ PORT_FRONTEND=$6
 DB_PASS=$7
 USER_LIMIT=$8
 CONNECTION_LIMIT=$9
-EMAIL=${10}
+EMAIL=$10
+BRANCH=${11:-main}
 
 # Validar campos obrigatórios
 errors=()
