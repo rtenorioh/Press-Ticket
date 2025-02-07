@@ -316,12 +316,53 @@ echo -e "${COLOR}Preparação Inicial...${RESET}" | tee -a "$LOG_FILE"
 
 } | tee -a "$LOG_FILE"
 
-# Criar o banco de dados e configurar MariaDB
+# Seção 2: Instalação do MariaDB
+echo -e "${COLOR}Verificando a instalação do MariaDB...${RESET}" | tee -a "$LOG_FILE"
+
+# Verifica se o MariaDB já está instalado
+if dpkg -l | grep -q mariadb-server; then
+    echo -e "${GREEN}MariaDB já está instalado. Pulando a instalação.${RESET}" | tee -a "$LOG_FILE"
+else
+    echo -e "${COLOR}MariaDB não encontrado. Instalando...${RESET}" | tee -a "$LOG_FILE"
+    sudo apt-get update && sudo apt-get install -y mariadb-server mariadb-client | tee -a "$LOG_FILE"
+
+    # Verifica se a instalação foi bem-sucedida
+    if [ $? -eq 0 ]; then
+        echo -e "${GREEN}MariaDB instalado com sucesso!${RESET}" | tee -a "$LOG_FILE"
+    else
+        echo -e "${RED}Erro: A instalação do MariaDB falhou. Verifique o log para mais detalhes.${RESET}"
+        finalizar "${RED}Erro: A instalação do MariaDB falhou. Verifique o log para mais detalhes.${RESET}" 1
+    fi
+fi
+
+# Verificar se MariaDB exige senha para acessar
+if sudo mysql -u root -e "SELECT 1;" &>/dev/null; then
+    MYSQL_CMD="sudo mysql -u root"
+    echo -e "${GREEN}Conexão com o MariaDB realizada sem senha.${RESET}" | tee -a "$LOG_FILE"
+else
+    MYSQL_CMD="sudo mysql -u root --password=\"$DB_PASS\""
+    echo -e "${YELLOW}O MariaDB exige senha para conexão. Utilizando a senha fornecida.${RESET}" | tee -a "$LOG_FILE"
+fi
+
+# Verificar a versão do MariaDB
+echo -e "${COLOR}Verificando a versão do MariaDB...${RESET}" | tee -a "$LOG_FILE"
+mariadb --version | tee -a "$LOG_FILE"
+
+# Verificar o status do serviço MariaDB
+echo -e "${COLOR}Verificando o status do serviço MariaDB...${RESET}" | tee -a "$LOG_FILE"
+if systemctl is-active --quiet mariadb; then
+    echo -e "${GREEN}O serviço MariaDB está ativo.${RESET}" | tee -a "$LOG_FILE"
+else
+    echo -e "${RED}Erro: O serviço MariaDB não está ativo.${RESET}"
+    finalizar "${RED}Erro: O serviço MariaDB não está ativo.${RESET}" 1
+fi
+
+# Criar banco de dados e configurar MariaDB
 echo -e "${COLOR}Criar banco de dados e configurar MariaDB...${RESET}" | tee -a "$LOG_FILE"
 
 # Verificar se o banco de dados já existe
 echo -e "${COLOR}Verificando se o banco de dados $NOME_EMPRESA já existe...${RESET}" | tee -a "$LOG_FILE"
-DB_EXISTS=$(sudo mariadb -u root -e "SHOW DATABASES LIKE '$NOME_EMPRESA';" | grep "$NOME_EMPRESA")
+DB_EXISTS=$($MYSQL_CMD -e "SHOW DATABASES LIKE '$NOME_EMPRESA';" | grep "$NOME_EMPRESA")
 if [ "$DB_EXISTS" ]; then
     echo -e "${RED}Erro: O banco de dados $NOME_EMPRESA já existe. Instalação interrompida.${RESET}"
     finalizar "${RED}Erro: O banco de dados $NOME_EMPRESA já existe. Instalação interrompida.${RESET}" 1
@@ -329,16 +370,32 @@ fi
 
 # Criar o banco de dados e configurar autenticação corretamente
 echo -e "${COLOR}Criando o banco de dados $NOME_EMPRESA...${RESET}" | tee -a "$LOG_FILE"
+
+# Verificar se MariaDB já exige senha para conexão
+if sudo mysql -u root -e "SELECT 1;" &>/dev/null; then
+    echo -e "${GREEN}MariaDB está acessível sem senha. Definindo senha para o usuário root...${RESET}" | tee -a "$LOG_FILE"
+    
+# Executa os comandos completos, incluindo definição de senha
 {
-    sudo mariadb -u root <<EOF
-CREATE DATABASE $NOME_EMPRESA CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
-
-ALTER USER 'root'@'localhost' IDENTIFIED BY '$SENHA_DEPLOY';
-
-FLUSH PRIVILEGES;
+    sudo mysql -u root <<EOF
+    CREATE DATABASE $NOME_EMPRESA CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+    ALTER USER 'root'@'localhost' IDENTIFIED BY '$DB_PASS';
+    FLUSH PRIVILEGES;
 EOF
-    echo -e "${GREEN}Banco de dados criado e configuração do MariaDB concluída com sucesso.${RESET}"
+    echo -e "${GREEN}Banco de dados criado e senha do root configurada com sucesso.${RESET}"
 } | tee -a "$LOG_FILE"
+
+else
+    echo -e "${YELLOW}MariaDB exige senha para conexão. Criando apenas o banco de dados...${RESET}" | tee -a "$LOG_FILE"
+
+# Executa apenas a criação do banco de dados, sem alterar a senha do root
+{
+    sudo mysql -u root --password="$DB_PASS" <<EOF
+CREATE DATABASE $NOME_EMPRESA CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+EOF
+    echo -e "${GREEN}Banco de dados criado com sucesso.${RESET}"
+} | tee -a "$LOG_FILE"
+fi
 
 # Reiniciar o MariaDB
 {
