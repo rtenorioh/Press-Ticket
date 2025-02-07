@@ -38,10 +38,10 @@ validate_url() {
         return 1
     fi
     if ! host "$url" &>/dev/null; then
-        echo -e "\e[31mErro: O domínio $url não possui DNS resolvido.\e[0m"
+        echo -e "\e[31mErro: O domínio $url não possui DNS propagado.\e[0m"
         return 1
     else
-        echo -e "\e[32mSucesso: O domínio $url foi resolvido corretamente.\e[0m"
+        echo -e "\e[32mSucesso: O domínio $url teve o DNS propagado corretamente.\e[0m"
         return 0
     fi
     echo "$url"
@@ -303,16 +303,6 @@ echo -e "${COLOR}Preparação Inicial...${RESET}" | tee -a "$LOG_FILE"
     # sudo DEBIAN_FRONTEND=noninteractive apt-get upgrade -yq
     echo -e "${GREEN}Atualização de pacotes concluída com sucesso.${RESET}" | tee -a "$LOG_FILE"
 
-    # Reiniciar serviços que utilizam bibliotecas desatualizadas
-    echo "Reiniciando serviços para aplicar as atualizações..."
-    sudo systemctl daemon-reexec
-    sudo systemctl restart cron.service
-    sudo systemctl restart mysql.service
-    sudo systemctl restart rsyslog.service
-    sudo systemctl restart irqbalance
-    sudo systemctl restart multipathd
-
-    echo -e "${GREEN}Reinício de serviços concluído.${RESET}" | tee -a "$LOG_FILE"
 } | tee -a "$LOG_FILE"
 
 # Seção 2: Instalação do MySQL
@@ -444,6 +434,20 @@ else
     echo -e "${RED}Erro ao atualizar pacotes.${RESET}"
     finalizar "${RED}Erro ao atualizar pacotes.${RESET}" 1
 fi
+
+# Reiniciar serviços que utilizam bibliotecas desatualizadas
+{
+    echo "Reiniciando serviços para aplicar as atualizações..."
+    sudo systemctl daemon-reexec
+    sudo systemctl restart cron.service
+    sudo systemctl restart dbus.service
+    sudo systemctl restart irqbalance.service
+    sudo systemctl restart polkit.service
+    sudo systemctl restart rsyslog.service
+    sudo systemctl restart ssh.service
+
+    echo -e "${GREEN}Reinício de serviços concluído.${RESET}"
+} | tee -a "$LOG_FILE"
 
 # Adicionando o usuário atual ao grupo MySQL
 echo -e "${COLOR}Adicionando o usuário atual ao grupo mysql...${RESET}" | tee -a "$LOG_FILE"
