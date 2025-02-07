@@ -240,13 +240,20 @@ cat <<EOM
 EOM
 echo -e " "
 
-sleep 3
+sleep 5
 
 echo -e " "
-echo -e "${COLOR}Iniciando a instalação...${RESET}" | tee -a "$LOG_FILE"
+echo -ne "${COLOR}Iniciando a instalação em ${YELLOW}10${RESET}..." | tee -a "$LOG_FILE"
+
+# Contagem regressiva de 10 a 0
+for i in {9..0}; do
+    echo -ne "\r${COLOR}Iniciando a instalação em ${YELLOW}$i${RESET}... " | tee -a "$LOG_FILE"
+    sleep 1
+done
+
 echo -e " "
 
-sleep 3
+sleep 10
 
 clear
 
