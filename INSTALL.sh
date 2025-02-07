@@ -312,37 +312,37 @@ echo -e "${COLOR}Preparação Inicial...${RESET}" | tee -a "$LOG_FILE"
 
 } | tee -a "$LOG_FILE"
 
-# Seção 2: Instalação do MySQL
-echo -e "${COLOR}Instalando MySQL...${RESET}" | tee -a "$LOG_FILE"
-sudo apt-get install -y mysql-server | tee -a "$LOG_FILE"
+# Seção 2: Instalação do MariaDB
+echo -e "${COLOR}Instalando MariaDB...${RESET}" | tee -a "$LOG_FILE"
+sudo apt-get install -y mariadb-server mariadb-client | tee -a "$LOG_FILE"
 
 # Verifica se o comando foi executado com sucesso
 if [ $? -eq 0 ]; then
-    echo -e "${GREEN}MySQL instalado com sucesso!${RESET}" | tee -a "$LOG_FILE"
+    echo -e "${GREEN}MariaDB instalado com sucesso!${RESET}" | tee -a "$LOG_FILE"
 else
-    echo -e "${RED}Erro: A instalação do MySQL falhou. Verifique o log para mais detalhes.${RESET}"
-    finalizar "${RED}Erro: A instalação do MySQL falhou. Verifique o log para mais detalhes.${RESET}" 1
+    echo -e "${RED}Erro: A instalação do MariaDB falhou. Verifique o log para mais detalhes.${RESET}"
+    finalizar "${RED}Erro: A instalação do MariaDB falhou. Verifique o log para mais detalhes.${RESET}" 1
 fi
 
-# Verificar a versão do MySQL
-echo -e "${COLOR}Verificar a versão do MySQL...${RESET}" | tee -a "$LOG_FILE"
-mysql --version | tee -a "$LOG_FILE"
+# Verificar a versão do MariaDB
+echo -e "${COLOR}Verificar a versão do MariaDB...${RESET}" | tee -a "$LOG_FILE"
+mariadb --version | tee -a "$LOG_FILE"
 
-# Verificar o status do serviço MySQL
-echo -e "${COLOR}Verificar o status do serviço MySQL...${RESET}" | tee -a "$LOG_FILE"
-if systemctl is-active --quiet mysql; then
-    echo -e "${GREEN}O serviço MySQL está ativo.${RESET}" | tee -a "$LOG_FILE"
+# Verificar o status do serviço MariaDB
+echo -e "${COLOR}Verificar o status do serviço MariaDB...${RESET}" | tee -a "$LOG_FILE"
+if systemctl is-active --quiet mariadb; then
+    echo -e "${GREEN}O serviço MariaDB está ativo.${RESET}" | tee -a "$LOG_FILE"
 else
-    echo -e "${RED}Erro: O serviço MySQL não está ativo.${RESET}"
-    finalizar "${RED}Erro: O serviço MySQL não está ativo.${RESET}" 1
+    echo -e "${RED}Erro: O serviço MariaDB não está ativo.${RESET}"
+    finalizar "${RED}Erro: O serviço MariaDB não está ativo.${RESET}" 1
 fi
 
-# Criar banco de dados e configurar MySQL
-echo -e "${COLOR}Criar banco de dados e configurar MySQL...${RESET}" | tee -a "$LOG_FILE"
+# Criar banco de dados e configurar MariaDB
+echo -e "${COLOR}Criar banco de dados e configurar MariaDB...${RESET}" | tee -a "$LOG_FILE"
 
 # Verificar se o banco de dados já existe
 echo -e "${COLOR}Verificando se o banco de dados $NOME_EMPRESA já existe...${RESET}" | tee -a "$LOG_FILE"
-DB_EXISTS=$(sudo mysql -u root -e "SHOW DATABASES LIKE '$NOME_EMPRESA';" | grep "$NOME_EMPRESA")
+DB_EXISTS=$(sudo mariadb -u root -e "SHOW DATABASES LIKE '$NOME_EMPRESA';" | grep "$NOME_EMPRESA")
 if [ "$DB_EXISTS" ]; then
     echo -e "${RED}Erro: O banco de dados $NOME_EMPRESA já existe. Instalação interrompida.${RESET}"
     finalizar "${RED}Erro: O banco de dados $NOME_EMPRESA já existe. Instalação interrompida.${RESET}" 1
@@ -351,20 +351,20 @@ fi
 # Criar o banco de dados
 echo -e "${COLOR}Criando o banco de dados $NOME_EMPRESA...${RESET}" | tee -a "$LOG_FILE"
 {
-    sudo mysql -u root <<EOF
+    sudo mariadb -u root <<EOF
 CREATE DATABASE $NOME_EMPRESA CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
 USE mysql;
 UPDATE user SET plugin='mysql_native_password' WHERE User='root';
 FLUSH PRIVILEGES;
 EOF
-    echo -e "${GREEN}Banco de dados criado e configuração do MySQL concluída com sucesso.${RESET}"
+    echo -e "${GREEN}Banco de dados criado e configuração do MariaDB concluída com sucesso.${RESET}"
 } | tee -a "$LOG_FILE"
 
-# Reiniciar o MySQL
+# Reiniciar o MariaDB
 {
-    echo -e "${COLOR}Reiniciando o MySQL...${RESET}"
-    sudo service mysql restart
-    echo -e "${GREEN}MySQL reiniciado com sucesso.${RESET}" | tee -a "$LOG_FILE"
+    echo -e "${COLOR}Reiniciando o MariaDB...${RESET}"
+    sudo systemctl restart mariadb
+    echo -e "${GREEN}MariaDB reiniciado com sucesso.${RESET}" | tee -a "$LOG_FILE"
 } | tee -a "$LOG_FILE"
 
 # Seção 3: Configuração do Usuário
@@ -456,14 +456,24 @@ fi
     echo -e "${GREEN}Reinício de serviços concluído.${RESET}"
 } | tee -a "$LOG_FILE"
 
-# Adicionando o usuário atual ao grupo MySQL
-echo -e "${COLOR}Adicionando o usuário atual ao grupo mysql...${RESET}" | tee -a "$LOG_FILE"
-sudo usermod -aG mysql ${USER} | tee -a "$LOG_FILE"
+# Adicionando o usuário atual ao grupo MariaDB
+echo -e "${COLOR}Adicionando o usuário atual ao grupo MariaDB...${RESET}" | tee -a "$LOG_FILE"
+
+# Verifica se o grupo 'mariadb' existe
+MYSQL_GROUP=$(getent group mariadb | cut -d: -f1)
+
+if [ -z "$MYSQL_GROUP" ]; then
+    echo -e "${RED}Erro: O grupo MariaDB não foi encontrado.${RESET}" | tee -a "$LOG_FILE"
+    finalizar "Erro: O grupo MariaDB não foi encontrado. Verifique a instalação." 1
+fi
+
+# Adiciona o usuário ao grupo MariaDB
+sudo usermod -aG "$MYSQL_GROUP" ${USER} | tee -a "$LOG_FILE"
 if [ $? -eq 0 ]; then
-    echo -e "${GREEN}Usuário adicionado ao grupo mysql com sucesso.${RESET}" | tee -a "$LOG_FILE"
+    echo -e "${GREEN}Usuário adicionado ao grupo $MYSQL_GROUP com sucesso.${RESET}" | tee -a "$LOG_FILE"
 else
-    echo -e "${RED}Erro ao adicionar o usuário ao grupo mysql.${RESET}"
-    finalizar "${RED}Erro ao adicionar o usuário ao grupo mysql.${RESET}" 1
+    echo -e "${RED}Erro ao adicionar o usuário ao grupo $MYSQL_GROUP.${RESET}"
+    finalizar "Erro ao adicionar o usuário ao grupo $MYSQL_GROUP." 1
 fi
 
 # Realizando a troca de login para carregar as variáveis de ambiente
