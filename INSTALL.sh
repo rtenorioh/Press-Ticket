@@ -40,9 +40,6 @@ validate_url() {
     if ! host "$url" &>/dev/null; then
         echo -e "\e[31mErro: O domínio $url não possui DNS propagado.\e[0m"
         return 1
-    else
-        echo -e "\e[32mSucesso: O domínio $url teve o DNS propagado corretamente.\e[0m"
-        return 0
     fi
     echo "$url"
     return 0
