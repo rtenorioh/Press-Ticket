@@ -298,8 +298,8 @@ echo -e "${COLOR}Preparação Inicial...${RESET}" | tee -a "$LOG_FILE"
 {
     cd ~
     echo "Atualizando pacotes do sistema sem intervenção..."
-    sudo DEBIAN_FRONTEND=noninteractive apt update -y
-    sudo DEBIAN_FRONTEND=noninteractive apt upgrade -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold"
+    sudo DEBIAN_FRONTEND=noninteractive apt-get update -y
+    sudo DEBIAN_FRONTEND=noninteractive apt-get upgrade -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold"
     sudo DEBIAN_FRONTEND=noninteractive apt-get install build-essential -y
     sudo DEBIAN_FRONTEND=noninteractive apt-get install -y apparmor-utils
     # sudo DEBIAN_FRONTEND=noninteractive apt-get update -yq
