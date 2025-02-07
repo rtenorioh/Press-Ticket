@@ -8,6 +8,7 @@ fi
 
 COLOR="\e[38;5;92m"
 GREEN="\e[32m"
+YELLOW="\e[33m"
 RED="\e[31m"
 RESET="\e[0m"
 BOLD="\e[1m"
@@ -22,9 +23,9 @@ START_TIME=$(date +%s)
 show_usage() {
     echo -e "\n\033[1;33m=== USO DO SCRIPT ===\033[0m"
     echo -e "\033[1mComando:\033[0m"
-    echo -e "  \033[1;32mcurl -sSL https://install.pressticket.com.br | sudo bash -s <SENHA_DEPLOY> <NOME_EMPRESA> <URL_BACKEND> <URL_FRONTEND> <PORT_BACKEND> <PORT_FRONTEND> <USER_LIMIT> <CONNECTION_LIMIT> <EMAIL>\033[0m"
+    echo -e "  \033[1;32mcurl -sSL https://install.pressticket.com.br | sudo bash -s <SENHA_DEPLOY> <NOME_EMPRESA> <URL_BACKEND> <URL_FRONTEND> <PORT_BACKEND> <PORT_FRONTEND> <DB_PASS> <USER_LIMIT> <CONNECTION_LIMIT> <EMAIL>\033[0m"
     echo -e "\n\033[1mExemplo:\033[0m"
-    echo -e "  \033[1;32mcurl -sSL https://install.pressticket.com.br | sudo bash -s 'senha123' 'empresa' 'back.pressticket.com.br' 'front.pressticket.com.br' 8080 3333 3 10 'admin@pressticket.com.br'\033[0m"
+    echo -e "  \033[1;32mcurl -sSL https://install.pressticket.com.br | sudo bash -s 'senha123' 'empresa' 'back.pressticket.com.br' 'front.pressticket.com.br' 8080 3333 'senha123' 3 10 'admin@pressticket.com.br'\033[0m"
     echo -e "\n\033[1;33m======================\033[0m"
     exit 1
 }
@@ -46,7 +47,7 @@ validate_url() {
 }
 
 # Validar parâmetros
-if [ $# -lt 9 ] || [ $# -gt 10 ]; then
+if [ $# -lt 10 ] || [ $# -gt 11 ]; then
     echo "Erro: Número incorreto de argumentos fornecido."
     usage
 fi
@@ -57,10 +58,10 @@ URL_BACKEND=$(validate_url "$3") || exit 1
 URL_FRONTEND=$(validate_url "$4") || exit 1
 PORT_BACKEND=$5
 PORT_FRONTEND=$6
-USER_LIMIT=$7
-CONNECTION_LIMIT=$8
-EMAIL=$9
-BRANCH=${10:-main}
+DB_PASS=$7
+USER_LIMIT=$8
+CONNECTION_LIMIT=$9
+EMAIL=${10}
 
 # Validar campos obrigatórios
 errors=()
@@ -69,6 +70,7 @@ errors=()
 [[ -z "$NOME_EMPRESA" ]] && errors+=("NOME_EMPRESA é obrigatório.")
 [[ ! "$PORT_BACKEND" =~ ^[0-9]+$ ]] && errors+=("PORT_BACKEND deve ser numérico.")
 [[ ! "$PORT_FRONTEND" =~ ^[0-9]+$ ]] && errors+=("PORT_FRONTEND deve ser numérico.")
+[[ -z "$DB_PASS" ]] && errors+=("DB_PASS é obrigatório.")
 [[ ! "$USER_LIMIT" =~ ^[0-9]+$ ]] && errors+=("USER_LIMIT deve ser numérico.")
 [[ ! "$CONNECTION_LIMIT" =~ ^[0-9]+$ ]] && errors+=("CONNECTION_LIMIT deve ser numérico.")
 [[ ! "$EMAIL" =~ ^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$ ]] && errors+=("EMAIL inválido.")
@@ -101,7 +103,7 @@ finalizar() {
         echo "**************************************************************"
         echo " Versão Instalada: $VERSION                           "
         echo " Fuso Horário: $SELECTED_TZ                                 "
-        echo " Hora Local: $(TZ=$SELECTED_TZ date +"%d-%m-%Y %H:%M:%S")   "
+        echo " Final da Instalação: $(TZ=$SELECTED_TZ date +"%d-%m-%Y %H:%M:%S")   "
         echo " Local do log: $LOG_FILE                                    "
         echo " Tempo Total: ${MINUTES} minutos e ${SECONDS} segundos.       "
         echo "**************************************************************"
@@ -228,6 +230,7 @@ cat <<EOM
 * URL_FRONTEND: $URL_FRONTEND
 * PORT_BACKEND: $PORT_BACKEND
 * PORT_FRONTEND: $PORT_FRONTEND
+* DB_PASS: NÃO ESQUECER!
 * USER_LIMIT: $USER_LIMIT
 * CONNECTION_LIMIT: $CONNECTION_LIMIT
 * EMAIL: $EMAIL
@@ -242,7 +245,8 @@ echo -e " "
 echo -e "${COLOR}Iniciando a instalação...${RESET}" | tee -a "$LOG_FILE"
 echo -e " "
 
-sleep 2
+sleep 3
+
 clear
 
 echo -e " "
@@ -274,9 +278,9 @@ sleep 3
     echo "**************************************************************"
     echo "*               PRESS TICKET - LOG DE INSTALAÇÃO           *"
     echo "**************************************************************"
-    echo " Versão Instalada: $VERSION                           "
+    echo " Versão a ser instalada: $VERSION                           "
     echo " Fuso Horário: $SELECTED_TZ                                 "
-    echo " Hora Local: $(TZ=$SELECTED_TZ date +"%d-%m-%Y %H:%M:%S")   "
+    echo " Inicio da Instalação: $(TZ=$SELECTED_TZ date +"%d-%m-%Y %H:%M:%S")   "
     echo " Local do log: $LOG_FILE                                    "
     echo "**************************************************************"
     echo " "
@@ -312,32 +316,7 @@ echo -e "${COLOR}Preparação Inicial...${RESET}" | tee -a "$LOG_FILE"
 
 } | tee -a "$LOG_FILE"
 
-# Seção 2: Instalação do MariaDB
-echo -e "${COLOR}Instalando MariaDB...${RESET}" | tee -a "$LOG_FILE"
-sudo apt-get install -y mariadb-server mariadb-client | tee -a "$LOG_FILE"
-
-# Verifica se o comando foi executado com sucesso
-if [ $? -eq 0 ]; then
-    echo -e "${GREEN}MariaDB instalado com sucesso!${RESET}" | tee -a "$LOG_FILE"
-else
-    echo -e "${RED}Erro: A instalação do MariaDB falhou. Verifique o log para mais detalhes.${RESET}"
-    finalizar "${RED}Erro: A instalação do MariaDB falhou. Verifique o log para mais detalhes.${RESET}" 1
-fi
-
-# Verificar a versão do MariaDB
-echo -e "${COLOR}Verificar a versão do MariaDB...${RESET}" | tee -a "$LOG_FILE"
-mariadb --version | tee -a "$LOG_FILE"
-
-# Verificar o status do serviço MariaDB
-echo -e "${COLOR}Verificar o status do serviço MariaDB...${RESET}" | tee -a "$LOG_FILE"
-if systemctl is-active --quiet mariadb; then
-    echo -e "${GREEN}O serviço MariaDB está ativo.${RESET}" | tee -a "$LOG_FILE"
-else
-    echo -e "${RED}Erro: O serviço MariaDB não está ativo.${RESET}"
-    finalizar "${RED}Erro: O serviço MariaDB não está ativo.${RESET}" 1
-fi
-
-# Criar banco de dados e configurar MariaDB
+# Criar o banco de dados e configurar MariaDB
 echo -e "${COLOR}Criar banco de dados e configurar MariaDB...${RESET}" | tee -a "$LOG_FILE"
 
 # Verificar se o banco de dados já existe
@@ -348,13 +327,14 @@ if [ "$DB_EXISTS" ]; then
     finalizar "${RED}Erro: O banco de dados $NOME_EMPRESA já existe. Instalação interrompida.${RESET}" 1
 fi
 
-# Criar o banco de dados
+# Criar o banco de dados e configurar autenticação corretamente
 echo -e "${COLOR}Criando o banco de dados $NOME_EMPRESA...${RESET}" | tee -a "$LOG_FILE"
 {
     sudo mariadb -u root <<EOF
 CREATE DATABASE $NOME_EMPRESA CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
-USE mysql;
-UPDATE user SET plugin='mysql_native_password' WHERE User='root';
+
+ALTER USER 'root'@'localhost' IDENTIFIED BY '$SENHA_DEPLOY';
+
 FLUSH PRIVILEGES;
 EOF
     echo -e "${GREEN}Banco de dados criado e configuração do MariaDB concluída com sucesso.${RESET}"
@@ -456,18 +436,22 @@ fi
     echo -e "${GREEN}Reinício de serviços concluído.${RESET}"
 } | tee -a "$LOG_FILE"
 
-# Adicionando o usuário atual ao grupo MariaDB
-echo -e "${COLOR}Adicionando o usuário atual ao grupo MariaDB...${RESET}" | tee -a "$LOG_FILE"
+# Adicionando o usuário atual ao grupo MariaDB/MySQL
+echo -e "${COLOR}Adicionando o usuário atual ao grupo MariaDB/MySQL...${RESET}" | tee -a "$LOG_FILE"
 
-# Verifica se o grupo 'mariadb' existe
+# Verifica se o grupo 'mariadb' ou 'mysql' existe
 MYSQL_GROUP=$(getent group mariadb | cut -d: -f1)
-
 if [ -z "$MYSQL_GROUP" ]; then
-    echo -e "${RED}Erro: O grupo MariaDB não foi encontrado.${RESET}" | tee -a "$LOG_FILE"
-    finalizar "Erro: O grupo MariaDB não foi encontrado. Verifique a instalação." 1
+    MYSQL_GROUP=$(getent group mysql | cut -d: -f1)
 fi
 
-# Adiciona o usuário ao grupo MariaDB
+# Se nenhum dos grupos for encontrado, interrompe a instalação
+if [ -z "$MYSQL_GROUP" ]; then
+    echo -e "${RED}Erro: Nenhum grupo MariaDB/MySQL foi encontrado.${RESET}" | tee -a "$LOG_FILE"
+    finalizar "Erro: Nenhum grupo MariaDB/MySQL foi encontrado. Verifique a instalação." 1
+fi
+
+# Adiciona o usuário ao grupo correto
 sudo usermod -aG "$MYSQL_GROUP" ${USER} | tee -a "$LOG_FILE"
 if [ $? -eq 0 ]; then
     echo -e "${GREEN}Usuário adicionado ao grupo $MYSQL_GROUP com sucesso.${RESET}" | tee -a "$LOG_FILE"
@@ -609,7 +593,7 @@ DB_DIALECT=mysql
 DB_HOST=localhost
 DB_TIMEZONE=-03:00
 DB_USER=root
-DB_PASS=
+DB_PASS=$SENHA_DEPLOY
 DB_NAME=$NOME_EMPRESA
 
 # Limitar Usuários e Conexões
