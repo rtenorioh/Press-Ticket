@@ -306,6 +306,12 @@ echo -e "${COLOR}Preparação Inicial...${RESET}" | tee -a "$LOG_FILE"
     # Reiniciar serviços que utilizam bibliotecas desatualizadas
     echo "Reiniciando serviços para aplicar as atualizações..."
     sudo systemctl daemon-reexec
+    sudo systemctl restart cron.service
+    sudo systemctl restart mysql.service
+    sudo systemctl restart rsyslog.service
+    sudo systemctl restart irqbalance
+    sudo systemctl restart multipathd
+
     echo -e "${GREEN}Reinício de serviços concluído.${RESET}" | tee -a "$LOG_FILE"
 } | tee -a "$LOG_FILE"
 
