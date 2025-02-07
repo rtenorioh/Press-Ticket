@@ -1,5 +1,5 @@
 #!/bin/bash
-
+set -x
 # Verificar se o script está sendo executado como root
 if [ "$EUID" -ne 0 ]; then
     echo "Erro: Este script precisa ser executado como root."
@@ -63,6 +63,8 @@ USER_LIMIT=$8
 CONNECTION_LIMIT=$9
 EMAIL=$10
 BRANCH=${11:-main}
+
+echo "Valor de EMAIL recebido: '$EMAIL'"
 
 # Validar campos obrigatórios
 errors=()
