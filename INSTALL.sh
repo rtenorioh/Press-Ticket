@@ -66,8 +66,6 @@ CONNECTION_LIMIT=$9
 EMAIL=${10}
 BRANCH=${11:-main}
 
-echo "Valor de EMAIL recebido: '$EMAIL'"
-
 # Validar campos obrigatórios
 errors=()
 
