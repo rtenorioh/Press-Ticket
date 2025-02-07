@@ -299,6 +299,8 @@ echo -e "${COLOR}Preparação Inicial...${RESET}" | tee -a "$LOG_FILE"
     cd ~
     echo "Atualizando pacotes do sistema sem intervenção..."
     sudo DEBIAN_FRONTEND=noninteractive apt-get update -y
+    echo 'exit 0' | sudo tee /usr/sbin/policy-rc.d
+    sudo sed -i 's/#\$nrconf{restart} =.*/$nrconf{restart} = "a";/' /etc/needrestart/needrestart.conf
     sudo DEBIAN_FRONTEND=noninteractive apt-get upgrade -y \
         -o Dpkg::Options::="--force-confdef" \
         -o Dpkg::Options::="--force-confold" \
@@ -838,7 +840,7 @@ echo -e "${GREEN}Nginx instalado com sucesso.${RESET}" | tee -a "$LOG_FILE"
 # Criando e configurando o arquivo do frontend no Nginx
 echo -e "${COLOR}Configurando o arquivo do frontend no Nginx...${RESET}" | tee -a "$LOG_FILE"
 
-if ! sudo tee /etc/nginx/sites-available/$NOME_EMPRESA-front <<EOF; then
+if ! sudo tee /etc/nginx/sites-available/$NOME_EMPRESA-front <<EOF
 server {
     server_name $URL_FRONTEND;
     location / {
@@ -854,6 +856,7 @@ server {
     }
 }
 EOF
+then
     finalizar "Erro ao criar o arquivo de configuração do frontend." 1
 fi
 
@@ -862,7 +865,7 @@ echo -e "${GREEN}Arquivo de configuração do frontend criado com sucesso.${RESE
 # Criando e configurando o arquivo do backend no Nginx
 echo -e "${COLOR}Configurando o arquivo do backend no Nginx...${RESET}" | tee -a "$LOG_FILE"
 
-if ! sudo tee /etc/nginx/sites-available/$NOME_EMPRESA-back <<EOF; then
+if ! sudo tee /etc/nginx/sites-available/$NOME_EMPRESA-back <<EOF
 server {
     server_name $URL_BACKEND;
     location / {
@@ -878,6 +881,7 @@ server {
     }
 }
 EOF
+then
     finalizar "Erro ao criar o arquivo de configuração do backend." 1
 fi
 
