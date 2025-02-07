@@ -301,7 +301,7 @@ echo -e "${COLOR}Preparação Inicial...${RESET}" | tee -a "$LOG_FILE"
     sudo DEBIAN_FRONTEND=noninteractive apt-get update -y
     sudo DEBIAN_FRONTEND=noninteractive apt-get upgrade -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold"
     sudo DEBIAN_FRONTEND=noninteractive apt-get install build-essential -y
-    sudo DEBIAN_FRONTEND=noninteractive apt-get install -y apparmor-utils
+    # sudo DEBIAN_FRONTEND=noninteractive apt-get install -y apparmor-utils
     # sudo DEBIAN_FRONTEND=noninteractive apt-get update -yq
     # sudo DEBIAN_FRONTEND=noninteractive apt-get upgrade -yq
     echo -e "${GREEN}Atualização de pacotes concluída com sucesso.${RESET}" | tee -a "$LOG_FILE"
