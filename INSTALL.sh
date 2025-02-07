@@ -170,7 +170,7 @@ fi
         for error in "${errors[@]}"; do
             echo "- $error"
         done
-        usage
+        show_usage
     fi
 } | tee -a "$LOG_FILE"
 
