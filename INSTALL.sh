@@ -629,35 +629,35 @@ if cd "$DEPLOY_HOME/$NOME_EMPRESA/backend"; then
 
     # Verifica se o arquivo existe
     if [ ! -f "$SEED_FILE" ]; then
-        finalizar "Erro: Arquivo de seed não encontrado: $SEED_FILE" 1
+        echo -e "${RED}Erro: Arquivo de seed não encontrado: $SEED_FILE.${RESET}" | tee -a "$LOG_FILE"
+        finalizar "Erro: Arquivo de seed não encontrado." 1
     fi
 
     # Realiza um backup do arquivo
     if ! cp "$SEED_FILE" "$BACKUP_FILE"; then
+        echo -e "${RED}Erro ao criar backup do arquivo de seed.${RESET}" | tee -a "$LOG_FILE"
         finalizar "Erro ao criar backup do arquivo de seed." 1
     fi
 
-    # Substitui o email no arquivo usando sed (com tratamento de erros)
+    # Substitui o email no arquivo usando sed
     if ! sed -i "s/masteradmin@pressticket.com.br/$EMAIL/g" "$SEED_FILE"; then
-        # Restaura o backup em caso de erro
-        if ! mv "$BACKUP_FILE" "$SEED_FILE"; then
-            echo "Atenção: Falha ao restaurar o backup do arquivo de seed após erro na substituição do email." | tee -a "$LOG_FILE"
+        echo -e "${RED}Erro ao substituir o email no arquivo de seed.${RESET}" | tee -a "$LOG_FILE"
+        if mv "$BACKUP_FILE" "$SEED_FILE"; then
+            echo -e "${YELLOW}Arquivo de seed restaurado com sucesso.${RESET}" | tee -a "$LOG_FILE"
+        else
+            echo -e "${RED}Falha ao restaurar o arquivo de seed. Verifique manualmente.${RESET}" | tee -a "$LOG_FILE"
         fi
-        finalizar "Erro ao substituir o email no arquivo de seed." 1
+        echo -e "${YELLOW}Prosseguindo com a instalação, mas o email não foi atualizado.${RESET}" | tee -a "$LOG_FILE"
     fi
 
-    # Verifica se a substituição foi bem-sucedida (com tratamento de erros)
+    # Verifica se a substituição foi bem-sucedida
     if grep -q "masteradmin@pressticket.com.br" "$SEED_FILE"; then
-        # Restaura o backup
-        if ! mv "$BACKUP_FILE" "$SEED_FILE"; then
-            echo "Atenção: Falha ao restaurar o backup do arquivo de seed após falha na verificação da substituição." | tee -a "$LOG_FILE"
-        fi
-        finalizar "Erro: Substituição do email falhou." 1
+        echo -e "${YELLOW}Aviso: O email do MasterAdmin não foi alterado corretamente. Verifique manualmente.${RESET}" | tee -a "$LOG_FILE"
+    else
+        echo -e "${GREEN}Email do usuário MasterAdmin atualizado com sucesso para: $EMAIL.${RESET}" | tee -a "$LOG_FILE"
     fi
-
-    echo -e "${GREEN}Email do usuário MasterAdmin atualizado com sucesso para: $EMAIL.${RESET}" | tee -a "$LOG_FILE"
-
 else
+    echo -e "${RED}Erro ao acessar o diretório do backend.${RESET}" | tee -a "$LOG_FILE"
     finalizar "Erro ao acessar o diretório do backend." 1
 fi
 
