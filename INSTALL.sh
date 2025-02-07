@@ -222,26 +222,29 @@ echo -e "${GREEN}Portas ${PORT_BACKEND} e ${PORT_FRONTEND} disponíveis.${RESET}
 echo " "
 
 # Exibir as variáveis validadas
-echo -e " "
-cat <<EOM
-*** Parâmetros recebidos e validados com sucesso: ***
-* SENHA_DEPLOY: NÃO ESQUECER!
-* NOME_EMPRESA: $NOME_EMPRESA
-* URL_BACKEND: $URL_BACKEND
-* URL_FRONTEND: $URL_FRONTEND
-* PORT_BACKEND: $PORT_BACKEND
-* PORT_FRONTEND: $PORT_FRONTEND
-* DB_PASS: NÃO ESQUECER!
-* USER_LIMIT: $USER_LIMIT
-* CONNECTION_LIMIT: $CONNECTION_LIMIT
-* EMAIL: $EMAIL
-* BRANCH: $BRANCH
-*****************************************************
+{
+    echo -e " "
+    cat <<EOM
+    *** Parâmetros recebidos e validados com sucesso: ***
+    * SENHA_DEPLOY: NÃO ESQUECER!
+    * NOME_EMPRESA: $NOME_EMPRESA
+    * URL_BACKEND: $URL_BACKEND
+    * URL_FRONTEND: $URL_FRONTEND
+    * PORT_BACKEND: $PORT_BACKEND
+    * PORT_FRONTEND: $PORT_FRONTEND
+    * DB_PASS: NÃO ESQUECER!
+    * USER_LIMIT: $USER_LIMIT
+    * CONNECTION_LIMIT: $CONNECTION_LIMIT
+    * EMAIL: $EMAIL
+    * BRANCH: $BRANCH
+    *****************************************************
 EOM
-echo -e " "
+    echo -e " "
+} | tee -a "$LOG_FILE"
 
 sleep 5
 
+# Exibir mensagem de inicio da instalação
 echo -e " "
 echo -ne "${COLOR}Iniciando a instalação em ${YELLOW}10${RESET}..." | tee -a "$LOG_FILE"
 
