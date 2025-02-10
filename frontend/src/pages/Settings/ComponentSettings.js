@@ -34,6 +34,8 @@ const ComponentSettings = ({ settings, getSettingValue, handleChangeBooleanSetti
         { key: "created", label: t("settings.general.created.name"), note: t("settings.general.created.note") },
         { key: "openTickets", label: t("settings.general.openTickets.name"), note: t("settings.general.openTickets.note") },
         { key: "signOption", label: t("settings.general.signOption.name"), note: t("settings.general.signOption.note") },
+        { key: "tabsPending", label: t("settings.general.tabsPending.name"), note: t("settings.general.tabsPending.note") },
+        { key: "tabsClosed", label: t("settings.general.tabsClosed.name"), note: t("settings.general.tabsClosed.note") },
     ];
 
     const settingsChunks = [];

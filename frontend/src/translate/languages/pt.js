@@ -568,6 +568,22 @@ const messages = {
               disabled: "Desativado",
             },
           },
+          tabsPending: {
+            name: "Mostrar tabs de pendentes",
+            note: "Se desabilitar não irá exibir a tab pendentes",
+            options: {
+              enabled: "Ativado",
+              disabled: "Desativado",
+            },
+          },
+          tabsClosed: {
+            name: "Mostrar tabs de finalizados",
+            note: "Se desabilitar não irá exibir a tab finalizados",
+            options: {
+              enabled: "Ativado",
+              disabled: "Desativado",
+            },
+          },
           timeCreateNewTicket: {
             name: "Novo Ticket em:",
             note: "Selecione o tempo que será necessário para abrir um novo ticket, caso o cliente entre em contatos novamente",

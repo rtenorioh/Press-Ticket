@@ -560,6 +560,31 @@ const messages = {
               disabled: "Disabled",
             },
           },
+          signOption: {
+            name: "Message Signature",
+            note: "Enable this feature to allow users to disable message signature",
+            options: {
+              enabled: "Enabled",
+              disabled: "Disabled",
+            },
+          },
+          tabsPending: {
+            name: "Show pending tabs",
+            note: "Disable this feature to hide the pending tabs",
+            options: {
+              enabled: "Enabled",
+              disabled: "Disabled",
+            },
+          },
+          tabsClosed: {
+            name: "Show closed tabs",
+            note: "Disable this feature to hide the closed tabs",
+            options: {
+              enabled: "Enabled",
+              disabled: "Disabled",
+              disabled: "Desativado",
+            },
+          },
           timeCreateNewTicket: {
             name: "New Ticket in:",
             note: "Select the time required to open a new ticket if the customer contacts again",

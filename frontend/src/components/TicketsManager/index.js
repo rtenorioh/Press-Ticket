@@ -27,6 +27,7 @@ import NewTicketModal from "../NewTicketModal";
 import TabPanel from "../TabPanel";
 import TicketsList from "../TicketsList";
 import TicketsQueueSelect from "../TicketsQueueSelect";
+import toastError from "../../errors/toastError";
 import useTickets from "../../hooks/useTickets";
 import api from "../../services/api";
 import { toast } from "react-toastify";
@@ -128,6 +129,7 @@ const TicketsManager = () => {
   const { user } = useContext(AuthContext);
   const [, setOpenCount] = useState(0);
   const userQueueIds = user.queues.map((q) => q.id);
+  const [settings, setSettings] = useState([]);
   const [selectedQueueIds, setSelectedQueueIds] = useState(userQueueIds || []);
   const [previousCounts, setPreviousCounts] = useState({
     inAttendance: 0,
@@ -175,7 +177,21 @@ const TicketsManager = () => {
       setShowAllTickets(true);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, []);
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const { data } = await api.get("/settings");
+        setSettings(data);
+      } catch (err) {
+        console.error(err);
+        toastError(err);
+        setSettings([]);
+      }
+    };
+    fetchSettings();
+  }, []);
 
   const handleSearch = (e) => {
     const searchedTerm = e.target.value.toLowerCase();
@@ -246,6 +262,13 @@ const TicketsManager = () => {
     setCloseAction(null);
   };
 
+  const canTabsSettings = (ts) => {
+    return (
+      (settings && settings.some(s => s.key === ts && s.value === "enabled")) ||
+      (user && user.profile === "admin")
+    );
+  };
+
   return (
     <Paper elevation={0} variant="outlined" className={classes.ticketsWrapper}>
       <NewTicketModal
@@ -305,42 +328,46 @@ const TicketsManager = () => {
               </Badge>
             }
             classes={{ root: classes.tab }}
-          />          
-          <Tab
-            value={"pending"}
-            icon={
-              <Badge
-                className={classes.badge}
-                badgeContent={previousCounts.waiting}
-                overlap="rectangular"
-                max={9999}
-                color="secondary"
-              >
-                <Tooltip title={t("tickets.tabs.pending.title")} placement="top" arrow>
-                  <HourglassEmptyRounded className={classes.tabIcon}/>
-                </Tooltip>
-              </Badge>
-            }
-            classes={{ root: classes.tab }}
-          />
-          <Tab
-            value={"closed"}
-            icon={
-              <Badge
-                className={classes.badge}
-                badgeContent={previousCounts.closed}
-                overlap="rectangular"
-                max={9999}
-                color="secondary"
-              >
-                <Tooltip title={t("tickets.tabs.closed.title")} placement="top" arrow>
-                  <CheckCircle className={classes.tabIcon} />
-                </Tooltip>
-              </Badge>
-            }  
-            classes={{ root: classes.tab }}
-          />
-        </Tabs>
+          /> 
+          {canTabsSettings("tabsPending") && (         
+            <Tab
+              value={"pending"}
+              icon={
+                <Badge
+                  className={classes.badge}
+                  badgeContent={previousCounts.waiting}
+                  overlap="rectangular"
+                  max={9999}
+                  color="secondary"
+                >
+                  <Tooltip title={t("tickets.tabs.pending.title")} placement="top" arrow>
+                    <HourglassEmptyRounded className={classes.tabIcon}/>
+                  </Tooltip>
+                </Badge>
+              }
+              classes={{ root: classes.tab }}
+            />
+          )}
+          {canTabsSettings("tabsClosed") && (
+            <Tab
+              value={"closed"}
+              icon={
+                <Badge
+                  className={classes.badge}
+                  badgeContent={previousCounts.closed}
+                  overlap="rectangular"
+                  max={9999}
+                  color="secondary"
+                >
+                  <Tooltip title={t("tickets.tabs.closed.title")} placement="top" arrow>
+                    <CheckCircle className={classes.tabIcon} />
+                  </Tooltip>
+                </Badge>
+              }  
+              classes={{ root: classes.tab }}
+            />
+          )}
+        </Tabs>  
       </Paper>
       <Paper square elevation={0} className={classes.ticketOptionsBox}>
         <Tooltip title={t("ticketsManager.buttons.newTicket")} placement="top" arrow>

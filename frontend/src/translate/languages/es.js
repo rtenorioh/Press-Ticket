@@ -560,6 +560,30 @@ const messages = {
                 disabled: "Desactivado",
               },
             },
+            signOption: {
+              name: "Suscribirse Mensaje",
+              note: "Active esta función para permitir que el usuario pueda desactivar la firma de mensajes",
+              options: {
+                enabled: "Activado",
+                disabled: "Desativado",
+              },
+            },
+            tabsPending: {
+              name: "Mostrar tabs de pendientes",
+              note: "Se desabilitar não irá exibir a tab pendentes",
+              options: {
+                enabled: "Activado",
+                disabled: "Desativado",
+              },
+            },
+            tabsClosed: {
+              name: "Mostrar tabs de finalizados",
+              note: "Se desabilitar não irá exibir a tab finalizados",
+              options: {
+                enabled: "Activado",
+                disabled: "Desativado",
+              },
+            },
             timeCreateNewTicket: {
               name: "Nuevo Ticket en:",
               note: "Selecciona el tiempo necesario para abrir un nuevo ticket si el cliente se pone en contacto nuevamente",
