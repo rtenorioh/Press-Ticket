@@ -136,6 +136,37 @@ else
     SYSTEM_VERSION="Arquivo package.json não encontrado"
 fi
 
+{
+    echo " "
+    echo "VERIFICANDO O FFmpeg"
+    echo " "
+} | tee -a "$LOG_FILE"
+
+sleep 2
+
+# Verifica se o FFmpeg está instalado
+if command -v ffmpeg &>/dev/null; then
+    echo -e "${GREEN}FFmpeg já está instalado.${RESET}" | tee -a "$LOG_FILE"
+else
+    echo -e "${YELLOW}FFmpeg não encontrado. Iniciando a instalação...${RESET}" | tee -a "$LOG_FILE"
+    
+    # Atualiza a lista de pacotes
+    echo -e "${COLOR}Atualizando a lista de pacotes...${RESET}" | tee -a "$LOG_FILE"
+    sudo apt-get update -y | tee -a "$LOG_FILE"
+
+    # Instala o FFmpeg
+    echo -e "${COLOR}Instalando o FFmpeg...${RESET}" | tee -a "$LOG_FILE"
+    sudo apt-get install -y ffmpeg | tee -a "$LOG_FILE"
+
+    # Verifica se a instalação foi bem-sucedida
+    if command -v ffmpeg &>/dev/null; then
+        echo -e "${GREEN}FFmpeg instalado com sucesso!${RESET}" | tee -a "$LOG_FILE"
+    else
+        echo -e "${RED}Erro ao instalar o FFmpeg. Verifique sua conexão e tente novamente.${RESET}"
+        finalizar "Erro ao instalar o FFmpeg." 1
+    fi
+fi
+
 # Adicionar informações iniciais ao log
 {
     echo " "
