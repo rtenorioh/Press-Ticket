@@ -584,6 +584,14 @@ const messages = {
               disabled: "Desativado",
             },
           },
+          listItemSpy: {
+            name: "Mostrar botão Espiar",
+            note: "Se habilitado, irá mostrar o botão Espiar na lista de tickets",
+            options: {
+              enabled: "Ativado",
+              disabled: "Desativado",
+            },
+          },
           timeCreateNewTicket: {
             name: "Novo Ticket em:",
             note: "Selecione o tempo que será necessário para abrir um novo ticket, caso o cliente entre em contatos novamente",

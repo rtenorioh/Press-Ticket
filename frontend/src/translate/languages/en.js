@@ -584,6 +584,14 @@ const messages = {
               disabled: "Disabled",
             },
           },
+          listItemSpy: {
+            name: "Show spy button",
+            note: "If enabled, the spy button will be shown on the tickets list",
+            options: {
+              enabled: "Enabled",
+              disabled: "Disabled",
+            },
+          },
           timeCreateNewTicket: {
             name: "New Ticket in:",
             note: "Select the time required to open a new ticket if the customer contacts again",

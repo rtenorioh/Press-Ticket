@@ -565,7 +565,7 @@ const messages = {
               note: "Active esta función para permitir que el usuario pueda desactivar la firma de mensajes",
               options: {
                 enabled: "Activado",
-                disabled: "Desativado",
+                disabled: "Desactivado",
               },
             },
             tabsPending: {
@@ -573,7 +573,7 @@ const messages = {
               note: "Se desabilitar não irá exibir a tab pendentes",
               options: {
                 enabled: "Activado",
-                disabled: "Desativado",
+                disabled: "Desactivado",
               },
             },
             tabsClosed: {
@@ -581,7 +581,15 @@ const messages = {
               note: "Se desabilitar não irá exibir a tab finalizados",
               options: {
                 enabled: "Activado",
-                disabled: "Desativado",
+                disabled: "Desactivado",
+              },
+            },
+            listItemSpy: {
+              name: "Mostrar botón Peek",
+              note: "Si está habilitado, se mostrará el botón Peek en la lista de tickets",
+              options: {
+                enabled: "Ativado",
+                disabled: "Desactivado",
               },
             },
             timeCreateNewTicket: {

@@ -196,6 +196,7 @@ const TicketListItem = ({ ticket, filteredTags }) => {
 	const [confirmationOpen, setConfirmationOpen] = useState(false);
 	const [tag, setTag] = useState([]);
 	const [settings, setSettings] = useState([]);
+	const [spy, setSpy] = useState([]);
 
 	useEffect(() => {
 		isMounted.current = true;
@@ -236,6 +237,7 @@ const TicketListItem = ({ ticket, filteredTags }) => {
 			console.error(err);
 			toastError(err);
 			setSettings([]);
+			setSpy([]);
 		  }
 		};
 		fetchSettings();
@@ -355,10 +357,17 @@ const TicketListItem = ({ ticket, filteredTags }) => {
 
 	const canTabsSettings = (ts) => {
 		return (
-		  (settings && settings.some(s => s.key === ts && s.value === "enabled")) ||
-		  (user && user.profile === "admin")
+			(settings && settings.some(s => s.key === ts && s.value === "enabled")) ||
+			(user && user.profile === "admin")
 		);
-	  };
+	};
+
+	const canSpy = (cs) => {
+		return (
+			(spy && spy.some(s => s.key === cs && s.value === "enabled")) ||
+			(user && user.profile === "admin")
+		);
+	};
 
 	return (
 		<React.Fragment key={ticket.id}>
@@ -607,7 +616,7 @@ const TicketListItem = ({ ticket, filteredTags }) => {
 						</Tooltip>
 					)}
 
-					{ticket.status === "pending" && (
+					{canSpy("listItemSpy") && ticket.status === "pending" && (
 						<Tooltip title={t("ticketsList.items.spy")}>
 							<IconButton
 								className={classes.bottomButton}
