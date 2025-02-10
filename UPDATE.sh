@@ -352,12 +352,12 @@ else
     echo "O arquivo $SEQUELIZE_DATA_FILE já existe. Nenhuma ação necessária." | tee -a "$LOG_FILE"
 fi
 
-# Verificação do arquivo .env
+# Verificação do arquivo .env no backend
 ENV_FILE=".env"
 
 {
     echo " "
-    echo "VERIFICANDO O ARQUIVO .env"
+    echo "VERIFICANDO O ARQUIVO .env DO BACKEND"
     echo " "
 } | tee -a "$LOG_FILE"
 
@@ -367,13 +367,10 @@ if [ -f "$ENV_FILE" ]; then
     if grep -q "^NODE_ENV=production" "$ENV_FILE"; then
         echo "A variável NODE_ENV já está configurada como production no arquivo .env." | tee -a "$LOG_FILE"
     else
-        # Verifica se existe NODE_ENV vazio ou se não existe
         if grep -q "^NODE_ENV=" "$ENV_FILE"; then
-            # Substitui a linha existente
             sed -i 's/^NODE_ENV=.*/NODE_ENV=production/' "$ENV_FILE"
             echo "A variável NODE_ENV foi atualizada para production no arquivo .env." | tee -a "$LOG_FILE"
         else
-            # Adiciona NODE_ENV=production no início do arquivo
             sed -i '1iNODE_ENV=production' "$ENV_FILE"
             echo "A variável NODE_ENV=production foi adicionada no início do arquivo .env." | tee -a "$LOG_FILE"
         fi
@@ -383,12 +380,8 @@ if [ -f "$ENV_FILE" ]; then
     if grep -q "^WEBHOOK=" "$ENV_FILE"; then
         echo "A variável WEBHOOK já existe no arquivo .env. Nenhuma alteração necessária." | tee -a "$LOG_FILE"
     else
-        # Obtém o valor da variável BACKEND_URL
         BACKEND_URL=$(grep "^BACKEND_URL=" "$ENV_FILE" | cut -d '=' -f2- | tr -d '[:space:]')
-
-        # Adiciona a variável WEBHOOK ao arquivo .env
         if [ -n "$BACKEND_URL" ]; then
-            echo "A variável WEBHOOK não foi encontrada. Adicionando com o valor de BACKEND_URL..." | tee -a "$LOG_FILE"
             echo "WEBHOOK=$BACKEND_URL" >>"$ENV_FILE"
             echo "A variável WEBHOOK foi adicionada ao arquivo .env com sucesso." | tee -a "$LOG_FILE"
         else
@@ -396,8 +389,29 @@ if [ -f "$ENV_FILE" ]; then
             finalizar "Erro ao configurar a variável WEBHOOK devido à ausência de BACKEND_URL." 1
         fi
     fi
+
+    # Verifica se PM2_FRONTEND existe no arquivo .env
+    if grep -q "^PM2_FRONTEND=" "$ENV_FILE"; then
+        echo "A variável PM2_FRONTEND já existe no arquivo .env." | tee -a "$LOG_FILE"
+    else
+        echo "PM2_FRONTEND=1" >>"$ENV_FILE"
+        echo "A variável PM2_FRONTEND foi adicionada ao arquivo .env." | tee -a "$LOG_FILE"
+    fi
+
+    # Verifica se PM2_BACKEND existe no arquivo .env
+    if grep -q "^PM2_BACKEND=" "$ENV_FILE"; then
+        echo "A variável PM2_BACKEND já existe no arquivo .env." | tee -a "$LOG_FILE"
+    else
+        echo "PM2_BACKEND=0" >>"$ENV_FILE"
+        echo "A variável PM2_BACKEND foi adicionada ao arquivo .env." | tee -a "$LOG_FILE"
+    fi
+
+    # Mensagem informando que o usuário deve confirmar os IDs após a atualização
+    echo -e "${YELLOW}Atenção: Após a atualização, confirme os IDs do PM2 para o frontend e backend e atualize-os no arquivo .env do backend.${RESET}" | tee -a "$LOG_FILE"
+    sleep 10
+
 else
-    echo "Erro: O arquivo .env não foi encontrado no diretório backend." | tee -a "$LOG_FILE"
+    echo "Erro: O arquivo .env não foi encontrado no diretório backend."
     finalizar "Erro ao localizar o arquivo .env no backend." 1
 fi
 
