@@ -195,6 +195,7 @@ const TicketListItem = ({ ticket, filteredTags }) => {
 	const [acceptTicketWithouSelectQueueOpen, setAcceptTicketWithouSelectQueueOpen] = useState(false);
 	const [confirmationOpen, setConfirmationOpen] = useState(false);
 	const [tag, setTag] = useState([]);
+	const [settings, setSettings] = useState([]);
 
 	useEffect(() => {
 		isMounted.current = true;
@@ -225,6 +226,20 @@ const TicketListItem = ({ ticket, filteredTags }) => {
 			isMounted.current = false;
 		};
 	}, []);
+
+	useEffect(() => {
+		const fetchSettings = async () => {
+		  try {
+			const { data } = await api.get("/settings");
+			setSettings(data);
+		  } catch (err) {
+			console.error(err);
+			toastError(err);
+			setSettings([]);
+		  }
+		};
+		fetchSettings();
+	  }, []);
 
 	const filterTicketByTags = () => {
 		if (!filteredTags || filteredTags.length === 0) return true;
@@ -337,6 +352,13 @@ const TicketListItem = ({ ticket, filteredTags }) => {
 	const handleConfirmClose = () => {
 		handleClosedTicket(ticket.id);
 	};
+
+	const canTabsSettings = (ts) => {
+		return (
+		  (settings && settings.some(s => s.key === ts && s.value === "enabled")) ||
+		  (user && user.profile === "admin")
+		);
+	  };
 
 	return (
 		<React.Fragment key={ticket.id}>
@@ -605,9 +627,9 @@ const TicketListItem = ({ ticket, filteredTags }) => {
 								<ClearOutlined />
 							</IconButton>
 						</Tooltip>
-					)}
+					)} 
 
-					{ticket.status === "open" && (
+					{canTabsSettings("tabsPending") && ticket.status === "open" && (
 						<Tooltip title={t("ticketsList.items.return")}>
 							<IconButton
 								className={classes.bottomButton}

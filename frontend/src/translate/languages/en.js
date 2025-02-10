@@ -582,7 +582,6 @@ const messages = {
             options: {
               enabled: "Enabled",
               disabled: "Disabled",
-              disabled: "Desativado",
             },
           },
           timeCreateNewTicket: {
