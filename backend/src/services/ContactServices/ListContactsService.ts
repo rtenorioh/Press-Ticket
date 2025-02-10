@@ -19,7 +19,7 @@ const ListContactsService = async ({
   pageNumber = "1",
   tags
 }: Request): Promise<Response> => {
-  const whereCondition: Filterable["where"] = {
+  const whereCondition: any = {
     [Op.or]: [
       {
         name: Sequelize.where(
@@ -41,26 +41,25 @@ const ListContactsService = async ({
     ]
   };
 
-  let includeCondition: Includeable[] = [
+  const includeCondition: Includeable[] = [
     {
       model: Tag,
       as: "tags",
       attributes: ["id", "name", "color"]
     }
   ];
-
+  
   if (Array.isArray(tags) && tags.length > 0) {
-    includeCondition = [
-      {
-        model: Tag,
-        as: "tags",
-        where: {
-          id: { [Op.in]: tags }
-        },
-        attributes: ["id", "name", "color"],
-        through: { attributes: [] }
-      }
-    ];
+    includeCondition[0] = {
+      model: Tag,
+      as: "tags",
+      required: true,
+      where: {
+        id: { [Op.in]: tags }
+      },
+      attributes: ["id", "name", "color"],
+      through: { attributes: [] }
+    };
   }
 
   const limit = 20;

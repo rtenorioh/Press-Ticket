@@ -137,30 +137,32 @@ const Contacts = () => {
 
   useEffect(() => {
     setLoading(true);
+  
     const delayDebounceFn = setTimeout(() => {
       const fetchContacts = async () => {
         try {
           const { data } = await api.get("/contacts/", {
-            params: { searchParam, pageNumber },
+            params: {
+              searchParam,
+              pageNumber,
+              tags: filteredTags.map(tag => tag.id).join(",")
+            }
           });
-
-          const filteredContacts = data.contacts.filter(contact => {
-            if (filteredTags.length === 0) return true;
-            return contact.tags && contact.tags.length > 0 && filteredTags.every(tag => contact.tags.some(ctag => ctag.id === tag.id));
-          });
-
-          dispatch({ type: "LOAD_CONTACTS", payload: filteredContacts });
+  
+          dispatch({ type: "LOAD_CONTACTS", payload: data.contacts });
           setHasMore(data.hasMore);
           setLoading(false);
         } catch (err) {
           toastError(err);
         }
       };
+  
       fetchContacts();
     }, 500);
+  
     return () => clearTimeout(delayDebounceFn);
   }, [searchParam, pageNumber, filteredTags]);
-
+   
   useEffect(() => {
     const socket = openSocket();
 
@@ -181,6 +183,8 @@ const Contacts = () => {
 
   const handleTagFilter = (tags) => {
     setFilteredTags(tags);
+    dispatch({ type: "RESET" }); // Resetar os contatos
+    setPageNumber(1); // Reiniciar a busca da página 1
   };
 
   const handleSearch = (event) => {

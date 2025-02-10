@@ -18,6 +18,7 @@ import GetProfilePicUrl from "../services/WbotServices/GetProfilePicUrl";
 type IndexQuery = {
   searchParam: string;
   pageNumber: string;
+  tags?: string;
 };
 
 type IndexGetContactQuery = {
@@ -43,11 +44,14 @@ interface ContactData {
 }
 
 export const index = async (req: Request, res: Response): Promise<Response> => {
-  const { searchParam, pageNumber } = req.query as IndexQuery;
+  const { searchParam, pageNumber, tags } = req.query as IndexQuery;
+
+  const tagIds = tags ? tags.split(",").map(tag => Number(tag)) : [];
 
   const { contacts, count, hasMore } = await ListContactsService({
     searchParam,
-    pageNumber
+    pageNumber,
+    tags: tagIds
   });
 
   return res.json({ contacts, count, hasMore });
