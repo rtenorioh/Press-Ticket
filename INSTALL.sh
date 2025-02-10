@@ -1,4 +1,6 @@
 #!/bin/bash
+# Debugar o script
+# set -x
 
 # Verificar se o script está sendo executado como root
 if [ "$EUID" -ne 0 ]; then
@@ -8,6 +10,7 @@ fi
 
 COLOR="\e[38;5;92m"
 GREEN="\e[32m"
+YELLOW="\e[33m"
 RED="\e[31m"
 RESET="\e[0m"
 BOLD="\e[1m"
@@ -22,9 +25,9 @@ START_TIME=$(date +%s)
 show_usage() {
     echo -e "\n\033[1;33m=== USO DO SCRIPT ===\033[0m"
     echo -e "\033[1mComando:\033[0m"
-    echo -e "  \033[1;32mcurl -sSL https://install.pressticket.com.br | sudo bash -s <SENHA_DEPLOY> <NOME_EMPRESA> <URL_BACKEND> <URL_FRONTEND> <PORT_BACKEND> <PORT_FRONTEND> <USER_LIMIT> <CONNECTION_LIMIT> <EMAIL>\033[0m"
+    echo -e "  \033[1;32mcurl -sSL https://install.pressticket.com.br | sudo bash -s <SENHA_DEPLOY> <NOME_EMPRESA> <URL_BACKEND> <URL_FRONTEND> <PORT_BACKEND> <PORT_FRONTEND> <DB_PASS> <USER_LIMIT> <CONNECTION_LIMIT> <EMAIL>\033[0m"
     echo -e "\n\033[1mExemplo:\033[0m"
-    echo -e "  \033[1;32mcurl -sSL https://install.pressticket.com.br | sudo bash -s 'senha123' 'empresa' 'back.pressticket.com.br' 'front.pressticket.com.br' 8080 3333 3 10 'admin@pressticket.com.br'\033[0m"
+    echo -e "  \033[1;32mcurl -sSL https://install.pressticket.com.br | sudo bash -s "senha123" "empresa" "back.pressticket.com.br" "front.pressticket.com.br" 8080 3333 "senha123" 3 10 "admin@pressticket.com.br"\033[0m"
     echo -e "\n\033[1;33m======================\033[0m"
     exit 1
 }
@@ -38,18 +41,15 @@ validate_url() {
         return 1
     fi
     if ! host "$url" &>/dev/null; then
-        echo -e "\e[31mErro: O domínio $url não possui DNS resolvido.\e[0m"
+        echo -e "\e[31mErro: O domínio $url não possui DNS propagado.\e[0m"
         return 1
-    else
-        echo -e "\e[32mSucesso: O domínio $url foi resolvido corretamente.\e[0m"
-        return 0
     fi
     echo "$url"
     return 0
 }
 
 # Validar parâmetros
-if [ $# -lt 9 ] || [ $# -gt 10 ]; then
+if [ $# -lt 10 ] || [ $# -gt 11 ]; then
     echo "Erro: Número incorreto de argumentos fornecido."
     usage
 fi
@@ -60,10 +60,11 @@ URL_BACKEND=$(validate_url "$3") || exit 1
 URL_FRONTEND=$(validate_url "$4") || exit 1
 PORT_BACKEND=$5
 PORT_FRONTEND=$6
-USER_LIMIT=$7
-CONNECTION_LIMIT=$8
-EMAIL=$9
-BRANCH=${10:-main}
+DB_PASS=$7
+USER_LIMIT=$8
+CONNECTION_LIMIT=$9
+EMAIL=${10}
+BRANCH=${11:-main}
 
 # Validar campos obrigatórios
 errors=()
@@ -72,6 +73,7 @@ errors=()
 [[ -z "$NOME_EMPRESA" ]] && errors+=("NOME_EMPRESA é obrigatório.")
 [[ ! "$PORT_BACKEND" =~ ^[0-9]+$ ]] && errors+=("PORT_BACKEND deve ser numérico.")
 [[ ! "$PORT_FRONTEND" =~ ^[0-9]+$ ]] && errors+=("PORT_FRONTEND deve ser numérico.")
+[[ -z "$DB_PASS" ]] && errors+=("DB_PASS é obrigatório.")
 [[ ! "$USER_LIMIT" =~ ^[0-9]+$ ]] && errors+=("USER_LIMIT deve ser numérico.")
 [[ ! "$CONNECTION_LIMIT" =~ ^[0-9]+$ ]] && errors+=("CONNECTION_LIMIT deve ser numérico.")
 [[ ! "$EMAIL" =~ ^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$ ]] && errors+=("EMAIL inválido.")
@@ -104,7 +106,7 @@ finalizar() {
         echo "**************************************************************"
         echo " Versão Instalada: $VERSION                           "
         echo " Fuso Horário: $SELECTED_TZ                                 "
-        echo " Hora Local: $(TZ=$SELECTED_TZ date +"%d-%m-%Y %H:%M:%S")   "
+        echo " Final da Instalação: $(TZ=$SELECTED_TZ date +"%d-%m-%Y %H:%M:%S")   "
         echo " Local do log: $LOG_FILE                                    "
         echo " Tempo Total: ${MINUTES} minutos e ${SECONDS} segundos.       "
         echo "**************************************************************"
@@ -170,7 +172,7 @@ fi
         for error in "${errors[@]}"; do
             echo "- $error"
         done
-        usage
+        show_usage
     fi
 } | tee -a "$LOG_FILE"
 
@@ -222,26 +224,41 @@ echo -e "${GREEN}Portas ${PORT_BACKEND} e ${PORT_FRONTEND} disponíveis.${RESET}
 echo " "
 
 # Exibir as variáveis validadas
-echo -e " "
-cat <<EOM
-*** Parâmetros recebidos e validados com sucesso: ***
-* SENHA_DEPLOY: NÃO ESQUECER!
-* NOME_EMPRESA: $NOME_EMPRESA
-* URL_BACKEND: $URL_BACKEND
-* URL_FRONTEND: $URL_FRONTEND
-* PORT_BACKEND: $PORT_BACKEND
-* PORT_FRONTEND: $PORT_FRONTEND
-* USER_LIMIT: $USER_LIMIT
-* CONNECTION_LIMIT: $CONNECTION_LIMIT
-* EMAIL: $EMAIL
-* BRANCH: $BRANCH
-*****************************************************
+{
+    echo -e " "
+    cat <<EOM
+    *** Parâmetros recebidos e validados com sucesso: ***
+    * SENHA_DEPLOY: NÃO ESQUECER!
+    * NOME_EMPRESA: $NOME_EMPRESA
+    * URL_BACKEND: $URL_BACKEND
+    * URL_FRONTEND: $URL_FRONTEND
+    * PORT_BACKEND: $PORT_BACKEND
+    * PORT_FRONTEND: $PORT_FRONTEND
+    * DB_PASS: NÃO ESQUECER!
+    * USER_LIMIT: $USER_LIMIT
+    * CONNECTION_LIMIT: $CONNECTION_LIMIT
+    * EMAIL: $EMAIL
+    * BRANCH: $BRANCH
+    *****************************************************
 EOM
+    echo -e " "
+} | tee -a "$LOG_FILE"
+
+sleep 5
+
+# Exibir mensagem de inicio da instalação
 echo -e " "
+echo -ne "${COLOR}Iniciando a instalação em ${YELLOW}10${RESET}..." | tee -a "$LOG_FILE"
+
+# Contagem regressiva de 10 a 0
+for i in {9..0}; do
+    echo -ne "\r${COLOR}Iniciando a instalação em ${YELLOW}$i${RESET}... " | tee -a "$LOG_FILE"
+    sleep 1
+done
 
 echo -e " "
-echo -e "${COLOR}Iniciando a instalação...${RESET}" | tee -a "$LOG_FILE"
-echo -e " "
+
+sleep 2
 
 clear
 
@@ -274,9 +291,9 @@ sleep 3
     echo "**************************************************************"
     echo "*               PRESS TICKET - LOG DE INSTALAÇÃO           *"
     echo "**************************************************************"
-    echo " Versão Instalada: $VERSION                           "
+    echo " Versão a ser instalada: $VERSION                           "
     echo " Fuso Horário: $SELECTED_TZ                                 "
-    echo " Hora Local: $(TZ=$SELECTED_TZ date +"%d-%m-%Y %H:%M:%S")   "
+    echo " Inicio da Instalação: $(TZ=$SELECTED_TZ date +"%d-%m-%Y %H:%M:%S")   "
     echo " Local do log: $LOG_FILE                                    "
     echo "**************************************************************"
     echo " "
@@ -295,69 +312,120 @@ echo -e "${COLOR}Preparação Inicial...${RESET}" | tee -a "$LOG_FILE"
 {
     cd ~
     echo "Atualizando pacotes do sistema sem intervenção..."
-    sudo DEBIAN_FRONTEND=noninteractive apt-get update -yq
-    sudo DEBIAN_FRONTEND=noninteractive apt-get upgrade -yq
+    sudo DEBIAN_FRONTEND=noninteractive apt-get update -y
+    echo 'exit 0' | sudo tee /usr/sbin/policy-rc.d
+    sudo sed -i 's/#\$nrconf{restart} =.*/$nrconf{restart} = "a";/' /etc/needrestart/needrestart.conf
+    sudo DEBIAN_FRONTEND=noninteractive apt-get upgrade -y \
+        -o Dpkg::Options::="--force-confdef" \
+        -o Dpkg::Options::="--force-confold" \
+        --allow-downgrades \
+        --allow-remove-essential \
+        --allow-change-held-packages \
+        --no-install-recommends \
+        --quiet
+    sudo DEBIAN_FRONTEND=noninteractive apt-get install build-essential -y
+    # sudo DEBIAN_FRONTEND=noninteractive apt-get install -y apparmor-utils
     echo -e "${GREEN}Atualização de pacotes concluída com sucesso.${RESET}" | tee -a "$LOG_FILE"
-    
-    # Reiniciar serviços que utilizam bibliotecas desatualizadas
-    echo "Reiniciando serviços para aplicar as atualizações..."
-    sudo systemctl daemon-reexec
-    echo -e "${GREEN}Reinício de serviços concluído.${RESET}" | tee -a "$LOG_FILE"
+
 } | tee -a "$LOG_FILE"
 
-# Seção 2: Instalação do MySQL
-echo -e "${COLOR}Instalando MySQL...${RESET}" | tee -a "$LOG_FILE"
-sudo apt-get install -y mysql-server | tee -a "$LOG_FILE"
+# Seção 2: Verificação do MySQL e Instalação do MariaDB
+echo -e "${COLOR}Verificando se MySQL já está instalado...${RESET}" | tee -a "$LOG_FILE"
 
-# Verifica se o comando foi executado com sucesso
-if [ $? -eq 0 ]; then
-    echo -e "${GREEN}MySQL instalado com sucesso!${RESET}" | tee -a "$LOG_FILE"
+# Verificar se o MySQL está instalado
+if dpkg -l | grep -q mysql-server; then
+    echo -e "${RED}Erro: O MySQL já está instalado no sistema.${RESET}" | tee -a "$LOG_FILE"
+    echo -e "${YELLOW}Por questões de compatibilidade, a instalação será interrompida.${RESET}" | tee -a "$LOG_FILE"
+    finalizar "Erro: MySQL já instalado. Remova o MySQL antes de instalar o MariaDB." 1
 else
-    echo -e "${RED}Erro: A instalação do MySQL falhou. Verifique o log para mais detalhes.${RESET}"
-    finalizar "${RED}Erro: A instalação do MySQL falhou. Verifique o log para mais detalhes.${RESET}" 1
+    echo -e "${GREEN}MySQL não encontrado. Prosseguindo com a instalação do MariaDB...${RESET}" | tee -a "$LOG_FILE"
 fi
 
-# Verificar a versão do MySQL
-echo -e "${COLOR}Verificar a versão do MySQL...${RESET}" | tee -a "$LOG_FILE"
-mysql --version | tee -a "$LOG_FILE"
+# Verificar se o MariaDB já está instalado
+echo -e "${COLOR}Verificando a instalação do MariaDB...${RESET}" | tee -a "$LOG_FILE"
 
-# Verificar o status do serviço MySQL
-echo -e "${COLOR}Verificar o status do serviço MySQL...${RESET}" | tee -a "$LOG_FILE"
-if systemctl is-active --quiet mysql; then
-    echo -e "${GREEN}O serviço MySQL está ativo.${RESET}" | tee -a "$LOG_FILE"
+if dpkg -l | grep -q mariadb-server; then
+    echo -e "${GREEN}MariaDB já está instalado. Pulando a instalação.${RESET}" | tee -a "$LOG_FILE"
 else
-    echo -e "${RED}Erro: O serviço MySQL não está ativo.${RESET}"
-    finalizar "${RED}Erro: O serviço MySQL não está ativo.${RESET}" 1
+    echo -e "${COLOR}MariaDB não encontrado. Instalando...${RESET}" | tee -a "$LOG_FILE"
+    sudo apt-get update && sudo apt-get install -y mariadb-server mariadb-client | tee -a "$LOG_FILE"
+
+    # Verifica se a instalação foi bem-sucedida
+    if [ $? -eq 0 ]; then
+        echo -e "${GREEN}MariaDB instalado com sucesso!${RESET}" | tee -a "$LOG_FILE"
+    else
+        echo -e "${RED}Erro: A instalação do MariaDB falhou. Verifique o log para mais detalhes.${RESET}" | tee -a "$LOG_FILE"
+        finalizar "Erro: A instalação do MariaDB falhou. Verifique o log para mais detalhes." 1
+    fi
 fi
 
-# Criar banco de dados e configurar MySQL
-echo -e "${COLOR}Criar banco de dados e configurar MySQL...${RESET}" | tee -a "$LOG_FILE"
+# Verificar se MariaDB exige senha para acessar
+if sudo mysql -u root -e "SELECT 1;" &>/dev/null; then
+    MYSQL_CMD="sudo mysql -u root"
+    echo -e "${GREEN}Conexão com o MariaDB realizada sem senha.${RESET}" | tee -a "$LOG_FILE"
+else
+    MYSQL_CMD="sudo mysql -u root --password=\"$DB_PASS\""
+    echo -e "${YELLOW}O MariaDB exige senha para conexão. Utilizando a senha fornecida.${RESET}" | tee -a "$LOG_FILE"
+fi
+
+# Verificar a versão do MariaDB
+echo -e "${COLOR}Verificando a versão do MariaDB...${RESET}" | tee -a "$LOG_FILE"
+mariadb --version | tee -a "$LOG_FILE"
+
+# Verificar o status do serviço MariaDB
+echo -e "${COLOR}Verificando o status do serviço MariaDB...${RESET}" | tee -a "$LOG_FILE"
+if systemctl is-active --quiet mariadb; then
+    echo -e "${GREEN}O serviço MariaDB está ativo.${RESET}" | tee -a "$LOG_FILE"
+else
+    echo -e "${RED}Erro: O serviço MariaDB não está ativo.${RESET}"
+    finalizar "${RED}Erro: O serviço MariaDB não está ativo.${RESET}" 1
+fi
+
+# Criar banco de dados e configurar MariaDB
+echo -e "${COLOR}Criar banco de dados e configurar MariaDB...${RESET}" | tee -a "$LOG_FILE"
 
 # Verificar se o banco de dados já existe
 echo -e "${COLOR}Verificando se o banco de dados $NOME_EMPRESA já existe...${RESET}" | tee -a "$LOG_FILE"
-DB_EXISTS=$(sudo mysql -u root -e "SHOW DATABASES LIKE '$NOME_EMPRESA';" | grep "$NOME_EMPRESA")
+DB_EXISTS=$($MYSQL_CMD -e "SHOW DATABASES LIKE '$NOME_EMPRESA';" | grep "$NOME_EMPRESA")
 if [ "$DB_EXISTS" ]; then
     echo -e "${RED}Erro: O banco de dados $NOME_EMPRESA já existe. Instalação interrompida.${RESET}"
     finalizar "${RED}Erro: O banco de dados $NOME_EMPRESA já existe. Instalação interrompida.${RESET}" 1
 fi
 
-# Criar o banco de dados
+# Criar o banco de dados e configurar autenticação corretamente
 echo -e "${COLOR}Criando o banco de dados $NOME_EMPRESA...${RESET}" | tee -a "$LOG_FILE"
+
+# Verificar se MariaDB já exige senha para conexão
+if sudo mysql -u root -e "SELECT 1;" &>/dev/null; then
+    echo -e "${GREEN}MariaDB está acessível sem senha. Definindo senha para o usuário root...${RESET}" | tee -a "$LOG_FILE"
+    
+# Executa os comandos completos, incluindo definição de senha
 {
     sudo mysql -u root <<EOF
-CREATE DATABASE $NOME_EMPRESA CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
-USE mysql;
-UPDATE user SET plugin='mysql_native_password' WHERE User='root';
-FLUSH PRIVILEGES;
+    CREATE DATABASE $NOME_EMPRESA CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+    ALTER USER 'root'@'localhost' IDENTIFIED BY '$DB_PASS';
+    FLUSH PRIVILEGES;
 EOF
-    echo -e "${GREEN}Banco de dados criado e configuração do MySQL concluída com sucesso.${RESET}"
+    echo -e "${GREEN}Banco de dados criado e senha do root configurada com sucesso.${RESET}"
 } | tee -a "$LOG_FILE"
 
-# Reiniciar o MySQL
+else
+    echo -e "${YELLOW}MariaDB exige senha para conexão. Criando apenas o banco de dados...${RESET}" | tee -a "$LOG_FILE"
+
+# Executa apenas a criação do banco de dados, sem alterar a senha do root
 {
-    echo -e "${COLOR}Reiniciando o MySQL...${RESET}"
-    sudo service mysql restart
-    echo -e "${GREEN}MySQL reiniciado com sucesso.${RESET}" | tee -a "$LOG_FILE"
+    sudo mysql -u root --password="$DB_PASS" <<EOF
+CREATE DATABASE $NOME_EMPRESA CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+EOF
+    echo -e "${GREEN}Banco de dados criado com sucesso.${RESET}"
+} | tee -a "$LOG_FILE"
+fi
+
+# Reiniciar o MariaDB
+{
+    echo -e "${COLOR}Reiniciando o MariaDB...${RESET}"
+    sudo systemctl restart mariadb
+    echo -e "${GREEN}MariaDB reiniciado com sucesso.${RESET}" | tee -a "$LOG_FILE"
 } | tee -a "$LOG_FILE"
 
 # Seção 3: Configuração do Usuário
@@ -435,14 +503,42 @@ else
     finalizar "${RED}Erro ao atualizar pacotes.${RESET}" 1
 fi
 
-# Adicionando o usuário atual ao grupo MySQL
-echo -e "${COLOR}Adicionando o usuário atual ao grupo mysql...${RESET}" | tee -a "$LOG_FILE"
-sudo usermod -aG mysql ${USER} | tee -a "$LOG_FILE"
+# Reiniciar serviços que utilizam bibliotecas desatualizadas
+{
+    echo "Reiniciando serviços para aplicar as atualizações..."
+    sudo systemctl daemon-reexec
+    sudo systemctl restart cron.service
+    sudo systemctl restart dbus.service
+    sudo systemctl restart irqbalance.service
+    sudo systemctl restart polkit.service
+    sudo systemctl restart rsyslog.service
+    sudo systemctl restart ssh.service
+
+    echo -e "${GREEN}Reinício de serviços concluído.${RESET}"
+} | tee -a "$LOG_FILE"
+
+# Adicionando o usuário atual ao grupo MariaDB/MySQL
+echo -e "${COLOR}Adicionando o usuário atual ao grupo MariaDB/MySQL...${RESET}" | tee -a "$LOG_FILE"
+
+# Verifica se o grupo 'mariadb' ou 'mysql' existe
+MYSQL_GROUP=$(getent group mariadb | cut -d: -f1)
+if [ -z "$MYSQL_GROUP" ]; then
+    MYSQL_GROUP=$(getent group mysql | cut -d: -f1)
+fi
+
+# Se nenhum dos grupos for encontrado, interrompe a instalação
+if [ -z "$MYSQL_GROUP" ]; then
+    echo -e "${RED}Erro: Nenhum grupo MariaDB/MySQL foi encontrado.${RESET}" | tee -a "$LOG_FILE"
+    finalizar "Erro: Nenhum grupo MariaDB/MySQL foi encontrado. Verifique a instalação." 1
+fi
+
+# Adiciona o usuário ao grupo correto
+sudo usermod -aG "$MYSQL_GROUP" ${USER} | tee -a "$LOG_FILE"
 if [ $? -eq 0 ]; then
-    echo -e "${GREEN}Usuário adicionado ao grupo mysql com sucesso.${RESET}" | tee -a "$LOG_FILE"
+    echo -e "${GREEN}Usuário adicionado ao grupo $MYSQL_GROUP com sucesso.${RESET}" | tee -a "$LOG_FILE"
 else
-    echo -e "${RED}Erro ao adicionar o usuário ao grupo mysql.${RESET}"
-    finalizar "${RED}Erro ao adicionar o usuário ao grupo mysql.${RESET}" 1
+    echo -e "${RED}Erro ao adicionar o usuário ao grupo $MYSQL_GROUP.${RESET}"
+    finalizar "Erro ao adicionar o usuário ao grupo $MYSQL_GROUP." 1
 fi
 
 # Realizando a troca de login para carregar as variáveis de ambiente
@@ -578,7 +674,7 @@ DB_DIALECT=mysql
 DB_HOST=localhost
 DB_TIMEZONE=-03:00
 DB_USER=root
-DB_PASS=
+DB_PASS=$SENHA_DEPLOY
 DB_NAME=$NOME_EMPRESA
 
 # Limitar Usuários e Conexões
@@ -615,35 +711,35 @@ if cd "$DEPLOY_HOME/$NOME_EMPRESA/backend"; then
 
     # Verifica se o arquivo existe
     if [ ! -f "$SEED_FILE" ]; then
-        finalizar "Erro: Arquivo de seed não encontrado: $SEED_FILE" 1
+        echo -e "${RED}Erro: Arquivo de seed não encontrado: $SEED_FILE.${RESET}" | tee -a "$LOG_FILE"
+        finalizar "Erro: Arquivo de seed não encontrado." 1
     fi
 
     # Realiza um backup do arquivo
     if ! cp "$SEED_FILE" "$BACKUP_FILE"; then
+        echo -e "${RED}Erro ao criar backup do arquivo de seed.${RESET}" | tee -a "$LOG_FILE"
         finalizar "Erro ao criar backup do arquivo de seed." 1
     fi
 
-    # Substitui o email no arquivo usando sed (com tratamento de erros)
+    # Substitui o email no arquivo usando sed
     if ! sed -i "s/masteradmin@pressticket.com.br/$EMAIL/g" "$SEED_FILE"; then
-        # Restaura o backup em caso de erro
-        if ! mv "$BACKUP_FILE" "$SEED_FILE"; then
-            echo "Atenção: Falha ao restaurar o backup do arquivo de seed após erro na substituição do email." | tee -a "$LOG_FILE"
+        echo -e "${RED}Erro ao substituir o email no arquivo de seed.${RESET}" | tee -a "$LOG_FILE"
+        if mv "$BACKUP_FILE" "$SEED_FILE"; then
+            echo -e "${YELLOW}Arquivo de seed restaurado com sucesso.${RESET}" | tee -a "$LOG_FILE"
+        else
+            echo -e "${RED}Falha ao restaurar o arquivo de seed. Verifique manualmente.${RESET}" | tee -a "$LOG_FILE"
         fi
-        finalizar "Erro ao substituir o email no arquivo de seed." 1
+        echo -e "${YELLOW}Prosseguindo com a instalação, mas o email não foi atualizado.${RESET}" | tee -a "$LOG_FILE"
     fi
 
-    # Verifica se a substituição foi bem-sucedida (com tratamento de erros)
+    # Verifica se a substituição foi bem-sucedida
     if grep -q "masteradmin@pressticket.com.br" "$SEED_FILE"; then
-        # Restaura o backup
-        if ! mv "$BACKUP_FILE" "$SEED_FILE"; then
-            echo "Atenção: Falha ao restaurar o backup do arquivo de seed após falha na verificação da substituição." | tee -a "$LOG_FILE"
-        fi
-        finalizar "Erro: Substituição do email falhou." 1
+        echo -e "${YELLOW}Aviso: O email do MasterAdmin não foi alterado corretamente. Verifique manualmente.${RESET}" | tee -a "$LOG_FILE"
+    else
+        echo -e "${GREEN}Email do usuário MasterAdmin atualizado com sucesso para: $EMAIL.${RESET}" | tee -a "$LOG_FILE"
     fi
-
-    echo -e "${GREEN}Email do usuário MasterAdmin atualizado com sucesso para: $EMAIL.${RESET}" | tee -a "$LOG_FILE"
-
 else
+    echo -e "${RED}Erro ao acessar o diretório do backend.${RESET}" | tee -a "$LOG_FILE"
     finalizar "Erro ao acessar o diretório do backend." 1
 fi
 
@@ -943,7 +1039,10 @@ echo -e "${COLOR}Configurando a renovação automática de certificados SSL...${
 
 # Adiciona a tarefa ao cron, caso não esteja configurada
 if ! crontab -l | grep -q "certbot renew"; then
-    (crontab -l 2>/dev/null; echo "0 3 */30 * * certbot renew --quiet --nginx") | crontab -
+    (
+        crontab -l 2>/dev/null
+        echo "0 3 */30 * * certbot renew --quiet --nginx"
+    ) | crontab -
     if [ $? -eq 0 ]; then
         echo -e "${GREEN}Renovação automática configurada com sucesso no cron para execução a cada 30 dias.${RESET}" | tee -a "$LOG_FILE"
     else
