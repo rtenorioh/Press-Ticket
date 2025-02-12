@@ -1,6 +1,6 @@
 #!/bin/bash
 # Debugar o script
-set -x
+# set -x
 
 # Verificar se o script está sendo executado como root
 if [ "$EUID" -ne 0 ]; then
@@ -353,7 +353,7 @@ if sudo mysql -u root -e "SELECT 1;" &>/dev/null; then
     MYSQL_CMD="sudo mysql -u root"
     echo -e "${GREEN}Conexão com o MariaDB realizada sem senha.${RESET}" | tee -a "$LOG_FILE"
 else
-    MYSQL_CMD="sudo mysql -u root --password=\"$DB_PASS\""
+    MYSQL_CMD="sudo mysql -u root --password='$DB_PASS'"
     echo -e "${YELLOW}O MariaDB exige senha para conexão. Utilizando a senha fornecida.${RESET}" | tee -a "$LOG_FILE"
 fi
 
