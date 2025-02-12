@@ -1,6 +1,6 @@
 #!/bin/bash
 # Debugar o script
-# set -x
+set -x
 
 # Verificar se o script está sendo executado como root
 if [ "$EUID" -ne 0 ]; then
@@ -967,7 +967,7 @@ echo -e "${COLOR}Adicionando configuração ao nginx.conf...${RESET}" | tee -a "
 # Verifica se a linha client_max_body_size já existe
 if ! grep -q "client_max_body_size" /etc/nginx/nginx.conf; then
     # Adiciona a linha se não existir
-    if ! sudo sed -i '/http {/a \    client_max_body_size 50M;' /etc/nginx/nginx.conf; then
+    if ! sudo sed -i '/http {/a \    client_max_body_size 100M;' /etc/nginx/nginx.conf; then
         finalizar "Erro ao adicionar client_max_body_size ao nginx.conf." 1
     fi
     echo -e "${GREEN}Configuração client_max_body_size adicionada com sucesso.${RESET}" | tee -a "$LOG_FILE"
@@ -1026,12 +1026,14 @@ echo -e "${GREEN}Certificado SSL gerado com sucesso para o frontend.${RESET}" | 
 # Configurando a renovação automática dos certificados SSL
 echo -e "${COLOR}Configurando a renovação automática de certificados SSL...${RESET}" | tee -a "$LOG_FILE"
 
-# Adiciona a tarefa ao cron, caso não esteja configurada
-if ! crontab -l | grep -q "certbot renew"; then
+# Verifica se a tarefa de renovação já existe no crontab
+if ! crontab -l | grep -q "certbot renew --quiet --nginx"; then
+    # Adiciona a tarefa ao cron, caso não esteja configurada
     (
         crontab -l 2>/dev/null
         echo "0 3 */30 * * certbot renew --quiet --nginx"
     ) | crontab -
+    
     if [ $? -eq 0 ]; then
         echo -e "${GREEN}Renovação automática configurada com sucesso no cron para execução a cada 30 dias.${RESET}" | tee -a "$LOG_FILE"
     else
