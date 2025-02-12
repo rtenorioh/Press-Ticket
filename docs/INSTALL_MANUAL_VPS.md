@@ -23,27 +23,27 @@ cd ~
 ### 1.3 Atualizando e fazendo upgrade da VPS
 
 ```
-sudo apt update && sudo apt upgrade
+apt update && sudo apt upgrade -y
 ```
 
-## Seção 2: Instalação do MySQL
+## Seção 2: Instalação do MariaDB
 
-### 2.1 Instalando MySQL Server
+### 2.1 Instalação do MariaDB
 
 ```
-apt install mysql-server
+apt install mariadb-server mariadb-client -y
 ```
 
 ### 2.2 Verificando a versão do MySQL Server (opcional)
 
 ```
-mysql --version
+mariadb --version
 ```
 
 ### 2.3 Verificando o status do MySQL Server
 
 ```
-sudo systemctl status mysql
+sudo systemctl status mariadb
 ```
 
 ### 2.4 Saindo da visualização de status do MySQL
@@ -62,34 +62,28 @@ sudo mysql -u root
 CREATE DATABASE press_ticket CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
 ```
 
-### 2.7 Acessar o banco de dados do MySQL
+### 2.7 Alterando o usuário root para usar senha para autenticar no banco de dados
 
 ```
-USE mysql;
+ALTER USER 'root'@'localhost' IDENTIFIED BY 'senha_root';
 ```
 
-### 2.8 Alterando o plugin de autenticação do MySQL
-
-```
-UPDATE user SET plugin='mysql_native_password' WHERE User='root';
-```
-
-### 2.9 Aplicando as mudanças
+### 2.8 Aplicando as mudanças
 
 ```
 FLUSH PRIVILEGES;
 ```
 
-### 2.10 Saindo do MySQL
+### 2.9 Saindo do MySQL
 
 ```
 exit;
 ```
 
-### 2.11 Reiniciando o MySQL
+### 2.10 Reiniciando o MySQL
 
 ```
-service mysql restart
+service mariadb restart
 ```
 
 ## Seção 3: Configuração do Usuário
@@ -195,7 +189,7 @@ NODE_ENV=production
 BACKEND_URL=https://back.pressticket.com.br
 FRONTEND_URL=https://ticket.pressticket.com.br
 WEBHOOK=https://back.pressticket.com.br
-PORT=8080
+PORT=4000
 PROXY_PORT=443
 
 #Caminho do Chrome
@@ -206,7 +200,7 @@ DB_DIALECT=mysql
 DB_HOST=localhost
 DB_TIMEZONE=-03:00
 DB_USER=root
-DB_PASS=
+DB_PASS=senha_root
 DB_NAME=press_ticket
 
 #Limitar Usuários e Conexões
@@ -317,7 +311,7 @@ REACT_APP_BACKEND_URL=https://back.pressticket.com.br
 REACT_APP_HOURS_CLOSE_TICKETS_AUTO=
 
 #PORTA do frontend
-PORT=3333
+PORT=3000
 
 #Para permitir acesso apenas do MasterAdmin (sempre ON)
 REACT_APP_MASTERADMIN=OFF
@@ -470,7 +464,7 @@ sudo nano /etc/nginx/nginx.conf
 ### 9.12 Incluir no arquivos de configuração do nginx dentro do http no item 9.11
 
 ```
-client_max_body_size 50M;
+client_max_body_size 100M;
 ```
 
 ### 9.13 Testando o Nginx
@@ -515,7 +509,7 @@ sudo certbot --nginx
 
 ---
 
-# Seção 11: Usuário padrão para Acesso
+# Seção 11: Usuário padrão para Acesso do Admin
 
 Usuário:
 
@@ -529,7 +523,7 @@ Senha:
 admin
 ```
 
-# Seção 12: Usuário Master para Acesso
+# Seção 12: Usuário padrão para Acesso do MasterAdmin
 
 Usuário:
 

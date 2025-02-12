@@ -27,7 +27,7 @@ show_usage() {
     echo -e "\033[1mComando:\033[0m"
     echo -e "  \033[1;32mcurl -sSL https://install.pressticket.com.br | sudo bash -s <SENHA_DEPLOY> <NOME_EMPRESA> <URL_BACKEND> <URL_FRONTEND> <PORT_BACKEND> <PORT_FRONTEND> <DB_PASS> <USER_LIMIT> <CONNECTION_LIMIT> <EMAIL>\033[0m"
     echo -e "\n\033[1mExemplo:\033[0m"
-    echo -e "  \033[1;32mcurl -sSL https://install.pressticket.com.br | sudo bash -s "senha123" "empresa" "back.pressticket.com.br" "front.pressticket.com.br" 8080 3333 "senha123" 3 10 "admin@pressticket.com.br"\033[0m"
+    echo -e "  \033[1;32mcurl -sSL https://install.pressticket.com.br | sudo bash -s "senha123" "empresa" "back.pressticket.com.br" "front.pressticket.com.br" 4000 3000 "senha123" 3 10 "email@pressticket.com.br"\033[0m"
     echo -e "\n\033[1;33m======================\033[0m"
     exit 1
 }
@@ -344,6 +344,7 @@ fi
 # Verificar se o MariaDB já está instalado
 echo -e "${COLOR}Verificando a instalação do MariaDB...${RESET}" | tee -a "$LOG_FILE"
 
+# Verifica se o MariaDB já está instalado
 if dpkg -l | grep -q mariadb-server; then
     echo -e "${GREEN}MariaDB já está instalado. Pulando a instalação.${RESET}" | tee -a "$LOG_FILE"
 else
@@ -354,7 +355,7 @@ else
     if [ $? -eq 0 ]; then
         echo -e "${GREEN}MariaDB instalado com sucesso!${RESET}" | tee -a "$LOG_FILE"
     else
-        echo -e "${RED}Erro: A instalação do MariaDB falhou. Verifique o log para mais detalhes.${RESET}" | tee -a "$LOG_FILE"
+        echo -e "${RED}Erro: A instalação do MariaDB falhou. Verifique o log para mais detalhes.${RESET}"
         finalizar "Erro: A instalação do MariaDB falhou. Verifique o log para mais detalhes." 1
     fi
 fi
@@ -364,7 +365,7 @@ if sudo mysql -u root -e "SELECT 1;" &>/dev/null; then
     MYSQL_CMD="sudo mysql -u root"
     echo -e "${GREEN}Conexão com o MariaDB realizada sem senha.${RESET}" | tee -a "$LOG_FILE"
 else
-    MYSQL_CMD="sudo mysql -u root --password=\"$DB_PASS\""
+    MYSQL_CMD="sudo mysql -u root --password='$DB_PASS'"
     echo -e "${YELLOW}O MariaDB exige senha para conexão. Utilizando a senha fornecida.${RESET}" | tee -a "$LOG_FILE"
 fi
 
@@ -386,7 +387,7 @@ echo -e "${COLOR}Criar banco de dados e configurar MariaDB...${RESET}" | tee -a 
 
 # Verificar se o banco de dados já existe
 echo -e "${COLOR}Verificando se o banco de dados $NOME_EMPRESA já existe...${RESET}" | tee -a "$LOG_FILE"
-DB_EXISTS=$($MYSQL_CMD -e "SHOW DATABASES LIKE '$NOME_EMPRESA';" | grep "$NOME_EMPRESA")
+DB_EXISTS=$($MYSQL_CMD -e "SHOW DATABASES LIKE '$NOME_EMPRESA';" 2>/dev/null) | tee -a "$LOG_FILE"
 if [ "$DB_EXISTS" ]; then
     echo -e "${RED}Erro: O banco de dados $NOME_EMPRESA já existe. Instalação interrompida.${RESET}"
     finalizar "${RED}Erro: O banco de dados $NOME_EMPRESA já existe. Instalação interrompida.${RESET}" 1
@@ -674,7 +675,7 @@ DB_DIALECT=mysql
 DB_HOST=localhost
 DB_TIMEZONE=-03:00
 DB_USER=root
-DB_PASS=$SENHA_DEPLOY
+DB_PASS=$DB_PASS
 DB_NAME=$NOME_EMPRESA
 
 # Limitar Usuários e Conexões
@@ -978,7 +979,7 @@ echo -e "${COLOR}Adicionando configuração ao nginx.conf...${RESET}" | tee -a "
 # Verifica se a linha client_max_body_size já existe
 if ! grep -q "client_max_body_size" /etc/nginx/nginx.conf; then
     # Adiciona a linha se não existir
-    if ! sudo sed -i '/http {/a \    client_max_body_size 50M;' /etc/nginx/nginx.conf; then
+    if ! sudo sed -i '/http {/a \    client_max_body_size 100M;' /etc/nginx/nginx.conf; then
         finalizar "Erro ao adicionar client_max_body_size ao nginx.conf." 1
     fi
     echo -e "${GREEN}Configuração client_max_body_size adicionada com sucesso.${RESET}" | tee -a "$LOG_FILE"
@@ -1037,12 +1038,14 @@ echo -e "${GREEN}Certificado SSL gerado com sucesso para o frontend.${RESET}" | 
 # Configurando a renovação automática dos certificados SSL
 echo -e "${COLOR}Configurando a renovação automática de certificados SSL...${RESET}" | tee -a "$LOG_FILE"
 
-# Adiciona a tarefa ao cron, caso não esteja configurada
-if ! crontab -l | grep -q "certbot renew"; then
+# Verifica se a tarefa de renovação já existe no crontab
+if ! crontab -l | grep -q "certbot renew --quiet --nginx"; then
+    # Adiciona a tarefa ao cron, caso não esteja configurada
     (
         crontab -l 2>/dev/null
         echo "0 3 */30 * * certbot renew --quiet --nginx"
     ) | crontab -
+    
     if [ $? -eq 0 ]; then
         echo -e "${GREEN}Renovação automática configurada com sucesso no cron para execução a cada 30 dias.${RESET}" | tee -a "$LOG_FILE"
     else

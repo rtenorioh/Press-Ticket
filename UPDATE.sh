@@ -29,7 +29,7 @@ finalizar() {
     {
         echo " "
         echo "**************************************************************"
-        echo "*                 PRESS TICKET - ATUALIZAÇÃO                *"
+        echo "*                 PRESS TICKET - ATUALIZAÇÃO                 *"
         echo "**************************************************************"
         echo " Versão Atual do Sistema: $SYSTEM_VERSION                   "
         echo " Nova Versão Atualizada: $VERSION                           "
@@ -171,7 +171,7 @@ fi
 {
     echo " "
     echo "**************************************************************"
-    echo "*               PRESS TICKET - LOG DE ATUALIZAÇÃO           *"
+    echo "*               PRESS TICKET - LOG DE ATUALIZAÇÃO            *"
     echo "**************************************************************"
     echo " Versão Atual do Sistema: $SYSTEM_VERSION                   "
     echo " Nova Versão Atualizada: $VERSION                           "
