@@ -27,7 +27,7 @@ show_usage() {
     echo -e "\033[1mComando:\033[0m"
     echo -e "  \033[1;32mcurl -sSL https://install.pressticket.com.br | sudo bash -s <SENHA_DEPLOY> <NOME_EMPRESA> <URL_BACKEND> <URL_FRONTEND> <PORT_BACKEND> <PORT_FRONTEND> <DB_PASS> <USER_LIMIT> <CONNECTION_LIMIT> <EMAIL>\033[0m"
     echo -e "\n\033[1mExemplo:\033[0m"
-    echo -e "  \033[1;32mcurl -sSL https://install.pressticket.com.br | sudo bash -s 'senha123' 'empresa' 'back.pressticket.com.br' 'front.pressticket.com.br' 8080 3333 'senha123' 3 10 'admin@pressticket.com.br'\033[0m"
+    echo -e "  \033[1;32mcurl -sSL https://install.pressticket.com.br | sudo bash -s "senha123" "empresa" "back.pressticket.com.br" "front.pressticket.com.br" 8080 3333 "senha123" 3 10 "admin@pressticket.com.br"\033[0m"
     echo -e "\n\033[1;33m======================\033[0m"
     exit 1
 }
@@ -258,7 +258,7 @@ done
 
 echo -e " "
 
-sleep 10
+sleep 2
 
 clear
 
@@ -663,7 +663,7 @@ DB_DIALECT=mysql
 DB_HOST=localhost
 DB_TIMEZONE=-03:00
 DB_USER=root
-DB_PASS=$SENHA_DEPLOY
+DB_PASS=$DB_PASS
 DB_NAME=$NOME_EMPRESA
 
 # Limitar Usuários e Conexões
