@@ -375,7 +375,7 @@ echo -e "${COLOR}Criar banco de dados e configurar MariaDB...${RESET}" | tee -a 
 
 # Verificar se o banco de dados já existe
 echo -e "${COLOR}Verificando se o banco de dados $NOME_EMPRESA já existe...${RESET}" | tee -a "$LOG_FILE"
-DB_EXISTS=$($MYSQL_CMD -e "SHOW DATABASES LIKE '$NOME_EMPRESA';" | grep "$NOME_EMPRESA")
+DB_EXISTS=$($MYSQL_CMD -e "SHOW DATABASES LIKE '$NOME_EMPRESA';" 2>/dev/null) | tee -a "$LOG_FILE"
 if [ "$DB_EXISTS" ]; then
     echo -e "${RED}Erro: O banco de dados $NOME_EMPRESA já existe. Instalação interrompida.${RESET}"
     finalizar "${RED}Erro: O banco de dados $NOME_EMPRESA já existe. Instalação interrompida.${RESET}" 1
