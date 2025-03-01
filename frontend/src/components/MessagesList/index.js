@@ -16,6 +16,7 @@ import {
   DoneAll,
   ExpandMore,
   GetApp,
+  KeyboardArrowDown
 } from "@material-ui/icons";
 import clsx from "clsx";
 import {
@@ -94,7 +95,8 @@ const useStyles = makeStyles((theme) => ({
     paddingRight: 5,
     paddingTop: 5,
     paddingBottom: 0,
-    boxShadow: "0 1px 1px #b3b3b3",
+    boxShadow: theme.mode === "light" ? "0 1px 1px #b3b3b3" : "0 1px 1px #000000",
+    transition: "background-color 0.5s ease-in-out",
   },
   quotedContainerLeft: {
     margin: "-3px -80px 6px -6px",
@@ -103,6 +105,7 @@ const useStyles = makeStyles((theme) => ({
     borderRadius: "7.5px",
     display: "flex",
     position: "relative",
+    cursor: "pointer",
   },
   quotedMsg: {
     padding: 10,
@@ -143,7 +146,11 @@ const useStyles = makeStyles((theme) => ({
     paddingRight: 5,
     paddingTop: 5,
     paddingBottom: 0,
-    boxShadow: "0 1px 1px #b3b3b3",
+    boxShadow: theme.mode === "light" ? "0 1px 1px #b3b3b3" : "0 1px 1px #000000",
+    transition: "background-color 0.5s ease-in-out",
+  },
+  messageHighlighted: {
+    backgroundColor: theme.palette.primary.main,
   },
   quotedContainerRight: {
     margin: "-3px -80px 6px -6px",
@@ -279,6 +286,17 @@ const useStyles = makeStyles((theme) => ({
     paddingBottom: 0,
     boxShadow: "0 1px 1px #b3b3b3",
   },
+  scrollToBottomButton: {
+    position: "absolute",
+    bottom: "20px",
+    right: "20px",
+    zIndex: 1000,
+    backgroundColor: "#fff",
+    boxShadow: "0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)",
+    "&:hover": {
+      backgroundColor: "#f5f5f5",
+    },
+  },
 }));
 
 const reducer = (state, action) => {
@@ -346,6 +364,7 @@ const MessagesList = ({ ticketId, isGroup }) => {
   const [pageNumber, setPageNumber] = useState(1);
   const [hasMore, setHasMore] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [showScrollButton, setShowScrollButton] = useState(false);
   const lastMessageRef = useRef();
   const { t } = useTranslation();
   const [selectedMessage, setSelectedMessage] = useState({});
@@ -417,7 +436,7 @@ const MessagesList = ({ ticketId, isGroup }) => {
 
   const scrollToBottom = () => {
     if (lastMessageRef.current) {
-      lastMessageRef.current.scrollIntoView({});
+      lastMessageRef.current.scrollIntoView({ behavior: "smooth" });
     }
   };
 
@@ -435,7 +454,10 @@ const MessagesList = ({ ticketId, isGroup }) => {
 
   const handleScroll = (e) => {
     if (!hasMore) return;
-    const { scrollTop } = e.currentTarget;
+    const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
+
+    const scrollPosition = scrollHeight - scrollTop - clientHeight;
+    setShowScrollButton(scrollPosition > 100);
 
     if (scrollTop === 0) {
       document.getElementById("messagesList").scrollTop = 1;
@@ -624,12 +646,82 @@ const MessagesList = ({ ticketId, isGroup }) => {
     }
   };
 
+  const scrollToMessage = async (id) => {
+    const element = document.getElementById(id);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+      element.classList.add(classes.messageHighlighted);
+      setTimeout(() => {
+        element.classList.remove(classes.messageHighlighted);
+      }, 2000);
+      checkScroll();
+    } else {
+      try {
+        setLoading(true);
+        let currentPage = pageNumber;
+        let messageFound = false;
+
+        while (!messageFound && hasMore) {
+          currentPage += 1;
+          const { data } = await api.get("/messages/" + ticketId, {
+            params: { pageNumber: currentPage }
+          });
+
+          if (data.messages.some(msg => msg.id === id)) {
+            messageFound = true;
+          }
+
+          dispatch({ type: "LOAD_MESSAGES", payload: data.messages });
+          setHasMore(data.hasMore);
+
+          if (!data.hasMore && !messageFound) {
+            break;
+          }
+        }
+
+        setPageNumber(currentPage);
+        setLoading(false);
+
+        setTimeout(() => {
+          const loadedElement = document.getElementById(id);
+          if (loadedElement) {
+            loadedElement.scrollIntoView({ behavior: 'smooth' });
+            loadedElement.classList.add(classes.messageHighlighted);
+            setTimeout(() => {
+              loadedElement.classList.remove(classes.messageHighlighted);
+            }, 2000);
+            checkScroll();
+          }
+        }, 100);
+      } catch (err) {
+        setLoading(false);
+        toastError(err);
+      }
+    }
+  };
+
+  const checkScroll = () => {
+    const messagesList = document.getElementById("messagesList");
+    if (messagesList) {
+      const { scrollTop, scrollHeight, clientHeight } = messagesList;
+      const scrollPosition = scrollHeight - scrollTop - clientHeight;
+      setShowScrollButton(scrollPosition > 100);
+    }
+  };
+
+  useEffect(() => {
+    if (!loading && messagesList.length > 0) {
+      checkScroll();
+    }
+  }, [loading, messagesList]);
+
   const renderQuotedMessage = (message) => {
     return (
       <div
         className={clsx(classes.quotedContainerLeft, {
           [classes.quotedContainerRight]: message.fromMe,
         })}
+        onClick={() => scrollToMessage(message.quotedMsg.id)}
       >
         <span
           className={clsx(classes.quotedSideColorLeft, {
@@ -693,7 +785,7 @@ const MessagesList = ({ ticketId, isGroup }) => {
               {renderDailyTimestamps(message, index)}
               {renderMessageDivider(message, index)}
               {renderNumberTicket(message, index)}
-              <div className={classes.messageCenter}>
+              <div id={message.id} className={classes.messageCenter}>
                 <IconButton
                   variant="contained"
                   size="small"
@@ -725,7 +817,7 @@ const MessagesList = ({ ticketId, isGroup }) => {
               {renderDailyTimestamps(message, index)}
               {renderMessageDivider(message, index)}
               {renderNumberTicket(message, index)}
-              <div className={classes.messageLeft} style={{ backgroundColor: "#E1F5FEEB" }}>
+              <div id={message.id} className={classes.messageLeft} style={{ backgroundColor: "#E1F5FEEB" }}>
                 {isGroup && (
                   <span className={classes.messageContactName}>
                     {message.contact?.name}
@@ -747,7 +839,7 @@ const MessagesList = ({ ticketId, isGroup }) => {
               {renderDailyTimestamps(message, index)}
               {renderMessageDivider(message, index)}
               {renderNumberTicket(message, index)}
-              <div className={classes.messageLeft}>
+              <div id={message.id} className={classes.messageLeft}>
                 <IconButton
                   variant="contained"
                   size="small"
@@ -802,7 +894,7 @@ const MessagesList = ({ ticketId, isGroup }) => {
               {renderDailyTimestamps(message, index)}
               {renderMessageDivider(message, index)}
               {renderNumberTicket(message, index)}
-              <div className={classes.messageRight}>
+              <div id={message.id} className={classes.messageRight}>
                 <IconButton
                   variant="contained"
                   size="small"
@@ -868,7 +960,16 @@ const MessagesList = ({ ticketId, isGroup }) => {
         onScroll={handleScroll}
       >
         {messagesList.length > 0 ? renderMessages() : []}
+        <div ref={lastMessageRef} />
       </div>
+      <IconButton
+        className={classes.scrollToBottomButton}
+        onClick={scrollToBottom}
+        size="small"
+        style={{ display: showScrollButton ? "flex" : "none" }}
+      >
+        <KeyboardArrowDown />
+      </IconButton>
       {loading && (
         <div>
           <CircularProgress className={classes.circleLoading} />
