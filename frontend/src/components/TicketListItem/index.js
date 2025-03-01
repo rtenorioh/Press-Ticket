@@ -42,9 +42,9 @@ import { AuthContext } from "../../context/Auth/AuthContext";
 import toastError from "../../errors/toastError";
 import api from "../../services/api";
 import AcceptTicketWithouSelectQueue from "../AcceptTicketWithoutQueueModal";
+import ConfirmationModal from "../ConfirmationModal";
 import ContactTag from "../ContactTag";
 import MarkdownWrapper from "../MarkdownWrapper";
-import ConfirmationModal from "../ConfirmationModal";
 
 const useStyles = makeStyles(theme => ({
 	ticket: {
@@ -182,6 +182,12 @@ const useStyles = makeStyles(theme => ({
 		display: 'flex',
 		alignItems: 'center',
 	},
+	customTooltip: {
+		maxWidth: 800,
+		maxHeight: 700,
+		overflow: "none",
+		whiteSpace: "pre-wrap",
+	}
 }));
 
 const TicketListItem = ({ ticket, filteredTags }) => {
@@ -504,39 +510,52 @@ const TicketListItem = ({ ticket, filteredTags }) => {
 					}
 					secondary={
 						<div>
-							<Typography
-								className={classes.contactLastMessage}
-								noWrap
-								component="span"
-								variant="body2"
-								color="textSecondary"
+							<Tooltip
+								classes={{ tooltip: classes.customTooltip }}
+								title={
+									<Typography>
+										{ticket.lastMessage
+											? ticket.lastMessage.replace("🢇", "").replace("🢅", "")
+											: ""}
+									</Typography>
+								}
+								placement="bottom"
+								arrow
 							>
-								{(() => {
-									if (ticket.lastMessage) {
-										if (ticket.lastMessage.includes("🢅") === true) {
-											return (
-												<img src={sendIcon} alt="Msg Enviada" width="12px" />
-											)
-										} else if (ticket.lastMessage.includes("🢇") === true) {
+								<Typography
+									className={classes.contactLastMessage}
+									noWrap
+									component="span"
+									variant="body2"
+									color="textSecondary"
+								>
+									{(() => {
+										if (ticket.lastMessage) {
+											if (ticket.lastMessage.includes("🢅") === true) {
+												return (
+													<img src={sendIcon} alt="Msg Enviada" width="12px" />
+												)
+											} else if (ticket.lastMessage.includes("🢇") === true) {
 
-											return (
-												<img src={receiveIcon} alt="Msg Recebida" width="12px" />
-											)
+												return (
+													<img src={receiveIcon} alt="Msg Recebida" width="12px" />
+												)
+											}
 										}
-									}
-								})()}
-								{ticket.lastMessage ? (
-									<MarkdownWrapper>{ticket.lastMessage.slice(0, 45).replace("🢇", "")
-										.replace("🢅", "") + (ticket.lastMessage.length > 45 ? " ..." : "").replace("🢇", "")
-											.replace("🢅", "")}</MarkdownWrapper>
-								) : (
-									<br />
-								)}
-							</Typography>
-
+									})()}
+									{ticket.lastMessage ? (
+											<MarkdownWrapper>{ticket.lastMessage.slice(0, 35).replace("🢇", "")
+												.replace("🢅", "") + (ticket.lastMessage.length > 35 ? " ..." : "").replace("🢇", "")
+													.replace("🢅", "")}
+											</MarkdownWrapper>
+									) : (
+										<br />
+									)}
+								</Typography>
+							</Tooltip>
 							<br></br>
 							{ticket.whatsappId && (
-								<Tooltip title={t("ticketsList.items.connection")}>
+								<Tooltip title={t("ticketsList.items.connection")} placement="bottom" arrow>
 									<Chip
 										className={classes.Radiusdot}
 										style={{
@@ -556,7 +575,7 @@ const TicketListItem = ({ ticket, filteredTags }) => {
 								</Tooltip>
 							)}
 							{ticket.status !== "pending" && ticket?.user?.name && (
-								<Tooltip title={t("ticketsList.items.user")}>
+								<Tooltip title={t("ticketsList.items.user")} placement="bottom" arrow>
 									<Chip
 										className={classes.Radiusdot}
 										style={{
@@ -577,7 +596,7 @@ const TicketListItem = ({ ticket, filteredTags }) => {
 							)}
 
 							<br></br>
-							<Tooltip title={t("ticketsList.items.tags")}>
+							<Tooltip title={t("ticketsList.items.tags")} placement="bottom" arrow>
 								<span className={classes.secondaryContentSecond}>
 									{
 										tag?.map((tag) => {
@@ -593,7 +612,7 @@ const TicketListItem = ({ ticket, filteredTags }) => {
 				/>
 				<div className={classes.buttonContainer}>
 					{(ticket.status === "pending" && (ticket.queue === null || ticket.queue === undefined)) && (
-						<Tooltip title={t("ticketsList.items.accept")}>
+						<Tooltip title={t("ticketsList.items.accept")} placement="bottom" arrow>
 							<IconButton
 								className={classes.bottomButton}
 								color="primary"
@@ -606,7 +625,7 @@ const TicketListItem = ({ ticket, filteredTags }) => {
 					)}
 
 					{ticket.status === "pending" && ticket.queue !== null && (
-						<Tooltip title={t("ticketsList.items.accept")}>
+						<Tooltip title={t("ticketsList.items.accept")} placement="bottom" arrow>
 							<IconButton
 								className={classes.bottomButton}
 								color="primary"
@@ -617,7 +636,7 @@ const TicketListItem = ({ ticket, filteredTags }) => {
 					)}
 
 					{canSpy("listItemSpy") && ticket.status === "pending" && (
-						<Tooltip title={t("ticketsList.items.spy")}>
+						<Tooltip title={t("ticketsList.items.spy")} placement="bottom" arrow>
 							<IconButton
 								className={classes.bottomButton}
 								color="primary"
@@ -628,7 +647,7 @@ const TicketListItem = ({ ticket, filteredTags }) => {
 					)}
 
 					{ticket.status === "pending" && (
-						<Tooltip title={t("ticketsList.items.close")}>
+						<Tooltip title={t("ticketsList.items.close")} placement="bottom" arrow>
 							<IconButton
 								className={classes.bottomButton}
 								color="primary"
@@ -639,7 +658,7 @@ const TicketListItem = ({ ticket, filteredTags }) => {
 					)} 
 
 					{canTabsSettings("tabsPending") && ticket.status === "open" && (
-						<Tooltip title={t("ticketsList.items.return")}>
+						<Tooltip title={t("ticketsList.items.return")} placement="bottom" arrow>
 							<IconButton
 								className={classes.bottomButton}
 								color="primary"
@@ -650,7 +669,7 @@ const TicketListItem = ({ ticket, filteredTags }) => {
 					)}
 
 					{ticket.status === "open" && (
-						<Tooltip title={t("ticketsList.items.close")}>
+						<Tooltip title={t("ticketsList.items.close")} placement="bottom" arrow>
 							<IconButton
 								className={classes.bottomButton}
 								color="primary"
@@ -666,13 +685,6 @@ const TicketListItem = ({ ticket, filteredTags }) => {
 							color="primary"
 							onClick={e => handleReopenTicket(ticket.id)} >
 							<Replay />
-						</IconButton>
-					)}
-
-					{ticket.status === "closed" && (
-						<IconButton
-							className={classes.bottomButton}
-							color="primary" >
 						</IconButton>
 					)}
 				</div>
