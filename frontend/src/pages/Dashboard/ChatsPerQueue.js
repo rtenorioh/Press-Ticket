@@ -14,31 +14,38 @@ import useTickets from "../../hooks/useTickets";
 import CustomTooltip from "./CustomTooltip";
 import Title from "./Title";
 
-const ChartPerQueue = ({ searchParam, pageNumber, status, date, showAll, queueIds, withUnreadMessages }) => {
+const ChartPerQueue = ({ queueIds, withUnreadMessages }) => {
     const theme = useTheme();
     const { t } = useTranslation();
-
-    const getCurrentDate = () => {
+    const [startDate, setStartDate] = useState(() => {
+        const d = new Date();
+        d.setDate(d.getDate() - 7);
+        return d.toISOString().split('T')[0];
+    });
+    const [endDate, setEndDate] = useState(() => {
         const today = new Date();
-        const year = today.getFullYear();
-        const month = String(today.getMonth() + 1).padStart(2, '0');
-        const day = String(today.getDate()).padStart(2, '0');
-        return `${year}-${month}-${day}`;
-    };
+        return today.toISOString().split('T')[0];
+    });
 
-    const [selectedDate, setSelectedDate] = useState(getCurrentDate());
     const { tickets } = useTickets({
-        searchParam,
-        pageNumber,
-        status,
-        date: selectedDate,
-        showAll,
+        pageNumber: 1,
+        status: undefined,
+        startDate,
+        endDate,
+        all: true,
+        showAll: true,
         queueIds,
         withUnreadMessages,
     });
 
     const [queueChartData, setQueueChartData] = useState([]);
+
     useEffect(() => {
+        if (!tickets || tickets.length === 0) {
+            setQueueChartData([]);
+            return;
+        }
+
         const queueData = tickets.reduce((acc, ticket) => {
             const queueName = ticket.queue?.name || "Sem Setor";
             const queueColor = ticket.queue?.color || "#7C7C7C";
@@ -51,32 +58,42 @@ const ChartPerQueue = ({ searchParam, pageNumber, status, date, showAll, queueId
             return acc;
         }, {});
 
-        const formattedData = Object.entries(queueData).map(([name, { value, color }]) => ({
-            name,
-            value,
-            color,
-        }));
+        const formattedData = Object.entries(queueData)
+            .map(([name, { value, color }]) => ({
+                name,
+                value,
+                color,
+            }))
+            .sort((a, b) => b.value - a.value);
 
         setQueueChartData(formattedData);
-    }, [tickets]);
+    }, [tickets, queueIds]);
 
-    const handleDateChange = (event) => {
-        setSelectedDate(event.target.value);
-    };
+    // if (loading) {
+    //     return <div>Carregando...</div>;
+    // }
 
     return (
         <React.Fragment>
             <Title>{t("dashboard.chartPerQueue.perQueue.title")}</Title>
-            <TextField
-                label={t("dashboard.chartPerQueue.date.title")}
-                type="date"
-                value={selectedDate}
-                onChange={handleDateChange}
-                InputLabelProps={{
-                    shrink: true,
-                }}
-                style={{ marginBottom: "16px" }}
-            />
+            <div
+                style={{ display: "flex", justifyContent: "space-between", marginBottom: "16px" }}
+            >
+                <TextField
+                    label={t("dashboard.chartPerQueue.date.start")}
+                    type="date"
+                    value={startDate}
+                    onChange={(e) => setStartDate(e.target.value)}
+                    InputLabelProps={{ shrink: true }}
+                />
+                <TextField
+                    label={t("dashboard.chartPerQueue.date.end")}
+                    type="date"
+                    value={endDate}
+                    onChange={(e) => setEndDate(e.target.value)}
+                    InputLabelProps={{ shrink: true }}
+                />
+            </div>
             <ResponsiveContainer>
                 <PieChart>
                     <Pie

@@ -1,28 +1,30 @@
 import { Request, Response } from "express";
+import { Op } from "sequelize";
 import formatBody from "../helpers/Mustache";
 import { getIO } from "../libs/socket";
+import Contact from "../models/Contact";
+import Ticket from "../models/Ticket";
 import ShowQueueService from "../services/QueueService/ShowQueueService";
 import CheckOpenTicketsService from "../services/TicketServices/CheckOpenTicketsService";
+import CloseTicketsService from "../services/TicketServices/CloseTicketsService";
 import CreateTicketService from "../services/TicketServices/CreateTicketService";
 import DeleteTicketService from "../services/TicketServices/DeleteTicketService";
 import ListTicketsService from "../services/TicketServices/ListTicketsService";
 import ShowTicketService from "../services/TicketServices/ShowTicketService";
 import UpdateTicketService from "../services/TicketServices/UpdateTicketService";
-import CloseTicketsService from "../services/TicketServices/CloseTicketsService";
 import SendWhatsAppMessage from "../services/WbotServices/SendWhatsAppMessage";
 import ShowWhatsAppService from "../services/WhatsappService/ShowWhatsAppService";
-import Ticket from "../models/Ticket";
-import Contact from "../models/Contact";
-import { Op } from "sequelize";
 
 type IndexQuery = {
   searchParam: string;
   pageNumber: string;
   status: string;
-  date: string;
+  startDate?: string;
+  endDate?: string;
   showAll: string;
   withUnreadMessages: string;
   queueIds: string;
+  all?: string;
 };
 
 interface TicketData {
@@ -37,14 +39,17 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
   const {
     pageNumber,
     status,
-    date,
+    startDate,
+    endDate,
     searchParam,
     showAll,
     queueIds: queueIdsStringified,
-    withUnreadMessages
+    withUnreadMessages,
+    all
   } = req.query as IndexQuery;
 
   const userId = req.user.id;
+  const isAdmin = req.user.profile === "admin";
 
   let queueIds: number[] = [];
 
@@ -56,11 +61,14 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
     searchParam,
     pageNumber,
     status,
-    date,
+    startDate,
+    endDate,
     showAll,
+    isAdmin,
     userId,
     queueIds,
-    withUnreadMessages
+    withUnreadMessages,
+    all
   });
 
   return res.status(200).json({ tickets, count, hasMore });
@@ -138,13 +146,10 @@ export const remove = async (
   const ticket = await DeleteTicketService(ticketId);
 
   const io = getIO();
-  io.to(ticket.status)
-    .to(ticketId)
-    .to("notification")
-    .emit("ticket", {
-      action: "delete",
-      ticketId: +ticketId
-    });
+  io.to(ticket.status).to(ticketId).to("notification").emit("ticket", {
+    action: "delete",
+    ticketId: +ticketId
+  });
 
   return res.status(200).json({ message: "ticket deleted" });
 };
@@ -172,11 +177,11 @@ export const checkOpenTickets = async (
           status: openTicket.status,
           user: openTicket.user
             ? {
-              id: openTicket.user.id,
-              name: openTicket.user.name
-            }
-            : null,
-        },
+                id: openTicket.user.id,
+                name: openTicket.user.name
+              }
+            : null
+        }
       });
     }
 
@@ -198,7 +203,7 @@ export const closeTickets = async (
 
   try {
     let whereCondition = {};
-    
+
     if (status === "open") {
       whereCondition = { status: "open" };
     } else if (status === "pending") {
@@ -237,7 +242,7 @@ export const closeTickets = async (
       tickets: tickets.map(ticket => ticket.id)
     });
 
-    return res.status(200).json({ 
+    return res.status(200).json({
       message: "Tickets closed successfully",
       count: tickets.length
     });

@@ -5,6 +5,7 @@ const rules = {
 	admin: {
 		static: [
 			"drawer-admin-items:view",
+			"dashboard-admin-items:view",
 			"tickets-manager:showall",
 			"user-modal:editProfile",
 			"user-modal:editQueues",
@@ -18,6 +19,7 @@ const rules = {
 	masteradmin: {
 		static: [
 			"drawer-admin-items:view",
+			"dashboard-admin-items:view",
 			"tickets-manager:showall",
 			"user-modal:editProfile",
 			"user-modal:editQueues",

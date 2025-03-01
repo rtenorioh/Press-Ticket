@@ -7,10 +7,13 @@ const useTickets = ({
     searchParam,
     pageNumber,
     status,
-    date,
+    startDate,
+    endDate,
     showAll,
+    userId,
     queueIds,
     withUnreadMessages,
+    all
 }) => {
     const [loading, setLoading] = useState(true);
     const [hasMore, setHasMore] = useState(false);
@@ -39,10 +42,13 @@ const useTickets = ({
                             searchParam,
                             pageNumber,
                             status,
-                            date,
+                            startDate,
+                            endDate,
                             showAll,
+                            userId,
                             queueIds,
                             withUnreadMessages,
+                            all
                         },
                     });
                     setTickets(data.tickets);
@@ -153,10 +159,13 @@ const useTickets = ({
         searchParam,
         pageNumber,
         status,
-        date,
+        startDate,
+        endDate,
         showAll,
+        userId,
         queueIds,
         withUnreadMessages,
+        all
     ]);
 
     return {

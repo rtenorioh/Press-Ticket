@@ -1,9 +1,8 @@
 import { Request, Response } from "express";
-
 import SetTicketMessagesAsRead from "../helpers/SetTicketMessagesAsRead";
 import { getIO } from "../libs/socket";
 import Message from "../models/Message";
-
+import CountMessagesService from "../services/MessageServices/CountMessagesService";
 import ListMessagesService from "../services/MessageServices/ListMessagesService";
 import ShowTicketService from "../services/TicketServices/ShowTicketService";
 import DeleteWhatsAppMessage from "../services/WbotServices/DeleteWhatsAppMessage";
@@ -86,10 +85,22 @@ export const remove = async (
   const message = await DeleteWhatsAppMessage(messageId);
 
   const io = getIO();
-  io.to(message.ticketId.toString()).emit("appMessage", {
-    action: "update",
+  io.to(message.ticketId.toString()).emit("message", {
+    action: "delete",
     message
   });
 
   return res.send();
+};
+
+export const count = async (req: Request, res: Response): Promise<Response> => {
+  const { userId, all, startDate, endDate } = req.query;
+
+  const counter = await CountMessagesService({
+    userId: userId ? Number(userId) : undefined,
+    all: all as string,
+    startDate: startDate as string,
+    endDate: endDate as string
+  });
+  return res.json(counter);
 };

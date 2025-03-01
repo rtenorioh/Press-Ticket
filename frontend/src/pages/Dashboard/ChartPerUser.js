@@ -16,20 +16,31 @@ import api from "../../services/api";
 import CustomTooltip from "./CustomTooltip";
 import Title from "./Title";
 
-const ChartPerUser = ({ searchParam, pageNumber, status, date, showAll, queueIds, withUnreadMessages }) => {
+const ChartPerUser = ({ searchParam, pageNumber, status, showAll, queueIds, withUnreadMessages }) => {
     const theme = useTheme();
     const { t } = useTranslation();
-    const { ticketsByUser } = useTickets({ searchParam, pageNumber, status, date, showAll, queueIds, withUnreadMessages });
+    const [startDate, setStartDate] = useState(() => {
+        const d = new Date();
+        d.setDate(d.getDate() - 7);
+        return d.toISOString().substring(0, 10);
+    });
+    const [endDate, setEndDate] = useState(() => {
+        const today = new Date();
+        return today.toISOString().substring(0, 10);
+    });
     const [userChartData, setUserChartData] = useState([]);
     const [users, setUsers] = useState({});
-    const getCurrentDate = () => {
-        const today = new Date();
-        const year = today.getFullYear();
-        const month = String(today.getMonth() + 1).padStart(2, '0');
-        const day = String(today.getDate()).padStart(2, '0');
-        return `${year}-${month}-${day}`;
-    };
-    const [selectedDate, setSelectedDate] = useState(getCurrentDate);
+    const { ticketsByUser } = useTickets({
+        searchParam,
+        pageNumber,
+        status: undefined,
+        startDate,
+        endDate,
+        showAll,
+        all: true,
+        queueIds,
+        withUnreadMessages
+    });
 
     useEffect(() => {
         const fetchUsers = async () => {
@@ -44,48 +55,60 @@ const ChartPerUser = ({ searchParam, pageNumber, status, date, showAll, queueIds
                 console.error("Erro ao buscar usuários:", err);
             }
         };
-
         fetchUsers();
     }, []);
 
     useEffect(() => {
-        if (
-            ticketsByUser &&
-            Object.keys(ticketsByUser).length > 0 &&
-            Object.keys(users).length > 0
-        ) {
-            const userData = Object.entries(ticketsByUser)
-                .map(([userId, dates]) => {
-                    const userName = users[String(userId)] || "Sem Usuário";
-                    const count = dates[selectedDate] || 0;
-                    return {
-                        userName,
-                        count,
-                    };
-                });
-            setUserChartData(userData);
-        } else {
+        if (!ticketsByUser || !users) {
             setUserChartData([]);
+            return;
         }
-    }, [ticketsByUser, users, selectedDate]);
 
-    const handleDateChange = (event) => {
-        setSelectedDate(event.target.value);
+        const userData = Object.entries(ticketsByUser).map(([userId, datesObj]) => {
+            const userName = users[String(userId)] || "Sem Usuário";
+
+            let count = 0;
+            for (const [dateKey, dateCount] of Object.entries(datesObj)) {
+                if (dateKey >= startDate && dateKey <= endDate) {
+                    count += dateCount;
+                }
+            }
+
+            return { userName, count };
+        });
+
+        setUserChartData(userData);
+    }, [ticketsByUser, users, startDate, endDate]);
+
+    const handleStartDateChange = (event) => {
+        setStartDate(event.target.value);
+    };
+
+    const handleEndDateChange = (event) => {
+        setEndDate(event.target.value);
     };
 
     return (
         <React.Fragment>
             <Title>{t("dashboard.chartPerUser.title")}</Title>
-            <TextField
-                label={t("dashboard.chartPerUser.date.title")}
-                type="date"
-                value={selectedDate}
-                onChange={handleDateChange}
-                InputLabelProps={{
-                    shrink: true,
-                }}
-                style={{ marginBottom: "16px" }}
-            />
+            <div
+                style={{ display: "flex", justifyContent: "space-between", marginBottom: "16px" }}
+            >
+                <TextField
+                    label={t("dashboard.chartPerUser.date.start")}
+                    type="date"
+                    value={startDate}
+                    onChange={handleStartDateChange}
+                    InputLabelProps={{ shrink: true }}
+                />
+                <TextField
+                    label={t("dashboard.chartPerUser.date.end")}
+                    type="date"
+                    value={endDate}
+                    onChange={handleEndDateChange}
+                    InputLabelProps={{ shrink: true }}
+                />
+            </div>
             <ResponsiveContainer>
                 <BarChart
                     data={userChartData}

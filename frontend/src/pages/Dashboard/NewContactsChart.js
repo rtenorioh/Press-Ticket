@@ -35,6 +35,7 @@ const NewContactsChart = ({
         status,
         date,
         showAll,
+        all: true,
         queueIds,
         withUnreadMessages,
     });
@@ -44,7 +45,7 @@ const NewContactsChart = ({
     const getLastWeekDateRange = () => {
         const end = new Date();
         const start = new Date();
-        start.setDate(end.getDate() - 6);
+        start.setDate(end.getDate() - 7);
         return { start, end };
     };
 
@@ -65,44 +66,31 @@ const NewContactsChart = ({
     }, [startDate, endDate]);
 
     useEffect(() => {
-        if (newContactsByDay && Object.keys(newContactsByDay).length > 0 && startDate && endDate) {
-            const start = new Date(startDate);
-            const end = new Date(endDate);
+        if (!startDate || !endDate) return;
 
-            const dateRange = generateDateRange(start, new Date(end.setHours(23, 59, 59, 999)));
+        const start = new Date(startDate);
+        const end = new Date(endDate);
 
-            const formattedData = dateRange.map((date) => {
-                const formattedDate = date.split("-").reverse().join("/");
-                const contactCount = newContactsByDay[formattedDate] || 0;
-
-                return {
-                    date: formattedDate,
-                    count: contactCount,
-                };
-            });
-
-            setContactsChartData(formattedData);
-        } else {
-            setContactsChartData([]);
-        }
-    }, [newContactsByDay, startDate, endDate]);
-
-    const generateDateRange = (start, end) => {
         const dateArray = [];
-        let currentDate = new Date(start);
 
-        while (currentDate <= end) {
-            const year = currentDate.getFullYear();
-            const month = String(currentDate.getMonth() + 1).padStart(2, '0');
-            const day = String(currentDate.getDate()).padStart(2, '0');
-            const formattedDate = `${year}-${month}-${day}`;
-
-            dateArray.push(formattedDate);
-            currentDate.setDate(currentDate.getDate() + 1);
+        for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+            dateArray.push(new Date(d).toISOString().substring(0, 10));
         }
 
-        return dateArray;
-    };
+        const initialChartData = dateArray.map(date => ({
+            date,
+            count: 0
+        }));
+
+        const updatedChartData = initialChartData.map(item => {
+            const displayDate = item.date.split('-').reverse().join('/');
+            const count = newContactsByDay[displayDate] || 0;
+            return { ...item, count };
+        });
+
+        setContactsChartData(updatedChartData);
+
+    }, [newContactsByDay, startDate, endDate]);
 
     return (
         <React.Fragment>

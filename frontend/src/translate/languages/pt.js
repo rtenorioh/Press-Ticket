@@ -142,27 +142,54 @@ const messages = {
             title: "Aguardando"
           },
           closed: {
-            title: "Finalizado"
+            title: "Finalizados"
+          },
+          sent: {
+            title: "Mensagens Enviadas",
+            titleAdmin: "Mensagens Totais Enviadas"
+          },
+          received: {
+            title: "Mensagens Recebidas",
+            titleAdmin: "Mensagens Totais Recebidas"
           }
         },
         charts: {
           perDay: {
-            title: "Tickets por dia: ",
+            title: "Tickets por período: ",
           },
           date: {
-            title: "Filtrar"
-          }
+            start: "Data inicial",
+            end: "Data final"
+          },
+          perConnection: {
+            date: {
+              start: "Data inicial",
+              end: "Data final"
+            },
+            perConnection: {
+              title: "Tickets por Canais"
+            }
+          },
+          perQueue: {
+            title: "Tickets por Setor",
+            date: {
+              start: "Data inicial",
+              end: "Data final"
+            },
+          },
         },
         chartPerUser: {
           title: "Tickets por usuário",
           ticket: "Ticket",
           date: {
-            title: "Filtrar"
-          }
+            start: "Data inicial",
+            end: "Data final"
+          },
         },
         chartPerConnection: {
           date: {
-            title: "Filtrar"
+            start: "Data inicial",
+            end: "Data final"
           },
           perConnection: {
             title: "Tickets por Canais"
@@ -170,10 +197,23 @@ const messages = {
         },
         chartPerQueue: {
           date: {
-            title: "Filtrar"
+            start: "Data inicial",
+            end: "Data final"
           },
           perQueue: {
             title: "Tickets por Setor"
+          }
+        },
+        ChartMessages: {
+          title: "Mensagens por Usuário",
+          noUser: "Sem Usuário",
+          messages: {
+            sent: "Enviadas",
+            received: "Recebidas"
+          },
+          date: {
+            start: "Data inicial",
+            end: "Data final"
           }
         },
         newContacts: {
@@ -196,7 +236,10 @@ const messages = {
         tags: {
           cloudTitle: "Tags: ",
           noTags: "Sem tags no momento!"
-        }
+        },
+        users: {
+          title: "Usuários Online"
+        },
       },
       forgotPassword: {
         title: "Esqueceu a Senha?",
@@ -714,16 +757,16 @@ const messages = {
         },
         menu: {
           all: "Todos os Tickets",
-          open: "Todos no Inbox",
+          open: "Todos Em Atendimento",
           pending: "Todos no Aguardando"
         },
         confirmationModal: {
-          closeAllTitle: "Fechar Todos os Tickets",
-          closeOpenTitle: "Fechar Tickets no Inbox",
-          closePendingTitle: "Fechar Tickets no Aguardando",
-          closeAllMessage: "Tem certeza que deseja fechar todos os Tickets?",
-          closeOpenMessage: "Tem certeza que deseja fechar todos os Tickets no Inbox?",
-          closePendingMessage: "Tem certeza que deseja fechar todos os Tickets no Aguardando?"
+          closeAllTitle: "Finalizar Todos os Tickets",
+          closeOpenTitle: "Finalizar Tickets Em Atendimento",
+          closePendingTitle: "Finalizar Tickets no Aguardando",
+          closeAllMessage: "Tem certeza que deseja finalizar todos os Tickets?",
+          closeOpenMessage: "Tem certeza que deseja finalizar todos os Tickets Em Atendimento?",
+          closePendingMessage: "Tem certeza que deseja finalizar todos os Tickets no Aguardando?"
         }
       },
       ticketsQueueSelect: {
@@ -744,7 +787,7 @@ const messages = {
           }
         },
         tabs: {
-          open: { title: "Inbox" },
+          open: { title: "Em Atendimento" },
           pending: { title: "Aguardando" },
           closed: { title: "Finalizados" },
           search: { title: "Busca" },
@@ -944,3 +987,4 @@ const messages = {
 };
 
 export { messages };
+

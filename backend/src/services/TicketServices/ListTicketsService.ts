@@ -1,5 +1,5 @@
 import { endOfDay, parseISO, startOfDay } from "date-fns";
-import { col, Filterable, fn, Includeable, Op, where } from "sequelize";
+import { col, fn, Includeable, Op, where } from "sequelize";
 import Contact from "../../models/Contact";
 import Message from "../../models/Message";
 import Queue from "../../models/Queue";
@@ -7,17 +7,19 @@ import Ticket from "../../models/Ticket";
 import User from "../../models/User";
 import Whatsapp from "../../models/Whatsapp";
 import ListSettingsServiceOne from "../SettingServices/ListSettingsServiceOne";
-import ShowUserService from "../UserServices/ShowUserService";
 
 interface Request {
   searchParam?: string;
   pageNumber?: string;
   status?: string;
-  date?: string;
+  startDate?: string;
+  endDate?: string;
   showAll?: string;
+  isAdmin?: boolean;
   userId: string;
   withUnreadMessages?: string;
   queueIds: number[];
+  all?: string;
 }
 
 interface Response {
@@ -29,20 +31,22 @@ interface Response {
 const ListTicketsService = async ({
   searchParam = "",
   pageNumber = "1",
-  queueIds,
   status,
-  date,
+  startDate,
+  endDate,
   showAll,
+  isAdmin,
   userId,
-  withUnreadMessages
+  withUnreadMessages,
+  queueIds,
+  all
 }: Request): Promise<Response> => {
-  let whereCondition: Filterable["where"] = {
+  let whereCondition: any = {
     [Op.or]: [{ userId }, { status: "pending" }],
     queueId: { [Op.or]: [queueIds, null] }
   };
-  let includeCondition: Includeable[];
 
-  includeCondition = [
+  let includeCondition: Includeable[] = [
     {
       model: Contact,
       as: "contact",
@@ -79,6 +83,9 @@ const ListTicketsService = async ({
   if (showAll === "true") {
     whereCondition = { queueId: { [Op.or]: [queueIds, null] } };
   }
+
+  const allTickets = await ListSettingsServiceOne({ key: "allTicket" });
+  const allTicketsEnabled = allTickets?.value === "enabled";
 
   if (status) {
     whereCondition = {
@@ -130,37 +137,42 @@ const ListTicketsService = async ({
     };
   }
 
-  if (date) {
+  if (startDate && endDate) {
     whereCondition = {
+      ...whereCondition,
       createdAt: {
-        [Op.between]: [+startOfDay(parseISO(date)), +endOfDay(parseISO(date))]
+        [Op.between]: [
+          startOfDay(parseISO(startDate)),
+          endOfDay(parseISO(endDate))
+        ]
       }
     };
   }
 
-  if (withUnreadMessages === "true") {
-    const user = await ShowUserService(userId);
-    const userQueueIds = user.queues.map(queue => queue.id);
-
+  if (!isAdmin && !allTicketsEnabled) {
     whereCondition = {
-      [Op.or]: [{ userId }, { status: "pending" }],
-      queueId: { [Op.or]: [userQueueIds, null] },
+      ...whereCondition,
+      userId
+    };
+  }
+
+  if (withUnreadMessages === "true") {
+    whereCondition = {
+      ...whereCondition,
       unreadMessages: { [Op.gt]: 0 }
     };
   }
 
-  const limit = 20;
-  const offset = limit * (+pageNumber - 1);
+  const defaultLimit = 20;
+  const limit = all === "true" ? undefined : defaultLimit;
+  const offset = all === "true" ? 0 : defaultLimit * (+(pageNumber || "1") - 1);
 
   const listSettingsService = await ListSettingsServiceOne({ key: "ASC" });
-  let settingASC = listSettingsService?.value;
-
-  settingASC = settingASC === "enabled" ? "ASC" : "DESC";
+  const settingASC = listSettingsService?.value === "enabled" ? "ASC" : "DESC";
 
   const listSettingsService2 = await ListSettingsServiceOne({ key: "created" });
-  let settingCreated = listSettingsService2?.value;
-
-  settingCreated = settingCreated === "enabled" ? "createdAt" : "updatedAt";
+  const settingCreated =
+    listSettingsService2?.value === "enabled" ? "createdAt" : "updatedAt";
 
   const { count, rows: tickets } = await Ticket.findAndCountAll({
     where: whereCondition,
@@ -171,7 +183,7 @@ const ListTicketsService = async ({
     order: [[settingCreated, settingASC]]
   });
 
-  const hasMore = count > offset + tickets.length;
+  const hasMore = !(all === "true") && count > offset + defaultLimit;
 
   return {
     tickets,

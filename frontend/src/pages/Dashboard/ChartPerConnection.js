@@ -14,29 +14,29 @@ import useTickets from "../../hooks/useTickets";
 import CustomTooltip from "./CustomTooltip";
 import Title from "./Title";
 
-const ChartPerConnection = ({ searchParam, pageNumber, status, date, showAll, queueIds, withUnreadMessages }) => {
+const ChartPerConnection = ({ searchParam, pageNumber, status, showAll, queueIds, withUnreadMessages }) => {
     const theme = useTheme();
     const { t } = useTranslation();
-
-    const getCurrentDate = () => {
+    const [startDate, setStartDate] = useState(() => {
+        const d = new Date();
+        d.setDate(d.getDate() - 7);
+        return d.toISOString().substring(0, 10);
+    });
+    const [endDate, setEndDate] = useState(() => {
         const today = new Date();
-        const year = today.getFullYear();
-        const month = String(today.getMonth() + 1).padStart(2, '0');
-        const day = String(today.getDate()).padStart(2, '0');
-        return `${year}-${month}-${day}`;
-    };
-
-    const [selectedDate, setSelectedDate] = useState(getCurrentDate());
+        return today.toISOString().substring(0, 10);
+    });
     const { tickets } = useTickets({
         searchParam,
         pageNumber,
         status,
-        date: selectedDate,
+        startDate,
+        endDate,
         showAll,
+        all: true,
         queueIds,
         withUnreadMessages,
     });
-
     const [connectionChartData, setConnectionChartData] = useState([]);
 
     useEffect(() => {
@@ -61,25 +61,29 @@ const ChartPerConnection = ({ searchParam, pageNumber, status, date, showAll, qu
         setConnectionChartData(formattedData);
     }, [tickets]);
 
-    const handleDateChange = (event) => {
-        setSelectedDate(event.target.value);
-    };
-
     const filteredChartData = connectionChartData.filter(data => data.value > 0);
 
     return (
         <React.Fragment>
             <Title>{t("dashboard.chartPerConnection.perConnection.title")}</Title>
-            <TextField
-                label={t("dashboard.chartPerConnection.date.title")}
-                type="date"
-                value={selectedDate}
-                onChange={handleDateChange}
-                InputLabelProps={{
-                    shrink: true,
-                }}
-                style={{ marginBottom: "16px" }}
-            />
+            <div
+                style={{ display: "flex", justifyContent: "space-between", marginBottom: "16px" }}
+            >
+                <TextField
+                    label={t("dashboard.chartPerConnection.date.start")}
+                    type="date"
+                    value={startDate}
+                    onChange={(e) => setStartDate(e.target.value)}
+                    InputLabelProps={{ shrink: true }}
+                />
+                <TextField
+                    label={t("dashboard.chartPerConnection.date.end")}
+                    type="date"
+                    value={endDate}
+                    onChange={(e) => setEndDate(e.target.value)}
+                    InputLabelProps={{ shrink: true }}
+                />
+            </div>
             <ResponsiveContainer width="95%" height={265}>
                 <PieChart>
                     <Pie

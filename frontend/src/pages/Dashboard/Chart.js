@@ -1,6 +1,5 @@
 import { useTheme } from "@material-ui/core";
 import TextField from "@material-ui/core/TextField";
-import { format, parseISO, startOfHour } from "date-fns";
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -19,52 +18,70 @@ import Title from "./Title";
 const Chart = () => {
 	const theme = useTheme();
 	const { t } = useTranslation();
-	const [selectedDate, setSelectedDate] = useState(() => {
-		const today = new Date();
-		const year = today.getFullYear();
-		const month = String(today.getMonth() + 1).padStart(2, '0');
-		const day = String(today.getDate()).padStart(2, '0');
-		return `${year}-${month}-${day}`;
-	});
-	const { tickets } = useTickets({ date: selectedDate });
 	const [chartData, setChartData] = useState([]);
+	const [startDate, setStartDate] = useState(() => {
+		const d = new Date();
+		d.setDate(d.getDate() - 6);
+		return d.toISOString().substring(0, 10);
+	});
+	const [endDate, setEndDate] = useState(() => {
+		const today = new Date();
+		return today.toISOString().substring(0, 10);
+	});
+	const { tickets } = useTickets({ startDate, endDate, all: true });
 
 	useEffect(() => {
-		const initialChartData = Array.from({ length: 24 * 2 }, (_, index) => {
-			const hours = Math.floor(index / 2);
-			const minutes = index % 2 === 0 ? "00" : "30";
-			return { time: `${String(hours).padStart(2, '0')}:${minutes}`, amount: 0 };
-		});
+		const start = new Date(startDate);
+		const end = new Date(endDate);
 
-		const updatedChartData = initialChartData.map((dataPoint) => {
-			const count = tickets.filter((ticket) => {
-				const ticketTime = format(startOfHour(parseISO(ticket.createdAt)), "HH:mm");
-				return ticketTime === dataPoint.time;
+		const dateArray = [];
+		for (let d = new Date(start); 
+		d <= end; 
+		d.setDate(d.getDate() + 1)
+	) {
+			dateArray.push(new Date(d).toISOString().substring(0, 10));
+		}
+
+		const initialChartData = dateArray.map(date => ({
+			date,
+			amount: 0
+		}));
+
+		const updatedChartData = initialChartData.map(item => {
+			const count = tickets.filter(ticket => {
+				const ticketDate = new Date(ticket.createdAt).toISOString().substring(0, 10);
+				return ticketDate === item.date;
 			}).length;
 
-			return { ...dataPoint, amount: count };
+			return { ...item, amount: count };
 		});
 
 		setChartData(updatedChartData);
-	}, [tickets, selectedDate]);
-
-	const handleDateChange = (event) => {
-		setSelectedDate(event.target.value);
-	};
+	}, [tickets, startDate, endDate]);
 
 	return (
 		<React.Fragment>
-			<Title>{`${t("dashboard.charts.perDay.title")}${tickets.length}`}</Title>
-			<TextField
-				label={t("dashboard.charts.date.title")}
-				type="date"
-				value={selectedDate}
-				onChange={handleDateChange}
-				InputLabelProps={{
-					shrink: true,
-				}}
-				style={{ marginBottom: "16px" }}
-			/>
+			<Title>{`${t("dashboard.charts.perDay.title")} ${tickets.length}`}</Title>
+			<div
+				style={{ display: "flex", justifyContent: "space-between", marginBottom: "16px" }}
+			>
+				<TextField
+					label={t("dashboard.charts.date.start")}
+					type="date"
+					value={startDate}
+					onChange={e => setStartDate(e.target.value)}
+					InputLabelProps={{ shrink: true }}
+					style={{ marginRight: "16px" }}
+				/>
+				<TextField
+					label={t("dashboard.charts.date.end")}
+					type="date"
+					value={endDate}
+					onChange={e => setEndDate(e.target.value)}
+					InputLabelProps={{ shrink: true }}
+					style={{ marginBottom: "16px" }}
+				/>
+			</div>
 			<ResponsiveContainer>
 				<AreaChart
 					data={chartData}
@@ -79,7 +96,7 @@ const Chart = () => {
 					}}
 				>
 					<XAxis
-						dataKey="time"
+						dataKey="date"
 						tickLine={false}
 						axisLine={false}
 						stroke={theme.palette.text.secondary}

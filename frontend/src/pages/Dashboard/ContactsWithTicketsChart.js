@@ -26,7 +26,7 @@ const ContactsWithTicketsChart = () => {
     const getLastWeekDateRange = () => {
         const end = new Date();
         const start = new Date();
-        start.setDate(end.getDate() - 6);
+        start.setDate(end.getDate() - 7);
         return { start, end };
     };
 
@@ -46,7 +46,7 @@ const ContactsWithTicketsChart = () => {
         }
     }, [startDate, endDate]);
 
-    const { contactsWithTicketsByDay } = useTickets({ startDate, endDate });
+    const { contactsWithTicketsByDay } = useTickets({ startDate, endDate, all: true });
 
     useEffect(() => {
         if (contactsWithTicketsByDay && startDate && endDate) {

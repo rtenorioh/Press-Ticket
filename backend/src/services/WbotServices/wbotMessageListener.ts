@@ -245,7 +245,8 @@ const verifyMediaMessage = async (
     read: msg.fromMe,
     mediaUrl: media.filename,
     mediaType: media.mimetype.split("/")[0],
-    quotedMsgId: quotedMsg?.id
+    quotedMsgId: quotedMsg?.id,
+    userId: ticket.userId
   };
 
   if (msg.fromMe === true) {
@@ -322,7 +323,8 @@ const verifyMessage = async (
     fromMe: msg.fromMe,
     mediaType: msg.type,
     read: msg.fromMe,
-    quotedMsgId: quotedMsg?.id
+    quotedMsgId: quotedMsg?.id,
+    userId: ticket.userId
   };
 
   if (msg.fromMe === true) {
