@@ -201,6 +201,14 @@ const useStyles = makeStyles((theme) => ({
     borderBottomLeftRadius: 8,
     borderBottomRightRadius: 8,
   },
+  messageVideo: {
+    width: 250,
+    maxHeight: 445,
+    borderTopLeftRadius: 8,
+    borderTopRightRadius: 8,
+    borderBottomLeftRadius: 8,
+    borderBottomRightRadius: 8,
+  },
   timestamp: {
     fontSize: 11,
     position: "absolute",
@@ -506,7 +514,7 @@ const MessagesList = ({ ticketId, isGroup }) => {
     } else if (message.mediaType === "video") {
       return (
         <video
-          className={classes.messageMedia}
+          className={classes.messageVideo}
           src={message.mediaUrl}
           controls
         />
@@ -646,7 +654,7 @@ const MessagesList = ({ ticketId, isGroup }) => {
           {message.quotedMsg.mediaType === "video"
             && (
               <video
-                className={classes.messageMedia}
+              className={classes.messageVideo}
                 src={message.quotedMsg.mediaUrl}
                 controls
               />
