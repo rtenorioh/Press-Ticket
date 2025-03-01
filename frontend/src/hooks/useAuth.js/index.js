@@ -4,6 +4,7 @@ import { useHistory } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useSocket } from "../../context/SocketContext";
 import api from "../../services/api";
+import { showLoading } from "../../utils/showLoading";
 
 const useAuth = () => {
     const history = useHistory();
@@ -86,7 +87,11 @@ const useAuth = () => {
             setUser(data.user);
             setIsAuth(true);
             toast.success(t("auth.toasts.success"));
-            history.push("/tickets");
+            const finishLoading = showLoading();
+            setTimeout(() => {
+                finishLoading();
+                history.push("/tickets");
+            }, 1500);
         } catch (err) {
             toast.error(t("auth.toasts.error"));
         }

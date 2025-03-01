@@ -14,11 +14,60 @@
       content="minimum-scale=1, initial-scale=1, width=device-width"
     />
     <noscript id="env-insertion-point"></noscript>
+    <style>
+      @keyframes pulse {
+        0% { opacity: 0.6; transform: scale(1); }
+        50% { opacity: 1; transform: scale(1.05); }
+        100% { opacity: 0.6; transform: scale(1); }
+      }
+
+      #splash-screen {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: #f5f5f5;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        z-index: 9999;
+        transition: opacity 0.3s ease-out;
+      }
+
+      .progress-bar {
+        width: 300px;
+        height: 4px;
+        background-color: #e0e0e0;
+        border-radius: 4px;
+        overflow: hidden;
+      }
+
+      .progress {
+        width: 0%;
+        height: 100%;
+        background-color: #25D366;
+        transition: width 0.5s ease-out;
+      }
+
+      .loading-text {
+        margin-bottom: 16px;
+        font-family: 'Roboto', sans-serif;
+        color: #666;
+        font-size: 22px;
+        font-weight: 500;
+        animation: pulse 2s ease-in-out infinite;
+      }
+    </style>
   </head>
   <body>
-    <noscript>
-      Você precisa habilitar o JavaScript para rodar este app.
-    </noscript>
+    <div id="splash-screen">
+      <div class="loading-text">Loading...</div>
+      <div class="progress-bar">
+        <div class="progress" id="progress-bar"></div>
+      </div>
+    </div>
     <div id="root"></div>
   </body>
 </html>
