@@ -76,7 +76,9 @@ const createContact = async (
 
   const ticket = await ShowTicketService(createTicket.id);
 
-  SetTicketMessagesAsRead(ticket);
+  if (ticket.status === "open") {
+    await SetTicketMessagesAsRead(ticket);
+  }
 
   return ticket;
 };

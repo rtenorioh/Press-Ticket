@@ -31,7 +31,9 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
     ticketId
   });
 
-  SetTicketMessagesAsRead(ticket);
+  if (ticket.status === "open") {
+    await SetTicketMessagesAsRead(ticket);
+  }
 
   return res.json({ count, messages, ticket, hasMore });
 };
@@ -43,7 +45,9 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
 
   const ticket = await ShowTicketService(ticketId);
 
-  SetTicketMessagesAsRead(ticket);
+  if (ticket.status === "open") {
+    await SetTicketMessagesAsRead(ticket);
+  }
 
   if (medias) {
     await Promise.all(

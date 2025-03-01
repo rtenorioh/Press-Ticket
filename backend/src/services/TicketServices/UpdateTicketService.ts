@@ -2,8 +2,6 @@ import CheckContactOpenTickets from "../../helpers/CheckContactOpenTickets";
 import SetTicketMessagesAsRead from "../../helpers/SetTicketMessagesAsRead";
 import { getIO } from "../../libs/socket";
 import Ticket from "../../models/Ticket";
-import SendWhatsAppMessage from "../WbotServices/SendWhatsAppMessage";
-import ShowWhatsAppService from "../WhatsappService/ShowWhatsAppService";
 import ShowTicketService from "./ShowTicketService";
 
 interface TicketData {
@@ -31,9 +29,11 @@ const UpdateTicketService = async ({
   const { status, userId, queueId, whatsappId } = ticketData;
 
   const ticket = await ShowTicketService(ticketId);
-  await SetTicketMessagesAsRead(ticket);
+  if (ticket.status === "open") {
+    await SetTicketMessagesAsRead(ticket);
+  }
 
-  if(whatsappId && ticket.whatsappId !== whatsappId) {
+  if (whatsappId && ticket.whatsappId !== whatsappId) {
     await CheckContactOpenTickets(ticket.contactId, whatsappId);
   }
 
@@ -50,7 +50,7 @@ const UpdateTicketService = async ({
     userId
   });
 
-  if(whatsappId) {
+  if (whatsappId) {
     await ticket.update({
       whatsappId
     });
