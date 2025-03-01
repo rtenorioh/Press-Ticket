@@ -413,6 +413,18 @@ const MessagesList = ({ ticketId, isGroup }) => {
     }
   };
 
+  const unsupportedMediaTypes = [
+    "ciphertext",
+    "list",
+    "template_button_reply",
+    "unknown",
+    "buttons_response",
+    "notification_template",
+    "groups_v4_invite",
+    "poll_creation",
+    "event_creation"
+  ];
+
   const handleScroll = (e) => {
     if (!hasMore) return;
     const { scrollTop } = e.currentTarget;
@@ -695,6 +707,28 @@ const MessagesList = ({ ticketId, isGroup }) => {
                   </svg>
                   <span>{t("messagesList.message.voiceVideoLost")} {format(parseISO(message.createdAt), "HH:mm")}</span>
                 </div>
+              </div>
+            </React.Fragment>
+          );
+        }
+        if (unsupportedMediaTypes.includes(message.mediaType)) {
+          return (
+            <React.Fragment key={message.id}>
+              {renderDailyTimestamps(message, index)}
+              {renderMessageDivider(message, index)}
+              {renderNumberTicket(message, index)}
+              <div className={classes.messageLeft} style={{ backgroundColor: "#E1F5FEEB" }}>
+                {isGroup && (
+                  <span className={classes.messageContactName}>
+                    {message.contact?.name}
+                  </span>
+                )}
+                <b>{t("messagesList.message.type")}</b>: <i>{message.mediaType}</i> <br />
+                {t("messagesList.message.notCompatibleWithSystem")} <br />
+                {t("messagesList.message.viewOnMobile")} <br />
+                <span className={classes.timestamp}>
+                  {format(parseISO(message.createdAt), "HH:mm")}
+                </span>
               </div>
             </React.Fragment>
           );

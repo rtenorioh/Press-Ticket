@@ -293,8 +293,9 @@ const prepareLocation = async (msg: WbotMessage): Promise<WbotMessage> => {
     );
 
     msg.body = `data:image/png;base64,${msg.body}|${gmapsUrl}`;
-    msg.body += `|${address || `${msg.location.latitude}, ${msg.location.longitude}`
-      }`;
+    msg.body += `|${
+      address || `${msg.location.latitude}, ${msg.location.longitude}`
+    }`;
   } catch (error) {
     console.error("Erro ao preparar a localização:", error);
     msg.body += `|${msg.location.latitude}, ${msg.location.longitude}`;
@@ -424,8 +425,9 @@ const verifyQueue = async (
     queues.forEach((queue, index) => {
       if (queue.startWork && queue.endWork) {
         if (isDisplay) {
-          options += `*${index + 1}* - ${queue.name} das ${queue.startWork
-            } as ${queue.endWork}\n`;
+          options += `*${index + 1}* - ${queue.name} das ${
+            queue.startWork
+          } as ${queue.endWork}\n`;
         } else {
           options += `*${index + 1}* - ${queue.name}\n`;
         }
@@ -460,15 +462,16 @@ const isValidMsg = (msg: WbotMessage): boolean => {
     msg.type === "ptt" ||
     msg.type === "video" ||
     msg.type === "image" ||
+    msg.type === "location" ||
     msg.type === "document" ||
     msg.type === "vcard" ||
     msg.type === "call_log" ||
+    msg.type === "poll_creation" ||
     // msg.type === "multi_vcard" ||
     msg.type === "sticker" ||
-    msg.type === "e2e_notification" || // Ignore Empty Messages Generated When Someone Changes His Account from Personal to Business or vice-versa
-    msg.type === "notification_template" || // Ignore Empty Messages Generated When Someone Changes His Account from Personal to Business or vice-versa
-    msg.author !== null || // Ignore Group Messages
-    msg.type === "location"
+    msg.type === "notification_template" ||
+    msg.type !== "e2e_notification" || // Ignore Empty Messages Generated When Someone Changes His Account from Personal to Business or vice-versa
+    msg.author !== null // Ignore Group Messages
   )
     return true;
   return false;
@@ -831,3 +834,4 @@ const wbotMessageListener = async (wbot: Session): Promise<void> => {
 };
 
 export { handleMessage, handleMsgAck, wbotMessageListener };
+

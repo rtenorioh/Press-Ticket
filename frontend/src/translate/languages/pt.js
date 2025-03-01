@@ -303,6 +303,9 @@ const messages = {
           },
         },
         message: {
+          notCompatibleWithSystem: "Você recebeu uma mensagem que atualmente não é compatível com o sistema.",
+          viewOnMobile: "Para visualizar o conteúdo completo, acesse o aplicativo no celular.",
+          type: "Tipo de mensagem",
           download: "Baixar",
           ticketNumber: "#ticket:",
           voiceVideoLost: "Mensagem de voz ou video perdida às",
@@ -787,7 +790,8 @@ const messages = {
           connection: "Canal",
           user: "Atendente",
           queue: "Setor",
-          tags: "Tags"
+          tags: "Tags",
+          ticket: "Ticket ID"
         },
         buttons: {
           accept: "Responder",
