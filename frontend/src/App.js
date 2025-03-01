@@ -3,12 +3,11 @@ import { ptBR } from "@material-ui/core/locale";
 import { ThemeProvider } from "@material-ui/core/styles";
 import React, { useEffect, useState } from "react";
 import "react-toastify/dist/ReactToastify.css";
+import { SocketProvider, useSocket } from './context/SocketContext';
 import toastError from "./errors/toastError";
 import Routes from "./routes";
 import api from "./services/api";
-import { SocketProvider, useSocket } from './context/SocketContext';
 import loadThemeConfig from "./themes/themeConfig";
-import { getImageUrl } from './helpers/imageHelper';
 
 const AppContent = () => {
   const [, setLocale] = useState(ptBR);
@@ -33,7 +32,6 @@ const AppContent = () => {
 
           if (lightConfig) {
             setLightThemeConfig(lightConfig);
-            document.title = lightConfig.company || "Press Ticket";
           }
 
           if (darkConfig) {
@@ -42,7 +40,6 @@ const AppContent = () => {
         }
       } catch (err) {
         toastError(err);
-        document.title = "Erro ao carregar título";
       }
     };
 
@@ -67,16 +64,6 @@ const AppContent = () => {
       setLocale(ptBR);
     }
   }, []);
-
-  useEffect(() => {
-    const favicon = document.querySelector("link[rel*='icon']") || document.createElement("link");
-    favicon.type = "image/x-icon";
-    favicon.rel = "shortcut icon";
-
-    const favico = theme === "dark" ? "favicoDark.ico" : "favico.ico";
-    favicon.href = getImageUrl(favico);
-    document.head.appendChild(favicon);
-  }, [theme]);
 
   const currentTheme = loadThemeConfig(
     theme,

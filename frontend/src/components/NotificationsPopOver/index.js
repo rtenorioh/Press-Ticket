@@ -20,7 +20,10 @@ import { toast } from "react-toastify";
 import useSound from "use-sound";
 import alertSound from "../../assets/sound.mp3";
 import { AuthContext } from "../../context/Auth/AuthContext";
+import toastError from "../../errors/toastError";
+import { getImageUrl } from "../../helpers/imageHelper";
 import useTickets from "../../hooks/useTickets";
+import api from "../../services/api";
 import openSocket from "../../services/socket-io";
 import TicketListItem from "../TicketListItem";
 
@@ -43,6 +46,7 @@ const useStyles = makeStyles((theme) => ({
 
 const NotificationsPopOver = () => {
 	const classes = useStyles();
+	const themeStorage = localStorage.getItem("theme");
 	const { t } = useTranslation();
 	const history = useHistory();
 	const { user } = useContext(AuthContext);
@@ -56,7 +60,6 @@ const NotificationsPopOver = () => {
 	const [notificationsAllowed, setNotificationsAllowed] = useState(
 		Notification.permission === "granted"
 	);
-
 	const { tickets } = useTickets({ withUnreadMessages: "true" });
 	const [play, { stop }] = useSound(alertSound, { soundEnabled: isAudioEnabled });
 	const soundAlertRef = useRef(play);
@@ -162,6 +165,45 @@ const NotificationsPopOver = () => {
 		};
 	}, [user, ticketIdUrl, handleNotifications]);
 
+	useEffect(() => {
+		const updateDocumentTitle = async () => {
+			try {
+				const { data } = await api.get("/personalizations");
+				let baseTitle = "Press Ticket";
+				let faviconUrl =
+					"https://github.com/rtenorioh/Press-Ticket/blob/main/frontend/public/favicon.ico?raw=true";
+				if (data && data.length > 0) {
+					const lightConfig = data.find((config) => config.theme === "light");
+					const darkConfig = data.find((config) => config.theme === "dark");
+
+					if (themeStorage === "light" && lightConfig) {
+						faviconUrl = lightConfig.favico || faviconUrl;
+						baseTitle = lightConfig.company || baseTitle;
+					} else if (themeStorage === "dark" && darkConfig) {
+						faviconUrl = darkConfig.favico || faviconUrl;
+					}
+				}
+				document.title =
+					notifications.length > 0
+						? `(${notifications.length}) ${baseTitle}`
+						: baseTitle;
+
+				let link = document.querySelector("link[rel~='icon']");
+				if (!link) {
+					link = document.createElement("link");
+					link.rel = "icon";
+					document.getElementsByTagName("head")[0].appendChild(link);
+				}
+				link.href = getImageUrl(faviconUrl);
+			} catch (err) {
+				toastError(err, t);
+				document.title = "Erro ao carregar título";
+			}
+		};
+
+		updateDocumentTitle();
+	}, [notifications, themeStorage, t]);
+
 	const toggleAudio = () => {
 		const newAudioStatus = !isAudioEnabled;
 		setIsAudioEnabled(newAudioStatus);
@@ -210,7 +252,7 @@ const NotificationsPopOver = () => {
 					badgeContent={notifications.length}
 					color="secondary"
 					overlap="rectangular"
-					max={9999}
+					max={999999}
 				>
 					<ChatIcon />
 				</Badge>

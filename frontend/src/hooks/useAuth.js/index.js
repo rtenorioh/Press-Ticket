@@ -1,9 +1,9 @@
-import { useEffect, useState, useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useHistory } from "react-router-dom";
 import { toast } from "react-toastify";
-import api from "../../services/api";
 import { useSocket } from "../../context/SocketContext";
+import api from "../../services/api";
 
 const useAuth = () => {
     const history = useHistory();
@@ -47,10 +47,8 @@ const useAuth = () => {
     }, [handleLogout]);
 
     useEffect(() => {
-        let socket;
 
         if (isAuth && user.id) {
-            socket = socket;
 
             if (socket) {
                 socket.on("userSessionExpired", data => {
@@ -77,7 +75,7 @@ const useAuth = () => {
                 socket.disconnect();
             }
         };
-    }, [user.id, isAuth, t, handleLogout]);
+    }, [user.id, isAuth, t, handleLogout, socket]);
 
     const handleLogin = async (userData) => {
         try {
