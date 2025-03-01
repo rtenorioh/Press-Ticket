@@ -60,7 +60,7 @@ const NotificationsPopOver = () => {
 	const [notificationsAllowed, setNotificationsAllowed] = useState(
 		Notification.permission === "granted"
 	);
-	const { tickets } = useTickets({ withUnreadMessages: "true" });
+	const { tickets } = useTickets({ withUnreadMessages: "true", all: true });
 	const [play, { stop }] = useSound(alertSound, { soundEnabled: isAudioEnabled });
 	const soundAlertRef = useRef(play);
 
