@@ -108,10 +108,12 @@ const verifyRevoked = async (msgBody?: string): Promise<void> => {
         return;
       }
 
-      io.to(msgIsDeleted.ticketId.toString()).emit("appMessage", {
-        action: "update",
-        message: msgIsDeleted
-      });
+      io.to(msgIsDeleted.ticketId.toString())
+        .to("notification")
+        .emit("appMessage", {
+          action: "update",
+          message: msgIsDeleted
+        });
     }
   } catch (err) {
     Sentry.captureException(err);
@@ -834,4 +836,3 @@ const wbotMessageListener = async (wbot: Session): Promise<void> => {
 };
 
 export { handleMessage, handleMsgAck, wbotMessageListener };
-

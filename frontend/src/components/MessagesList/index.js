@@ -500,7 +500,7 @@ const MessagesList = ({ ticketId, isGroup }) => {
       } else return (<></>)
     }*/
     else if (message.mediaType === "image") {
-      return <ModalImageCors imageUrl={message.mediaUrl} />;
+      return <ModalImageCors imageUrl={message.mediaUrl} isDeleted={message.isDeleted} />;
     } else if (message.mediaType === "audio") {
       return <Audio url={message.mediaUrl} />
     } else if (message.mediaType === "video") {
