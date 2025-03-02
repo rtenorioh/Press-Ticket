@@ -239,6 +239,7 @@ const TicketListItem = ({ ticket, filteredTags }) => {
 		  try {
 			const { data } = await api.get("/settings");
 			setSettings(data);
+			setSpy(data);
 		  } catch (err) {
 			console.error(err);
 			toastError(err);
