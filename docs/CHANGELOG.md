@@ -1,5 +1,87 @@
 # Changelog
 
+### v1.11.0 (01/03/2025)
+
+- [Ajustes e atualização em documentação e instalador](https://github.com/rtenorioh/Press-Ticket/commit/bd643d62613a02e7c19d63a961cb04e8e17cecec);
+- [Ajustar o tamanho do campo profilePicUrl na tabela Contacts](https://github.com/rtenorioh/Press-Ticket/commit/c9006535c7da0e4843d2f1489a9244cdf823c2c7);
+- [Renderização genérica para os mediaTypes não tratados](https://github.com/rtenorioh/Press-Ticket/commit/c7ae7b071bf57a132f372f59304b6a9c1e12b960);
+- [config(auth): atualiza os tempos de expiração do JWT (8h e 1d)](https://github.com/rtenorioh/Press-Ticket/commit/33bc201e877fedbb88d7dbd3ee02cd547f6f4c7d);
+- [Tooltip para última mensagem em TicketListItem](https://github.com/rtenorioh/Press-Ticket/commit/9124bcb5b1ba2a295ab55c3bd9311a5383705568);
+- [Ajuste em document.title e favicon dinamicamente e contagem de notificações](https://github.com/rtenorioh/Press-Ticket/commit/b5b45f4f9f538a0fe5d7c2b907da407bc49492c0);
+- [Ajustes nas mensagens deletadas](https://github.com/rtenorioh/Press-Ticket/commit/eb18027e0f7745e60ee33e411bbf1ac6d1669426);
+- [feat: adicionado tela de carregamento com barra de progresso e texto dinâmico](https://github.com/rtenorioh/Press-Ticket/commit/4bb055b15072527e68d00ceae47b0ff622dc22cd);
+- [Ajuste na visualização de videos](https://github.com/rtenorioh/Press-Ticket/commit/17dd4c911398b0a06d733485c6d3f02b924159f5);
+- [feat: adicionado atualização de texto dinâmico na tela de carregamento](https://github.com/rtenorioh/Press-Ticket/commit/23ae10ed8cbb28355c448e9e03707bbc0db5cd3f);
+- [feat: adicionado botão para rolar até a última mensagem e destaque na mensagem ao clicar](https://github.com/rtenorioh/Press-Ticket/commit/42c269a75605e4fd6e261254621730aad7cd1144);
+- [feat: atualizar mensagens do ticket apenas se o status for "aberto"](https://github.com/rtenorioh/Press-Ticket/commit/b7922cb90cada2ed5093d95f75ad5a92a958da4d);
+- [feat: atualizar URL da API e adicionar novas rotas para contagem de mensagens](https://github.com/rtenorioh/Press-Ticket/commit/f545633b058a85bb73ebdb996a0d259efa94f2e3);
+- [feat: adicionar contagem de mensagens e associar userId às mensagens](https://github.com/rtenorioh/Press-Ticket/commit/07a87cd3af34d9d1d026e9db33fc24c649d55d91);
+- [Adicionar opção para recuperar todos os tickets na lista de notificações](https://github.com/rtenorioh/Press-Ticket/commit/80b487b70070cbbdc8c47324d04a3b328649d14c);
+- [Adicionar state de vigilância ao recuperar configurações](https://github.com/rtenorioh/Press-Ticket/commit/d8bdfd1af644681d3a6edf6bcc115da049e677bf);
+- [feat: adicionar inclusão e exclusão de diretórios no tsconfig](https://github.com/rtenorioh/Press-Ticket/commit/90fe933420e0762d1ed8a297a2a609f0bd050e70); e
+- [feat: atualizar versão do sistema para v1.11.0](https://github.com/rtenorioh/Press-Ticket/commit/e71e49e5156e1044669f6c06fab3aa720c3dda43);
+
+### v1.10.4 (26/01/2025)
+
+- [Fixando o TagsFilter na tela](https://github.com/rtenorioh/Press-Ticket/commit/ada923786559ec536a3373804cb801baaa5e6740);
+- [Melhorias no instalador automatico](https://github.com/rtenorioh/Press-Ticket/commit/0d639050f395017abf389435de997025a307be7a);
+- [Corrige problema de CORS com renderização direta de imagem](https://github.com/rtenorioh/Press-Ticket/commit/e1191ed718baa1c1bb33029ac5e1a151870c5535);
+- [Refactor: Melhoria na gestão de conexões do socket](https://github.com/rtenorioh/Press-Ticket/commit/2a1f172cfcd0459cacf4fefadbc99200b5e832ed);
+- [Ajustes de args do puppeteer](https://github.com/rtenorioh/Press-Ticket/commit/25efaa314927f0b7c0f1a334a1719eb1cd883cc8);
+- [Adicionado tratamento de erro e delay na sincronização de mensagens não lidas](https://github.com/rtenorioh/Press-Ticket/commit/a1d740d09abb8a481c11e20be85fba6c2b21bb18);
+- [Ajuste no contador dos status para exibição total e melhoria no visual no TicketsManager](https://github.com/rtenorioh/Press-Ticket/commit/83488ab6255474fe02ed3e47f3af220caffa43d8);
+- [Implementação do botão de Finalizar no TicketsManager (Todos, Inbox ou Pendentes)](https://github.com/rtenorioh/Press-Ticket/commit/73da75143ba601fafa10dab61727fc0a5103c546);
+- [Implementação do ConfirmationModal no Finalizar Tickets no TicketsManager](https://github.com/rtenorioh/Press-Ticket/commit/0ff2d215acdd1ad811da239ef991fb57d4841c7b);
+- [Ajustar atualização de 'ack' para garantir valor padrão](https://github.com/rtenorioh/Press-Ticket/commit/129dfa3f5c2c716afc004e1af3c83ad7240348f4);
+- [Habilitar/Desabilitar Aguardando e Finalizados](https://github.com/rtenorioh/Press-Ticket/commit/c322a1a48516069bc7e6891f0b3e0c72d9ffa8c9);
+- [Habilitar/Desabilitar botão Mover para Aguardando](https://github.com/rtenorioh/Press-Ticket/commit/681cbe000abd3a676860190c5f3be62e01f80366);
+- [Habilitar/Desabilitar botão espiar](https://github.com/rtenorioh/Press-Ticket/commit/9b9346cc62952aa1391096cd38db4389069ff3a1);
+- [Verificar pelo atualizador se ffmpeg esta instalado](https://github.com/rtenorioh/Press-Ticket/commit/b06a22493b323adcf464989c630b76ca0dd1b43a);
+- [Verficar pelo atualizador a existencia das variaveis do PM2 no .env do backend](https://github.com/rtenorioh/Press-Ticket/commit/d87b7bd196db0037d932196a394976d18ae79f66);
+- [Correção e melhorias no Instalador automático](https://github.com/rtenorioh/Press-Ticket/commit/abc36eab00daa86e3542512ad68d97c95727bf0e);
+- [Correção do TagsFilter nos Contatos](https://github.com/rtenorioh/Press-Ticket/commit/24c8969701dc61f568f962dcae7b0a0108b0dffc); e
+- [Atualização de versão](https://github.com/rtenorioh/Press-Ticket/commit/e15bd7383a39c5e0721104cc03a428d401d481ee).
+
+### v1.10.3 (24/01/2025)
+
+- [Corrigir a URL exibida na função de versionamento](https://github.com/rtenorioh/Press-Ticket/commit/17a48d62a51ba5de7f2df336ae83819adf459885);
+- [Permitir interação no atualizador para instalação do node](https://github.com/rtenorioh/Press-Ticket/commit/4a38200b5d1188232236778d3a22d7fed4e282a9);
+- [Criar variavel WEBHOOK pelo atualizador](https://github.com/rtenorioh/Press-Ticket/commit/499870ed862d74bca398a53e608bc5cac60961cf);
+- [Ajuste na mensagem de conclusao do atualizador](https://github.com/rtenorioh/Press-Ticket/commit/4746fd4226c37d354b16e1daf8c25ec790d3f87a);
+- [Correção na renderização das imagens](https://github.com/rtenorioh/Press-Ticket/commit/e58cc76d9a58aaf2148d96752ef3a5e710fe7f96);
+- [Melhoria no regex para nome do arquivo](https://github.com/rtenorioh/Press-Ticket/commit/5e3b3eb171941ec6078a37aa5be11474e34fe7f1);
+- [Ajuste no queue quando o status for close](https://github.com/rtenorioh/Press-Ticket/commit/e012a8a9519e3dc7295a54e0d5c2de23b95a43e4);
+- [Adicionado modal de confirmação ao finalizar ticket](https://github.com/rtenorioh/Press-Ticket/commit/1085f9efdd76f7437c8558c37f2c9d7b7a413d9a);
+- [Respostas rápidas pesquisar pelo atalho](https://github.com/rtenorioh/Press-Ticket/commit/a782a6392b55cf28588c005eff3e289afb123224);
+- [Ampliado melhoria no regex do nome do arquivo](https://github.com/rtenorioh/Press-Ticket/commit/6799d37b0e5752c360412c3012e225a7c5fef48e);
+- [Redução no Limit do ListContactServices](https://github.com/rtenorioh/Press-Ticket/commit/081509e5abafb481b53dcfa38412b8272e48538b);
+- [Ajustes e melhorias no sistema de autenticação](https://github.com/rtenorioh/Press-Ticket/commit/900aaa5c4b1becc6878c58265442ce7f3f29e185);
+- [Atualização nas documentações](https://github.com/rtenorioh/Press-Ticket/commit/f12d82baf4ebcc49cc4cbc255a23797929ee609f);
+- [Atualizador Automático ajustado](https://github.com/rtenorioh/Press-Ticket/commit/f6c7250ff57d97e6054533e369919c8cbaac530b);
+- [Add Instalador Automático](https://github.com/rtenorioh/Press-Ticket/commit/2552e25a05456ec9a1d4d3bd36ba1c6bde2e66f5);
+- [Ajuste no tempo de renovação do Token](https://github.com/rtenorioh/Press-Ticket/commit/bd257643fda7149d9e7607076b45e935180eaf42);
+- [Ajuste na aplicação do Theme no Layout](https://github.com/rtenorioh/Press-Ticket/commit/6e6396096bd275a0161dcc21a38be80f8bfa9542);
+- [Correção no status do Usuário](https://github.com/rtenorioh/Press-Ticket/commit/4f40e5ac83bd087a988cbdeb499a2169e4cfe207);
+- [Assinatura ter permissão do Admin para ativar ou não](https://github.com/rtenorioh/Press-Ticket/commit/047836f8a307b1499928a2a5ec823ebbce57a431);
+- [Correções Diversas](https://github.com/rtenorioh/Press-Ticket/commit/91169ce49ff2303538340d11f185b67c6a41209d);
+- [Retornando a Lib para alpha.3](https://github.com/rtenorioh/Press-Ticket/commit/1eb466d271d0b06e3f32e48d925d9cd5d0dc4afc); e
+- [Alteração de versão](https://github.com/rtenorioh/Press-Ticket/commit/ab28a05dd226e55afeaa350ed844656b29ae94bf).
+
+### v1.10.2 (16/01/2025)
+
+- [Atualização do UPDATE.sh](https://github.com/rtenorioh/Press-Ticket/commit/2ff124b58da0f5a621bcdb08b5e64afb99524841);
+- [Atualização do README.md](https://github.com/rtenorioh/Press-Ticket/commit/ad43da673c9091904239cc4dc4352d6de670d63c);
+- [Exibir o caption das imagens](https://github.com/rtenorioh/Press-Ticket/commit/f56ef3f7aee10722d4df5c562b2d204929b3a59a);
+- [Carregar as mensagens ao editar](https://github.com/rtenorioh/Press-Ticket/commit/7ebf742c9fd113dd8aa5d7962a946bd1087ad8e6);
+- [Realizar ajustes no build do front e remoção de console.log](https://github.com/rtenorioh/Press-Ticket/commit/e52356c5e5c5fa83a55e1deb28164e0a3378aff0);
+- [Ajuste na validação ao realizar Login](https://github.com/rtenorioh/Press-Ticket/commit/2d88d55312f757f3b13d605f700dd1966a80c323);
+- [Adicionado a função de recuperação de senha](https://github.com/rtenorioh/Press-Ticket/commit/6658b05ef0a87ca82cde20faf9e3abb8210dc6fe);
+- [Ajuste das logos da personalização](https://github.com/rtenorioh/Press-Ticket/commit/55c7f87d841b488d421863d5464726107557d69b);
+- [Ajustes na tradução e liberação dos idiomas FR e DE](https://github.com/rtenorioh/Press-Ticket/commit/7bcc1391a3c247139d6c696ab3e906fd22831513);
+- [Retorno do campo de Pesquisa em Contatos](https://github.com/rtenorioh/Press-Ticket/commit/113c4715b35d28d0f2088532c97b28218665fc97);
+- [Implementação de Login único](https://github.com/rtenorioh/Press-Ticket/commit/5b0986bc24593ef111307b157b903650d22d0263); e
+- [Atualização de versão](https://github.com/rtenorioh/Press-Ticket/commit/f1fc3f2927df1c85a27e13a2976c726f6a178658).
+
 ### v1.10.1 (05/01/2025)
 
 - [Ajuste na Atualização do campo whatsapp.number](https://github.com/rtenorioh/Press-Ticket/commit/4514b65cbcefc25f0f77cac2e7db581dea73cc78);
