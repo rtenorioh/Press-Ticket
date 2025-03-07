@@ -17,6 +17,7 @@ import UserSession from "../models/UserSession";
 import UserWhatsapp from "../models/UserWhatsapp";
 import Whatsapp from "../models/Whatsapp";
 import WhatsappQueue from "../models/WhatsappQueue";
+import ApiToken from "../models/ApiToken";
 
 // eslint-disable-next-line
 const dbConfig = require("../config/database");
@@ -39,6 +40,7 @@ const models = [
   Tag,
   ContactTag,
   Integration,
+  ApiToken,
   OldMessage,
   Personalization,
   UserSession

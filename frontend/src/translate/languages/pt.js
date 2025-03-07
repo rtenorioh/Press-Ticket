@@ -1,6 +1,51 @@
 const messages = {
   pt: {
     translations: {
+      apiKey: {
+        title: "Gerenciador de Tokens",
+        button: {
+          new: "Novo Token"
+        },
+        permissions: {
+          createMessages: "Enviar Mensagens",
+          createMedias: "Enviar Mídia",
+          readWhatsapps: "Visualizar Conexões",
+          updateWhatsapps: "Editar Conexões",
+          createContacts: "Criar Contatos"
+        },
+        messages: {
+          success: {
+            copy: "Token copiado com sucesso",
+            created: "Token criado com sucesso",
+            deleted: "Token deletado com sucesso"
+          },
+          error: {
+            create: "Erro ao criar token",
+            delete: "Erro ao deletar token",
+            nameExists: "Já existe um token com este nome"
+          }
+        },
+        modal: {
+          title: "Criar novo token",
+          name: "Nome",
+          permissions: "Permissões",
+          permissionsRequired: "Selecione ao menos uma permissão",
+          buttons: {
+            cancel: "Cancelar",
+            save: "Salvar"
+          }
+        },
+        confirmationModal: {
+          message: "Tem certeza que deseja excluir este token?",
+        },
+        table: {
+          name: "Nome",
+          token: "Token",
+          permissions: "Permissões",
+          created_at: "Criado em:",
+          actions: "Ação"
+        }
+      },
       auth: {
         toasts: {
           success: "Login efetuado com sucesso!",
@@ -987,4 +1032,3 @@ const messages = {
 };
 
 export { messages };
-
