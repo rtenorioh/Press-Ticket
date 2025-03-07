@@ -115,7 +115,9 @@ const ApiKey = () => {
     const handlePermissionChange = (permission) => {
         setNewToken(prev => ({
             ...prev,
-            permissions: [...prev.permissions, permission]
+            permissions: prev.permissions.includes(permission)
+                ? prev.permissions.filter(p => p !== permission)
+                : [...prev.permissions, permission]
         }));
     };
 
@@ -134,7 +136,8 @@ const ApiKey = () => {
                 name: newToken.name,
                 permissions: newToken.permissions
             };
-
+            
+            console.log("Enviando token:", data);
             await api.post('/api-tokens', data);
             await fetchTokens();
             setOpenNewDialog(false);

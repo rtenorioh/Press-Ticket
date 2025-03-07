@@ -1,33 +1,24 @@
 import ApiToken from "../../models/ApiToken";
 
+const DEFAULT_PERMISSIONS = [
+  'create:contacts',
+  'create:messages',
+  'create:medias',
+  'read:whatsapps',
+  'update:whatsapps'
+];
+
 const ListPermissionsService = async (): Promise<string[]> => {
   const tokens = await ApiToken.findAll();
   const uniquePermissions = new Set<string>();
 
+  DEFAULT_PERMISSIONS.forEach(p => uniquePermissions.add(p));
+
   for (const token of tokens) {
     if (!token.permissions) continue;
     
-    try {
-      // Tenta fazer parse como JSON primeiro
-      let permissions: string | string[];
-      try {
-        permissions = JSON.parse(token.permissions);
-      } catch {
-        // Se falhar, assume que é uma string simples
-        permissions = token.permissions;
-      }
-
-      // Se for array, adiciona cada item
-      if (Array.isArray(permissions)) {
-        permissions.forEach(p => uniquePermissions.add(p));
-      } 
-      // Se for string, adiciona ela diretamente
-      else if (typeof permissions === 'string') {
-        uniquePermissions.add(permissions);
-      }
-    } catch (error) {
-      console.error(`Error processing permissions for token ${token.id}:`, error);
-    }
+    const permissions = token.permissions as unknown as string[];
+    permissions.forEach(p => uniquePermissions.add(p));
   }
 
   return Array.from(uniquePermissions).sort();

@@ -2,7 +2,7 @@
   "openapi": "3.0.0",
   "info": {
     "title": "Documentação da API do Press Ticket",
-    "description": "Documentação da API para envio de mensagens e mídia.",
+    "description": "Documentação da API para envio de mensagens e gerenciamento de contatos.",
     "contact": {
       "email": "robson.tenorio@gmail.com"
     },
@@ -10,37 +10,35 @@
   },
   "servers": [
     {
-      "url": "https://apiback.pressticket.com.br",
+      "url": "https://devapi.pressticket.com.br",
       "description": "API Press Ticket"
     }
   ],
   "paths": {
-    "/api/messages/send": {
+    "/api/messages/v1/send": {
       "post": {
         "summary": "Envio de Mensagens",
-        "description": "Envio de Mensagens",
-        "tags": [
-          "SEND"
-        ],
+        "description": "Envio de Mensagens via API\n\nPermissões requeridas: `create:messages`",
+        "tags": ["Messages"],
         "security": [
           {
-            "bearerAuth": []
+            "apiToken": ["create:messages"]
           }
         ],
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#components/schemas/SEND"
+                "$ref": "#/components/schemas/SendMessage"
               },
               "examples": {
-                "SEND": {
+                "text": {
                   "value": {
                     "number": "5522999999999",
                     "body": "Mensagem de Teste da API",
-                    "userId": "1",
-                    "queueId": "1",
-                    "whatsappId": "1"
+                    "userId": 1,
+                    "queueId": 1,
+                    "whatsappId": 1
                   }
                 }
               }
@@ -49,18 +47,74 @@
         },
         "responses": {
           "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "$ref": "#components/schemas/SEND"
+            "description": "Mensagem enviada com sucesso"
+          },
+          "401": {
+            "description": "Token inválido ou não fornecido"
+          },
+          "403": {
+            "description": "Token não tem permissão 'create:messages'"
+          },
+          "500": {
+            "description": "Erro interno!"
+          }
+        }
+      }
+    },
+    "/v1/contacts": {
+      "post": {
+        "summary": "Criar Contato",
+        "description": "Criar um novo contato via API\n\nPermissões requeridas: `create:contacts`",
+        "tags": ["Contacts"],
+        "security": [
+          {
+            "apiToken": ["create:contacts"]
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Contact"
+              },
+              "examples": {
+                "basic": {
+                  "value": {
+                    "name": "Test Contact API",
+                    "number": "5522999999999"
+                  }
+                },
+                "complete": {
+                  "value": {
+                    "name": "Test Contact API",
+                    "number": "5522999999999",
+                    "email": "test@example.com",
+                    "address": "Street Name, 123",
+                    "extraInfo": [
+                      {
+                        "name": "RG",
+                        "value": "123456789"
+                      },
+                      {
+                        "name": "CPF",
+                        "value": "12345678901"
+                      }
+                    ]
+                  }
                 }
               }
             }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Contato criado com sucesso"
           },
           "401": {
-            "description": "Acesso não autorizado!"
+            "description": "Token inválido ou não fornecido"
+          },
+          "403": {
+            "description": "Token não tem permissão 'create:contacts'"
           },
           "500": {
             "description": "Erro interno!"
@@ -71,32 +125,78 @@
   },
   "components": {
     "schemas": {
-      "SEND": {
+      "SendMessage": {
         "type": "object",
+        "required": ["number", "body", "userId", "queueId", "whatsappId"],
         "properties": {
           "number": {
-            "type": "number"
+            "type": "string",
+            "description": "Número do destinatário no formato DDI+DDD+NÚMERO (ex: 5522999999999)"
           },
           "body": {
-            "type": "string"
+            "type": "string",
+            "description": "Conteúdo da mensagem"
           },
           "userId": {
-            "type": "number"
+            "type": "integer",
+            "description": "ID do usuário que está enviando a mensagem"
           },
           "queueId": {
-            "type": "number"
+            "type": "integer",
+            "description": "ID da fila"
           },
           "whatsappId": {
-            "type": "number"
+            "type": "integer",
+            "description": "ID da conexão do WhatsApp"
+          }
+        }
+      },
+      "Contact": {
+        "type": "object",
+        "required": ["name", "number"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Nome do contato"
+          },
+          "number": {
+            "type": "string",
+            "description": "Número do contato no formato DDI+DDD+NÚMERO (ex: 5522999999999)"
+          },
+          "email": {
+            "type": "string",
+            "description": "Email do contato"
+          },
+          "address": {
+            "type": "string",
+            "description": "Endereço do contato"
+          },
+          "extraInfo": {
+            "type": "array",
+            "description": "Informações adicionais do contato",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "description": "Nome do campo adicional"
+                },
+                "value": {
+                  "type": "string",
+                  "description": "Valor do campo adicional"
+                }
+              }
+            }
           }
         }
       }
     },
     "securitySchemes": {
-      "bearerAuth": {
-        "type": "http",
-        "scheme": "bearer",
-        "bearerFormat": "JWT"
+      "apiToken": {
+        "type": "apiKey",
+        "name": "x-api-token",
+        "in": "header",
+        "description": "Token de API para autenticação. Requer permissões específicas para cada rota:\n- `create:messages`: Para enviar mensagens\n- `create:contacts`: Para criar contatos"
       }
     }
   }
