@@ -17,30 +17,49 @@ import Title from "./Title";
 const ChartPerQueue = ({ queueIds, withUnreadMessages }) => {
     const theme = useTheme();
     const { t } = useTranslation();
+    
+    const formatDate = (date) => {
+        const d = new Date(date);
+        return d.toISOString().split('T')[0];
+    };
+
+    const formatQueueIds = (ids) => {
+        if (!ids) return undefined;
+        if (Array.isArray(ids)) {
+            return ids.join(',');
+        }
+        return String(ids);
+    };
+
     const [startDate, setStartDate] = useState(() => {
         const d = new Date();
         d.setDate(d.getDate() - 7);
-        return d.toISOString().split('T')[0];
-    });
-    const [endDate, setEndDate] = useState(() => {
-        const today = new Date();
-        return today.toISOString().split('T')[0];
+        return formatDate(d);
     });
 
-    const { tickets } = useTickets({
+    const [endDate, setEndDate] = useState(() => {
+        return formatDate(new Date());
+    });
+
+    const { tickets, error } = useTickets({
         pageNumber: 1,
-        status: undefined,
-        startDate,
-        endDate,
+        startDate: startDate ? formatDate(startDate) : undefined,
+        endDate: endDate ? formatDate(endDate) : undefined,
         all: true,
         showAll: true,
-        queueIds,
+        queueIds: formatQueueIds(queueIds),
         withUnreadMessages,
     });
 
     const [queueChartData, setQueueChartData] = useState([]);
 
     useEffect(() => {
+        if (error) {
+            console.error('ChartPerQueue - Erro:', error);
+            setQueueChartData([]);
+            return;
+        }
+
         if (!tickets || tickets.length === 0) {
             setQueueChartData([]);
             return;
@@ -67,11 +86,7 @@ const ChartPerQueue = ({ queueIds, withUnreadMessages }) => {
             .sort((a, b) => b.value - a.value);
 
         setQueueChartData(formattedData);
-    }, [tickets, queueIds]);
-
-    // if (loading) {
-    //     return <div>Carregando...</div>;
-    // }
+    }, [tickets, queueIds, error]);
 
     return (
         <React.Fragment>
@@ -94,25 +109,32 @@ const ChartPerQueue = ({ queueIds, withUnreadMessages }) => {
                     InputLabelProps={{ shrink: true }}
                 />
             </div>
-            <ResponsiveContainer>
-                <PieChart>
-                    <Pie
-                        data={queueChartData}
-                        cx="40%"
-                        cy="50%"
-                        outerRadius={80}
-                        fill={theme.palette.primary.main}
-                        dataKey="value"
-                        label
-                    >
-                        {queueChartData.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={entry.color} />
-                        ))}
-                    </Pie>
-                    <Tooltip content={<CustomTooltip />} cursor={true} />
-                    <Legend layout="vertical" align="right" verticalAlign="middle" />
-                </PieChart>
-            </ResponsiveContainer>
+            {queueChartData.length > 0 ? (
+                <ResponsiveContainer>
+                    <PieChart>
+                        <Pie
+                            data={queueChartData}
+                            dataKey="value"
+                            nameKey="name"
+                            cx="40%"
+                            cy="50%"
+                            outerRadius={80}
+                            fill={theme.palette.primary.main}
+                            label
+                        >
+                            {queueChartData.map((entry, index) => (
+                                <Cell key={index} fill={entry.color} />
+                            ))}
+                        </Pie>
+                        <Tooltip content={<CustomTooltip />} />
+                        <Legend layout="vertical" align="right" verticalAlign="middle" />
+                    </PieChart>
+                </ResponsiveContainer>
+            ) : (
+                <div style={{ textAlign: 'center', padding: '100px' }}>
+                    {error ? 'Erro ao carregar dados' : 'Nenhum dado disponível para o período selecionado'}
+                </div>
+            )}
         </React.Fragment>
     );
 };
