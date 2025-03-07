@@ -1,5 +1,13 @@
 # Changelog
 
+### v1.12.0 (07/03/2025)
+
+- [feat: melhorar tratamento de erros e validação de IDs de fila na recuperação de tickets](https://github.com/rtenorioh/Press-Ticket/commit/b84677531f8978b0692e503a93c3ee73ec7636e4);
+- [feat: implementar serviço de gerenciamento de tokens de API com rotas e validação](https://github.com/rtenorioh/Press-Ticket/commit/8e0e025a91e635e7de0e46f980b85c691b48c470);
+- [feat: adicionar suporte a permissões de API e rotas com validação de token](https://github.com/rtenorioh/Press-Ticket/commit/ddd7355c78c0687bc41d418febede48228c0739c);
+- [feat: adicionar novas permissões de contatos e atualizar rotas de API](https://github.com/rtenorioh/Press-Ticket/commit/e240a9047b689d1fc8eff1f0e973e735e14fad8e); e
+- [feat: atualizar versão do sistema para v1.12.0](https://github.com/rtenorioh/Press-Ticket/commit/3eb3588abbeff855089fe6ba41baca4a7d371ef6).
+
 ### v1.11.0 (01/03/2025)
 
 - [Ajustes e atualização em documentação e instalador](https://github.com/rtenorioh/Press-Ticket/commit/bd643d62613a02e7c19d63a961cb04e8e17cecec);
