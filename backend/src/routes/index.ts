@@ -1,7 +1,6 @@
 import { Router } from "express";
 
 import apiRoutes from "./apiRoutes";
-import apiTokenRoutes from "./apiTokenRoutes";
 import authRoutes from "./authRoutes";
 import contactRoutes from "./contactRoutes";
 import hubChannelRoutes from "./hubChannelRoutes";
@@ -40,6 +39,5 @@ routes.use(hubMessageRoutes);
 routes.use(hubWebhookRoutes);
 routes.use(systemRoutes);
 routes.use(personalizationRoutes);
-routes.use(apiTokenRoutes);
 
 export default routes;
