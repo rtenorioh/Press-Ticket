@@ -33,39 +33,24 @@ const useTickets = ({
     };
 
     useEffect(() => {
-        let isMounted = true;
-        const controller = new AbortController();
-
-        const fetchTickets = async () => {
-            try {
-                const params = {
-                    pageNumber,
-                    status,
-                    startDate,
-                    endDate,
-                    showAll,
-                    userId,
-                    withUnreadMessages,
-                    all
-                };
-
-                if (searchParam) params.searchParam = searchParam;
-                if (queueIds) params.queueIds = queueIds;
-
-                const { data } = await api.get("/tickets", {
-                    params,
-                    signal: controller.signal,
-                    paramsSerializer: params => {
-                        return Object.entries(params)
-                            .filter(([_, value]) => value !== undefined && value !== null)
-                            .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
-                            .join('&');
-                    }
-                });
-
-                if (!isMounted) return;
-
-                if (data && Array.isArray(data.tickets)) {
+        setLoading(true);
+        const delayDebounceFn = setTimeout(() => {
+            const fetchTickets = async () => {
+                try {
+                    const { data } = await api.get("/tickets", {
+                        params: {
+                            searchParam,
+                            pageNumber,
+                            status,
+                            startDate,
+                            endDate,
+                            showAll,
+                            userId,
+                            queueIds,
+                            withUnreadMessages,
+                            all
+                        },
+                    });
                     setTickets(data.tickets);
 
                     const contactsByDay = data.tickets.reduce((acc, ticket) => {
@@ -150,35 +135,26 @@ const useTickets = ({
                         });
                     }
 
-                    setHasMore(data.hasMore || false);
-                    setCount(data.count || 0);
-                } else {
-                    console.error('useTickets - Dados inválidos recebidos:', data);
-                    setTickets([]);
-                    setHasMore(false);
-                    setCount(0);
-                }
-            } catch (err) {
-                console.error('useTickets - Erro na requisição:', err);
-                if (!isMounted) return;
-                toastError(err);
-                setTickets([]);
-                setHasMore(false);
-                setCount(0);
-            } finally {
-                if (isMounted) {
+                    setHasMore(data.hasMore);
+                    setCount(data.count);
                     setLoading(false);
+                } catch (err) {
+                    setLoading(false);
+                    toastError(err);
                 }
-            }
-        };
+            };
 
-        setLoading(true);
-        fetchTickets();
+            const closeTicket = async (ticket) => {
+                await api.put(`/tickets/${ticket.id}`, {
+                    status: "closed",
+                    userId: ticket.userId || null,
+                    queueId: null,
+                });
+            };
 
-        return () => {
-            isMounted = false;
-            controller.abort();
-        };
+            fetchTickets();
+        }, 500);
+        return () => clearTimeout(delayDebounceFn);
     }, [
         searchParam,
         pageNumber,
@@ -191,14 +167,6 @@ const useTickets = ({
         withUnreadMessages,
         all
     ]);
-
-    const closeTicket = async (ticket) => {
-        await api.put(`/tickets/${ticket.id}`, {
-            status: "closed",
-            userId: ticket.userId || null,
-            queueId: null,
-        });
-    };
 
     return {
         tickets,

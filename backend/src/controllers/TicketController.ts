@@ -54,31 +54,8 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
   let queueIds: number[] = [];
 
   if (queueIdsStringified) {
-    try {
-      // Verifica se já é um array
-      if (Array.isArray(queueIdsStringified)) {
-        queueIds = queueIdsStringified.map(Number);
-      } 
-      // Verifica se é uma string com valores separados por vírgula
-      else if (typeof queueIdsStringified === 'string' && queueIdsStringified.includes(',')) {
-        queueIds = queueIdsStringified.split(',').map(id => Number(id.trim()));
-      }
-      // Tenta fazer o parse como JSON
-      else {
-        const parsed = JSON.parse(queueIdsStringified);
-        queueIds = Array.isArray(parsed) ? parsed.map(Number) : [Number(parsed)];
-      }
-    } catch (err) {
-      // Se houver erro no parse, tenta converter diretamente para número
-      const queueId = Number(queueIdsStringified);
-      if (!isNaN(queueId)) {
-        queueIds = [queueId];
-      }
-    }
+    queueIds = JSON.parse(queueIdsStringified);
   }
-
-  // Filtra valores inválidos
-  queueIds = queueIds.filter(id => !isNaN(id) && id > 0);
 
   const { tickets, count, hasMore } = await ListTicketsService({
     searchParam,
