@@ -12,8 +12,8 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
     const { pageNumber, pageSize } = req.query;
 
     const { tokens, count, hasMore } = await ListApiTokenService({
-        pageNumber: pageNumber ? parseInt(pageNumber as string) : undefined,
-        pageSize: pageSize ? parseInt(pageSize as string) : undefined
+        pageNumber: pageNumber ? parseInt(pageNumber as string, 10) : undefined,
+        pageSize: pageSize ? parseInt(pageSize as string, 10) : undefined
     });
 
     return res.status(200).json({
@@ -31,6 +31,7 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
         permissions: Yup.array()
             .of(Yup.string().oneOf(validPermissions))
             .required()
+            .min(1, "At least one permission is required")
     });
 
     try {
@@ -39,14 +40,17 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
         throw new AppError(err.message);
     }
 
-    const { name } = req.body;
+    const { name, permissions } = req.body;
 
     const existingToken = await FindByNameService(name);
     if (existingToken) {
         throw new AppError("ERR_TOKEN_NAME_ALREADY_EXISTS");
     }
 
-    const token = await CreateApiTokenService(req.body);
+    const token = await CreateApiTokenService({
+        name,
+        permissions: JSON.stringify(permissions)
+    });
 
     return res.status(200).json(token);
 };

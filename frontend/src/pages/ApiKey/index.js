@@ -115,7 +115,9 @@ const ApiKey = () => {
     const handlePermissionChange = (permission) => {
         setNewToken(prev => ({
             ...prev,
-            permissions: [...prev.permissions, permission]
+            permissions: prev.permissions.includes(permission)
+                ? prev.permissions.filter(p => p !== permission)
+                : [...prev.permissions, permission]
         }));
     };
 
