@@ -141,6 +141,7 @@ const messages = {
           cancel: "Cancelar",
         },
         success: "Contato salvo com sucesso.",
+        numberError: "Número de WhatsApp inválido. Por favor, verifique e tente novamente.",
       },
       contacts: {
         title: "Contatos",

@@ -113,7 +113,12 @@ const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
 			toast.success(t("contactModal.success"));
 			handleClose();
 		} catch (err) {
-			toastError(err);
+			if (err.response && err.response.status === 400 &&
+				(err.response.data.error?.includes("number") || err.response.data.message?.includes("number"))) {
+				toast.error(t("contactModal.numberError") || "Número de WhatsApp inválido. Verifique e tente novamente.");
+			} else {
+				toastError(err, t);
+			}
 		}
 	};
 
