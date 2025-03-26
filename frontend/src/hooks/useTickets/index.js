@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { getHoursCloseTicketsAuto } from "../../config";
 import toastError from "../../errors/toastError";
 import api from "../../services/api";
@@ -15,6 +16,7 @@ const useTickets = ({
     withUnreadMessages,
     all
 }) => {
+    const { t } = useTranslation();
     const [loading, setLoading] = useState(true);
     const [hasMore, setHasMore] = useState(false);
     const [tickets, setTickets] = useState([]);
@@ -139,16 +141,16 @@ const useTickets = ({
                     setCount(data.count);
                     setLoading(false);
                 } catch (err) {
+                    console.error("Erro na requisição:", err.message);
                     setLoading(false);
-                    toastError(err);
+                    toastError(err, t);
                 }
             };
 
             const closeTicket = async (ticket) => {
                 await api.put(`/tickets/${ticket.id}`, {
                     status: "closed",
-                    userId: ticket.userId || null,
-                    queueId: null,
+                    userId: ticket.userId || null
                 });
             };
 

@@ -54,7 +54,15 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
   let queueIds: number[] = [];
 
   if (queueIdsStringified) {
-    queueIds = JSON.parse(queueIdsStringified);
+    try {
+      // Garantir que queueIds seja um array
+      queueIds = Array.isArray(queueIdsStringified)
+        ? queueIdsStringified.map(Number)
+        : JSON.parse(queueIdsStringified);
+    } catch (error) {
+      console.error("Erro ao fazer JSON.parse:", error.message);
+      return res.status(400).json({ error: "Invalid JSON format for queueIds" });
+    }
   }
 
   const { tickets, count, hasMore } = await ListTicketsService({
