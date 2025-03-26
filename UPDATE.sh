@@ -410,6 +410,31 @@ if [ -f "$ENV_FILE" ]; then
     echo -e "${YELLOW}Atenção: Após a atualização, confirme os IDs do PM2 para o frontend e backend e atualize-os no arquivo .env do backend.${RESET}" | tee -a "$LOG_FILE"
     sleep 10
 
+    # Verifica se a URL em swagger.json é igual à variável BACKEND_URL no .env
+    SWAGGER_FILE="$SCRIPT_DIR/backend/src/swagger.json"
+    if [ -f "$SWAGGER_FILE" ]; then
+        # Extrai a URL do servers no swagger.json
+        SWAGGER_URL=$(grep -o '"url": "[^"]*"' "$SWAGGER_FILE" | head -1 | cut -d '"' -f4)
+        
+        # Extrai a BACKEND_URL do .env
+        BACKEND_URL=$(grep "^BACKEND_URL=" "$ENV_FILE" | cut -d '=' -f2- | tr -d '[:space:]')
+        
+        if [ -n "$BACKEND_URL" ] && [ -n "$SWAGGER_URL" ]; then
+            if [ "$SWAGGER_URL" = "$BACKEND_URL" ]; then
+                echo "A URL em swagger.json ($SWAGGER_URL) é igual à BACKEND_URL no .env ($BACKEND_URL)." | tee -a "$LOG_FILE"
+            else
+                echo "A URL em swagger.json ($SWAGGER_URL) é diferente da BACKEND_URL no .env ($BACKEND_URL). Atualizando..." | tee -a "$LOG_FILE"
+                # Substitui a URL no swagger.json
+                sed -i "s|\"url\": \"$SWAGGER_URL\"|\"url\": \"$BACKEND_URL\"|" "$SWAGGER_FILE"
+                echo "URL em swagger.json atualizada para $BACKEND_URL com sucesso." | tee -a "$LOG_FILE"
+            fi
+        else
+            echo "Erro: Não foi possível extrair a URL do swagger.json ou a BACKEND_URL do .env." | tee -a "$LOG_FILE"
+        fi
+    else
+        echo "Erro: O arquivo swagger.json não foi encontrado em $SWAGGER_FILE." | tee -a "$LOG_FILE"
+    fi
+
 else
     echo "Erro: O arquivo .env não foi encontrado no diretório backend."
     finalizar "Erro ao localizar o arquivo .env no backend." 1
