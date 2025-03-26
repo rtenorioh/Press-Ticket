@@ -167,7 +167,8 @@ const useTickets = ({
         userId,
         queueIds,
         withUnreadMessages,
-        all
+        all,
+        t
     ]);
 
     return {

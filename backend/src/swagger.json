@@ -66,6 +66,63 @@
       }
     },
     "/v1/contacts": {
+      "get": {
+        "summary": "Listar Contatos",
+        "description": "Listar todos os contatos via API\n\nPermissões requeridas: `read:contacts`",
+        "tags": [
+          "Contacts"
+        ],
+        "security": [
+          {
+            "apiToken": [
+              "read:contacts"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "searchParam",
+            "in": "query",
+            "description": "Parâmetro de busca para filtrar contatos",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "pageNumber",
+            "in": "query",
+            "description": "Número da página para paginação",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "tags",
+            "in": "query",
+            "description": "IDs das tags para filtrar contatos, separados por vírgula",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de contatos retornada com sucesso"
+          },
+          "401": {
+            "description": "Token inválido ou não fornecido"
+          },
+          "403": {
+            "description": "Token não tem permissão 'read:contacts'"
+          },
+          "500": {
+            "description": "Erro interno!"
+          }
+        }
+      },
       "post": {
         "summary": "Criar Contato",
         "description": "Criar um novo contato via API\n\nPermissões requeridas: `create:contacts`",
@@ -123,6 +180,225 @@
           },
           "403": {
             "description": "Token não tem permissão 'create:contacts'"
+          },
+          "500": {
+            "description": "Erro interno!"
+          }
+        }
+      }
+    },
+    "/v1/contacts/{contactId}": {
+      "get": {
+        "summary": "Obter Contato",
+        "description": "Obter detalhes de um contato específico via API\n\nPermissões requeridas: `read:contacts`",
+        "tags": [
+          "Contacts"
+        ],
+        "security": [
+          {
+            "apiToken": [
+              "read:contacts"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "contactId",
+            "in": "path",
+            "description": "ID do contato a ser consultado",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Detalhes do contato retornados com sucesso"
+          },
+          "401": {
+            "description": "Token inválido ou não fornecido"
+          },
+          "403": {
+            "description": "Token não tem permissão 'read:contacts'"
+          },
+          "404": {
+            "description": "Contato não encontrado"
+          },
+          "500": {
+            "description": "Erro interno!"
+          }
+        }
+      },
+      "put": {
+        "summary": "Atualizar Contato",
+        "description": "Atualizar um contato existente via API\n\nPermissões requeridas: `update:contacts`",
+        "tags": [
+          "Contacts"
+        ],
+        "security": [
+          {
+            "apiToken": [
+              "update:contacts"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "contactId",
+            "in": "path",
+            "description": "ID do contato a ser atualizado",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Contact"
+              },
+              "examples": {
+                "update": {
+                  "value": {
+                    "name": "Updated Contact Name",
+                    "number": "5522999999999",
+                    "email": "updated@example.com",
+                    "address": "New Address, 456"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Contato atualizado com sucesso"
+          },
+          "401": {
+            "description": "Token inválido ou não fornecido"
+          },
+          "403": {
+            "description": "Token não tem permissão 'update:contacts'"
+          },
+          "404": {
+            "description": "Contato não encontrado"
+          },
+          "500": {
+            "description": "Erro interno!"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Excluir Contato",
+        "description": "Excluir um contato existente via API\n\nPermissões requeridas: `delete:contacts`",
+        "tags": [
+          "Contacts"
+        ],
+        "security": [
+          {
+            "apiToken": [
+              "delete:contacts"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "contactId",
+            "in": "path",
+            "description": "ID do contato a ser excluído",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Contato excluído com sucesso"
+          },
+          "401": {
+            "description": "Token inválido ou não fornecido"
+          },
+          "403": {
+            "description": "Token não tem permissão 'delete:contacts'"
+          },
+          "404": {
+            "description": "Contato não encontrado"
+          },
+          "500": {
+            "description": "Erro interno!"
+          }
+        }
+      }
+    },
+    "/v1/contact": {
+      "post": {
+        "summary": "Consultar Contato",
+        "description": "Consultar um contato específico por nome, número, endereço ou email via API\n\nPermissões requeridas: `create:contacts`",
+        "tags": [
+          "Contacts"
+        ],
+        "security": [
+          {
+            "apiToken": [
+              "create:contacts"
+            ]
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "Nome do contato para busca"
+                  },
+                  "number": {
+                    "type": "string",
+                    "description": "Número do contato para busca"
+                  },
+                  "address": {
+                    "type": "string",
+                    "description": "Endereço do contato para busca"
+                  },
+                  "email": {
+                    "type": "string",
+                    "description": "Email do contato para busca"
+                  }
+                }
+              },
+              "examples": {
+                "byNumber": {
+                  "value": {
+                    "number": "5522999999999"
+                  }
+                },
+                "byName": {
+                  "value": {
+                    "name": "Test Contact"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Contato encontrado com sucesso"
+          },
+          "401": {
+            "description": "Token inválido ou não fornecido"
+          },
+          "403": {
+            "description": "Token não tem permissão 'create:contacts'"
+          },
+          "404": {
+            "description": "Contato não encontrado"
           },
           "500": {
             "description": "Erro interno!"
