@@ -2,9 +2,6 @@ import ApiToken from "../../models/ApiToken";
 
 const DEFAULT_PERMISSIONS = [
   'create:contacts',
-  'read:contacts',
-  'update:contacts',
-  'delete:contacts',
   'create:messages',
   'create:medias',
   'read:whatsapps',

@@ -137,6 +137,7 @@ const ApiKey = () => {
                 permissions: newToken.permissions
             };
             
+            console.log("Enviando token:", data);
             await api.post('/api-tokens', data);
             await fetchTokens();
             setOpenNewDialog(false);
@@ -179,10 +180,7 @@ const ApiKey = () => {
             'create:medias': t("apiKey.permissions.createMedias"),
             'read:whatsapps': t("apiKey.permissions.readWhatsapps"),
             'update:whatsapps': t("apiKey.permissions.updateWhatsapps"),
-            'create:contacts': t("apiKey.permissions.createContacts"),
-            'read:contacts': t("apiKey.permissions.readContacts"),
-            'update:contacts': t("apiKey.permissions.updateContacts"),
-            'delete:contacts': t("apiKey.permissions.deleteContacts")
+            'create:contacts': t("apiKey.permissions.createContacts")
         };
         return names[permission] || permission;
     };
@@ -298,13 +296,9 @@ const ApiKey = () => {
                             )}
                         </Typography>
                         <Grid container spacing={2}>
-                            <Grid item xs={6}>
-                                <Typography variant="subtitle2" style={{ marginBottom: '8px' }}>
-                                    {t("apiKey.categories.contacts")}
-                                </Typography>
-                                {['create:contacts', 'read:contacts', 'update:contacts', 'delete:contacts'].map((permission) => (
+                            {['create:contacts', 'create:messages'].map((permission) => (
+                                <Grid item xs={12} key={permission}>
                                     <FormControlLabel
-                                        key={permission}
                                         control={
                                             <Checkbox
                                                 checked={newToken.permissions.includes(permission)}
@@ -313,29 +307,9 @@ const ApiKey = () => {
                                             />
                                         }
                                         label={renderPermissionName(permission)}
-                                        style={{ display: 'block', marginBottom: '8px' }}
                                     />
-                                ))}
-                            </Grid>
-                            <Grid item xs={6}>
-                                <Typography variant="subtitle2" style={{ marginBottom: '8px' }}>
-                                    {t("apiKey.categories.messages")}
-                                </Typography>
-                                {['create:messages'].map((permission) => (
-                                    <FormControlLabel
-                                        key={permission}
-                                        control={
-                                            <Checkbox
-                                                checked={newToken.permissions.includes(permission)}
-                                                onChange={() => handlePermissionChange(permission)}
-                                                color="primary"
-                                            />
-                                        }
-                                        label={renderPermissionName(permission)}
-                                        style={{ display: 'block', marginBottom: '8px' }}
-                                    />
-                                ))}
-                            </Grid>
+                                </Grid>
+                            ))}
                         </Grid>
                     </DialogContent>
                     <DialogActions>

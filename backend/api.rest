@@ -130,42 +130,17 @@ Authorization: Bearer {{token}}
 GET {{baseUrl}}/whatsapp
 x-api-token: 3136bb3d-9e7f-4340-9d64-d5bb4671e774
 
-### Test API Token - Send Message
-POST {{baseUrl}}/api/messages/v1/send
-x-api-token: d836fd46-c69b-40c7-a4e3-f09a1c1c85d1
-Content-Type: application/json
-
-{
-    "number": "5522992581997",
-    "body": "Test message using API token",
-    "userId": 1,
-    "queueId": 1,
-    "whatsappId": 1
-}
-
-### Test API Token - List Contacts
-GET {{baseUrl}}/v1/contacts
-x-api-token: e7f328b7-f271-451b-a3d1-0b6b95029033
-
-### Test API Token - List Contacts with Pagination
-GET {{baseUrl}}/v1/contacts?pageNumber=1&searchParam=Test
-x-api-token: e7f328b7-f271-451b-a3d1-0b6b95029033
-
-### Test API Token - Get Contact by ID
-GET {{baseUrl}}/v1/contacts/50
-x-api-token: e7f328b7-f271-451b-a3d1-0b6b95029033
-
 ### Test API Token - Create Contact
 POST {{baseUrl}}/v1/contacts
-x-api-token: e7f328b7-f271-451b-a3d1-0b6b95029033
+x-api-token: c3e60472-064b-40c9-a507-3f824a2b5621
 Content-Type: application/json
 
 {
-  "name": "Test Contact API",
-  "number": "5522995555555",
-  "address": "rua",
-  "email": "email",
-  "extraInfo": [
+    "name": "Test Contact API",
+    "number": "5522992581997",
+    "address": "rua",
+    "email": "email",
+   "extraInfo": [
     {
       "name": "custom_id",
       "value": "11111"
@@ -177,27 +152,15 @@ Content-Type: application/json
   ]
 }
 
-### Test API Token - Update Contact
-PUT {{baseUrl}}/v1/contacts/50
-x-api-token: e7f328b7-f271-451b-a3d1-0b6b95029033
+### Test API Token - Send Message
+POST {{baseUrl}}/api/messages/v1/send
+x-api-token: d836fd46-c69b-40c7-a4e3-f09a1c1c85d1
 Content-Type: application/json
 
 {
-  "name": "Felipe Freitas Dev",
-  "email": "",
-  "address": "",
-  "number": "5511933464218"
-}
-
-### Test API Token - Delete Contact
-DELETE {{baseUrl}}/v1/contacts/100
-x-api-token: e7f328b7-f271-451b-a3d1-0b6b95029033
-
-### Test API Token - Find Contact
-POST {{baseUrl}}/v1/contact
-x-api-token: e7f328b7-f271-451b-a3d1-0b6b95029033
-Content-Type: application/json
-
-{
-  "number": "5522992581997"
+    "number": "5522992581997",
+    "body": "Test message using API token",
+    "userId": 1,
+    "queueId": 1,
+    "whatsappId": 1
 }

@@ -6,19 +6,12 @@ const messages = {
         button: {
           new: "Novo Token"
         },
-        categories: {
-          contacts: "Contatos",
-          messages: "Mensagens"
-        },
         permissions: {
           createMessages: "Enviar Mensagens",
           createMedias: "Enviar Mídia",
           readWhatsapps: "Visualizar Conexões",
           updateWhatsapps: "Editar Conexões",
-          createContacts: "Criar Contatos",
-          readContacts: "Visualizar Contatos",
-          updateContacts: "Editar Contatos",
-          deleteContacts: "Deletar Contatos"
+          createContacts: "Criar Contatos"
         },
         messages: {
           success: {
