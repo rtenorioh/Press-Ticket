@@ -3,8 +3,8 @@
 #Variaveis
 # @baseUrl = http://localhost:8080
 @baseUrl = https://devapi.pressticket.com.br
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IlByZXNzLVRpY2tldCIsInByb2ZpbGUiOiJhZG1pbiIsImlkIjoxLCJpYXQiOjE3NDEzMDY0MTUsImV4cCI6MTc0MTMzNTIxNX0.l-mfrtfPH9dF7-WJqIGnyWxG2Uy7UdSVMVSJQqwWTRs
-@token2 = 02d0f367-c6ce-4bfe-bfe1-20cc42836515
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IlByZXNzLVRpY2tldCIsInByb2ZpbGUiOiJhZG1pbiIsImlkIjoxLCJpYXQiOjE3Mzk5MTIxMTUsImV4cCI6MTczOTk0MDkxNX0.j_VT9pSYCmI2HjZZjSY9Qd7ODvTMDaJRwVrsJ-gzIp4
+@token2 = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Ik1hc3RlckFkbWluIiwicHJvZmlsZSI6Im1hc3RlcmFkbWluIiwiaWQiOjIsImlhdCI6MTczNjAyNjE2OCwiZXhwIjoxNzM2MDI5NzY4fQ.ba8-Ed234-2KeLawtjxF0JTlrPXhk12kDrJmmrJO6s4
 
 @refreshToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidG9rZW5WZXJzaW9uIjowLCJpYXQiOjE3MzI4ODUzMzQsImV4cCI6MTczMzQ5MDEzNH0.RwuRIufYUB9dQZQg0aeaVtnOryn-sESNL1mFlShmBM4
 
@@ -14,7 +14,7 @@ Content-Type: application/json
 
 {
   "email": "admin@pressticket.com.br",
-  "password": "258369"
+  "password": "admin"
 }
 
 ### Teste da Rota POST /auth/refresh_token
@@ -101,66 +101,3 @@ Content-Type: application/json
 GET {{baseUrl}}/messages/count?startDate=2025-02-01&endDate=2025-02-18&&all=true
 Authorization: Bearer {{token}}
 Content-Type: application/json
-
-### API Tokens Routes ###
-
-### List all tokens
-GET {{baseUrl}}/api-tokens
-Authorization: Bearer {{token}}
-
-### Create new token
-POST {{baseUrl}}/api-tokens
-Authorization: Bearer {{token}}
-Content-Type: application/json
-
-{
-    "name": "Test API Token",
-    "permissions": ["create:messages", "create:medias", "read:whatsapps"]
-}
-
-### Get token by id
-GET {{baseUrl}}/api-tokens/6
-Authorization: Bearer {{token}}
-
-### Delete token
-DELETE {{baseUrl}}/api-tokens/2
-Authorization: Bearer {{token}}
-
-### Test API Token Authentication - List Whatsapps
-GET {{baseUrl}}/whatsapp
-x-api-token: 3136bb3d-9e7f-4340-9d64-d5bb4671e774
-
-### Test API Token - Create Contact
-POST {{baseUrl}}/v1/contacts
-x-api-token: c3e60472-064b-40c9-a507-3f824a2b5621
-Content-Type: application/json
-
-{
-    "name": "Test Contact API",
-    "number": "5522992581997",
-    "address": "rua",
-    "email": "email",
-   "extraInfo": [
-    {
-      "name": "custom_id",
-      "value": "11111"
-    },
-    {
-      "name": "country",
-      "value": "Brazil"
-    }
-  ]
-}
-
-### Test API Token - Send Message
-POST {{baseUrl}}/api/messages/v1/send
-x-api-token: d836fd46-c69b-40c7-a4e3-f09a1c1c85d1
-Content-Type: application/json
-
-{
-    "number": "5522992581997",
-    "body": "Test message using API token",
-    "userId": 1,
-    "queueId": 1,
-    "whatsappId": 1
-}

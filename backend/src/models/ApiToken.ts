@@ -25,32 +25,23 @@ class ApiToken extends Model<ApiToken> {
   @Column({
     type: DataType.TEXT,
     allowNull: true,
-    defaultValue: "[]",
     get(this: ApiToken): string[] {
+      const rawValue = this.getDataValue("permissions");
+      if (!rawValue) return [];
+
       try {
-        const value = this.getDataValue("permissions") as string;
-        return value ? JSON.parse(value) : [];
+        const parsedValue = JSON.parse(rawValue);
+        return Array.isArray(parsedValue) ? parsedValue : [];
       } catch (error) {
         console.error("Error parsing permissions:", error);
         return [];
       }
     },
-    set(this: ApiToken, value: string[] | string): void {
+    set(this: ApiToken, value: string[] | null): void {
       if (Array.isArray(value)) {
         this.setDataValue("permissions", JSON.stringify(value));
-      } else if (typeof value === 'string') {
-        try {
-          const parsed = JSON.parse(value);
-          if (Array.isArray(parsed)) {
-            this.setDataValue("permissions", value);
-          } else {
-            this.setDataValue("permissions", "[]");
-          }
-        } catch {
-          this.setDataValue("permissions", "[]");
-        }
       } else {
-        this.setDataValue("permissions", "[]");
+        this.setDataValue("permissions", JSON.stringify([]));
       }
     }
   })

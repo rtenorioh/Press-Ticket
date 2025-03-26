@@ -3,17 +3,19 @@ import ApiToken from "../../models/ApiToken";
 
 interface TokenData {
   name: string;
-  permissions: string;
+  permissions: number[];
 }
 
-const CreateApiTokenService = async ({ name, permissions }: TokenData): Promise<ApiToken> => {
-  const token = await ApiToken.create({
-    name,
-    token: uuidv4(),
-    permissions
+const CreateApiTokenService = async (data: TokenData): Promise<ApiToken> => {
+  const token = uuidv4();
+
+  const apiToken = await ApiToken.create({
+    name: data.name,
+    token: token,
+    permissions: data.permissions
   });
 
-  return token;
+  return apiToken;
 };
 
 export default CreateApiTokenService;
