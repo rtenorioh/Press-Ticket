@@ -1,4 +1,5 @@
 import { Sequelize } from "sequelize-typescript";
+import ApiToken from "../models/ApiToken";
 import Contact from "../models/Contact";
 import ContactCustomField from "../models/ContactCustomField";
 import ContactTag from "../models/ContactTag";
@@ -41,7 +42,8 @@ const models = [
   Integration,
   OldMessage,
   Personalization,
-  UserSession
+  UserSession,
+  ApiToken
 ];
 
 sequelize.addModels(models);
