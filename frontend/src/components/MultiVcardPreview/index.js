@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
 import {
   Box,
   makeStyles
 } from "@material-ui/core";
+import React, { useEffect, useState } from 'react';
 import VcardPreview from '../VcardPreview';
 
 const useStyles = makeStyles((theme) => ({
@@ -128,13 +128,6 @@ const MultiVcardPreview = ({ contacts, timestamp }) => {
   const mainContactName = firstContact.name || "Contato";
   const otherContactsCount = otherContacts.length;
   
-  let titleCard = mainContactName;
-  if (otherContactsCount === 1) {
-    titleCard = `${mainContactName} e 1 outro contato`;
-  } else if (otherContactsCount > 1) {
-    titleCard = `${mainContactName} e outros ${otherContactsCount} contatos`;
-  }
-  
   return (
     <Box sx={{ marginTop: 1, marginBottom: 1 }}>
       <div className={classes.container}>
@@ -145,10 +138,7 @@ const MultiVcardPreview = ({ contacts, timestamp }) => {
               +{otherContactsCount}
             </span>
           )}
-          <span className={classes.timestamp}>
-            {timestamp ? new Date(timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : ''}
-          </span>
-        </div>
+          </div>
         
         <div className={classes.contactsContainer}>
           {(showAllContacts ? processedContacts : [firstContact]).map((contact, index) => (
