@@ -347,6 +347,20 @@ const verifyMessage = async (
   await CreateMessageService({ messageData });
 };
 
+let greetingCounts: { [contactId: string]: number } = {};
+const greetingLimit = (5 * 2);
+let resetGreetingCountTimeout: NodeJS.Timeout;
+
+const resetGreetingCounts = () => {
+  greetingCounts = {};
+  console.log("Contadores de saudações resetados.");
+};
+
+const startGreetingCountResetTimer = () => {
+  clearTimeout(resetGreetingCountTimeout);
+  resetGreetingCountTimeout = setTimeout(resetGreetingCounts, 1800000); // 30 minutos
+};
+
 const verifyQueue = async (
   wbot: Session,
   msg: WbotMessage,
@@ -357,11 +371,27 @@ const verifyQueue = async (
     wbot.id!
   );
 
-  if (queues.length === 1) {
+  const queueLengthSetting = await ListSettingsServiceOne({ key: "queueLength" });
+  const queueLength = queueLengthSetting?.value;
+  const queueValue = queueLength === "enabled" ? 0 : 1;
+
+  if (queues.length === queueValue) {
     await UpdateTicketService({
       ticketData: { queueId: queues[0].id },
       ticketId: ticket.id
     });
+
+    const chat = await msg.getChat();
+    await chat.sendStateTyping();
+
+    const body = formatBody(`\u200e${queues[0].greetingMessage}`, ticket);
+
+    const sentMessage = await wbot.sendMessage(
+      `${contact.number}@c.us`,
+      body
+    );
+
+    await verifyMessage(sentMessage, ticket, contact);
 
     return;
   }
@@ -388,6 +418,8 @@ const verifyQueue = async (
     const horatermino = hhtermino + mmtermino;
 
     if (hora < horainicio || hora > horatermino) {
+      const chat = await msg.getChat();
+      await chat.sendStateTyping();
       const body = formatBody(`\u200e${choosenQueue.absenceMessage}`, ticket);
       const debouncedSentMessage = debounce(
         async () => {
@@ -413,25 +445,40 @@ const verifyQueue = async (
 
       const body = formatBody(`\u200e${choosenQueue.greetingMessage}`, ticket);
 
-      const sentMessage = await wbot.sendMessage(
-        `${contact.number}@c.us`,
-        body
+      const debouncedSentMessage = debounce(
+        async () => {
+          const sentMessage = await wbot.sendMessage(
+            `${contact.number}@c.us`,
+            body
+          );
+          verifyMessage(sentMessage, ticket, contact);
+        },
+        3000,
+        ticket.id
       );
-
-      await verifyMessage(sentMessage, ticket, contact);
+      debouncedSentMessage();
     }
   } else {
     let options = "";
 
-    const chat = await msg.getChat();
-    await chat.sendStateTyping();
+    const contactId = contact.id.toString();
+    if (!greetingCounts[contactId]) {
+      greetingCounts[contactId] = 0;
+    }
+
+    if (greetingCounts[contactId] < greetingLimit) {
+      const chat = await msg.getChat();
+      await chat.sendStateTyping();
+      greetingCounts[contactId]++;
+      console.log(`Contador de saudações para ${contactId}:`, greetingCounts[contactId]);
+      startGreetingCountResetTimer();
+    }
 
     queues.forEach((queue, index) => {
       if (queue.startWork && queue.endWork) {
         if (isDisplay) {
-          options += `*${index + 1}* - ${queue.name} das ${
-            queue.startWork
-          } as ${queue.endWork}\n`;
+          options += `*${index + 1}* - ${queue.name} das ${queue.startWork
+            } as ${queue.endWork}\n`;
         } else {
           options += `*${index + 1}* - ${queue.name}\n`;
         }
@@ -440,21 +487,69 @@ const verifyQueue = async (
       }
     });
 
-    const body = formatBody(`\u200e${greetingMessage}\n\n${options}`, ticket);
+    if (queues.length >= 2) {
+      if (greetingCounts[contactId] < greetingLimit) {
+        const body = formatBody(`\u200e${greetingMessage}\n\n${options}`, ticket);
 
-    const debouncedSentMessage = debounce(
-      async () => {
-        const sentMessage = await wbot.sendMessage(
-          `${contact.number}@c.us`,
-          body
+        const debouncedSentMessage = debounce(
+          async () => {
+            const sentMessage = await wbot.sendMessage(
+              `${contact.number}@c.us`,
+              body
+            );
+            verifyMessage(sentMessage, ticket, contact);
+          },
+          3000,
+          ticket.id
         );
-        verifyMessage(sentMessage, ticket, contact);
-      },
-      3000,
-      ticket.id
-    );
 
-    debouncedSentMessage();
+        debouncedSentMessage();
+        greetingCounts[contactId]++;
+        console.log(`Contador de saudações para ${contactId}:`, greetingCounts[contactId]);
+        startGreetingCountResetTimer();
+      } else {
+        console.log(`Limite de saudações atingido para ${contactId}.`);
+      }
+    } else {
+      await UpdateTicketService({
+        ticketData: { queueId: queues[0].id },
+        ticketId: ticket.id
+      });
+
+      const body = formatBody(`\u200e${greetingMessage}`, ticket);
+      const body2 = formatBody(`\u200e${queues[0].greetingMessage}`, ticket);
+
+      const debouncedSentMessage = debounce(
+        async () => {
+          const sentMessage = await wbot.sendMessage(
+            `${contact.number}@c.us`,
+            body
+          );
+          verifyMessage(sentMessage, ticket, contact);
+        },
+        3000,
+        ticket.id
+      );
+
+      debouncedSentMessage();
+
+      setTimeout(() => {
+        const debouncedSecondMessage = debounce(
+          async () => {
+            const sentMessage = await wbot.sendMessage(
+              `${contact.number}@c.us`,
+              body2
+            );
+            verifyMessage(sentMessage, ticket, contact);
+          },
+          2000,
+          ticket.id
+        );
+
+        debouncedSecondMessage();
+      }, 5000);
+    }
+
   }
 };
 
