@@ -1044,6 +1044,7 @@ const messages = {
         ERR_OUT_OF_HOURS: "Fora do Horário de Expediente!",
         ERR_OPEN_USER_TICKET: "Já existe um ticket aberto para este contato com ",
         ERR_OTHER_OPEN_TICKET: "Já existe um ticket aberto para este contato.",
+        ERR_NONE_USER_TICKET: "Já existe um ticket aberto para este contato sem atendente.",
         ERR_SESSION_EXPIRED: "Sessão expirada. Por favor entre.",
         ERR_SENDING_WAPP_MSG: "Erro ao enviar mensagem do WhatsApp. Verifique a página de canais.",
         ERR_USER_INACTIVE: "Este atendente está desativado!",

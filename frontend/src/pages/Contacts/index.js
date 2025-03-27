@@ -242,7 +242,7 @@ const Contacts = () => {
 
       history.push(`/tickets/${data.id}`);
     } catch (err) {
-      toastError(err);
+      toastError(err, t);
     } finally {
       setLoading(false);
     }
