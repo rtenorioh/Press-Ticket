@@ -8,6 +8,25 @@ import Ticket from "../../models/Ticket";
 
 import formatBody from "../../helpers/Mustache";
 
+async function findMessageDirectlyFromWA(wbot: any, ticket: Ticket, quotedMsgId: string): Promise<any | null> {
+  try {
+    const chat = await wbot.getChatById(`${ticket.contact.number}@g.us`);
+
+    const messages = await chat.fetchMessages({ limit: 500 });
+
+    const foundMsg = messages.find((m: any) => m.id.id === quotedMsgId);
+
+    if (foundMsg) {
+      return foundMsg;
+    }
+
+    return null;
+  } catch (error) {
+    console.error(`Erro ao buscar mensagem diretamente do WhatsApp: ${error}`);
+    return null;
+  }
+}
+
 interface Request {
   body: string;
   ticket: Ticket;
@@ -19,27 +38,79 @@ const SendWhatsAppMessage = async ({
   ticket,
   quotedMsg
 }: Request): Promise<WbotMessage> => {
-  let quotedMsgSerializedId: string | undefined;
-  if (quotedMsg) {
-    await GetWbotMessage(ticket, quotedMsg.id);
-    quotedMsgSerializedId = SerializeWbotMsgId(ticket, quotedMsg);
+  const wbot = await GetTicketWbot(ticket);
+
+  if (quotedMsg && ticket.isGroup) {
+    const originalMessage = await findMessageDirectlyFromWA(wbot, ticket, quotedMsg.id);
+
+    if (originalMessage) {
+      try {
+        const sentMessage = await originalMessage.reply(formatBody(body, ticket));
+
+        await ticket.update({ lastMessage: body });
+        return sentMessage;
+      } catch (replyError) {
+        console.error(`Erro ao usar reply nativo: ${replyError}`);
+
+        try {
+          const sentMessage = await wbot.sendMessage(
+            `${ticket.contact.number}@g.us`,
+            formatBody(body, ticket),
+            { linkPreview: false, quotedMessageId: originalMessage.id._serialized }
+          );
+
+          await ticket.update({ lastMessage: body });
+          return sentMessage;
+        } catch (idError) {
+          console.error(`Erro ao usar ID serializado diretamente: ${idError}`);
+        }
+      }
+    }
+
+    const sentMessage = await wbot.sendMessage(
+      `${ticket.contact.number}@g.us`,
+      formatBody(body, ticket),
+      { linkPreview: false }
+    );
+
+    await ticket.update({ lastMessage: body });
+    return sentMessage;
   }
 
-  const wbot = await GetTicketWbot(ticket);
+  let quotedMsgSerializedId: string | undefined;
+
+  if (quotedMsg && !ticket.isGroup) {
+    try {
+      await GetWbotMessage(ticket, quotedMsg.id);
+      quotedMsgSerializedId = SerializeWbotMsgId(ticket, quotedMsg);
+    } catch (error) {
+      console.error(`Erro ao buscar mensagem citada: ${error}`);
+      throw new AppError("ERR_FETCH_WAPP_MSG");
+    }
+  }
+
+  const sendOptions: {
+    linkPreview: boolean;
+    quotedMessageId?: string;
+  } = {
+    linkPreview: false
+  };
+
+  if (quotedMsgSerializedId) {
+    sendOptions.quotedMessageId = quotedMsgSerializedId;
+  }
 
   try {
     const sentMessage = await wbot.sendMessage(
-      `${ticket.contact.number}@${ticket.isGroup ? "g" : "c"}.us`,
+      `${ticket.contact.number}@c.us`,
       formatBody(body, ticket),
-      {
-        quotedMessageId: quotedMsgSerializedId,
-        linkPreview: false
-      }
+      sendOptions
     );
 
     await ticket.update({ lastMessage: body });
     return sentMessage;
   } catch (err) {
+    console.error("Erro ao enviar mensagem:", err);
     throw new AppError("ERR_SENDING_WAPP_MSG");
   }
 };

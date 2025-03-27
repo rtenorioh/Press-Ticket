@@ -392,7 +392,7 @@ const MessageInput = ({ ticketStatus }) => {
         }
       }
     } catch (err) {
-      toastError(err);
+      toastError(err, t);
     }
     setInputMessage("");
     setShowEmoji(false);
