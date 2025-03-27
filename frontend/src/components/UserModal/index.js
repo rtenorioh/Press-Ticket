@@ -90,8 +90,8 @@ const UserModal = ({ open, onClose, userId }) => {
 		email: "",
 		password: "",
 		profile: "user",
-		startWork: "",
-		endWork: "",
+		startWork: "00:00",
+		endWork: "23:59",
 		isTricked: "enabled",
 		active: "true"
 	};
