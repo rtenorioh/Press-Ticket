@@ -1,5 +1,34 @@
 # Changelog
 
+### v1.13.0 (27/03/2025)
+
+- [Revert "Changelog", This reverts commit a2ba7758b53c483accdfedfb01841c188f3091c2.](https://github.com/rtenorioh/Press-Ticket/commit/c1ebe32e19ded66659c2f15084ec042937c1f789);
+- [Revert "feat: atualizar versão do sistema para v1.12.0", This reverts commit 3eb3588abbeff855089fe6ba41baca4a7d371ef6.](https://github.com/rtenorioh/Press-Ticket/commit/1563b1aa687140a5f89658d7b2e5e042d4afdaaa);
+- [Revert "feat: adicionar novas permissões de contatos e atualizar rotas de API", This reverts commit e240a9047b689d1fc8eff1f0e973e735e14fad8e.](https://github.com/rtenorioh/Press-Ticket/commit/488965f17fc04de9ec8841d67b8c4debe2a63e87);
+- [Revert "feat: adicionar suporte a permissões de API e rotas com validação de token", This reverts commit ddd7355c78c0687bc41d418febede48228c0739c.](https://github.com/rtenorioh/Press-Ticket/commit/8d3a775489ac43873197e72652afd8791fb907a6);
+- [Revert "feat: implementar serviço de gerenciamento de tokens de API com rotas e validação", This reverts commit 8e0e025a91e635e7de0e46f980b85c691b48c470.](https://github.com/rtenorioh/Press-Ticket/commit/5fbc4d288a050197797b9c20d7e1be946813bbdb);
+- [Revert "feat: melhorar tratamento de erros e validação de IDs de fila na recuperação de tickets", This reverts commit b84677531f8978b0692e503a93c3ee73ec7636e4.](https://github.com/rtenorioh/Press-Ticket/commit/bb14bc0ce9052b9bc51d41c383205b94eaad1c95);
+- [feat: melhorar tratamento de queueIds e adicionar suporte a tradução de erros](https://github.com/rtenorioh/Press-Ticket/commit/c1f648c555782bac0f80567cac23940b498c24ec);
+- [feat: implementar serviço de gerenciamento de tokens de API com rotas e tradução de mensagens](https://github.com/rtenorioh/Press-Ticket/commit/bf29c57bbce9499ea9b8b3d9f6480b02061a6626);
+- [feat: adicionar suporte a gerenciamento de permissões de API e validação de tokens](https://github.com/rtenorioh/Press-Ticket/commit/bd7cecdf50bbdef96f395af948510408681d1705);
+- [feat: adicionar suporte a novas permissões de contatos e atualizar tradução de mensagens](https://github.com/rtenorioh/Press-Ticket/commit/99c1054222adf28ee8af727f87c2a7782c51a511);
+- [docs: atualizar changelog para incluir versão v1.12.0 que foi revertida](https://github.com/rtenorioh/Press-Ticket/commit/5f26b98d39ae7a1f6c19810879b4c5ea0fe8530c);
+- [feat: adicionar verificação e atualização da URL no swagger.json com base na BACKEND_URL do .env](https://github.com/rtenorioh/Press-Ticket/commit/cceeec8e8bb187ea04a4558551c9f5133ef10e64);
+- [feat: adicionar tratamento de erro para número de WhatsApp inválido no ContactModal e mensagem correspondente](https://github.com/rtenorioh/Press-Ticket/commit/fd455258ab4012e147e467ececc6744d84adccdd);
+- [feat: adicionar configuração de queueLength nas definições e tradução correspondente (Envio de Saudação com um Setor)](https://github.com/rtenorioh/Press-Ticket/commit/f5d229a7aa62af0d36fb97d619dba34e8f81894c);
+- [feat: adicionar contagem de saudações com limite e reset automático](https://github.com/rtenorioh/Press-Ticket/commit/f7ad2e84715386643a06d66d1e7c0c1d4ac2ef5f);
+- [style: adicionar coluna de tipo na tabela de usuários e estilização correspondente](https://github.com/rtenorioh/Press-Ticket/commit/c3b92e2ad9cd59152d5ee6bafa9468c54efb1b92);
+- [feat: adicionar coluna 'active' na tabela de usuários e atualizar serviços relacionados](https://github.com/rtenorioh/Press-Ticket/commit/ce9ba98e74c1b5b81d999a7b8b41d86ea909d8aa);
+- [feat: atualizar endpoints de API para usar 'x-api-token' e versão v1](https://github.com/rtenorioh/Press-Ticket/commit/71a54dc61facad0064b48178e92b2431a2cc0eb9);
+- [feat: atualizar evento de emissão para 'appMessage' e adicionar tratamento de ação de exclusão na lista de mensagens](https://github.com/rtenorioh/Press-Ticket/commit/e82070d4505eabd958da6bbc491ec80bcff62045);
+- [feat: definir horários padrão de início e fim de trabalho no modal de usuário](https://github.com/rtenorioh/Press-Ticket/commit/88dbcbb64f19dffa4d468abb5ecc571898c43b55);
+- [feat: adicionar suporte para visualização de múltiplos vCards e melhorar o processamento de mensagens multi_vcard](https://github.com/rtenorioh/Press-Ticket/commit/9fd7c37c9cd5eeb5ee6525becde0b91dfdc38ab8);
+- [feat: melhorar busca de mensagens no WhatsApp e adicionar tratamento de erros para mensagens em grupos](https://github.com/rtenorioh/Press-Ticket/commit/244b1552e01b09d300e012c35c08878766a1cbf7);
+- [feat: remover ícones antigos e adicionar novos logos ao projeto](https://github.com/rtenorioh/Press-Ticket/commit/d563f5db9ba67b8ca248849bed1b97d453435243);
+- [feat: adicionar tratamento de erro com tradução para tickets sem atendente](https://github.com/rtenorioh/Press-Ticket/commit/3e25e1d8076b6826b08fdc7aba93ce5daa5132e1);
+- [feat: otimizar a exibição de contatos no MultiVcardPreview e remover lógica de título desnecessária](https://github.com/rtenorioh/Press-Ticket/commit/a3817cb57aafcefd4b350c403b9054dd6b2aa2df); e
+- [feat: atualizar a versão do sistema para v1.13.0 no package.json](https://github.com/rtenorioh/Press-Ticket/commit/36c4ec34bcc868a54cea2f071c1121a2ee0ae991).
+
 ### v1.12.0 (07/03/2025) - Revertido em 25/03/2025
 
 - [feat: melhorar tratamento de erros e validação de IDs de fila na recuperação de tickets](https://github.com/rtenorioh/Press-Ticket/commit/b84677531f8978b0692e503a93c3ee73ec7636e4);
