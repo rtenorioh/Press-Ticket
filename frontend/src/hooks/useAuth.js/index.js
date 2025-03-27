@@ -3,7 +3,8 @@ import { useTranslation } from "react-i18next";
 import { useHistory } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useSocket } from "../../context/SocketContext";
-import api from "../../services/api";
+import toastError from "../../errors/toastError";
+import api, { markUserAsInactive } from "../../services/api";
 import { showLoading } from "../../utils/showLoading";
 
 const useAuth = () => {
@@ -26,8 +27,15 @@ const useAuth = () => {
         history.push("/login");
     }, [history, socket]);
 
+    const [userInactive, setUserInactive] = useState(false);
+
     useEffect(() => {
         const checkAuth = async () => {
+            if (userInactive) {
+                setLoading(false);
+                return;
+            }
+
             const token = localStorage.getItem("token");
             if (token) {
                 try {
@@ -38,14 +46,33 @@ const useAuth = () => {
                     setIsAuth(true);
                     setUser(data.user);
                 } catch (err) {
-                    handleLogout();
+                    if (err.response && err.response.data && err.response.data.error === "ERR_USER_INACTIVE") {
+                        setUserInactive(true);
+                        markUserAsInactive();
+
+                        toast.error(t("backendErrors.ERR_USER_INACTIVE") || "Este atendente está desativado!", {
+                            autoClose: 10000,
+                            onClose: () => {
+                                history.push("/login");
+                            }
+                        });
+
+                        localStorage.removeItem("token");
+                        localStorage.removeItem("user");
+                        setIsAuth(false);
+                        setUser({});
+
+                        delete api.defaults.headers.Authorization;
+                    } else {
+                        handleLogout();
+                    }
                 }
             }
             setLoading(false);
         };
 
         checkAuth();
-    }, [handleLogout]);
+    }, [handleLogout, userInactive, t, history]);
 
     useEffect(() => {
 
@@ -93,7 +120,7 @@ const useAuth = () => {
                 history.push("/tickets");
             }, 1500);
         } catch (err) {
-            toast.error(t("auth.toasts.error"));
+            toastError(err, t);
         }
     };
 

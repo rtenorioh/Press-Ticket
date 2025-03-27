@@ -1,5 +1,5 @@
-import User from "../models/User";
 import Queue from "../models/Queue";
+import User from "../models/User";
 import Whatsapp from "../models/Whatsapp";
 
 interface SerializedUser {
@@ -14,6 +14,7 @@ interface SerializedUser {
   createdAt: Date;
   whatsapps: Whatsapp[];
   queues: Queue[];
+  active: boolean;
 }
 
 export const SerializeUser = async (user: User): Promise<SerializedUser> => {
@@ -30,5 +31,6 @@ export const SerializeUser = async (user: User): Promise<SerializedUser> => {
     createdAt: user.createdAt,
     whatsapps: user.whatsapps,
     queues: user.queues,
+    active: user.active,
   };
 };

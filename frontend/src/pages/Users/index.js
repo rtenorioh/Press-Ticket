@@ -17,9 +17,13 @@ import {
 import { makeStyles } from "@material-ui/core/styles";
 import {
   AddCircleOutline,
+  CheckCircleOutline,
   DeleteOutline,
   Edit,
+  HighlightOff,
   Info,
+  Lock,
+  LockOpen,
   Search
 } from "@material-ui/icons";
 import React, { useEffect, useReducer, useState } from "react";
@@ -227,6 +231,16 @@ const Users = () => {
     setPageNumber(1);
   };
 
+  const handleToggleActive = async (user) => {
+    try {
+      await api.put(`/users/${user.id}`, { active: !user.active });
+      dispatch({ type: "UPDATE_USERS", payload: { ...user, active: !user.active } });
+      toast.success(t("users.toasts.updated"));
+    } catch (err) {
+      toastError(err);
+    }
+  };
+
   const loadMore = () => {
     setPageNumber((prevState) => prevState + 1);
   };
@@ -384,7 +398,15 @@ const Users = () => {
                   <TableRow key={user.id}>
                     <TableCell align="center">{user.id}</TableCell>
                     <TableCell align="center">{user.name}</TableCell>
-                    <TableCell align="center">{user.online ? "🟢" : "🔴"}</TableCell>
+                    <TableCell align="center">
+                      <Tooltip title={user.online ? t("users.status.online") : t("users.status.offline")} arrow>
+                        {user.online ? (
+                          <CheckCircleOutline style={{ color: "green" }} />
+                        ) : (
+                          <HighlightOff style={{ color: "red" }} />
+                        )}
+                      </Tooltip>
+                    </TableCell>
                     <TableCell align="center">{user.email}</TableCell>
                     <TableCell align="center">{user.profile}</TableCell>
                     <TableCell align="center">
@@ -406,21 +428,33 @@ const Users = () => {
                     <TableCell align="center">{user.startWork}</TableCell>
                     <TableCell align="center">{user.endWork}</TableCell>
                     <TableCell align="center">
-                      <IconButton
-                        size="small"
-                        onClick={() => handleEditUser(user.id)}
-                      >
-                        <Edit color="secondary" />
-                      </IconButton>
-                      <IconButton
-                        size="small"
-                        onClick={() => {
-                          setConfirmModalOpen(true);
-                          setDeletingUser(user);
-                        }}
-                      >
-                        <DeleteOutline color="secondary" />
-                      </IconButton>
+                      <Tooltip title={user.active ? t("users.actions.activate") : t("users.actions.deactivate")} arrow>
+                        <IconButton
+                          size="small"
+                          onClick={() => handleToggleActive(user)}
+                        >
+                          {user.active ? <LockOpen color="secondary" /> : <Lock color="secondary" />}
+                        </IconButton>
+                      </Tooltip>
+                      <Tooltip title={t("users.actions.edit")} arrow>
+                        <IconButton
+                          size="small"
+                          onClick={() => handleEditUser(user.id)}
+                        >
+                          <Edit color="secondary" />
+                        </IconButton>
+                      </Tooltip>
+                      <Tooltip title={t("users.actions.delete")} arrow>
+                        <IconButton
+                          size="small"
+                          onClick={() => {
+                            setConfirmModalOpen(true);
+                            setDeletingUser(user);
+                          }}
+                        >
+                          <DeleteOutline color="secondary" />
+                        </IconButton>
+                      </Tooltip>
                     </TableCell>
                   </TableRow>
                 ))}

@@ -1,14 +1,14 @@
-import User from "../../models/User";
+import { v4 as uuidv4 } from "uuid";
 import AppError from "../../errors/AppError";
 import {
   createAccessToken,
   createRefreshToken
 } from "../../helpers/CreateTokens";
-import Queue from "../../models/Queue";
-import { getIO } from "../../libs/socket";
-import { v4 as uuidv4 } from "uuid";
-import UserSession from "../../models/UserSession";
 import { SerializeUser } from "../../helpers/SerializeUser";
+import { getIO } from "../../libs/socket";
+import Queue from "../../models/Queue";
+import User from "../../models/User";
+import UserSession from "../../models/UserSession";
 
 interface Request {
   email: string;
@@ -27,6 +27,7 @@ interface Response {
     endWork: string;
     createdAt: Date;
     queues: Queue[];
+    active: boolean;
   };
   token: string;
   refreshToken: string;
@@ -43,6 +44,10 @@ const AuthUserService = async ({
 
   if (!user) {
     throw new AppError("ERR_INVALID_CREDENTIALS", 401);
+  }
+
+  if (!user.active) {
+    throw new AppError("ERR_USER_INACTIVE", 401);
   }
 
   const Hr = new Date();
@@ -70,7 +75,7 @@ const AuthUserService = async ({
   }
 
   await user.update({ online: true });
-  
+
   const io = getIO();
   io.emit("userSessionUpdate", {
     userId: user.id,

@@ -49,7 +49,8 @@ const ListUsersService = async ({
       "isTricked",
       "createdAt",
       "startWork",
-      "endWork"
+      "endWork",
+      "active"
     ],
     limit,
     offset,

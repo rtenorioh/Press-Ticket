@@ -22,7 +22,7 @@ const processQueue = (error, token = null) => {
 };
 
 const handleLogout = () => {
-  api.delete("/auth/logout").catch(() => {});
+  api.delete("/auth/logout").catch(() => { });
   localStorage.removeItem("token");
   window.location.href = "/login";
 };
@@ -35,13 +35,26 @@ const refreshToken = async () => {
     lastRefreshTime = Date.now();
     return { token, user };
   } catch (err) {
+    if (err?.response?.data?.error === "ERR_USER_INACTIVE") {
+      throw err;
+    }
     handleLogout();
     throw err;
   }
 };
 
+let userInactive = false;
+
+const setUserInactiveFlag = (value) => {
+  userInactive = value;
+};
+
 api.interceptors.request.use(
   async config => {
+    if (userInactive && !config.url.includes("/auth/logout")) {
+      return Promise.reject(new Error("User is inactive"));
+    }
+
     if (config.url.includes("/auth/refresh_token") || config.url.includes("/auth/logout")) {
       return config;
     }
@@ -54,6 +67,9 @@ api.interceptors.request.use(
           const { token: newToken } = await refreshToken();
           config.headers.Authorization = `Bearer ${newToken}`;
         } catch (err) {
+          if (err?.response?.data?.error === "ERR_USER_INACTIVE") {
+            setUserInactiveFlag(true);
+          }
           console.error("Error refreshing token:", err);
           return Promise.reject(err);
         }
@@ -73,7 +89,11 @@ api.interceptors.response.use(
   async error => {
     const originalRequest = error.config;
 
-    if (error?.response?.data?.error === "ERR_SESSION_EXPIRED") {
+    if (error?.response?.data?.error === "ERR_SESSION_EXPIRED" || error?.response?.data?.error === "ERR_USER_INACTIVE") {
+      if (error?.response?.data?.error === "ERR_USER_INACTIVE") {
+        return Promise.reject(error);
+      }
+
       handleLogout();
       return Promise.reject(error);
     }
@@ -110,5 +130,9 @@ api.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
+export const markUserAsInactive = () => {
+  setUserInactiveFlag(true);
+};
 
 export default api;

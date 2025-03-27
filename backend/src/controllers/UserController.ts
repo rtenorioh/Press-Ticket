@@ -42,7 +42,8 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     queueIds,
     whatsappIds,
     startWork,
-    endWork
+    endWork,
+    active
   } = req.body;
 
   if (
@@ -63,7 +64,8 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     queueIds,
     whatsappIds,
     startWork,
-    endWork
+    endWork,
+    active
   });
 
   const io = getIO();

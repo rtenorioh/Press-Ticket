@@ -2,15 +2,15 @@ import {
   Avatar,
   Button,
   IconButton,
+  InputAdornment,
   Paper,
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableRow,
-  Tooltip,
-  InputAdornment,
-  TextField
+  TextField,
+  Tooltip
 } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import {
@@ -20,8 +20,8 @@ import {
   DeleteOutline,
   Edit,
   ImportContacts,
-  WhatsApp,
-  Search
+  Search,
+  WhatsApp
 } from "@material-ui/icons";
 import React, { useContext, useEffect, useReducer, useState } from "react";
 import { CSVLink } from "react-csv";
@@ -137,7 +137,7 @@ const Contacts = () => {
 
   useEffect(() => {
     setLoading(true);
-  
+
     const delayDebounceFn = setTimeout(() => {
       const fetchContacts = async () => {
         try {
@@ -148,7 +148,7 @@ const Contacts = () => {
               tags: filteredTags.map(tag => tag.id).join(",")
             }
           });
-  
+
           dispatch({ type: "LOAD_CONTACTS", payload: data.contacts });
           setHasMore(data.hasMore);
           setLoading(false);
@@ -156,13 +156,13 @@ const Contacts = () => {
           toastError(err);
         }
       };
-  
+
       fetchContacts();
     }, 500);
-  
+
     return () => clearTimeout(delayDebounceFn);
   }, [searchParam, pageNumber, filteredTags]);
-   
+
   useEffect(() => {
     const socket = openSocket();
 
@@ -227,7 +227,7 @@ const Contacts = () => {
           setLoading(false);
           toastError({
             message: t("contacts.errors.ticketAlreadyOpen", {
-              atendente: assignedUserName,
+              userName: assignedUserName,
             }),
           });
           return;
@@ -354,7 +354,7 @@ const Contacts = () => {
       <MainHeader>
         <Title>{t("contacts.title")} ({contacts.length})</Title>
         <MainHeaderButtonsWrapper>
-        <TextField
+          <TextField
             placeholder={t("contacts.searchPlaceholder")}
             type="search"
             value={searchParam}

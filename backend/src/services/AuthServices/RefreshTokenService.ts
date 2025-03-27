@@ -1,15 +1,15 @@
-import { verify } from "jsonwebtoken";
 import { Response as Res } from "express";
+import { verify } from "jsonwebtoken";
 
-import User from "../../models/User";
-import AppError from "../../errors/AppError";
-import ShowUserService from "../UserServices/ShowUserService";
 import authConfig from "../../config/auth";
+import AppError from "../../errors/AppError";
 import {
   createAccessToken,
   createRefreshToken
 } from "../../helpers/CreateTokens";
+import User from "../../models/User";
 import UserSession from "../../models/UserSession";
+import ShowUserService from "../UserServices/ShowUserService";
 
 interface RefreshTokenPayload {
   id: string;
@@ -35,6 +35,11 @@ export const RefreshTokenService = async (
     if (user.tokenVersion !== tokenVersion) {
       res.clearCookie("jrt");
       throw new AppError("ERR_SESSION_EXPIRED", 401);
+    }
+
+    if (!user.active) {
+      res.clearCookie("jrt");
+      throw new AppError("ERR_USER_INACTIVE", 401);
     }
 
     const session = await UserSession.findOne({
@@ -83,6 +88,12 @@ export const RefreshTokenService = async (
 
     return { user, newToken, refreshToken };
   } catch (err) {
+    if (err instanceof AppError) {  
+      if (err.message === "ERR_USER_INACTIVE") {
+        throw err;
+      }
+    }
+
     res.clearCookie("jrt");
     throw new AppError("ERR_SESSION_EXPIRED", 401);
   }

@@ -110,7 +110,7 @@ const AcceptTicketWithouSelectQueue = ({ modalOpen, onClose, ticketId }) => {
 				setLoading(false);
 				toastError({
 					message: t("ticketsList.errors.ticketAlreadyOpen", {
-						atendente: assignedUserName,
+						userName: assignedUserName,
 					}),
 				});
 				return;

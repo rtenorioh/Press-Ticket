@@ -92,7 +92,8 @@ const UserModal = ({ open, onClose, userId }) => {
 		profile: "user",
 		startWork: "",
 		endWork: "",
-		isTricked: "enabled"
+		isTricked: "enabled",
+		active: "true"
 	};
 	const { user: loggedInUser } = useContext(AuthContext);
 	const [user, setUser] = useState(initialState);

@@ -14,7 +14,8 @@ const ShowUserService = async (id: string | number): Promise<User> => {
       "isTricked",
       "tokenVersion",
       "startWork",
-      "endWork"
+      "endWork",
+      "active"
     ],
     include: [
       { model: Queue, as: "queues", attributes: ["id", "name", "color"] },

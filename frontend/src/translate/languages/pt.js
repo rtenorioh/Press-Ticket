@@ -56,7 +56,8 @@ const messages = {
       auth: {
         toasts: {
           success: "Login efetuado com sucesso!",
-          session_expired: "Sua sessão expirou pois foi iniciada em outro dispositivo."
+          session_expired: "Sua sessão expirou pois foi iniciada em outro dispositivo.",
+          user_inactive: "Usuário desativado. Por favor, contate o administrador."
         },
       },
       chat: {
@@ -150,7 +151,7 @@ const messages = {
           deletedAll: "Todos contatos excluídos com sucesso!",
         },
         errors: {
-          "ticketAlreadyOpen": "Já existe um ticket aberto para este contato, atribuído a {{atendente}}."
+          ticketAlreadyOpen: "Já existe um ticket aberto para este contato, atribuído a {{userName}}."
         },
         searchPlaceholder: "Pesquisar...",
         confirmationModal: {
@@ -908,7 +909,7 @@ const messages = {
           queue: "Selecionar setor"
         },
         errors: {
-          ticketAlreadyOpen: "Já existe um ticket aberto para este contato com o atendente {{atendente}}."
+          ticketAlreadyOpen: "Já existe um ticket aberto para este contato com o atendente {{userName}}."
         }
       },
       ticketOptionsMenu: {
@@ -964,6 +965,16 @@ const messages = {
           deleteTitle: "Excluir",
           deleteMessage: "Todos os dados do atendente serão perdidos. Os tickets abertos deste atendente serão movidos para a espera.",
         },
+        status: {
+          online: "Online",
+          offline: "Offline",
+        },
+        actions: {
+          activate: "Ativado",
+          deactivate: "Desativado",
+          edit: "Editar",
+          delete: "Excluir",
+        }
       },
       userModal: {
         title: {
@@ -1035,6 +1046,8 @@ const messages = {
         ERR_OTHER_OPEN_TICKET: "Já existe um ticket aberto para este contato.",
         ERR_SESSION_EXPIRED: "Sessão expirada. Por favor entre.",
         ERR_SENDING_WAPP_MSG: "Erro ao enviar mensagem do WhatsApp. Verifique a página de canais.",
+        ERR_USER_INACTIVE: "Este atendente está desativado!",
+        ERR_USER_TICKET_LIMIT: "Limite de tickets atingido para este atendente.",
         ERR_USER_CREATION_COUNT: "Limite de atendentes atingido, para alterar entre em contato com o suporte.",
         ERR_USER_CREATION_DISABLED: "A criação do atendente foi desabilitada pelo administrador.",
         ERR_WAPP_CHECK_CONTACT: "Não foi possível verificar o contato do WhatsApp. Verifique a página de canais",

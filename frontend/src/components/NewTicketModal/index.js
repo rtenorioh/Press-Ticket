@@ -123,7 +123,7 @@ const NewTicketModal = ({ modalOpen, onClose }) => {
 					setLoading(false);
 					toastError({
 						message: t("ticketsList.errors.ticketAlreadyOpen", {
-							atendente: assignedUserName,
+							userName: assignedUserName,
 						}),
 					});
 					return;
