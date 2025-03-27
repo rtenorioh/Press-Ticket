@@ -1,4 +1,5 @@
 import {
+  Box,
   Button,
   CircularProgress,
   Divider,
@@ -35,6 +36,7 @@ import LocationPreview from "../LocationPreview";
 import MarkdownWrapper from "../MarkdownWrapper";
 import MessageOptionsMenu from "../MessageOptionsMenu";
 import ModalImageCors from "../ModalImageCors";
+import MultiVcardPreview from "../MultiVcardPreview";
 import VcardPreview from "../VcardPreview";
 
 const useStyles = makeStyles((theme) => ({
@@ -423,10 +425,6 @@ const MessagesList = ({ ticketId, isGroup }) => {
       if (data.action === "update") {
         dispatch({ type: "UPDATE_MESSAGE", payload: data.message });
       }
-
-      if (data.action === "delete") {
-        dispatch({ type: "DELETE_MESSAGE", payload: data.message });
-      }
     });
 
     return () => {
@@ -516,23 +514,47 @@ const MessagesList = ({ ticketId, isGroup }) => {
       }
       return <VcardPreview contact={contact} numbers={obj[0].number} />
     }
-    /*else if (message.mediaType === "multi_vcard") {
-      console.log("multi_vcard")
-      console.log(message)
-    	
-      if(message.body !== null && message.body !== "") {
-        let newBody = JSON.parse(message.body)
-        return (
-          <>
-            {
-            newBody.map(v => (
-              <VcardPreview contact={v.name} numbers={v.number} />
-            ))
+    else if (message.mediaType === "multi_vcard") {
+      if (message.body !== null && message.body !== "") {
+        try {
+          let contacts = message.body;
+
+          if (typeof contacts === 'string') {
+            try {
+              contacts = JSON.parse(contacts);
+            } catch (parseError) {
+              console.error("Erro ao fazer parse do JSON:", parseError);
+              const cleanContacts = contacts.replace(/\\n/g, '').replace(/\\r/g, '').replace(/\\\\/g, '').replace(/\\"/g, '"');
+              try {
+                contacts = JSON.parse(cleanContacts);
+              } catch (cleanParseError) {
+                console.error("Erro ao fazer parse do JSON após limpeza:", cleanParseError);
+                return null;
+              }
             }
-          </>
-        )
-      } else return (<></>)
-    }*/
+          }
+
+          if (!Array.isArray(contacts)) {
+            console.warn("O corpo da mensagem não é um array, convertendo:", contacts);
+            contacts = [contacts];
+          }
+
+          if (contacts.length > 0) {
+            return (
+              <Box sx={{
+                display: "flex",
+                justifyContent: message.fromMe ? "flex-end" : "flex-start",
+                width: "100%"
+              }}>
+                <MultiVcardPreview contacts={contacts} timestamp={message.createdAt} />
+              </Box>
+            );
+          }
+        } catch (error) {
+          console.error("Erro ao processar mensagem multi_vcard:", error);
+        }
+      }
+    }
     else if (message.mediaType === "image") {
       return <ModalImageCors imageUrl={message.mediaUrl} isDeleted={message.isDeleted} />;
     } else if (message.mediaType === "audio") {
@@ -750,7 +772,7 @@ const MessagesList = ({ ticketId, isGroup }) => {
           {message.quotedMsg.mediaType === "video"
             && (
               <video
-              className={classes.messageVideo}
+                className={classes.messageVideo}
                 src={message.quotedMsg.mediaUrl}
                 controls
               />
@@ -872,7 +894,7 @@ const MessagesList = ({ ticketId, isGroup }) => {
                   </div>
                 )}
                 {(message.mediaUrl || message.mediaType === "location" || message.mediaType === "vcard"
-                  //|| message.mediaType === "multi_vcard" 
+                  || message.mediaType === "multi_vcard"
                 ) && checkMessageMedia(message)}
                 <div
                   className={clsx(classes.textContentItem, {
@@ -883,7 +905,7 @@ const MessagesList = ({ ticketId, isGroup }) => {
                 >
                   {message.quotedMsg && renderQuotedMessage(message)}
 
-                  <MarkdownWrapper>{message.body}</MarkdownWrapper>
+                  {message.mediaType !== "multi_vcard" && <MarkdownWrapper>{message.body}</MarkdownWrapper>}
                   <span className={classes.timestamp}>
                     {message.isEdited && <span>{t("messagesList.message.edited")} </span>}
                     {format(parseISO(message.createdAt), "HH:mm")}
@@ -910,7 +932,7 @@ const MessagesList = ({ ticketId, isGroup }) => {
                   <ExpandMore />
                 </IconButton>
                 {(message.mediaUrl || message.mediaType === "location" || message.mediaType === "vcard"
-                  //|| message.mediaType === "multi_vcard" 
+                  || message.mediaType === "multi_vcard"
                 ) && checkMessageMedia(message)}
                 <div
                   className={clsx(classes.textContentItem, {
@@ -932,7 +954,7 @@ const MessagesList = ({ ticketId, isGroup }) => {
                     </div>
                   )}
                   {message.quotedMsg && renderQuotedMessage(message)}
-                  <MarkdownWrapper>{message.body}</MarkdownWrapper>
+                  {message.mediaType !== "multi_vcard" && <MarkdownWrapper>{message.body}</MarkdownWrapper>}
                   <span className={classes.timestamp}>
                     {message.isEdited && <span>{t("messagesList.message.edited")} </span>}
                     {format(parseISO(message.createdAt), "HH:mm")}

@@ -21,6 +21,21 @@ interface Request {
 const CreateMessageService = async ({
   messageData
 }: Request): Promise<Message> => {
+  if (messageData.mediaType === "multi_vcard") {
+
+    if (typeof messageData.body === 'string') {
+      try {
+        const parsedBody = JSON.parse(messageData.body);
+        if (Array.isArray(parsedBody)) {
+          console.log("Array length:", parsedBody.length);
+          console.log("First item:", parsedBody[0]);
+        }
+      } catch (error) {
+        console.error("Error parsing message body:", error);
+      }
+    }
+  }
+  
   await Message.upsert(messageData);
 
   const message = await Message.findByPk(messageData.id, {
