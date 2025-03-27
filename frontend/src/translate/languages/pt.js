@@ -953,7 +953,8 @@ const messages = {
         },
         modalTable: {
           id: "ID",
-          name: "Nome"
+          name: "Nome",
+          type: "Tipo",
         },
         toasts: {
           deleted: "Atendente excluído com sucesso.",

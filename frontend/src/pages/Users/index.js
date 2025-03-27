@@ -24,7 +24,7 @@ import {
 } from "@material-ui/icons";
 import React, { useEffect, useReducer, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useLocation, useHistory } from "react-router-dom";
+import { useHistory, useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
 import ConfirmationModal from "../../components/ConfirmationModal";
 import MainContainer from "../../components/MainContainer";
@@ -108,6 +108,14 @@ const useStyles = makeStyles((theme) => ({
     width: "400px",
     maxHeight: "80%",
     overflowY: "auto",
+  },
+  queuesColor: {
+    flex: "none",
+    width: "8px",
+    height: "100%",
+    position: "absolute",
+    top: "0%",
+    left: "0%",
   },
 }));
 
@@ -241,7 +249,7 @@ const Users = () => {
     setModalContent([]);
     setModalOpen(false);
   };
-  
+
   return (
     <MainContainer>
       <Modal
@@ -259,13 +267,22 @@ const Users = () => {
                 <TableRow>
                   <TableCell>{t("users.modalTable.id")}</TableCell>
                   <TableCell>{t("users.modalTable.name")}</TableCell>
+                  {modalTitle === t("users.modalTitle.channel") && (
+                    <TableCell>{t("users.modalTable.type")}</TableCell>
+                  )}
                 </TableRow>
               </TableHead>
               <TableBody>
                 {modalContent.map((item, index) => (
                   <TableRow key={index}>
-                    <TableCell>{item.id}</TableCell>
+                    <TableCell style={{ padding: 0, width: "5px", position: "relative" }}>
+                      <div style={{ backgroundColor: item.color, width: "5px", height: "100%", position: "absolute", top: 0, left: 0 }}></div>
+                      <div style={{ paddingLeft: "20px" }}>{item.id}</div>
+                    </TableCell>
                     <TableCell>{item.name}</TableCell>
+                    {modalTitle === t("users.modalTitle.channel") && (
+                      <TableCell>{item.type === null ? "wwebjs" : item.type}</TableCell>
+                    )}
                   </TableRow>
                 ))}
               </TableBody>
@@ -308,13 +325,13 @@ const Users = () => {
             }}
           />
           <Tooltip title={t("users.buttons.add")}>
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={handleOpenUserModal}
-          >
-            <AddCircleOutline />
-          </Button>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleOpenUserModal}
+            >
+              <AddCircleOutline />
+            </Button>
           </Tooltip>
         </MainHeaderButtonsWrapper>
       </MainHeader>
@@ -326,7 +343,7 @@ const Users = () => {
         <Table size="small">
           <TableHead>
             <TableRow>
-            <TableCell align="center">
+              <TableCell align="center">
                 {t("users.table.id")}
               </TableCell>
               <TableCell align="center">
@@ -371,29 +388,29 @@ const Users = () => {
                     <TableCell align="center">{user.email}</TableCell>
                     <TableCell align="center">{user.profile}</TableCell>
                     <TableCell align="center">
-                    <IconButton
-                      size="small"
-                      onClick={() => handleOpenModal(user.whatsapps, t("users.modalTitle.channel"))}
-                    >
-                      <Info color="secondary" />
-                    </IconButton>
-                  </TableCell>
-                  <TableCell align="center">
-                    <IconButton
-                      size="small"
-                      onClick={() => handleOpenModal(user.queues, t("users.modalTitle.queue"))}
-                    >
-                      <Info color="secondary" />
-                    </IconButton>
-                  </TableCell>
-                  <TableCell align="center">{user.startWork}</TableCell>
-                  <TableCell align="center">{user.endWork}</TableCell>
+                      <IconButton
+                        size="small"
+                        onClick={() => handleOpenModal(user.whatsapps, t("users.modalTitle.channel"))}
+                      >
+                        <Info color="secondary" />
+                      </IconButton>
+                    </TableCell>
+                    <TableCell align="center">
+                      <IconButton
+                        size="small"
+                        onClick={() => handleOpenModal(user.queues, t("users.modalTitle.queue"))}
+                      >
+                        <Info color="secondary" />
+                      </IconButton>
+                    </TableCell>
+                    <TableCell align="center">{user.startWork}</TableCell>
+                    <TableCell align="center">{user.endWork}</TableCell>
                     <TableCell align="center">
                       <IconButton
                         size="small"
                         onClick={() => handleEditUser(user.id)}
                       >
-                      <Edit color="secondary" />
+                        <Edit color="secondary" />
                       </IconButton>
                       <IconButton
                         size="small"
@@ -402,7 +419,7 @@ const Users = () => {
                           setDeletingUser(user);
                         }}
                       >
-                      <DeleteOutline color="secondary" />
+                        <DeleteOutline color="secondary" />
                       </IconButton>
                     </TableCell>
                   </TableRow>
