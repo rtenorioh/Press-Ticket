@@ -2,7 +2,7 @@
 const codeSnippets = {
   HTTP: (number, body, userId, queueId, whatsappId, token) => `POST ${process.env.REACT_APP_BACKEND_URL}/api/messages/send HTTP/1.1
 User-Agent: vscode-restclient
-Authorization: Bearer ${token}
+x-api-token: ${token}
 Content-Type: application/json
 Host: localhost:4000
 Content-Length: ${85 + body.length}
@@ -17,11 +17,11 @@ Content-Length: ${85 + body.length}
   JavaScript_JQuery: (number, body, userId, queueId, whatsappId, token) => `const settings = {
   "async": true,
   "crossDomain": true,
-  "url": "${process.env.REACT_APP_BACKEND_URL}/api/messages/send}",
+  "url": "${process.env.REACT_APP_BACKEND_URL}/api/messages/v1/send}",
   "method": "POST",
   "headers": {
     "user-agent": "vscode-restclient",
-    "authorization": "Bearer ${token}",
+    "x-api-token": "${token}",
     "content-type": "application/json"
   },
   "processData": false,
@@ -33,12 +33,12 @@ $.ajax(settings).done(function (response) {
 });
         `,
   JavaScript_fetch: (number, body, userId, queueId, whatsappId, token) => `
-        fetch("${process.env.REACT_APP_BACKEND_URL}/api/messages/send", {
+        fetch("${process.env.REACT_APP_BACKEND_URL}/api/messages/v1/send", {
             "method": "POST",
             "headers": {
                 "user-agent": "vscode-restclient",
                 "Content-Type": "application/json",
-                "Authorization": "Bearer ${token}",
+                "x-api-token": "${token}",
             },
             "body": {
                 number: "${number}",
@@ -59,10 +59,10 @@ $.ajax(settings).done(function (response) {
         const request = require('request');
         const options = {
             method: 'POST',
-            url: '${process.env.REACT_APP_BACKEND_URL}/api/messages/send',
+            url: '${process.env.REACT_APP_BACKEND_URL}/api/messages/v1/send',
             headers: {
                 'user-agent': 'vscode-restclient',
-                'Authorization': 'Bearer ${token}',
+                'x-api-token': '${token}',
                 'Content-Type': 'application/json',
             },
             body: {
@@ -87,7 +87,7 @@ $curl = curl_init();
 
 curl_setopt_array($curl, [
   CURLOPT_PORT => "4000",
-  CURLOPT_URL => "${process.env.REACT_APP_BACKEND_URL}/api/messages/send",
+  CURLOPT_URL => "${process.env.REACT_APP_BACKEND_URL}/api/messages/v1/send",
   CURLOPT_RETURNTRANSFER => true,
   CURLOPT_ENCODING => "",
   CURLOPT_MAXREDIRS => 10,
@@ -96,7 +96,7 @@ curl_setopt_array($curl, [
   CURLOPT_CUSTOMREQUEST => "POST",
   CURLOPT_POSTFIELDS => "{\"number\": \"${number}\",\"body\": \"${body}\",\"userId\": \"${userId}\",\"queueId\": \"${queueId}\",\"whatsappId\": \"${whatsappId}\"}",
   CURLOPT_HTTPHEADER => [
-    'Authorization': 'Bearer ${token}',
+    'x-api-token: ${token}',
     "content-type: application/json",
     "user-agent: vscode-restclient"
   ],
