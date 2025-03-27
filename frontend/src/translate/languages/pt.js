@@ -691,6 +691,14 @@ const messages = {
               disabled: "Desativado",
             },
           },
+          queueLength: {
+            name: "Permitir enviar saudação com 1 Setor",
+            note: "Se habilitado, irá permitir enviar a mensagem de saudação apenas com 1 setor",
+            options: {
+              enabled: "Ativado",
+              disabled: "Desativado",
+            }
+          },
           timeCreateNewTicket: {
             name: "Novo Ticket em:",
             note: "Selecione o tempo que será necessário para abrir um novo ticket, caso o cliente entre em contatos novamente",

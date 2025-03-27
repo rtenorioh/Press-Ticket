@@ -37,6 +37,7 @@ const ComponentSettings = ({ settings, getSettingValue, handleChangeBooleanSetti
         { key: "tabsPending", label: t("settings.general.tabsPending.name"), note: t("settings.general.tabsPending.note") },
         { key: "tabsClosed", label: t("settings.general.tabsClosed.name"), note: t("settings.general.tabsClosed.note") },
         { key: "listItemSpy", label: t("settings.general.listItemSpy.name"), note: t("settings.general.listItemSpy.note") },
+        { key: "queueLength", label: t("settings.general.queueLength.name"), note: t("settings.general.queueLength.note") },
     ];
 
     const settingsChunks = [];
