@@ -85,7 +85,7 @@ export const remove = async (
   const message = await DeleteWhatsAppMessage(messageId);
 
   const io = getIO();
-  io.to(message.ticketId.toString()).emit("message", {
+  io.to(message.ticketId.toString()).emit("appMessage", {
     action: "delete",
     message
   });

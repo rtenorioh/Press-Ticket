@@ -423,6 +423,10 @@ const MessagesList = ({ ticketId, isGroup }) => {
       if (data.action === "update") {
         dispatch({ type: "UPDATE_MESSAGE", payload: data.message });
       }
+
+      if (data.action === "delete") {
+        dispatch({ type: "DELETE_MESSAGE", payload: data.message });
+      }
     });
 
     return () => {
