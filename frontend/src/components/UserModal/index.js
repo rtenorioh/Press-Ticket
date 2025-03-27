@@ -140,7 +140,7 @@ const UserModal = ({ open, onClose, userId }) => {
 			toast.success(t("userModal.success"));
 			history.go(0);
 		} catch (err) {
-			toastError(err);
+			toastError(err, t);
 		}
 		handleClose();
 	};
