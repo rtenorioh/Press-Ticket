@@ -515,9 +515,11 @@ const TicketListItem = ({ ticket, filteredTags }) => {
 								classes={{ tooltip: classes.customTooltip }}
 								title={
 									<Typography>
-										{ticket.lastMessage
-											? ticket.lastMessage.replace("🢇", "").replace("🢅", "")
-											: ""}
+										<MarkdownWrapper>
+											{ticket.lastMessage
+												? ticket.lastMessage.replace("🢇", "").replace("🢅", "")
+												: ""}
+										</MarkdownWrapper>
 									</Typography>
 								}
 								placement="bottom"

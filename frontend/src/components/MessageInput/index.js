@@ -24,6 +24,10 @@ import {
   Cancel,
   CheckCircleOutline,
   Clear,
+  Code,
+  FormatListBulleted,
+  FormatListNumbered,
+  FormatQuote,
   HighlightOff,
   Mic,
   Mood,
@@ -84,6 +88,14 @@ const useStyles = makeStyles((theme) => ({
   dropInfoOut: {
     display: "none",
   },
+  formatMenu: {
+    backgroundColor: theme.palette.background.paper,
+    borderRadius: 30,
+    boxShadow: theme.shadows[2],
+    padding: '4px 8px',
+    display: 'flex',
+    alignItems: 'center',
+  },
   gridFiles: {
     maxHeight: "100%",
     overflow: "scroll",
@@ -104,10 +116,11 @@ const useStyles = makeStyles((theme) => ({
     flex: 1,
     position: "relative",
   },
-  messageInput: {
-    paddingLeft: 10,
+  
+  messageInputField: {
     flex: 1,
-    border: "none"
+    width: "100%",
+    paddingLeft: 10,
   },
   sendMessageIcons: {
     color: theme.palette.text.primary,
@@ -244,6 +257,17 @@ const MessageInput = ({ ticketStatus }) => {
   const { t } = useTranslation();
 
   useEffect(() => {
+    const handleClickAway = (event) => {
+      const menu = document.getElementById('format-menu');
+      if (menu && !menu.contains(event.target)) {
+        menu.style.display = 'none';
+      }
+    };
+    document.addEventListener('mousedown', handleClickAway);
+    return () => document.removeEventListener('mousedown', handleClickAway);
+  }, []);
+
+  useEffect(() => {
     inputRef.current.focus();
   }, [replyingMessage, editingMessage]);
 
@@ -299,6 +323,76 @@ const MessageInput = ({ ticketStatus }) => {
     }, 10000);
     // eslint-disable-next-line
   }, [onDragEnter === true]);
+
+  const formatText = (prefix, suffix) => {
+    const selection = window.getSelection();
+    const selectedText = selection.toString();
+    if (selectedText) {
+      const formattedText = `${prefix}${selectedText}${suffix}`;
+      const textArea = inputRef.current;
+      const start = textArea.selectionStart;
+      const end = textArea.selectionEnd;
+      const textBefore = inputMessage.substring(0, start);
+      const textAfter = inputMessage.substring(end);
+      setInputMessage(textBefore + formattedText + textAfter);
+      document.getElementById('format-menu').style.display = 'none';
+    }
+  };
+
+  const formatListNumbered = () => {
+    const selection = window.getSelection();
+    const selectedText = selection.toString();
+    if (selectedText) {
+      const lines = selectedText.split('\n');
+      const formattedLines = lines.map((line, index) => `${index + 1}. ${line}`);
+      const formattedText = formattedLines.join('\n');
+
+      const textArea = inputRef.current;
+      const start = textArea.selectionStart;
+      const end = textArea.selectionEnd;
+      const textBefore = inputMessage.substring(0, start);
+      const textAfter = inputMessage.substring(end);
+
+      setInputMessage(textBefore + formattedText + textAfter);
+      document.getElementById('format-menu').style.display = 'none';
+    }
+  };
+
+  const formatListBulleted = () => {
+    const selection = window.getSelection();
+    const selectedText = selection.toString();
+    if (selectedText) {
+      const lines = selectedText.split('\n');
+      const formattedLines = lines.map(line => `• ${line}`);
+      const formattedText = formattedLines.join('\n');
+
+      const textArea = inputRef.current;
+      const start = textArea.selectionStart;
+      const end = textArea.selectionEnd;
+      const textBefore = inputMessage.substring(0, start);
+      const textAfter = inputMessage.substring(end);
+
+      setInputMessage(textBefore + formattedText + textAfter);
+      document.getElementById('format-menu').style.display = 'none';
+    }
+  };
+
+  const formatQuote = () => {
+    const selection = window.getSelection();
+    const selectedText = selection.toString();
+    if (selectedText) {
+      const formattedText = `> ${selectedText}`;
+
+      const textArea = inputRef.current;
+      const start = textArea.selectionStart;
+      const end = textArea.selectionEnd;
+      const textBefore = inputMessage.substring(0, start);
+      const textAfter = inputMessage.substring(end);
+
+      setInputMessage(textBefore + formattedText + textAfter);
+      document.getElementById('format-menu').style.display = 'none';
+    }
+  };
 
   const capitalizeFirstLetter = (string) => {
     return string.charAt(0).toUpperCase() + string.slice(1);
@@ -740,11 +834,8 @@ const MessageInput = ({ ticketStatus }) => {
           </Hidden>
           <div className={classes.messageInputWrapper}>
             <InputBase
-              inputRef={(input) => {
-                input && input.focus();
-                input && (inputRef.current = input);
-              }}
-              className={classes.messageInput}
+              className={classes.messageInputField}
+              inputRef={inputRef}
               placeholder={
                 ticketStatus === "open"
                   ? t("messagesInput.placeholderOpen")
@@ -761,10 +852,79 @@ const MessageInput = ({ ticketStatus }) => {
               onKeyDown={(e) => {
                 if (loading || e.shiftKey) return;
                 else if (e.key === "Enter") {
-                  handleSendMessage(e);
+                  handleSendMessage();
+                }
+              }}
+              onMouseUp={() => {
+                const selection = window.getSelection();
+                if (selection.toString().length > 0) {
+                  // Position the formatting menu near the selection
+                  const range = selection.getRangeAt(0);
+                  const rect = range.getBoundingClientRect();
+                  const menuElement = document.getElementById('format-menu');
+                  if (menuElement) {
+                    menuElement.style.display = 'flex';
+                    menuElement.style.top = `${rect.top - 40}px`;
+                    menuElement.style.left = `${rect.left}px`;
+                  }
                 }
               }}
             />
+            <div
+              id="format-menu"
+              className={classes.formatMenu}
+              style={{ display: 'none', position: 'absolute', zIndex: 1000 }}
+            >
+              <IconButton 
+                size="small" 
+                onClick={() => formatText('*','*')}
+                style={{ padding: '6px', margin: '0 2px' }}
+              >
+                <Typography style={{ fontWeight: 'bold', fontSize: '15px', color: '#444' }}>B</Typography>
+              </IconButton>
+              <IconButton 
+                size="small" 
+                onClick={() => formatText('_','_')}
+                style={{ padding: '6px', margin: '0 2px' }}
+              >
+                <Typography style={{ fontStyle: 'italic', fontSize: '15px', color: '#444' }}>I</Typography>
+              </IconButton>
+              <IconButton 
+                size="small" 
+                onClick={() => formatText('~','~')}
+                style={{ padding: '6px', margin: '0 2px' }}
+              >
+                <Typography style={{ textDecoration: 'line-through', fontSize: '15px', color: '#444' }}>S</Typography>
+              </IconButton>
+              <IconButton 
+                size="small" 
+                onClick={() => formatText('`','`')}
+                style={{ padding: '6px', margin: '0 2px' }}
+              >
+                <Code fontSize="small" style={{ color: '#444' }} />
+              </IconButton>
+              <IconButton 
+                size="small" 
+                onClick={() => formatListNumbered()}
+                style={{ padding: '6px', margin: '0 2px' }}
+              >
+                <FormatListNumbered fontSize="small" style={{ color: '#444' }} />
+              </IconButton>
+              <IconButton 
+                size="small" 
+                onClick={() => formatListBulleted()}
+                style={{ padding: '6px', margin: '0 2px' }}
+              >
+                <FormatListBulleted fontSize="small" style={{ color: '#444' }} />
+              </IconButton>
+              <IconButton 
+                size="small" 
+                onClick={() => formatQuote()}
+                style={{ padding: '6px', margin: '0 2px' }}
+              >
+                <FormatQuote fontSize="small" style={{ color: '#444' }} />
+              </IconButton>
+            </div>
             {typeBar ? (
               <ul className={classes.messageQuickAnswersWrapper}>
                 {quickAnswers.map((value, index) => {
