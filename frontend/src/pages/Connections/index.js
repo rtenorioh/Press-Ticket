@@ -22,6 +22,8 @@ import {
 	Email,
 	Facebook,
 	Instagram,
+	PlayCircleOutline,
+	Replay,
 	SignalCellular4Bar,
 	SignalCellularConnectedNoInternet0Bar,
 	SignalCellularConnectedNoInternet2Bar,
@@ -76,6 +78,14 @@ const useStyles = makeStyles(theme => ({
 	},
 	buttonProgress: {
 		color: green[500],
+		margin: theme.spacing(1)
+	},
+	actionFeedback: {
+		display: 'flex',
+		flexDirection: 'row',
+		justifyContent: 'center',
+		alignItems: 'center',
+		gap: '4px'
 	}
 }));
 
@@ -126,6 +136,86 @@ const Connections = () => {
 	const [confirmModalInfo, setConfirmModalInfo] = useState(
 		confirmationModalInitialState
 	);
+	const [loadingActions, setLoadingActions] = useState({});
+	const [actionMessages, setActionMessages] = useState({});
+
+	const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+	const createCountdownToast = (seconds, initialMessage, finalMessage, onComplete = null, reload = false) => {
+		let secondsRemaining = seconds;
+		let intervalId = null;
+		let toastId = null;
+
+		const showToast = () => {
+			if (toastId) {
+				toast.update(toastId, {
+					render: `${initialMessage} ${secondsRemaining} segundos...`,
+					type: toast.TYPE.INFO,
+					autoClose: false,
+					closeButton: false
+				});
+			} else {
+				toastId = toast.info(`${initialMessage} ${secondsRemaining} segundos...`, {
+					autoClose: false,
+					closeButton: false,
+					draggable: false,
+					position: toast.POSITION.TOP_RIGHT
+				});
+			}
+		};
+
+		const startCountdown = () => {
+			showToast();
+
+			intervalId = setInterval(() => {
+				secondsRemaining -= 1;
+				
+				showToast();
+
+				if (secondsRemaining <= 0) {
+					clearInterval(intervalId);
+					
+					if (toastId) {
+						toast.dismiss(toastId);
+					}
+					
+					toast.success(finalMessage, {
+						position: toast.POSITION.TOP_RIGHT
+					});
+					
+					if (onComplete && typeof onComplete === 'function') {
+						onComplete();
+					}
+					
+					if (reload) {
+						setTimeout(() => {
+							history.go(0);
+						}, 1000);
+					}
+				}
+			}, 1000);
+
+			return new Promise((resolve) => {
+				setTimeout(() => {
+					resolve();
+				}, (secondsRemaining + 1) * 1000);
+			});
+		};
+
+		const cancelCountdown = () => {
+			if (intervalId) {
+				clearInterval(intervalId);
+			}
+			if (toastId) {
+				toast.dismiss(toastId);
+			}
+		};
+
+		return {
+			startCountdown,
+			cancelCountdown
+		};
+	};
 
 	const getChannelIcon = (channel) => {
 		switch (channel) {
@@ -148,17 +238,67 @@ const Connections = () => {
 
 	const handleStartWhatsAppSession = async whatsAppId => {
 		try {
+			setLoadingActions(prev => ({ ...prev, [whatsAppId]: 'startSession' }));
+			setActionMessages(prev => ({ ...prev, [whatsAppId]: 'Iniciando sessão...' }));
+			
+			const startSessionToastId = toast.info('Iniciando sessão do WhatsApp...', {
+				autoClose: false,
+				closeButton: false,
+				draggable: false,
+			});
+			
 			await api.post(`/whatsappsession/${whatsAppId}`);
+			
+			toast.update(startSessionToastId, {
+				render: 'Sessão iniciada com sucesso! Aguarde...',
+				type: toast.TYPE.SUCCESS,
+			});
+			
+			setTimeout(() => {
+				setLoadingActions(prev => ({ ...prev, [whatsAppId]: undefined }));
+				setActionMessages(prev => ({ ...prev, [whatsAppId]: undefined }));
+				
+				toast.dismiss(startSessionToastId);
+				
+				toast.success('Sessão iniciada com sucesso!');
+			}, 3000);
 		} catch (err) {
 			toastError(err);
+			setLoadingActions(prev => ({ ...prev, [whatsAppId]: undefined }));
+			setActionMessages(prev => ({ ...prev, [whatsAppId]: undefined }));
 		}
 	};
 
 	const handleRequestNewQrCode = async whatsAppId => {
 		try {
+			setLoadingActions(prev => ({ ...prev, [whatsAppId]: 'newQrCode' }));
+			setActionMessages(prev => ({ ...prev, [whatsAppId]: 'Solicitando novo QR code...' }));
+			
+			const qrCodeToastId = toast.info('Solicitando novo QR code...', {
+				autoClose: false,
+				closeButton: false,
+				draggable: false,
+			});
+			
 			await api.put(`/whatsappsession/${whatsAppId}`);
+			
+			toast.update(qrCodeToastId, {
+				render: 'Novo QR code gerado com sucesso! Aguarde...',
+				type: toast.TYPE.SUCCESS,
+			});
+			
+			setTimeout(() => {
+				setLoadingActions(prev => ({ ...prev, [whatsAppId]: undefined }));
+				setActionMessages(prev => ({ ...prev, [whatsAppId]: undefined }));
+				
+				toast.dismiss(qrCodeToastId);
+				
+				toast.success('Novo QR code gerado com sucesso!');
+			}, 3000);
 		} catch (err) {
 			toastError(err);
+			setLoadingActions(prev => ({ ...prev, [whatsAppId]: undefined }));
+			setActionMessages(prev => ({ ...prev, [whatsAppId]: undefined }));
 		}
 	};
 
@@ -209,78 +349,217 @@ const Connections = () => {
 	};
 
 	const handleSubmitConfirmationModal = async () => {
+		const whatsAppId = confirmModalInfo.whatsAppId;
+		setConfirmModalOpen(false);
+		setConfirmModalInfo(confirmationModalInitialState);
+
 		if (confirmModalInfo.action === "disconnect") {
 			try {
-				await api.delete(`/whatsappsession/${confirmModalInfo.whatsAppId}`);
-				toast.success('Sessão desconectada com sucesso!');
+				setLoadingActions(prev => ({ ...prev, [whatsAppId]: 'disconnect' }));
+				setActionMessages(prev => ({ ...prev, [whatsAppId]: 'Desconectando sessão...' }));
+				
+				const disconnectToastId = toast.info('Desconectando sessão do WhatsApp...', {
+					autoClose: false,
+					closeButton: false,
+					draggable: false,
+				});
+				
+				await api.delete(`/whatsappsession/${whatsAppId}`);
+				
+				toast.update(disconnectToastId, {
+					render: 'Sessão desconectada com sucesso! Aguarde...',
+					type: toast.TYPE.SUCCESS,
+				});
+				
+				setTimeout(() => {
+					setLoadingActions(prev => ({ ...prev, [whatsAppId]: undefined }));
+					setActionMessages(prev => ({ ...prev, [whatsAppId]: undefined }));
+					
+					toast.dismiss(disconnectToastId);
+					
+					toast.success('Sessão desconectada com sucesso!');
+				}, 3000);
 			} catch (err) {
-				toastError(err);
+				toastError(err, t);
+				setLoadingActions(prev => ({ ...prev, [whatsAppId]: undefined }));
+				setActionMessages(prev => ({ ...prev, [whatsAppId]: undefined }));
 			}
 		}
 
 		if (confirmModalInfo.action === "delete") {
 			try {
-				await api.delete(`/whatsapp/${confirmModalInfo.whatsAppId}`);
-				toast.success(t("connections.toasts.deleted"));
+				setLoadingActions(prev => ({ ...prev, [whatsAppId]: 'delete' }));
+				setActionMessages(prev => ({ ...prev, [whatsAppId]: 'Excluindo canal...' }));
+				
+				const deleteToastId = toast.info('Excluindo canal do WhatsApp...', {
+					autoClose: false,
+					closeButton: false,
+					draggable: false,
+				});
+				
+				await api.delete(`/whatsapp/${whatsAppId}`);
+				
+				toast.update(deleteToastId, {
+					render: 'Canal excluído com sucesso! Aguarde...',
+					type: toast.TYPE.SUCCESS,
+				});
+				
+				setTimeout(() => {
+					setLoadingActions(prev => ({ ...prev, [whatsAppId]: undefined }));
+					setActionMessages(prev => ({ ...prev, [whatsAppId]: undefined }));
+					
+					toast.dismiss(deleteToastId);
+					
+					toast.success(t("connections.toasts.deleted"));
+				}, 3000);
 			} catch (err) {
 				toastError(err);
+				setLoadingActions(prev => ({ ...prev, [whatsAppId]: undefined }));
+				setActionMessages(prev => ({ ...prev, [whatsAppId]: undefined }));
 			}
 		}
-
-		setConfirmModalOpen(false);
-		setConfirmModalInfo(confirmationModalInitialState);
 	};
 
 	const handleRestartSession = async (whatsAppId) => {
 		try {
+			setLoadingActions(prev => ({ ...prev, [whatsAppId]: 'restart' }));
+			setActionMessages(prev => ({ ...prev, [whatsAppId]: 'Reiniciando sessão...' }));
+			
+			const initialToastId = toast.info('Reiniciando sessão do WhatsApp...', {
+				autoClose: false,
+				position: toast.POSITION.TOP_RIGHT
+			});
+			
 			await api.post(`/whatsapp/${whatsAppId}/restart`);
-			toast.success(t("connections.toasts.sessionRestarted"));
+			
+			toast.dismiss(initialToastId);
+			
+			toast.success('Sessão reiniciada com sucesso!', {
+				position: toast.POSITION.TOP_RIGHT
+			});
+			
+			setLoadingActions(prev => ({ ...prev, [whatsAppId]: undefined }));
+			setActionMessages(prev => ({ ...prev, [whatsAppId]: undefined }));
+			
+			await delay(500);
+			
+			const countdown = createCountdownToast(
+				1,
+				'Atualizando a página em',
+				'Página atualizada!',
+				null,
+				true
+			);
+			
+			await countdown.startCountdown();
 		} catch (err) {
 			toastError(err);
+			setLoadingActions(prev => ({ ...prev, [whatsAppId]: undefined }));
+			setActionMessages(prev => ({ ...prev, [whatsAppId]: undefined }));
 		}
 	};
 
 	const handleStartSession = async (whatsAppId) => {
 		try {
+			// Iniciar o indicador de carregamento
+			setLoadingActions(prev => ({ ...prev, [whatsAppId]: 'start' }));
+			setActionMessages(prev => ({ ...prev, [whatsAppId]: 'Iniciando sessão...' }));
+			
+			// Criar um toast inicial
+			const startToastId = toast.info('Iniciando sessão do WhatsApp...', {
+				autoClose: false,
+				closeButton: false,
+				draggable: false,
+			});
+			
+			// Fazer a chamada para iniciar a sessão
 			await api.post(`/whatsapp/${whatsAppId}/start`);
-			toast.success(t("connections.toasts.sessionStarted"));
+			
+			// Fechar o toast inicial
+			toast.dismiss(startToastId);
+			
+			const countdownToast = createCountdownToast(
+				3,
+				'Sessão iniciada com sucesso! Aguarde',
+				'Sessão iniciada com sucesso!',
+				() => {
+					setLoadingActions(prev => ({ ...prev, [whatsAppId]: undefined }));
+					setActionMessages(prev => ({ ...prev, [whatsAppId]: undefined }));
+				},
+				false
+			);
+			
+			// Iniciar a contagem regressiva
+			await countdownToast.startCountdown();
 		} catch (err) {
 			toastError(err);
+			setLoadingActions(prev => ({ ...prev, [whatsAppId]: undefined }));
+			setActionMessages(prev => ({ ...prev, [whatsAppId]: undefined }));
 		}
 	};
 
 	const handleShutdownSession = async (whatsAppId) => {
 		try {
+			// Iniciar o indicador de carregamento
+			setLoadingActions(prev => ({ ...prev, [whatsAppId]: 'shutdown' }));
+			setActionMessages(prev => ({ ...prev, [whatsAppId]: 'Desligando sessão...' }));
+			
+			// Criar um toast inicial
+			const shutdownToastId = toast.info('Desligando sessão do WhatsApp...', {
+				autoClose: false,
+				closeButton: false,
+				draggable: false,
+			});
+			
+			// Fazer a chamada para desligar a sessão
 			await api.post(`/whatsapp/${whatsAppId}/shutdown`);
-			toast.success(t("connections.toasts.sessionShutdown"));
-			history.go(0);
+			
+			// Fechar o toast inicial
+			toast.dismiss(shutdownToastId);
+			
+			const countdownToast = createCountdownToast(
+				5,
+				'Sessão desligada com sucesso! Atualizando em',
+				'Sessão desligada com sucesso!',
+				() => {
+					setLoadingActions(prev => ({ ...prev, [whatsAppId]: undefined }));
+					setActionMessages(prev => ({ ...prev, [whatsAppId]: undefined }));
+				},
+				true
+			);
+			
+			await countdownToast.startCountdown();
 		} catch (err) {
 			toastError(err);
+			setLoadingActions(prev => ({ ...prev, [whatsAppId]: undefined }));
+			setActionMessages(prev => ({ ...prev, [whatsAppId]: undefined }));
 		}
 	};
 
 	const renderActionButtons = (whatsApp) => {
+		if (loadingActions[whatsApp.id]) {
+			return (
+				<div className={classes.actionFeedback}>
+					<CircularProgress size={24} className={classes.buttonProgress} />
+					{actionMessages[whatsApp.id] && (
+						<Typography variant="caption" style={{ fontSize: '0.7rem' }}>
+							{actionMessages[whatsApp.id]}
+						</Typography>
+					)}
+				</div>
+			);
+		}
+
 		return (
 			<>
-				{whatsApp.status === "DISCONNECTED" && (
-					<Tooltip title={t("connections.buttons.start")}>
-						<IconButton
-							size="small"
-							color="primary"
-							onClick={() => handleStartSession(whatsApp?.id)}
-						>
-							<PowerSettingsNewIcon />
-						</IconButton>
-					</Tooltip>
-				)}
-				{(whatsApp.status === "qrcode" && whatsApp.status === "CONNECTED") && (
+				{(whatsApp.status === "CONNECTED") && (
 					<Tooltip title={t("connections.buttons.shutdown")}>
 						<IconButton
 							size="small"
 							color="secondary"
 							onClick={() => handleShutdownSession(whatsApp?.id)}
 						>
-							<PowerSettingsNewIcon />
+							<DeleteOutline />
 						</IconButton>
 					</Tooltip>
 				)}
@@ -297,13 +576,22 @@ const Connections = () => {
 				)}
 				{whatsApp.status === "DISCONNECTED" && (
 					<>
+						<Tooltip title={t("connections.buttons.start")}>
+							<IconButton
+								size="small"
+								color="primary"
+								onClick={() => handleStartSession(whatsApp?.id)}
+							>
+								<PlayCircleOutline />
+							</IconButton>
+						</Tooltip>
 						<Tooltip title={t("connections.buttons.tryAgain")}>
 							<IconButton
 								size="small"
 								color="primary"
 								onClick={() => handleStartWhatsAppSession(whatsApp.id)}
 							>
-								<PowerSettingsNewIcon />
+								<Replay />
 							</IconButton>
 						</Tooltip>
 						<Tooltip title={t("connections.buttons.newQr")}>
@@ -312,7 +600,7 @@ const Connections = () => {
 								color="secondary"
 								onClick={() => handleRequestNewQrCode(whatsApp.id)}
 							>
-								<RefreshIcon />
+								<VisibilityIcon />
 							</IconButton>
 						</Tooltip>
 					</>
@@ -391,36 +679,19 @@ const Connections = () => {
 	};
 
 	const restartpm2 = async () => {
-		const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
-		let secondsRemaining = 15;
-
-		const countdownToastId = toast.info(`O sistema será reiniciado em ${secondsRemaining} segundos...`, {
-			autoClose: false,
-		});
-
-		const updateToast = () => {
-			toast.update(countdownToastId, {
-				render: `O sistema será reiniciado em ${secondsRemaining} segundos...`,
-			});
-		};
-
 		try {
 			await api.post('/restartpm2');
 
-			const intervalId = setInterval(() => {
-				secondsRemaining -= 1;
-				updateToast();
-
-				if (secondsRemaining <= 0) {
-					clearInterval(intervalId);
-					toast.dismiss(countdownToastId);
-				}
-			}, 1000);
-
-			await delay(secondsRemaining * 1000);
-			history.go(0);
+			const countdownToast = createCountdownToast(
+				15,
+				'Reiniciando o sistema em',
+				'Sistema reiniciado com sucesso!',
+				null,
+				true
+			);
+			
+			await countdownToast.startCountdown();
 		} catch (err) {
-			toast.dismiss(countdownToastId);
 			toastError(err);
 		}
 	};
@@ -561,7 +832,11 @@ const Connections = () => {
 												) : "-"}
 											</TableCell>
 											<TableCell align="center">
-												{whatsApp?.type === null || whatsApp?.type === undefined ? renderActionButtons(whatsApp) : "-"}
+												{whatsApp?.type === null || whatsApp?.type === undefined ? (
+													<div className={classes.actionFeedback}>
+														{renderActionButtons(whatsApp)}
+													</div>
+												) : "-"}
 											</TableCell>
 											<TableCell align="center">
 												{format(parseISO(whatsApp.updatedAt), "dd/MM/yy HH:mm")}

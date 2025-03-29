@@ -6,6 +6,7 @@ import { Client, LocalAuth, MessageMedia } from "whatsapp-web.js";
 import AppError from "../errors/AppError";
 import Integration from "../models/Integration";
 import Whatsapp from "../models/Whatsapp";
+import { StartWhatsAppSession } from "../services/WbotServices/StartWhatsAppSession";
 import { handleMessage } from "../services/WbotServices/wbotMessageListener";
 import { logger } from "../utils/logger";
 import { getIO } from "./socket";
@@ -318,6 +319,11 @@ export const shutdownWbot = async (whatsappId: string): Promise<void> => {
     throw new AppError("Invalid WhatsApp ID format.");
   }
 
+  const whatsapp = await Whatsapp.findByPk(whatsappIDNumber);
+  if (!whatsapp) {
+    throw new AppError("WhatsApp not found.");
+  }
+
   const sessionIndex = sessions.findIndex(s => s.id === whatsappIDNumber);
   if (sessionIndex === -1) {
     console.warn(`Sessão com ID ${whatsappIDNumber} não foi encontrada.`);
@@ -342,6 +348,17 @@ export const shutdownWbot = async (whatsappId: string): Promise<void> => {
     console.log(
       `Sessão com ID ${whatsappIDNumber} removida da lista de sessões.`
     );
+    const retry = whatsapp.retries;
+    await whatsapp.update({
+      status: "DISCONNECTED",
+      qrcode: "",
+      session: "",
+      retries: retry + 1,
+      number: ""
+    });
+
+    StartWhatsAppSession(whatsapp);
+    
   } catch (error) {
     console.error(
       `Erro ao desligar ou limpar a sessão com ID ${whatsappIDNumber}:`,
