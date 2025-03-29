@@ -1,5 +1,15 @@
 # Changelog
 
+### v1.13.1 (29/03/2025)
+
+- [feat: adicionar suporte à tradução no tratamento de erro do UserModal](https://github.com/rtenorioh/Press-Ticket/commit/f3f5d89a366c13a95318db5552baf108e8536906);
+- [feat: adicionar suporte para renderização de Markdown no TicketListItem e melhorar o componente MarkdownWrapper](https://github.com/rtenorioh/Press-Ticket/commit/bf087cf61e7f942632c9078fdf20f9e956be1b94);
+- [feat: melhorar o método de reinício do sistema com Promise e logger](https://github.com/rtenorioh/Press-Ticket/commit/b5fe1208328f08b8a3e002aab708f21ca26eb869);
+- [feat: adicionar verificação de existência do WhatsApp e reiniciar sessão](https://github.com/rtenorioh/Press-Ticket/commit/5c46e364c536752fe9a3447f6814b6bc395c63a3);
+- [feat: adicionar rotas da API para envio de mensagens com suporte a mídia](https://github.com/rtenorioh/Press-Ticket/commit/a3b51070c0249393a4b9951dcd0f269def308d23);
+- [feat: adicionar documentação das rotas da API para envio de mensagens e gerenciamento de contatos](https://github.com/rtenorioh/Press-Ticket/commit/5c5ba51d4f7c2e63932f2e17d1b73f7aca7084b8); e
+- [feat: atualizar a versão do sistema para v1.13.1](https://github.com/rtenorioh/Press-Ticket/commit/a664e7ec30240298f9d0841d14e5133fa78167e9).
+
 ### v1.13.0 (27/03/2025)
 
 - [Revert "Changelog", This reverts commit a2ba7758b53c483accdfedfb01841c188f3091c2.](https://github.com/rtenorioh/Press-Ticket/commit/c1ebe32e19ded66659c2f15084ec042937c1f789);
