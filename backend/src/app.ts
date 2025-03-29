@@ -5,9 +5,9 @@ import express, { Request, Response, NextFunction } from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import * as Sentry from "@sentry/node";
-import path from "path";
 import { logger } from "./utils/logger";
 import updateLastActivity from "./middleware/updateLastActivity";
+import openApiRoutes from "./routes/openApiRoutes";
 
 import "./database";
 import uploadConfig from "./config/upload";
@@ -30,6 +30,15 @@ app.use(
 app.use(cookieParser());
 app.use(express.json());
 app.use(Sentry.Handlers.requestHandler());
+
+const openApiCorsOptions = {
+  credentials: true,
+  origin: "*",
+  allowedHeaders: ["Content-Type", "Authorization", "x-api-token"],
+};
+
+app.use("/v1", cors(openApiCorsOptions), openApiRoutes);
+
 app.use("/public", express.static(uploadConfig.directory));
 app.use(routes);
 app.use(updateLastActivity);

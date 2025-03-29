@@ -15,10 +15,10 @@
     }
   ],
   "paths": {
-    "/api/messages/v1/send": {
+    "/v1/messages/send": {
       "post": {
-        "summary": "Envio de Mensagens",
-        "description": "Envio de Mensagens via API\n\nPermissões requeridas: `create:messages`",
+        "summary": "Envio de Mensagens de Texto",
+        "description": "Envio de Mensagens de Texto via API\n\nPermissões requeridas: `create:messages`",
         "tags": [
           "Messages"
         ],
@@ -52,6 +52,88 @@
         "responses": {
           "200": {
             "description": "Mensagem enviada com sucesso"
+          },
+          "401": {
+            "description": "Token inválido ou não fornecido"
+          },
+          "403": {
+            "description": "Token não tem permissão 'create:messages'"
+          },
+          "500": {
+            "description": "Erro interno!"
+          }
+        }
+      }
+    },
+    "/v1/messages/send-media": {
+      "post": {
+        "summary": "Envio de Mensagens com Mídia",
+        "description": "Envio de Mensagens com Mídia (imagens, documentos, áudio) via API\n\nPermissões requeridas: `create:messages`",
+        "tags": [
+          "Messages"
+        ],
+        "security": [
+          {
+            "apiToken": [
+              "create:messages"
+            ]
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "number": {
+                    "type": "string",
+                    "description": "Número do destinatário no formato DDI+DDD+NÚMERO (ex: 5522999999999)"
+                  },
+                  "body": {
+                    "type": "string",
+                    "description": "Legenda ou texto da mensagem (opcional)"
+                  },
+                  "medias": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "format": "binary"
+                    },
+                    "description": "Arquivos de mídia para envio (imagens, documentos, áudio)"
+                  },
+                  "userId": {
+                    "type": "integer",
+                    "description": "ID do usuário que está enviando a mensagem"
+                  },
+                  "queueId": {
+                    "type": "integer",
+                    "description": "ID da fila"
+                  },
+                  "whatsappId": {
+                    "type": "integer",
+                    "description": "ID da conexão do WhatsApp"
+                  }
+                },
+                "required": ["number", "medias", "userId", "queueId", "whatsappId"]
+              },
+              "examples": {
+                "media": {
+                  "value": {
+                    "number": "5522999999999",
+                    "body": "Legenda da imagem",
+                    "medias": "[arquivo binário]",
+                    "userId": 1,
+                    "queueId": 1,
+                    "whatsappId": 1
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Mensagem com mídia enviada com sucesso"
           },
           "401": {
             "description": "Token inválido ou não fornecido"

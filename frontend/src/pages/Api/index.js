@@ -180,7 +180,11 @@ const Api = () => {
         }
 
         try {
-            await axios.post(`${process.env.REACT_APP_BACKEND_URL}/api/messages/v1/send`, payload, {
+            const endpoint = media 
+                ? `${process.env.REACT_APP_BACKEND_URL}/v1/messages/send-media` 
+                : `${process.env.REACT_APP_BACKEND_URL}/v1/messages/send`;
+                
+            await axios.post(endpoint, payload, {
                 headers: {
                     "x-api-token": token,
                     "Content-Type": media ? "multipart/form-data" : "application/json"
@@ -224,7 +228,7 @@ const Api = () => {
                         <p>Informações necessárias para envio de mensagens de texto:</p>
 
                         <div className={classes.apiUrl}>
-                            <b>URL:</b> {process.env.REACT_APP_BACKEND_URL}/api/messages/v1/send
+                            <b>URL:</b> {process.env.REACT_APP_BACKEND_URL}/v1/messages/send
                         </div>
 
                         <div className={classes.apiMethod}>Método: POST</div>
@@ -259,7 +263,7 @@ const Api = () => {
                         <p>Informações necessárias para envio de mensagens com mídia:</p>
 
                         <div className={classes.apiUrl}>
-                            <b>URL:</b> {process.env.REACT_APP_BACKEND_URL}/api/messages/v1/send
+                            <b>URL:</b> {process.env.REACT_APP_BACKEND_URL}/v1/messages/send-media
                         </div>
 
                         <div className={classes.apiMethod}>Método: POST</div>

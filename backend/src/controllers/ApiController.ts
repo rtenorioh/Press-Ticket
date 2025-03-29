@@ -151,5 +151,101 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
     }, 1000);
   }
 
-  return res.send({ error: resp });
+  return res.send({ resp });
+};
+
+export const sendMessage = async (req: Request, res: Response): Promise<Response> => {
+  const { body, quotedMsg, userId, queueId, whatsappId }: MessageData & WhatsappData & { userId: number; queueId: number } =
+    req.body;
+
+  const newContact: ContactData = req.body;
+  const formattedNumber = newContact.number.replace("-", "").replace(" ", "");
+
+  const schema = Yup.object().shape({
+    number: Yup.string()
+      .required()
+      .matches(/^\d+$/, "Invalid number format. Only numbers are allowed."),
+    userId: Yup.number().required("User ID is required")
+  });
+
+  try {
+    await schema.validate({ number: formattedNumber, userId });
+  } catch (err: any) {
+    throw new AppError(err.message);
+  }
+
+  const contactAndTicket = await createContact(whatsappId, formattedNumber, userId, queueId);
+
+  const resp = await SendWhatsAppMessage({
+    body,
+    ticket: contactAndTicket,
+    quotedMsg
+  });
+
+  const listSettingsService = await ListSettingsServiceOne({
+    key: "closeTicketApi"
+  });
+  const closeTicketApi = listSettingsService?.value;
+
+  if (closeTicketApi === "enabled") {
+    setTimeout(async () => {
+      await UpdateTicketService({
+        ticketId: contactAndTicket.id,
+        ticketData: { status: "closed" }
+      });
+    }, 1000);
+  }
+
+  return res.send({ resp });
+};
+
+export const sendMedia = async (req: Request, res: Response): Promise<Response> => {
+  const { body, quotedMsg, userId, queueId, whatsappId }: MessageData & WhatsappData & { userId: number; queueId: number } =
+    req.body;
+
+  const medias = req.files as Express.Multer.File[];
+  const newContact: ContactData = req.body;
+  const formattedNumber = newContact.number.replace("-", "").replace(" ", "");
+
+  const schema = Yup.object().shape({
+    number: Yup.string()
+      .required()
+      .matches(/^\d+$/, "Invalid number format. Only numbers are allowed."),
+    userId: Yup.number().required("User ID is required")
+  });
+
+  try {
+    await schema.validate({ number: formattedNumber, userId });
+  } catch (err: any) {
+    throw new AppError(err.message);
+  }
+
+  const contactAndTicket = await createContact(whatsappId, formattedNumber, userId, queueId);
+
+  let resp: any;
+  await Promise.all(
+    medias.map(async (media: Express.Multer.File) => {
+      resp = await SendWhatsAppMedia({
+        body,
+        media,
+        ticket: contactAndTicket
+      });
+    })
+  );
+
+  const listSettingsService = await ListSettingsServiceOne({
+    key: "closeTicketApi"
+  });
+  const closeTicketApi = listSettingsService?.value;
+
+  if (closeTicketApi === "enabled") {
+    setTimeout(async () => {
+      await UpdateTicketService({
+        ticketId: contactAndTicket.id,
+        ticketData: { status: "closed" }
+      });
+    }, 1000);
+  }
+
+  return res.send({ resp });
 };
