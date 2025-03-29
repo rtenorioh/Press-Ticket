@@ -1,0 +1,145 @@
+@baseUrl = https://devapi.pressticket.com.br
+@apiToken = c3f307b2-8a56-4a9a-91a7-0d9675f4c6d7
+
+### Variáveis para testes
+@contactId = 1
+@searchParam = nome_ou_numero
+@pageNumber = 1
+@tags = 1,2,3
+
+### ============================================================
+### ROTAS DE MENSAGENS
+### ============================================================
+
+### (Envio de Mensagens de Texto) Teste da Rota POST /v1/messages/send
+POST {{baseUrl}}/v1/messages/send
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+{
+  "number": "5522992463080",
+  "body": "Mensagem de teste via API",
+  "userId": 1,
+  "queueId": 2,
+  "whatsappId": 1
+}
+
+### (Envio de Mensagens com Mídia) Teste da Rota POST /v1/messages/send-media
+# Nota: Para testar no VS Code com a extensão REST Client, você precisará usar o formato multipart/form-data
+# Este exemplo é apenas ilustrativo. Para um teste real, use uma ferramenta como Postman ou Insomnia.
+POST {{baseUrl}}/v1/messages/send-media
+x-api-token: {{apiToken}}
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="number"
+
+5522992463080
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="body"
+
+Legenda da imagem enviada via API
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="userId"
+
+1
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="queueId"
+
+2
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="whatsappId"
+
+1
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="medias"; filename="example.jpg"
+Content-Type: image/jpeg
+
+< ./path/to/your/image.jpg
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
+
+### ============================================================
+### ROTAS DE CONTATOS
+### ============================================================
+
+### (Listar Contatos) Teste da Rota GET /v1/contacts
+GET {{baseUrl}}/v1/contacts
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+### (Listar Contatos com Parâmetros) Teste da Rota GET /v1/contacts com parâmetros
+GET {{baseUrl}}/v1/contacts?searchParam={{searchParam}}&pageNumber={{pageNumber}}&tags={{tags}}
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+### (Criar Contato - Básico) Teste da Rota POST /v1/contacts
+POST {{baseUrl}}/v1/contacts
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+{
+  "name": "Test Contact API",
+  "number": "5522999999999"
+}
+
+### (Criar Contato - Completo) Teste da Rota POST /v1/contacts
+POST {{baseUrl}}/v1/contacts
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+{
+  "name": "Test Contact API",
+  "number": "5522999999999",
+  "email": "test@example.com",
+  "address": "Street Name, 123",
+  "extraInfo": [
+    {
+      "name": "RG",
+      "value": "123456789"
+    },
+    {
+      "name": "CPF",
+      "value": "12345678901"
+    }
+  ]
+}
+
+### (Obter Contato) Teste da Rota GET /v1/contacts/{contactId}
+GET {{baseUrl}}/v1/contacts/{{contactId}}
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+### (Atualizar Contato) Teste da Rota PUT /v1/contacts/{contactId}
+PUT {{baseUrl}}/v1/contacts/{{contactId}}
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+{
+  "name": "Updated Contact Name",
+  "number": "5522999999999",
+  "email": "updated@example.com",
+  "address": "New Address, 456"
+}
+
+### (Excluir Contato) Teste da Rota DELETE /v1/contacts/{contactId}
+DELETE {{baseUrl}}/v1/contacts/{{contactId}}
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+### (Consultar Contato por Número) Teste da Rota POST /v1/contact
+POST {{baseUrl}}/v1/contact
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+{
+  "number": "5522999999999"
+}
+
+### (Consultar Contato por Nome) Teste da Rota POST /v1/contact
+POST {{baseUrl}}/v1/contact
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+{
+  "name": "Test Contact"
+}
