@@ -7,11 +7,11 @@ import cookieParser from "cookie-parser";
 import * as Sentry from "@sentry/node";
 import { logger } from "./utils/logger";
 import updateLastActivity from "./middleware/updateLastActivity";
-import openApiRoutes from "./routes/openApiRoutes";
 
 import "./database";
 import uploadConfig from "./config/upload";
 import AppError from "./errors/AppError";
+import openApiRoutes from "./routes/openApiRoutes";
 import routes from "./routes";
 
 if (process.env.NODE_ENV === "production") {
