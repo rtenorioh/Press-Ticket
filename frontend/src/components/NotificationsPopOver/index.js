@@ -151,8 +151,7 @@ const NotificationsPopOver = () => {
 				const shouldNotNotify =
 					(data.message.ticketId === ticketIdUrl &&
 						document.visibilityState === "visible") ||
-					(data.ticket.userId && data.ticket.userId !== user?.id) ||
-					data.ticket.isGroup;
+					(data.ticket.userId && data.ticket.userId !== user?.id)
 
 				if (shouldNotNotify) return;
 
