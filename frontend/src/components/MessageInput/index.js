@@ -324,73 +324,151 @@ const MessageInput = ({ ticketStatus }) => {
     // eslint-disable-next-line
   }, [onDragEnter === true]);
 
-  const formatText = (prefix, suffix) => {
+  const showFormatMenu = () => {
     const selection = window.getSelection();
-    const selectedText = selection.toString();
-    if (selectedText) {
-      const formattedText = `${prefix}${selectedText}${suffix}`;
-      const textArea = inputRef.current;
-      const start = textArea.selectionStart;
-      const end = textArea.selectionEnd;
-      const textBefore = inputMessage.substring(0, start);
-      const textAfter = inputMessage.substring(end);
-      setInputMessage(textBefore + formattedText + textAfter);
-      document.getElementById('format-menu').style.display = 'none';
+    const menuElement = document.getElementById('format-menu');
+    if (!selection?.toString()) {
+      menuElement.style.display = 'none';
+    } else {
+      // Position the formatting menu near the selection
+      const range = selection.getRangeAt(0);
+      const rect = range.getBoundingClientRect();
+      menuElement.style.display = 'flex';
+      menuElement.style.top = `${rect.top - 40}px`;
+      menuElement.style.left = `${rect.left}px`;
     }
   };
 
-  const formatListNumbered = () => {
+  const formatText = (prefix, suffix) => {
     const selection = window.getSelection();
-    const selectedText = selection.toString();
+    const selectedText = selection.toString().trim();
     if (selectedText) {
-      const lines = selectedText.split('\n');
-      const formattedLines = lines.map((line, index) => `${index + 1}. ${line}`);
-      const formattedText = formattedLines.join('\n');
-
+      let formattedText = `${prefix}${selectedText}${suffix}`;
       const textArea = inputRef.current;
       const start = textArea.selectionStart;
       const end = textArea.selectionEnd;
       const textBefore = inputMessage.substring(0, start);
       const textAfter = inputMessage.substring(end);
-
+      
+      const prevChar = textBefore.charAt(start - 1);
+      if (prevChar && prevChar !== ' ' && prevChar !== '\n') {
+        formattedText = ` ${formattedText}`;
+      }
+      
+      const nextChar = textAfter.charAt(0);
+      if (nextChar && nextChar !== ' ' && nextChar !== '\n') {
+        formattedText = `${formattedText} `;
+      }
+      
       setInputMessage(textBefore + formattedText + textAfter);
       document.getElementById('format-menu').style.display = 'none';
+      setTimeout(() => {
+        textArea.focus();
+        textArea.setSelectionRange(
+          start + prefix.length - 1,
+          start + prefix.length + formattedText.length - 1
+        );
+        showFormatMenu();
+      }, 0);
+    }
+  };
+
+  const splitSelectionLines = () => {
+    const selection = window.getSelection();
+    const selectedText = selection.toString();
+    if (selectedText) {
+      const textArea = inputRef.current;
+      const start = textArea.selectionStart;
+      const end = textArea.selectionEnd;
+
+      const firstLineStart = inputMessage.substring(0, start).lastIndexOf("\n")+1;
+      const lastLineEnd = end+inputMessage.substring(end).indexOf("\n");
+      const textBefore = inputMessage.substring(0, firstLineStart);
+      const textAfter = inputMessage.substring(lastLineEnd);
+
+      const lines = inputMessage.substring(firstLineStart, lastLineEnd).split('\n');
+      return { lines, textBefore, textAfter };
+    }
+    return { lines: [], textBefore: inputMessage, textAfter: "" };
+  };
+
+  const formatCode = () => {
+    const selection = window.getSelection();
+    if (selection.toString().indexOf('\n') === -1) {
+      formatText('`', '`');
+      return;
+    }
+      
+    const { lines, textBefore, textAfter } = splitSelectionLines();
+    if (lines.length > 0) {
+      const formattedText = "```\n" + lines.join('\n') + "\n```\n";
+      setInputMessage(textBefore + formattedText + textAfter);
+      setTimeout(() => {
+        const textArea = inputRef.current;
+        textArea.focus();
+        textArea.setSelectionRange(
+          textBefore.length,
+          textBefore.length + formattedText.length
+        );
+        showFormatMenu();
+      }, 0);
+    }
+  };
+          
+  const formatListNumbered = () => {
+    const { lines, textBefore, textAfter } = splitSelectionLines();
+    if (lines.length > 0) {
+      const formattedLines = lines.map((line, index) => `${index + 1}. ${line}`);
+      const formattedText = formattedLines.join('\n');
+
+      setInputMessage(textBefore + formattedText + textAfter);
+      setTimeout(() => {
+        const textArea = inputRef.current;
+        textArea.focus();
+        textArea.setSelectionRange(
+          textBefore.length,
+          textBefore.length + formattedText.length
+        );
+        showFormatMenu();
+      }, 0);
     }
   };
 
   const formatListBulleted = () => {
-    const selection = window.getSelection();
-    const selectedText = selection.toString();
-    if (selectedText) {
-      const lines = selectedText.split('\n');
-      const formattedLines = lines.map(line => `• ${line}`);
+    const { lines, textBefore, textAfter } = splitSelectionLines();
+    if (lines.length > 0) {
+      const formattedLines = lines.map(line => `* ${line}`);
       const formattedText = formattedLines.join('\n');
 
-      const textArea = inputRef.current;
-      const start = textArea.selectionStart;
-      const end = textArea.selectionEnd;
-      const textBefore = inputMessage.substring(0, start);
-      const textAfter = inputMessage.substring(end);
-
       setInputMessage(textBefore + formattedText + textAfter);
-      document.getElementById('format-menu').style.display = 'none';
+      setTimeout(() => {
+        const textArea = inputRef.current;
+        textArea.focus();
+        textArea.setSelectionRange(
+          textBefore.length,
+          textBefore.length + formattedText.length
+        );
+        showFormatMenu();
+      }, 0);
     }
   };
 
   const formatQuote = () => {
-    const selection = window.getSelection();
-    const selectedText = selection.toString();
-    if (selectedText) {
-      const formattedText = `> ${selectedText}`;
-
-      const textArea = inputRef.current;
-      const start = textArea.selectionStart;
-      const end = textArea.selectionEnd;
-      const textBefore = inputMessage.substring(0, start);
-      const textAfter = inputMessage.substring(end);
+    const { lines, textBefore, textAfter } = splitSelectionLines();
+    if (lines.length > 0) {
+      const formattedLines = lines.map(line => `> ${line}`);
+      const formattedText = formattedLines.join('\n');
 
       setInputMessage(textBefore + formattedText + textAfter);
-      document.getElementById('format-menu').style.display = 'none';
+      setTimeout(() => {
+        const textArea = inputRef.current;
+        textArea.focus();
+        textArea.setSelectionRange(
+          textBefore.length,
+          textBefore.length + formattedText.length
+        );
+        showFormatMenu();
+      }, 0);
     }
   };
 
@@ -849,24 +927,33 @@ const MessageInput = ({ ticketStatus }) => {
               onPaste={(e) => {
                 ticketStatus === "open" && handleInputPaste(e);
               }}
+              onMouseUp={showFormatMenu}
+              onKeyUp={showFormatMenu}
               onKeyDown={(e) => {
-                if (loading || e.shiftKey) return;
+                if (e.ctrlKey && e.key === 'b') {
+                  e.preventDefault();
+                  formatText('*', '*');
+                } else if (e.ctrlKey && e.key === 'i') {
+                  e.preventDefault();
+                  formatText('_', '_');
+                } else if (e.ctrlKey && e.key === 's') {
+                  e.preventDefault();
+                  formatText('~', '~');
+                } else if (e.ctrlKey && e.key === 'm') {
+                  e.preventDefault();
+                  formatCode();
+                } else if (e.ctrlKey && e.key === 'q') {
+                  e.preventDefault();
+                  formatQuote();
+                } else if (e.ctrlKey && e.key === 'n') {
+                  e.preventDefault();
+                  formatListNumbered();
+                } else if (e.ctrlKey && e.key === 'l') {
+                  e.preventDefault();
+                  formatListBulleted();
+                } else if (loading || e.shiftKey) return;
                 else if (e.key === "Enter") {
                   handleSendMessage();
-                }
-              }}
-              onMouseUp={() => {
-                const selection = window.getSelection();
-                if (selection.toString().length > 0) {
-                  // Position the formatting menu near the selection
-                  const range = selection.getRangeAt(0);
-                  const rect = range.getBoundingClientRect();
-                  const menuElement = document.getElementById('format-menu');
-                  if (menuElement) {
-                    menuElement.style.display = 'flex';
-                    menuElement.style.top = `${rect.top - 40}px`;
-                    menuElement.style.left = `${rect.left}px`;
-                  }
                 }
               }}
             />
@@ -898,28 +985,28 @@ const MessageInput = ({ ticketStatus }) => {
               </IconButton>
               <IconButton 
                 size="small" 
-                onClick={() => formatText('`','`')}
+                onClick={formatCode}
                 style={{ padding: '6px', margin: '0 2px' }}
               >
                 <Code fontSize="small" style={{ color: '#444' }} />
               </IconButton>
               <IconButton 
                 size="small" 
-                onClick={() => formatListNumbered()}
+                onClick={formatListNumbered}
                 style={{ padding: '6px', margin: '0 2px' }}
               >
                 <FormatListNumbered fontSize="small" style={{ color: '#444' }} />
               </IconButton>
               <IconButton 
                 size="small" 
-                onClick={() => formatListBulleted()}
+                onClick={formatListBulleted}
                 style={{ padding: '6px', margin: '0 2px' }}
               >
                 <FormatListBulleted fontSize="small" style={{ color: '#444' }} />
               </IconButton>
               <IconButton 
                 size="small" 
-                onClick={() => formatQuote()}
+                onClick={formatQuote}
                 style={{ padding: '6px', margin: '0 2px' }}
               >
                 <FormatQuote fontSize="small" style={{ color: '#444' }} />
