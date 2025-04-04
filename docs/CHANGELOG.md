@@ -1,5 +1,14 @@
 # Changelog
 
+### v1.13.2 (04/04/2025)
+
+- [corrige ordem de importação](https://github.com/rtenorioh/Press-Ticket/commit/6c3d8176e8f7d83e24ac52224a1f8cb42a2af2a0);
+- [Enable sound on group notification. When a message arrives in groups, the attendant will be notified by sound.](https://github.com/rtenorioh/Press-Ticket/commit/a7671e0f7e1e7c4c7a34f3b1d99bc28a3bde92e6);
+- [melhorias no menu de formatação](https://github.com/rtenorioh/Press-Ticket/commit/d3bf7c29e85185c104824a3739fc21e867ad0f8e);
+- [Atualiza a dependência whatsapp-web.js para a versão 1.27.0](https://github.com/rtenorioh/Press-Ticket/commit/e868c4c58adf2cd2bdb0cf4621abd3adb636572c);
+- [Remove package-lock.json do .gitignore em frontend e backend](https://github.com/rtenorioh/Press-Ticket/commit/a3f26cb1dc1243c1003322981e51d3b35450018e); e
+- [feat: atualizar a versão do sistema para v1.13.2](https://github.com/rtenorioh/Press-Ticket/commit/fe5e593d47e2c1950f5a87ac25440951566005dd).
+
 ### v1.13.1 (29/03/2025)
 
 - [feat: adicionar suporte à tradução no tratamento de erro do UserModal](https://github.com/rtenorioh/Press-Ticket/commit/f3f5d89a366c13a95318db5552baf108e8536906);
