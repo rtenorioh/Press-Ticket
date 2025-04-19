@@ -33,7 +33,7 @@ import api from "../../services/api";
 import openSocket from "../../services/socket-io";
 import Audio from "../Audio";
 import LocationPreview from "../LocationPreview";
-import MarkdownWrapper from "../MarkdownWrapper";
+import WhatsMarked from "react-whatsmarked";
 import MessageOptionsMenu from "../MessageOptionsMenu";
 import ModalImageCors from "../ModalImageCors";
 import MultiVcardPreview from "../MultiVcardPreview";
@@ -905,7 +905,7 @@ const MessagesList = ({ ticketId, isGroup }) => {
                 >
                   {message.quotedMsg && renderQuotedMessage(message)}
 
-                  {message.mediaType !== "multi_vcard" && <MarkdownWrapper>{message.body}</MarkdownWrapper>}
+                  {message.mediaType !== "multi_vcard" && <WhatsMarked>{message.body}</WhatsMarked>}
                   <span className={classes.timestamp}>
                     {message.isEdited && <span>{t("messagesList.message.edited")} </span>}
                     {format(parseISO(message.createdAt), "HH:mm")}
@@ -954,7 +954,7 @@ const MessagesList = ({ ticketId, isGroup }) => {
                     </div>
                   )}
                   {message.quotedMsg && renderQuotedMessage(message)}
-                  {message.mediaType !== "multi_vcard" && <MarkdownWrapper>{message.body}</MarkdownWrapper>}
+                  {message.mediaType !== "multi_vcard" && <WhatsMarked>{message.body}</WhatsMarked>}
                   <span className={classes.timestamp}>
                     {message.isEdited && <span>{t("messagesList.message.edited")} </span>}
                     {format(parseISO(message.createdAt), "HH:mm")}

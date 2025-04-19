@@ -20,7 +20,6 @@ import clsx from "clsx";
 import React, { useContext, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useLocation } from "react-router-dom";
-import { systemVersion } from "../../package.json";
 import defaultLogo from '../assets/logo.jpg';
 import { getImageUrl } from '../helpers/imageHelper';
 import BackdropLoading from "../components/BackdropLoading";
@@ -33,6 +32,8 @@ import toastError from "../errors/toastError";
 import api from "../services/api";
 import openSocket from "../services/socket-io";
 import MainListItems from "./MainListItems";
+
+const systemVersion = "v1.13.2";
 
 const drawerWidth = 240;
 
