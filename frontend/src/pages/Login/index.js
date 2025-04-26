@@ -1,17 +1,16 @@
-import {
-  Box,
-  Button,
-  Container,
-  CssBaseline,
-  Grid,
-  IconButton,
-  InputAdornment,
-  Link,
-  TextField,
-  Typography
-} from '@material-ui/core';
-import { makeStyles } from "@material-ui/core/styles";
-import { Visibility, VisibilityOff } from '@material-ui/icons';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import Container from '@mui/material/Container';
+import CssBaseline from '@mui/material/CssBaseline';
+import Grid from '@mui/material/Grid';
+import IconButton from '@mui/material/IconButton';
+import InputAdornment from '@mui/material/InputAdornment';
+import Link from '@mui/material/Link';
+import TextField from '@mui/material/TextField';
+import Typography from '@mui/material/Typography';
+import { styled } from '@mui/material/styles';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import React, { useContext, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link as RouterLink } from "react-router-dom";
@@ -27,31 +26,30 @@ const Copyright = ({ companyName, companyUrl }) => {
       {new Date().getFullYear()}
       {" - "}
       <Link color="inherit" href={companyUrl || "https://github.com/rtenorioh/Press-Ticket"}>
-        {companyName || "Press Ticket"}
+        {companyName || "Press Ticket®"}
       </Link>
       {"."}
     </Typography>
   );
 };
 
-const useStyles = makeStyles((theme) => ({
-  paper: {
-    marginTop: theme.spacing(8),
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-  },
-  form: {
-    width: "100%", // Fix IE 11 issue.
-    marginTop: theme.spacing(1),
-  },
-  submit: {
-    margin: theme.spacing(3, 0, 2),
-  },
+const StyledForm = styled('form')(({ theme }) => ({
+  width: "100%", // Fix IE 11 issue.
+  marginTop: theme.spacing(1),
+}));
+
+const StyledDiv = styled('div')(({ theme }) => ({
+  marginTop: theme.spacing(8),
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
+}));
+
+const StyledButton = styled(Button)(({ theme }) => ({
+  margin: theme.spacing(3, 0, 2),
 }));
 
 const Login = () => {
-  const classes = useStyles();
   const { t } = useTranslation();
   const [user, setUser] = useState({ email: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
@@ -59,7 +57,7 @@ const Login = () => {
   const [theme, setTheme] = useState("light");
   const [companyData, setCompanyData] = useState({
     logo: null,
-    name: "Press Ticket",
+    name: "Press Ticket®",
     url: "https://github.com/rtenorioh/Press-Ticket"
   });
 
@@ -75,7 +73,7 @@ const Login = () => {
           if (lightConfig) {
             setCompanyData(prevData => ({
               ...prevData,
-              name: lightConfig.company || "Press Ticket",
+              name: lightConfig.company || "Press Ticket®",
               url: lightConfig.url || "https://github.com/rtenorioh/Press-Ticket"
             }));
           }
@@ -146,12 +144,12 @@ const Login = () => {
   return (
     <Container component="main" maxWidth="xs">
       <CssBaseline />
-      <div className={classes.paper}>
-        <img src={getImageUrl(companyData.logo)} alt="logo" style={{ height: 120, marginBottom: 20 }} />
+      <StyledDiv>
+        <img src={getImageUrl(companyData.logo)} alt="logo" sx={{ height: 120, marginBottom: 20 }} />
         <Typography component="h1" variant="h5">
           {t("login.title")}
         </Typography>
-        <form className={classes.form} noValidate onSubmit={handlSubmit}>
+        <StyledForm noValidate onSubmit={handlSubmit}>
           <TextField
             variant="outlined"
             margin="normal"
@@ -184,21 +182,20 @@ const Login = () => {
                     aria-label="toggle password visibility"
                     onClick={() => setShowPassword((e) => !e)}
                   >
-                    {showPassword ? <VisibilityOff color="secondary" /> : <Visibility color="secondary" />}
+                    {showPassword ? <VisibilityOffIcon color="secondary" /> : <VisibilityIcon color="secondary" />}
                   </IconButton>
                 </InputAdornment>
               )
             }}
           />
-          <Button
+          <StyledButton
             type="submit"
             fullWidth
             variant="contained"
             color="primary"
-            className={classes.submit}
           >
             {t("login.buttons.submit")}
-          </Button>
+          </StyledButton>
           <Grid container>
             <Grid item xs>
               <Link
@@ -221,8 +218,8 @@ const Login = () => {
               </Link>
             </Grid>
           </Grid>
-        </form>
-      </div>
+        </StyledForm>
+      </StyledDiv>
       <Box mt={5}><Copyright companyName={companyData.name} companyUrl={companyData.url} /></Box>
     </Container>
   );

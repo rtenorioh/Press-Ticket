@@ -7,7 +7,7 @@ module.exports = {
       [
         {
           theme: "light",
-          company: "Press Ticket",
+          company: "Press Ticket®",
           url: "https://pressticket.com.br",
           primaryColor: "#5C4B9B",
           secondaryColor: "#D5C6F0",

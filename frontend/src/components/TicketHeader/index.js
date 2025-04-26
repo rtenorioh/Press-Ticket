@@ -1,28 +1,24 @@
 import React from "react";
 
-import { Card, Button } from "@material-ui/core";
-import { makeStyles } from "@material-ui/core/styles";
+import { Card, Button, styled } from "@mui/material";
 import TicketHeaderSkeleton from "../TicketHeaderSkeleton";
-import ArrowBackIos from "@material-ui/icons/ArrowBackIos";
-import { useHistory } from "react-router-dom";
+import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
+import { useNavigate } from "react-router-dom";
 
-const useStyles = makeStyles((theme) => ({
-  ticketHeader: {
-    display: "flex",
-    backgroundColor: theme.palette.background.default,
-    flex: "none",
-    borderBottom: "1px solid rgba(0, 0, 0, 0.12)",
-    [theme.breakpoints.down("sm")]: {
-      flexWrap: "wrap",
-    },
+const TicketHeaderCard = styled(Card)(({ theme }) => ({
+  display: "flex",
+  backgroundColor: theme.palette.background.default,
+  flex: "none",
+  borderBottom: "1px solid rgba(0, 0, 0, 0.12)",
+  [theme.breakpoints.down("sm")]: {
+    flexWrap: "wrap",
   },
 }));
 
 const TicketHeader = ({ loading, children }) => {
-  const classes = useStyles();
-  const history = useHistory();
+  const navigate = useNavigate();
   const handleBack = () => {
-    history.push("/tickets");
+    navigate("/tickets");
   };
 
   return (
@@ -30,12 +26,12 @@ const TicketHeader = ({ loading, children }) => {
       {loading ? (
         <TicketHeaderSkeleton />
       ) : (
-        <Card square className={classes.ticketHeader}>
+        <TicketHeaderCard square>
           <Button color="primary" onClick={handleBack}>
-            <ArrowBackIos />
+            <ArrowBackIosIcon />
           </Button>
           {children}
-        </Card>
+        </TicketHeaderCard>
       )}
     </>
   );

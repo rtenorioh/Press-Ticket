@@ -223,15 +223,23 @@ export const sendMedia = async (req: Request, res: Response): Promise<Response> 
   const contactAndTicket = await createContact(whatsappId, formattedNumber, userId, queueId);
 
   let resp: any;
-  await Promise.all(
-    medias.map(async (media: Express.Multer.File) => {
-      resp = await SendWhatsAppMedia({
-        body,
-        media,
-        ticket: contactAndTicket
-      });
-    })
-  );
+  if (medias && medias.length > 0) {
+    await Promise.all(
+      medias.map(async (media: Express.Multer.File) => {
+        resp = await SendWhatsAppMedia({
+          body,
+          media,
+          ticket: contactAndTicket
+        });
+      })
+    );
+  } else {
+    resp = await SendWhatsAppMessage({
+      body,
+      ticket: contactAndTicket,
+      quotedMsg
+    });
+  }
 
   const listSettingsService = await ListSettingsServiceOne({
     key: "closeTicketApi"

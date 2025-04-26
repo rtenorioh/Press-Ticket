@@ -1,8 +1,6 @@
-import {
-	List,
-	makeStyles,
-	Paper
-} from "@material-ui/core";
+import List from '@mui/material/List';
+import Paper from '@mui/material/Paper';
+import { styled } from '@mui/material/styles';
 import React, { useContext, useEffect, useReducer, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { AuthContext } from "../../context/Auth/AuthContext";
@@ -14,57 +12,44 @@ import TagsFilter from "../TagsFilter";
 import TicketListItem from "../TicketListItem";
 import TicketsListSkeleton from "../TicketsListSkeleton";
 
-const useStyles = makeStyles((theme) => ({
-	ticketsListWrapper: {
-		position: "relative",
-		display: "flex",
-		height: "100%",
-		flexDirection: "column",
-		overflow: "hidden",
-		borderTopRightRadius: 0,
-		borderBottomRightRadius: 0,
-	},
-	ticketsList: {
-		flex: 1,
-		overflowY: "scroll",
-		...theme.scrollbarStyles,
-		borderTop: "2px solid rgba(0, 0, 0, 0.12)",
-	},
-	ticketsListHeader: {
-		color: "rgb(67, 83, 105)",
-		zIndex: 2,
-		backgroundColor: "white",
-		borderBottom: "1px solid rgba(0, 0, 0, 0.12)",
-		display: "flex",
-		alignItems: "center",
-		justifyContent: "space-between",
-	},
-	ticketsCount: {
-		fontWeight: "normal",
-		color: "rgb(104, 121, 146)",
-		marginLeft: "8px",
-		fontSize: "14px",
-	},
-	noTicketsText: {
-		textAlign: "center",
-		color: "rgb(104, 121, 146)",
-		fontSize: "14px",
-		lineHeight: "1.4",
-	},
-	noTicketsTitle: {
-		textAlign: "center",
-		fontSize: "16px",
-		fontWeight: "600",
-		margin: "0px",
-	},
-	noTicketsDiv: {
-		display: "flex",
-		height: "100px",
-		margin: 40,
-		flexDirection: "column",
-		alignItems: "center",
-		justifyContent: "center",
-	},
+const TicketsListWrapper = styled(Paper)(({ theme }) => ({
+	position: "relative",
+	display: "flex",
+	height: "100%",
+	flexDirection: "column",
+	overflow: "hidden",
+	borderTopRightRadius: 0,
+	borderBottomRightRadius: 0,
+}));
+
+const TicketsListStyled = styled(Paper)(({ theme }) => ({
+	flex: 1,
+	overflowY: "scroll",
+	...theme.scrollbarStyles,
+	borderTop: "2px solid rgba(0, 0, 0, 0.12)",
+}));
+
+const NoTicketsText = styled('p')(({ theme }) => ({
+	textAlign: "center",
+	color: "rgb(104, 121, 146)",
+	fontSize: "14px",
+	lineHeight: "1.4",
+}));
+
+const NoTicketsTitle = styled('span')(({ theme }) => ({
+	textAlign: "center",
+	fontSize: "16px",
+	fontWeight: "600",
+	margin: "0px",
+}));
+
+const NoTicketsDiv = styled('div')(({ theme }) => ({
+	display: "flex",
+	height: "100px",
+	margin: 40,
+	flexDirection: "column",
+	alignItems: "center",
+	justifyContent: "center",
 }));
 
 const reducer = (state, action) => {
@@ -158,12 +143,11 @@ const TicketsList = (props) => {
 		style,
 		tags,
 	} = props;
-	const classes = useStyles();
 	const { t } = useTranslation();
 	const [pageNumber, setPageNumber] = useState(1);
 	const [ticketsList, dispatch] = useReducer(reducer, []);
 	const { user } = useContext(AuthContext);
-	const { profile, queues } = user;
+	const { profile, queues } = user || {};
 	const [settings, setSettings] = useState([]);
 	const [filteredTags, setFilteredTags] = useState([]);
 
@@ -198,7 +182,7 @@ const TicketsList = (props) => {
 	}, []);
 
 	useEffect(() => {
-		const queueIds = queues.map((q) => q.id);
+		const queueIds = queues?.map((q) => q.id);
 		const filteredTickets = tickets.filter((t) => queueIds.indexOf(t.queueId) > -1);
 
 		const getSettingValue = key => {
@@ -317,25 +301,24 @@ const TicketsList = (props) => {
 	};
 
 	return (
-		<Paper className={classes.ticketsListWrapper} style={style}>
+		<TicketsListWrapper sx={style}>
 			<TagsFilter onFiltered={handleTagFilter} />
-			<Paper
+			<TicketsListStyled
 				square
 				name="closed"
 				elevation={0}
-				className={classes.ticketsList}
 				onScroll={handleScroll}
 			>
-				<List style={{ paddingTop: 0 }}>
+				<List sx={{ paddingTop: 0 }}>
 					{ticketsList.length === 0 && !loading ? (
-						<div className={classes.noTicketsDiv}>
-							<span className={classes.noTicketsTitle}>
+						<NoTicketsDiv>
+							<NoTicketsTitle>
 								{t("ticketsList.noTicketsTitle")}
-							</span>
-							<p className={classes.noTicketsText}>
+							</NoTicketsTitle>
+							<NoTicketsText>
 								{t("ticketsList.noTicketsMessage")}
-							</p>
-						</div>
+							</NoTicketsText>
+						</NoTicketsDiv>
 					) : (
 						<>
 							{ticketsList.map((ticket) => (
@@ -345,8 +328,8 @@ const TicketsList = (props) => {
 					)}
 					{loading && <TicketsListSkeleton />}
 				</List>
-			</Paper>
-		</Paper>
+			</TicketsListStyled>
+		</TicketsListWrapper>
 	);
 };
 

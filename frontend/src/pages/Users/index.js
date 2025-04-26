@@ -1,5 +1,5 @@
 import {
-  Backdrop,
+  Box,
   Button,
   Fade,
   IconButton,
@@ -13,22 +13,20 @@ import {
   TableRow,
   TextField,
   Tooltip
-} from "@material-ui/core";
-import { makeStyles } from "@material-ui/core/styles";
-import {
-  AddCircleOutline,
-  CheckCircleOutline,
-  DeleteOutline,
-  Edit,
-  HighlightOff,
-  Info,
-  Lock,
-  LockOpen,
-  Search
-} from "@material-ui/icons";
+} from "@mui/material";
+import { styled } from "@mui/material/styles";
+import AddCircleOutline from "@mui/icons-material/AddCircleOutline";
+import TaskAltIcon from '@mui/icons-material/TaskAlt';
+import DeleteOutline from "@mui/icons-material/DeleteOutline";
+import Edit from "@mui/icons-material/Edit";
+import HighlightOff from "@mui/icons-material/HighlightOff";
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import Lock from "@mui/icons-material/Lock";
+import LockOpen from "@mui/icons-material/LockOpen";
+import Search from "@mui/icons-material/Search";
 import React, { useEffect, useReducer, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useHistory, useLocation } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
 import ConfirmationModal from "../../components/ConfirmationModal";
 import MainContainer from "../../components/MainContainer";
@@ -96,37 +94,76 @@ const reducer = (state, action) => {
   }
 };
 
-const useStyles = makeStyles((theme) => ({
-  mainPaper: {
-    flex: 1,
-    padding: theme.spacing(2),
-    margin: theme.spacing(1),
-    overflowY: "scroll",
-    ...theme.scrollbarStyles,
+const MainPaper = styled(Paper)(({ theme }) => ({
+  flex: 1,
+  padding: theme.spacing(2),
+  margin: theme.spacing(2),
+  overflowY: "auto",
+  borderRadius: theme.shape.borderRadius,
+  boxShadow: "0 4px 10px rgba(0,0,0,0.05)",
+  ...theme.scrollbarStyles,
+}));
+
+const ModalPaper = styled('div')(({ theme }) => ({
+  backgroundColor: theme.palette.background.paper,
+  padding: theme.spacing(3),
+  borderRadius: theme.shape.borderRadius,
+  boxShadow: theme.shadows[24],
+  width: "400px",
+  maxWidth: "90%",
+  maxHeight: "80%",
+  overflowY: "auto",
+}));
+
+const StyledTableCell = styled(TableCell)(({ theme }) => ({
+  padding: theme.spacing(1, 2),
+  fontSize: '0.875rem',
+}));
+
+const StyledTableRow = styled(TableRow)(({ theme }) => ({
+  '&:nth-of-type(odd)': {
+    backgroundColor: theme.palette.action.hover,
   },
-  modalPaper: {
-    backgroundColor: "white",
-    padding: theme.spacing(2),
-    borderRadius: "8px",
-    boxShadow: theme.shadows[5],
-    width: "400px",
-    maxHeight: "80%",
-    overflowY: "auto",
+  '&:hover': {
+    backgroundColor: theme.palette.action.selected,
   },
-  queuesColor: {
-    flex: "none",
-    width: "8px",
-    height: "100%",
-    position: "absolute",
-    top: "0%",
-    left: "0%",
+  transition: 'background-color 0.2s ease',
+}));
+
+const ActionButtons = styled('div')(({ theme }) => ({
+  display: 'flex',
+  justifyContent: 'center',
+  gap: theme.spacing(0.5),
+}));
+
+const ColorIndicator = styled('div')(({ theme }) => ({
+  flex: "none",
+  width: "8px",
+  height: "100%",
+  position: "absolute",
+  top: "0%",
+  left: "0%",
+  borderTopLeftRadius: theme.shape.borderRadius,
+  borderBottomLeftRadius: theme.shape.borderRadius,
+}));
+
+const IdContainer = styled('div')({
+  paddingLeft: "20px",
+});
+
+const SearchContainer = styled('div')(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  gap: theme.spacing(1),
+  width: '100%',
+  [theme.breakpoints.up('md')]: {
+    width: '60%',
   },
 }));
 
 const Users = () => {
-  const classes = useStyles();
   const { t } = useTranslation();
-  const history = useHistory();
+  const navigate = useNavigate();
   const location = useLocation();
   const user = location.state?.user;
   const [loading, setLoading] = useState(false);
@@ -190,7 +227,7 @@ const Users = () => {
         localStorage.removeItem("token");
         toast.error(data.message || "Sua sessão foi encerrada.");
         setTimeout(() => {
-          history.push("/login");
+          navigate("/login");
         }, 1000);
       }
     });
@@ -198,7 +235,7 @@ const Users = () => {
     return () => {
       socket.disconnect();
     };
-  }, [history, user]);
+  }, [navigate, user]);
 
   const handleOpenUserModal = () => {
     setSelectedUsers([]);
@@ -269,12 +306,17 @@ const Users = () => {
       <Modal
         open={modalOpen}
         onClose={handleCloseModal}
-        BackdropComponent={Backdrop}
-        BackdropProps={{ timeout: 500 }}
-        style={{ display: "flex", alignItems: "center", justifyContent: "center" }}
+        sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}
+        slotProps={{
+          backdrop: {
+            sx: {
+              backgroundColor: "rgba(0, 0, 0, 0.4)"
+            }
+          }
+        }}
       >
         <Fade in={modalOpen}>
-          <div className={classes.modalPaper}>
+          <ModalPaper>
             <h2>{modalTitle}</h2>
             <Table size="small">
               <TableHead>
@@ -289,9 +331,9 @@ const Users = () => {
               <TableBody>
                 {modalContent.map((item, index) => (
                   <TableRow key={index}>
-                    <TableCell style={{ padding: 0, width: "5px", position: "relative" }}>
-                      <div style={{ backgroundColor: item.color, width: "5px", height: "100%", position: "absolute", top: 0, left: 0 }}></div>
-                      <div style={{ paddingLeft: "20px" }}>{item.id}</div>
+                    <TableCell sx={{ padding: 0, width: "5px", position: "relative" }}>
+                      <ColorIndicator sx={{ backgroundColor: item.color }}></ColorIndicator>
+                      <IdContainer>{item.id}</IdContainer>
                     </TableCell>
                     <TableCell>{item.name}</TableCell>
                     {modalTitle === t("users.modalTitle.channel") && (
@@ -301,7 +343,7 @@ const Users = () => {
                 ))}
               </TableBody>
             </Table>
-          </div>
+          </ModalPaper>
         </Fade>
       </Modal>
       <ConfirmationModal
@@ -323,70 +365,93 @@ const Users = () => {
         userId={selectedUsers.length === 1 ? selectedUsers[0] : null}
       />
       <MainHeader>
-        <Title>{t("users.title")} ({users.length})</Title>
-        <MainHeaderButtonsWrapper>
-          <TextField
-            placeholder={t("contacts.searchPlaceholder")}
-            type="search"
-            value={searchParam}
-            onChange={handleSearch}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <Search color="secondary" />
-                </InputAdornment>
-              ),
-            }}
-          />
-          <Tooltip title={t("users.buttons.add")}>
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={handleOpenUserModal}
-            >
-              <AddCircleOutline />
-            </Button>
-          </Tooltip>
+        <Title>{t("users.title")} {users.length > 0 ? `(${users.length})` : ""}</Title>
+        <MainHeaderButtonsWrapper sx={{ display: 'flex', alignItems: 'center' }}>
+          <SearchContainer sx={{ display: 'flex', alignItems: 'center' }}>
+            <TextField
+              placeholder={t("users.searchPlaceholder")}
+              type="search"
+              value={searchParam}
+              onChange={handleSearch}
+              fullWidth
+              variant="outlined"
+              size="small"
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Search color="secondary" />
+                  </InputAdornment>
+                ),
+              }}
+              sx={{ 
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: 2,
+                  height: '40px'
+                },
+                my: 0,
+                py: 0
+              }}
+            />
+          </SearchContainer>
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <Tooltip title={t("users.buttons.add")}>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleOpenUserModal}
+                sx={{
+                  borderRadius: 2,
+                  px: { xs: 1, sm: 2 },
+                  height: '40px', // Mesma altura do campo de pesquisa
+                  minWidth: '40px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  '& .MuiSvgIcon-root': {
+                    fontSize: '1.25rem'
+                  }
+                }}
+              >
+                <AddCircleOutline />
+              </Button>
+            </Tooltip>
+          </Box>
         </MainHeaderButtonsWrapper>
       </MainHeader>
-      <Paper
-        className={classes.mainPaper}
-        variant="outlined"
-        onScroll={handleScroll}
-      >
+      <MainPaper variant="outlined" onScroll={handleScroll}>
         <Table size="small">
           <TableHead>
             <TableRow>
-              <TableCell align="center">
+              <StyledTableCell align="center">
                 {t("users.table.id")}
-              </TableCell>
-              <TableCell align="center">
+              </StyledTableCell>
+              <StyledTableCell align="center">
                 {t("users.table.name")}
-              </TableCell>
-              <TableCell align="center">
+              </StyledTableCell>
+              <StyledTableCell align="center">
                 {t("users.table.status")}
-              </TableCell>
-              <TableCell align="center">
+              </StyledTableCell>
+              <StyledTableCell align="center">
                 {t("users.table.email")}
-              </TableCell>
-              <TableCell align="center">
+              </StyledTableCell>
+              <StyledTableCell align="center">
                 {t("users.table.profile")}
-              </TableCell>
-              <TableCell align="center">
+              </StyledTableCell>
+              <StyledTableCell align="center">
                 {t("users.table.whatsapp")}
-              </TableCell>
-              <TableCell align="center">
+              </StyledTableCell>
+              <StyledTableCell align="center">
                 {t("users.table.queue")}
-              </TableCell>
-              <TableCell align="center">
+              </StyledTableCell>
+              <StyledTableCell align="center">
                 {t("users.table.startWork")}
-              </TableCell>
-              <TableCell align="center">
+              </StyledTableCell>
+              <StyledTableCell align="center">
                 {t("users.table.endWork")}
-              </TableCell>
-              <TableCell align="center">
+              </StyledTableCell>
+              <StyledTableCell align="center">
                 {t("users.table.actions")}
-              </TableCell>
+              </StyledTableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -395,74 +460,86 @@ const Users = () => {
             ) : (
               <>
                 {users.map((user) => (
-                  <TableRow key={user.id}>
-                    <TableCell align="center">{user.id}</TableCell>
-                    <TableCell align="center">{user.name}</TableCell>
-                    <TableCell align="center">
-                      <Tooltip title={user.online ? t("users.status.online") : t("users.status.offline")} arrow>
-                        {user.online ? (
-                          <CheckCircleOutline style={{ color: "green" }} />
-                        ) : (
-                          <HighlightOff style={{ color: "red" }} />
-                        )}
+                  <StyledTableRow key={user.id}>
+                    <StyledTableCell align="center">{user.id}</StyledTableCell>
+                    <StyledTableCell align="center">{user.name}</StyledTableCell>
+                    <StyledTableCell align="center">
+                      <Tooltip title={user.online ? t("users.status.online") : t("users.status.offline")} arrow placement="top">
+                        <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+                          {user.online ? (
+                            <TaskAltIcon sx={{ color: "green" }} />
+                          ) : (
+                            <HighlightOff sx={{ color: "red" }} />
+                          )}
+                        </Box>
                       </Tooltip>
-                    </TableCell>
-                    <TableCell align="center">{user.email}</TableCell>
-                    <TableCell align="center">{user.profile}</TableCell>
-                    <TableCell align="center">
-                      <IconButton
-                        size="small"
-                        onClick={() => handleOpenModal(user.whatsapps, t("users.modalTitle.channel"))}
-                      >
-                        <Info color="secondary" />
-                      </IconButton>
-                    </TableCell>
-                    <TableCell align="center">
-                      <IconButton
-                        size="small"
-                        onClick={() => handleOpenModal(user.queues, t("users.modalTitle.queue"))}
-                      >
-                        <Info color="secondary" />
-                      </IconButton>
-                    </TableCell>
-                    <TableCell align="center">{user.startWork}</TableCell>
-                    <TableCell align="center">{user.endWork}</TableCell>
-                    <TableCell align="center">
-                      <Tooltip title={user.active ? t("users.actions.activate") : t("users.actions.deactivate")} arrow>
+                    </StyledTableCell>
+                    <StyledTableCell align="center">{user.email}</StyledTableCell>
+                    <StyledTableCell align="center">{user.profile}</StyledTableCell>
+                    <StyledTableCell align="center">
+                      <Tooltip title={t("users.table.viewChannels")} arrow placement="top">
                         <IconButton
                           size="small"
-                          onClick={() => handleToggleActive(user)}
+                          onClick={() => handleOpenModal(user.whatsapps, t("users.modalTitle.channel"))}
+                          sx={{ color: 'primary.main' }}
                         >
-                          {user.active ? <LockOpen color="secondary" /> : <Lock color="secondary" />}
+                          <InfoOutlinedIcon />
                         </IconButton>
                       </Tooltip>
-                      <Tooltip title={t("users.actions.edit")} arrow>
+                    </StyledTableCell>
+                    <StyledTableCell align="center">
+                      <Tooltip title={t("users.table.viewQueues")} arrow placement="top">
                         <IconButton
                           size="small"
-                          onClick={() => handleEditUser(user.id)}
+                          onClick={() => handleOpenModal(user.queues, t("users.modalTitle.queue"))}
+                          sx={{ color: 'primary.main' }}
                         >
-                          <Edit color="secondary" />
+                          <InfoOutlinedIcon />
                         </IconButton>
                       </Tooltip>
-                      <Tooltip title={t("users.actions.delete")} arrow>
-                        <IconButton
-                          size="small"
-                          onClick={() => {
-                            setConfirmModalOpen(true);
-                            setDeletingUser(user);
-                          }}
-                        >
-                          <DeleteOutline color="secondary" />
-                        </IconButton>
-                      </Tooltip>
-                    </TableCell>
-                  </TableRow>
+                    </StyledTableCell>
+                    <StyledTableCell align="center">{user.startWork}</StyledTableCell>
+                    <StyledTableCell align="center">{user.endWork}</StyledTableCell>
+                    <StyledTableCell align="center">
+                      <ActionButtons>
+                        <Tooltip title={user.active ? t("users.actions.deactivate") : t("users.actions.activate")} arrow placement="top">
+                          <IconButton
+                            size="small"
+                            onClick={() => handleToggleActive(user)}
+                            sx={{ color: user.active ? 'secondary.main' : 'success.main' }}
+                          >
+                            {user.active ? <Lock /> : <LockOpen />}
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip title={t("users.actions.edit")} arrow placement="top">
+                          <IconButton
+                            size="small"
+                            onClick={() => handleEditUser(user.id)}
+                          >
+                            <Edit color="info"/>
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip title={t("users.actions.delete")} arrow placement="top">
+                          <IconButton
+                            size="small"
+                            onClick={() => {
+                              setConfirmModalOpen(true);
+                              setDeletingUser(user);
+                            }}
+                            sx={{ color: 'error.main' }}
+                          >
+                            <DeleteOutline />
+                          </IconButton>
+                        </Tooltip>
+                      </ActionButtons>
+                    </StyledTableCell>
+                  </StyledTableRow>
                 ))}
               </>
             )}
           </TableBody>
         </Table>
-      </Paper>
+      </MainPaper>
     </MainContainer>
   );
 };

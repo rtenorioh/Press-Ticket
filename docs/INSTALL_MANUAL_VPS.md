@@ -1,4 +1,4 @@
-# Manual de Instalação do Press Ticket na VPS
+# Manual de Instalação do Press Ticket® na VPS
 
 ### Observação:
 
@@ -164,9 +164,9 @@ wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
 sudo apt install ./google-chrome-stable_current_amd64.deb
 ```
 
-## Seção 5: Instalação do Press Ticket
+## Seção 5: Instalação do Press Ticket®
 
-### 6.1 Baixando o repositório do Press Ticket
+### 6.1 Baixando o repositório do Press Ticket®
 
 ```
 git clone https://github.com/rtenorioh/Press-Ticket.git Press-Ticket

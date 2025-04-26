@@ -1,21 +1,20 @@
-import {
-	Box,
-	Button,
-	Container,
-	CssBaseline,
-	Grid,
-	IconButton,
-	InputAdornment,
-	Link,
-	TextField,
-	Typography
-} from '@material-ui/core';
-import { makeStyles } from "@material-ui/core/styles";
-import { Visibility, VisibilityOff } from '@material-ui/icons';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import Container from '@mui/material/Container';
+import CssBaseline from '@mui/material/CssBaseline';
+import Grid from '@mui/material/Grid';
+import IconButton from '@mui/material/IconButton';
+import InputAdornment from '@mui/material/InputAdornment';
+import Link from '@mui/material/Link';
+import TextField from '@mui/material/TextField';
+import Typography from '@mui/material/Typography';
+import { styled } from '@mui/material/styles';
+import Visibility from '@mui/icons-material/Visibility';
+import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import { Field, Form, Formik } from "formik";
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Link as RouterLink, useHistory } from "react-router-dom";
+import { Link as RouterLink, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import * as Yup from "yup";
 import { getImageUrl } from '../../helpers/imageHelper';
@@ -28,27 +27,27 @@ const Copyright = ({ companyName, companyUrl }) => {
 			{new Date().getFullYear()}
 			{" - "}
 			<Link color="inherit" href={companyUrl || "https://github.com/rtenorioh/Press-Ticket"}>
-				{companyName || "Press Ticket"}
+				{companyName || "Press Ticket®"}
 			</Link>
 			{"."}
 		</Typography>
 	);
 };
 
-const useStyles = makeStyles(theme => ({
-	paper: {
-		marginTop: theme.spacing(8),
-		display: "flex",
-		flexDirection: "column",
-		alignItems: "center",
-	},
-	form: {
-		width: "100%",
-		marginTop: theme.spacing(3),
-	},
-	submit: {
-		margin: theme.spacing(3, 0, 2),
-	},
+const FormContainer = styled('div')(({ theme }) => ({
+	marginTop: theme.spacing(8),
+	display: "flex",
+	flexDirection: "column",
+	alignItems: "center",
+}));
+
+const StyledForm = styled(Form)(({ theme }) => ({
+	width: "100%",
+	marginTop: theme.spacing(3),
+}));
+
+const SubmitButton = styled(Button)(({ theme }) => ({
+	margin: theme.spacing(3, 0, 2),
 }));
 
 const UserSchema = Yup.object().shape({
@@ -61,16 +60,15 @@ const UserSchema = Yup.object().shape({
 });
 
 const SignUp = () => {
-	const classes = useStyles();
 	const { t } = useTranslation();
-	const history = useHistory();
+	const navigate = useNavigate();
 	const initialState = { name: "", email: "", password: "" };
 	const [showPassword, setShowPassword] = useState(false);
 	const [user] = useState(initialState);
 	const [theme, setTheme] = useState("light");
 	const [companyData, setCompanyData] = useState({
 		logo: 'logo.jpg',
-		name: "Press Ticket",
+		name: "Press Ticket®",
 		url: "https://github.com/rtenorioh/Press-Ticket"
 	});
 
@@ -86,7 +84,7 @@ const SignUp = () => {
 					if (lightConfig) {
 						setCompanyData(prevData => ({
 							...prevData,
-							name: lightConfig.company || "Press Ticket",
+							name: lightConfig.company || "Press Ticket®",
 							url: lightConfig.url || "https://github.com/rtenorioh/Press-Ticket"
 						}));
 					}
@@ -141,7 +139,7 @@ const SignUp = () => {
 		try {
 			await api.post("/auth/signup", values);
 			toast.success(t("signup.toasts.success"));
-			history.push("/login");
+			navigate("/login");
 		} catch (err) {
 			toastError(err);
 		}
@@ -150,8 +148,8 @@ const SignUp = () => {
 	return (
 		<Container component="main" maxWidth="xs">
 			<CssBaseline />
-			<div className={classes.paper}>
-				<img src={getImageUrl(companyData.logo)} alt="logo" style={{ height: 120, marginBottom: 20 }} />
+			<FormContainer>
+				<img src={getImageUrl(companyData.logo)} alt="logo" sx={{ height: 120, marginBottom: 20 }} />
 				<Typography component="h1" variant="h5">
 					{t("signup.title")}
 				</Typography>
@@ -167,7 +165,7 @@ const SignUp = () => {
 					}}
 				>
 					{({ touched, errors, isSubmitting }) => (
-						<Form className={classes.form}>
+						<StyledForm>
 							<Grid container spacing={2}>
 								<Grid item xs={12}>
 									<Field
@@ -224,15 +222,14 @@ const SignUp = () => {
 									/>
 								</Grid>
 							</Grid>
-							<Button
+							<SubmitButton
 								type="submit"
 								fullWidth
 								variant="contained"
 								color="primary"
-								className={classes.submit}
 							>
 								{t("signup.buttons.submit")}
-							</Button>
+							</SubmitButton>
 							<Grid container justifyContent="flex-end">
 								<Grid item>
 									<Link
@@ -245,10 +242,10 @@ const SignUp = () => {
 									</Link>
 								</Grid>
 							</Grid>
-						</Form>
+						</StyledForm>
 					)}
 				</Formik>
-			</div>
+			</FormContainer>
 			<Box mt={5}><Copyright companyName={companyData.name} companyUrl={companyData.url} /></Box>
 		</Container>
 	);

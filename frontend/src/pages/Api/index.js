@@ -1,106 +1,241 @@
-import Button from "@material-ui/core/Button";
-import Container from "@material-ui/core/Container";
-import Grid from "@material-ui/core/Grid";
-import Paper from "@material-ui/core/Paper";
-import { makeStyles } from "@material-ui/core/styles";
-import TextField from "@material-ui/core/TextField";
+import {
+  Button,
+  Container,
+  Grid,
+  Paper,
+  TextField,
+  Typography,
+  MenuItem,
+  Box,
+  Divider,
+  Card,
+  CardContent,
+  Tooltip
+} from "@mui/material";
+import { styled } from "@mui/material/styles";
+import SendIcon from "@mui/icons-material/Send";
+import AttachFileIcon from "@mui/icons-material/AttachFile";
+import InfoIcon from "@mui/icons-material/Info";
+import CodeIcon from "@mui/icons-material/Code";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import CodeSnippetGenerator from "../../components/CodeSnippetGenerator";
 import toastError from "../../errors/toastError";
 import api from "../../services/api";
+import { toast } from "react-toastify";
 
-const useStyles = makeStyles(theme => ({
-    root: {
-        display: "flex",
-        justifyContent: "center",
-        padding: theme.spacing(2),
+const Root = styled(Container)(({ theme }) => ({
+    display: "flex",
+    justifyContent: "center",
+    padding: theme.spacing(2),
+    maxWidth: 1400,
+}));
+
+const FormContainer = styled(Card)(({ theme }) => ({
+    display: "flex",
+    flexDirection: "column",
+    width: "100%",
+    backgroundColor: theme.palette.background.paper,
+    borderRadius: theme.shape.borderRadius,
+    boxShadow: "0 4px 20px rgba(0, 0, 0, 0.08)",
+    position: "sticky",
+    top: theme.spacing(2),
+    overflow: "visible",
+    [theme.breakpoints.down('md')]: {
+        position: "static",
     },
-    formContainer: {
-        display: "flex",
-        flexDirection: "column",
-        width: "100%",
-        maxHeight: "550px",
-        maxWidth: 600,
-        backgroundColor: theme.palette.background.paper,
-        padding: theme.spacing(3),
-        borderRadius: "8px",
-        boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-        position: "sticky",
-        top: theme.spacing(8),
+}));
+
+const FormContent = styled(CardContent)(({ theme }) => ({
+    padding: theme.spacing(3),
+    '&:last-child': {
+        paddingBottom: theme.spacing(3),
     },
-    instructionContainer: {
-        padding: theme.spacing(3),
-        backgroundColor: theme.palette.background.paper,
-        borderRadius: "8px",
-        boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+}));
+
+const InstructionContainer = styled(Card)(({ theme }) => ({
+    backgroundColor: theme.palette.background.paper,
+    borderRadius: theme.shape.borderRadius,
+    boxShadow: "0 4px 20px rgba(0, 0, 0, 0.08)",
+    overflow: "hidden",
+}));
+
+const InstructionContent = styled(CardContent)(({ theme }) => ({
+    padding: theme.spacing(3),
+    '&:last-child': {
+        paddingBottom: theme.spacing(3),
     },
-    input: {
-        marginBottom: theme.spacing(2),
-    },
-    button: {
-        marginTop: theme.spacing(1),
+}));
+
+const SectionTitle = styled(Typography)(({ theme }) => ({
+    fontWeight: 600,
+    marginBottom: theme.spacing(2),
+    color: theme.palette.primary.main,
+    position: "relative",
+    '&:after': {
+        content: '""',
+        position: "absolute",
+        bottom: -8,
+        left: 0,
+        width: 40,
+        height: 3,
         backgroundColor: theme.palette.primary.main,
-        color: "#fff",
+        borderRadius: 3,
     },
-    fileInput: {
-        marginTop: theme.spacing(1),
+}));
+
+const SubTitle = styled(Typography)(({ theme }) => ({
+    fontWeight: 600,
+    marginTop: theme.spacing(3),
+    marginBottom: theme.spacing(1),
+    color: theme.palette.text.primary,
+}));
+
+const StyledInput = styled(TextField)(({ theme }) => ({
+    marginBottom: theme.spacing(2),
+    '& .MuiOutlinedInput-root': {
+        borderRadius: theme.shape.borderRadius,
     },
-    color: {
-        color: theme.palette.primary.main,
+}));
+
+const StyledButton = styled(Button)(({ theme }) => ({
+    marginTop: theme.spacing(2),
+    borderRadius: theme.shape.borderRadius,
+    padding: theme.spacing(1, 3),
+    fontWeight: 500,
+    boxShadow: "0 4px 10px rgba(0, 0, 0, 0.1)",
+    transition: "all 0.2s",
+    '&:hover': {
+        boxShadow: "0 6px 15px rgba(0, 0, 0, 0.15)",
+        transform: "translateY(-2px)",
     },
-    text: {
-        marginBottom: theme.spacing(0.5),
+}));
+
+const FileInputContainer = styled(Box)(({ theme }) => ({
+    display: "flex",
+    alignItems: "center",
+    marginBottom: theme.spacing(2),
+    padding: theme.spacing(1.5),
+    border: `1px dashed ${theme.palette.divider}`,
+    borderRadius: theme.shape.borderRadius,
+    backgroundColor: theme.palette.background.default,
+}));
+
+const FileInput = styled('input')(({ theme }) => ({
+    display: "none",
+}));
+
+const CodeBlock = styled(Box)(({ theme }) => ({
+    backgroundColor: theme.palette.mode === 'dark' ? '#2d2d2d' : '#f5f5f5',
+    padding: theme.spacing(2),
+    borderRadius: theme.shape.borderRadius,
+    fontFamily: 'monospace',
+    fontSize: '0.85rem',
+    overflowX: 'auto',
+    marginBottom: theme.spacing(2),
+    border: `1px solid ${theme.palette.divider}`,
+}));
+
+const ApiMethod = styled(Box)(({ theme }) => ({
+    backgroundColor: theme.palette.primary.lighter || '#e3f2fd',
+    color: theme.palette.primary.dark,
+    padding: theme.spacing(0.5, 1.5),
+    borderRadius: theme.shape.borderRadius,
+    fontWeight: 600,
+    display: 'inline-flex',
+    alignItems: 'center',
+    marginBottom: theme.spacing(1),
+    fontSize: '0.85rem',
+}));
+
+const ApiUrl = styled(Box)(({ theme }) => ({
+    backgroundColor: theme.palette.background.default,
+    padding: theme.spacing(1.5),
+    borderRadius: theme.shape.borderRadius,
+    fontFamily: 'monospace',
+    fontSize: '0.85rem',
+    overflowX: 'auto',
+    marginBottom: theme.spacing(2),
+    border: `1px solid ${theme.palette.divider}`,
+    wordBreak: 'break-all',
+}));
+
+const ApiHeader = styled(Box)(({ theme }) => ({
+    backgroundColor: theme.palette.warning.lighter || '#fff8e1',
+    padding: theme.spacing(1.5),
+    borderRadius: theme.shape.borderRadius,
+    fontFamily: 'monospace',
+    fontSize: '0.85rem',
+    marginBottom: theme.spacing(2),
+    border: `1px solid ${theme.palette.divider}`,
+}));
+
+const PermissionTag = styled(Box)(({ theme }) => ({
+    display: 'inline-flex',
+    alignItems: 'center',
+    backgroundColor: theme.palette.primary.lighter || '#e3f2fd',
+    color: theme.palette.primary.dark,
+    padding: theme.spacing(0.5, 1.5),
+    borderRadius: 20,
+    fontWeight: 500,
+    fontSize: '0.75rem',
+    marginBottom: theme.spacing(2),
+    '& .MuiSvgIcon-root': {
+        fontSize: '0.875rem',
+        marginRight: theme.spacing(0.5),
     },
-    textP: {
-        marginBottom: theme.spacing(1),
-    },
-    observacao: {
-        marginBottom: theme.spacing(1),
-        color: theme.palette.text.secondary,
-        fontSize: '0.85rem',
-    },
-    permissao: {
-        marginBottom: theme.spacing(1),
+}));
+
+const ListItem = styled(Box)(({ theme }) => ({
+    marginBottom: theme.spacing(1),
+    display: 'flex',
+    alignItems: 'flex-start',
+    '&:before': {
+        content: '"•"',
+        marginRight: theme.spacing(1),
         color: theme.palette.primary.main,
         fontWeight: 'bold',
-        fontSize: '0.85rem',
     },
-    apiUrl: {
-        backgroundColor: theme.palette.background.paper,
-        padding: theme.spacing(0.5),
-        borderRadius: '4px',
-        fontFamily: 'monospace',
-        overflowX: 'auto',
-        marginBottom: theme.spacing(1),
-    },
-    apiMethod: {
-        backgroundColor: '#e3f2fd',
-        color: '#0d47a1',
-        padding: theme.spacing(0.5, 1),
-        borderRadius: '4px',
-        fontWeight: 'bold',
-        display: 'inline-block',
-        marginBottom: theme.spacing(0.5),
-    },
-    apiHeader: {
-        backgroundColor: '#fff8e1',
-        padding: theme.spacing(0.5),
-        borderRadius: '4px',
-        fontFamily: 'monospace',
-        marginBottom: theme.spacing(1),
-    },
-    formTitle: {
-        marginBottom: theme.spacing(1),
-        fontSize: '1.4rem',
-    },
-    gridContainer: {
-        marginBottom: theme.spacing(1),
-    }
+}));
+
+const ResponseCode = styled(Box)(({ theme, status }) => ({
+    display: 'inline-flex',
+    alignItems: 'center',
+    backgroundColor: 
+        status === 200 ? theme.palette.success.lighter || '#e8f5e9' :
+        status === 401 || status === 403 ? theme.palette.warning.lighter || '#fff8e1' :
+        theme.palette.error.lighter || '#ffebee',
+    color: 
+        status === 200 ? theme.palette.success.dark :
+        status === 401 || status === 403 ? theme.palette.warning.dark :
+        theme.palette.error.dark,
+    padding: theme.spacing(0.5, 1),
+    borderRadius: theme.shape.borderRadius,
+    fontWeight: 600,
+    fontSize: '0.75rem',
+    marginRight: theme.spacing(1),
+}));
+
+const GridContainer = styled(Grid)(({ theme }) => ({
+    marginBottom: theme.spacing(1),
+}));
+
+const SelectedFileChip = styled(Box)(({ theme }) => ({
+    display: 'inline-flex',
+    alignItems: 'center',
+    backgroundColor: theme.palette.primary.lighter || '#e3f2fd',
+    color: theme.palette.primary.dark,
+    padding: theme.spacing(0.5, 1),
+    borderRadius: theme.shape.borderRadius,
+    fontSize: '0.75rem',
+    marginLeft: theme.spacing(1),
+    maxWidth: 200,
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
 }));
 
 const Api = () => {
-    const classes = useStyles();
     const [number, setNumber] = useState("");
     const [body, setBody] = useState("");
     const [media, setMedia] = useState(null);
@@ -154,7 +289,7 @@ const Api = () => {
         const token = manualToken;
 
         if (!token) {
-            alert("É necessário fornecer um token de API válido para enviar mensagens.");
+            toast.error("É necessário fornecer um token de API válido para enviar mensagens.");
             return;
         }
 
@@ -191,248 +326,347 @@ const Api = () => {
                 }
             });
 
-            alert("Mensagem enviada com sucesso!");
+            toast.success("Mensagem enviada com sucesso!");
+            setBody("");
+            setMedia(null);
 
         } catch (error) {
             console.error("Erro ao enviar mensagem:", error);
-            alert(`Erro ao enviar mensagem: ${error.response?.data?.message || error.message}`);
+            toast.error(`Erro ao enviar mensagem: ${error.response?.data?.message || error.message}`);
         }
     };
 
     return (
-        <Container className={classes.root}>
+        <Root>
             <Grid container spacing={4}>
                 <Grid item xs={12} md={6}>
-                    <Paper className={classes.instructionContainer}>
-                        <h2>Documentação para envio de mensagens</h2>
-                        <p className={classes.permissao}>Permissão necessária: <code>create:messages</code></p>
+                    <InstructionContainer>
+                        <InstructionContent>
+                            <SectionTitle variant="h5">Documentação para envio de mensagens</SectionTitle>
+                            <PermissionTag>
+                                <InfoIcon /> Permissão necessária: <code>create:messages</code>
+                            </PermissionTag>
 
-                        <h2 className={classes.color}>Métodos de Envio</h2>
-                        <p className={classes.text}>1. Mensagens de Texto</p>
-                        <p className={classes.text}>2. Mensagens de Mídia</p>
+                            <SubTitle variant="h6">Métodos de Envio</SubTitle>
+                            <ListItem>Mensagens de Texto</ListItem>
+                            <ListItem>Mensagens de Mídia</ListItem>
 
-                        <h2 className={classes.color}>Instruções</h2>
-                        <p><b>Observações Importantes</b></p>
-                        <ul>
-                            <li className={classes.text}>Para obter o token da API, acesse a seção <b>API key</b> no menu lateral. Sem este token não será possível enviar mensagens.</li>
-                            <li className={classes.text}>O número para envio deve estar no formato internacional, sem caracteres especiais:</li>
-                            <ul>
-                                <li className={classes.text}>Código do país - Ex: 55 (Brasil)</li>
-                                <li className={classes.text}>DDD - Ex: 22</li>
-                                <li className={classes.text}>Número - Ex: 999999999</li>
-                                <li className={classes.text}>Formato final: 5522999999999</li>
-                            </ul>
-                        </ul>
+                            <Divider sx={{ my: 2 }} />
 
-                        <h2 className={classes.color}>1. Mensagens de Texto</h2>
-                        <p>Informações necessárias para envio de mensagens de texto:</p>
+                            <SubTitle variant="h6">Instruções</SubTitle>
+                            <Typography variant="subtitle2" fontWeight={600} sx={{ mt: 1, mb: 1 }}>
+                                Observações Importantes
+                            </Typography>
+                            
+                            <ListItem>
+                                <Typography variant="body2">
+                                    Para obter o token da API, acesse a seção <b>API key</b> no menu lateral. Sem este token não será possível enviar mensagens.
+                                </Typography>
+                            </ListItem>
+                            <ListItem>
+                                <Box>
+                                    <Typography variant="body2" sx={{ mb: 1 }}>
+                                        O número para envio deve estar no formato internacional, sem caracteres especiais:
+                                    </Typography>
+                                    <Box sx={{ pl: 2 }}>
+                                        <Typography variant="body2" sx={{ mb: 0.5 }}>• Código do país - Ex: 55 (Brasil)</Typography>
+                                        <Typography variant="body2" sx={{ mb: 0.5 }}>• DDD - Ex: 22</Typography>
+                                        <Typography variant="body2" sx={{ mb: 0.5 }}>• Número - Ex: 999999999</Typography>
+                                        <Typography variant="body2" sx={{ mb: 0.5, fontWeight: 600 }}>• Formato final: 5522999999999</Typography>
+                                    </Box>
+                                </Box>
+                            </ListItem>
 
-                        <div className={classes.apiUrl}>
-                            <b>URL:</b> {process.env.REACT_APP_BACKEND_URL}/v1/messages/send
-                        </div>
+                            <Divider sx={{ my: 2 }} />
 
-                        <div className={classes.apiMethod}>Método: POST</div>
+                            <SubTitle variant="h6">1. Mensagens de Texto</SubTitle>
+                            <Typography variant="body2" sx={{ mb: 2 }}>
+                                Informações necessárias para envio de mensagens de texto:
+                            </Typography>
 
-                        <p><b>Headers:</b></p>
-                        <div className={classes.apiHeader}>
-                            x-api-token: [seu_token]<br />
-                            Content-Type: application/json
-                        </div>
+                            <ApiUrl>
+                                <Typography variant="body2" fontWeight={600} sx={{ mb: 0.5 }}>URL:</Typography>
+                                <Typography variant="body2" fontFamily="monospace">
+                                    {process.env.REACT_APP_BACKEND_URL}/v1/messages/send
+                                </Typography>
+                            </ApiUrl>
 
-                        <p><b>Corpo da requisição (JSON):</b></p>
-                        <pre style={{ backgroundColor: '#f5f5f5', padding: '10px', borderRadius: '4px', overflowX: 'auto' }}>
-                            {`{
-"number": "5522999999999",
-"body": "Mensagem de teste via API",
-"userId": 1,
-"queueId": 1,
-"whatsappId": 1
+                            <ApiMethod>
+                                <CodeIcon sx={{ mr: 0.5, fontSize: '1rem' }} /> Método: POST
+                            </ApiMethod>
+
+                            <Typography variant="body2" fontWeight={600} sx={{ mb: 1 }}>Headers:</Typography>
+                            <ApiHeader>
+                                <Typography variant="body2" fontFamily="monospace">
+                                    x-api-token: [seu_token]<br />
+                                    Content-Type: application/json
+                                </Typography>
+                            </ApiHeader>
+
+                            <Typography variant="body2" fontWeight={600} sx={{ mb: 1 }}>Corpo da requisição (JSON):</Typography>
+                            <CodeBlock>
+{`{
+  "number": "5522999999999",
+  "body": "Mensagem de teste via API",
+  "userId": 1,
+  "queueId": 1,
+  "whatsappId": 1
 }`}
-                        </pre>
+                            </CodeBlock>
 
-                        <p><b>Parâmetros obrigatórios:</b></p>
-                        <ul>
-                            <li><b>number:</b> Número do destinatário no formato DDI+DDD+NÚMERO</li>
-                            <li><b>body:</b> Conteúdo da mensagem</li>
-                            <li><b>userId:</b> ID do usuário que está enviando a mensagem</li>
-                            <li><b>queueId:</b> ID do Setor</li>
-                            <li><b>whatsappId:</b> ID do Canal WhatsApp(wwebjs) </li>
-                        </ul>
+                            <Typography variant="body2" fontWeight={600} sx={{ mb: 1 }}>Parâmetros obrigatórios:</Typography>
+                            <Box sx={{ mb: 2 }}>
+                                <ListItem>
+                                    <Typography variant="body2"><b>number:</b> Número do destinatário no formato DDI+DDD+NÚMERO</Typography>
+                                </ListItem>
+                                <ListItem>
+                                    <Typography variant="body2"><b>body:</b> Conteúdo da mensagem</Typography>
+                                </ListItem>
+                                <ListItem>
+                                    <Typography variant="body2"><b>userId:</b> ID do usuário que está enviando a mensagem</Typography>
+                                </ListItem>
+                                <ListItem>
+                                    <Typography variant="body2"><b>queueId:</b> ID do Setor</Typography>
+                                </ListItem>
+                                <ListItem>
+                                    <Typography variant="body2"><b>whatsappId:</b> ID do Canal WhatsApp(wwebjs)</Typography>
+                                </ListItem>
+                            </Box>
 
-                        <h2 className={classes.color}>2. Mensagens de Mídia</h2>
-                        <p>Informações necessárias para envio de mensagens com mídia:</p>
+                            <Divider sx={{ my: 2 }} />
 
-                        <div className={classes.apiUrl}>
-                            <b>URL:</b> {process.env.REACT_APP_BACKEND_URL}/v1/messages/send-media
-                        </div>
+                            <SubTitle variant="h6">2. Mensagens de Mídia</SubTitle>
+                            <Typography variant="body2" sx={{ mb: 2 }}>
+                                Informações necessárias para envio de mensagens com mídia:
+                            </Typography>
 
-                        <div className={classes.apiMethod}>Método: POST</div>
+                            <ApiUrl>
+                                <Typography variant="body2" fontWeight={600} sx={{ mb: 0.5 }}>URL:</Typography>
+                                <Typography variant="body2" fontFamily="monospace">
+                                    {process.env.REACT_APP_BACKEND_URL}/v1/messages/send-media
+                                </Typography>
+                            </ApiUrl>
 
-                        <p><b>Headers:</b></p>
-                        <div className={classes.apiHeader}>
-                            x-api-token: [seu_token]<br />
-                            Content-Type: multipart/form-data
-                        </div>
+                            <ApiMethod>
+                                <CodeIcon sx={{ mr: 0.5, fontSize: '1rem' }} /> Método: POST
+                            </ApiMethod>
 
-                        <p><b>Corpo da requisição (FormData):</b></p>
-                        <pre style={{ backgroundColor: '#f5f5f5', padding: '10px', borderRadius: '4px', overflowX: 'auto' }}>
-                            {`{
-"number": "5522999999999",
-"body": "Mensagem de teste via API",
-"medias": "arquivo.jpg",
-"userId": 1,
-"queueId": 1,
-"whatsappId": 1
+                            <Typography variant="body2" fontWeight={600} sx={{ mb: 1 }}>Headers:</Typography>
+                            <ApiHeader>
+                                <Typography variant="body2" fontFamily="monospace">
+                                    x-api-token: [seu_token]<br />
+                                    Content-Type: multipart/form-data
+                                </Typography>
+                            </ApiHeader>
+
+                            <Typography variant="body2" fontWeight={600} sx={{ mb: 1 }}>Corpo da requisição (FormData):</Typography>
+                            <CodeBlock>
+{`{
+  "number": "5522999999999",
+  "body": "Mensagem de teste via API",
+  "medias": "arquivo.jpg",
+  "userId": 1,
+  "queueId": 1,
+  "whatsappId": 1
 }`}
-                        </pre>
+                            </CodeBlock>
 
-                        <p><b>Parâmetros obrigatórios:</b></p>
-                        <ul>
-                            <li><b>number:</b> 5522999999999</li>
-                            <li><b>body:</b> Mensagem que acompanha a mídia</li>
-                            <li><b>medias:</b> Arquivo de mídia (imagem, vídeo, áudio ou documento)</li>
-                            <li><b>userId:</b> ID do usuário que está enviando</li>
-                            <li><b>queueId:</b> ID do Setor</li>
-                            <li><b>whatsappId:</b> ID do Canal WhatsApp(wwebjs) </li>
-                        </ul>
+                            <Typography variant="body2" fontWeight={600} sx={{ mb: 1 }}>Parâmetros obrigatórios:</Typography>
+                            <Box sx={{ mb: 2 }}>
+                                <ListItem>
+                                    <Typography variant="body2"><b>number:</b> Número do destinatário no formato DDI+DDD+NÚMERO</Typography>
+                                </ListItem>
+                                <ListItem>
+                                    <Typography variant="body2"><b>body:</b> Mensagem que acompanha a mídia</Typography>
+                                </ListItem>
+                                <ListItem>
+                                    <Typography variant="body2"><b>medias:</b> Arquivo de mídia (imagem, vídeo, áudio ou documento)</Typography>
+                                </ListItem>
+                                <ListItem>
+                                    <Typography variant="body2"><b>userId:</b> ID do usuário que está enviando</Typography>
+                                </ListItem>
+                                <ListItem>
+                                    <Typography variant="body2"><b>queueId:</b> ID do Setor</Typography>
+                                </ListItem>
+                                <ListItem>
+                                    <Typography variant="body2"><b>whatsappId:</b> ID do Canal WhatsApp(wwebjs)</Typography>
+                                </ListItem>
+                            </Box>
 
-                        <p><b>Respostas da API:</b></p>
-                        <ul>
-                            <li><b>200:</b> Mensagem enviada com sucesso</li>
-                            <li><b>401:</b> Token inválido ou não fornecido</li>
-                            <li><b>403:</b> Token não tem permissão 'create:messages'</li>
-                            <li><b>500:</b> Erro interno!</li>
-                        </ul>
-                    </Paper>
+                            <Divider sx={{ my: 2 }} />
+
+                            <Typography variant="body2" fontWeight={600} sx={{ mb: 1 }}>Respostas da API:</Typography>
+                            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                    <ResponseCode status={200}>200</ResponseCode>
+                                    <Typography variant="body2">Mensagem enviada com sucesso</Typography>
+                                </Box>
+                                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                    <ResponseCode status={401}>401</ResponseCode>
+                                    <Typography variant="body2">Token inválido ou não fornecido</Typography>
+                                </Box>
+                                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                    <ResponseCode status={403}>403</ResponseCode>
+                                    <Typography variant="body2">Token não tem permissão 'create:messages'</Typography>
+                                </Box>
+                                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                    <ResponseCode status={500}>500</ResponseCode>
+                                    <Typography variant="body2">Erro interno!</Typography>
+                                </Box>
+                            </Box>
+                        </InstructionContent>
+                    </InstructionContainer>
                 </Grid>
                 <Grid item xs={12} md={6}>
-                    <Paper className={classes.formContainer}>
-                        <h3 className={classes.formTitle}>Envie Mensagens de Texto ou Mídia</h3>
-                        <form onSubmit={handleSubmit}>
-                            <TextField
-                                className={classes.input}
-                                label="Token da API"
-                                variant="outlined"
-                                size="small"
-                                fullWidth
-                                value={manualToken}
-                                onChange={(e) => setManualToken(e.target.value)}
-                                placeholder="Insira seu token da API aqui (sem 'Bearer')"
-                                helperText="Usar apenas token com permissão 'create:messages'"
-                            />
-                            <TextField
-                                className={classes.input}
-                                label="Número de telefone"
-                                variant="outlined"
-                                size="small"
-                                fullWidth
-                                value={number}
-                                onChange={(e) => setNumber(e.target.value)}
-                                required
-                            />
-                            <TextField
-                                className={classes.input}
-                                label="Corpo da mensagem"
-                                variant="outlined"
-                                size="small"
-                                fullWidth
-                                value={body}
-                                onChange={(e) => setBody(e.target.value)}
-                                required
-                                multiline
-                                rows={2}
-                            />
-                            <Grid container spacing={1} className={classes.gridContainer}>
-                                <Grid item xs={4}>
-                                    <TextField
-                                        select
-                                        className={classes.input}
-                                        label="Usuário"
-                                        variant="outlined"
-                                        size="small"
-                                        fullWidth
-                                        value={userId || ""}
-                                        onChange={(e) => setUserId(e.target.value)}
-                                    >
-                                        {users.map((user) => (
-                                            <option key={user.id} value={user.id}>
-                                                {user.name}
-                                            </option>
-                                        ))}
-                                    </TextField>
-                                </Grid>
-                                <Grid item xs={4}>
-                                    <TextField
-                                        select
-                                        className={classes.input}
-                                        label="Setor"
-                                        variant="outlined"
-                                        size="small"
-                                        fullWidth
-                                        value={queueId || ""}
-                                        onChange={(e) => setQueueId(e.target.value)}
-                                    >
-                                        {queues.map((queue) => (
-                                            <option key={queue.id} value={queue.id}>
-                                                {queue.name}
-                                            </option>
-                                        ))}
-                                    </TextField>
-                                </Grid>
-                                <Grid item xs={4}>
-                                    <TextField
-                                        select
-                                        className={classes.input}
-                                        label="Conexão WhatsApp"
-                                        variant="outlined"
-                                        size="small"
-                                        fullWidth
-                                        value={whatsappId || ""}
-                                        onChange={(e) => setWhatsappId(e.target.value)}
-                                    >
-                                        {whatsapps
-                                            .filter(whatsapp => whatsapp.type === null)
-                                            .map((whatsapp) => (
-                                                <option key={whatsapp.id} value={whatsapp.id}>
-                                                    {whatsapp.name}
-                                                </option>
-                                            ))
-                                        }
-                                    </TextField>
-                                </Grid>
-                            </Grid>
-                            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
-                                <span style={{ fontSize: '0.85rem', marginRight: '8px' }}>Arquivo de mídia (opcional):</span>
-                                <input
-                                    className={classes.fileInput}
-                                    type="file"
-                                    onChange={handleMediaChange}
-                                    accept="image/*,video/*,audio/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-                                    style={{ fontSize: '0.85rem' }}
+                    <FormContainer>
+                        <FormContent>
+                            <SectionTitle variant="h5">Envie Mensagens de Texto ou Mídia</SectionTitle>
+                            <form onSubmit={handleSubmit}>
+                                <StyledInput
+                                    label="Token da API"
+                                    variant="outlined"
+                                    size="small"
+                                    fullWidth
+                                    value={manualToken}
+                                    onChange={(e) => setManualToken(e.target.value)}
+                                    placeholder="Insira seu token da API aqui (sem 'Bearer')"
+                                    helperText="Usar apenas token com permissão 'create:messages'"
                                 />
-                            </div>
-                            <Button
-                                className={classes.button}
-                                type="submit"
-                                fullWidth
-                                variant="contained"
-                                size="small"
-                            >
-                                ENVIAR MENSAGEM
-                            </Button>
-                        </form>
-                        <CodeSnippetGenerator
-                            number={number}
-                            body={body}
-                            userId={userId}
-                            queueId={queueId}
-                            whatsappId={whatsappId}
-                            token={manualToken}
-                        />
-                    </Paper>
+                                <StyledInput
+                                    label="Número de telefone"
+                                    variant="outlined"
+                                    size="small"
+                                    fullWidth
+                                    value={number}
+                                    onChange={(e) => setNumber(e.target.value)}
+                                    placeholder="Ex: 5522999999999"
+                                    required
+                                />
+                                <StyledInput
+                                    label="Corpo da mensagem"
+                                    variant="outlined"
+                                    size="small"
+                                    fullWidth
+                                    value={body}
+                                    onChange={(e) => setBody(e.target.value)}
+                                    required
+                                    multiline
+                                    rows={3}
+                                    placeholder="Digite sua mensagem aqui"
+                                />
+                                <GridContainer container spacing={2}>
+                                    <Grid item xs={12} sm={4}>
+                                        <StyledInput
+                                            select
+                                            label="Usuário"
+                                            variant="outlined"
+                                            size="small"
+                                            fullWidth
+                                            value={userId || ""}
+                                            onChange={(e) => setUserId(e.target.value)}
+                                        >
+                                            {users.map((user) => (
+                                                <MenuItem key={user.id} value={user.id}>
+                                                    {user.name}
+                                                </MenuItem>
+                                            ))}
+                                        </StyledInput>
+                                    </Grid>
+                                    <Grid item xs={12} sm={4}>
+                                        <StyledInput
+                                            select
+                                            label="Setor"
+                                            variant="outlined"
+                                            size="small"
+                                            fullWidth
+                                            value={queueId || ""}
+                                            onChange={(e) => setQueueId(e.target.value)}
+                                        >
+                                            {queues.map((queue) => (
+                                                <MenuItem key={queue.id} value={queue.id}>
+                                                    {queue.name}
+                                                </MenuItem>
+                                            ))}
+                                        </StyledInput>
+                                    </Grid>
+                                    <Grid item xs={12} sm={4}>
+                                        <StyledInput
+                                            select
+                                            label="Conexão WhatsApp"
+                                            variant="outlined"
+                                            size="small"
+                                            fullWidth
+                                            value={whatsappId || ""}
+                                            onChange={(e) => setWhatsappId(e.target.value)}
+                                        >
+                                            {whatsapps
+                                                .filter(whatsapp => whatsapp.type === null)
+                                                .map((whatsapp) => (
+                                                    <MenuItem key={whatsapp.id} value={whatsapp.id}>
+                                                        {whatsapp.name}
+                                                    </MenuItem>
+                                                ))
+                                            }
+                                        </StyledInput>
+                                    </Grid>
+                                </GridContainer>
+                                
+                                <FileInputContainer>
+                                    <label htmlFor="media-upload">
+                                        <Button
+                                            component="span"
+                                            variant="outlined"
+                                            size="small"
+                                            startIcon={<AttachFileIcon />}
+                                            sx={{ mr: 1 }}
+                                        >
+                                            Selecionar Arquivo
+                                        </Button>
+                                    </label>
+                                    <FileInput
+                                        id="media-upload"
+                                        type="file"
+                                        onChange={handleMediaChange}
+                                        accept="image/*,video/*,audio/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                                    />
+                                    <Typography variant="body2" color="textSecondary">
+                                        {media ? (
+                                            <SelectedFileChip>{media.name}</SelectedFileChip>
+                                        ) : (
+                                            "Nenhum arquivo selecionado"
+                                        )}
+                                    </Typography>
+                                </FileInputContainer>
+                                
+                                <StyledButton
+                                    type="submit"
+                                    variant="contained"
+                                    color="primary"
+                                    fullWidth
+                                    endIcon={<SendIcon />}
+                                >
+                                    Enviar Mensagem
+                                </StyledButton>
+                            </form>
+                            
+                            <Box sx={{ mt: 4, pt: 3, borderTop: '1px dashed', borderColor: 'divider' }}>
+                                <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 2 }}>
+                                    Gerador de Snippets
+                                </Typography>
+                                <CodeSnippetGenerator
+                                    number={number}
+                                    body={body}
+                                    userId={userId}
+                                    queueId={queueId}
+                                    whatsappId={whatsappId}
+                                    token={manualToken}
+                                />
+                            </Box>
+                        </FormContent>
+                    </FormContainer>
                 </Grid>
             </Grid>
-        </Container>
+        </Root>
     );
 };
 

@@ -1,5 +1,4 @@
-import Menu from "@material-ui/core/Menu";
-import MenuItem from "@material-ui/core/MenuItem";
+import { Menu, MenuItem } from "@mui/material";
 import React, { useContext, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { AuthContext } from "../../context/Auth/AuthContext";
@@ -51,7 +50,6 @@ const TicketOptionsMenu = ({ ticket, menuOpen, handleClose, anchorEl }) => {
 			<Menu
 				id="menu-appbar"
 				anchorEl={anchorEl}
-				getContentAnchorEl={null}
 				anchorOrigin={{
 					vertical: "bottom",
 					horizontal: "right",

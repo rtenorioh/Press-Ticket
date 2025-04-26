@@ -1,7 +1,7 @@
 {
   "openapi": "3.0.0",
   "info": {
-    "title": "Documentação da API do Press Ticket",
+    "title": "Documentação da API do Press Ticket®",
     "description": "Documentação da API para envio de mensagens e gerenciamento de contatos.",
     "contact": {
       "email": "robson.tenorio@gmail.com"
@@ -11,7 +11,7 @@
   "servers": [
     {
       "url": "https://apiback.pressticket.com.br",
-      "description": "API Press Ticket"
+      "description": "API Press Ticket®"
     }
   ],
   "paths": {

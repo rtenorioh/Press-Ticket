@@ -29,7 +29,7 @@ finalizar() {
     {
         echo " "
         echo "**************************************************************"
-        echo "*                 PRESS TICKET - ATUALIZAÇÃO                 *"
+        echo "*                 PRESS TICKET® - ATUALIZAÇÃO                 *"
         echo "**************************************************************"
         echo " Versão Atual do Sistema: $SYSTEM_VERSION                   "
         echo " Nova Versão Atualizada: $VERSION                           "
@@ -171,7 +171,7 @@ fi
 {
     echo " "
     echo "**************************************************************"
-    echo "*               PRESS TICKET - LOG DE ATUALIZAÇÃO            *"
+    echo "*               PRESS TICKET® - LOG DE ATUALIZAÇÃO            *"
     echo "**************************************************************"
     echo " Versão Atual do Sistema: $SYSTEM_VERSION                   "
     echo " Nova Versão Atualizada: $VERSION                           "
@@ -242,7 +242,7 @@ NODE_PATH="/usr/bin/node"
 if [ ! -x "$NODE_PATH" ]; then
     {
         echo "Node.js não está instalado corretamente ou não foi encontrado. Instalando a versão 20.x..."
-        curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+        curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
         sudo apt-get install -y nodejs
         sudo npm install -g npm
         if [ $? -ne 0 ]; then

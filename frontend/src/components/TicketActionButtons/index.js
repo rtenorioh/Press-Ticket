@@ -1,9 +1,8 @@
-import { IconButton } from "@material-ui/core";
-import { makeStyles } from "@material-ui/core/styles";
-import { MoreVert, Replay } from "@material-ui/icons";
+import { IconButton, styled } from "@mui/material";
+import { MoreVert, Replay } from "@mui/icons-material";
 import React, { useContext, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useHistory } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../../context/Auth/AuthContext";
 import toastError from "../../errors/toastError";
 import api from "../../services/api";
@@ -12,22 +11,19 @@ import { Can } from "../Can";
 import TicketOptionsMenu from "../TicketOptionsMenu";
 import ConfirmationModal from "../ConfirmationModal";
 
-const useStyles = makeStyles(theme => ({
-	actionButtons: {
-		marginRight: 6,
-		flex: "none",
-		alignSelf: "center",
-		marginLeft: "auto",
-		"& > *": {
-			margin: theme.spacing(1),
-		},
+const ActionButtonsContainer = styled('div')(({ theme }) => ({
+	marginRight: 6,
+	flex: "none",
+	alignSelf: "center",
+	marginLeft: "auto",
+	"& > *": {
+		margin: theme.spacing(1),
 	},
 }));
 
 const TicketActionButtons = ({ ticket }) => {
-	const classes = useStyles();
 	const { t } = useTranslation();
-	const history = useHistory();
+	const navigate = useNavigate();
 	const [anchorEl, setAnchorEl] = useState(null);
 	const [loading, setLoading] = useState(false);
 	const [confirmationOpen, setConfirmationOpen] = useState(false);
@@ -59,9 +55,9 @@ const TicketActionButtons = ({ ticket }) => {
 			}
 			setLoading(false);
 			if (status === "open") {
-				history.push(`/tickets/${ticket.id}`);
+				navigate(`/tickets/${ticket.id}`);
 			} else {
-				history.push("/tickets");
+				navigate("/tickets");
 			}
 		} catch (err) {
 			setLoading(false);
@@ -78,7 +74,7 @@ const TicketActionButtons = ({ ticket }) => {
 	};
 
 	return (
-		<div className={classes.actionButtons}>
+		<ActionButtonsContainer>
 			{ticket.status === "closed" && (
 				<ButtonWithSpinner
 					loading={loading}
@@ -148,7 +144,7 @@ const TicketActionButtons = ({ ticket }) => {
 					</>
 				)}
 			/>
-		</div>
+		</ActionButtonsContainer>
 	);
 };
 

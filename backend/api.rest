@@ -45,7 +45,7 @@ Authorization: Bearer {{token2}}
 Content-Type: application/json
 
 {
-  "company": "Press Ticket",
+  "company": "Press Ticket®",
   "url": "https://pressticket.com.br"
 }
 

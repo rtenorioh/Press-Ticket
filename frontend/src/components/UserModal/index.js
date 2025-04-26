@@ -9,16 +9,22 @@ import {
 	IconButton,
 	InputAdornment,
 	InputLabel,
-	makeStyles,
 	MenuItem,
 	Select,
-	TextField
-} from '@material-ui/core';
-import { green } from "@material-ui/core/colors";
-import {
-	Visibility,
-	VisibilityOff
-} from '@material-ui/icons';
+	TextField,
+	Typography,
+	Box,
+	Tooltip,
+	Divider,
+	Paper
+} from '@mui/material';
+import { green } from '@mui/material/colors';
+import { styled } from '@mui/material/styles';
+import { useTheme } from '@mui/material/styles';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import EditIcon from '@mui/icons-material/Edit';
 import {
 	Field,
 	Form,
@@ -26,7 +32,7 @@ import {
 } from "formik";
 import React, { useContext, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useHistory } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import * as Yup from "yup";
 import { AuthContext } from "../../context/Auth/AuthContext";
@@ -36,40 +42,72 @@ import { Can } from "../Can";
 import ConectionSelect from "../ConectionSelect";
 import QueueSelect from "../QueueSelect";
 
-const useStyles = makeStyles(theme => ({
-	root: {
-		backgroundColor: theme.palette.background.paper,
+const Root = styled('div')(({ theme }) => ({
+    backgroundColor: theme.palette.background.paper,
 		display: "flex",
 		flexWrap: "wrap",
+}));
+
+const StyledDialog = styled(Dialog)(({ theme }) => ({
+	'& .MuiDialogTitle-root': {
+		backgroundColor: theme.palette.mode === 'dark' ? theme.palette.background.paper : theme.palette.primary.main,
+		color: theme.palette.mode === 'dark' ? theme.palette.primary.main : theme.palette.primary.contrastText,
+		padding: theme.spacing(2),
 	},
-	multFieldLine: {
-		display: "flex",
-		"& > *:not(:last-child)": {
-			marginRight: theme.spacing(1),
+	'& .MuiDialogContent-root': {
+		padding: theme.spacing(3),
+	},
+	'& .MuiDialogActions-root': {
+		padding: theme.spacing(2),
+		backgroundColor: '#f5f5f5',
+	},
+}));
+
+const MultFieldLine = styled('div')(({ theme }) => ({
+	display: "flex",
+	gap: theme.spacing(2),
+	"& > *": {
+		flex: 1
+	},
+	[theme.breakpoints.down('sm')]: {
+		flexDirection: 'column'
+	}
+}));
+
+const ButtonProgress = styled(CircularProgress)(({ theme }) => ({
+	color: green[500],
+	position: "absolute",
+	top: "50%",
+	left: "50%",
+	marginTop: -12,
+	marginLeft: -12,
+}));
+
+const StyledFormControl = styled(FormControl)(({ theme }) => ({
+	margin: theme.spacing(1),
+	minWidth: 120,
+	'& .MuiOutlinedInput-root': {
+		borderRadius: 8,
+		transition: 'all 0.3s ease',
+		'&:hover': {
+			boxShadow: `0 0 0 2px ${theme.palette.primary.light}25`,
+		},
+		'&.Mui-focused': {
+			boxShadow: `0 0 0 2px ${theme.palette.primary.light}40`,
 		},
 	},
-	btnWrapper: {
-		position: "relative",
-	},
-	buttonProgress: {
-		color: green[500],
-		position: "absolute",
-		top: "50%",
-		left: "50%",
-		marginTop: -12,
-		marginLeft: -12,
-	},
-	formControl: {
-		margin: theme.spacing(1),
-		minWidth: 120,
-	},
-	textField: {
-		marginRight: theme.spacing(1),
-		flex: 1,
-	},
-	container: {
-		display: 'flex',
-		flexWrap: 'wrap',
+}));
+
+const StyledTextField = styled(TextField)(({ theme }) => ({
+	'& .MuiOutlinedInput-root': {
+		borderRadius: 8,
+		transition: 'all 0.3s ease',
+		'&:hover': {
+			boxShadow: `0 0 0 2px ${theme.palette.primary.light}25`,
+		},
+		'&.Mui-focused': {
+			boxShadow: `0 0 0 2px ${theme.palette.primary.light}40`,
+		},
 	},
 }));
 
@@ -83,8 +121,8 @@ const UserSchema = Yup.object().shape({
 });
 
 const UserModal = ({ open, onClose, userId }) => {
-	const classes = useStyles();
 	const { t } = useTranslation();
+	const theme = useTheme();
 	const initialState = {
 		name: "",
 		email: "",
@@ -102,7 +140,7 @@ const UserModal = ({ open, onClose, userId }) => {
 	const [showPassword, setShowPassword] = useState(false);
 	const startWorkRef = useRef();
 	const endWorkRef = useRef();
-	const history = useHistory();
+	const navigate = useNavigate();
 
 	useEffect(() => {
 		const fetchUser = async () => {
@@ -138,7 +176,8 @@ const UserModal = ({ open, onClose, userId }) => {
 				await api.post("/users", userData);
 			}
 			toast.success(t("userModal.success"));
-			history.go(0);
+			// Usando navigate para recarregar a página
+			navigate(0);
 		} catch (err) {
 			toastError(err, t);
 		}
@@ -146,18 +185,28 @@ const UserModal = ({ open, onClose, userId }) => {
 	};
 
 	return (
-		<div className={classes.root}>
-			<Dialog
+		<Root>
+			<StyledDialog
 				open={open}
 				onClose={handleClose}
-				maxWidth="xs"
+				maxWidth="sm"
 				fullWidth
 				scroll="paper"
 			>
-				<DialogTitle id="form-dialog-title">
-					{userId
-						? `${t("userModal.title.edit")}`
-						: `${t("userModal.title.add")}`}
+				<DialogTitle>
+					<Typography variant="h6" component="div" sx={{ fontWeight: 'bold', display: 'flex', alignItems: 'center' }}>
+						{userId ? (
+							<>
+								<EditIcon sx={{ mr: 1, fontSize: 24 }} />
+								{t("userModal.title.edit")}
+							</>
+						) : (
+							<>
+								<PersonAddIcon sx={{ mr: 1, fontSize: 24 }} />
+								{t("userModal.title.add")}
+							</>
+						)}
+					</Typography>
 				</DialogTitle>
 				<Formik
 					initialValues={user}
@@ -173,9 +222,9 @@ const UserModal = ({ open, onClose, userId }) => {
 					{({ touched, errors, isSubmitting }) => (
 						<Form>
 							<DialogContent dividers>
-								<div className={classes.multFieldLine}>
+								<MultFieldLine>
 									<Field
-										as={TextField}
+										as={StyledTextField}
 										label={t("userModal.form.name")}
 										autoFocus
 										name="name"
@@ -183,10 +232,11 @@ const UserModal = ({ open, onClose, userId }) => {
 										helperText={touched.name && errors.name}
 										variant="outlined"
 										margin="dense"
+										placeholder={t("userModal.form.namePlaceholder")}
 										fullWidth
 									/>
 									<Field
-										as={TextField}
+										as={StyledTextField}
 										name="password"
 										variant="outlined"
 										margin="dense"
@@ -194,35 +244,44 @@ const UserModal = ({ open, onClose, userId }) => {
 										error={touched.password && Boolean(errors.password)}
 										helperText={touched.password && errors.password}
 										type={showPassword ? 'text' : 'password'}
+										placeholder={t("userModal.form.passwordPlaceholder")}
 										InputProps={{
+											sx: { borderRadius: 8 },
 											endAdornment: (
 												<InputAdornment position="end">
-													<IconButton
-														aria-label="toggle password visibility"
-														onClick={() => setShowPassword((e) => !e)}
-													>
-														{showPassword ? <VisibilityOff color="secondary" /> : <Visibility color="secondary" />}
-													</IconButton>
+													<Tooltip title={t("userModal.form.toggleVisibility")} arrow placement="top">
+														<IconButton
+															aria-label="toggle password visibility"
+															onClick={() => setShowPassword((e) => !e)}
+															size="small"
+															color="primary"
+														>
+															{showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
+														</IconButton>
+													</Tooltip>
 												</InputAdornment>
 											)
 										}}
 										fullWidth
 									/>
-								</div>
-								<div className={classes.multFieldLine}>
+								</MultFieldLine>
+								<MultFieldLine>
 									<Field
-										as={TextField}
+										as={StyledTextField}
 										label={t("userModal.form.email")}
 										name="email"
 										error={touched.email && Boolean(errors.email)}
 										helperText={touched.email && errors.email}
 										variant="outlined"
 										margin="dense"
+										placeholder={t("userModal.form.emailPlaceholder")}
+										InputProps={{
+											sx: { borderRadius: 8 }
+										}}
 										fullWidth
 									/>
-									<FormControl
+									<StyledFormControl
 										variant="outlined"
-										className={classes.formControl}
 										margin="dense"
 									>
 										<Can
@@ -248,8 +307,8 @@ const UserModal = ({ open, onClose, userId }) => {
 												</>
 											)}
 										/>
-									</FormControl>
-								</div>
+									</StyledFormControl>
+								</MultFieldLine>
 								<Can
 									role={loggedInUser.profile}
 									perform="user-modal:editWhatsapps"
@@ -274,63 +333,72 @@ const UserModal = ({ open, onClose, userId }) => {
 									role={loggedInUser.profile}
 									perform="user-modal:editProfile"
 									yes={() => (
-										<form className={classes.container} noValidate>
-											<Field
-												as={TextField}
-												label={t("userModal.form.startWork")}
-												type="time"
-												ampm={false}
-												defaultValue="00:00"
-												inputRef={startWorkRef}
-												InputLabelProps={{
-													shrink: true,
-												}}
-												inputProps={{
-													step: 600, // 5 min
-												}}
-												fullWidth
-												name="startWork"
-												error={
-													touched.startWork && Boolean(errors.startWork)
-												}
-												helperText={
-													touched.startWork && errors.startWork
-												}
-												variant="outlined"
-												margin="dense"
-												className={classes.textField}
-											/>
-											<Field
-												as={TextField}
-												label={t("userModal.form.endWork")}
-												type="time"
-												ampm={false}
-												defaultValue="23:59"
-												inputRef={endWorkRef}
-												InputLabelProps={{
-													shrink: true,
-												}}
-												inputProps={{
-													step: 600, // 5 min
-												}}
-												fullWidth
-												name="endWork"
-												error={
-													touched.endWork && Boolean(errors.endWork)
-												}
-												helperText={
-													touched.endWork && errors.endWork
-												}
-												variant="outlined"
-												margin="dense"
-												className={classes.textField}
-											/>
+										<form noValidate>
+											<MultFieldLine>
+												<Field
+													as={StyledTextField}
+													label={t("userModal.form.startWork")}
+													type="time"
+													ampm={false}
+													defaultValue="00:00"
+													inputRef={startWorkRef}
+													InputLabelProps={{
+														shrink: true,
+													}}
+													inputProps={{
+														step: 600, // 5 min
+													}}
+													name="startWork"
+													error={
+														touched.startWork && Boolean(errors.startWork)
+													}
+													helperText={
+														touched.startWork && errors.startWork
+													}
+													variant="outlined"
+													margin="dense"
+													InputProps={{
+														sx: { borderRadius: 8 }
+													}}
+													sx={{
+														flex: 1,
+													}}
+												/>
+												<Field
+													as={StyledTextField}
+													label={t("userModal.form.endWork")}
+													type="time"
+													ampm={false}
+													defaultValue="23:59"
+													inputRef={endWorkRef}
+													InputLabelProps={{
+														shrink: true,
+													}}
+													inputProps={{
+														step: 600, // 5 min
+													}}
+													name="endWork"
+													error={
+														touched.endWork && Boolean(errors.endWork)
+													}
+													helperText={
+														touched.endWork && errors.endWork
+													}
+													variant="outlined"
+													margin="dense"
+													InputProps={{
+														sx: { borderRadius: 8 }
+													}}
+													sx={{
+														flex: 1,
+													}}
+												/>
+											</MultFieldLine>
 										</form>
 									)}
 								/>
-								<FormControl
+								<StyledFormControl
 									variant="outlined"
-									className={classes.formControl}
 									margin="dense"
 								>
 									<Can
@@ -356,31 +424,54 @@ const UserModal = ({ open, onClose, userId }) => {
 											</>
 										)}
 									/>
-								</FormControl>
+								</StyledFormControl>
 							</DialogContent>
-							<DialogActions>
+							<Divider />
+							<DialogActions sx={{ padding: 2, gap: 1, display: 'flex', justifyContent: 'flex-end' }}>
 								<Button
 									onClick={handleClose}
-									color="secondary"
 									disabled={isSubmitting}
-									variant="outlined"
+									variant="contained"
+									size="large"
+									sx={{
+										borderRadius: 20,
+										backgroundColor: '#e0e0e0',
+										color: '#757575',
+										minWidth: '120px',
+										textTransform: 'uppercase',
+										fontWeight: 'bold',
+										transition: 'all 0.3s ease',
+										'&:hover': {
+											backgroundColor: '#d5d5d5',
+										}
+									}}
 								>
 									{t("userModal.buttons.cancel")}
 								</Button>
 								<Button
 									type="submit"
-									color="primary"
 									disabled={isSubmitting}
 									variant="contained"
-									className={classes.btnWrapper}
+									size="large"
+									sx={{
+										position: "relative",
+										borderRadius: 20,
+										minWidth: '120px',
+										backgroundColor: theme.palette.primary.main,
+										transition: 'all 0.3s ease',
+										textTransform: 'uppercase',
+										fontWeight: 'bold',
+										'&:hover': {
+											backgroundColor: theme.palette.primary.dark
+										}
+									}}
 								>
 									{userId
 										? `${t("userModal.buttons.okEdit")}`
 										: `${t("userModal.buttons.okAdd")}`}
 									{isSubmitting && (
-										<CircularProgress
+										<ButtonProgress
 											size={24}
-											className={classes.buttonProgress}
 										/>
 									)}
 								</Button>
@@ -388,8 +479,8 @@ const UserModal = ({ open, onClose, userId }) => {
 						</Form>
 					)}
 				</Formik>
-			</Dialog>
-		</div>
+			</StyledDialog>
+		</Root>
 	);
 };
 

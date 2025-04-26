@@ -1,71 +1,66 @@
 import {
   Box,
-  makeStyles
-} from "@material-ui/core";
+  styled
+} from "@mui/material";
 import React, { useEffect, useState } from 'react';
 import VcardPreview from '../VcardPreview';
 
-const useStyles = makeStyles((theme) => ({
-  container: {
-    backgroundColor: '#e6ffda',
-    borderRadius: '8px',
-    padding: '12px 14px',
-    // maxWidth: '85%',
-    marginTop: '8px',
-    marginBottom: '8px',
-    boxShadow: '0 1px 1px rgba(0, 0, 0, 0.08)',
-    position: 'relative',
-    border: '1px solid rgba(0, 0, 0, 0.05)'
-  },
-  title: {
-    color: '#075E54',
-    fontWeight: 600,
-    fontSize: '15px',
-    marginBottom: '10px',
-    display: 'flex',
-    alignItems: 'center',
-    padding: '0 0 8px 0',
-    borderBottom: '1px solid rgba(0, 0, 0, 0.05)'
-  },
-  viewAllButton: {
-    color: '#128c7e',
-    fontSize: '14px',
-    padding: '10px 12px',
-    borderRadius: '4px',
-    cursor: 'pointer',
-    textAlign: 'center',
-    marginTop: '10px',
-    backgroundColor: 'rgba(18, 140, 126, 0.08)',
-    width: '100%',
-    fontWeight: 500,
-    transition: 'all 0.2s ease',
-    '&:hover': {
-      backgroundColor: 'rgba(18, 140, 126, 0.12)'
-    }
-  },
-  timestamp: {
-    marginLeft: 'auto',
-    fontSize: '12px',
-    color: '#667781'
-  },
-  contactsContainer: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '8px'
-  },
-  contactCounter: {
-    backgroundColor: '#128c7e',
-    color: 'white',
-    borderRadius: '12px',
-    padding: '2px 8px',
-    fontSize: '12px',
-    marginLeft: '8px',
-    fontWeight: 'normal'
+const Container = styled('div')(({ theme }) => ({
+  backgroundColor: '#e6ffda',
+  borderRadius: '8px',
+  padding: '12px 14px',
+  marginTop: '8px',
+  marginBottom: '8px',
+  boxShadow: '0 1px 1px rgba(0, 0, 0, 0.08)',
+  position: 'relative',
+  border: '1px solid rgba(0, 0, 0, 0.05)'
+}));
+
+const Title = styled('div')(({ theme }) => ({
+  color: '#075E54',
+  fontWeight: 600,
+  fontSize: '15px',
+  marginBottom: '10px',
+  display: 'flex',
+  alignItems: 'center',
+  padding: '0 0 8px 0',
+  borderBottom: '1px solid rgba(0, 0, 0, 0.05)'
+}));
+
+const ViewAllButton = styled('div')(({ theme }) => ({
+  color: '#128c7e',
+  fontSize: '14px',
+  padding: '10px 12px',
+  borderRadius: '4px',
+  cursor: 'pointer',
+  textAlign: 'center',
+  marginTop: '10px',
+  backgroundColor: 'rgba(18, 140, 126, 0.08)',
+  width: '100%',
+  fontWeight: 500,
+  transition: 'all 0.2s ease',
+  '&:hover': {
+    backgroundColor: 'rgba(18, 140, 126, 0.12)'
   }
 }));
 
-const MultiVcardPreview = ({ contacts, timestamp }) => {
-  const classes = useStyles();
+const ContactsContainer = styled('div')(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '8px'
+}));
+
+const ContactCounter = styled('span')(({ theme }) => ({
+  backgroundColor: '#128c7e',
+  color: 'white',
+  borderRadius: '12px',
+  padding: '2px 8px',
+  fontSize: '12px',
+  marginLeft: '8px',
+  fontWeight: 'normal'
+}));
+
+const MultiVcardPreview = ({ contacts }) => {
   const [showAllContacts, setShowAllContacts] = useState(false);
   const [processedContacts, setProcessedContacts] = useState([]);
 
@@ -120,7 +115,6 @@ const MultiVcardPreview = ({ contacts, timestamp }) => {
   }, [contacts]);
   
   if (!processedContacts || processedContacts.length === 0) {
-    // console.warn("No valid contacts to display");
     return null;
   }
   
@@ -130,17 +124,17 @@ const MultiVcardPreview = ({ contacts, timestamp }) => {
   
   return (
     <Box sx={{ marginTop: 1, marginBottom: 1 }}>
-      <div className={classes.container}>
-        <div className={classes.title}>
+      <Container>
+        <Title>
           {mainContactName}
           {otherContactsCount > 0 && (
-            <span className={classes.contactCounter}>
+            <ContactCounter>
               +{otherContactsCount}
-            </span>
+            </ContactCounter>
           )}
-          </div>
+        </Title>
         
-        <div className={classes.contactsContainer}>
+        <ContactsContainer>
           {(showAllContacts ? processedContacts : [firstContact]).map((contact, index) => (
             <Box key={index}>
               <VcardPreview 
@@ -149,17 +143,16 @@ const MultiVcardPreview = ({ contacts, timestamp }) => {
               />
             </Box>
           ))}
-        </div>
+        </ContactsContainer>
         
         {otherContactsCount > 0 && !showAllContacts && (
-          <div 
-            className={classes.viewAllButton}
+          <ViewAllButton 
             onClick={() => setShowAllContacts(true)}
           >
             Ver todos os {processedContacts.length} contatos
-          </div>
+          </ViewAllButton>
         )}
-      </div>
+      </Container>
     </Box>
   );
 };

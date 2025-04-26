@@ -1,10 +1,6 @@
 import React from "react";
 
-import ListItem from "@material-ui/core/ListItem";
-import ListItemText from "@material-ui/core/ListItemText";
-import ListItemAvatar from "@material-ui/core/ListItemAvatar";
-import Divider from "@material-ui/core/Divider";
-import Skeleton from "@material-ui/lab/Skeleton";
+import { ListItem, ListItemText, ListItemAvatar, Divider, Skeleton } from "@mui/material";
 
 const TicketsSkeleton = () => {
 	return (

@@ -1,5 +1,5 @@
-import { Dialog, DialogContent, Paper, Typography } from "@material-ui/core";
-import QRCode from "qrcode.react";
+import { Dialog, DialogContent, Paper, Typography } from "@mui/material";
+import { QRCodeSVG } from "qrcode.react";
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import toastError from "../../errors/toastError";
@@ -45,13 +45,13 @@ const QrcodeModal = ({ open, onClose, whatsAppId }) => {
 
 	return (
 		<Dialog open={open} onClose={onClose} maxWidth="lg" scroll="paper">
-			<DialogContent style={{ background: '#ffffff' }}>
-				<Paper elevation={0} style={{ background: '#ffffff' }}>
+			<DialogContent sx={{ background: '#ffffff' }}>
+				<Paper elevation={0} sx={{ background: '#ffffff' }}>
 					<Typography color="primary" gutterBottom>
 						{t("qrCode.message")}
 					</Typography>
 					{qrCode ? (
-						<QRCode value={qrCode} size={256} />
+						<QRCodeSVG value={qrCode} size={256} />
 					) : (
 						<span>Waiting for QR Code</span>
 					)}

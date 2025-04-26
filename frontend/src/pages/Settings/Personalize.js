@@ -1,5 +1,20 @@
-import { AppBar, Box, Button, Card, Grid, IconButton, makeStyles, Tab, Tabs, TextField, Typography } from "@material-ui/core";
-import DeleteIcon from "@material-ui/icons/Delete";
+import { 
+    Box, 
+    Button, 
+    Card, 
+    Grid, 
+    IconButton, 
+    Tab, 
+    Tabs, 
+    TextField, 
+    Typography,
+    Paper,
+    Divider,
+    Alert,
+    Tooltip
+} from "@mui/material";
+import { styled } from "@mui/material/styles";
+import DeleteIcon from "@mui/icons-material/Delete";
 import PropTypes from "prop-types";
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -8,83 +23,172 @@ import api from "../../services/api";
 import openSocket from "../../services/socket-io";
 import { getImageUrl } from '../../helpers/imageHelper';
 
-const useStyles = makeStyles((theme) => ({
-    root: {
-        backgroundColor: theme.palette.background.paper,
-        width: "100%",
-    },
-    fullWidthContainer: {
-        width: "100%",
-        padding: theme.spacing(5),
-        boxSizing: "border-box",
-    },
-    cardContainer: {
-        display: "flex",
-        alignItems: "center",
-        marginBottom: theme.spacing(1),
-    },
-    card: {
-        width: theme.spacing(15),
-        height: theme.spacing(15),
-        marginRight: theme.spacing(1),
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        position: "relative",
-        border: "1px solid #ddd",
-        cursor: "pointer",
-        backgroundColor: "#f5f5f5",
-        "&:hover": {
-            backgroundColor: "#eeeeee",
+const Root = styled('div')(({ theme }) => ({
+    backgroundColor: theme.palette.background.paper,
+    width: "100%",
+    borderRadius: theme.shape.borderRadius,
+    overflow: 'hidden',
+}));
+
+const TabsContainer = styled(Paper)(({ theme }) => ({
+    borderRadius: 0,
+    boxShadow: 'none',
+    borderBottom: `1px solid ${theme.palette.divider}`,
+    backgroundColor: theme.palette.background.default,
+}));
+
+const StyledTabs = styled(Tabs)(({ theme }) => ({
+    '& .MuiTab-root': {
+        minWidth: 120,
+        fontWeight: 500,
+        transition: 'all 0.2s',
+        '&.Mui-selected': {
+            color: theme.palette.primary.main,
+            fontWeight: 600,
         },
     },
-    cardMedia: {
-        width: "100%",
-        height: "100%",
-        backgroundSize: "contain",
-        backgroundPosition: "center",
-        backgroundRepeat: "no-repeat",
-        position: "absolute",
-        top: 0,
-        left: 0,
+}));
+
+const FullWidthContainer = styled(Box)(({ theme }) => ({
+    width: "100%",
+    padding: theme.spacing(3),
+    boxSizing: "border-box",
+}));
+
+const CardContainer = styled(Grid)(({ theme }) => ({
+    display: "flex",
+    alignItems: "center",
+    marginBottom: theme.spacing(2),
+}));
+
+const StyledCard = styled(Card)(({ theme }) => ({
+    width: theme.spacing(15),
+    height: theme.spacing(15),
+    marginRight: theme.spacing(2),
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+    position: "relative",
+    border: `1px solid ${theme.palette.divider}`,
+    cursor: "pointer",
+    backgroundColor: theme.palette.background.default,
+    borderRadius: theme.shape.borderRadius,
+    boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+    transition: "all 0.2s ease",
+    overflow: "visible", // Garante que o botão de excluir não seja cortado
+    "&:hover": {
+        backgroundColor: theme.palette.action.hover,
+        boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
     },
-    deleteIcon: {
-        position: "absolute",
-        top: 4,
-        right: 4,
-        color: theme.palette.error.main,
-        backgroundColor: "rgba(255, 255, 255, 0.8)",
-        padding: 4,
-        borderRadius: "50%",
-        "&:hover": {
-            backgroundColor: "rgba(255, 255, 255, 1)",
+}));
+
+const CardMedia = styled('div')({
+    width: "100%",
+    height: "100%",
+    backgroundSize: "contain",
+    backgroundPosition: "center",
+    backgroundRepeat: "no-repeat",
+    position: "absolute",
+    top: 0,
+    left: 0,
+    zIndex: 1,
+    pointerEvents: "none", // Permite que os cliques passem através do CardMedia
+});
+
+const DeleteIconButton = styled(IconButton)(({ theme }) => ({
+    position: "absolute",
+    top: 4,
+    right: 4,
+    color: theme.palette.error.main,
+    backgroundColor: "rgba(255, 255, 255, 0.8)",
+    padding: 4,
+    borderRadius: "50%",
+    zIndex: 10,
+    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+    "&:hover": {
+        backgroundColor: "rgba(255, 255, 255, 1)",
+        color: theme.palette.error.dark,
+        boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+    },
+}));
+
+const StyledTextField = styled(TextField)(({ theme }) => ({
+    marginBottom: theme.spacing(3),
+    '& .MuiOutlinedInput-root': {
+        borderRadius: theme.shape.borderRadius,
+        '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+            borderColor: theme.palette.primary.main,
+            borderWidth: 2,
         },
     },
-    textField: {
-        marginBottom: theme.spacing(2),
+}));
+
+const Title = styled(Typography)(({ theme }) => ({
+    marginBottom: theme.spacing(2),
+    fontWeight: 600,
+    color: theme.palette.text.primary,
+}));
+
+const SectionTitle = styled(Typography)(({ theme }) => ({
+    marginBottom: theme.spacing(2),
+    marginTop: theme.spacing(4),
+    fontWeight: 600,
+    '&:first-of-type': {
+        marginTop: theme.spacing(1),
     },
-    title: {
-        marginBottom: theme.spacing(1),
-    },
-    titleContainer: {
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        marginBottom: theme.spacing(2),
-    },
-    button: {
-        marginLeft: theme.spacing(2),
-    },
-    cardLabel: {
-        position: "absolute",
-        bottom: 4,
-        width: "100%",
-        textAlign: "center",
-        backgroundColor: "rgba(255, 255, 255, 0.8)",
-        padding: "2px 0",
-        fontSize: "0.75rem",
-    }
+}));
+
+const TitleContainer = styled('div')(({ theme }) => ({
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: theme.spacing(3),
+}));
+
+const ActionButton = styled(Button)(({ theme }) => ({
+    marginTop: theme.spacing(1),
+    borderRadius: theme.shape.borderRadius,
+    padding: theme.spacing(1, 3),
+    fontWeight: 500,
+}));
+
+const CardLabel = styled(Typography)({
+    position: "absolute",
+    bottom: 4,
+    width: "100%",
+    textAlign: "center",
+    backgroundColor: "rgba(255, 255, 255, 0.8)",
+    padding: "2px 0",
+    fontSize: "0.75rem",
+});
+
+const CardDescription = styled(Typography)(({ theme }) => ({
+    marginTop: theme.spacing(1),
+    textAlign: "center",
+    fontSize: "0.75rem",
+    color: theme.palette.text.secondary,
+    padding: theme.spacing(0, 1),
+}));
+
+const ImagePreview = styled('div')(({ theme }) => ({
+    position: 'relative',
+    width: '100%',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    marginBottom: theme.spacing(2),
+}));
+
+const PreviewThumbnail = styled('img')(({ theme }) => ({
+    maxWidth: '60px',
+    maxHeight: '60px',
+    objectFit: 'contain',
+    marginTop: theme.spacing(1),
+    border: `1px solid ${theme.palette.divider}`,
+    borderRadius: theme.shape.borderRadius,
+    padding: theme.spacing(0.5),
+    backgroundColor: theme.palette.background.paper,
 }));
 
 const TabPanel = (props) => {
@@ -94,16 +198,17 @@ const TabPanel = (props) => {
         <div
             role="tabpanel"
             hidden={value !== index}
-            id={`full-width-tabpanel-${index}`}
-            aria-labelledby={`full-width-tab-${index}`}
+            id={`settings-tabpanel-${index}`}
+            aria-labelledby={`settings-tab-${index}`}
             {...other}
+            style={{ width: '100%' }}
         >
             {value === index && (
-                <Box p={3}>
-                    <Typography variant="caption" component="div">{children}</Typography>
+                <Box>
+                    {children}
                 </Box>
             )}
-        </div >
+        </div>
     );
 };
 
@@ -113,8 +218,7 @@ TabPanel.propTypes = {
     value: PropTypes.any.isRequired,
 };
 
-const PersonalizeSettings = ({ onThemeConfigUpdate }) => {
-    const classes = useStyles();
+const PersonalizeSettings = ({ toggleTheme, onThemeConfigUpdate }) => {
     const { t } = useTranslation();
     const [tabValue, setTabValue] = useState(0);
     const [data, setData] = useState({ company: "", url: "" });
@@ -336,7 +440,28 @@ const PersonalizeSettings = ({ onThemeConfigUpdate }) => {
 
             if (response.status === 200) {
                 toast.success(`Cores do tema ${theme} salvas com sucesso!`);
-                onThemeConfigUpdate(theme, colorsToSave);
+                // Usar onThemeConfigUpdate para atualizar a configuração do tema
+                if (typeof onThemeConfigUpdate === 'function') {
+                    onThemeConfigUpdate(theme, colorsToSave);
+                }
+                
+                // Verificar se a função toggleTheme existe e é uma função
+                if (toggleTheme && typeof toggleTheme === 'function') {
+                    // Se estamos no tema atual, precisamos alternar para aplicar as mudanças
+                    const currentTheme = localStorage.getItem('theme') || 'light';
+                    if (currentTheme === theme) {
+                        try {
+                            // Aplicar as mudanças sem alternar o tema
+                            // Em vez de alternar duas vezes, vamos apenas atualizar a página
+                            // após um pequeno atraso para garantir que as configurações sejam salvas
+                            setTimeout(() => {
+                                window.location.reload();
+                            }, 1000);
+                        } catch (error) {
+                            console.error('Erro ao aplicar mudanças de tema:', error);
+                        }
+                    }
+                }
             } else {
                 throw new Error(`${t("settings.personalize.error.colors")} ${theme}`);
             }
@@ -347,59 +472,59 @@ const PersonalizeSettings = ({ onThemeConfigUpdate }) => {
     };
 
     return (
-        <div className={classes.root}>
-            <AppBar position="static" color="default">
-                <Tabs
+        <Root>
+            <TabsContainer>
+                <StyledTabs
                     value={tabValue}
                     onChange={handleTabChange}
                     indicatorColor="primary"
                     textColor="primary"
                     variant="fullWidth"
                 >
-                    <Tab label={t("settings.personalize.tabs.data")} />
+                    <Tab label={t("settings.personalize.tabs.company")} />
                     <Tab label={t("settings.personalize.tabs.logos")} />
                     <Tab label={t("settings.personalize.tabs.colors")} />
-                </Tabs>
-            </AppBar>
+                </StyledTabs>
+            </TabsContainer>
             <TabPanel value={tabValue} index={0}>
-                <div className={classes.fullWidthContainer}>
-                    <TextField
+                <FullWidthContainer>
+                    <SectionTitle variant="h6">{t("settings.personalize.tabpanel.companyInfo")}</SectionTitle>
+                    
+                    <StyledTextField
                         label={t("settings.personalize.tabpanel.company")}
                         variant="outlined"
                         fullWidth
-                        className={classes.textField}
                         value={data?.company}
                         onChange={handleCompanyChange}
+                        placeholder="Press Ticket®"
                     />
-                    <TextField
+                    <StyledTextField
                         label={t("settings.personalize.tabpanel.url")}
                         variant="outlined"
                         fullWidth
-                        className={classes.textField}
                         value={data?.url}
                         onChange={handleUrlChange}
+                        placeholder="https://github.com/rtenorioh/Press-Ticket"
                     />
-                    <Button
+                    <ActionButton
                         variant="contained"
                         color="primary"
-                        className={classes.button}
                         onClick={handleSaveCompanyData}
                     >
                         {t("settings.personalize.tabpanel.button.save")}
-                    </Button>
-                </div>
+                    </ActionButton>
+                </FullWidthContainer>
             </TabPanel>
             <TabPanel value={tabValue} index={1}>
-                <div className={classes.fullWidthContainer}>
+                <FullWidthContainer>
                     <Grid container spacing={5}>
                         <Grid item xs={12}>
-                            <Typography variant="h6" className={classes.title}>{t("settings.personalize.tabpanel.light")}</Typography>
+                            <Title variant="h6">{t("settings.personalize.tabpanel.light")}</Title>
                             <Grid container spacing={3}>
-                                <Grid item xs={12} sm={6} md={4} className={classes.cardContainer}>
-                                    <Card className={classes.card} onClick={() => !logos.themeLight.favico && handleCardClick("light", "favico")}>
-                                        <div
-                                            className={classes.cardMedia}
-                                            style={{
+                                <CardContainer item xs={12} sm={6} md={4} >
+                                    <StyledCard onClick={() => !logos.themeLight.favico && handleCardClick("light", "favico")}>
+                                        <CardMedia
+                                            sx={{
                                                 backgroundImage: `url("${logos.themeLight.favico}")`,
                                                 backgroundPosition: 'center',
                                                 backgroundRepeat: 'no-repeat',
@@ -410,22 +535,54 @@ const PersonalizeSettings = ({ onThemeConfigUpdate }) => {
                                                 e.target.style.backgroundImage = '';
                                             }}
                                         />
-                                        <Typography className={classes.cardLabel}>
+                                        <CardLabel>
                                             Favicon
-                                        </Typography>
+                                        </CardLabel>
                                         {logos.themeLight.favico && (
-                                            <IconButton
-                                                className={classes.deleteIcon}
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    handleDeleteLogo("light", "favico");
+                                            <Box 
+                                                sx={{ 
+                                                    position: 'absolute', 
+                                                    top: 4, 
+                                                    right: 4, 
+                                                    zIndex: 20 
                                                 }}
-                                                size="small"
+                                                onClick={(e) => e.stopPropagation()}
                                             >
-                                                <DeleteIcon fontSize="small" />
-                                            </IconButton>
+                                                <IconButton
+                                                    size="small"
+                                                    color="error"
+                                                    sx={{ 
+                                                        bgcolor: 'rgba(255, 255, 255, 0.8)',
+                                                        '&:hover': { bgcolor: 'rgba(255, 255, 255, 1)' } 
+                                                    }}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleDeleteLogo("light", "favico");
+                                                    }}
+                                                >
+                                                    <DeleteIcon fontSize="small" />
+                                                </IconButton>
+                                            </Box>
                                         )}
-                                    </Card>
+                                    </StyledCard>
+                                    <CardDescription>
+                                        Ícone pequeno exibido na aba do navegador (16x16 ou 32x32 pixels)
+                                    </CardDescription>
+                                    {logos.themeLight.favico && (
+                                        <ImagePreview>
+                                            <Typography variant="caption" color="textSecondary" gutterBottom>
+                                                Imagem atual:
+                                            </Typography>
+                                            <PreviewThumbnail 
+                                                src={logos.themeLight.favico} 
+                                                alt="Favicon atual" 
+                                                onError={(e) => {
+                                                    console.error("Erro ao carregar miniatura:", logos.themeLight.favico);
+                                                    e.target.style.display = 'none';
+                                                }}
+                                            />
+                                        </ImagePreview>
+                                    )}
                                     <input
                                         accept="image/*"
                                         style={{ display: "none" }}
@@ -433,12 +590,11 @@ const PersonalizeSettings = ({ onThemeConfigUpdate }) => {
                                         type="file"
                                         onChange={(e) => handleLogoChange(e, "light", "favico")}
                                     />
-                                </Grid>
-                                <Grid item xs={12} sm={6} md={4} className={classes.cardContainer}>
-                                    <Card className={classes.card} onClick={() => !logos.themeLight.logo && handleCardClick("light", "logo")}>
-                                        <div
-                                            className={classes.cardMedia}
-                                            style={{
+                                </CardContainer>
+                                <CardContainer item xs={12} sm={6} md={4}>
+                                    <StyledCard onClick={() => !logos.themeLight.logo && handleCardClick("light", "logo")}>
+                                        <CardMedia
+                                            sx={{
                                                 backgroundImage: `url("${logos.themeLight.logo}")`,
                                                 backgroundPosition: 'center',
                                                 backgroundRepeat: 'no-repeat',
@@ -449,22 +605,54 @@ const PersonalizeSettings = ({ onThemeConfigUpdate }) => {
                                                 e.target.style.backgroundImage = '';
                                             }}
                                         />
-                                        <Typography className={classes.cardLabel}>
+                                        <CardLabel>
                                             Logo
-                                        </Typography>
+                                        </CardLabel>
                                         {logos.themeLight.logo && (
-                                            <IconButton
-                                                className={classes.deleteIcon}
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    handleDeleteLogo("light", "logo");
+                                            <Box 
+                                                sx={{ 
+                                                    position: 'absolute', 
+                                                    top: 4, 
+                                                    right: 4, 
+                                                    zIndex: 20 
                                                 }}
-                                                size="small"
+                                                onClick={(e) => e.stopPropagation()}
                                             >
-                                                <DeleteIcon fontSize="small" />
-                                            </IconButton>
+                                                <IconButton
+                                                    size="small"
+                                                    color="error"
+                                                    sx={{ 
+                                                        bgcolor: 'rgba(255, 255, 255, 0.8)',
+                                                        '&:hover': { bgcolor: 'rgba(255, 255, 255, 1)' } 
+                                                    }}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleDeleteLogo("light", "logo");
+                                                    }}
+                                                >
+                                                    <DeleteIcon fontSize="small" />
+                                                </IconButton>
+                                            </Box>
                                         )}
-                                    </Card>
+                                    </StyledCard>
+                                    <CardDescription>
+                                        Logo principal exibido no menu lateral e no login (tamanho recomendado: 150x150 pixels)
+                                    </CardDescription>
+                                    {logos.themeLight.logo && (
+                                        <ImagePreview>
+                                            <Typography variant="caption" color="textSecondary" gutterBottom>
+                                                Imagem atual:
+                                            </Typography>
+                                            <PreviewThumbnail 
+                                                src={logos.themeLight.logo} 
+                                                alt="Logo atual" 
+                                                onError={(e) => {
+                                                    console.error("Erro ao carregar miniatura:", logos.themeLight.logo);
+                                                    e.target.style.display = 'none';
+                                                }}
+                                            />
+                                        </ImagePreview>
+                                    )}
                                     <input
                                         accept="image/*"
                                         style={{ display: "none" }}
@@ -472,12 +660,11 @@ const PersonalizeSettings = ({ onThemeConfigUpdate }) => {
                                         type="file"
                                         onChange={(e) => handleLogoChange(e, "light", "logo")}
                                     />
-                                </Grid>
-                                <Grid item xs={12} sm={6} md={4} className={classes.cardContainer}>
-                                    <Card className={classes.card} onClick={() => !logos.themeLight.logoTicket && handleCardClick("light", "logoTicket")}>
-                                        <div
-                                            className={classes.cardMedia}
-                                            style={{
+                                </CardContainer>
+                                <CardContainer item xs={12} sm={6} md={4}>
+                                    <StyledCard onClick={() => !logos.themeLight.logoTicket && handleCardClick("light", "logoTicket")}>
+                                        <CardMedia
+                                            sx={{
                                                 backgroundImage: `url("${logos.themeLight.logoTicket}")`,
                                                 backgroundPosition: 'center',
                                                 backgroundRepeat: 'no-repeat',
@@ -488,22 +675,54 @@ const PersonalizeSettings = ({ onThemeConfigUpdate }) => {
                                                 e.target.style.backgroundImage = '';
                                             }}
                                         />
-                                        <Typography className={classes.cardLabel}>
+                                        <CardLabel>
                                             Logo Ticket
-                                        </Typography>
+                                        </CardLabel>
                                         {logos.themeLight.logoTicket && (
-                                            <IconButton
-                                                className={classes.deleteIcon}
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    handleDeleteLogo("light", "logoTicket");
+                                            <Box 
+                                                sx={{ 
+                                                    position: 'absolute', 
+                                                    top: 4, 
+                                                    right: 4, 
+                                                    zIndex: 20 
                                                 }}
-                                                size="small"
+                                                onClick={(e) => e.stopPropagation()}
                                             >
-                                                <DeleteIcon fontSize="small" />
-                                            </IconButton>
+                                                <IconButton
+                                                    size="small"
+                                                    color="error"
+                                                    sx={{ 
+                                                        bgcolor: 'rgba(255, 255, 255, 0.8)',
+                                                        '&:hover': { bgcolor: 'rgba(255, 255, 255, 1)' } 
+                                                    }}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleDeleteLogo("light", "logoTicket");
+                                                    }}
+                                                >
+                                                    <DeleteIcon fontSize="small" />
+                                                </IconButton>
+                                            </Box>
                                         )}
-                                    </Card>
+                                    </StyledCard>
+                                    <CardDescription>
+                                        Logo exibido na interface de atendimentos (tamanho recomendado: 100x100 pixels)
+                                    </CardDescription>
+                                    {logos.themeLight.logoTicket && (
+                                        <ImagePreview>
+                                            <Typography variant="caption" color="textSecondary" gutterBottom>
+                                                Imagem atual:
+                                            </Typography>
+                                            <PreviewThumbnail 
+                                                src={logos.themeLight.logoTicket} 
+                                                alt="Logo Ticket atual" 
+                                                onError={(e) => {
+                                                    console.error("Erro ao carregar miniatura:", logos.themeLight.logoTicket);
+                                                    e.target.style.display = 'none';
+                                                }}
+                                            />
+                                        </ImagePreview>
+                                    )}
                                     <input
                                         accept="image/*"
                                         style={{ display: "none" }}
@@ -511,17 +730,16 @@ const PersonalizeSettings = ({ onThemeConfigUpdate }) => {
                                         type="file"
                                         onChange={(e) => handleLogoChange(e, "light", "logoTicket")}
                                     />
-                                </Grid>
+                                </CardContainer>
                             </Grid>
                         </Grid>
                         <Grid item xs={12}>
-                            <Typography variant="h6" className={classes.title}>{t("settings.personalize.tabpanel.dark")}</Typography>
+                            <Title variant="h6">{t("settings.personalize.tabpanel.dark")}</Title>
                             <Grid container spacing={3}>
-                                <Grid item xs={12} sm={6} md={4} className={classes.cardContainer}>
-                                    <Card className={classes.card} onClick={() => !logos.themeDark.favico && handleCardClick("dark", "favico")}>
-                                        <div
-                                            className={classes.cardMedia}
-                                            style={{
+                                <CardContainer item xs={12} sm={6} md={4}>
+                                    <StyledCard onClick={() => !logos.themeDark.favico && handleCardClick("dark", "favico")}>
+                                        <CardMedia
+                                            sx={{
                                                 backgroundImage: `url("${logos.themeDark.favico}")`,
                                                 backgroundPosition: 'center',
                                                 backgroundRepeat: 'no-repeat',
@@ -532,22 +750,54 @@ const PersonalizeSettings = ({ onThemeConfigUpdate }) => {
                                                 e.target.style.backgroundImage = '';
                                             }}
                                         />
-                                        <Typography className={classes.cardLabel}>
+                                        <CardLabel>
                                             Favicon
-                                        </Typography>
+                                        </CardLabel>
                                         {logos.themeDark.favico && (
-                                            <IconButton
-                                                className={classes.deleteIcon}
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    handleDeleteLogo("dark", "favico");
+                                            <Box 
+                                                sx={{ 
+                                                    position: 'absolute', 
+                                                    top: 4, 
+                                                    right: 4, 
+                                                    zIndex: 20 
                                                 }}
-                                                size="small"
+                                                onClick={(e) => e.stopPropagation()}
                                             >
-                                                <DeleteIcon fontSize="small" />
-                                            </IconButton>
+                                                <IconButton
+                                                    size="small"
+                                                    color="error"
+                                                    sx={{ 
+                                                        bgcolor: 'rgba(255, 255, 255, 0.8)',
+                                                        '&:hover': { bgcolor: 'rgba(255, 255, 255, 1)' } 
+                                                    }}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleDeleteLogo("dark", "favico");
+                                                    }}
+                                                >
+                                                    <DeleteIcon fontSize="small" />
+                                                </IconButton>
+                                            </Box>
                                         )}
-                                    </Card>
+                                    </StyledCard>
+                                    <CardDescription>
+                                        Ícone pequeno exibido na aba do navegador (16x16 ou 32x32 pixels)
+                                    </CardDescription>
+                                    {logos.themeDark.favico && (
+                                        <ImagePreview>
+                                            <Typography variant="caption" color="textSecondary" gutterBottom>
+                                                Imagem atual:
+                                            </Typography>
+                                            <PreviewThumbnail 
+                                                src={logos.themeDark.favico} 
+                                                alt="Favicon atual" 
+                                                onError={(e) => {
+                                                    console.error("Erro ao carregar miniatura:", logos.themeDark.favico);
+                                                    e.target.style.display = 'none';
+                                                }}
+                                            />
+                                        </ImagePreview>
+                                    )}
                                     <input
                                         accept="image/*"
                                         style={{ display: "none" }}
@@ -555,12 +805,11 @@ const PersonalizeSettings = ({ onThemeConfigUpdate }) => {
                                         type="file"
                                         onChange={(e) => handleLogoChange(e, "dark", "favico")}
                                     />
-                                </Grid>
-                                <Grid item xs={12} sm={6} md={4} className={classes.cardContainer}>
-                                    <Card className={classes.card} onClick={() => !logos.themeDark.logo && handleCardClick("dark", "logo")}>
-                                        <div
-                                            className={classes.cardMedia}
-                                            style={{
+                                </CardContainer>
+                                <CardContainer item xs={12} sm={6} md={4}>
+                                    <StyledCard onClick={() => !logos.themeDark.logo && handleCardClick("dark", "logo")}>
+                                        <CardMedia
+                                            sx={{
                                                 backgroundImage: `url("${logos.themeDark.logo}")`,
                                                 backgroundPosition: 'center',
                                                 backgroundRepeat: 'no-repeat',
@@ -571,22 +820,54 @@ const PersonalizeSettings = ({ onThemeConfigUpdate }) => {
                                                 e.target.style.backgroundImage = '';
                                             }}
                                         />
-                                        <Typography className={classes.cardLabel}>
+                                        <CardLabel>
                                             Logo
-                                        </Typography>
+                                        </CardLabel>
                                         {logos.themeDark.logo && (
-                                            <IconButton
-                                                className={classes.deleteIcon}
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    handleDeleteLogo("dark", "logo");
+                                            <Box 
+                                                sx={{ 
+                                                    position: 'absolute', 
+                                                    top: 4, 
+                                                    right: 4, 
+                                                    zIndex: 20 
                                                 }}
-                                                size="small"
+                                                onClick={(e) => e.stopPropagation()}
                                             >
-                                                <DeleteIcon fontSize="small" />
-                                            </IconButton>
+                                                <IconButton
+                                                    size="small"
+                                                    color="error"
+                                                    sx={{ 
+                                                        bgcolor: 'rgba(255, 255, 255, 0.8)',
+                                                        '&:hover': { bgcolor: 'rgba(255, 255, 255, 1)' } 
+                                                    }}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleDeleteLogo("dark", "logo");
+                                                    }}
+                                                >
+                                                    <DeleteIcon fontSize="small" />
+                                                </IconButton>
+                                            </Box>
                                         )}
-                                    </Card>
+                                    </StyledCard>
+                                    <CardDescription>
+                                        Logo principal exibido no menu lateral e no login (tamanho recomendado: 150x150 pixels)
+                                    </CardDescription>
+                                    {logos.themeDark.logo && (
+                                        <ImagePreview>
+                                            <Typography variant="caption" color="textSecondary" gutterBottom>
+                                                Imagem atual:
+                                            </Typography>
+                                            <PreviewThumbnail 
+                                                src={logos.themeDark.logo} 
+                                                alt="Logo atual" 
+                                                onError={(e) => {
+                                                    console.error("Erro ao carregar miniatura:", logos.themeDark.logo);
+                                                    e.target.style.display = 'none';
+                                                }}
+                                            />
+                                        </ImagePreview>
+                                    )}
                                     <input
                                         accept="image/*"
                                         style={{ display: "none" }}
@@ -594,12 +875,11 @@ const PersonalizeSettings = ({ onThemeConfigUpdate }) => {
                                         type="file"
                                         onChange={(e) => handleLogoChange(e, "dark", "logo")}
                                     />
-                                </Grid>
-                                <Grid item xs={12} sm={6} md={4} className={classes.cardContainer}>
-                                    <Card className={classes.card} onClick={() => !logos.themeDark.logoTicket && handleCardClick("dark", "logoTicket")}>
-                                        <div
-                                            className={classes.cardMedia}
-                                            style={{
+                                </CardContainer>
+                                <CardContainer item xs={12} sm={6} md={4}>
+                                    <StyledCard onClick={() => !logos.themeDark.logoTicket && handleCardClick("dark", "logoTicket")}>
+                                        <CardMedia
+                                            sx={{
                                                 backgroundImage: `url("${logos.themeDark.logoTicket}")`,
                                                 backgroundPosition: 'center',
                                                 backgroundRepeat: 'no-repeat',
@@ -610,22 +890,54 @@ const PersonalizeSettings = ({ onThemeConfigUpdate }) => {
                                                 e.target.style.backgroundImage = '';
                                             }}
                                         />
-                                        <Typography className={classes.cardLabel}>
+                                        <CardLabel>
                                             Logo Ticket
-                                        </Typography>
+                                        </CardLabel>
                                         {logos.themeDark.logoTicket && (
-                                            <IconButton
-                                                className={classes.deleteIcon}
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    handleDeleteLogo("dark", "logoTicket");
+                                            <Box 
+                                                sx={{ 
+                                                    position: 'absolute', 
+                                                    top: 4, 
+                                                    right: 4, 
+                                                    zIndex: 20 
                                                 }}
-                                                size="small"
+                                                onClick={(e) => e.stopPropagation()}
                                             >
-                                                <DeleteIcon fontSize="small" />
-                                            </IconButton>
+                                                <IconButton
+                                                    size="small"
+                                                    color="error"
+                                                    sx={{ 
+                                                        bgcolor: 'rgba(255, 255, 255, 0.8)',
+                                                        '&:hover': { bgcolor: 'rgba(255, 255, 255, 1)' } 
+                                                    }}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleDeleteLogo("dark", "logoTicket");
+                                                    }}
+                                                >
+                                                    <DeleteIcon fontSize="small" />
+                                                </IconButton>
+                                            </Box>
                                         )}
-                                    </Card>
+                                    </StyledCard>
+                                    <CardDescription>
+                                        Logo exibido na interface de tickets/atendimentos (tamanho recomendado: 100x100 pixels)
+                                    </CardDescription>
+                                    {logos.themeDark.logoTicket && (
+                                        <ImagePreview>
+                                            <Typography variant="caption" color="textSecondary" gutterBottom>
+                                                Imagem atual:
+                                            </Typography>
+                                            <PreviewThumbnail 
+                                                src={logos.themeDark.logoTicket} 
+                                                alt="Logo Ticket atual" 
+                                                onError={(e) => {
+                                                    console.error("Erro ao carregar miniatura:", logos.themeDark.logoTicket);
+                                                    e.target.style.display = 'none';
+                                                }}
+                                            />
+                                        </ImagePreview>
+                                    )}
                                     <input
                                         accept="image/*"
                                         style={{ display: "none" }}
@@ -633,131 +945,121 @@ const PersonalizeSettings = ({ onThemeConfigUpdate }) => {
                                         type="file"
                                         onChange={(e) => handleLogoChange(e, "dark", "logoTicket")}
                                     />
-                                </Grid>
+                                </CardContainer>
                             </Grid>
                         </Grid>
                     </Grid>
-                </div>
+                </FullWidthContainer>
             </TabPanel>
             <TabPanel value={tabValue} index={2}>
-                <div className={classes.fullWidthContainer}>
-                    <div className={classes.titleContainer}>
+                <FullWidthContainer>
+                    <TitleContainer>
                         <Typography variant="h6">{t("settings.personalize.tabpanel.light")}</Typography>
-                        <Button
+                        <ActionButton
                             variant="contained"
                             color="primary"
-                            className={classes.button}
                             onClick={() => handleSaveColors("light")}
                         >
                             {t("settings.personalize.tabpanel.button.saveLight")}
-                        </Button>
-                    </div>
+                        </ActionButton>
+                    </TitleContainer>
                     <Grid container spacing={5}>
                         <Grid item xs={12} md={3}>
-                            <TextField
+                            <StyledTextField
                                 label={t("settings.personalize.tabpanel.input.primary")}
                                 type="color"
                                 variant="outlined"
                                 fullWidth
-                                className={classes.textField}
                                 value={colors.themeLight.primaryColor}
                                 onChange={(e) => handleColorChange(e, "themeLight", "primaryColor")}
                             />
                         </Grid>
                         <Grid item xs={12} md={3}>
-                            <TextField
+                            <StyledTextField
                                 label={t("settings.personalize.tabpanel.input.secondary")}
                                 type="color"
                                 variant="outlined"
                                 fullWidth
-                                className={classes.textField}
                                 value={colors.themeLight.secondaryColor}
                                 onChange={(e) => handleColorChange(e, "themeLight", "secondaryColor")}
                             />
                         </Grid>
                         <Grid item xs={12} md={3}>
-                            <TextField
+                            <StyledTextField
                                 label={t("settings.personalize.tabpanel.input.default")}
                                 type="color"
                                 variant="outlined"
                                 fullWidth
-                                className={classes.textField}
                                 value={colors.themeLight.backgroundDefault}
                                 onChange={(e) => handleColorChange(e, "themeLight", "backgroundDefault")}
                             />
                         </Grid>
                         <Grid item xs={12} md={3}>
-                            <TextField
+                            <StyledTextField
                                 label={t("settings.personalize.tabpanel.input.paper")}
                                 type="color"
                                 variant="outlined"
                                 fullWidth
-                                className={classes.textField}
                                 value={colors.themeLight.backgroundPaper}
                                 onChange={(e) => handleColorChange(e, "themeLight", "backgroundPaper")}
                             />
                         </Grid>
                     </Grid>
-                    <div className={classes.titleContainer}>
+                    <TitleContainer>
                         <Typography variant="h6">{t("settings.personalize.tabpanel.dark")}</Typography>
-                        <Button
+                        <ActionButton
                             variant="contained"
                             color="primary"
-                            className={classes.button}
                             onClick={() => handleSaveColors("dark")}
                         >
                             {t("settings.personalize.tabpanel.button.saveDark")}
-                        </Button>
-                    </div>
+                        </ActionButton>
+                    </TitleContainer>
                     <Grid container spacing={5}>
                         <Grid item xs={12} md={3}>
-                            <TextField
+                            <StyledTextField
                                 label={t("settings.personalize.tabpanel.input.primary")}
                                 type="color"
                                 variant="outlined"
                                 fullWidth
-                                className={classes.textField}
                                 value={colors.themeDark.primaryColor}
                                 onChange={(e) => handleColorChange(e, "themeDark", "primaryColor")}
                             />
                         </Grid>
                         <Grid item xs={12} md={3}>
-                            <TextField
+                            <StyledTextField
                                 label={t("settings.personalize.tabpanel.input.secondary")}
                                 type="color"
                                 variant="outlined"
                                 fullWidth
-                                className={classes.textField}
                                 value={colors.themeDark.secondaryColor}
                                 onChange={(e) => handleColorChange(e, "themeDark", "secondaryColor")}
                             />
                         </Grid>
                         <Grid item xs={12} md={3}>
-                            <TextField
+                            <StyledTextField
                                 label={t("settings.personalize.tabpanel.input.default")}
                                 type="color"
                                 variant="outlined"
                                 fullWidth
-                                className={classes.textField}
                                 value={colors.themeDark.backgroundDefault}
                                 onChange={(e) => handleColorChange(e, "themeDark", "backgroundDefault")}
                             />
                         </Grid>
                         <Grid item xs={12} md={3}>
-                            <TextField
+                            <StyledTextField
                                 label={t("settings.personalize.tabpanel.input.paper")}
                                 type="color"
                                 variant="outlined"
                                 fullWidth
-                                className={classes.textField}
                                 value={colors.themeDark.backgroundPaper}
                                 onChange={(e) => handleColorChange(e, "themeDark", "backgroundPaper")}
                             />
                         </Grid>
                     </Grid>
-                </div>
+                </FullWidthContainer>
             </TabPanel>
-        </div>
+        </Root>
     );
 };
 

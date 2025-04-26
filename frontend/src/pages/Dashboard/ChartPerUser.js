@@ -1,4 +1,5 @@
-import { TextField, useTheme } from "@material-ui/core";
+import { useTheme } from "@mui/material/styles";
+import { styled, Paper, Box } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -15,6 +16,19 @@ import useTickets from "../../hooks/useTickets";
 import api from "../../services/api";
 import CustomTooltip from "./CustomTooltip";
 import Title from "./Title";
+import ResponsiveDateFilter from "../../components/ResponsiveDateFilter";
+
+const ChartPaper = styled(Paper)(({ theme }) => ({
+    padding: theme.spacing(2, 1.5, 1.5, 1.5),
+    background: `linear-gradient(135deg, ${theme.palette.primary.light} 0%, ${theme.palette.background.paper} 100%)`,
+    borderRadius: 18,
+    boxShadow: "0 4px 24px 0 rgba(80, 80, 160, 0.07)",
+    marginBottom: theme.spacing(1),
+    overflow: 'unset',
+    [theme.breakpoints.down('sm')]: {
+        padding: theme.spacing(1.5, 1, 1, 1),
+    },
+}));
 
 const ChartPerUser = ({ searchParam, pageNumber, status, showAll, queueIds, withUnreadMessages }) => {
     const theme = useTheme();
@@ -80,64 +94,47 @@ const ChartPerUser = ({ searchParam, pageNumber, status, showAll, queueIds, with
         setUserChartData(userData);
     }, [ticketsByUser, users, startDate, endDate]);
 
-    const handleStartDateChange = (event) => {
-        setStartDate(event.target.value);
-    };
-
-    const handleEndDateChange = (event) => {
-        setEndDate(event.target.value);
-    };
-
     return (
-        <React.Fragment>
-            <Title>{t("dashboard.chartPerUser.title")}</Title>
-            <div
-                style={{ display: "flex", justifyContent: "space-between", marginBottom: "16px" }}
-            >
-                <TextField
-                    label={t("dashboard.chartPerUser.date.start")}
-                    type="date"
-                    value={startDate}
-                    onChange={handleStartDateChange}
-                    InputLabelProps={{ shrink: true }}
+        <ChartPaper>
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start', flexWrap: 'wrap', margin: 0, padding: 0, gap: 70 }}>
+                <Title sx={{ color: 'text.primary', fontWeight: 700, fontSize: '1.1rem', mb: 0 }}>{t("dashboard.chartPerUser.title")}</Title>
+                <ResponsiveDateFilter
+                    startDateLabel={t("dashboard.chartPerUser.date.start")}
+                    endDateLabel={t("dashboard.chartPerUser.date.end")}
+                    startDate={startDate}
+                    endDate={endDate}
+                    onStartDateChange={setStartDate}
+                    onEndDateChange={setEndDate}
                 />
-                <TextField
-                    label={t("dashboard.chartPerUser.date.end")}
-                    type="date"
-                    value={endDate}
-                    onChange={handleEndDateChange}
-                    InputLabelProps={{ shrink: true }}
-                />
-            </div>
-            <ResponsiveContainer>
+            </Box>
+            <ResponsiveContainer width="100%" height={300}>
                 <BarChart
                     data={userChartData}
-                    barSize={40}
-                    width={730}
-                    height={300}
                     margin={{
                         top: 16,
                         right: 16,
                         bottom: 0,
                         left: 24,
                     }}
+                    barGap={4}
+                    barCategoryGap={18}
                 >
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="userName" stroke={theme.palette.text.secondary} />
-                    <YAxis stroke={theme.palette.text.secondary}>
-                        <Label
+                    <CartesianGrid strokeDasharray="2 4" stroke={theme.palette.divider} />
+                    <XAxis dataKey="userName" stroke={theme.palette.text.secondary} tick={{ fill: theme.palette.text.secondary }} />
+                    <YAxis stroke={theme.palette.text.secondary} tick={{ fill: theme.palette.text.secondary }}>
+                        {/* <Label
                             angle={270}
                             position="left"
-                            style={{ textAnchor: "middle", fill: theme.palette.text.primary }}
+                            sx={{ textAnchor: "middle", fill: theme.palette.text.primary }}
                         >
                             {t("dashboard.chartPerUser.ticket")}
-                        </Label>
+                        </Label> */}
                     </YAxis>
-                    <Tooltip content={<CustomTooltip />} cursor={true} />
-                    <Bar dataKey="count" fill={theme.palette.primary.main} />
+                    <Tooltip content={<CustomTooltip />} cursor={{ fill: theme.palette.action.hover, opacity: 0.07 }} />
+                    <Bar dataKey="count" fill={theme.palette.primary.main} radius={[8, 8, 0, 0]} maxBarSize={36} isAnimationActive={true} />
                 </BarChart>
             </ResponsiveContainer>
-        </React.Fragment>
+        </ChartPaper>
     );
 };
 

@@ -1,4 +1,4 @@
-# Manual de Instalação do Press Ticket em Localhost
+# Manual de Instalação do Press Ticket® em Localhost
 
 ### Programas Essenciais:
 
@@ -35,7 +35,7 @@ E crie o banco de dados manualmente.
 
 ### 2. Clonar o repositório:
 
-Para clonar o repositório do Press Ticket, use o seguinte comando no terminal:
+Para clonar o repositório do Press Ticket®, use o seguinte comando no terminal:
 
 ```bash
 git clone https://github.com/rtenorioh/Press-Ticket.git Press-Ticket

@@ -1,7 +1,4 @@
-import { Checkbox, ListItemText } from "@material-ui/core";
-import FormControl from "@material-ui/core/FormControl";
-import MenuItem from "@material-ui/core/MenuItem";
-import Select from "@material-ui/core/Select";
+import { Checkbox, ListItemText, FormControl, MenuItem, Select } from "@mui/material";
 import React from "react";
 import { useTranslation } from "react-i18next";
 
@@ -34,7 +31,6 @@ const TicketsQueueSelect = ({
 							vertical: "top",
 							horizontal: "left",
 						},
-						getContentAnchorEl: null,
 					}}
 					renderValue={() => t("ticketsQueueSelect.placeholder")}
 				>
@@ -42,12 +38,12 @@ const TicketsQueueSelect = ({
 						userQueues.map(queue => (
 							<MenuItem dense key={queue.id} value={queue.id}>
 								<Checkbox
-									style={{
-										color: queue.color,
-									}}
 									size="small"
 									color="primary"
 									checked={selectedQueueIds.indexOf(queue.id) > -1}
+									sx={{
+										color: queue.color,
+									}}
 								/>
 								<ListItemText primary={queue.name} />
 							</MenuItem>

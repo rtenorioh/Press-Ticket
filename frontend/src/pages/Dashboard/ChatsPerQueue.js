@@ -1,5 +1,6 @@
-import { useTheme } from "@material-ui/core/styles";
-import TextField from '@material-ui/core/TextField';
+import { useTheme } from "@mui/material/styles";
+import ResponsiveDateFilter from "../../components/ResponsiveDateFilter";
+import { styled, Paper, Box } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -13,6 +14,18 @@ import {
 import useTickets from "../../hooks/useTickets";
 import CustomTooltip from "./CustomTooltip";
 import Title from "./Title";
+
+const ChartPaper = styled(Paper)(({ theme }) => ({
+  padding: theme.spacing(2, 1.5, 1.5, 1.5),
+  background: `linear-gradient(135deg, ${theme.palette.primary.light} 0%, ${theme.palette.background.paper} 100%)`,
+  borderRadius: 18,
+  boxShadow: "0 4px 24px 0 rgba(80, 80, 160, 0.07)",
+  marginBottom: theme.spacing(1),
+  overflow: 'unset',
+  [theme.breakpoints.down('sm')]: {
+    padding: theme.spacing(1.5, 1, 1, 1),
+  },
+}));
 
 const ChartPerQueue = ({ queueIds, withUnreadMessages }) => {
     const theme = useTheme();
@@ -69,51 +82,51 @@ const ChartPerQueue = ({ queueIds, withUnreadMessages }) => {
         setQueueChartData(formattedData);
     }, [tickets, queueIds]);
 
-    // if (loading) {
-    //     return <div>Carregando...</div>;
-    // }
+    const filteredChartData = queueChartData.filter(data => data.value > 0);
 
     return (
-        <React.Fragment>
-            <Title>{t("dashboard.chartPerQueue.perQueue.title")}</Title>
-            <div
-                style={{ display: "flex", justifyContent: "space-between", marginBottom: "16px" }}
+      <ChartPaper>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start', flexWrap: 'wrap', margin: 0, padding: 0, gap: 1 }}>
+          <Title sx={{ color: 'text.primary', fontWeight: 700, fontSize: '1.1rem', mb: 0 }}>{t("dashboard.chartPerQueue.perQueue.title")}</Title>
+          <ResponsiveDateFilter
+            startDateLabel={t("dashboard.chartPerQueue.date.start")}
+            endDateLabel={t("dashboard.chartPerQueue.date.end")}
+            startDate={startDate}
+            endDate={endDate}
+            onStartDateChange={setStartDate}
+            onEndDateChange={setEndDate}
+          />
+        </Box>
+        <ResponsiveContainer width="100%" height={220}>
+          <PieChart>
+            <Pie
+              data={filteredChartData.length > 0 ? filteredChartData : [{ name: 'Sem dados', value: 1, color: '#d1d1d1' }]}
+              cx="50%"
+              cy="50%"
+              innerRadius={45}
+              outerRadius={80}
+              fill={theme.palette.primary.main}
+              dataKey="value"
+              labelLine={false}
+              label={({ name, value, percent }) =>
+                filteredChartData.length > 0 && value > 0
+                  ? `${name}: ${value} (${(percent * 100).toFixed(0)}%)`
+                  : null
+              }
+              isAnimationActive={true}
+              animationDuration={900}
+              stroke="#fff"
+              strokeWidth={3}
             >
-                <TextField
-                    label={t("dashboard.chartPerQueue.date.start")}
-                    type="date"
-                    value={startDate}
-                    onChange={(e) => setStartDate(e.target.value)}
-                    InputLabelProps={{ shrink: true }}
-                />
-                <TextField
-                    label={t("dashboard.chartPerQueue.date.end")}
-                    type="date"
-                    value={endDate}
-                    onChange={(e) => setEndDate(e.target.value)}
-                    InputLabelProps={{ shrink: true }}
-                />
-            </div>
-            <ResponsiveContainer>
-                <PieChart>
-                    <Pie
-                        data={queueChartData}
-                        cx="40%"
-                        cy="50%"
-                        outerRadius={80}
-                        fill={theme.palette.primary.main}
-                        dataKey="value"
-                        label
-                    >
-                        {queueChartData.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={entry.color} />
-                        ))}
-                    </Pie>
-                    <Tooltip content={<CustomTooltip />} cursor={true} />
-                    <Legend layout="vertical" align="right" verticalAlign="middle" />
-                </PieChart>
-            </ResponsiveContainer>
-        </React.Fragment>
+              {(filteredChartData.length > 0 ? filteredChartData : [{ name: 'Sem dados', value: 1, color: '#d1d1d1' }]).map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={entry.color} style={{ filter: 'drop-shadow(0 2px 8px rgba(80,80,160,0.10))' }} />
+              ))}
+            </Pie>
+            <Tooltip content={<CustomTooltip />} cursor={true} />
+            {/* <Legend layout="vertical" align="right" verticalAlign="middle" /> */}
+          </PieChart>
+        </ResponsiveContainer>
+      </ChartPaper>
     );
 };
 

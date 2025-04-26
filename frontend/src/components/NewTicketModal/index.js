@@ -2,22 +2,22 @@ import {
 	FormControl,
 	InputLabel,
 	MenuItem,
-	Select
-} from "@material-ui/core";
-import Button from "@material-ui/core/Button";
-import CircularProgress from "@material-ui/core/CircularProgress";
-import Dialog from "@material-ui/core/Dialog";
-import DialogActions from "@material-ui/core/DialogActions";
-import DialogContent from "@material-ui/core/DialogContent";
-import DialogTitle from "@material-ui/core/DialogTitle";
-import Grid from "@material-ui/core/Grid";
-import TextField from "@material-ui/core/TextField";
+	Select,
+	Button,
+	CircularProgress,
+	Dialog,
+	DialogActions,
+	DialogContent,
+	DialogTitle,
+	Grid,
+	TextField
+} from "@mui/material";
 import Autocomplete, {
 	createFilterOptions,
-} from "@material-ui/lab/Autocomplete";
+} from "@mui/material/Autocomplete";
 import React, { useCallback, useContext, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useHistory } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../../context/Auth/AuthContext";
 import toastError from "../../errors/toastError";
 import api from "../../services/api";
@@ -29,7 +29,7 @@ const filter = createFilterOptions({
 });
 
 const NewTicketModal = ({ modalOpen, onClose }) => {
-	const history = useHistory();
+	const navigate = useNavigate();
 	const { t } = useTranslation();
 	const [options, setOptions] = useState([]);
 	const [loading, setLoading] = useState(false);
@@ -132,12 +132,12 @@ const NewTicketModal = ({ modalOpen, onClose }) => {
 
 			const { data: ticket } = await api.post("/tickets", {
 				contactId: contactId,
-				userId: user.id,
+				userId: user?.id,
 				status: "open",
 				queueId: selectedQueue,
 				whatsappId: selectedWhatsapp
 			});
-			history.push(`/tickets/${ticket.id}`);
+			navigate(`/tickets/${ticket.id}`);
 		} catch (err) {
 			toastError(err);
 		}
@@ -174,11 +174,11 @@ const NewTicketModal = ({ modalOpen, onClose }) => {
 		return filtered;
 	};
 
-	const renderOption = (option) => {
+	const renderOption = (props, option) => {
 		if (option.number) {
-			return `${option.name} - ${option.number}`;
+			return <li {...props}>{`${option.name} - ${option.number}`}</li>;
 		} else {
-			return `${t("newTicketModal.add")} ${option.name}`;
+			return <li {...props}>{`${t("newTicketModal.add")} ${option.name}`}</li>;
 		}
 	};
 
@@ -224,7 +224,7 @@ const NewTicketModal = ({ modalOpen, onClose }) => {
 										variant="outlined"
 										required
 										onChange={(e) => setSearchParam(e.target.value)}
-										onKeyDown={(e) => {
+										onKeyPress={(e) => {
 											if (loading || !selectedContact) return;
 											else if (e.key === "Enter") {
 												handleSaveTicket(selectedContact.id);
@@ -256,8 +256,8 @@ const NewTicketModal = ({ modalOpen, onClose }) => {
 									<MenuItem value="">
 										{t("newTicketModal.select.none")}
 									</MenuItem>
-									{Array.isArray(user.whatsapps) &&
-										user.whatsapps.map((whatsapp) => (
+									{Array.isArray(user?.whatsapps) &&
+										user?.whatsapps.map((whatsapp) => (
 											<MenuItem key={whatsapp.id} value={whatsapp.id}>
 												{whatsapp.name}
 											</MenuItem>
@@ -276,7 +276,7 @@ const NewTicketModal = ({ modalOpen, onClose }) => {
 									<MenuItem value="">
 										{t("newTicketModal.select.none")}
 									</MenuItem>
-									{user.queues.map((queue) => (
+									{user?.queues.map((queue) => (
 										<MenuItem key={queue.id} value={queue.id}>
 											{queue.name}
 										</MenuItem>

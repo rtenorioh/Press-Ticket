@@ -1,5 +1,4 @@
-import { Menu } from "@material-ui/core";
-import MenuItem from "@material-ui/core/MenuItem";
+import { Menu, MenuItem } from "@mui/material";
 import PropTypes from "prop-types";
 import React, { useContext, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -72,7 +71,6 @@ const MessageOptionsMenu = ({ message, menuOpen, handleClose, anchorEl }) => {
       </MessageHistoryModal>
       <Menu
         anchorEl={anchorEl}
-        getContentAnchorEl={null}
         anchorOrigin={{
           vertical: "bottom",
           horizontal: "right",

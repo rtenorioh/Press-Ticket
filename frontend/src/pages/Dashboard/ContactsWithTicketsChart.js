@@ -1,5 +1,6 @@
-import { useTheme } from "@material-ui/core/styles";
-import TextField from "@material-ui/core/TextField";
+import { useTheme } from "@mui/material/styles";
+import { styled, Paper, Box } from "@mui/material";
+import ResponsiveDateFilter from "../../components/ResponsiveDateFilter";
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -15,6 +16,18 @@ import {
 import useTickets from "../../hooks/useTickets";
 import CustomTooltip from "./CustomTooltip";
 import Title from "./Title";
+
+const ChartPaper = styled(Paper)(({ theme }) => ({
+    padding: theme.spacing(2, 1.5, 1.5, 1.5),
+    background: `linear-gradient(135deg, ${theme.palette.primary.light} 0%, ${theme.palette.background.paper} 100%)`,
+    borderRadius: 18,
+    boxShadow: "0 4px 24px 0 rgba(80, 80, 160, 0.07)",
+    marginBottom: theme.spacing(1),
+    overflow: 'unset',
+    [theme.breakpoints.down('sm')]: {
+        padding: theme.spacing(1.5, 1, 1, 1),
+    },
+}));
 
 const ContactsWithTicketsChart = () => {
     const theme = useTheme();
@@ -65,59 +78,46 @@ const ContactsWithTicketsChart = () => {
     }, [contactsWithTicketsByDay, startDate, endDate]);
 
     return (
-        <React.Fragment>
-            <Title>{t("dashboard.contactsWithTickets.title")}</Title>
-            <div
-                style={{ display: "flex", justifyContent: "space-between", marginBottom: "16px" }}
-            >
-                <TextField
-                    label={t("dashboard.contactsWithTickets.date.start")}
-                    type="date"
-                    value={startDate}
-                    onChange={(e) => setStartDate(e.target.value)}
-                    InputLabelProps={{
-                        shrink: true,
-                    }}
+        <ChartPaper>
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start', flexWrap: 'wrap', margin: 0, padding: 0, gap: 2 }}>
+                <Title sx={{ color: 'text.primary', fontWeight: 700, fontSize: '1.1rem', mb: 0 }}>{t("dashboard.contactsWithTickets.title")}</Title>
+                <ResponsiveDateFilter
+                    startDateLabel={t("dashboard.contactsWithTickets.date.start")}
+                    endDateLabel={t("dashboard.contactsWithTickets.date.end")}
+                    startDate={startDate}
+                    endDate={endDate}
+                    onStartDateChange={setStartDate}
+                    onEndDateChange={setEndDate}
                 />
-                <TextField
-                    label={t("dashboard.contactsWithTickets.date.end")}
-                    type="date"
-                    value={endDate}
-                    onChange={(e) => setEndDate(e.target.value)}
-                    InputLabelProps={{
-                        shrink: true,
-                    }}
-                />
-            </div>
-            <ResponsiveContainer>
+            </Box>
+            <ResponsiveContainer width="100%" height={220}>
                 <BarChart
                     data={chartData}
-                    barSize={40}
-                    width={730}
-                    height={250}
                     margin={{
                         top: 16,
                         right: 16,
                         bottom: 0,
                         left: 24,
                     }}
+                    barGap={4}
+                    barCategoryGap={18}
                 >
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="date" stroke={theme.palette.text.secondary} />
-                    <YAxis stroke={theme.palette.text.secondary}>
-                        <Label
+                    <CartesianGrid strokeDasharray="2 4" stroke={theme.palette.divider} />
+                    <XAxis dataKey="date" stroke={theme.palette.text.secondary} tick={{ fill: theme.palette.text.secondary }} />
+                    <YAxis stroke={theme.palette.text.secondary} tick={{ fill: theme.palette.text.secondary }}>
+                        {/* <Label
                             angle={270}
                             position="left"
-                            style={{ textAnchor: "middle", fill: theme.palette.text.primary }}
+                            sx={{ textAnchor: "middle", fill: theme.palette.text.secondary }}
                         >
                             {t("dashboard.contactsWithTickets.unique")}
-                        </Label>
+                        </Label> */}
                     </YAxis>
-                    <Tooltip content={<CustomTooltip />} />
-                    <Bar dataKey="count" fill={theme.palette.primary.main} />
+                    <Tooltip content={<CustomTooltip />} cursor={{ fill: theme.palette.action.hover, opacity: 0.07 }} />
+                    <Bar dataKey="count" fill={theme.palette.primary.main} radius={[8, 8, 0, 0]} maxBarSize={36} isAnimationActive={true} />
                 </BarChart>
             </ResponsiveContainer>
-        </React.Fragment>
+        </ChartPaper>
     );
 };
 

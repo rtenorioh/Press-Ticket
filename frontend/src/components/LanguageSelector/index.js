@@ -1,4 +1,4 @@
-import { IconButton, Menu, MenuItem, Tooltip } from "@material-ui/core";
+import { IconButton, Menu, MenuItem, Tooltip } from "@mui/material";
 import React, { useState } from "react";
 import Flag from "react-world-flags";
 import i18n from "../../translate/i18n";
@@ -60,7 +60,6 @@ const LanguageSelector = () => {
                 anchorEl={anchorEl}
                 open={Boolean(anchorEl)}
                 onClose={handleCloseMenu}
-                getContentAnchorEl={null}
                 anchorOrigin={{
                     vertical: "bottom",
                     horizontal: "right",

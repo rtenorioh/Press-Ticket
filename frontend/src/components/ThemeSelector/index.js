@@ -1,5 +1,6 @@
-import { IconButton } from '@material-ui/core';
-import { Brightness4, Brightness7 } from '@material-ui/icons';
+import IconButton from '@mui/material/IconButton';
+import Brightness4Icon from '@mui/icons-material/Brightness4';
+import Brightness7Icon from '@mui/icons-material/Brightness7';
 import React, { useEffect, useState } from 'react';
 
 function ThemeSelector({ toggleTheme }) {
@@ -12,14 +13,18 @@ function ThemeSelector({ toggleTheme }) {
         }
     }, []);
 
-    const renderThemeIcon = theme === 'light' ? <Brightness7 /> : <Brightness4 />;
+    const renderThemeIcon = theme === 'light' ? <Brightness7Icon /> : <Brightness4Icon />;
 
     return (
         <IconButton
             color="inherit"
             onClick={() => {
-                toggleTheme();
-                setTheme(prevTheme => (prevTheme === 'light' ? 'dark' : 'light'));
+                if (typeof toggleTheme === 'function') {
+                    toggleTheme();
+                    setTheme(prevTheme => (prevTheme === 'light' ? 'dark' : 'light'));
+                } else {
+                    console.error('toggleTheme não é uma função');
+                }
             }}
             aria-label="Toggle theme"
         >

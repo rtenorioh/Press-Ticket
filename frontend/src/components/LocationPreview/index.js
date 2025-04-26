@@ -1,95 +1,94 @@
-import { Button, Divider, Typography } from "@material-ui/core";
-import { makeStyles } from "@material-ui/core/styles";
+import { Button, Divider, Typography, styled } from "@mui/material";
 import PropTypes from "prop-types";
 import React from "react";
 import toastError from "../../errors/toastError";
+import { useTranslation } from "react-i18next";
 
-const useStyles = makeStyles((theme) => ({
-	container: {
-		minWidth: "250px",
-		display: "flex",
-		flexDirection: "column",
-	},
-	imageContainer: {
-		display: "flex",
-		justifyContent: "center",
-		alignItems: "center",
-		marginBottom: theme.spacing(2),
-	},
-	image: {
-		width: "100px",
-		cursor: "pointer",
-		borderRadius: theme.shape.borderRadius,
-		boxShadow: theme.shadows[1],
-	},
-	description: {
-		margin: theme.spacing(1, 2),
-		color: theme.palette.text.primary,
-		wordBreak: "break-word",
-	},
-	button: {
-		marginTop: theme.spacing(1),
-	},
+const Container = styled('div')(({ theme }) => ({
+  minWidth: "250px",
+  display: "flex",
+  flexDirection: "column",
+}));
+
+const ImageContainer = styled('div')(({ theme }) => ({
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+  marginBottom: theme.spacing(2),
+}));
+
+const Image = styled('img')(({ theme }) => ({
+  width: "100px",
+  cursor: "pointer",
+  borderRadius: theme.shape.borderRadius,
+  boxShadow: theme.shadows[1],
+}));
+
+const Description = styled(Typography)(({ theme }) => ({
+  margin: theme.spacing(1, 2),
+  color: theme.palette.text.primary,
+  wordBreak: "break-word",
+}));
+
+const StyledButton = styled(Button)(({ theme }) => ({
+  marginTop: theme.spacing(1),
 }));
 
 const LocationPreview = ({ image, link, description }) => {
-	const classes = useStyles();
+  const { t } = useTranslation();
+  const handleLocation = async () => {
+    try {
+      if (link) {
+        window.open(link, "_blank", "noopener, noreferrer");
+      }
+    } catch (err) {
+      toastError(err);
+    }
+  };
 
-	const handleLocation = async () => {
-		try {
-			if (link) {
-				window.open(link, "_blank", "noopener, noreferrer");
-			}
-		} catch (err) {
-			toastError(err);
-		}
-	};
-
-	return (
-		<div className={classes.container}>
-			<div className={classes.imageContainer}>
-				<img
-					src={image || "/placeholder-image.png"}
-					alt={description || "Localização"}
-					className={classes.image}
-					onClick={handleLocation}
-				/>
-			</div>
-			{description && (
-				<Typography variant="subtitle1" className={classes.description}>
-					{description.split("\\n").map((line, index) => (
-						<span key={index}>
-							{line}
-							<br />
-						</span>
-					))}
-				</Typography>
-			)}
-			<Divider />
-			<Button
-				fullWidth
-				color="primary"
-				variant="contained"
-				onClick={handleLocation}
-				disabled={!link}
-				className={classes.button}
-			>
-				Visualizar
-			</Button>
-		</div>
-	);
+  return (
+    <Container>
+      <ImageContainer>
+        <Image
+          src={image || "/placeholder-image.png"}
+          alt={description || t("locationPreview.alt")}
+          onClick={handleLocation}
+        />
+      </ImageContainer>
+      {description && (
+        <Description variant="subtitle1">
+          {description.split("\\n").map((line, index) => (
+            <span key={index}>
+              {line}
+              <br />
+            </span>
+          ))}
+        </Description>
+      )}
+      <Divider />
+      <StyledButton
+        fullWidth
+        color="primary"
+        variant="contained"
+        onClick={handleLocation}
+        disabled={!link}
+      >
+        {t("locationPreview.buttons.view")}
+      </StyledButton>
+    </Container>
+  );
 };
 
 LocationPreview.propTypes = {
-	image: PropTypes.string,
-	link: PropTypes.string,
-	description: PropTypes.string,
+  image: PropTypes.string,
+  link: PropTypes.string,
+  description: PropTypes.string,
 };
 
 LocationPreview.defaultProps = {
-	image: null,
-	link: null,
-	description: "",
+  image: null,
+  link: null,
+  description: "",
 };
 
 export default LocationPreview;

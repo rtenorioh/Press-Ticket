@@ -1,7 +1,7 @@
-import { Paper, makeStyles } from "@material-ui/core";
-import clsx from "clsx";
+import { Paper } from "@mui/material";
+import { styled } from "@mui/material/styles";
 import React, { useEffect, useState } from "react";
-import { useHistory, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { EditMessageProvider } from "../../context/EditingMessage/EditingMessageContext";
 import { ReplyMessageProvider } from "../../context/ReplyingMessage/ReplyingMessageContext";
@@ -17,64 +17,63 @@ import TicketInfo from "../TicketInfo";
 
 const drawerWidth = 320;
 
-const useStyles = makeStyles((theme) => ({
-  root: {
-    backgroundColor: theme.palette.background.default,
-    display: "flex",
-    height: "100%",
-    position: "relative",
-    overflow: "hidden",
+const Root = styled('div')(({ theme }) => ({
+  backgroundColor: theme.palette.background.default,
+  display: "flex",
+  height: "100%",
+  position: "relative",
+  overflow: "hidden",
+}));
+
+const TicketInfoContainer = styled('div')(({ theme }) => ({
+  backgroundColor: theme.palette.background.default,
+  maxWidth: "50%",
+  flexBasis: "50%",
+  [theme.breakpoints.down('sm')]: {
+    maxWidth: "80%",
+    flexBasis: "80%",
   },
-  ticketInfo: {
-    backgroundColor: theme.palette.background.default,
-    maxWidth: "50%",
-    flexBasis: "50%",
-    [theme.breakpoints.down("sm")]: {
-      maxWidth: "80%",
-      flexBasis: "80%",
-    },
+}));
+
+const TicketActionButtonsContainer = styled('div')(({ theme }) => ({
+  backgroundColor: theme.palette.background.default,
+  maxWidth: "50%",
+  flexBasis: "50%",
+  display: "flex",
+  [theme.breakpoints.down('sm')]: {
+    maxWidth: "100%",
+    flexBasis: "100%",
+    marginBottom: "5px",
   },
-  ticketActionButtons: {
-    backgroundColor: theme.palette.background.default,
-    maxWidth: "50%",
-    flexBasis: "50%",
-    display: "flex",
-    [theme.breakpoints.down("sm")]: {
-      maxWidth: "100%",
-      flexBasis: "100%",
-      marginBottom: "5px",
-    },
-  },
-  mainWrapper: {
-    flex: 1,
-    height: "100%",
-    display: "flex",
-    flexDirection: "column",
-    overflow: "hidden",
-    borderTopLeftRadius: 0,
-    borderBottomLeftRadius: 0,
-    borderLeft: "0",
-    marginRight: -drawerWidth,
-    transition: theme.transitions.create("margin", {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.leavingScreen,
-    }),
-  },
-  mainWrapperShift: {
+}));
+
+const MainWrapper = styled(Paper)(({ theme, open }) => ({
+  flex: 1,
+  height: "100%",
+  display: "flex",
+  flexDirection: "column",
+  overflow: "hidden",
+  borderTopLeftRadius: 0,
+  borderBottomLeftRadius: 0,
+  borderLeft: "0",
+  marginRight: open ? 0 : -drawerWidth,
+  transition: theme.transitions.create("margin", {
+    easing: open 
+      ? theme.transitions.easing.easeOut
+      : theme.transitions.easing.sharp,
+    duration: open 
+      ? theme.transitions.duration.enteringScreen
+      : theme.transitions.duration.leavingScreen,
+  }),
+  ...(open && {
     borderTopRightRadius: 0,
     borderBottomRightRadius: 0,
-    transition: theme.transitions.create("margin", {
-      easing: theme.transitions.easing.easeOut,
-      duration: theme.transitions.duration.enteringScreen,
-    }),
-    marginRight: 0,
-  },
+  }),
 }));
 
 const Ticket = () => {
   const { ticketId } = useParams();
-  const history = useHistory();
-  const classes = useStyles();
+  const navigate = useNavigate();
 
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -98,7 +97,7 @@ const Ticket = () => {
       fetchTicket();
     }, 500);
     return () => clearTimeout(delayDebounceFn);
-  }, [ticketId, history]);
+  }, [ticketId, navigate]);
 
   useEffect(() => {
     const socket = openSocket();
@@ -112,7 +111,7 @@ const Ticket = () => {
 
       if (data.action === "delete") {
         toast.success("Ticket deleted sucessfully.");
-        history.push("/tickets");
+        navigate("/tickets");
       }
     });
 
@@ -130,7 +129,7 @@ const Ticket = () => {
     return () => {
       socket.disconnect();
     };
-  }, [ticketId, history]);
+  }, [ticketId, navigate]);
 
   const handleDrawerOpen = () => {
     setDrawerOpen(true);
@@ -141,25 +140,23 @@ const Ticket = () => {
   };
 
   return (
-    <div className={classes.root} id="drawer-container">
-      <Paper
+    <Root id="drawer-container">
+      <MainWrapper
         variant="outlined"
         elevation={0}
-        className={clsx(classes.mainWrapper, {
-          [classes.mainWrapperShift]: drawerOpen,
-        })}
+        open={drawerOpen}
       >
         <TicketHeader loading={loading}>
-          <div className={classes.ticketInfo}>
+          <TicketInfoContainer>
             <TicketInfo
               contact={contact}
               ticket={ticket}
               onClick={handleDrawerOpen}
             />
-          </div>
-          <div className={classes.ticketActionButtons}>
+          </TicketInfoContainer>
+          <TicketActionButtonsContainer>
             <TicketActionButtons ticket={ticket} />
-          </div>
+          </TicketActionButtonsContainer>
         </TicketHeader>
         <ReplyMessageProvider>
           <EditMessageProvider>
@@ -170,14 +167,14 @@ const Ticket = () => {
             <MessageInput ticketStatus={ticket.status} />
           </EditMessageProvider>
         </ReplyMessageProvider>
-      </Paper>
+      </MainWrapper>
       <ContactDrawer
         open={drawerOpen}
         handleDrawerClose={handleDrawerClose}
         contact={contact}
         loading={loading}
       />
-    </div>
+    </Root>
   );
 };
 

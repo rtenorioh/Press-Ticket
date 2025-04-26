@@ -8,12 +8,15 @@ import {
 	Grid,
 	IconButton,
 	InputAdornment,
-	makeStyles,
 	TextField,
-} from "@material-ui/core";
-import { green } from "@material-ui/core/colors";
-import { useTheme } from "@material-ui/core/styles";
-import { Colorize } from "@material-ui/icons";
+	Typography,
+	Tooltip,
+	Box,
+} from "@mui/material";
+import { green } from "@mui/material/colors";
+import { useTheme } from "@mui/material/styles";
+import { styled } from "@mui/material/styles";
+import { AccountTreeOutlined, Colorize, Edit } from "@mui/icons-material";
 import { Field, Form, Formik } from "formik";
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -23,47 +26,70 @@ import toastError from "../../errors/toastError";
 import api from "../../services/api";
 import ColorPicker from "../ColorPicker";
 
-const useStyles = makeStyles((theme) => ({
-	root: {
-		display: "flex",
-		flexWrap: "wrap",
+const Root = styled('div')(({ theme }) => ({
+	display: "flex",
+	flexWrap: "wrap",
+}));
+
+const StyledDialog = styled(Dialog)(({ theme }) => ({
+	'& .MuiDialogTitle-root': {
+		backgroundColor: theme.palette.mode === 'dark' ? theme.palette.background.paper : theme.palette.primary.main,
+		color: theme.palette.mode === 'dark' ? theme.palette.primary.main : theme.palette.primary.contrastText,
+		padding: theme.spacing(2),
 	},
-	textField: {
-		marginRight: theme.spacing(1),
-		flex: 1,
+	'& .MuiDialogContent-root': {
+		padding: theme.spacing(3),
 	},
-	container: {
-		display: "flex",
-		flexWrap: "wrap",
+	'& .MuiDialogActions-root': {
+		padding: theme.spacing(2),
+		backgroundColor: '#f5f5f5',
 	},
-	btnWrapper: {
-		position: "relative",
-	},
-	buttonProgress: {
-		color: green[500],
-		position: "absolute",
-		top: "50%",
-		left: "50%",
-		marginTop: -12,
-		marginLeft: -12,
-	},
-	colorAdorment: {
-		width: 20,
-		height: 20,
+}));
+
+const ButtonProgress = styled(CircularProgress)(({ theme }) => ({
+	color: green[500],
+	position: "absolute",
+	top: "50%",
+	left: "50%",
+	marginTop: -12,
+	marginLeft: -12,
+}));
+
+const ColorAdorment = styled('div')(({ theme }) => ({
+	width: 24,
+	height: 24,
+	borderRadius: '50%',
+	border: `1px solid ${theme.palette.divider}`,
+	transition: 'all 0.3s ease',
+}));
+
+const StyledTextField = styled(TextField)(({ theme }) => ({
+	'& .MuiOutlinedInput-root': {
+		borderRadius: 8,
+		transition: 'all 0.3s ease',
+		'&:hover': {
+			boxShadow: `0 0 0 2px ${theme.palette.primary.light}25`,
+		},
+		'&.Mui-focused': {
+			boxShadow: `0 0 0 2px ${theme.palette.primary.light}40`,
+		},
 	},
 }));
 
 const QueueModal = ({ open, onClose, queueId }) => {
-	const classes = useStyles();
 	const theme = useTheme();
 	const { t } = useTranslation();
+	const [loading, setLoading] = useState(false);
 
 	const QueueSchema = Yup.object().shape({
 		name: Yup.string()
 			.min(2, t("queueModal.validation.tooShort"))
 			.max(50, t("queueModal.validation.tooLong"))
-			.required(t("queueModal.validation.required")),
-		color: Yup.string().min(3, t("queueModal.validation.tooShort")).max(9, t("queueModal.validation.tooLong")).required(),
+			.required(t("queueModal.validation.requiredName")),
+		color: Yup.string()
+		.min(3, t("queueModal.validation.tooShort"))
+		.max(9, t("queueModal.validation.tooLong"))
+		.required(t("queueModal.validation.requiredColor")),
 		greetingMessage: Yup.string(),
 		startWork: Yup.string(),
 		endWork: Yup.string(),
@@ -74,8 +100,8 @@ const QueueModal = ({ open, onClose, queueId }) => {
 		name: "",
 		color: "",
 		greetingMessage: "",
-		startWork: "",
-		endWork: "",
+		startWork: "00:00",
+		endWork: "23:59",
 		absenceMessage: "",
 	};
 
@@ -120,11 +146,35 @@ const QueueModal = ({ open, onClose, queueId }) => {
 		}
 	};
 
+	const handleColorChange = (color, setFieldValue) => {
+		setFieldValue("color", color);
+	};
+
 	return (
-		<div className={classes.root}>
-			<Dialog open={open} onClose={handleClose} scroll="paper">
+		<Root>
+			<StyledDialog 
+				open={open} 
+				onClose={handleClose} 
+				scroll="paper"
+				fullWidth
+				maxWidth="sm"
+			>
 				<DialogTitle>
-					{queueId ? t("queueModal.title.edit") : t("queueModal.title.add")}
+					<Typography variant="h6" component="div" sx={{ fontWeight: 'bold', display: 'flex', alignItems: 'center' }}>
+						{queueId ? (
+							<>
+								<Edit sx={{ mr: 1, fontSize: 24 }} />
+								{t("queueModal.title.edit")}
+							</>
+						) : (
+							<>
+								<Box sx={{ mr: 1, width: 24, height: 24, borderRadius: '50%', bgcolor: 'primary.main', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+									<Typography variant="subtitle2" sx={{ color: 'white', fontWeight: 'bold' }}><AccountTreeOutlined /></Typography>
+								</Box>
+								{t("queueModal.title.add")}
+							</>
+						)}
+					</Typography>
 				</DialogTitle>
 				<Formik
 					initialValues={queue}
@@ -141,7 +191,7 @@ const QueueModal = ({ open, onClose, queueId }) => {
 								<Grid container spacing={2}>
 									<Grid item xs={6}>
 										<Field
-											as={TextField}
+											as={StyledTextField}
 											label={t("queueModal.form.name")}
 											autoFocus
 											name="name"
@@ -150,34 +200,47 @@ const QueueModal = ({ open, onClose, queueId }) => {
 											variant="outlined"
 											margin="dense"
 											fullWidth
+											placeholder={t("queueModal.form.namePlaceholder")}
+											InputProps={{
+												sx: { borderRadius: 2 }
+											}}
 										/>
 									</Grid>
 									<Grid item xs={6}>
 										<Field
-											as={TextField}
+											as={StyledTextField}
 											label={t("queueModal.form.color")}
 											name="color"
 											value={values.color}
-											onFocus={() => setColorPickerModalOpen(true)}
+											onClick={() => setColorPickerModalOpen(true)}
 											error={touched.color && Boolean(errors.color)}
 											helperText={touched.color && errors.color}
 											InputProps={{
+												readOnly: true,
+												placeholder: "#000000",
+												sx: { borderRadius: 2 },
 												startAdornment: (
 													<InputAdornment position="start">
-														<div
-															style={{ backgroundColor: values.color || '#fff' }}
-															className={classes.colorAdorment}
-														></div>
+														<Tooltip title={t("queueModal.form.colorTooltip")} arrow placement="top">
+															<ColorAdorment
+																sx={{ 
+																	backgroundColor: values.color || "#fff",
+																	cursor: 'pointer',
+																	'&:hover': { transform: 'scale(1.1)' } 
+																}}
+															/>
+														</Tooltip>
 													</InputAdornment>
 												),
 												endAdornment: (
-													<IconButton
-														size="small"
-														color="default"
-														onClick={() => setColorPickerModalOpen(true)}
-													>
-														<Colorize />
-													</IconButton>
+													<Tooltip title={t("queueModal.form.selectColor")} arrow placement="top">
+														<IconButton
+															color="primary"
+															onClick={() => setColorPickerModalOpen(true)}
+														>
+															<Colorize />
+														</IconButton>
+													</Tooltip>
 												),
 											}}
 											variant="outlined"
@@ -189,14 +252,12 @@ const QueueModal = ({ open, onClose, queueId }) => {
 										open={colorPickerModalOpen}
 										handleClose={() => setColorPickerModalOpen(false)}
 										currentColor={values.color}
-										onChange={(color) => {
-											setFieldValue("color", color);
-										}}
+										onChange={(color) => handleColorChange(color, setFieldValue)}
 										theme={theme}
 									/>
 									<Grid item xs={12}>
 										<Field
-											as={TextField}
+											as={StyledTextField}
 											label={t("queueModal.form.greetingMessage")}
 											type="greetingMessage"
 											multiline
@@ -207,18 +268,22 @@ const QueueModal = ({ open, onClose, queueId }) => {
 											helperText={touched.greetingMessage && errors.greetingMessage}
 											variant="outlined"
 											margin="dense"
+											placeholder={t("queueModal.form.greetingMessagePlaceholder")}
+											InputProps={{
+												sx: { borderRadius: 2 }
+											}}
 										/>
 									</Grid>
 									<Grid item xs={6}>
 										<Field
-											as={TextField}
+											as={StyledTextField}
 											label={t("queueModal.form.startWork")}
 											type="time"
 											InputLabelProps={{
 												shrink: true,
 											}}
 											inputProps={{
-												step: 600, // 10 minutes
+												step: 300, // 5 minutes
 											}}
 											fullWidth
 											name="startWork"
@@ -226,18 +291,21 @@ const QueueModal = ({ open, onClose, queueId }) => {
 											helperText={touched.startWork && errors.startWork}
 											variant="outlined"
 											margin="dense"
+											InputProps={{
+												sx: { borderRadius: 2 }
+											}}
 										/>
 									</Grid>
 									<Grid item xs={6}>
 										<Field
-											as={TextField}
+											as={StyledTextField}
 											label={t("queueModal.form.endWork")}
 											type="time"
 											InputLabelProps={{
 												shrink: true,
 											}}
 											inputProps={{
-												step: 600, // 10 minutes
+												step: 300, // 5 minutes
 											}}
 											fullWidth
 											name="endWork"
@@ -245,11 +313,14 @@ const QueueModal = ({ open, onClose, queueId }) => {
 											helperText={touched.endWork && errors.endWork}
 											variant="outlined"
 											margin="dense"
+											InputProps={{
+												sx: { borderRadius: 2 }
+											}}
 										/>
 									</Grid>
 									<Grid item xs={12}>
 										<Field
-											as={TextField}
+											as={StyledTextField}
 											label={t("queueModal.form.absenceMessage")}
 											type="absenceMessage"
 											multiline
@@ -260,17 +331,31 @@ const QueueModal = ({ open, onClose, queueId }) => {
 											helperText={touched.absenceMessage && errors.absenceMessage}
 											variant="outlined"
 											margin="dense"
+											placeholder={t("queueModal.form.absenceMessagePlaceholder")}
+											InputProps={{
+												sx: { borderRadius: 2 }
+											}}
 										/>
 									</Grid>
 								</Grid>
 							</DialogContent>
 
-							<DialogActions>
+							<DialogActions sx={{ padding: 2, gap: 1 }}>
 								<Button
 									onClick={handleClose}
-									color="secondary"
 									disabled={isSubmitting}
-									variant="outlined"
+									variant="contained"
+									size="large"
+									sx={{
+										borderRadius: 20,
+										backgroundColor: '#e0e0e0',
+										color: '#757575',
+										minWidth: '120px',
+										transition: 'all 0.3s ease',
+										'&:hover': {
+											backgroundColor: '#d5d5d5',
+										}
+									}}
 								>
 									{t("queueModal.buttons.cancel")}
 								</Button>
@@ -279,19 +364,29 @@ const QueueModal = ({ open, onClose, queueId }) => {
 									color="primary"
 									disabled={isSubmitting}
 									variant="contained"
-									className={classes.btnWrapper}
+									size="large"
+									sx={{
+										position: 'relative',
+										borderRadius: 20,
+										minWidth: '120px',
+										transition: 'all 0.3s ease',
+										fontWeight: 'bold',
+										'&:hover': {
+											boxShadow: '0 6px 12px rgba(0, 0, 0, 0.15)'
+										}
+									}}
 								>
 									{queueId ? t("queueModal.buttons.okEdit") : t("queueModal.buttons.okAdd")}
 									{isSubmitting && (
-										<CircularProgress size={24} className={classes.buttonProgress} />
+										<ButtonProgress size={24} />
 									)}
 								</Button>
 							</DialogActions>
 						</Form>
 					)}
 				</Formik>
-			</Dialog>
-		</div>
+			</StyledDialog>
+		</Root>
 	);
 };
 

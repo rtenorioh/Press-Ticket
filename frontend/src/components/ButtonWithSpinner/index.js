@@ -1,20 +1,21 @@
-import { Button, CircularProgress } from "@material-ui/core";
-import { makeStyles } from "@material-ui/core/styles";
+import { Button, CircularProgress } from "@mui/material";
+import { styled } from "@mui/material/styles";
 import PropTypes from "prop-types";
 import React from "react";
 
-const useStyles = makeStyles(theme => ({
-	button: {
-		position: "relative",
-	},
-	buttonProgress: {
-		color: props => props.spinnerColor || theme.palette.primary.main,
-		position: "absolute",
-		top: "50%",
-		left: "50%",
-		marginTop: -12,
-		marginLeft: -12,
-	},
+const StyledButton = styled(Button)({
+	position: "relative",
+});
+
+const ButtonProgress = styled(CircularProgress, {
+	shouldForwardProp: (prop) => prop !== 'spinnerColor'
+})(({ theme, spinnerColor }) => ({
+	color: spinnerColor || theme.palette.primary.main,
+	position: "absolute",
+	top: "50%",
+	left: "50%",
+	marginTop: -12,
+	marginLeft: -12,
 }));
 
 const ButtonWithSpinner = ({
@@ -25,11 +26,8 @@ const ButtonWithSpinner = ({
 	ariaLabel = "Loading...",
 	...rest
 }) => {
-	const classes = useStyles({ spinnerColor });
-
 	return (
-		<Button
-			className={classes.button}
+		<StyledButton
 			disabled={loading}
 			aria-busy={loading}
 			aria-label={loading ? ariaLabel : undefined}
@@ -37,12 +35,12 @@ const ButtonWithSpinner = ({
 		>
 			{children}
 			{loading && (
-				<CircularProgress
+				<ButtonProgress
 					size={spinnerSize}
-					className={classes.buttonProgress}
+					spinnerColor={spinnerColor}
 				/>
 			)}
-		</Button>
+		</StyledButton>
 	);
 };
 

@@ -1,39 +1,57 @@
-import { Chip } from "@material-ui/core";
-import { makeStyles } from "@material-ui/core/styles";
+import { Chip, Paper, Box, Typography } from "@mui/material";
+import { styled, useTheme } from "@mui/material/styles";
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import api from "../../services/api";
 import Title from "./Title";
 
-const useStyles = makeStyles((theme) => ({
-    chip: {
-        margin: theme.spacing(1),
-        fontWeight: 500,
-        color: "#fff",
-        boxShadow: "0 2px 5p rgba(0, 0, 0, 0.2)",
-        borderRadius: "8px",
-        transition: "transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out",
-        '&:hover': {
-            transform: "scale(1.05)",
-            boxShadow: "0 4px 10px rgba(0, 0, 0, 0.3)"
-        }
-    },
-    tagContainer: {
-        margin: theme.spacing(2, 0),
-        display: "flex",
-        flexWrap: "wrap",
-        justifyContent: "center",
-    },
-    tagCounter: {
-        fontSize: "0.8rem",
-        marginLeft: theme.spacing(0.5),
-        color: "#fff",
+const ChartPaper = styled(Paper)(({ theme }) => ({
+    padding: theme.spacing(2, 1.5, 1.5, 1.5),
+    background: `linear-gradient(135deg, ${theme.palette.primary.light} 0%, ${theme.palette.background.paper} 100%)`,
+    borderRadius: 18,
+    boxShadow: "0 4px 24px 0 rgba(80, 80, 160, 0.07)",
+    marginBottom: theme.spacing(1),
+    overflow: 'unset',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    [theme.breakpoints.down('sm')]: {
+        padding: theme.spacing(1.5, 1, 1, 1),
     },
 }));
 
+const StyledChip = styled(Chip)(({ theme }) => ({
+    margin: theme.spacing(1),
+    fontWeight: 500,
+    color: "#fff",
+    borderRadius: "8px",
+    background: theme.palette.primary.dark,
+    boxShadow: "0 2px 8px 0 rgba(80, 80, 160, 0.10)",
+    transition: "transform 0.2s, box-shadow 0.2s",
+    '&:hover': {
+        transform: "scale(1.07)",
+        boxShadow: "0 4px 12px rgba(80,80,160,0.14)"
+    }
+}));
+
+const TagContainer = styled(Box)(({ theme }) => ({
+    margin: theme.spacing(2, 0),
+    display: "flex",
+    flexWrap: "wrap",
+    justifyContent: "center",
+    alignItems: "center",
+    minHeight: 60,
+}));
+
+const TagCounter = styled('span')(({ theme }) => ({
+    fontSize: "0.8rem",
+    marginLeft: theme.spacing(0.5),
+    color: "#fff",
+}));
+
 const TagCloud = () => {
-    const classes = useStyles();
     const { t } = useTranslation();
+    const theme = useTheme();
     const [tags, setTags] = useState([]);
 
     useEffect(() => {
@@ -45,35 +63,42 @@ const TagCloud = () => {
                 console.error("Error fetching tags: ", err);
             }
         };
-
         fetchTags();
     }, []);
 
     return (
-        <div>
-            <Title>{t("dashboard.tags.cloudTitle")} {tags.length}</Title>
+        <ChartPaper>
+            <Box display="flex" alignItems="center" width="100%" mb={1}>
+                <Title sx={{ flex: 1, mb: 0 }}>{t("dashboard.tags.cloudTitle")} {tags.length}</Title>
+            </Box>
             {tags.length > 0 ? (
-                <div className={classes.tagContainer}>
+                <TagContainer>
                     {tags.map((tag) => (
-                        <Chip
+                        <StyledChip
                             key={tag.id}
                             label={
                                 <span>
                                     {tag.name}
-                                    <span className={classes.tagCounter}> ({tag.usageCount})</span>
+                                    <TagCounter> ({tag.usageCount})</TagCounter>
                                 </span>
                             }
-                            style={{
+                            sx={{
                                 backgroundColor: tag.color,
+                                color: theme.palette.getContrastText(tag.color || theme.palette.primary.dark),
+                                fontWeight: 500,
+                                fontSize: '1rem',
+                                minWidth: 80,
+                                justifyContent: 'center',
                             }}
-                            className={classes.chip}
                         />
                     ))}
-                </div>
+                </TagContainer>
             ) : (
-                <p>{t("dashboard.tags.noTags")}</p>
+                <Typography variant="body2" color="text.secondary" align="center" sx={{ mt: 4, mb: 4 }}>
+                    {t("dashboard.tags.noTags")}
+                </Typography>
             )}
-        </div>
+        </ChartPaper>
     );
 };
 

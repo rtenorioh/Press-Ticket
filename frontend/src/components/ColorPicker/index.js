@@ -1,4 +1,4 @@
-import { Dialog } from "@material-ui/core";
+import { Dialog } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { ChromePicker } from "react-color";
 

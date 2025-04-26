@@ -11,14 +11,14 @@ import {
   ListItem,
   ListItemAvatar,
   ListItemText,
-  makeStyles,
   Menu,
   MenuItem,
   Paper,
   Switch,
   Typography
-} from "@material-ui/core";
-import { green } from "@material-ui/core/colors";
+} from "@mui/material";
+import { styled } from "@mui/material/styles";
+import { green } from "@mui/material/colors";
 import {
   AttachFile,
   Cancel,
@@ -33,10 +33,9 @@ import {
   Mood,
   MoreVert,
   Send
-} from "@material-ui/icons";
-import clsx from "clsx";
-import { Picker } from "emoji-mart";
-import "emoji-mart/css/emoji-mart.css";
+} from "@mui/icons-material";
+import { useTheme } from "@mui/material/styles";
+import EmojiPicker, { Theme as EmojiTheme } from 'emoji-picker-react';
 import MicRecorder from "mic-recorder-to-mp3";
 import PropTypes from "prop-types";
 import React, {
@@ -54,189 +53,189 @@ import toastError from "../../errors/toastError";
 import { useLocalStorage } from "../../hooks/useLocalStorage";
 import api from "../../services/api";
 import RecordingTimer from "./RecordingTimer";
-
+import FormatBoldIcon from "@mui/icons-material/FormatBold";
+import FormatItalicIcon from "@mui/icons-material/FormatItalic";
+import StrikethroughSIcon from "@mui/icons-material/StrikethroughS";
 const Mp3Recorder = new MicRecorder({ bitRate: 128 });
 
-const useStyles = makeStyles((theme) => ({
-  mainWrapper: {
-    background: "#eee",
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    borderTop: "1px solid rgba(0, 0, 0, 0.12)",
-    [theme.breakpoints.down("sm")]: {
-      position: "fixed",
-      bottom: 0,
-      width: "100%",
-    },
-  },
-  avatar: {
-    width: "50px",
-    height: "50px",
-    borderRadius: "25%"
-  },
-  dropInfo: {
-    background: "#eee",
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
+const MainWrapper = styled(Paper)(({ theme }) => ({
+  background: "#eee",
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
+  borderTop: "1px solid rgba(0, 0, 0, 0.12)",
+  [theme.breakpoints.down('sm')]: {
+    position: "fixed",
+    bottom: 0,
     width: "100%",
-    padding: 15,
-    left: 0,
-    right: 0,
   },
-  dropInfoOut: {
-    display: "none",
-  },
-  formatMenu: {
-    backgroundColor: theme.palette.background.paper,
-    borderRadius: 30,
-    boxShadow: theme.shadows[2],
-    padding: '4px 8px',
-    display: 'flex',
-    alignItems: 'center',
-  },
-  gridFiles: {
-    maxHeight: "100%",
-    overflow: "scroll",
-  },
-  newMessageBox: {
-    background: theme.palette.background.default,
-    width: "100%",
-    display: "flex",
-    padding: "7px",
-    alignItems: "center",
-  },
-  messageInputWrapper: {
-    padding: 6,
-    marginRight: 7,
-    background: theme.palette.background.paper,
-    display: "flex",
-    borderRadius: 20,
-    flex: 1,
-    position: "relative",
-  },
-  
-  messageInputField: {
-    flex: 1,
-    width: "100%",
-    paddingLeft: 10,
-  },
-  sendMessageIcons: {
-    color: theme.palette.text.primary,
-  },
-  uploadInput: {
-    display: "none",
-  },
-  viewMediaInputWrapper: {
-    maxHeight: "80%",
-    display: "flex",
-    padding: "10px 13px",
-    position: "relative",
-    justifyContent: "space-between",
-    alignItems: "center",
-    backgroundColor: "#eee",
-    borderTop: "1px solid rgba(0, 0, 0, 0.12)",
-  },
-  emojiBox: {
-    position: "absolute",
-    bottom: 63,
-    width: 40,
-    borderTop: "1px solid #e8e8e8",
-  },
-  circleLoading: {
-    color: green[500],
-    opacity: "70%",
-    position: "absolute",
-    top: "20%",
-    left: "50%",
-    marginLeft: -12,
-  },
-  audioLoading: {
-    color: green[500],
-    opacity: "70%",
-  },
-  recorderWrapper: {
-    display: "flex",
-    alignItems: "center",
-    alignContent: "middle",
-  },
-  cancelAudioIcon: {
-    color: "red",
-  },
-  sendAudioIcon: {
-    color: "green",
-  },
-  replyginMsgWrapper: {
-    display: "flex",
+}));
+
+const AvatarStyled = styled(Avatar)(({ theme }) => ({
+  width: "50px",
+  height: "50px",
+  borderRadius: "25%",
+  border: `1px solid ${theme.palette.background.paper}`,
+}));
+
+const DropInfo = styled('div')(({ theme, show }) => ({
+  background: theme.palette.background.paper,
+  color: theme.palette.text.primary,
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
+  width: "100%",
+  padding: 15,
+  left: 0,
+  right: 0,
+  ...(show ? {} : { display: "none" }),
+}));
+
+const FormatMenu = styled('div')(({ theme }) => ({
+  backgroundColor: theme.palette.background.paper,
+  color: theme.palette.text.primary,
+  borderRadius: 30,
+  boxShadow: theme.shadows[2],
+  padding: '4px 8px',
+  display: 'flex',
+  alignItems: 'center',
+}));
+
+const GridFiles = styled(Grid)(({ theme }) => ({
+  maxHeight: "100%",
+  overflow: "scroll",
+  width: "100%"
+}));
+
+const NewMessageBox = styled('div')(({ theme }) => ({
+  background: theme.palette.background.default,
+  width: "100%",
+  display: "flex",
+  padding: "7px",
+  alignItems: "center",
+}));
+
+const InputWrapper = styled('div')(({ theme }) => ({
+  padding: 6,
+  marginRight: 7,
+  background: theme.palette.background.paper,
+  display: "flex",
+  borderRadius: 20,
+  flex: 1,
+  position: "relative",
+}));
+
+const InputBaseStyled = styled(InputBase)(({ theme }) => ({
+  flex: 1,
+  width: "100%",
+  paddingLeft: 10,
+}));
+
+const InputStyled = styled('input')(({ theme }) => ({
+  display: "none",
+}));
+
+const MediaInputWrapper = styled(Paper)(({ theme }) => ({ 
+  maxHeight: "80%",
+  display: "flex",
+  padding: "10px 13px",
+  position: "relative",
+  justifyContent: "space-between",
+  alignItems: "center",
+  backgroundColor: "#eee",
+  borderTop: "1px solid rgba(0, 0, 0, 0.12)",
+}));
+
+const EmojiBoxStyled = styled('div')(({ theme}) => ({
+  position: "absolute",
+  bottom: 63,
+  width: 40,
+  borderTop: "1px solid #e8e8e8",
+}));
+
+const CircularProgressStyled = styled(CircularProgress)(({ theme }) => ({
+  color: green[500],
+  opacity: "70%",
+  position: "absolute",
+  top: "20%",
+  left: "50%",
+  marginLeft: -12,
+}));
+
+const RecorderWrapper = styled('div')(({ theme }) => ({
+  display: "flex",
+  alignItems: "center",
+  alignContent: "middle",
+}));
+
+const ReplyginMsgWrapper = styled('div')(({ theme }) => ({
+  display: "flex",
     width: "100%",
     alignItems: "center",
     justifyContent: "center",
     paddingTop: 8,
     paddingLeft: 73,
     paddingRight: 7,
-  },
-  replyginMsgContainer: {
-    flex: 1,
+}));
+
+const ReplyginMsgContainer = styled('div')(({ theme }) => ({
+  flex: 1,
     marginRight: 5,
     overflowY: "hidden",
     backgroundColor: "rgba(0, 0, 0, 0.05)",
     borderRadius: "7.5px",
     display: "flex",
     position: "relative",
-  },
-  replyginMsgBody: {
-    padding: 10,
-    height: "auto",
-    display: "block",
-    whiteSpace: "pre-wrap",
-    overflow: "hidden",
-  },
-  replyginContactMsgSideColor: {
-    flex: "none",
-    width: "4px",
-    backgroundColor: "#35cd96",
-  },
-  replyginSelfMsgSideColor: {
-    flex: "none",
-    width: "4px",
-    backgroundColor: "#6bcbef",
-  },
-  messageContactName: {
-    display: "flex",
+}));
+
+const ReplyginMsgBody = styled('div')(({ theme }) => ({
+  padding: 10,
+  height: "auto",
+  display: "block",
+  whiteSpace: "pre-wrap",
+  overflow: "hidden",
+}));
+
+const SideColor = styled('span')(({ theme, messageFromMe }) => ({
+  backgroundColor: messageFromMe ? "#35cd96" : "#6bcbef",
+  flex: "none",
+  width: "4px",
+}));
+  
+const MessageContactName = styled('span')(({ theme }) => ({
+  display: "flex",
     color: "#6bcbef",
     fontWeight: 500,
-  },
-  messageQuickAnswersWrapper: {
-    margin: 0,
-    position: "absolute",
-    bottom: "55px",
-    background: theme.palette.background.default,
-    padding: 0,
-    border: "none",
-    left: 0,
-    width: "100%",
-    maxHeight: "350px",
-    overflowY: "auto",
-    "& li": {
-      listStyle: "none",
-      "& a": {
-        display: "block",
-        padding: "8px",
-        textOverflow: "ellipsis",
-        overflowY: "hidden",
-        maxHeight: "30px",
-        "&:hover": {
-          background: theme.palette.background.paper,
-          cursor: "pointer",
-        },
+}));
+
+const MessageQuickAnswersWrapper = styled('ul')(({ theme }) => ({
+  margin: 0,
+  position: "absolute",
+  bottom: "55px",
+  background: theme.palette.background.default,
+  padding: 0,
+  border: "none",
+  left: 0,
+  width: "100%",
+  maxHeight: "350px",
+  overflowY: "auto",
+  "& li": {
+    listStyle: "none",
+    "& a": {
+      display: "block",
+      padding: "8px",
+      textOverflow: "ellipsis",
+      overflowY: "hidden",
+      maxHeight: "30px",
+      "&:hover": {
+        background: theme.palette.background.paper,
+        cursor: "pointer",
       },
     },
-  }
+  },
 }));
 
 const MessageInput = ({ ticketStatus }) => {
-  const classes = useStyles();
   const { ticketId } = useParams();
   const [medias, setMedias] = useState([]);
   const [inputMessage, setInputMessage] = useState("");
@@ -255,6 +254,7 @@ const MessageInput = ({ ticketStatus }) => {
   const [signMessage, setSignMessage] = useLocalStorage("signOption", true);
   const [channelType, setChannelType] = useState(null);
   const { t } = useTranslation();
+  const theme = useTheme();
 
   useEffect(() => {
     const handleClickAway = (event) => {
@@ -486,9 +486,8 @@ const MessageInput = ({ ticketStatus }) => {
     setTypeBar(false);
   };
 
-  const handleAddEmoji = (e) => {
-    let emoji = e.native;
-    setInputMessage((prevState) => prevState + emoji);
+  const handleAddEmoji = (emojiObject) => {
+    setInputMessage((prevState) => prevState + emojiObject.emoji);
   };
 
   const handleChangeMedias = (e) => {
@@ -661,22 +660,18 @@ const MessageInput = ({ ticketStatus }) => {
 
   const renderReplyingMessage = (message) => {
     return (
-      <div className={classes.replyginMsgWrapper}>
-        <div className={classes.replyginMsgContainer}>
-          <span
-            className={clsx(classes.replyginContactMsgSideColor, {
-              [classes.replyginSelfMsgSideColor]: !message.fromMe,
-            })}
-          ></span>
-          <div className={classes.replyginMsgBody}>
+      <ReplyginMsgWrapper>
+        <ReplyginMsgContainer>
+          <SideColor messageFromMe={message.fromMe} />
+          <ReplyginMsgBody>
             {!message.fromMe && (
-              <span className={classes.messageContactName}>
+              <MessageContactName>
                 {message.contact?.name}
-              </span>
+              </MessageContactName>
             )}
             {message.body}
-          </div>
-        </div>
+          </ReplyginMsgBody>
+        </ReplyginMsgContainer>
         <IconButton
           aria-label="showRecorder"
           component="span"
@@ -686,18 +681,17 @@ const MessageInput = ({ ticketStatus }) => {
             setEditingMessage(null);
           }}
         >
-          <Clear className={classes.sendMessageIcons} />
+          <Clear sx={{ color: theme.palette.text.primary }} />
         </IconButton>
-      </div>
+      </ReplyginMsgWrapper>
     );
   };
 
   if (medias.length > 0)
     return (
-      <Paper
+      <MediaInputWrapper
         elevation={0}
         square
-        className={classes.viewMediaInputWrapper}
         onDragEnter={() => setOnDragEnter(true)}
         onDrop={(e) => handleInputDrop(e)}
       >
@@ -706,15 +700,15 @@ const MessageInput = ({ ticketStatus }) => {
           component="span"
           onClick={(e) => setMedias([])}
         >
-          <Cancel className={classes.sendMessageIcons} />
+          <Cancel sx={{ color: theme.palette.text.primary }} />
         </IconButton>
 
         {loading ? (
           <div>
-            <CircularProgress className={classes.circleLoading} />
+            <CircularProgressStyled/>
           </div>
         ) : (
-          <Grid item className={classes.gridFiles}>
+          <GridFiles item>
             <Typography variant="h6" component="div">
               {t("uploads.titles.titleFileList")} ({medias.length})
             </Typography>
@@ -723,7 +717,7 @@ const MessageInput = ({ ticketStatus }) => {
                 return (
                   <ListItem key={index}>
                     <ListItemAvatar>
-                      <Avatar className={classes.avatar} alt={value.name} src={URL.createObjectURL(value)} />
+                      <AvatarStyled alt={value.name} src={URL.createObjectURL(value)} />
                     </ListItemAvatar>
                     <ListItemText
                       primary={`${value.name}`}
@@ -734,20 +728,20 @@ const MessageInput = ({ ticketStatus }) => {
               })}
             </List>
             <InputBase
-              style={{ width: "0", height: "0" }}
+              sx={{ width: "0", height: "0" }}
               inputRef={(input) => {
                 if (input !== null) {
                   input.focus();
                 }
               }}
-              onKeyDown={(e) => {
+              onKeyPress={(e) => {
                 if (e.key === "Enter") {
                   handleUploadMedia(e);
                 }
               }}
               defaultValue={medias[0].name}
             />
-          </Grid>
+          </GridFiles>
         )}
         <IconButton
           aria-label="send-upload"
@@ -755,24 +749,23 @@ const MessageInput = ({ ticketStatus }) => {
           onClick={handleUploadMedia}
           disabled={loading}
         >
-          <Send className={classes.sendMessageIcons} />
+          <Send sx={{ color: theme.palette.text.primary }} />
         </IconButton>
-      </Paper>
+      </MediaInputWrapper>
     );
   else {
     return (
-      <Paper
+      <MainWrapper
         square
         elevation={0}
-        className={classes.mainWrapper}
         onDragEnter={() => setOnDragEnter(true)}
         onDrop={(e) => handleInputDrop(e)}
       >
-        <div className={onDragEnter ? classes.dropInfo : classes.dropInfoOut}>
+        <DropInfo show={onDragEnter}>
           {t("uploads.titles.titleUploadMsgDragDrop")}
-        </div>
+        </DropInfo>
         {(replyingMessage && renderReplyingMessage(replyingMessage)) || (editingMessage && renderReplyingMessage(editingMessage))}
-        <div className={classes.newMessageBox}>
+        <NewMessageBox>
           <Hidden only={["sm", "xs"]}>
             <IconButton
               aria-label="emojiPicker"
@@ -780,31 +773,36 @@ const MessageInput = ({ ticketStatus }) => {
               disabled={loading || recording || ticketStatus !== "open"}
               onClick={(e) => setShowEmoji((prevState) => !prevState)}
             >
-              <Mood className={classes.sendMessageIcons} />
+              <Mood sx={{ color: theme.palette.text.primary }} />
             </IconButton>
             {showEmoji ? (
-              <div className={classes.emojiBox}>
-                <ClickAwayListener onClickAway={(e) => setShowEmoji(true)}>
-                  <Picker
-                    perLine={16}
-                    theme={"dark"}
-                    i18n={t}
-                    showPreview={true}
-                    showSkinTones={false}
-                    onSelect={handleAddEmoji}
-                  />
+              <EmojiBoxStyled>
+                <ClickAwayListener onClickAway={(e) => setShowEmoji(false)}>
+                  <div sx={{ position: 'absolute', zIndex: 1000, bottom: '60px', left: '10px' }}>
+                    <EmojiPicker 
+                      theme={theme.palette.mode === 'dark' ? EmojiTheme.DARK : EmojiTheme.LIGHT}
+                      onEmojiClick={(emojiObject) => handleAddEmoji(emojiObject)}
+                      emojiStyle={"facebook"}
+                      searchDisabled={false}
+                      searchPlaceholder={t("messagesInput.emoji.searchPlaceholder")}
+                      skinTonesDisabled={false}
+                      previewConfig={{ showPreview: false }}
+                      width={450}
+                      height={400}
+                    />
+                  </div>
                 </ClickAwayListener>
-              </div>
+              </EmojiBoxStyled>
             ) : null}
 
-            <input
+            <InputStyled
               multiple
               type="file"
               id="upload-button"
               disabled={loading || recording || ticketStatus !== "open"}
-              className={classes.uploadInput}
               onChange={handleChangeMedias}
             />
+
             <label htmlFor="upload-button">
               <IconButton
                 aria-label="upload"
@@ -812,12 +810,12 @@ const MessageInput = ({ ticketStatus }) => {
                 disabled={loading || recording || ticketStatus !== "open"}
                 onMouseOver={() => setOnDragEnter(true)}
               >
-                <AttachFile className={classes.sendMessageIcons} />
+                <AttachFile sx={{ color: theme.palette.text.primary }} />
               </IconButton>
             </label>
             {canSignMessage() && (
             <FormControlLabel
-              style={{ marginRight: 7, color: "primary" }}
+              sx={{ marginRight: 7, color: "primary" }}
               label={t("messagesInput.signMessage")}
               labelPlacement="start"
               control={
@@ -861,7 +859,7 @@ const MessageInput = ({ ticketStatus }) => {
                   disabled={loading || recording || ticketStatus !== "open"}
                   onClick={(e) => setShowEmoji((prevState) => !prevState)}
                 >
-                  <Mood className={classes.sendMessageIcons} />
+                  <Mood sx={{ color: theme.palette.text.primary }} />
                 </IconButton>
               </MenuItem>
               <MenuItem onClick={handleMenuItemClick}>
@@ -870,7 +868,7 @@ const MessageInput = ({ ticketStatus }) => {
                   type="file"
                   id="upload-button"
                   disabled={loading || recording || ticketStatus !== "open"}
-                  className={classes.uploadInput}
+                  sx={{ display: "none" }}
                   onChange={handleChangeMedias}
                 />
                 <label htmlFor="upload-button">
@@ -879,14 +877,14 @@ const MessageInput = ({ ticketStatus }) => {
                     component="span"
                     disabled={loading || recording || ticketStatus !== "open"}
                   >
-                    <AttachFile className={classes.sendMessageIcons} />
+                    <AttachFile sx={{ color: theme.palette.text.primary }} />
                   </IconButton>
                 </label>
               </MenuItem>
               <MenuItem onClick={handleMenuItemClick}>
                 {canSignMessage() && (
                 <FormControlLabel
-                  style={{ marginRight: 7, color: "gray" }}
+                  sx={{ marginRight: 7, color: "gray" }}
                   label={t("messagesInput.signMessage")}
                   labelPlacement="start"
                   control={
@@ -910,9 +908,8 @@ const MessageInput = ({ ticketStatus }) => {
               </MenuItem>
             </Menu>
           </Hidden>
-          <div className={classes.messageInputWrapper}>
-            <InputBase
-              className={classes.messageInputField}
+          <InputWrapper>
+            <InputBaseStyled
               inputRef={inputRef}
               placeholder={
                 ticketStatus === "open"
@@ -929,7 +926,7 @@ const MessageInput = ({ ticketStatus }) => {
               }}
               onMouseUp={showFormatMenu}
               onKeyUp={showFormatMenu}
-              onKeyDown={(e) => {
+              onKeyPress={(e) => {
                 if (e.ctrlKey && e.key === 'b') {
                   e.preventDefault();
                   formatText('*', '*');
@@ -957,67 +954,69 @@ const MessageInput = ({ ticketStatus }) => {
                 }
               }}
             />
-            <div
+            <FormatMenu
               id="format-menu"
-              className={classes.formatMenu}
-              style={{ display: 'none', position: 'absolute', zIndex: 1000 }}
+              sx={{
+                display: 'none',
+                position: 'absolute',
+                zIndex: 1000
+              }}
             >
               <IconButton 
                 size="small" 
                 onClick={() => formatText('*','*')}
-                style={{ padding: '6px', margin: '0 2px' }}
+                sx={{ padding: '6px', margin: '0 2px' }}
               >
-                <Typography style={{ fontWeight: 'bold', fontSize: '15px', color: '#444' }}>B</Typography>
+                <FormatBoldIcon />
               </IconButton>
               <IconButton 
                 size="small" 
                 onClick={() => formatText('_','_')}
-                style={{ padding: '6px', margin: '0 2px' }}
+                sx={{ padding: '6px', margin: '0 2px' }}
               >
-                <Typography style={{ fontStyle: 'italic', fontSize: '15px', color: '#444' }}>I</Typography>
+                <FormatItalicIcon />
               </IconButton>
               <IconButton 
                 size="small" 
                 onClick={() => formatText('~','~')}
-                style={{ padding: '6px', margin: '0 2px' }}
+                sx={{ padding: '6px', margin: '0 2px' }}
               >
-                <Typography style={{ textDecoration: 'line-through', fontSize: '15px', color: '#444' }}>S</Typography>
+                <StrikethroughSIcon />
               </IconButton>
               <IconButton 
                 size="small" 
                 onClick={formatCode}
-                style={{ padding: '6px', margin: '0 2px' }}
+                sx={{ padding: '6px', margin: '0 2px' }}
               >
-                <Code fontSize="small" style={{ color: '#444' }} />
+                <Code />
               </IconButton>
               <IconButton 
                 size="small" 
                 onClick={formatListNumbered}
-                style={{ padding: '6px', margin: '0 2px' }}
+                sx={{ padding: '6px', margin: '0 2px' }}
               >
-                <FormatListNumbered fontSize="small" style={{ color: '#444' }} />
+                <FormatListNumbered />
               </IconButton>
               <IconButton 
                 size="small" 
                 onClick={formatListBulleted}
-                style={{ padding: '6px', margin: '0 2px' }}
+                sx={{ padding: '6px', margin: '0 2px' }}
               >
-                <FormatListBulleted fontSize="small" style={{ color: '#444' }} />
+                <FormatListBulleted />
               </IconButton>
               <IconButton 
                 size="small" 
                 onClick={formatQuote}
-                style={{ padding: '6px', margin: '0 2px' }}
+                sx={{ padding: '6px', margin: '0 2px' }}
               >
-                <FormatQuote fontSize="small" style={{ color: '#444' }} />
+                <FormatQuote />
               </IconButton>
-            </div>
+            </FormatMenu>
             {typeBar ? (
-              <ul className={classes.messageQuickAnswersWrapper}>
+              <MessageQuickAnswersWrapper>
                 {quickAnswers.map((value, index) => {
                   return (
                     <li
-                      className={classes.messageQuickAnswersWrapperItem}
                       key={index}
                     >
                       {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
@@ -1027,11 +1026,11 @@ const MessageInput = ({ ticketStatus }) => {
                     </li>
                   );
                 })}
-              </ul>
+              </MessageQuickAnswersWrapper>
             ) : (
               <div></div>
             )}
-          </div>
+          </InputWrapper>
           {inputMessage ? (
             <IconButton
               aria-label="sendMessage"
@@ -1039,10 +1038,10 @@ const MessageInput = ({ ticketStatus }) => {
               onClick={handleSendMessage}
               disabled={loading}
             >
-              <Send className={classes.sendMessageIcons} />
+              <Send sx={{ color: theme.palette.text.primary }} />
             </IconButton>
           ) : recording ? (
-            <div className={classes.recorderWrapper}>
+            <RecorderWrapper>
               <IconButton
                 aria-label="cancelRecording"
                 component="span"
@@ -1050,11 +1049,11 @@ const MessageInput = ({ ticketStatus }) => {
                 disabled={loading}
                 onClick={handleCancelAudio}
               >
-                <HighlightOff className={classes.cancelAudioIcon} />
+                <HighlightOff sx={{ color: "red" }} />
               </IconButton>
               {loading ? (
                 <div>
-                  <CircularProgress className={classes.audioLoading} />
+                  <CircularProgress sx={{ color: green[500], opacity: "70%" }} />
                 </div>
               ) : (
                 <RecordingTimer />
@@ -1066,9 +1065,9 @@ const MessageInput = ({ ticketStatus }) => {
                 onClick={handleUploadAudio}
                 disabled={loading}
               >
-                <CheckCircleOutline className={classes.sendAudioIcon} />
+                <CheckCircleOutline sx={{ color: "green" }} />
               </IconButton>
-            </div>
+            </RecorderWrapper>
           ) : (
             <IconButton
               aria-label="showRecorder"
@@ -1076,17 +1075,17 @@ const MessageInput = ({ ticketStatus }) => {
               disabled={loading || ticketStatus !== "open"}
               onClick={handleStartRecording}
             >
-              <Mic className={classes.sendMessageIcons} />
+              <Mic sx={{ color: theme.palette.text.primary }} />
             </IconButton>
           )}
-        </div>
-      </Paper>
+        </NewMessageBox>
+      </MainWrapper>
     );
   }
 };
 
 MessageInput.propTypes = {
   ticketStatus: PropTypes.string
-}
+};
 
 export default MessageInput;

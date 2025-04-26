@@ -28,16 +28,11 @@ const check = (role, action, data) => {
 	return false;
 };
 
-const Can = ({ role, perform, data, yes, no }) =>
+const Can = ({ role, perform, data, yes = () => null, no = () => null }) =>
 	check(role, perform, data) ? yes() : no();
 
-Can.defaultProps = {
-	yes: () => null,
-	no: () => null,
-};
-
 Can.propTypes = {
-	role: PropTypes.string.isRequired,
+	role: PropTypes?.string?.isRequired,
 	perform: PropTypes.string.isRequired,
 	data: PropTypes.object,
 	yes: PropTypes.func,

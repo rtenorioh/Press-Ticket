@@ -1,4 +1,4 @@
-import Skeleton from "@material-ui/lab/Skeleton";
+import { Skeleton } from "@mui/material";
 import React from "react";
 
 const WithSkeleton = ({ loading, children, fullWidth }) => {

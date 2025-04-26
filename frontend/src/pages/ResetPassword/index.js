@@ -7,8 +7,8 @@ import {
     Link,
     TextField,
     Typography,
-} from "@material-ui/core";
-import { makeStyles } from "@material-ui/core/styles";
+} from "@mui/material";
+import { styled } from "@mui/material/styles";
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link as RouterLink, useLocation } from "react-router-dom";
@@ -23,31 +23,30 @@ const Copyright = ({ companyName, companyUrl }) => {
             {new Date().getFullYear()}
             {" - "}
             <Link color="inherit" href={companyUrl || "https://github.com/rtenorioh/Press-Ticket"}>
-                {companyName || "Press Ticket"}
+                {companyName || "Press Ticket®"}
             </Link>
             {"."}
         </Typography>
     );
 };
 
-const useStyles = makeStyles((theme) => ({
-    paper: {
-        marginTop: theme.spacing(8),
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-    },
-    form: {
-        width: "100%", // Fix IE 11 issue.
-        marginTop: theme.spacing(1),
-    },
-    submit: {
-        margin: theme.spacing(3, 0, 2),
-    },
+const FormContainer = styled('div')(({ theme }) => ({
+    marginTop: theme.spacing(8),
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+}));
+
+const StyledForm = styled('form')(({ theme }) => ({
+    width: "100%", // Fix IE 11 issue.
+    marginTop: theme.spacing(1),
+}));
+
+const SubmitButton = styled(Button)(({ theme }) => ({
+    margin: theme.spacing(3, 0, 2),
 }));
 
 const ResetPassword = () => {
-    const classes = useStyles();
     const { t } = useTranslation();
     const location = useLocation();
     const token = new URLSearchParams(location.search).get("token");
@@ -56,7 +55,7 @@ const ResetPassword = () => {
     const [theme, setTheme] = useState("light");
     const [companyData, setCompanyData] = useState({
         logo: 'logo.jpg',
-        name: "Press Ticket",
+        name: "Press Ticket®",
         url: "https://github.com/rtenorioh/Press-Ticket"
     });
 
@@ -72,7 +71,7 @@ const ResetPassword = () => {
                     if (lightConfig) {
                         setCompanyData(prevData => ({
                             ...prevData,
-                            name: lightConfig.company || "Press Ticket",
+                            name: lightConfig.company || "Press Ticket®",
                             url: lightConfig.url || "https://github.com/rtenorioh/Press-Ticket"
                         }));
                     }
@@ -144,12 +143,12 @@ const ResetPassword = () => {
     return (
         <Container component="main" maxWidth="xs">
             <CssBaseline />
-            <div className={classes.paper}>
-                <img src={getImageUrl(companyData.logo)} alt="logo" style={{ height: 120, marginBottom: 20 }} />
+            <FormContainer>
+                <img src={getImageUrl(companyData.logo)} alt="logo" sx={{ height: 120, marginBottom: 20 }} />
                 <Typography component="h1" variant="h5">
                     {t("resetPassword.title")}
                 </Typography>
-                <form className={classes.form} noValidate onSubmit={handleSubmit}>
+                <StyledForm noValidate onSubmit={handleSubmit}>
                     <TextField
                         variant="outlined"
                         margin="normal"
@@ -176,15 +175,14 @@ const ResetPassword = () => {
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
                     />
-                    <Button
+                    <SubmitButton
                         type="submit"
                         fullWidth
                         variant="contained"
                         color="primary"
-                        className={classes.submit}
                     >
                         {t("resetPassword.buttons.submit")}
-                    </Button>
+                    </SubmitButton>
                     <Grid container>
                         <Grid item>
                             <Link
@@ -197,8 +195,8 @@ const ResetPassword = () => {
                             </Link>
                         </Grid>
                     </Grid>
-                </form>
-            </div>
+                </StyledForm>
+            </FormContainer>
             <Box mt={5}><Copyright companyName={companyData.name} companyUrl={companyData.url} /></Box>
         </Container>
     );

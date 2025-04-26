@@ -1,14 +1,13 @@
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useHistory } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import { useSocket } from "../../context/SocketContext";
-import toastError from "../../errors/toastError";
-import api, { markUserAsInactive } from "../../services/api";
-import { showLoading } from "../../utils/showLoading";
+import { useSocket } from "../context/SocketContext";
+import toastError from "../errors/toastError";
+import api, { markUserAsInactive } from "../services/api";
 
 const useAuth = () => {
-    const history = useHistory();
+    const navigate = useNavigate();
     const { t } = useTranslation();
     const [isAuth, setIsAuth] = useState(false);
     const [loading, setLoading] = useState(true);
@@ -24,8 +23,8 @@ const useAuth = () => {
         localStorage.removeItem("user");
         setIsAuth(false);
         setUser({});
-        history.push("/login");
-    }, [history, socket]);
+        navigate("/login");
+    }, [navigate, socket]);
 
     const [userInactive, setUserInactive] = useState(false);
 
@@ -53,7 +52,7 @@ const useAuth = () => {
                         toast.error(t("backendErrors.ERR_USER_INACTIVE") || "Este atendente está desativado!", {
                             autoClose: 10000,
                             onClose: () => {
-                                history.push("/login");
+                                navigate("/login");
                             }
                         });
 
@@ -72,40 +71,27 @@ const useAuth = () => {
         };
 
         checkAuth();
-    }, [handleLogout, userInactive, t, history]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     useEffect(() => {
-
-        if (isAuth && user.id) {
-
-            if (socket) {
-                socket.on("userSessionExpired", data => {
-                    if (data.userId === user.id && localStorage.getItem("token")) {
-                        handleLogout();
-                        toast.error(data.message || t("auth.toasts.session_expired"));
-                    }
-                });
-
-                socket.on("userSessionUpdate", data => {
-                    if (data.userId === user.id) {
-                        setUser(prevUser => ({
-                            ...prevUser,
-                            online: data.online
-                        }));
-                    }
-                });
+        const token = localStorage.getItem("token");
+        if (token) {
+            try {
+                const { user: storedUser } = JSON.parse(
+                    localStorage.getItem("user") || "{}"
+                );
+                setIsAuth(true);
+                setUser(storedUser);
+            } catch (err) {
+                toastError(err);
             }
         }
-
-        return () => {
-            if (!isAuth && socket) {
-                socket.emit("logout");
-                socket.disconnect();
-            }
-        };
-    }, [user.id, isAuth, t, handleLogout, socket]);
+        setLoading(false);
+    }, []);
 
     const handleLogin = async (userData) => {
+        setLoading(true);
         try {
             const { data } = await api.post("/auth/login", userData);
             localStorage.setItem("token", JSON.stringify(data.token));
@@ -114,13 +100,11 @@ const useAuth = () => {
             setUser(data.user);
             setIsAuth(true);
             toast.success(t("auth.toasts.success"));
-            const finishLoading = showLoading();
-            setTimeout(() => {
-                finishLoading();
-                history.push("/tickets");
-            }, 1500);
+            navigate("/tickets");
+            setLoading(false);
         } catch (err) {
-            toastError(err, t);
+            toastError(err);
+            setLoading(false);
         }
     };
 

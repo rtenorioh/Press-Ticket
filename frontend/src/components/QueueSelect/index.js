@@ -1,22 +1,20 @@
-import { Chip, FormControl, InputLabel, MenuItem, Select } from "@material-ui/core";
-import { makeStyles } from "@material-ui/core/styles";
+import { Chip, FormControl, InputLabel, MenuItem, Select } from "@mui/material";
+import { styled } from "@mui/material/styles";
 import React, { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import toastError from "../../errors/toastError";
 import api from "../../services/api";
 
-const useStyles = makeStyles(theme => ({
-	chips: {
-		display: "flex",
-		flexWrap: "wrap",
-	},
-	chip: {
-		margin: 2,
-	},
+const ChipsContainer = styled('div')(({ theme }) => ({
+	display: "flex",
+	flexWrap: "wrap",
+}));
+
+const StyledChip = styled(Chip)(({ theme }) => ({
+	margin: 2,
 }));
 
 const QueueSelect = ({ selectedQueueIds, onChange }) => {
-	const classes = useStyles();
 	const [queues, setQueues] = useState([]);
 	const { t } = useTranslation();
 	const loaded = useRef(false);
@@ -45,7 +43,7 @@ const QueueSelect = ({ selectedQueueIds, onChange }) => {
 				<InputLabel>{t("queueSelect.inputLabel")}</InputLabel>
 				<Select
 					multiple
-					labelWidth={60}
+					label={t("queueSelect.inputLabel")}
 					value={selectedQueueIds}
 					onChange={handleChange}
 					inputProps={{
@@ -63,21 +61,20 @@ const QueueSelect = ({ selectedQueueIds, onChange }) => {
 						getContentAnchorEl: null,
 					}}
 					renderValue={selected => (
-						<div className={classes.chips}>
+						<ChipsContainer>
 							{selected?.length > 0 &&
 								selected.map(id => {
 									const queue = queues.find(q => q.id === id);
 									return queue ? (
-										<Chip
+										<StyledChip
 											key={id}
-											style={{ backgroundColor: queue.color || "#f0f0f0" }}
+											sx={{ backgroundColor: queue.color || "#f0f0f0" }}
 											variant="outlined"
 											label={queue.name}
-											className={classes.chip}
 										/>
 									) : null;
 								})}
-						</div>
+						</ChipsContainer>
 					)}
 				>
 					{queues.map(queue => (

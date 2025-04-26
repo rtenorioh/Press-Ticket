@@ -6,16 +6,16 @@ import {
 	ListItemText,
 	Popover,
 	Tooltip
-} from "@material-ui/core";
-import { makeStyles } from "@material-ui/core/styles";
-import ChatIcon from "@material-ui/icons/Chat";
-import HelpOutlineIcon from "@material-ui/icons/HelpOutline";
-import VolumeOffIcon from "@material-ui/icons/VolumeOff";
-import VolumeUpIcon from "@material-ui/icons/VolumeUp";
+} from "@mui/material";
+import { styled } from "@mui/material/styles";
+import ChatIcon from "@mui/icons-material/Chat";
+import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
+import VolumeOffIcon from "@mui/icons-material/VolumeOff";
+import VolumeUpIcon from "@mui/icons-material/VolumeUp";
 import { format } from "date-fns";
 import React, { useCallback, useContext, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useHistory } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
 import useSound from "use-sound";
 import alertSound from "../../assets/sound.mp3";
@@ -27,13 +27,14 @@ import api from "../../services/api";
 import openSocket from "../../services/socket-io";
 import TicketListItem from "../TicketListItem";
 
-const useStyles = makeStyles((theme) => ({
-	tabContainer: {
-		overflowY: "auto",
-		maxHeight: 350,
-		...theme.scrollbarStyles,
-	},
-	popoverPaper: {
+const TabContainer = styled('div')(({ theme }) => ({
+	overflowY: "auto",
+	maxHeight: 350,
+	...(theme.scrollbarStyles || {}),
+}));
+
+const PopoverPaper = styled(Popover)(({ theme }) => ({
+	'& .MuiPopover-paper': {
 		width: "100%",
 		maxWidth: 350,
 		marginLeft: theme.spacing(2),
@@ -41,16 +42,16 @@ const useStyles = makeStyles((theme) => ({
 		[theme.breakpoints.down("sm")]: {
 			maxWidth: 270,
 		},
-	},
+	}
 }));
 
 const NotificationsPopOver = () => {
-	const classes = useStyles();
 	const themeStorage = localStorage.getItem("theme");
 	const { t } = useTranslation();
-	const history = useHistory();
+	const navigate = useNavigate();
+	const location = useLocation();
 	const { user } = useContext(AuthContext);
-	const ticketIdUrl = +history.location.pathname.split("/")[2];
+	const ticketIdUrl = +location.pathname.split("/")[2];
 	const anchorEl = useRef();
 	const [isOpen, setIsOpen] = useState(false);
 	const [notifications, setNotifications] = useState([]);
@@ -114,14 +115,14 @@ const NotificationsPopOver = () => {
 			notification.onclick = (e) => {
 				e.preventDefault();
 				window.focus();
-				history.push(`/tickets/${ticket.id}`);
+				navigate(`/tickets/${ticket.id}`);
 			};
 
 			if (isAudioEnabled && soundAlertRef.current) {
 				soundAlertRef.current();
 			}
 		},
-		[isAudioEnabled, history, notificationsAllowed, t]
+		[isAudioEnabled, navigate, notificationsAllowed, t]
 	);
 
 	useEffect(() => {
@@ -151,7 +152,7 @@ const NotificationsPopOver = () => {
 				const shouldNotNotify =
 					(data.message.ticketId === ticketIdUrl &&
 						document.visibilityState === "visible") ||
-					(data.ticket.userId && data.ticket.userId !== user?.id)
+					(data.ticket.userId && data.ticket.userId !== user?.id);
 
 				if (shouldNotNotify) return;
 
@@ -168,7 +169,7 @@ const NotificationsPopOver = () => {
 		const updateDocumentTitle = async () => {
 			try {
 				const { data } = await api.get("/personalizations");
-				let baseTitle = "Press Ticket";
+				let baseTitle = "Press Ticket®";
 				let faviconUrl =
 					"https://github.com/rtenorioh/Press-Ticket/blob/main/frontend/public/favicon.ico?raw=true";
 				if (data && data.length > 0) {
@@ -256,7 +257,7 @@ const NotificationsPopOver = () => {
 					<ChatIcon />
 				</Badge>
 			</IconButton>
-			<Popover
+			<PopoverPaper
 				disableScrollLock
 				open={isOpen}
 				anchorEl={anchorEl.current}
@@ -268,10 +269,9 @@ const NotificationsPopOver = () => {
 					vertical: "top",
 					horizontal: "right",
 				}}
-				classes={{ paper: classes.popoverPaper }}
 				onClose={handleClickAway}
 			>
-				<List dense className={classes.tabContainer}>
+				<List dense component={TabContainer}>
 					{notifications.length === 0 ? (
 						<ListItem>
 							<ListItemText>{t("notifications.noTickets")}</ListItemText>
@@ -284,7 +284,7 @@ const NotificationsPopOver = () => {
 						))
 					)}
 				</List>
-			</Popover>
+			</PopoverPaper>
 		</>
 	);
 };

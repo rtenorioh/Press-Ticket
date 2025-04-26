@@ -4,7 +4,9 @@ const messages = {
       apiKey: {
         title: "Gerenciador de Tokens",
         button: {
-          new: "Novo Token"
+          new: "Novo Token",
+          copy: "Copiar Token",
+          delete: "Deletar Token"
         },
         categories: {
           contacts: "Contatos",
@@ -333,6 +335,12 @@ const messages = {
           }
         },
       },
+      locationPreview: {
+        alt: "Localização",
+        buttons: {
+          view: "Visualizar"
+        }
+      },
       login: {
         title: "Faça o seu login agora",
         form: {
@@ -391,7 +399,9 @@ const messages = {
       },
       messagesList: {
         header: {
-          assignedTo: "Responsável:",
+          assignedTo: "Responsável",
+          queue: "Setor",
+          noQueue: "Nenhum",
           buttons: {
             return: "Retornar",
             resolve: "Finalizar",
@@ -414,6 +424,9 @@ const messages = {
         placeholderOpen: "Digite uma mensagem",
         placeholderClosed: "Reabra ou aceite esse ticket para enviar uma mensagem.",
         signMessage: "Assinar",
+        emoji: {
+          searchPlaceholder: "Pesquisar Emojis",
+        },
       },
       messageVariablesPicker: {
         label: "Variavéis disponíveis",
@@ -470,13 +483,24 @@ const messages = {
         notification: {
           title: "Setor salvo com sucesso!",
         },
+        validation: {
+          tooShort: "Muito curto",
+          tooLong: "Muito longo",
+          requiredName: "O nome do setor é obrigatório",
+          requiredColor: "A cor do setor é obrigatória",
+        },
         form: {
           name: "Nome",
+          namePlaceholder: "Digite o nome do setor",
           color: "Cor",
+          colorTooltip: "Cor atual do setor",
+          selectColor: "Selecionar cor",
           greetingMessage: "Mensagem de saudação",
+          greetingMessagePlaceholder: "Digite a mensagem que será enviada quando o cliente for atendido neste setor",
           startWork: "Abertura",
           endWork: "Fechamento",
           absenceMessage: "Mensagem de ausência",
+          absenceMessagePlaceholder: "Digite a mensagem que será enviada quando o setor estiver fechado",
         },
         buttons: {
           okAdd: "Adicionar",
@@ -493,10 +517,12 @@ const messages = {
           id: "ID",
           name: "Nome",
           color: "Cor",
-          greeting: "Mensagem de saudação",
+          greeting: "Mensagens",
           actions: "Ações",
           startWork: "Abertura",
           endWork: "Fechamento",
+          edit: "Editar",
+          delete: "Excluir",
         },
         buttons: {
           add: "Adicionar setor",
@@ -505,6 +531,12 @@ const messages = {
           deleteTitle: "Excluir",
           deleteMessage: "Você tem certeza? Essa ação não pode ser revertida! Os tickets desse setor continuarão existindo, mas não terão mais nenhuma setor atribuído.",
         },
+        messagesModal: {
+          title: "Mensagens",
+          greetingMessage: "Mensagem de Saudação",
+          absenceMessage: "Mensagem de Ausência",
+          none: "Nenhuma mensagem"
+        }
       },
       queueSelect: {
         inputLabel: "Setores",
@@ -541,6 +573,7 @@ const messages = {
           shortcut: "Atalho",
           message: "Resposta Rápida",
         },
+        variables: "Variáveis disponíveis",
         buttons: {
           okAdd: "Adicionar",
           okEdit: "Salvar",
@@ -565,13 +598,19 @@ const messages = {
         }
       },
       settings: {
+        title: "Configurações",
         success: "Configurações salvas com sucesso.",
         tabs: {
           general: "Gerais",
           personalize: "Personalizar",
-          integrations: "Integrações"
+          integrations: "Integrações",
+          company: "Empresa"
         },
         general: {
+          ticketManagement: "Gerenciamento de Tickets",
+          userInterface: "Interface do Usuário",
+          systemBehavior: "Comportamento do Sistema",
+          timeSettings: "Configurações de Tempo",
           userCreation: {
             name: "Criação de atendente",
             note: "Permitir a criação de atendente",
@@ -734,15 +773,16 @@ const messages = {
             colors: "Erro ao salvar cores do tema: "
           },
           tabs: {
-            data: "Dados",
+            company: "Empresa",
             logos: "Logos",
             colors: "Cores",
           },
           tabpanel: {
-            company: "Empresa",
+            companyInfo: "Informações da Empresa",
+            company: "Nome da Empresa",
             url: "URL",
-            light: "Theme Light",
-            dark: "Theme Dark",
+            light: "Tema Claro",
+            dark: "Tema Escuro",
             input: {
               primary: "Cor Primária",
               secondary: "Cor Secundária",
@@ -933,6 +973,7 @@ const messages = {
       },
       users: {
         title: "Atendentes",
+        searchPlaceholder: "Pesquisar...",
         table: {
           id: "ID",
           name: "Nome",
@@ -941,6 +982,8 @@ const messages = {
           profile: "Perfil",
           whatsapp: "Canal",
           queue: "Setor",
+          viewChannels: "Visualizar Canais",
+          viewQueues: "Visualizar Setores",
           startWork: "Horário inicial",
           endWork: "Horário final",
           actions: "Ações",
@@ -983,8 +1026,12 @@ const messages = {
         },
         form: {
           name: "Nome",
+          namePlaceholder: "Digite o nome do atendente",
           email: "E-mail",
+          emailPlaceholder: "Digite o e-mail do atendente",
           password: "Senha",
+          passwordPlaceholder: "Digite a senha do atendente",
+          toggleVisibility: "Mostrar/ocultar senha",
           profile: "Perfil",
           admin: "Administrador",
           user: "Atendente",
@@ -1008,9 +1055,29 @@ const messages = {
         },
         form: {
           name: "Nome",
+          namePlaceholder: "Digite o nome da conexão",
           default: "Padrão",
           display: "Exibir horário dos setores",
-          farewellMessage: "Mensagem de despedida"
+          farewellMessage: "Mensagem de despedida",
+          farewellMessagePlaceholder: "Esta mensagem será enviada antes de fechar o atendimento",
+          greetingMessagePlaceholder: "Esta mensagem será enviada quando o cliente iniciar a conversa",
+          color: "Cor",
+          channels: "Ativar Canais",
+          mainInfo: "Informações Principais",
+          messagesTitle: "Mensagens",
+          appearanceTitle: "Aparência",
+          queuesTitle: "Setores",
+          channelSelection: "Seleção de Canal",
+          selectChannel: "Selecionar Canal",
+          selectChannelPlaceholder: "Selecione um canal"
+        },
+        integration: {
+          title: "Integração de Canais",
+          description: "Para ativar <strong>Facebook</strong>, <strong>Instagram</strong>, <strong>Telegram</strong> e <strong>WebChat</strong>, cadastre-se pelo botão abaixo, depois adquirir os canais desejados usando o cupom abaixo. Insira o token da sua <strong>Account</strong> na página de Integrações para finalizar a integração.",
+          discount: "Use o cupom abaixo para <strong>50% de desconto</strong> na compra dos canais!",
+          copied: "Copiado!",
+          copy: "Copiar cupom",
+          register: "REALIZE O CADASTRO AQUI"
         },
         buttons: {
           okAdd: "Adicionar",
@@ -1047,6 +1114,7 @@ const messages = {
         ERR_NONE_USER_TICKET: "Já existe um ticket aberto para este contato sem atendente.",
         ERR_SESSION_EXPIRED: "Sessão expirada. Por favor entre.",
         ERR_SENDING_WAPP_MSG: "Erro ao enviar mensagem do WhatsApp. Verifique a página de canais.",
+        ERR_SYNC_TAGS: "Erro ao sincronizar tags.",
         ERR_USER_INACTIVE: "Este atendente está desativado!",
         ERR_USER_TICKET_LIMIT: "Limite de tickets atingido para este atendente.",
         ERR_USER_CREATION_COUNT: "Limite de atendentes atingido, para alterar entre em contato com o suporte.",

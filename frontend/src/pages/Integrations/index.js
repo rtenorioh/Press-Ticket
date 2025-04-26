@@ -2,12 +2,12 @@ import {
 	Container,
 	Grid,
 	IconButton,
-	makeStyles,
 	Paper,
 	TextField,
 	Typography,
-} from "@material-ui/core";
-import { Visibility, VisibilityOff } from "@material-ui/icons";
+} from "@mui/material";
+import { styled } from "@mui/material/styles";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
@@ -15,39 +15,41 @@ import Title from "../../components/Title";
 import toastError from "../../errors/toastError";
 import api from "../../services/api";
 
-const useStyles = makeStyles((theme) => ({
-	root: {
-		display: "flex",
-		alignItems: "center",
-		padding: theme.spacing(2, 2, 3),
-	},
-	paper: {
-		padding: theme.spacing(1),
-		marginBottom: 12,
-	},
-	integrationRow: {
-		display: "flex",
-		alignItems: "center",
-		marginBottom: theme.spacing(1),
-		gap: theme.spacing(2),
-	},
-	textFieldContainer: {
-		position: "relative",
-		width: "100%",
-	},
-	textField: {
-		width: "100%",
-	},
-	iconButton: {
-		position: "absolute",
-		right: theme.spacing(1),
-		top: "50%",
-		transform: "translateY(-50%)",
-	},
+const Root = styled('div')(({ theme }) => ({
+	display: "flex",
+	alignItems: "center",
+	padding: theme.spacing(2, 2, 3),
+}));
+
+const StyledPaper = styled(Paper)(({ theme }) => ({
+	padding: theme.spacing(1),
+	marginBottom: 12,
+}));
+
+const IntegrationRow = styled('div')(({ theme }) => ({
+	display: "flex",
+	alignItems: "center",
+	marginBottom: theme.spacing(1),
+	gap: theme.spacing(2),
+}));
+
+const TextFieldContainer = styled('div')(({ theme }) => ({
+	position: "relative",
+	width: "100%",
+}));
+
+const StyledTextField = styled(TextField)(({ theme }) => ({
+	width: "100%",
+}));
+
+const StyledIconButton = styled(IconButton)(({ theme }) => ({
+	position: "absolute",
+	right: theme.spacing(1),
+	top: "50%",
+	transform: "translateY(-50%)",
 }));
 
 const Integrations = () => {
-	const classes = useStyles();
 	const { t } = useTranslation();
 
 	const [integrations, setIntegrations] = useState([]);
@@ -119,18 +121,17 @@ const Integrations = () => {
 	};
 
 	return (
-		<div className={classes.root}>
-			<Container className={classes.container}>
+		<Root>
+			<Container>
 				<Title>{t("integrations.title")}</Title>
-				<Paper className={classes.paper}>
-					<div className={classes.integrationRow}>
+				<StyledPaper>
+					<IntegrationRow>
 						<Typography align="left" variant="body1">
 							{t("integrations.integrations.openai.title")}
 						</Typography>
 
-						<div className={classes.textFieldContainer}>
-							<TextField
-								className={classes.textField}
+						<TextFieldContainer>
+							<StyledTextField
 								id="organization"
 								name="organization"
 								margin="dense"
@@ -145,17 +146,15 @@ const Integrations = () => {
 								fullWidth
 								type="text"
 							/>
-							<IconButton
-								className={classes.iconButton}
+							<StyledIconButton
 								onClick={() => handleToggleShowKey("organization")}
 							>
 								{showKeys["organization"] ? <VisibilityOff /> : <Visibility />}
-							</IconButton>
-						</div>
+							</StyledIconButton>
+						</TextFieldContainer>
 
-						<div className={classes.textFieldContainer}>
-							<TextField
-								className={classes.textField}
+						<TextFieldContainer>
+							<StyledTextField
 								id="apikey"
 								name="apikey"
 								label={t("integrations.integrations.openai.apikey")}
@@ -170,27 +169,25 @@ const Integrations = () => {
 								}
 								type="text"
 							/>
-							<IconButton
-								className={classes.iconButton}
+							<StyledIconButton
 								onClick={() => handleToggleShowKey("apikey")}
 							>
 								{showKeys["apikey"] ? <VisibilityOff /> : <Visibility />}
-							</IconButton>
-						</div>
-					</div>
-				</Paper>
+							</StyledIconButton>
+						</TextFieldContainer>
+					</IntegrationRow>
+				</StyledPaper>
 
-				<Paper className={classes.paper}>
+				<StyledPaper>
 					<Grid container spacing={2}>
 						<Grid item xs={12} sm={6}>
-							<div className={classes.integrationRow}>
+							<IntegrationRow>
 								<Typography align="left" variant="body1">
 									{t("integrations.integrations.n8n.title")}
 								</Typography>
 
-								<div className={classes.textFieldContainer}>
-									<TextField
-										className={classes.textField}
+								<TextFieldContainer>
+									<StyledTextField
 										id="urlApiN8N"
 										name="urlApiN8N"
 										margin="dense"
@@ -205,25 +202,23 @@ const Integrations = () => {
 										}
 										type="text"
 									/>
-									<IconButton
-										className={classes.iconButton}
+									<StyledIconButton
 										onClick={() => handleToggleShowKey("urlApiN8N")}
 									>
 										{showKeys["urlApiN8N"] ? <VisibilityOff /> : <Visibility />}
-									</IconButton>
-								</div>
-							</div>
+									</StyledIconButton>
+								</TextFieldContainer>
+							</IntegrationRow>
 						</Grid>
 
 						<Grid item xs={12} sm={6}>
-							<div className={classes.integrationRow}>
+							<IntegrationRow>
 								<Typography align="left" variant="body1">
 									{t("integrations.integrations.hub.title")}
 								</Typography>
 
-								<div className={classes.textFieldContainer}>
-									<TextField
-										className={classes.textField}
+								<TextFieldContainer>
+									<StyledTextField
 										id="hubToken"
 										name="hubToken"
 										margin="dense"
@@ -238,29 +233,27 @@ const Integrations = () => {
 										}
 										type="text"
 									/>
-									<IconButton
-										className={classes.iconButton}
+									<StyledIconButton
 										onClick={() => handleToggleShowKey("hubToken")}
 									>
 										{showKeys["hubToken"] ? <VisibilityOff /> : <Visibility />}
-									</IconButton>
-								</div>
-							</div>
+									</StyledIconButton>
+								</TextFieldContainer>
+							</IntegrationRow>
 						</Grid>
 					</Grid>
-				</Paper>
+				</StyledPaper>
 
-				<Paper className={classes.paper}>
+				<StyledPaper>
 					<Grid container spacing={2}>
 						<Grid item xs={12}>
-							<div className={classes.integrationRow}>
+							<IntegrationRow>
 								<Typography align="left" variant="body1">
 									{t("integrations.integrations.maps.title")}
 								</Typography>
 
-								<div className={classes.textFieldContainer}>
-									<TextField
-										className={classes.textField}
+								<TextFieldContainer>
+									<StyledTextField
 										id="apiMaps"
 										name="apiMaps"
 										margin="dense"
@@ -275,19 +268,18 @@ const Integrations = () => {
 										}
 										type="text"
 									/>
-									<IconButton
-										className={classes.iconButton}
+									<StyledIconButton
 										onClick={() => handleToggleShowKey("apiMaps")}
 									>
 										{showKeys["apiMaps"] ? <VisibilityOff /> : <Visibility />}
-									</IconButton>
-								</div>
-							</div>
+									</StyledIconButton>
+								</TextFieldContainer>
+							</IntegrationRow>
 						</Grid>
 					</Grid>
-				</Paper>
+				</StyledPaper>
 			</Container>
-		</div>
+		</Root>
 	);
 };
 

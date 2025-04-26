@@ -1,20 +1,22 @@
-import { makeStyles } from "@material-ui/core/styles";
+import { styled } from "@mui/material/styles";
 import React from "react";
 
-const useStyles = makeStyles((theme) => ({
-	headerButtonsWrapper: {
-		display: "flex",
-		marginLeft: "auto",
-		"& > *": {
-			margin: theme.spacing(1),
-		},
+const HeaderButtonsWrapperDiv = styled('div')(({ theme }) => ({
+	display: "flex",
+	marginLeft: "auto",
+	alignItems: "center",
+	justifyContent: "center",
+	gap: theme.spacing(2),
+	"& > *": {
+		margin: 0,
 	},
+	[theme.breakpoints.down('sm')]: {
+		gap: theme.spacing(1),
+	}
 }));
 
 const HeaderButtonsWrapper = ({ children }) => {
-	const classes = useStyles();
-
-	return <div className={classes.headerButtonsWrapper}>{children}</div>;
+	return <HeaderButtonsWrapperDiv>{children}</HeaderButtonsWrapperDiv>;
 };
 
 export default HeaderButtonsWrapper;

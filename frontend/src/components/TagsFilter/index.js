@@ -1,6 +1,5 @@
-import { Chip, Paper, TextField } from "@material-ui/core";
-import Autocomplete from "@material-ui/lab/Autocomplete";
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
+import { Autocomplete, Chip, Paper, TextField } from "@mui/material";
 import toastError from "../../errors/toastError";
 import api from "../../services/api";
 
@@ -38,19 +37,23 @@ const TagsFilter = ({ onFiltered }) => {
     }
 
     return (
-        <Paper style={{ padding: 10 }}>
+        <Paper sx={{ padding: 1 }}>
             <Autocomplete
                 multiple
                 size="small"
                 options={tags}
                 value={selecteds}
-                onChange={(e, v, r) => onChange(v)}
+                onChange={(e, v) => onChange(v)}
                 getOptionLabel={(option) => option.name}
                 renderTags={(value, getTagProps) =>
                     value.map((option, index) => (
                         <Chip
                             variant="outlined"
-                            style={{ backgroundColor: option.color || '#eee', textShadow: '1px 1px 1px #000', color: 'white' }}
+                            sx={{ 
+                                backgroundColor: option.color || '#eee', 
+                                textShadow: '1px 1px 1px #000', 
+                                color: 'white' 
+                            }}
                             label={option.name}
                             {...getTagProps({ index })}
                             size="small"

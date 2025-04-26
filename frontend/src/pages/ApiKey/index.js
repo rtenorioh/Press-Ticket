@@ -1,25 +1,31 @@
 import {
-    Button,
-    Checkbox,
-    Dialog,
-    DialogActions,
-    DialogContent,
-    DialogTitle,
-    FormControlLabel,
-    Grid,
-    IconButton,
-    Paper,
-    Table,
-    TableBody,
-    TableCell,
-    TableContainer,
-    TableHead,
-    TableRow,
-    TextField,
-    Typography
-} from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
-import { DeleteOutline, FileCopy } from '@material-ui/icons';
+  Button,
+  Checkbox,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  FormControlLabel,
+  Grid,
+  IconButton,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TextField,
+  Typography,
+  Tooltip,
+  Box
+} from '@mui/material';
+import { styled, useTheme } from '@mui/material/styles';
+import DeleteOutline from '@mui/icons-material/DeleteOutline';
+import FileCopy from '@mui/icons-material/FileCopy';
+import AddCircleOutline from '@mui/icons-material/AddCircleOutline';
+import VpnKeyRounded from '@mui/icons-material/VpnKeyRounded';
+import Stack from '@mui/material/Stack';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'react-toastify';
@@ -31,24 +37,71 @@ import TableRowSkeleton from "../../components/TableRowSkeleton";
 import Title from '../../components/Title';
 import api from '../../services/api';
 
-const useStyles = makeStyles(theme => ({
-    mainPaper: {
-        flex: 1,
+const MainPaper = styled(Paper)(({ theme }) => ({
+    flex: 1,
+    padding: theme.spacing(2),
+    margin: theme.spacing(2),
+    overflowY: 'scroll',
+    borderRadius: theme.shape.borderRadius,
+    boxShadow: '0 4px 10px rgba(0,0,0,0.05)',
+    ...theme.scrollbarStyles
+}));
+
+const StyledTableCell = styled(TableCell)(({ theme }) => ({
+    padding: theme.spacing(1, 2),
+    fontSize: '0.875rem',
+}));
+
+const StyledDialog = styled(Dialog)(({ theme }) => ({
+    '& .MuiDialogTitle-root': {
+        backgroundColor: theme.palette.primary.main,
+        color: '#fff',
+        '& .MuiTypography-root': {
+            fontWeight: 500,
+        },
         padding: theme.spacing(2),
-        margin: theme.spacing(1),
-        overflowY: 'scroll',
-        ...theme.scrollbarStyles
     },
-    customTableCell: {
-        display: 'flex',
-        alignItems: 'center',
-        gap: '0.5rem'
+    '& .MuiDialogContent-root': {
+        padding: theme.spacing(3),
+    },
+    '& .MuiDialogActions-root': {
+        padding: theme.spacing(2),
+        backgroundColor: '#f5f5f5',
+    },
+}));
+
+const StyledTableHead = styled(TableHead)(({ theme }) => ({
+    backgroundColor: theme.palette.background.default,
+    '& .MuiTableCell-root': {
+        color: theme.palette.text.secondary,
+        fontWeight: 600,
     }
 }));
 
+const TokenDisplay = styled('div')(({ theme }) => ({
+    display: 'flex',
+    alignItems: 'center',
+    gap: theme.spacing(1),
+    maxWidth: 280,
+    [theme.breakpoints.down('md')]: {
+        maxWidth: 180,
+    },
+}));
+
+const TokenText = styled(Typography)(({ theme }) => ({
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+    fontSize: '0.875rem',
+    fontFamily: 'monospace',
+    backgroundColor: theme.palette.background.default,
+    padding: theme.spacing(0.5, 1),
+    borderRadius: theme.shape.borderRadius,
+}));
+
 const ApiKey = () => {
-    const classes = useStyles();
     const { t } = useTranslation();
+    const theme = useTheme();
     const [tokens, setTokens] = useState([]);
     const [loading, setLoading] = useState(false);
     const [hasMore, setHasMore] = useState(true);
@@ -194,110 +247,152 @@ const ApiKey = () => {
             <MainHeader>
                 <Title>{t("apiKey.title")} {total > 0 ? `(${total})` : ""}</Title>
                 <MainHeaderButtonsWrapper>
-                    <Button
-                        variant="contained"
-                        color="primary"
-                        onClick={() => setOpenNewDialog(true)}
-                    >
-                        {t("apiKey.button.new")}
-                    </Button>
+                    <Tooltip title={t("apiKey.button.new")} arrow>
+                        <Button
+                            variant="contained"
+                            color="primary"
+                            onClick={() => setOpenNewDialog(true)}
+                            sx={{
+                                borderRadius: 2,
+                                px: { xs: 1, sm: 2 },
+                                '& .MuiButton-startIcon': {
+                                    mr: { xs: 0, sm: 1 }
+                                }
+                            }}
+                        >
+                            <AddCircleOutline />
+                        </Button>
+                    </Tooltip>
                 </MainHeaderButtonsWrapper>
             </MainHeader>
-            <Paper
-                className={classes.mainPaper}
+            <MainPaper
                 variant="outlined"
                 onScroll={handleScroll}
             >
-                <TableContainer>
+                <TableContainer sx={{ borderRadius: 1, overflow: 'hidden' }}>
                     <Table>
-                        <TableHead>
+                        <StyledTableHead>
                             <TableRow>
-                                <TableCell>{t("apiKey.table.name")}</TableCell>
-                                <TableCell>{t("apiKey.table.token")}</TableCell>
-                                <TableCell>{t("apiKey.table.permissions")}</TableCell>
-                                <TableCell>{t("apiKey.table.created_at")}</TableCell>
-                                <TableCell align="center">{t("apiKey.table.actions")}</TableCell>
+                                <StyledTableCell>{t("apiKey.table.name")}</StyledTableCell>
+                                <StyledTableCell>{t("apiKey.table.token")}</StyledTableCell>
+                                <StyledTableCell>{t("apiKey.table.permissions")}</StyledTableCell>
+                                <StyledTableCell>{t("apiKey.table.created_at")}</StyledTableCell>
+                                <StyledTableCell align="center">{t("apiKey.table.actions")}</StyledTableCell>
                             </TableRow>
-                        </TableHead>
+                        </StyledTableHead>
                         <TableBody>
-                            {tokens.map((token) => (
-                                <TableRow key={token.id}>
-                                    <TableCell>{token.name}</TableCell>
-                                    <TableCell>
-                                        <div style={{ display: 'flex', alignItems: 'center' }}>
-                                            <Typography
-                                                style={{
-                                                    maxWidth: 200,
-                                                    overflow: 'hidden',
-                                                    textOverflow: 'ellipsis',
-                                                    whiteSpace: 'nowrap'
-                                                }}
-                                            >
+                            {loading && tokens.length === 0 ? (
+                                <TableRowSkeleton columns={5} />
+                            ) : tokens.length === 0 ? (
+                                <TableRow>
+                                    <StyledTableCell colSpan={5} align="center">
+                                        <Typography variant="body2" color="textSecondary">
+                                            {t("apiKey.messages.noTokens")}
+                                        </Typography>
+                                    </StyledTableCell>
+                                </TableRow>
+                            ) : tokens.map((token) => (
+                                <TableRow key={token.id} hover>
+                                    <StyledTableCell>
+                                        <Typography variant="body2" fontWeight={500}>
+                                            {token.name}
+                                        </Typography>
+                                    </StyledTableCell>
+                                    <StyledTableCell>
+                                        <TokenDisplay>
+                                            <TokenText>
                                                 {token.token}
-                                            </Typography>
+                                            </TokenText>
+                                            <Tooltip title={t("apiKey.button.copy")} arrow>
+                                                <IconButton
+                                                    size="small"
+                                                    onClick={() => handleCopyToken(token.token)}
+                                                    sx={{ bgcolor: 'background.default', '&:hover': { bgcolor: 'action.hover' } }}
+                                                >
+                                                    <FileCopy fontSize="small" />
+                                                </IconButton>
+                                            </Tooltip>
+                                        </TokenDisplay>
+                                    </StyledTableCell>
+                                    <StyledTableCell>
+                                        <Typography variant="body2" color="textSecondary">
+                                            {Array.isArray(token.permissions) ? token.permissions.map(renderPermissionName).join(', ') : ''}
+                                        </Typography>
+                                    </StyledTableCell>
+                                    <StyledTableCell>
+                                        <Typography variant="body2" color="textSecondary">
+                                            {new Date(token.createdAt).toLocaleString()}
+                                        </Typography>
+                                    </StyledTableCell>
+                                    <StyledTableCell align="center">
+                                        <Tooltip title={t("apiKey.button.delete")} arrow>
                                             <IconButton
                                                 size="small"
-                                                onClick={() => handleCopyToken(token.token)}
+                                                onClick={() => {
+                                                    setTokenToDelete(token.id);
+                                                    setConfirmModalOpen(true);
+                                                }}
+                                                sx={{ color: 'error.main', '&:hover': { bgcolor: 'error.lighter' } }}
                                             >
-                                                <FileCopy fontSize="small" />
+                                                <DeleteOutline fontSize="small" />
                                             </IconButton>
-                                        </div>
-                                    </TableCell>
-                                    <TableCell>
-                                        {Array.isArray(token.permissions) ? token.permissions.map(renderPermissionName).join(', ') : ''}
-                                    </TableCell>
-                                    <TableCell>{new Date(token.createdAt).toLocaleString()}</TableCell>
-                                    <TableCell align="center">
-                                        <IconButton
-                                            size="small"
-                                            onClick={() => {
-                                                setTokenToDelete(token.id);
-                                                setConfirmModalOpen(true);
-                                            }}
-                                        >
-                                            <DeleteOutline />
-                                        </IconButton>
-                                    </TableCell>
+                                        </Tooltip>
+                                    </StyledTableCell>
                                 </TableRow>
                             ))}
                             {loading && <TableRowSkeleton columns={5} />}
                         </TableBody>
                     </Table>
                 </TableContainer>
-            </Paper>
+            </MainPaper>
 
-            <Dialog
+            <StyledDialog
                 open={openNewDialog}
                 onClose={handleClose}
                 maxWidth="sm"
                 fullWidth
+                PaperProps={{
+                    sx: {
+                        borderRadius: 2,
+                        boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
+                    }
+                }}
             >
-                <DialogTitle>{t("apiKey.modal.title")}</DialogTitle>
-                <DialogContent>
+                <DialogTitle>
+                    <Stack direction="row" alignItems="center">
+                        <VpnKeyRounded fontSize="small" sx={{ mr: 1.5 }}/>
+                        {t("apiKey.modal.title")}
+                    </Stack>
+                </DialogTitle>
+                <DialogContent sx={{ pt: 0 }}>
                     <TextField
                         autoFocus
                         margin="dense"
                         label={t("apiKey.modal.name")}
                         type="text"
                         fullWidth
-                        value={newToken.name || ''}
+                        value={newToken.name}
                         onChange={handleNameChange}
+                        variant="outlined"
+                        sx={{ mb: 2, mt: 1 }}
                     />
-                    <Typography
-                        variant="subtitle1"
-                        style={{
-                            marginTop: '16px',
-                            color: hasSelectedPermissions ? 'inherit' : '#f44336'
-                        }}
-                    >
-                        {t("apiKey.modal.permissions")}
-                        {!hasSelectedPermissions && (
-                            <Typography variant="caption" style={{ marginLeft: 8, color: '#f44336' }}>
-                                ({t("apiKey.modal.permissionsRequired")})
-                            </Typography>
-                        )}
-                    </Typography>
                     <Grid container spacing={2}>
+                        <Grid item xs={12}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
+                                <Typography variant="subtitle1" fontWeight={500}>
+                                    {t("apiKey.modal.permissions")}
+                                </Typography>
+                                {!hasSelectedPermissions && (
+                                    <Typography 
+                                        variant="caption" 
+                                        color="error.main" 
+                                        sx={{ fontWeight: 500 }}
+                                    >
+                                        ({t("apiKey.modal.permissionsRequired")})
+                                    </Typography>
+                                )}
+                            </Box>
+                        </Grid>
                         <Grid item xs={6}>
                             <Typography variant="subtitle2" style={{ marginBottom: '8px' }}>
                                 {t("apiKey.categories.contacts")}
@@ -338,19 +433,42 @@ const ApiKey = () => {
                         </Grid>
                     </Grid>
                 </DialogContent>
-                <DialogActions>
-                    <Button onClick={handleClose} color="secondary">
+                <DialogActions sx={{ px: 3, pb: 3, pt: 1 }}>
+                    <Button 
+                        onClick={handleClose} 
+                        variant="contained"
+                        sx={{ 
+                            borderRadius: 20,
+                            backgroundColor: '#e0e0e0',
+                            color: '#757575',
+                            '&:hover': {
+                                backgroundColor: '#d5d5d5',
+                            },
+                            textTransform: 'uppercase',
+                            fontWeight: 'bold',
+                        }}
+                    >
                         {t("apiKey.modal.buttons.cancel")}
                     </Button>
                     <Button
                         onClick={handleCreateToken}
-                        color="primary"
+                        variant="contained"
                         disabled={!newToken.name || !hasSelectedPermissions}
+                        sx={{ 
+                            borderRadius: 20, 
+                            ml: 2,
+                            backgroundColor: theme.palette.primary.main,
+                            '&:hover': {
+                                backgroundColor: theme.palette.secondary.main,
+                            },
+                            textTransform: 'uppercase',
+                            fontWeight: 'bold',
+                        }}
                     >
                         {t("apiKey.modal.buttons.save")}
                     </Button>
                 </DialogActions>
-            </Dialog>
+            </StyledDialog>
 
             <ConfirmationModal
                 title="Excluir Token"

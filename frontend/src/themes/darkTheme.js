@@ -1,12 +1,12 @@
-import { createTheme } from '@material-ui/core/styles';
+import { createTheme } from '@mui/material/styles';
 import backgroundImageDark from "../assets/backgroundDark.jpg";
 
 const getDarkTheme = (config, locale) =>
     createTheme(
         {
-            overrides: {
+            components: {
                 MuiCssBaseline: {
-                    "@global": {
+                    styleOverrides: {
                         body: {
                             backgroundColor: config?.backgroundDefault || "#2E2E3A",
                         },

@@ -1,6 +1,6 @@
-import { CssBaseline } from "@material-ui/core";
-import { ptBR } from "@material-ui/core/locale";
-import { ThemeProvider } from "@material-ui/core/styles";
+import CssBaseline from "@mui/material/CssBaseline";
+import { ptBR } from "@mui/material/locale";
+import { ThemeProvider } from "@mui/material/styles";
 import React, { useEffect, useState } from "react";
 import "react-toastify/dist/ReactToastify.css";
 import { SocketProvider, useSocket } from './context/SocketContext';
@@ -20,6 +20,14 @@ const AppContent = () => {
     const newTheme = theme === "light" ? "dark" : "light";
     setTheme(newTheme);
     localStorage.setItem("theme", newTheme);
+  };
+
+  const onThemeConfigUpdate = (themeType, config) => {
+    if (themeType === "light") {
+      setLightThemeConfig(prevConfig => ({ ...prevConfig, ...config }));
+    } else if (themeType === "dark") {
+      setDarkThemeConfig(prevConfig => ({ ...prevConfig, ...config }));
+    }
   };
 
   useEffect(() => {
@@ -73,7 +81,7 @@ const AppContent = () => {
   return (
     <ThemeProvider theme={currentTheme}>
       <CssBaseline />
-      <Routes toggleTheme={toggleTheme} currentTheme={theme} />
+      <Routes toggleTheme={toggleTheme} onThemeConfigUpdate={onThemeConfigUpdate} currentTheme={theme} />
     </ThemeProvider>
   );
 };

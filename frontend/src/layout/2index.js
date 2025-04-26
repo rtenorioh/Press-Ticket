@@ -1,26 +1,24 @@
-import {
-  AppBar,
-  Divider,
-  Drawer,
-  IconButton,
-  Link,
-  List,
-  makeStyles,
-  Menu,
-  MenuItem,
-  Toolbar,
-  Tooltip,
-  Typography
-} from "@material-ui/core";
-import { CheckCircle, Info } from "@material-ui/icons";
-import AccountCircle from "@material-ui/icons/AccountCircle";
-import ChevronLeftIcon from "@material-ui/icons/ChevronLeft";
-import MenuIcon from "@material-ui/icons/Menu";
-import clsx from "clsx";
+import AppBar from '@mui/material/AppBar';
+import Divider from '@mui/material/Divider';
+import Drawer from '@mui/material/Drawer';
+import IconButton from '@mui/material/IconButton';
+import Link from '@mui/material/Link';
+import List from '@mui/material/List';
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
+import Toolbar from '@mui/material/Toolbar';
+import Tooltip from '@mui/material/Tooltip';
+import Typography from '@mui/material/Typography';
+import { styled } from '@mui/material/styles';
+import CheckCircle from '@mui/icons-material/CheckCircle';
+import Info from '@mui/icons-material/Info';
+import AccountCircle from '@mui/icons-material/AccountCircle';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import MenuIcon from '@mui/icons-material/Menu';
 import React, { useContext, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useLocation } from "react-router-dom";
-import { systemVersion } from "../../package.json";
+import packageJson from "../../package.json";
 import defaultLogo from '../assets/logo.jpg';
 import { getImageUrl } from '../helpers/imageHelper';
 import BackdropLoading from "../components/BackdropLoading";
@@ -34,113 +32,113 @@ import api from "../services/api";
 import openSocket from "../services/socket-io";
 import MainListItems from "./MainListItems";
 
-const drawerWidth = 240;
+const drawerWidth = 350;
 
-const useStyles = makeStyles((theme) => ({
-  root: {
-    display: "flex",
-    height: "100vh",
-    [theme.breakpoints.down("sm")]: {
-      height: "calc(100vh - 56px)",
-    },
+const Root = styled('div')(({ theme }) => ({
+  display: "flex",
+  height: "100vh",
+  [theme.breakpoints.down("sm")]: {
+    height: "calc(100vh - 56px)",
   },
-  toolbar: {
-    paddingRight: 24,
-    color: "#ffffff",
-    background: theme.palette?.primary?.main || "#6B62FE",
+}));
+
+const StyledToolbar = styled(Toolbar)(({ theme }) => ({
+  paddingRight: 24,
+  color: "#ffffff",
+  background: theme.palette?.primary?.main || "#6B62FE",
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  [theme.breakpoints.down('sm')]: {
+    paddingLeft: theme.spacing(1),
+    paddingRight: theme.spacing(1),
   },
-  toolbarIcon: {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "flex-end",
-    padding: "0 8px",
-    minHeight: "48px",
-    backgroundColor: theme.palette.background.paper,
-  },
-  appBar: {
-    zIndex: theme.zIndex.drawer + 1,
-    transition: theme.transitions.create(["width", "margin"], {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.leavingScreen,
-    }),
-  },
-  appBarShift: {
+}));
+
+const ToolbarIcon = styled('div')(({ theme }) => ({
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "space-between",
+  padding: "0 8px",
+  minHeight: "40px",
+  backgroundColor: theme.palette.background.paper,
+}));
+
+const StyledAppBar = styled(AppBar, {
+  shouldForwardProp: (prop) => prop !== 'open',
+})(({ theme, open }) => ({
+  zIndex: theme.zIndex.drawer + 1,
+  transition: theme.transitions.create(["width", "margin"], {
+    easing: theme.transitions.easing.sharp,
+    duration: theme.transitions.duration.leavingScreen,
+  }),
+  ...(open && {
     marginLeft: drawerWidth,
     width: `calc(100% - ${drawerWidth}px)`,
     transition: theme.transitions.create(["width", "margin"], {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.enteringScreen,
     }),
+  }),
+}));
+
+const MenuButton = styled(IconButton)(({ theme, hidden }) => ({
+  marginRight: theme.spacing(2),
+  borderRadius: 8,
+  padding: theme.spacing(1),
+  transition: 'all 0.2s',
+  '&:hover': {
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
   },
-  menuButton: {
-    marginRight: 36,
-  },
-  menuButtonHidden: {
+  ...(hidden && {
     display: "none",
-  },
-  title: {
-    flexGrow: 1,
-  },
-  drawerPaper: {
-    position: "relative",
-    whiteSpace: "nowrap",
-    width: drawerWidth,
-    transition: theme.transitions.create("width", {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.enteringScreen,
-    }),
-  },
-  drawerPaperClose: {
-    overflowX: "hidden",
-    transition: theme.transitions.create("width", {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.leavingScreen,
-    }),
-    width: theme.spacing(7),
-    [theme.breakpoints.up("sm")]: {
-      width: theme.spacing(9),
-    },
-  },
-  appBarSpacer: {
-    minHeight: "48px",
-  },
-  content: {
-    flex: 1,
-    overflow: "auto",
-  },
-  container: {
-    paddingTop: theme.spacing(4),
-    paddingBottom: theme.spacing(4),
-  },
-  paper: {
-    padding: theme.spacing(2),
-    display: "flex",
-    overflow: "auto",
-    flexDirection: "column",
-  },
-  systemCss: {
-    display: "flex",
-    justifyContent: "center",
-    fontSize: 12,
+  }),
+}));
+
+const Title = styled(Typography)(({ theme }) => ({
+  flexGrow: 1,
+  fontWeight: 500,
+  marginLeft: theme.spacing(1),
+  [theme.breakpoints.down('sm')]: {
+    fontSize: '0.9rem',
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    maxWidth: '40vw',
   },
 }));
 
+const AppBarSpacer = styled('div')(({ theme }) => ({
+  minHeight: "15px",
+}));
+
+const Content = styled('main')(({ theme }) => ({
+  flex: 1,
+  overflow: "auto",
+  marginTop: theme.spacing(6),
+}));
+
+const SystemCss = styled('div')(({ theme }) => ({
+  display: "flex",
+  justifyContent: "center",
+  fontSize: 12,
+}));
+
 const LoggedInLayout = ({ children, toggleTheme, onThemeConfigUpdate }) => {
-  const classes = useStyles();
   const { t } = useTranslation();
   const location = useLocation();
+  const systemVersion = packageJson.systemVersion;
   const [userModalOpen, setUserModalOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const { handleLogout, loading } = useContext(AuthContext);
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [drawerVariant, setDrawerVariant] = useState("permanent");
   const { user } = useContext(AuthContext);
   const [latestVersion, setLatestVersion] = useState("");
   const themeStorage = localStorage.getItem("theme");
   const [companyData, setCompanyData] = useState({
     logo: defaultLogo,
-    name: "Press Ticket",
+    name: "Press Ticket®",
     url: "https://github.com/rtenorioh/Press-Ticket"
   });
 
@@ -156,7 +154,7 @@ const LoggedInLayout = ({ children, toggleTheme, onThemeConfigUpdate }) => {
           if (lightConfig) {
             setCompanyData(prevData => ({
               ...prevData,
-              name: lightConfig.company || "Press Ticket",
+              name: lightConfig.company || "Press Ticket®",
               url: lightConfig.url || "https://github.com/rtenorioh/Press-Ticket"
             }));
           }
@@ -210,7 +208,9 @@ const LoggedInLayout = ({ children, toggleTheme, onThemeConfigUpdate }) => {
         }
 
       } catch (err) {
-        toastError(err);
+        if (!(err && err.message && err.message.includes('Network Error'))) {
+          toastError(err);
+        }
       }
     };
 
@@ -230,7 +230,7 @@ const LoggedInLayout = ({ children, toggleTheme, onThemeConfigUpdate }) => {
     };
 
     compareVersions();
-  }, []);
+  }, [systemVersion]);
 
   const fetchLatestRelease = async () => {
     try {
@@ -267,14 +267,6 @@ const LoggedInLayout = ({ children, toggleTheme, onThemeConfigUpdate }) => {
     }
   }, []);
 
-  useEffect(() => {
-    if (document.body.offsetWidth < 600) {
-      setDrawerVariant("temporary");
-    } else {
-      setDrawerVariant("permanent");
-    }
-  }, [drawerOpen]);
-
   const handleMenu = (event) => {
     setAnchorEl(event.currentTarget);
     setMenuOpen(true);
@@ -296,9 +288,7 @@ const LoggedInLayout = ({ children, toggleTheme, onThemeConfigUpdate }) => {
   };
 
   const drawerClose = () => {
-    if (document.body.offsetWidth < 600) {
-      setDrawerOpen(false);
-    }
+    setDrawerOpen(false);
   };
 
   if (loading) {
@@ -306,83 +296,96 @@ const LoggedInLayout = ({ children, toggleTheme, onThemeConfigUpdate }) => {
   }
 
   return (
-    <div className={classes.root}>
+    <Root>
       <Drawer
-        variant={drawerVariant}
-        className={drawerOpen ? classes.drawerPaper : classes.drawerPaperClose}
-        classes={{
-          paper: clsx(
-            classes.drawerPaper,
-            !drawerOpen && classes.drawerPaperClose
-          ),
+        variant="temporary"
+        sx={{
+          width: drawerWidth,
+          flexShrink: 0,
+          overflowX: 'hidden',
+          '& .MuiDrawer-paper': {
+            width: drawerWidth,
+            boxSizing: 'border-box',
+            overflowX: 'hidden',
+          },
         }}
         open={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+        ModalProps={{ keepMounted: true }}
       >
-        <div className={classes.toolbarIcon}>
-          <img alt="logo" src={getImageUrl(companyData.logo)} style={{ height: 50, marginBottom: 10, marginTop: 5 }} />
-          <IconButton color="secondary" onClick={() => setDrawerOpen(!drawerOpen)}>
+        <ToolbarIcon>
+          <img alt="logo" src={getImageUrl(companyData.logo)} style={{ height: 35, marginBottom: 0, marginTop: 0, maxWidth: '70%', objectFit: 'contain' }} />
+          <IconButton 
+            color="secondary" 
+            onClick={() => setDrawerOpen(false)}
+            sx={{ 
+              borderRadius: 1.5,
+              '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.04)' } 
+            }}
+          >
             <ChevronLeftIcon />
           </IconButton>
-        </div>
-        <Divider />
-        <List>
+        </ToolbarIcon>
+        <Divider sx={{ my: 0.5 }} />
+        <List sx={{ py: 0.5, width: '100%', overflowX: 'hidden' }}>
           <MainListItems drawerClose={drawerClose} location={location} />
         </List>
-        <Divider />
+        <Divider sx={{ my: 0.5 }} />
       </Drawer>
       <UserModal
         open={userModalOpen}
         onClose={() => setUserModalOpen(false)}
         userId={user?.id}
       />
-      <AppBar
+      <StyledAppBar
         position="absolute"
-        className={clsx(classes.appBar, drawerOpen && classes.appBarShift)}
         color={process.env.NODE_ENV === "development" ? "inherit" : "primary"}
       >
-        <Toolbar variant="dense" className={classes.toolbar}>
-          <IconButton
+        <StyledToolbar variant="dense" >
+          <MenuButton
             edge="start"
             color="inherit"
             aria-label="open drawer"
             onClick={() => setDrawerOpen(!drawerOpen)}
-            className={clsx(
-              classes.menuButton,
-              drawerOpen && classes.menuButtonHidden
-            )}
           >
             <MenuIcon />
-          </IconButton>
-          <Typography
+          </MenuButton>
+          <Title
             component="h1"
             variant="h6"
             color="inherit"
             noWrap
-            className={classes.title}
           >
-            {t("mainDrawer.appBar.message.hi")} {user.name}, {t("mainDrawer.appBar.message.text")} {companyData.name || "Press Ticket"}.
-          </Typography>
+            {document.body.offsetWidth < 600 ? 
+              companyData.name || "Press Ticket®" :
+              `${t("mainDrawer.appBar.message.hi")} ${user?.name || "Visitante"}, ${t("mainDrawer.appBar.message.text")} ${companyData.name || "Press Ticket®"}.`
+            }
+          </Title>
 
-          <ThemeSelector toggleTheme={toggleTheme} />
-
-          <LanguageSelector />
-
-          {user.id && <NotificationsPopOver />}
-
-          <div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <ThemeSelector toggleTheme={toggleTheme} />
+            <LanguageSelector />
+            {user?.id && <NotificationsPopOver />}
             <IconButton
               aria-label="account of current user"
               aria-controls="menu-appbar"
               aria-haspopup="true"
               onClick={handleMenu}
               color="inherit"
+              sx={{
+                borderRadius: '50%',
+                padding: 0.5,
+                border: '2px solid rgba(255, 255, 255, 0.8)',
+                '&:hover': {
+                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                }
+              }}
             >
-              <AccountCircle />
+              <AccountCircle sx={{ fontSize: '28px' }} />
             </IconButton>
             <Menu
               id="menu-appbar"
               anchorEl={anchorEl}
-              getContentAnchorEl={null}
               anchorOrigin={{
                 vertical: "bottom",
                 horizontal: "right",
@@ -393,46 +396,73 @@ const LoggedInLayout = ({ children, toggleTheme, onThemeConfigUpdate }) => {
               }}
               open={menuOpen}
               onClose={handleCloseMenu}
+              PaperProps={{
+                sx: {
+                  mt: 1.5,
+                  borderRadius: 2,
+                  boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
+                  minWidth: '180px',
+                  overflow: 'visible',
+                  '&:before': {
+                    content: '""',
+                    display: 'block',
+                    position: 'absolute',
+                    top: 0,
+                    right: 14,
+                    width: 10,
+                    height: 10,
+                    bgcolor: 'background.paper',
+                    transform: 'translateY(-50%) rotate(45deg)',
+                    zIndex: 0,
+                  },
+                }
+              }}
             >
-              <MenuItem onClick={handleOpenUserModal}>
+              <MenuItem onClick={handleOpenUserModal} sx={{ py: 1.5, px: 2.5, borderRadius: 1, mx: 0.5, my: 0.5 }}>
                 {t("mainDrawer.appBar.user.profile")}
               </MenuItem>
-              <MenuItem onClick={handleClickLogout}>
+              <MenuItem onClick={handleClickLogout} sx={{ py: 1.5, px: 2.5, borderRadius: 1, mx: 0.5, my: 0.5 }}>
                 {t("mainDrawer.appBar.user.logout")}
               </MenuItem>
               <Divider />
-              <span className={classes.systemCss}>
+              <SystemCss>
                 <Link
                   color="inherit"
                   href={companyData.url || "https://github.com/rtenorioh/Press-Ticket"}
-                  style={{ display: "flex", alignItems: "center", marginTop: 10 }}
+                  sx={{ 
+                    display: "flex", 
+                    alignItems: "center", 
+                    marginTop: 0,
+                    textDecoration: 'none',
+                    '&:hover': { opacity: 0.9 }
+                  }}
                 >
                   {latestVersion && latestVersion > systemVersion ? (
-                    <span style={{ color: "#eee8aa" }}>
+                    <span style={{ color: "#eee8aa", display: 'flex', alignItems: 'center' }}>
                       <Tooltip title="Entrar em contato com o Suporte para solicitar Atualização!" arrow placement="left-start" >
-                        <Info fontSize="small" />
+                        <Info fontSize="small" sx={{ color: "#fff000", mr: 0.5 }}/>
                       </Tooltip>
                     </span>
                   ) : (
-                    <span style={{ color: "green" }}>
+                    <span style={{ color: "green", display: 'flex', alignItems: 'center' }}>
                       <Tooltip title="Versão atualizada!" arrow placement="left-start" >
-                        <CheckCircle fontSize="small" />
+                        <CheckCircle fontSize="small" sx={{ color: "#00ff00", mr: 0.5 }}/>
                       </Tooltip>
                     </span>
                   )}
-                  <span style={{ marginLeft: "5px" }}>{systemVersion}</span>
+                  <span style={{ fontWeight: 500 }}>{systemVersion}</span>
                 </Link>
-              </span>
+              </SystemCss>
             </Menu>
           </div>
-        </Toolbar>
-      </AppBar>
-      <main className={classes.content}>
-        <div className={classes.appBarSpacer} />
+        </StyledToolbar>
+      </StyledAppBar>
+      <Content>
+        <AppBarSpacer />
 
         {children ? children : null}
-      </main>
-    </div>
+      </Content>
+    </Root>
   );
 };
 

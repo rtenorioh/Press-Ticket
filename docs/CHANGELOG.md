@@ -781,6 +781,6 @@
 - Usando MySql ao invés de Docker;
 - Implementado função de aparecer `digitando...` antes de enviar a lista de setores;
 - Implentado a inclusão do nome do usuário na msg de boas vindas;
-- Criado uma variável no arquivo de tradução para alterar o nome Press Ticket;
+- Criado uma variável no arquivo de tradução para alterar o nome Press Ticket®;
 - Na página de contatos o botão importar contatos está disponível apenas para Admin; e
 - Conexões foi movido para a área administrativa.

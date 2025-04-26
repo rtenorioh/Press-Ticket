@@ -1,21 +1,21 @@
-import {
-  Button,
-  IconButton,
-  makeStyles,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
-  Tooltip,
-  Typography
-} from "@material-ui/core";
-import {
-  AddCircleOutline,
-  DeleteOutline,
-  Edit
-} from "@material-ui/icons";
+import Box from '@mui/material/Box';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import Modal from '@mui/material/Modal';
+import Divider from '@mui/material/Divider';
+import Button from '@mui/material/Button';
+import IconButton from '@mui/material/IconButton';
+import Paper from '@mui/material/Paper';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+import Tooltip from '@mui/material/Tooltip';
+import Typography from '@mui/material/Typography';
+import { styled } from '@mui/material/styles';
+import AddCircleOutline from '@mui/icons-material/AddCircleOutline';
+import DeleteOutline from '@mui/icons-material/DeleteOutline';
+import Edit from '@mui/icons-material/Edit';
 import React, { useEffect, useReducer, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
@@ -30,19 +30,48 @@ import toastError from "../../errors/toastError";
 import api from "../../services/api";
 import openSocket from "../../services/socket-io";
 
-const useStyles = makeStyles((theme) => ({
-  mainPaper: {
-    flex: 1,
-    padding: theme.spacing(2),
-    margin: theme.spacing(1),
-    overflowY: "scroll",
-    ...theme.scrollbarStyles,
+const MainPaper = styled(Paper)(({ theme }) => ({
+  flex: 1,
+  padding: theme.spacing(2),
+  margin: theme.spacing(2),
+  overflowY: "auto",
+  borderRadius: theme.shape.borderRadius,
+  boxShadow: "0 4px 10px rgba(0,0,0,0.05)",
+  ...theme.scrollbarStyles,
+}));
+
+const CustomTableCell = styled('div')(({ theme }) => ({
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+}));
+
+const StyledTableCell = styled(TableCell)(({ theme }) => ({
+  padding: theme.spacing(1, 2),
+  fontSize: '0.875rem',
+}));
+
+const StyledTableRow = styled(TableRow)(({ theme }) => ({
+  '&:nth-of-type(odd)': {
+    backgroundColor: theme.palette.action.hover,
   },
-  customTableCell: {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
+  '&:hover': {
+    backgroundColor: theme.palette.action.selected,
   },
+  transition: 'background-color 0.2s ease',
+}));
+
+const ColorBox = styled(Box)(({ theme }) => ({
+  width: 40,
+  height: 20,
+  borderRadius: 10,
+  margin: '0 auto',
+}));
+
+const ActionButtons = styled('div')(({ theme }) => ({
+  display: 'flex',
+  justifyContent: 'center',
+  gap: theme.spacing(1),
 }));
 
 const reducer = (state, action) => {
@@ -89,7 +118,6 @@ const reducer = (state, action) => {
 };
 
 const Queues = () => {
-  const classes = useStyles();
   const { t } = useTranslation();
   const [queues, dispatch] = useReducer(reducer, []);
   const [loading, setLoading] = useState(false);
@@ -97,6 +125,22 @@ const Queues = () => {
   const [queueModalOpen, setQueueModalOpen] = useState(false);
   const [selectedQueue, setSelectedQueue] = useState(null);
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
+  const [deletingQueue, setDeletingQueue] = useState(null);
+  const [messageModalOpen, setMessageModalOpen] = useState(false);
+  const [selectedQueueMessages, setSelectedQueueMessages] = useState({ greetingMessage: '', absenceMessage: '' });
+
+  const handleOpenMessageModal = (queue) => {
+    setSelectedQueueMessages({
+      greetingMessage: queue.greetingMessage,
+      absenceMessage: queue.absenceMessage
+    });
+    setMessageModalOpen(true);
+  };
+
+  const handleCloseMessageModal = () => {
+    setMessageModalOpen(false);
+    setSelectedQueueMessages({ greetingMessage: '', absenceMessage: '' });
+  };
 
   useEffect(() => {
     (async () => {
@@ -104,7 +148,6 @@ const Queues = () => {
       try {
         const { data } = await api.get("/queue");
         dispatch({ type: "LOAD_QUEUES", payload: data });
-
         setLoading(false);
       } catch (err) {
         toastError(err);
@@ -148,7 +191,7 @@ const Queues = () => {
 
   const handleCloseConfirmationModal = () => {
     setConfirmModalOpen(false);
-    setSelectedQueue(null);
+    setDeletingQueue(null);
   };
 
   const handleDeleteQueue = async (queueId) => {
@@ -158,30 +201,30 @@ const Queues = () => {
     } catch (err) {
       toastError(err);
     }
-    setSelectedQueue(null);
+    setDeletingQueue(null);
+    setConfirmModalOpen(false);
   };
 
   return (
     <MainContainer>
-      <ConfirmationModal
-        title={
-          selectedQueue &&
-          `${t("queues.confirmationModal.deleteTitle")} ${selectedQueue.name
-          }?`
-        }
-        open={confirmModalOpen}
-        onClose={handleCloseConfirmationModal}
-        onConfirm={() => handleDeleteQueue(selectedQueue.id)}
-      >
-        {t("queues.confirmationModal.deleteMessage")}
-      </ConfirmationModal>
       <QueueModal
         open={queueModalOpen}
         onClose={handleCloseQueueModal}
         queueId={selectedQueue?.id}
       />
+      <ConfirmationModal
+        title={
+          deletingQueue &&
+          `${t("queues.confirmationModal.deleteTitle")} ${deletingQueue.name}?`
+        }
+        open={confirmModalOpen}
+        onClose={handleCloseConfirmationModal}
+        onConfirm={() => handleDeleteQueue(deletingQueue.id)}
+      >
+        {t("queues.confirmationModal.deleteMessage")}
+      </ConfirmationModal>
       <MainHeader>
-        <Title>{t("queues.title")} ({queues.length})</Title>
+        <Title>{t("queues.title")} {queues.length > 0 ? `(${queues.length})` : ""}</Title>
         <MainHeaderButtonsWrapper>
           <Tooltip title={t("queues.buttons.add")}>
             <div>
@@ -189,6 +232,10 @@ const Queues = () => {
                 variant="contained"
                 color="primary"
                 onClick={handleOpenQueueModal}
+                sx={{
+                  borderRadius: 2,
+                  px: { xs: 1, sm: 2 },
+                }}
               >
                 <AddCircleOutline />
               </Button>
@@ -196,90 +243,156 @@ const Queues = () => {
           </Tooltip>
         </MainHeaderButtonsWrapper>
       </MainHeader>
-      <Paper className={classes.mainPaper} variant="outlined">
+      <MainPaper variant="outlined">
         <Table size="small">
           <TableHead>
             <TableRow>
-              <TableCell align="center">
-                {t("queues.table.id")}
-              </TableCell>
-              <TableCell align="center">
-                {t("queues.table.name")}
-              </TableCell>
-              <TableCell align="center">
-                {t("queues.table.color")}
-              </TableCell>
-              <TableCell align="center">
-                {t("queues.table.greeting")}
-              </TableCell>
-              <TableCell align="center">
-                {t("queues.table.startWork")}
-              </TableCell>
-              <TableCell align="center">
-                {t("queues.table.endWork")}
-              </TableCell>
-              <TableCell align="center">
-                {t("queues.table.actions")}
-              </TableCell>
+              <StyledTableCell align="center">{t("queues.table.id")}</StyledTableCell>
+              <StyledTableCell align="center">{t("queues.table.name")}</StyledTableCell>
+              <StyledTableCell align="center">{t("queues.table.color")}</StyledTableCell>
+              <StyledTableCell align="center">{t("queues.table.greeting")}</StyledTableCell>
+              <StyledTableCell align="center">{t("queues.table.startWork")}</StyledTableCell>
+              <StyledTableCell align="center">{t("queues.table.endWork")}</StyledTableCell>
+              <StyledTableCell align="center">{t("queues.table.actions")}</StyledTableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            <>
-              {queues.map((queue) => (
-                <TableRow key={queue.id}>
-                  <TableCell align="center">{queue.id}</TableCell>
-                  <TableCell align="center">{queue.name}</TableCell>
-                  <TableCell align="center">
-                    <div className={classes.customTableCell}>
-                      <span
-                        style={{
-                          backgroundColor: queue.color,
-                          width: 20,
-                          height: 20,
-                          alignSelf: "center",
-                          borderRadius: 10
-                        }}
-                      />
-                    </div>
-                  </TableCell>
-                  <TableCell align="center">
-                    <div className={classes.customTableCell}>
-                      <Typography
-                        style={{ width: 300, align: "center" }}
-                        noWrap
-                        variant="body2"
+            {loading ? (
+              <TableRowSkeleton columns={7} />
+            ) : (
+              queues.map((queue) => (
+                <StyledTableRow key={queue.id}>
+                  <StyledTableCell align="center">{queue.id}</StyledTableCell>
+                  <StyledTableCell align="center">{queue.name}</StyledTableCell>
+                  <StyledTableCell align="center">
+                    <ColorBox sx={{ backgroundColor: queue.color }} />
+                  </StyledTableCell>
+                  <StyledTableCell align="center">
+                    <Tooltip 
+                      title={t("queues.messagesModal.title")} 
+                      arrow 
+                      placement="top"
+                    >
+                      <IconButton 
+                        onClick={() => handleOpenMessageModal(queue)} 
+                        size="small"
+                        sx={{ color: 'primary.main' }}
                       >
-                        {queue.greetingMessage}
-                      </Typography>
-                    </div>
-                  </TableCell>
-                  <TableCell align="center">{queue.startWork}</TableCell>
-                  <TableCell align="center">{queue.endWork}</TableCell>
-                  <TableCell align="center">
-                    <IconButton
-                      size="small"
-                      onClick={() => handleEditQueue(queue)}
-                    >
-                      <Edit color="secondary" />
-                    </IconButton>
+                        <InfoOutlinedIcon />
+                      </IconButton>
+                    </Tooltip>
+                  </StyledTableCell>
+                  <StyledTableCell align="center">{queue.startWork}</StyledTableCell>
+                  <StyledTableCell align="center">{queue.endWork}</StyledTableCell>
+                  <StyledTableCell align="center">
+                    <ActionButtons>
+                      <Tooltip title={t("queues.table.edit")} arrow placement="top">
+                        <IconButton
+                          size="small"
+                          onClick={() => handleEditQueue(queue)}
+                        >
+                          <Edit color="info"/>
+                        </IconButton>
+                      </Tooltip>
 
-                    <IconButton
-                      size="small"
-                      onClick={() => {
-                        setSelectedQueue(queue);
-                        setConfirmModalOpen(true);
-                      }}
-                    >
-                      <DeleteOutline color="secondary" />
-                    </IconButton>
-                  </TableCell>
-                </TableRow>
-              ))}
-              {loading && <TableRowSkeleton columns={4} />}
-            </>
+                      <Tooltip title={t("queues.table.delete")} arrow placement="top">
+                        <IconButton
+                          size="small"
+                          onClick={() => {
+                            setConfirmModalOpen(true);
+                            setDeletingQueue(queue);
+                          }}
+                          sx={{ color: 'error.main' }}
+                        >
+                          <DeleteOutline />
+                        </IconButton>
+                      </Tooltip>
+                    </ActionButtons>
+                  </StyledTableCell>
+                </StyledTableRow>
+              ))
+            )}
           </TableBody>
         </Table>
-      </Paper>
+      </MainPaper>
+      <Modal
+        open={messageModalOpen}
+        onClose={handleCloseMessageModal}
+        closeAfterTransition
+      >
+        <Box
+          sx={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: 400,
+            maxWidth: '90%',
+            bgcolor: 'background.paper',
+            boxShadow: 24,
+            p: 3,
+            borderRadius: theme => theme.shape.borderRadius,
+          }}
+        >
+          <Typography variant="h6" component="h2" sx={{ fontWeight: 600 }}>
+            {t("queues.messagesModal.title")}
+          </Typography>
+          <Divider sx={{ my: 2 }} />
+          
+          <Typography variant="subtitle1" sx={{ fontWeight: 500, color: 'primary.main', mb: 1 }}>
+            {t("queues.messagesModal.greetingMessage")}:
+          </Typography>
+          <Paper 
+            variant="outlined" 
+            sx={{ 
+              p: 2, 
+              mb: 2, 
+              bgcolor: 'background.default',
+              borderRadius: theme => theme.shape.borderRadius,
+            }}
+          >
+            <Typography variant="body2">
+              {selectedQueueMessages.greetingMessage || (
+                <Typography component="span" color="text.secondary" fontStyle="italic">
+                  {t("queues.messagesModal.none")}
+                </Typography>
+              )}
+            </Typography>
+          </Paper>
+          
+          <Typography variant="subtitle1" sx={{ fontWeight: 500, color: 'primary.main', mb: 1 }}>
+            {t("queues.messagesModal.absenceMessage")}:
+          </Typography>
+          <Paper 
+            variant="outlined" 
+            sx={{ 
+              p: 2, 
+              mb: 2, 
+              bgcolor: 'background.default',
+              borderRadius: theme => theme.shape.borderRadius,
+            }}
+          >
+            <Typography variant="body2">
+              {selectedQueueMessages.absenceMessage || (
+                <Typography component="span" color="text.secondary" fontStyle="italic">
+                  {t("queues.messagesModal.none")}
+                </Typography>
+              )}
+            </Typography>
+          </Paper>
+          
+          <Box sx={{ mt: 3, display: 'flex', justifyContent: 'flex-end' }}>
+            <Button 
+              onClick={handleCloseMessageModal}
+              variant="contained"
+              color="primary"
+              sx={{ borderRadius: 2 }}
+            >
+              {t("close")}
+            </Button>
+          </Box>
+        </Box>
+      </Modal>
     </MainContainer>
   );
 };

@@ -1,37 +1,37 @@
-import Button from "@material-ui/core/Button";
-import Dialog from "@material-ui/core/Dialog";
-import DialogActions from "@material-ui/core/DialogActions";
-import DialogContent from "@material-ui/core/DialogContent";
-import DialogTitle from "@material-ui/core/DialogTitle";
-import Typography from "@material-ui/core/Typography";
-import { makeStyles } from "@material-ui/core/styles";
-import { Cancel, CheckCircle } from "@material-ui/icons";
+import Button from "@mui/material/Button";
+import Dialog from "@mui/material/Dialog";
+import DialogActions from "@mui/material/DialogActions";
+import DialogContent from "@mui/material/DialogContent";
+import DialogTitle from "@mui/material/DialogTitle";
+import Typography from "@mui/material/Typography";
+import { styled } from "@mui/material/styles";
+import { Cancel, CheckCircle } from "@mui/icons-material";
 import React from "react";
 import { useTranslation } from "react-i18next";
 
-const useStyles = makeStyles((theme) => ({
-	dialogTitle: {
-		backgroundColor: theme.palette.background.default,
-		color: theme.palette.text.primary,
-	},
-	dialogActions: {
-		justifyContent: "space-between",
-		padding: theme.spacing(2),
-	},
-	cancelButton: {
-		color: theme.palette.error.main,
-	},
-	confirmButton: {
-		backgroundColor: theme.palette.primary.main,
-		color: theme.palette.primary.contrastText,
-		"&:hover": {
-			backgroundColor: theme.palette.primary.dark,
-		},
+const DialogTitleStyled = styled(DialogTitle)(({ theme }) => ({
+	backgroundColor: theme.palette.background.default,
+	color: theme.palette.text.primary,
+}));
+
+const DialogActionsStyled = styled(DialogActions)(({ theme }) => ({
+	justifyContent: "space-between",
+	padding: theme.spacing(2),
+}));
+
+const CancelButton = styled(Button)(({ theme }) => ({
+	color: theme.palette.error.main,
+}));
+
+const ConfirmButton = styled(Button)(({ theme }) => ({
+	backgroundColor: theme.palette.primary.main,
+	color: theme.palette.primary.contrastText,
+	"&:hover": {
+		backgroundColor: theme.palette.primary.dark,
 	},
 }));
 
 const ConfirmationModal = ({ title, children, open, onClose, onConfirm }) => {
-	const classes = useStyles();
 	const { t } = useTranslation();
 
 	return (
@@ -42,33 +42,31 @@ const ConfirmationModal = ({ title, children, open, onClose, onConfirm }) => {
 			maxWidth="sm"
 			fullWidth
 		>
-			<DialogTitle id="confirm-dialog" className={classes.dialogTitle}>
+			<DialogTitleStyled id="confirm-dialog">
 				{title}
-			</DialogTitle>
+			</DialogTitleStyled>
 			<DialogContent dividers>
 				<Typography>{children}</Typography>
 			</DialogContent>
-			<DialogActions className={classes.dialogActions}>
-				<Button
+			<DialogActionsStyled>
+				<CancelButton
 					variant="outlined"
 					onClick={() => onClose(false)}
-					className={classes.cancelButton}
 					startIcon={<Cancel />}
 				>
 					{t("confirmationModal.buttons.cancel")}
-				</Button>
-				<Button
+				</CancelButton>
+				<ConfirmButton
 					variant="contained"
 					onClick={() => {
 						onClose(false);
 						onConfirm();
 					}}
-					className={classes.confirmButton}
 					startIcon={<CheckCircle />}
 				>
 					{t("confirmationModal.buttons.confirm")}
-				</Button>
-			</DialogActions>
+				</ConfirmButton>
+			</DialogActionsStyled>
 		</Dialog>
 	);
 };

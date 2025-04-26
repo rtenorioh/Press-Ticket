@@ -1,4 +1,5 @@
 import {
+  Box,
   Button,
   IconButton,
   InputAdornment,
@@ -10,15 +11,13 @@ import {
   TableRow,
   TextField,
   Tooltip
-} from "@material-ui/core";
-import { makeStyles } from "@material-ui/core/styles";
-import {
-  AddCircleOutline,
-  DeleteForever,
-  DeleteOutline,
-  Edit,
-  Search
-} from "@material-ui/icons";
+} from "@mui/material";
+import { styled } from "@mui/material/styles";
+import AddCircleOutline from "@mui/icons-material/AddCircleOutline";
+import DeleteForever from "@mui/icons-material/DeleteForever";
+import DeleteOutline from "@mui/icons-material/DeleteOutline";
+import Edit from "@mui/icons-material/Edit";
+import Search from "@mui/icons-material/Search";
 import React, { useCallback, useEffect, useReducer, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
@@ -77,23 +76,42 @@ const reducer = (state, action) => {
   }
 };
 
-const useStyles = makeStyles((theme) => ({
-  mainPaper: {
-    flex: 1,
-    padding: theme.spacing(2),
-    margin: theme.spacing(1),
-    overflowY: "scroll",
-    ...theme.scrollbarStyles,
+const MainPaper = styled(Paper)(({ theme }) => ({
+  flex: 1,
+  padding: theme.spacing(2),
+  margin: theme.spacing(1),
+  overflowY: "scroll",
+  ...theme.scrollbarStyles,
+  borderRadius: theme.shape.borderRadius,
+  boxShadow: theme.shadows[1],
+}));
+
+const CustomTableCell = styled(TableCell)(({ theme }) => ({
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+  padding: theme.spacing(1),
+}));
+
+const SearchContainer = styled(Box)(({ theme }) => ({
+  display: "flex",
+  alignItems: "center",
+  width: "100%",
+  [theme.breakpoints.down("md")]: {
+    marginBottom: theme.spacing(1),
   },
-  customTableCell: {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
+}));
+
+const ButtonContainer = styled(Box)(({ theme }) => ({
+  display: "flex",
+  alignItems: "center",
+  gap: theme.spacing(1),
+  [theme.breakpoints.down("md")]: {
+    marginTop: theme.spacing(1),
   },
 }));
 
 const Tags = () => {
-  const classes = useStyles();
   const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [pageNumber, setPageNumber] = useState(1);
@@ -240,46 +258,73 @@ const Tags = () => {
         tagId={selectedTag && selectedTag.id}
       />
       <MainHeader>
-        <Title >{t("tags.title")} ({tags.length})</Title>
+        <Title>{t("tags.title")} {tags.length > 0 ? `(${tags.length})` : ""}</Title>
         <MainHeaderButtonsWrapper>
-          <TextField
-            placeholder={t("contacts.searchPlaceholder")}
-            type="search"
-            value={searchParam}
-            onChange={handleSearch}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <Search color="secondary" />
-                </InputAdornment>
-              ),
-            }}
-          />
-          <Tooltip title={t("tags.buttons.add")}>
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={handleOpenTagModal}
-            >
-              <AddCircleOutline />
-            </Button>
-          </Tooltip>
-          <Tooltip title={t("tags.buttons.deleteAll")}>
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={(e) => {
-                setConfirmModalOpen(true);
-                setDeletingAllTags(tags);
-              }}
-            >
-              <DeleteForever />
-            </Button>
-          </Tooltip>
+          <Box sx={{ 
+            display: 'flex', 
+            flexDirection: { xs: 'column', md: 'row' },
+            alignItems: { xs: 'flex-start', md: 'center' },
+            width: '100%',
+            gap: 1
+          }}>
+            <SearchContainer>
+              <TextField
+                placeholder={t("contacts.searchPlaceholder")}
+                type="search"
+                fullWidth
+                size="small"
+                value={searchParam}
+                onChange={handleSearch}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <Search color="secondary" />
+                    </InputAdornment>
+                  ),
+                }}
+                sx={{
+                  py: 0,
+                  '& .MuiOutlinedInput-root': {
+                    height: 40
+                  }
+                }}
+              />
+            </SearchContainer>
+            <ButtonContainer>
+              <Tooltip title={t("tags.buttons.add")}>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={handleOpenTagModal}
+                  sx={{
+                    minWidth: { xs: '100%', md: 'auto' },
+                    height: 40
+                  }}
+                >
+                  <AddCircleOutline />
+                </Button>
+              </Tooltip>
+              <Tooltip title={t("tags.buttons.deleteAll")}>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={(e) => {
+                    setConfirmModalOpen(true);
+                    setDeletingAllTags(tags);
+                  }}
+                  sx={{
+                    minWidth: { xs: '100%', md: 'auto' },
+                    height: 40
+                  }}
+                >
+                  <DeleteForever />
+                </Button>
+              </Tooltip>
+            </ButtonContainer>
+          </Box>
         </MainHeaderButtonsWrapper>
       </MainHeader>
-      <Paper
-        className={classes.mainPaper}
+      <MainPaper
         variant="outlined"
         onScroll={handleScroll}
       >
@@ -300,17 +345,15 @@ const Tags = () => {
                     {tag.name}
                   </TableCell>
                   <TableCell align="center">
-                    <div className={classes.customTableCell}>
-                      <span
-                        style={{
-                          backgroundColor: tag.color,
-                          width: 20,
-                          height: 20,
-                          alignSelf: "center",
-                          borderRadius: 10
-                        }}
-                      />
-                    </div>
+                    <Box
+                      sx={{
+                        backgroundColor: tag.color,
+                        width: 40,
+                        height: 20,
+                        margin: "0 auto",
+                        borderRadius: 10
+                      }}
+                    />
                   </TableCell>
                   <TableCell align="center">{tag.contacttag.length ? (<span>{tag.contacttag.length}</span>) : <span>0</span>}</TableCell>
                   <TableCell align="center">
@@ -318,7 +361,7 @@ const Tags = () => {
                       size="small"
                       onClick={() => handleEditTag(tag)}
                     >
-                      <Edit color="secondary" />
+                      <Edit color="info" />
                     </IconButton>
 
                     <IconButton
@@ -328,7 +371,7 @@ const Tags = () => {
                         setDeletingTag(tag);
                       }}
                     >
-                      <DeleteOutline color="secondary" />
+                      <DeleteOutline color="error" />
                     </IconButton>
                   </TableCell>
                 </TableRow>
@@ -337,7 +380,7 @@ const Tags = () => {
             </>
           </TableBody>
         </Table>
-      </Paper>
+      </MainPaper>
     </MainContainer>
   );
 };

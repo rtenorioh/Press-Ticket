@@ -4,8 +4,11 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  makeStyles
-} from "@material-ui/core";
+  Box,
+  Typography,
+  Paper
+} from "@mui/material";
+import { styled, useTheme } from "@mui/material/styles";
 import { Form, Formik } from "formik";
 import React, { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -18,14 +21,54 @@ import FormikTextField from "../FormikTextField";
 import MessageVariablesPicker from "../MessageVariablesPicker";
 import WithSkeleton from "../WithSkeleton";
 
-const useStyles = makeStyles(theme => ({
-  root: {
-    display: "flex",
-    flexWrap: "wrap",
-    "& > *:not(:last-child)": {
-      marginRight: theme.spacing(1)
-    }
-  }
+const StyledDialog = styled(Dialog)(({ theme }) => ({
+  '& .MuiDialogTitle-root': {
+    backgroundColor: theme.palette.primary.main,
+    color: '#fff',
+    '& .MuiTypography-root': {
+      fontWeight: 500,
+    },
+    padding: theme.spacing(2),
+  },
+  '& .MuiDialogContent-root': {
+    padding: theme.spacing(3),
+  },
+  '& .MuiDialogActions-root': {
+    padding: theme.spacing(2),
+    backgroundColor: '#f5f5f5',
+  },
+}));
+
+const FormContainer = styled(Box)(({ theme }) => ({
+  display: "flex",
+  flexDirection: "column",
+  width: "100%",
+  gap: theme.spacing(3),
+}));
+
+const FieldContainer = styled(Box)(({ theme }) => ({
+  display: "flex",
+  flexDirection: "column",
+  width: "100%",
+  marginBottom: theme.spacing(1),
+}));
+
+const VariablesContainer = styled(Box)(({ theme }) => ({
+  marginTop: theme.spacing(2),
+  '& .MuiButton-root': {
+    margin: theme.spacing(0.5),
+    borderRadius: theme.shape.borderRadius,
+    backgroundColor: '#673ab7',
+    color: 'white',
+    '&:hover': {
+      backgroundColor: '#5e35b1',
+    },
+  },
+}));
+
+const VariablesTitle = styled(Typography)(({ theme }) => ({
+  marginBottom: theme.spacing(1),
+  fontWeight: 500,
 }));
 
 const QuickAnswerSchema = Yup.object().shape({
@@ -46,13 +89,12 @@ const QuickAnswersModal = ({
   quickAnswerId,
   initialValues
 }) => {
-  const classes = useStyles();
-
   const initialState = {
     shortcut: "",
     message: "",
   };
   const { t } = useTranslation();
+  const theme = useTheme();
   const isMounted = useRef(true);
   const messageInputRef = useRef();
   const [loading, setLoading] = useState(false);
@@ -127,87 +169,129 @@ const QuickAnswersModal = ({
   };
 
   return (
-    <div className={classes.root}>
-      <Dialog
-        maxWidth="sm"
-        fullWidth
-        open={open}
-        onClose={handleClose}
-        scroll="paper"
+    <StyledDialog
+      maxWidth="sm"
+      fullWidth
+      open={open}
+      onClose={handleClose}
+      scroll="paper"
+    >
+      <DialogTitle>
+        {quickAnswerId
+          ? t("quickAnswersModal.title.edit")
+          : t("quickAnswersModal.title.add")}
+      </DialogTitle>
+      <Formik
+        initialValues={quickAnswer || initialState}
+        enableReinitialize={true}
+        validationSchema={QuickAnswerSchema}
+        onSubmit={handleSaveQuickAnswer}
       >
-        <DialogTitle>
-          {quickAnswerId
-            ? t("quickAnswersModal.title.edit")
-            : t("quickAnswersModal.title.add")}
-        </DialogTitle>
-        <Formik
-          initialValues={quickAnswer || initialState}
-          enableReinitialize={true}
-          validationSchema={QuickAnswerSchema}
-          onSubmit={handleSaveQuickAnswer}
-        >
-          {({ touched, errors, isSubmitting, setFieldValue, values }) => (
-            <Form>
-              <DialogContent dividers>
-                <WithSkeleton loading={loading}>
-                  <FormikTextField
-                    label={t("quickAnswersModal.form.shortcut")}
-                    autoFocus
-                    name="shortcut"
-                    touched={touched}
-                    errors={errors}
-                    variant="outlined"
-                    margin="dense"
-                    value={values.shortcut || ""}
-                    onChange={(e) => setFieldValue("shortcut", e.target.value)}
-                    disabled={isSubmitting}
-                  />
-                </WithSkeleton>
-                <WithSkeleton fullWidth loading={loading}>
-                  <FormikTextField
-                    label={t("quickAnswersModal.form.message")}
-                    multiline
-                    inputRef={messageInputRef}
-                    minRows={5}
-                    fullWidth
-                    name="message"
-                    touched={touched}
-                    errors={errors}
-                    variant="outlined"
-                    margin="dense"
-                    value={values.message || ""}
-                    onChange={(e) => setFieldValue("message", e.target.value)}
-                    disabled={isSubmitting}
-                  />
-                </WithSkeleton>
-                <WithSkeleton loading={loading}>
-                  <MessageVariablesPicker
-                    disabled={isSubmitting}
-                    onClick={(value) => handleClickMsgVar(value, setFieldValue)}
-                  />
-                </WithSkeleton>
-              </DialogContent>
-              <DialogActions>
-                <Button onClick={handleClose} disabled={isSubmitting}>
-                  {t("quickAnswersModal.buttons.cancel")}
-                </Button>
-                <ButtonWithSpinner
-                  type="submit"
-                  color="primary"
-                  disabled={loading || isSubmitting}
-                  loading={isSubmitting}
-                  variant="contained"
-                >
-                  {quickAnswerId
-                    ? t("quickAnswersModal.buttons.okEdit")
-                    : t("quickAnswersModal.buttons.okAdd")}
-                </ButtonWithSpinner>
-              </DialogActions>
-            </Form>
-          )}
-        </Formik>
-      </Dialog>
-    </div>
+        {({ touched, errors, isSubmitting, setFieldValue, values }) => (
+          <Form>
+            <DialogContent dividers>
+              <FormContainer>
+                <FieldContainer>
+                  <Typography variant="body2" sx={{ mb: 0.5 }}>
+                    {t("quickAnswersModal.form.shortcut")}
+                  </Typography>
+                  <WithSkeleton loading={loading}>
+                    <FormikTextField
+                      autoFocus
+                      name="shortcut"
+                      touched={touched}
+                      errors={errors}
+                      variant="outlined"
+                      fullWidth
+                      value={values.shortcut || ""}
+                      onChange={(e) => setFieldValue("shortcut", e.target.value)}
+                      disabled={isSubmitting}
+                      placeholder={t("quickAnswersModal.form.shortcut")}
+                    />
+                  </WithSkeleton>
+                </FieldContainer>
+                
+                <FieldContainer>
+                  <Typography variant="body2" sx={{ mb: 0.5 }}>
+                    {t("quickAnswersModal.form.message")}
+                  </Typography>
+                  <WithSkeleton fullWidth loading={loading}>
+                    <FormikTextField
+                      multiline
+                      inputRef={messageInputRef}
+                      minRows={5}
+                      fullWidth
+                      name="message"
+                      touched={touched}
+                      errors={errors}
+                      variant="outlined"
+                      value={values.message || ""}
+                      onChange={(e) => setFieldValue("message", e.target.value)}
+                      disabled={isSubmitting}
+                      placeholder={t("quickAnswersModal.form.message")}
+                    />
+                  </WithSkeleton>
+                </FieldContainer>
+                
+                <VariablesContainer>
+                  <VariablesTitle variant="body2">
+                    {t("quickAnswersModal.variables")}
+                  </VariablesTitle>
+                  <Paper variant="outlined" sx={{ p: 2, borderRadius: 1 }}>
+                    <WithSkeleton loading={loading}>
+                      <MessageVariablesPicker
+                        disabled={isSubmitting}
+                        onClick={(value) => handleClickMsgVar(value, setFieldValue)}
+                      />
+                    </WithSkeleton>
+                  </Paper>
+                </VariablesContainer>
+              </FormContainer>
+            </DialogContent>
+            <DialogActions>
+              <Button 
+                onClick={handleClose} 
+                disabled={isSubmitting}
+                variant="contained"
+                sx={{ 
+                  borderRadius: 20,
+                  px: 3,
+                  backgroundColor: '#e0e0e0',
+                  color: '#757575',
+                  '&:hover': {
+                    backgroundColor: '#d5d5d5',
+                  },
+                  textTransform: 'uppercase',
+                  fontWeight: 'bold',
+                }}
+              >
+                {t("quickAnswersModal.buttons.cancel")}
+              </Button>
+              <ButtonWithSpinner
+                type="submit"
+                disabled={loading || isSubmitting}
+                loading={isSubmitting}
+                variant="contained"
+                sx={{ 
+                  borderRadius: 20,
+                  px: 3,
+                  backgroundColor: theme.palette.primary.main,
+                  '&:hover': {
+                    backgroundColor: theme.palette.primary.dark,
+                  },
+                  textTransform: 'uppercase',
+                  fontWeight: 'bold',
+                }}
+              >
+                {quickAnswerId
+                  ? t("quickAnswersModal.buttons.okEdit")
+                  : t("quickAnswersModal.buttons.okAdd")}
+              </ButtonWithSpinner>
+            </DialogActions>
+          </Form>
+        )}
+      </Formik>
+    </StyledDialog>
   );
 };
 

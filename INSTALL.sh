@@ -102,7 +102,7 @@ finalizar() {
     {
         echo " "
         echo "**************************************************************"
-        echo "*                 PRESS TICKET - INSTALAÇÃO                *"
+        echo "*                 PRESS TICKET®® - INSTALAÇÃO                *"
         echo "**************************************************************"
         echo " Versão Instalada: $VERSION                           "
         echo " Fuso Horário: $SELECTED_TZ                                 "
@@ -289,7 +289,7 @@ sleep 3
 {
     echo " "
     echo "**************************************************************"
-    echo "*               PRESS TICKET - LOG DE INSTALAÇÃO           *"
+    echo "*               PRESS TICKET®® - LOG DE INSTALAÇÃO           *"
     echo "**************************************************************"
     echo " Versão a ser instalada: $VERSION                           "
     echo " Fuso Horário: $SELECTED_TZ                                 "
@@ -597,7 +597,7 @@ else
     echo -e "${RED}Erro ao excluir o pacote de instalação.${RESET}" | tee -a "$LOG_FILE"
 fi
 
-## Seção 6: Instalação do Press Ticket
+## Seção 6: Instalação do Press Ticket®®
 
 # Garantir que o diretório home do usuário deploy seja usado
 DEPLOY_HOME=$(eval echo ~deploy)
@@ -1101,7 +1101,7 @@ echo -e "${GREEN}---------------------------------------${RESET}" | tee -a "$LOG
 echo " " | tee -a "$LOG_FILE"
 echo -e "${COLOR}Acesse o sistema e configure conforme necessário.${RESET}" | tee -a "$LOG_FILE"
 echo " " | tee -a "$LOG_FILE"
-echo -e "${COLOR}Obrigado por utilizar o Sistema Press Ticket!${RESET}" | tee -a "$LOG_FILE"
+echo -e "${COLOR}Obrigado por utilizar o Sistema Press Ticket®®!${RESET}" | tee -a "$LOG_FILE"
 echo -e "${COLOR}************** Desde de 2022 ****************${RESET}" | tee -a "$LOG_FILE"
 echo " " | tee -a "$LOG_FILE"
 

@@ -1,4 +1,5 @@
 import {
+	Box,
 	Button,
 	CircularProgress,
 	IconButton,
@@ -9,11 +10,12 @@ import {
 	TableHead,
 	TableRow,
 	Tooltip,
+	tooltipClasses,
 	Typography,
-} from "@material-ui/core";
-import { green } from "@material-ui/core/colors";
-import { makeStyles } from "@material-ui/core/styles";
-import Zoom from "@material-ui/core/Zoom";
+} from "@mui/material";
+import { green } from "@mui/material/colors";
+import { styled } from '@mui/material/styles';
+import { Zoom } from "@mui/material"
 import {
 	CheckCircle,
 	CropFree,
@@ -31,14 +33,14 @@ import {
 	SyncOutlined,
 	Telegram,
 	WhatsApp
-} from "@material-ui/icons";
-import PowerSettingsNewIcon from "@material-ui/icons/PowerSettingsNew";
-import RefreshIcon from "@material-ui/icons/Refresh";
-import VisibilityIcon from "@material-ui/icons/Visibility";
+} from "@mui/icons-material";
+import PowerSettingsNewIcon from "@mui/icons-material/PowerSettingsNew";
+import RefreshIcon from "@mui/icons-material/Refresh";
+import VisibilityIcon from "@mui/icons-material/Visibility"; 
 import { format, parseISO } from "date-fns";
 import React, { useCallback, useContext, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useHistory } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import ConfirmationModal from "../../components/ConfirmationModal";
 import MainContainer from "../../components/MainContainer";
@@ -53,73 +55,78 @@ import { WhatsAppsContext } from "../../context/WhatsApp/WhatsAppsContext";
 import toastError from "../../errors/toastError";
 import api from "../../services/api";
 
-const useStyles = makeStyles(theme => ({
-	mainPaper: {
-		flex: 1,
-		padding: theme.spacing(2),
-		margin: theme.spacing(1),
-		overflowY: "scroll",
-		...theme.scrollbarStyles,
-	},
-	customTableCell: {
-		display: "flex",
-		alignItems: "center",
-		justifyContent: "center",
-	},
-	tooltip: {
-		backgroundColor: "#f5f5f9",
-		color: "rgba(0, 0, 0, 0.87)",
-		fontSize: theme.typography.pxToRem(14),
-		border: "1px solid #dadde9",
-		maxWidth: 450,
-	},
-	tooltipPopper: {
-		textAlign: "center",
-	},
-	buttonProgress: {
-		color: green[500],
-		margin: theme.spacing(1)
-	},
-	actionFeedback: {
-		display: 'flex',
-		flexDirection: 'row',
-		justifyContent: 'center',
-		alignItems: 'center',
-		gap: '4px'
-	}
+const MainPaper = styled(Paper)(({ theme }) => ({
+	flex: 1,
+	padding: theme.spacing(2),
+	margin: theme.spacing(2),
+	overflowY: "auto",
+	borderRadius: theme.shape.borderRadius,
+	boxShadow: "0 4px 10px rgba(0,0,0,0.05)",
+	...theme.scrollbarStyles,
 }));
 
-const CustomToolTip = ({ title, content, children }) => {
-	const classes = useStyles();
+const CustomTableCell = styled('div')({
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+});
 
+const CustomTooltipStyled = styled(({ className, ...props }) => (
+	<Tooltip {...props} classes={{ popper: className }} />
+))(({ theme }) => ({
+	[`& .${tooltipClasses.tooltip}`]: {
+		backgroundColor: theme.palette.background.paper,
+		color: theme.palette.text.primary,
+		boxShadow: theme.shadows[3],
+		fontSize: 12,
+		backdropFilter: 'blur(4px)',
+		padding: '10px 14px',
+		maxWidth: 300,
+		borderRadius: theme.shape.borderRadius,
+	},
+	[`& .${tooltipClasses.arrow}`]: {
+		color: theme.palette.background.paper,
+	},
+}));
+
+const CircularProgressStyled = styled(CircularProgress)(({ theme }) => ({
+	color: green[500],
+	margin: theme.spacing(1)
+}));
+
+const ActionFeedback = styled('div')({
+	display: 'flex',
+	flexDirection: 'row',
+	justifyContent: 'center',
+	alignItems: 'center',
+	gap: '4px'
+});
+
+const CustomToolTip = ({ title, content, children }) => {
 	return (
-		<Tooltip
-			arrow
-			classes={{
-				tooltip: classes.tooltip,
-				popper: classes.tooltipPopper,
-			}}
-			title={
-				<React.Fragment>
-					<Typography gutterBottom color="inherit">
-						{title}
-					</Typography>
-					{content && <Typography>{content}</Typography>}
-				</React.Fragment>
-			}
-			TransitionComponent={Zoom}
-		>
-			<div>
-				{children}
-			</div>
-		</Tooltip>
+		<CustomTooltipStyled
+      arrow
+      placement="top"
+      title={
+        <React.Fragment>
+          <Typography variant="subtitle2" fontWeight={600} gutterBottom color="inherit">
+            {title}
+          </Typography>
+          {content && <Typography variant="body2">{content}</Typography>}
+        </React.Fragment>
+      }
+      TransitionComponent={Zoom}
+    >
+      <div>
+        {children}
+      </div>
+    </CustomTooltipStyled>
 	);
 };
 
 const Connections = () => {
-	const classes = useStyles();
 	const { t } = useTranslation();
-	const history = useHistory();
+	const navigate = useNavigate();
 	const { user } = useContext(AuthContext);
 	const { whatsApps, loading } = useContext(WhatsAppsContext);
 	const [whatsAppModalOpen, setWhatsAppModalOpen] = useState(false);
@@ -150,7 +157,7 @@ const Connections = () => {
 			if (toastId) {
 				toast.update(toastId, {
 					render: `${initialMessage} ${secondsRemaining} segundos...`,
-					type: toast.TYPE.INFO,
+					type: "info",
 					autoClose: false,
 					closeButton: false
 				});
@@ -159,7 +166,7 @@ const Connections = () => {
 					autoClose: false,
 					closeButton: false,
 					draggable: false,
-					position: toast.POSITION.TOP_RIGHT
+					position: "top-right"
 				});
 			}
 		};
@@ -180,7 +187,7 @@ const Connections = () => {
 					}
 					
 					toast.success(finalMessage, {
-						position: toast.POSITION.TOP_RIGHT
+						position: "top-right"
 					});
 					
 					if (onComplete && typeof onComplete === 'function') {
@@ -189,7 +196,7 @@ const Connections = () => {
 					
 					if (reload) {
 						setTimeout(() => {
-							history.go(0);
+							navigate(0);
 						}, 1000);
 					}
 				}
@@ -220,17 +227,17 @@ const Connections = () => {
 	const getChannelIcon = (channel) => {
 		switch (channel) {
 			case "facebook":
-				return <Facebook style={{ color: "#3b5998" }} />;
+				return <Facebook sx={{ color: "#3b5998" }} />;
 			case "instagram":
-				return <Instagram style={{ color: "#cd486b" }} />;
+				return <Instagram sx={{ color: "#cd486b" }} />;
 			case "telegram":
-				return <Telegram style={{ color: "#85b2ff" }} />;
+				return <Telegram sx={{ color: "#85b2ff" }} />;
 			case "email":
-				return <Email style={{ color: "#004f9f" }} />;
+				return <Email sx={{ color: "#004f9f" }} />;
 			case "webchat":
-				return <Sms style={{ color: "#EB6D58" }} />;
+				return <Sms sx={{ color: "#EB6D58" }} />;
 			case null:
-				return <WhatsApp style={{ color: "#075e54" }} />;
+				return <WhatsApp sx={{ color: "#075e54" }} />;
 			default:
 				return null;
 		}
@@ -427,7 +434,7 @@ const Connections = () => {
 			
 			const initialToastId = toast.info('Reiniciando sessão do WhatsApp...', {
 				autoClose: false,
-				position: toast.POSITION.TOP_RIGHT
+				position: "top-right"
 			});
 			
 			await api.post(`/whatsapp/${whatsAppId}/restart`);
@@ -435,7 +442,7 @@ const Connections = () => {
 			toast.dismiss(initialToastId);
 			
 			toast.success('Sessão reiniciada com sucesso!', {
-				position: toast.POSITION.TOP_RIGHT
+				position: "top-right"
 			});
 			
 			setLoadingActions(prev => ({ ...prev, [whatsAppId]: undefined }));
@@ -461,21 +468,17 @@ const Connections = () => {
 
 	const handleStartSession = async (whatsAppId) => {
 		try {
-			// Iniciar o indicador de carregamento
 			setLoadingActions(prev => ({ ...prev, [whatsAppId]: 'start' }));
 			setActionMessages(prev => ({ ...prev, [whatsAppId]: 'Iniciando sessão...' }));
 			
-			// Criar um toast inicial
 			const startToastId = toast.info('Iniciando sessão do WhatsApp...', {
 				autoClose: false,
 				closeButton: false,
 				draggable: false,
 			});
 			
-			// Fazer a chamada para iniciar a sessão
 			await api.post(`/whatsapp/${whatsAppId}/start`);
 			
-			// Fechar o toast inicial
 			toast.dismiss(startToastId);
 			
 			const countdownToast = createCountdownToast(
@@ -489,7 +492,6 @@ const Connections = () => {
 				false
 			);
 			
-			// Iniciar a contagem regressiva
 			await countdownToast.startCountdown();
 		} catch (err) {
 			toastError(err);
@@ -500,21 +502,17 @@ const Connections = () => {
 
 	const handleShutdownSession = async (whatsAppId) => {
 		try {
-			// Iniciar o indicador de carregamento
 			setLoadingActions(prev => ({ ...prev, [whatsAppId]: 'shutdown' }));
 			setActionMessages(prev => ({ ...prev, [whatsAppId]: 'Desligando sessão...' }));
 			
-			// Criar um toast inicial
 			const shutdownToastId = toast.info('Desligando sessão do WhatsApp...', {
 				autoClose: false,
 				closeButton: false,
 				draggable: false,
 			});
 			
-			// Fazer a chamada para desligar a sessão
 			await api.post(`/whatsapp/${whatsAppId}/shutdown`);
 			
-			// Fechar o toast inicial
 			toast.dismiss(shutdownToastId);
 			
 			const countdownToast = createCountdownToast(
@@ -539,14 +537,14 @@ const Connections = () => {
 	const renderActionButtons = (whatsApp) => {
 		if (loadingActions[whatsApp.id]) {
 			return (
-				<div className={classes.actionFeedback}>
-					<CircularProgress size={24} className={classes.buttonProgress} />
+				<ActionFeedback>
+					<CircularProgressStyled size={24} />
 					{actionMessages[whatsApp.id] && (
-						<Typography variant="caption" style={{ fontSize: '0.7rem' }}>
+						<Typography variant="caption" sx={{ fontSize: '0.7rem' }}>
 							{actionMessages[whatsApp.id]}
 						</Typography>
 					)}
-				</div>
+				</ActionFeedback>
 			);
 		}
 
@@ -641,7 +639,7 @@ const Connections = () => {
 
 	const renderStatusToolTips = whatsApp => {
 		return (
-			<div className={classes.customTableCell}>
+			<CustomTableCell>
 				{whatsApp.status === "DISCONNECTED" && (
 					<CustomToolTip
 						title={t("connections.toolTips.disconnected.title")}
@@ -651,7 +649,7 @@ const Connections = () => {
 					</CustomToolTip>
 				)}
 				{whatsApp.status === "OPENING" && (
-					<CircularProgress size={24} className={classes.buttonProgress} />
+					<CircularProgressStyled size={24} />
 				)}
 				{whatsApp.status === "qrcode" && (
 					<CustomToolTip
@@ -663,7 +661,7 @@ const Connections = () => {
 				)}
 				{whatsApp.status === "CONNECTED" && (
 					<CustomToolTip title={t("connections.toolTips.connected.title")}>
-						<SignalCellular4Bar style={{ color: green[500] }} />
+						<SignalCellular4Bar sx={{ color: green[500] }} />
 					</CustomToolTip>
 				)}
 				{(whatsApp.status === "TIMEOUT" || whatsApp.status === "PAIRING") && (
@@ -674,7 +672,7 @@ const Connections = () => {
 						<SignalCellularConnectedNoInternet2Bar color="secondary" />
 					</CustomToolTip>
 				)}
-			</div>
+			</CustomTableCell>
 		);
 	};
 
@@ -692,7 +690,9 @@ const Connections = () => {
 			
 			await countdownToast.startCountdown();
 		} catch (err) {
-			toastError(err);
+			if (!(err && err.message && err.message.includes('Network Error'))) {
+				toastError(err);
+			}
 		}
 	};
 
@@ -733,13 +733,18 @@ const Connections = () => {
 				whatsAppId={!qrModalOpen && selectedWhatsApp?.id}
 			/>
 			<MainHeader>
-				<Title>{t("connections.title")} ({whatsApps.length})</Title>
+				<Title>{t("connections.title")} {whatsApps.length > 0 ? `(${whatsApps.length})` : ""}</Title>
 				<MainHeaderButtonsWrapper>
-					<Tooltip title={t("connections.buttons.restart")}>
+					<Tooltip title={t("connections.buttons.restart")} arrow>
 						<Button
 							variant="contained"
 							color="primary"
 							onClick={restartpm2}
+							sx={{
+								borderRadius: 2,
+								px: { xs: 1, sm: 2 },
+								mr: 1
+							}}
 						>
 							<SyncOutlined />
 						</Button>
@@ -749,13 +754,17 @@ const Connections = () => {
 							variant="contained"
 							color="primary"
 							onClick={handleOpenWhatsAppModal}
+							sx={{
+								borderRadius: 2,
+								px: { xs: 1, sm: 2 },
+							}}
 						>
 							<WhatsApp />
 						</Button>
 					</Tooltip>
 				</MainHeaderButtonsWrapper>
 			</MainHeader>
-			<Paper className={classes.mainPaper} variant="outlined">
+			<MainPaper variant="outlined">
 				<Table size="small">
 					<TableHead>
 						<TableRow>
@@ -809,17 +818,17 @@ const Connections = () => {
 												{whatsApp.name}
 											</TableCell>
 											<TableCell align="center">
-												<div className={classes.customTableCell}>
-													<span
-														style={{
+												<CustomTableCell>
+													<Box
+														sx={{
 															backgroundColor: whatsApp.color,
-															width: 20,
+															width: 40,
 															height: 20,
 															alignSelf: "center",
 															borderRadius: 10
 														}}
 													/>
-												</div>
+												</CustomTableCell>
 											</TableCell>
 											<TableCell align="center">
 												{whatsApp?.type === null || whatsApp?.type === undefined ? renderStatusToolTips(whatsApp) : "-"}
@@ -833,9 +842,9 @@ const Connections = () => {
 											</TableCell>
 											<TableCell align="center">
 												{whatsApp?.type === null || whatsApp?.type === undefined ? (
-													<div className={classes.actionFeedback}>
+													<ActionFeedback>
 														{renderActionButtons(whatsApp)}
-													</div>
+													</ActionFeedback>
 												) : "-"}
 											</TableCell>
 											<TableCell align="center">
@@ -843,9 +852,9 @@ const Connections = () => {
 											</TableCell>
 											<TableCell align="center">
 												{whatsApp.isDefault && (
-													<div className={classes.customTableCell}>
-														<CheckCircle style={{ color: green[500] }} />
-													</div>
+													<CustomTableCell>
+														<CheckCircle sx={{ color: green[500] }} />
+													</CustomTableCell>
 												)}
 											</TableCell>
 											<TableCell align="center">
@@ -853,7 +862,7 @@ const Connections = () => {
 													size="small"
 													onClick={() => handleEditWhatsApp(whatsApp)}
 												>
-													<Edit color="secondary" />
+													<Edit color="info" />
 												</IconButton>
 												<IconButton
 													size="small"
@@ -861,7 +870,7 @@ const Connections = () => {
 														handleOpenConfirmationModal("delete", whatsApp.id);
 													}}
 												>
-													<DeleteOutline color="secondary" />
+													<DeleteOutline color="error" />
 												</IconButton>
 											</TableCell>
 										</TableRow>
@@ -870,7 +879,7 @@ const Connections = () => {
 						)}
 					</TableBody>
 				</Table>
-			</Paper>
+			</MainPaper>
 		</MainContainer>
 	);
 };

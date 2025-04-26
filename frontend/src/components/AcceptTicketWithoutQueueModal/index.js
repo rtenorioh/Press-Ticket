@@ -6,37 +6,28 @@ import {
 	DialogTitle,
 	FormControl,
 	InputLabel,
-	makeStyles,
 	MenuItem,
-	Select,
-} from "@material-ui/core";
+	Select
+} from "@mui/material";
+import { styled } from "@mui/material/styles";
 import PropTypes from "prop-types";
 import React, { useCallback, useContext, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useHistory } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../../context/Auth/AuthContext";
 import toastError from "../../errors/toastError";
 import api from "../../services/api";
 import ButtonWithSpinner from "../ButtonWithSpinner";
 
-const useStyles = makeStyles((theme) => ({
-	autoComplete: {
-		width: 300,
-	},
-	maxWidth: {
-		width: "100%",
-	},
-	buttonColorError: {
-		color: theme.palette.error.main,
-		borderColor: theme.palette.error.main,
-	},
+const ButtonColorError = styled(Button)(({ theme }) => ({
+	color: theme.palette.error.main,
+	borderColor: theme.palette.error.main,
 }));
 
 const INITIAL_QUEUE_VALUE = "";
 
 const AcceptTicketWithouSelectQueue = ({ modalOpen, onClose, ticketId }) => {
-	const history = useHistory();
-	const classes = useStyles();
+	const navigate = useNavigate();
 	const [selectedQueue, setSelectedQueue] = useState(INITIAL_QUEUE_VALUE);
 	const [loading, setLoading] = useState(false);
 	const { user } = useContext(AuthContext);
@@ -95,7 +86,7 @@ const AcceptTicketWithouSelectQueue = ({ modalOpen, onClose, ticketId }) => {
 					queueId,
 				});
 				setLoading(false);
-				history.push(`/tickets/${ticketId}`);
+				navigate(`/tickets/${ticketId}`);
 				handleClose();
 				return;
 			}
@@ -123,13 +114,13 @@ const AcceptTicketWithouSelectQueue = ({ modalOpen, onClose, ticketId }) => {
 			});
 
 			setLoading(false);
-			history.push(`/tickets/${ticketId}`);
+			navigate(`/tickets/${ticketId}`);
 			handleClose();
 		} catch (err) {
 			setLoading(false);
 			toastError(err, t);
 		}
-	}, [ticketId, userId, history, handleClose, checkOpenTickets, t, settings]);
+	}, [ticketId, userId, navigate, handleClose, checkOpenTickets, t, settings]);
 
 	return (
 		<Dialog
@@ -142,11 +133,11 @@ const AcceptTicketWithouSelectQueue = ({ modalOpen, onClose, ticketId }) => {
 				{t("ticketsList.acceptModal.title")}
 			</DialogTitle>
 			<DialogContent dividers>
-				<FormControl variant="outlined" className={classes.maxWidth}>
+				<FormControl variant="outlined" sx={{ width: "100%" }}>
 					<InputLabel>{t("ticketsList.acceptModal.queue")}</InputLabel>
 					<Select
 						value={selectedQueue}
-						className={classes.autoComplete}
+						sx={{ width: 300 }}
 						onChange={(e) => setSelectedQueue(e.target.value)}
 						label={t("ticketsList.acceptModal.queue")}
 					>
@@ -158,14 +149,13 @@ const AcceptTicketWithouSelectQueue = ({ modalOpen, onClose, ticketId }) => {
 				</FormControl>
 			</DialogContent>
 			<DialogActions>
-				<Button
+				<ButtonColorError
 					onClick={handleClose}
-					className={classes.buttonColorError}
 					disabled={loading}
 					variant="outlined"
 				>
 					{t("ticketsList.buttons.cancel")}
-				</Button>
+				</ButtonColorError>
 				<ButtonWithSpinner
 					variant="contained"
 					type="button"

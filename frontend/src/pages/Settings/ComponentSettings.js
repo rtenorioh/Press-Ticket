@@ -1,25 +1,63 @@
-import { Checkbox, FormControlLabel, Grid, Paper, Select, Tooltip, Typography } from "@material-ui/core";
-import { makeStyles } from "@material-ui/core/styles";
+import { 
+    Checkbox, 
+    FormControlLabel, 
+    Grid, 
+    Paper, 
+    Select, 
+    Tooltip, 
+    Typography, 
+    Box,
+    MenuItem,
+    InputLabel,
+    FormControl,
+    Card,
+    CardContent,
+    Divider
+} from "@mui/material";
+import { styled } from "@mui/material/styles";
 import React from "react";
 import { useTranslation } from "react-i18next";
 
-const useStyles = makeStyles(theme => ({
-    paper: {
-        padding: theme.spacing(0, 1),
-        display: "flex",
-        alignItems: "center",
-        marginBottom: theme.spacing(2),
+const SettingCard = styled(Card)(({ theme }) => ({
+    marginBottom: theme.spacing(2),
+    borderRadius: theme.shape.borderRadius,
+    boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+    transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+    '&:hover': {
+        boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
     },
-    settingOption: {
-        marginLeft: "auto",
+}));
+
+const SettingItem = styled(Box)(({ theme }) => ({
+    padding: theme.spacing(1.5, 2),
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    borderBottom: `1px solid ${theme.palette.divider}`,
+    '&:last-child': {
+        borderBottom: 'none',
     },
-    gridContainer: {
-        padding: theme.spacing(2),
+}));
+
+const GridContainer = styled(Grid)(({ theme }) => ({
+    width: '100%',
+}));
+
+const StyledFormControl = styled(FormControl)(({ theme }) => ({
+    minWidth: 200,
+    marginLeft: 'auto',
+}));
+
+const SectionTitle = styled(Typography)(({ theme }) => ({
+    fontWeight: 600,
+    marginBottom: theme.spacing(2),
+    marginTop: theme.spacing(3),
+    '&:first-of-type': {
+        marginTop: 0,
     },
 }));
 
 const ComponentSettings = ({ settings, getSettingValue, handleChangeBooleanSetting, handleChangeSetting }) => {
-    const classes = useStyles();
     const { t } = useTranslation();
 
     const booleanSettings = [
@@ -45,63 +83,92 @@ const ComponentSettings = ({ settings, getSettingValue, handleChangeBooleanSetti
         settingsChunks.push(booleanSettings.slice(i, i + 8));
     }
 
+    // Agrupar configurações por categorias para melhor organização
+    const groupedSettings = [
+        {
+            title: t("settings.general.ticketManagement"),
+            settings: booleanSettings.filter(s => [
+                'allTicket', 'CheckMsgIsGroup', 'closeTicketApi', 'ASC', 'created', 'openTickets', 
+                'tabsPending', 'tabsClosed', 'queueLength'
+            ].includes(s.key))
+        },
+        {
+            title: t("settings.general.userInterface"),
+            settings: booleanSettings.filter(s => [
+                'sideMenu', 'quickAnswer', 'signOption', 'listItemSpy', 'call'
+            ].includes(s.key))
+        },
+        {
+            title: t("settings.general.systemBehavior"),
+            settings: booleanSettings.filter(s => [
+                'userCreation'
+            ].includes(s.key))
+        }
+    ];
+
     return (
-        <Grid container spacing={3} className={classes.gridContainer}>
-            {settingsChunks.map((chunk, index) => (
-                <Grid item xs={12} sm={6} md={4} key={index}>
-                    {chunk.map(setting => (
-                        <Paper className={classes.paper} key={setting.key}>
-                            <Tooltip title={setting.note}>
-                                <FormControlLabel
-                                    control={
-                                        <Checkbox
-                                            checked={settings && settings.length > 0 && getSettingValue(setting.key) === "enabled"}
-                                            onChange={handleChangeBooleanSetting}
-                                            name={setting.key}
-                                            color="primary"
-                                        />
-                                    }
-                                    label={setting.label}
-                                />
-                            </Tooltip>
-                        </Paper>
-                    ))}
+        <GridContainer container spacing={2}>
+            {groupedSettings.map((group, groupIndex) => (
+                <Grid item xs={12} key={groupIndex}>
+                    <SectionTitle variant="h6">{group.title}</SectionTitle>
+                    <SettingCard>
+                        {group.settings.map((setting, idx) => (
+                            <SettingItem key={setting.key}>
+                                <Tooltip title={setting.note} placement="top-start">
+                                    <FormControlLabel
+                                        control={
+                                            <Checkbox
+                                                checked={settings && settings.length > 0 && getSettingValue(setting.key) === "enabled"}
+                                                onChange={handleChangeBooleanSetting}
+                                                name={setting.key}
+                                                color="primary"
+                                            />
+                                        }
+                                        label={setting.label}
+                                        sx={{ marginRight: 'auto' }}
+                                    />
+                                </Tooltip>
+                            </SettingItem>
+                        ))}
+                    </SettingCard>
                 </Grid>
             ))}
-            <Grid item xs={12} sm={6} md={4}>
-                <Tooltip title={t("settings.general.timeCreateNewTicket.note")}>
-                    <Paper className={classes.paper} elevation={3}>
-                        <Typography variant="body1">
-                            {t("settings.general.timeCreateNewTicket.name")}
-                        </Typography>
-                        <Select
-                            margin="dense"
-                            variant="outlined"
-                            native
-                            id="timeCreateNewTicket-setting"
-                            name="timeCreateNewTicket"
-                            value={settings && settings.length > 0 && getSettingValue("timeCreateNewTicket")}
-                            className={classes.settingOption}
-                            onChange={handleChangeSetting}
-                        >
-                            <option value="10">{t("settings.general.timeCreateNewTicket.options.10")}</option>
-                            <option value="30">{t("settings.general.timeCreateNewTicket.options.30")}</option>
-                            <option value="60">{t("settings.general.timeCreateNewTicket.options.60")}</option>
-                            <option value="300">{t("settings.general.timeCreateNewTicket.options.300")}</option>
-                            <option value="1800">{t("settings.general.timeCreateNewTicket.options.1800")}</option>
-                            <option value="3600">{t("settings.general.timeCreateNewTicket.options.3600")}</option>
-                            <option value="7200">{t("settings.general.timeCreateNewTicket.options.7200")}</option>
-                            <option value="21600">{t("settings.general.timeCreateNewTicket.options.21600")}</option>
-                            <option value="43200">{t("settings.general.timeCreateNewTicket.options.43200")}</option>
-                            <option value="86400">{t("settings.general.timeCreateNewTicket.options.86400")}</option>
-                            <option value="604800">{t("settings.general.timeCreateNewTicket.options.604800")}</option>
-                            <option value="1296000">{t("settings.general.timeCreateNewTicket.options.1296000")}</option>
-                            <option value="2592000">{t("settings.general.timeCreateNewTicket.options.2592000")}</option>
-                        </Select>
-                    </Paper>
-                </Tooltip>
+            
+            <Grid item xs={12}>
+                <SectionTitle variant="h6">{t("settings.general.timeSettings")}</SectionTitle>
+                <SettingCard>
+                    <SettingItem>
+                        <Tooltip title={t("settings.general.timeCreateNewTicket.note")} placement="top-start">
+                            <Typography variant="body1">
+                                {t("settings.general.timeCreateNewTicket.name")}
+                            </Typography>
+                        </Tooltip>
+                        <StyledFormControl variant="outlined" size="small">
+                            <Select
+                                id="timeCreateNewTicket-setting"
+                                name="timeCreateNewTicket"
+                                value={settings && settings.length > 0 ? getSettingValue("timeCreateNewTicket") : ""}
+                                onChange={handleChangeSetting}
+                            >
+                                <MenuItem value="10">{t("settings.general.timeCreateNewTicket.options.10")}</MenuItem>
+                                <MenuItem value="30">{t("settings.general.timeCreateNewTicket.options.30")}</MenuItem>
+                                <MenuItem value="60">{t("settings.general.timeCreateNewTicket.options.60")}</MenuItem>
+                                <MenuItem value="300">{t("settings.general.timeCreateNewTicket.options.300")}</MenuItem>
+                                <MenuItem value="1800">{t("settings.general.timeCreateNewTicket.options.1800")}</MenuItem>
+                                <MenuItem value="3600">{t("settings.general.timeCreateNewTicket.options.3600")}</MenuItem>
+                                <MenuItem value="7200">{t("settings.general.timeCreateNewTicket.options.7200")}</MenuItem>
+                                <MenuItem value="21600">{t("settings.general.timeCreateNewTicket.options.21600")}</MenuItem>
+                                <MenuItem value="43200">{t("settings.general.timeCreateNewTicket.options.43200")}</MenuItem>
+                                <MenuItem value="86400">{t("settings.general.timeCreateNewTicket.options.86400")}</MenuItem>
+                                <MenuItem value="604800">{t("settings.general.timeCreateNewTicket.options.604800")}</MenuItem>
+                                <MenuItem value="1296000">{t("settings.general.timeCreateNewTicket.options.1296000")}</MenuItem>
+                                <MenuItem value="2592000">{t("settings.general.timeCreateNewTicket.options.2592000")}</MenuItem>
+                            </Select>
+                        </StyledFormControl>
+                    </SettingItem>
+                </SettingCard>
             </Grid>
-        </Grid>
+        </GridContainer>
     );
 };
 

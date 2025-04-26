@@ -1,12 +1,12 @@
-# Manual de Instalação Automática do Press Ticket na VPS
+# Manual de Instalação Automática do Press Ticket® na VPS
 
-Este manual descreve os passos necessários para realizar a Instalação automática do sistema **Press Ticket** em sua VPS.
+Este manual descreve os passos necessários para realizar a Instalação automática do sistema **Press Ticket®** em sua VPS.
 
 ## Passos para Instalação
 
 ### 1. Acessar a VPS
 
-Conecte-se à VPS onde o **Press Ticket** será instalado. Utilize o usuário `root`:
+Conecte-se à VPS onde o **Press Ticket®** será instalado. Utilize o usuário `root`:
 
 ```bash
 ssh root@ip-da-vps

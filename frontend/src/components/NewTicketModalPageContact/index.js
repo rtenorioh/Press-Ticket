@@ -10,10 +10,10 @@ import {
 	MenuItem,
 	Select,
 	TextField
-} from "@material-ui/core";
+} from "@mui/material";
 import Autocomplete, {
 	createFilterOptions,
-} from "@material-ui/lab/Autocomplete";
+} from "@mui/material/Autocomplete";
 import React, { useContext, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
@@ -78,7 +78,7 @@ const NewTicketModalPageContact = ({ modalOpen, onClose, initialContact }) => {
 
 	const handleSaveTicket = async contactId => {
 		if (!contactId) return;
-		if (selectedQueue === "" && user.profile !== 'admin') {
+		if (selectedQueue === "" && user?.profile !== 'admin') {
 			toast.error(t("newTicketModalContactPage.queue"));
 			return;
 		}
@@ -88,7 +88,7 @@ const NewTicketModalPageContact = ({ modalOpen, onClose, initialContact }) => {
 			const { data: ticket } = await api.post("/tickets", {
 				contactId: contactId,
 				queueId,
-				userId: user.id,
+				userId: user?.id,
 				status: "open",
 			});
 			onClose(ticket);
@@ -127,11 +127,11 @@ const NewTicketModalPageContact = ({ modalOpen, onClose, initialContact }) => {
 		return filtered;
 	};
 
-	const renderOption = option => {
+	const renderOption = (props, option) => {
 		if (option.number) {
-			return `${option.name} - ${option.number}`;
+			return <li {...props}>{`${option.name} - ${option.number}`}</li>;
 		} else {
-			return `${t("newTicketModalContactPage.add")} ${option.name}`;
+			return <li {...props}>{`${t("newTicketModalContactPage.add")} ${option.name}`}</li>;
 		}
 	};
 
@@ -231,14 +231,14 @@ const NewTicketModalPageContact = ({ modalOpen, onClose, initialContact }) => {
 									if (selectedQueue === "") {
 										return "Selecione uma fila"
 									}
-									const queue = user.queues.find(q => q.id === selectedQueue)
-									return queue.name
+									const queue = user?.queues?.find(q => q.id === selectedQueue)
+									return queue?.name
 								}}
 							>
-								{user.queues?.length > 0 &&
-									user.queues.map((queue, key) => (
-										<MenuItem dense key={key} value={queue.id}>
-											<ListItemText primary={queue.name} />
+								{user?.queues?.length > 0 &&
+									user?.queues?.map((queue, key) => (
+										<MenuItem dense key={key} value={queue?.id}>
+											<ListItemText primary={queue?.name} />
 										</MenuItem>
 									))}
 							</Select>

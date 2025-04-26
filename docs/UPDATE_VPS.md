@@ -1,12 +1,12 @@
-# Manual de Atualização Automática do Press Ticket na VPS
+# Manual de Atualização Automática do Press Ticket® na VPS
 
-Este manual descreve os passos necessários para realizar a atualização automática do sistema **Press Ticket** em sua VPS.
+Este manual descreve os passos necessários para realizar a atualização automática do sistema **Press Ticket®** em sua VPS.
 
 ## Passos para Atualização
 
 ### 1. Acessar a VPS
 
-Conecte-se à VPS onde o **Press Ticket** está instalado. Utilize o usuário apropriado (`root` ou `deploy`), dependendo de sua configuração:
+Conecte-se à VPS onde o **Press Ticket®** está instalado. Utilize o usuário apropriado (`root` ou `deploy`), dependendo de sua configuração:
 
 ```bash
 ssh usuario@ip-da-vps

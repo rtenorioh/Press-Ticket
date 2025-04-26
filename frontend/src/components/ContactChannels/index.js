@@ -1,5 +1,5 @@
-import { IconButton, Tooltip } from "@material-ui/core";
-import { Email, Facebook, Instagram, Sms, Telegram } from "@material-ui/icons";
+import { IconButton, Tooltip } from "@mui/material";
+import { Email, Facebook, Instagram, Sms, Telegram } from "@mui/icons-material";
 import React from "react";
 
 const ContactChannels = ({ contact, handleSaveTicket, setContactTicket, setNewTicketModalOpen }) => {
@@ -54,7 +54,7 @@ const ContactChannels = ({ contact, handleSaveTicket, setContactTicket, setNewTi
                         aria-label={`Open ${channel.label}`}
                     >
                         <Tooltip title={channel.label} arrow placement="left">
-                            <channel.Icon style={{ color: channel.color }} />
+                            {React.createElement(channel.Icon, { sx: { color: channel.color } })}
                         </Tooltip>
                     </IconButton>
                     {channel.id}

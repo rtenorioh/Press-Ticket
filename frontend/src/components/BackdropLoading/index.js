@@ -1,8 +1,8 @@
 import PropTypes from "prop-types";
 import React from "react";
 
-import CircularProgress from "@material-ui/core/CircularProgress";
-import { styled } from "@material-ui/core/styles";
+import CircularProgress from "@mui/material/CircularProgress";
+import { styled } from "@mui/material/styles";
 
 const BackdropStyled = styled('div')(({ theme, open }) => ({
 	zIndex: theme.zIndex.drawer + 1,

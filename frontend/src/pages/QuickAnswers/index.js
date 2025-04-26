@@ -1,27 +1,24 @@
-import {
-  Button,
-  IconButton,
-  InputAdornment,
-  makeStyles,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
-  TextField,
-  Tooltip
-} from "@material-ui/core";
-import {
-  AddCircleOutline,
-  DeleteForever,
-  DeleteOutline,
-  Edit,
-  Search
-} from "@material-ui/icons";
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import IconButton from '@mui/material/IconButton';
+import InputAdornment from '@mui/material/InputAdornment';
+import Paper from '@mui/material/Paper';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+import TextField from '@mui/material/TextField';
+import Tooltip from '@mui/material/Tooltip';
+import { styled } from '@mui/material/styles';
+import AddCircleOutline from '@mui/icons-material/AddCircleOutline';
+import DeleteForever from '@mui/icons-material/DeleteForever';
+import DeleteOutline from '@mui/icons-material/DeleteOutline';
+import Edit from '@mui/icons-material/Edit';
+import Search from '@mui/icons-material/Search';
 import React, { useContext, useEffect, useReducer, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useHistory } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import ConfirmationModal from "../../components/ConfirmationModal";
 import MainContainer from "../../components/MainContainer";
@@ -79,20 +76,37 @@ const reducer = (state, action) => {
   }
 };
 
-const useStyles = makeStyles((theme) => ({
-  mainPaper: {
-    flex: 1,
-    padding: theme.spacing(2),
-    margin: theme.spacing(1),
-    overflowY: "scroll",
-    ...theme.scrollbarStyles,
+const MainPaper = styled(Paper)(({ theme }) => ({
+  flex: 1,
+  padding: theme.spacing(2),
+  margin: theme.spacing(1),
+  overflowY: "scroll",
+  ...theme.scrollbarStyles,
+  borderRadius: theme.shape.borderRadius,
+  boxShadow: theme.shadows[1],
+}));
+
+const SearchContainer = styled(Box)(({ theme }) => ({
+  display: "flex",
+  alignItems: "center",
+  width: "100%",
+  [theme.breakpoints.down("md")]: {
+    marginBottom: theme.spacing(1),
+  },
+}));
+
+const ButtonContainer = styled(Box)(({ theme }) => ({
+  display: "flex",
+  alignItems: "center",
+  gap: theme.spacing(1),
+  [theme.breakpoints.down("md")]: {
+    marginTop: theme.spacing(1),
   },
 }));
 
 const QuickAnswers = () => {
-  const classes = useStyles();
   const { t } = useTranslation();
-  const history = useHistory();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [pageNumber, setPageNumber] = useState(1);
   const [searchParam, setSearchParam] = useState("");
@@ -199,7 +213,7 @@ const QuickAnswers = () => {
     try {
       await api.delete("/quickAnswers");
       toast.success(t("quickAnswers.toasts.deletedAll"));
-      history.go(0);
+      navigate(0);
     } catch (err) {
       toastError(err);
     }
@@ -223,7 +237,7 @@ const QuickAnswers = () => {
   const canEditQuickAnswers = () => {
     return (
       settings.some(s => s.key === "quickAnswer" && s.value === "enabled") ||
-      user.profile === "admin"
+      user?.profile === "admin"
     );
   };
 
@@ -253,50 +267,77 @@ const QuickAnswers = () => {
         quickAnswerId={selectedQuickAnswers && selectedQuickAnswers.id}
       ></QuickAnswersModal>
       <MainHeader>
-        <Title>{t("quickAnswers.title")} ({quickAnswers.length})</Title>
+        <Title>{t("quickAnswers.title")} {quickAnswers.length > 0 ? `(${quickAnswers.length})` : ""}</Title>
         <MainHeaderButtonsWrapper>
-          <TextField
-            placeholder={t("quickAnswers.searchPlaceholder")}
-            type="search"
-            value={searchParam}
-            onChange={handleSearch}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <Search color="secondary" />
-                </InputAdornment>
-              ),
-            }}
-          />
-          {canEditQuickAnswers() && (
-            <Tooltip title={t("quickAnswers.buttons.add")}>
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={handleOpenQuickAnswersModal}
-              >
-                <AddCircleOutline />
-              </Button>
-            </Tooltip>
-          )}
-          {canEditQuickAnswers() && (
-            <Tooltip title={t("quickAnswers.buttons.deleteAll")}>
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={(e) => {
-                  setConfirmModalOpen(true);
-                  setDeletingAllQuickAnswers(quickAnswers);
+          <Box sx={{ 
+            display: 'flex', 
+            flexDirection: { xs: 'column', md: 'row' },
+            alignItems: { xs: 'flex-start', md: 'center' },
+            width: '100%',
+            gap: 1
+          }}>
+            <SearchContainer>
+              <TextField
+                placeholder={t("quickAnswers.searchPlaceholder")}
+                type="search"
+                fullWidth
+                size="small"
+                value={searchParam}
+                onChange={handleSearch}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <Search color="secondary" />
+                    </InputAdornment>
+                  ),
                 }}
-              >
-                <DeleteForever />
-              </Button>
-            </Tooltip>
-          )}
+                sx={{
+                  py: 0,
+                  '& .MuiOutlinedInput-root': {
+                    height: 40
+                  }
+                }}
+              />
+            </SearchContainer>
+            <ButtonContainer>
+              {canEditQuickAnswers() && (
+                <Tooltip title={t("quickAnswers.buttons.add")}>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={handleOpenQuickAnswersModal}
+                    sx={{
+                      minWidth: { xs: '100%', md: 'auto' },
+                      height: 40
+                    }}
+                  >
+                    <AddCircleOutline />
+                  </Button>
+                </Tooltip>
+              )}
+              {canEditQuickAnswers() && (
+                <Tooltip title={t("quickAnswers.buttons.deleteAll")}>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={(e) => {
+                      setConfirmModalOpen(true);
+                      setDeletingAllQuickAnswers(quickAnswers);
+                    }}
+                    sx={{
+                      minWidth: { xs: '100%', md: 'auto' },
+                      height: 40
+                    }}
+                  >
+                    <DeleteForever />
+                  </Button>
+                </Tooltip>
+              )}
+            </ButtonContainer>
+          </Box>
         </MainHeaderButtonsWrapper>
       </MainHeader>
-      <Paper
-        className={classes.mainPaper}
+      <MainPaper
         variant="outlined"
         onScroll={handleScroll}
       >
@@ -322,34 +363,32 @@ const QuickAnswers = () => {
                 <TableRow key={quickAnswer.id}>
                   <TableCell align="center">{quickAnswer.shortcut}</TableCell>
                   <TableCell align="center">{quickAnswer.message}</TableCell>
-                  {canEditQuickAnswers() && (
-                    <TableCell align="center">
-                      <IconButton
-                        size="small"
-                        onClick={() => handleEditQuickAnswers(quickAnswer)}
-                      >
-                        <Edit color="secondary" />
-                      </IconButton>
+                  <TableCell align="center">
+                    <IconButton
+                      size="small"
+                      onClick={() => handleEditQuickAnswers(quickAnswer)}
+                    >
+                      <Edit color="info" />
+                    </IconButton>
 
-                      <IconButton
-                        size="small"
-                        onClick={(e) => {
-                          setConfirmModalOpen(true);
-                          setDeletingQuickAnswers(quickAnswer);
-                        }}
-                      >
-                        <DeleteOutline color="secondary" />
-                      </IconButton>
-                    </TableCell>
-                  )}
+                    <IconButton
+                      size="small"
+                      onClick={(e) => {
+                        setConfirmModalOpen(true);
+                        setDeletingQuickAnswers(quickAnswer);
+                      }}
+                    >
+                      <DeleteOutline color="error" />
+                    </IconButton>
+                  </TableCell>
                 </TableRow>
               ))}
               {loading && <TableRowSkeleton columns={3} />}
             </>
           </TableBody>
         </Table>
-      </Paper>
-    </MainContainer >
+      </MainPaper>
+    </MainContainer>
   );
 };
 

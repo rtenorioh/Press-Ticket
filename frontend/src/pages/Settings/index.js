@@ -1,4 +1,5 @@
-import { Box, Container, makeStyles, Tab, Tabs } from "@material-ui/core";
+import { Box, Container, Tab, Tabs, Paper, Typography } from '@mui/material';
+import { styled } from '@mui/material/styles';
 import React, { useContext, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
@@ -9,26 +10,55 @@ import openSocket from "../../services/socket-io.js";
 import Integrations from "../Integrations";
 import ComponentSettings from "./ComponentSettings";
 import Personalize from "./Personalize.js";
+import MainContainer from "../../components/MainContainer";
+import MainHeader from "../../components/MainHeader";
+import Title from "../../components/Title";
 
-const useStyles = makeStyles(theme => ({
-	root: {
-		flexGrow: 1,
-		display: "flex",
-		height: "92%",
-		backgroundColor: theme.palette.background.paper,
-		padding: theme.spacing(1),
+const SettingsContainer = styled(Paper)(({ theme }) => ({
+	flex: 1,
+	display: "flex",
+	backgroundColor: theme.palette.background.paper,
+	borderRadius: theme.shape.borderRadius,
+	boxShadow: "0 4px 10px rgba(0,0,0,0.05)",
+	overflow: "hidden",
+	margin: theme.spacing(2),
+}));
+
+const StyledTabs = styled(Tabs)(({ theme }) => ({
+	borderRight: `1px solid ${theme.palette.divider}`,
+	minWidth: 220,
+	backgroundColor: theme.palette.background.default,
+	'& .MuiTab-root': {
+		textAlign: 'left',
+		alignItems: 'flex-start',
+		padding: theme.spacing(2, 3),
+		minHeight: 48,
+		'&.Mui-selected': {
+			backgroundColor: theme.palette.background.paper,
+			color: theme.palette.primary.main,
+			fontWeight: 600,
+		},
 	},
-	tabs: {
-		borderRight: `1px solid ${theme.palette.divider}`,
-		minWidth: 200,
-	},
-	container: {
-		padding: theme.spacing(0),
+	'& .MuiTabs-indicator': {
+		left: 0,
+		right: 'auto',
+		width: 4,
 	},
 }));
 
-const Settings = ({ onThemeConfigUpdate }) => {
-	const classes = useStyles();
+const ContentContainer = styled(Box)(({ theme }) => ({
+	flex: 1,
+	padding: theme.spacing(3),
+	overflow: "auto",
+	...theme.scrollbarStyles,
+}));
+
+const TabContainer = styled(Container)(({ theme }) => ({
+	padding: theme.spacing(0),
+	width: '100%',
+}));
+
+const Settings = ({ toggleTheme, onThemeConfigUpdate }) => {
 	const { t } = useTranslation();
 	const [settings, setSettings] = useState([]);
 	const [tabValue, setTabValue] = useState(0);
@@ -136,7 +166,7 @@ const Settings = ({ onThemeConfigUpdate }) => {
 	};
 
 	const tabList = [
-		{ key: "personalize", label: t("settings.tabs.personalize"), component: <Personalize onThemeConfigUpdate={onThemeConfigUpdate} /> },
+		{ key: "personalize", label: t("settings.tabs.personalize"), component: <Personalize toggleTheme={toggleTheme} onThemeConfigUpdate={onThemeConfigUpdate} /> },
 		{ key: "general", label: t("settings.tabs.general"), component: <ComponentSettings settings={settings} getSettingValue={getSettingValue} handleChangeBooleanSetting={handleChangeBooleanSetting} handleChangeSetting={handleChangeSetting} /> },
 		{ key: "integrations", label: t("settings.tabs.integrations"), component: <Integrations /> }
 	];
@@ -144,28 +174,32 @@ const Settings = ({ onThemeConfigUpdate }) => {
 	const visibleTabs = tabList.filter(tab => shouldShowTab(tab.key));
 	
 	return (
-		<div className={classes.root}>
-			<Tabs
-				orientation="vertical"
-				variant="scrollable"
-				value={tabValue}
-				onChange={handleTabChange}
-				className={classes.tabs}
-			>
-				{visibleTabs.map((tab, index) => (
-				<Tab key={tab.key} label={tab.label} />
-			))}
-			</Tabs>
-			<Box p={3}>
-			{visibleTabs.map((tab, index) => (
-				tabValue === index && (
-					<Container key={tab.key} className={classes.container}>
-						{tab.component}
-					</Container>
-				)
-			))}
-			</Box>
-		</div>
+		<MainContainer>
+			<MainHeader>
+				<Title>{t("settings.title")}</Title>
+			</MainHeader>
+			<SettingsContainer>
+				<StyledTabs
+					orientation="vertical"
+					variant="scrollable"
+					value={tabValue}
+					onChange={handleTabChange}
+				>
+					{visibleTabs.map((tab, index) => (
+						<Tab key={tab.key} label={tab.label} />
+					))}
+				</StyledTabs>
+				<ContentContainer>
+					{visibleTabs.map((tab, index) => (
+						tabValue === index && (
+							<TabContainer key={tab.key}>
+								{tab.component}
+							</TabContainer>
+						)
+					))}
+				</ContentContainer>
+			</SettingsContainer>
+		</MainContainer>
 	);
 };
 

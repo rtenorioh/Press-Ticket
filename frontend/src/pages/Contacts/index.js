@@ -1,3 +1,4 @@
+  import React, { useContext, useEffect, useReducer, useState } from "react";
 import {
   Avatar,
   Button,
@@ -10,9 +11,10 @@ import {
   TableHead,
   TableRow,
   TextField,
-  Tooltip
-} from "@material-ui/core";
-import { makeStyles } from "@material-ui/core/styles";
+  Tooltip,
+  Box
+} from "@mui/material";
+import { styled } from '@mui/material/styles';
 import {
   AddCircleOutline,
   Archive,
@@ -22,12 +24,12 @@ import {
   ImportContacts,
   Search,
   WhatsApp
-} from "@material-ui/icons";
-import React, { useContext, useEffect, useReducer, useState } from "react";
+} from "@mui/icons-material";
 import { CSVLink } from "react-csv";
 import { useTranslation } from "react-i18next";
-import { useHistory } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+
 import { Can } from "../../components/Can";
 import ConfirmationModal from "../../components/ConfirmationModal/";
 import ContactChannels from "../../components/ContactChannels";
@@ -88,33 +90,33 @@ const reducer = (state, action) => {
   }
 };
 
-const useStyles = makeStyles((theme) => ({
-  mainPaper: {
-    flex: 1,
-    padding: theme.spacing(2),
-    margin: theme.spacing(1),
-    overflowY: "scroll",
-    ...theme.scrollbarStyles,
-  },
-  csvbtn: {
-    textDecoration: 'none'
-  },
-  avatar: {
-    width: "50px",
-    height: "50px",
-    borderRadius: "25%"
-  },
-  buttonSize: {
-    maxWidth: "36px",
-    maxHeight: "36px",
-    padding: theme.spacing(1),
-  },
+const PaperStyled = styled(Paper)(({ theme }) => ({
+  flex: 1,
+  padding: theme.spacing(2),
+  margin: theme.spacing(1),
+  overflowY: "scroll",
+  ...theme.scrollbarStyles,
+}));
+
+const CSVLinkStyled = styled(CSVLink)(({ theme }) => ({
+  textDecoration: 'none'
+}));
+
+const AvatarStyled = styled(Avatar)(({ theme }) => ({
+  width: "50px",
+  height: "50px",
+  borderRadius: "25%"
+}));
+
+const ButtonStyled = styled(Button)(({ theme }) => ({
+  maxWidth: "36px",
+  maxHeight: "36px",
+  padding: theme.spacing(1),
 }));
 
 const Contacts = () => {
-  const classes = useStyles();
   const { t } = useTranslation();
-  const history = useHistory();
+  const navigate = useNavigate();
   const { user } = useContext(AuthContext);
   const [loading, setLoading] = useState(false);
   const [pageNumber, setPageNumber] = useState(1);
@@ -204,7 +206,7 @@ const Contacts = () => {
   const handleCloseOrOpenTicket = (ticket) => {
     setNewTicketModalOpen(false);
     if (ticket !== undefined && ticket.id !== undefined) {
-      history.push(`/tickets/${ticket.id}`);
+      navigate(`/tickets/${ticket.id}`);
     }
     setLoading(false);
   };
@@ -240,7 +242,7 @@ const Contacts = () => {
         status: "open",
       });
 
-      history.push(`/tickets/${data.id}`);
+      navigate(`/tickets/${data.id}`);
     } catch (err) {
       toastError(err, t);
     } finally {
@@ -269,7 +271,7 @@ const Contacts = () => {
     try {
       await api.delete("/contacts");
       toast.success(t("contacts.toasts.deletedAll"));
-      history.go(0);
+      navigate(0);
     } catch (err) {
       toastError(err);
     }
@@ -281,7 +283,7 @@ const Contacts = () => {
   const handleimportContact = async () => {
     try {
       await api.post("/contacts/import");
-      history.go(0);
+      navigate(0);
     } catch (err) {
       toastError(err);
     }
@@ -292,7 +294,7 @@ const Contacts = () => {
   };
 
   const handleScroll = (e) => {
-    if (!hasMore || loading) return;
+    if (!hasMore || loading || !e.currentTarget) return;
     const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
     if (scrollHeight - (scrollTop + 100) < clientHeight) {
       loadMore();
@@ -317,7 +319,7 @@ const Contacts = () => {
   };
 
   return (
-    <MainContainer className={classes.mainContainer}>
+    <MainContainer>
       <NewTicketModalPageContact
         modalOpen={newTicketModalOpen}
         initialContact={contactTicket}
@@ -352,7 +354,7 @@ const Contacts = () => {
         }
       </ConfirmationModal>
       <MainHeader>
-        <Title>{t("contacts.title")} ({contacts.length})</Title>
+        <Title>{t("contacts.title")} {contacts.length > 0 ? `(${contacts.length})` : ""}</Title>
         <MainHeaderButtonsWrapper>
           <TextField
             placeholder={t("contacts.searchPlaceholder")}
@@ -366,81 +368,100 @@ const Contacts = () => {
                 </InputAdornment>
               ),
             }}
+            size="small"
+            sx={{ alignSelf: 'center', marginRight: 1, minWidth: 220 }}
           />
-          <Can
-            role={user.profile}
-            perform="drawer-admin-items:view"
-            yes={() => (
-              <>
-                <Tooltip title={t("contacts.buttons.import")}>
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    className={classes.buttonSize}
-                    onClick={(e) => setConfirmOpen(true)}
-                  >
-                    <ImportContacts />
-                  </Button>
-                </Tooltip>
-              </>
-            )}
-          />
-          <Tooltip title={t("contacts.buttons.add")}>
-            <Button
-              variant="contained"
-              color="primary"
-              className={classes.buttonSize}
-              onClick={handleOpenContactModal}
-            >
-              <AddCircleOutline />
-            </Button>
-          </Tooltip>
-          <Tooltip title={t("contacts.buttons.export")}>
-            <CSVLink
-              className={classes.csvbtn}
-              separator=";"
-              filename={'pressticket-contacts.csv'}
-              data={
-                contacts.map((contact) => ({
-                  name: contact.name,
-                  number: contact.number,
-                  address: contact.address,
-                  email: contact.email
-                }))
-              }>
-              <Button
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            <Can
+              role={user?.profile}
+              perform="drawer-admin-items:view"
+              yes={() => (
+                <>
+                  <Tooltip title={t("contacts.buttons.import")}disabled={loading}>
+                    <ButtonStyled
+                      variant="contained"
+                      color="primary"
+                      disabled={loading}
+                      onClick={(e) => setConfirmOpen(true)}
+                    >
+                      <ImportContacts />
+                    </ButtonStyled>
+                  </Tooltip>
+                </>
+              )}
+            />
+            <Tooltip title={t("contacts.buttons.add")} disabled={loading}>
+              <ButtonStyled
                 variant="contained"
-                color="primary">
-                <Archive />
-              </Button>
-            </CSVLink>
-          </Tooltip>
-          <Can
-            role={user.profile}
-            perform="drawer-admin-items:view"
-            yes={() => (
-              <>
-                <Tooltip title={t("contacts.buttons.delete")}>
+                color="primary"
+                disabled={loading}
+                onClick={handleOpenContactModal}
+              >
+                <AddCircleOutline />
+              </ButtonStyled>
+            </Tooltip>
+            <Tooltip title={t("contacts.buttons.export")} disabled={loading}>
+              <span style={{ display: 'inline-block' }}>
+                {contacts && contacts.length > 0 ? (
+                  <CSVLinkStyled
+                    separator=";"
+                    filename={'pressticket-contacts.csv'}
+                    data={contacts.map((contact) => ({
+                      name: contact.name,
+                      number: contact.number,
+                      address: contact.address,
+                      email: contact.email,
+                    }))}
+                  >
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      disabled={loading}
+                      sx={{ maxWidth: "36px", maxHeight: "36px", padding: 1 }}
+                    >
+                      <Archive />
+                    </Button>
+                  </CSVLinkStyled>
+                ) : (
                   <Button
                     variant="contained"
                     color="primary"
-                    className={classes.buttonSize}
-                    onClick={(e) => {
-                      setConfirmOpen(true);
-                      setDeletingAllContact(contacts);
-                    }}
+                    disabled={true}
+                    sx={{ maxWidth: "36px", maxHeight: "36px", padding: 1 }}
                   >
-                    <DeleteForever />
+                    <Archive />
                   </Button>
-                </Tooltip>
-              </>
-            )}
-          />
+                )}
+              </span>
+            </Tooltip>
+            <Can
+              role={user?.profile}
+              perform="drawer-admin-items:view"
+              yes={() => (
+                <>
+                  <Tooltip title={t("contacts.buttons.delete")} disabled={loading}>
+                    <ButtonStyled
+                      variant="contained"
+                      color="primary"
+                      disabled={loading}
+                      onClick={(e) => {
+                        setConfirmOpen(true);
+                        setDeletingAllContact(contacts);
+                      }}
+                    >
+                      <DeleteForever />
+                    </ButtonStyled>
+                  </Tooltip>
+                </>
+              )}
+            />
+          </Box>
         </MainHeaderButtonsWrapper>
       </MainHeader>
-      <TagsFilter onFiltered={handleTagFilter} />
-      <Paper
-        className={classes.mainPaper}
+      <Box sx={{ padding: 1 }}>
+        <TagsFilter onFiltered={handleTagFilter} />
+      </Box>
+      <PaperStyled
         variant="outlined"
         onScroll={handleScroll}
       >
@@ -468,25 +489,27 @@ const Contacts = () => {
                 })
                 .map((contact) => (
                   <TableRow key={contact.id}>
-                    <TableCell style={{ paddingRight: 0 }}>
-                      <Avatar src={contact.profilePicUrl} className={classes.avatar} alt="contact_image" />
+                    <TableCell sx={{ paddingRight: 0 }}>
+                      <AvatarStyled src={contact.profilePicUrl} alt="contact_image" />
                     </TableCell>
                     <TableCell>{contact.name}</TableCell>
                     <TableCell align="center">
                       {contact.number ? (
-                        <>
+                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
                           <IconButton size="small" onClick={() => handleSaveTicket(contact.id)}>
-                            <Tooltip title="wwebjs" arrow placement="left" >
-                              <WhatsApp style={{ color: "#075e54" }} />
+                            <Tooltip title="wwebjs" disabled={loading} arrow placement="left" >
+                              <WhatsApp sx={{ color: "#075e54" }} />
                             </Tooltip>
                           </IconButton>
-                          {user.isTricked === "enabled" ? formatPhoneNumber(contact.number) : formatPhoneNumber(contact.number).slice(0, -4) + "****"}
-                        </>
+                          <span>
+                            {user?.isTricked === "enabled" ? formatPhoneNumber(contact.number) : formatPhoneNumber(contact.number).slice(0, -4) + "****"}
+                          </span>
+                        </Box>
                       ) : (
                         "-"
                       )}
                     </TableCell>
-                    <TableCell>{contact.address}</TableCell>
+                    <TableCell align="center">{contact.address}</TableCell>
                     <TableCell align="center">
                       <ContactChannels
                         contact={contact}
@@ -496,35 +519,37 @@ const Contacts = () => {
                       />
                     </TableCell>
                     <TableCell align="center">
-                      {contact.number && (
-                        <IconButton size="small" onClick={() => hadleEditContact(contact.id)}>
-                          <Edit color="secondary" />
-                        </IconButton>
-                      )}
-                      <Can
-                        role={user.profile}
-                        perform="contacts-page:deleteContact"
-                        yes={() => (
-                          <IconButton
-                            size="small"
-                            onClick={(e) => {
-                              setConfirmOpen(true);
-                              setDeletingContact(contact);
-                            }}
-                          >
-                            <DeleteOutline color="secondary" />
+                      <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+                        {contact.number && (
+                          <IconButton size="small" onClick={() => hadleEditContact(contact.id)}>
+                            <Edit color="info" />
                           </IconButton>
                         )}
-                      />
+                        <Can
+                          role={user?.profile}
+                          perform="contacts-page:deleteContact"
+                          yes={() => (
+                            <IconButton
+                              size="small"
+                              onClick={(e) => {
+                                setConfirmOpen(true);
+                                setDeletingContact(contact);
+                              }}
+                            >
+                              <DeleteOutline color="error" />
+                            </IconButton>
+                          )}
+                        />
+                      </Box>
                     </TableCell>
                   </TableRow>
                 ))}
-              {loading && <TableRowSkeleton avatar columns={3} />}
+              {loading && <TableRowSkeleton avatar columns={4} />}
             </>
           </TableBody>
         </Table>
-      </Paper >
-    </MainContainer >
+      </PaperStyled>
+    </MainContainer>
   );
 };
 
