@@ -15,7 +15,7 @@ import { AuthContext } from "../../context/Auth/AuthContext";
 import ContactDrawerSkeleton from "../ContactDrawerSkeleton";
 import ContactModal from "../ContactModal";
 import CopyToClipboard from "../CopyToClipboard";
-import MarkdownWrapper from "../MarkdownWrapper";
+import WhatsMarked from "react-whatsmarked";
 import { TagsContainer } from "../TagsContainer";
 import ModalImageContatc from "./ModalImage";
 
@@ -160,7 +160,7 @@ const ContactDrawer = ({ open, handleDrawerClose, contact, loading }) => {
                   <CopyToClipboard content={info.value} color="secondary" />
                 </InputLabel>
                 <Typography component="div" noWrap style={{ paddingTop: 2 }}>
-                  <MarkdownWrapper>{info.value}</MarkdownWrapper>
+                  <WhatsMarked>{info.value}</WhatsMarked>
                 </Typography>
               </ContactExtraInfo>
             ))}

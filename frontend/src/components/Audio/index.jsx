@@ -1,4 +1,5 @@
-import { Button } from "@mui/material";
+import { Button, Box, styled } from "@mui/material";
+import SpeedIcon from "@mui/icons-material/Speed";
 import React, {
   useCallback,
   useEffect,
@@ -8,6 +9,37 @@ import React, {
 } from "react";
 
 const LS_NAME = "audioMessageRate";
+
+// Estilos usando o sistema de styled do MUI v5
+const AudioContainer = styled(Box)(({ theme }) => ({
+  display: "flex",
+  flexDirection: "column",
+  position: "relative",
+  width: "100%",
+  maxWidth: "400px",
+  margin: "8px 0",
+}));
+
+const AudioElement = styled("audio")(({ theme }) => ({
+  width: "100%",
+  borderRadius: theme.shape.borderRadius,
+  outline: "none",
+}));
+
+const SpeedButton = styled(Button)(({ theme }) => ({
+  position: "absolute",
+  right: 0,
+  bottom: "8px",
+  minWidth: "36px",
+  padding: "4px 8px",
+  backgroundColor: theme.palette.primary.main,
+  color: theme.palette.primary.contrastText,
+  borderRadius: theme.shape.borderRadius,
+  fontSize: "0.75rem",
+  "&:hover": {
+    backgroundColor: theme.palette.primary.dark,
+  },
+}));
 
 const Audio = ({ url }) => {
   const audioRef = useRef(null);
@@ -63,25 +95,22 @@ const Audio = ({ url }) => {
     return <source src={sourceUrl} type={isIOS ? "audio/mp3" : "audio/ogg"} />;
   }, [url, isIOS]);
 
-  const buttonStyle = useMemo(
-    () => ({
-      marginLeft: "5px",
-      marginTop: "-45px",
-    }),
-    []
-  );
-
   return (
-    <>
-      <audio ref={audioRef} controls>
+    <AudioContainer>
+      <AudioElement ref={audioRef} controls>
         {getAudioSource()}
-      </audio>
+      </AudioElement>
       {showButtonRate && (
-        <Button style={buttonStyle} onClick={toggleRate}>
+        <SpeedButton 
+          variant="contained" 
+          size="small" 
+          onClick={toggleRate}
+          startIcon={<SpeedIcon fontSize="small" />}
+        >
           {audioRate}x
-        </Button>
+        </SpeedButton>
       )}
-    </>
+    </AudioContainer>
   );
 };
 

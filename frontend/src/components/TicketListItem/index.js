@@ -38,7 +38,7 @@ import api from "../../services/api";
 import AcceptTicketWithouSelectQueue from "../AcceptTicketWithoutQueueModal";
 import ConfirmationModal from "../ConfirmationModal";
 import ContactTag from "../ContactTag";
-import MarkdownWrapper from "../MarkdownWrapper";
+import WhatsMarked from "react-whatsmarked";
 
 const StyledListItem = styled(ListItem)(({ theme }) => ({
 	position: "relative",
@@ -479,11 +479,11 @@ const TicketListItem = ({ ticket, filteredTags }) => {
 							<CustomTooltip
 								title={
 									<Typography>
-										<MarkdownWrapper sx={{ wordBreak: 'break-word' }}>
+										<WhatsMarked sx={{ wordBreak: 'break-word' }}>
 											{ticket.lastMessage
 												? ticket.lastMessage.replace("🢇", "").replace("🢅", "")
 												: ""}
-										</MarkdownWrapper>
+										</WhatsMarked>
 									</Typography>
 								}
 								placement="bottom"
@@ -511,10 +511,10 @@ const TicketListItem = ({ ticket, filteredTags }) => {
 										}
 									})()}
 									{ticket.lastMessage ? (
-											<MarkdownWrapper sx={{ wordBreak: 'break-word', display: 'inline-block', width: '100%' }}>{ticket.lastMessage.slice(0, 35).replace("🢇", "")
+											<WhatsMarked sx={{ wordBreak: 'break-word', display: 'inline-block', width: '100%' }}>{ticket.lastMessage.slice(0, 35).replace("🢇", "")
 												.replace("🢅", "") + (ticket.lastMessage.length > 35 ? " ..." : "").replace("🢇", "")
 													.replace("🢅", "")}
-											</MarkdownWrapper>
+											</WhatsMarked>
 									) : (
 										<br />
 									)}

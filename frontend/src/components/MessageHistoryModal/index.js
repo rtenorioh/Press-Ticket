@@ -9,7 +9,7 @@ import { format, parseISO } from "date-fns";
 import PropTypes from "prop-types";
 import React from "react";
 import { useTranslation } from "react-i18next";
-import MarkdownWrapper from "../MarkdownWrapper";
+import WhatsMarked from "react-whatsmarked";
 
 const StyledDialog = styled(Dialog)(({ theme }) => ({
   '& .MuiDialogTitle-root': {
@@ -87,7 +87,7 @@ const MessageHistoryModal = ({ open, onClose, oldMessages }) => {
               {oldMessages?.map((oldMessage) => (
                 <MessageRow key={oldMessage.id}>
                   <MessageCell component="th" scope="row">
-                    <MarkdownWrapper>{oldMessage.body}</MarkdownWrapper>
+                    <WhatsMarked>{oldMessage.body}</WhatsMarked>
                   </MessageCell>
                   <TimestampCell
                     align="right"
