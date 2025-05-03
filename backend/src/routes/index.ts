@@ -4,6 +4,7 @@ import apiRoutes from "./apiRoutes";
 import apiTokenRoutes from "./apiTokenRoutes";
 import authRoutes from "./authRoutes";
 import contactRoutes from "./contactRoutes";
+import errorLogRoutes from "./errorLogRoutes";
 import hubChannelRoutes from "./hubChannelRoutes";
 import hubMessageRoutes from "./hubMessageRoutes";
 import hubWebhookRoutes from "./hubWebhookRoutes";
@@ -41,5 +42,6 @@ routes.use(hubWebhookRoutes);
 routes.use(systemRoutes);
 routes.use(personalizationRoutes);
 routes.use(apiTokenRoutes);
+routes.use("/error-logs", errorLogRoutes);
 
 export default routes;

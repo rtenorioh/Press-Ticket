@@ -1,9 +1,34 @@
-import { IconButton, Menu, MenuItem, Tooltip } from "@mui/material";
+import { IconButton, Menu, MenuItem, Tooltip, Typography, Divider } from "@mui/material";
+import { styled } from "@mui/material/styles";
 import React, { useState } from "react";
 import Flag from "react-world-flags";
 import i18n from "../../translate/i18n";
+import { useTranslation } from "react-i18next";
+
+const StyledFlag = styled(Flag)(({ theme }) => ({
+    borderRadius: "50%",
+    border: "2px solid rgba(255,255,255,0.2)",
+    boxShadow: "0 2px 5px rgba(0,0,0,0.1)",
+    transition: "all 0.2s ease",
+}));
+
+const StyledMenuItem = styled(MenuItem)(({ theme }) => ({
+    display: "flex",
+    alignItems: "center",
+    padding: theme.spacing(1, 2),
+    "&:hover": {
+        backgroundColor: theme.palette.action.hover,
+    },
+    "&.Mui-selected": {
+        backgroundColor: `${theme.palette.primary.light}30`,
+        "&:hover": {
+            backgroundColor: `${theme.palette.primary.light}40`,
+        },
+    },
+}));
 
 const LanguageSelector = () => {
+    const { t } = useTranslation();
     const [anchorEl, setAnchorEl] = useState(null);
     const currentLanguage = i18n.language;
 
@@ -48,10 +73,16 @@ const LanguageSelector = () => {
                     onClick={handleOpenMenu}
                     aria-controls="language-menu"
                     aria-haspopup="true"
+                    sx={{
+                        padding: 0.5,
+                        "&:hover": {
+                            backgroundColor: "rgba(255,255,255,0.1)",
+                        }
+                    }}
                 >
-                    <Flag
+                    <StyledFlag
                         code={languages.find((lang) => lang.code === currentLanguage)?.flag || "BR"}
-                        style={{ width: 24, height: 24, borderRadius: "50%" }}
+                        style={{ width: 28, height: 28 }}
                     />
                 </IconButton>
             </Tooltip>
@@ -68,19 +99,47 @@ const LanguageSelector = () => {
                     vertical: "top",
                     horizontal: "right",
                 }}
+                PaperProps={{
+                    elevation: 3,
+                    sx: {
+                        mt: 1,
+                        borderRadius: 2,
+                        minWidth: 180,
+                        overflow: "visible",
+                        "&:before": {
+                            content: '""',
+                            display: "block",
+                            position: "absolute",
+                            top: 0,
+                            right: 14,
+                            width: 10,
+                            height: 10,
+                            bgcolor: "background.paper",
+                            transform: "translateY(-50%) rotate(45deg)",
+                            zIndex: 0,
+                        },
+                    },
+                }}
             >
+                <Typography variant="subtitle2" sx={{ px: 2, py: 1, fontWeight: 500, color: "text.secondary" }}>
+                    {t("languageSelector.title")}
+                </Typography>
+                <Divider />
                 {languages.map((language) => (
-                    <MenuItem
+                    <StyledMenuItem
                         key={language.code}
                         onClick={() => handleLanguageChange(language.code)}
                         disabled={disabledLanguages.includes(language.code)}
+                        selected={currentLanguage === language.code}
                     >
-                        <Flag
+                        <StyledFlag
                             code={language.flag}
-                            style={{ width: 24, height: 24, marginRight: 8 }}
+                            style={{ width: 24, height: 24 }}
                         />
-                        {language.label}
-                    </MenuItem>
+                        <Typography variant="body2" sx={{ ml: 1.5, fontWeight: currentLanguage === language.code ? 600 : 400 }}>
+                            {language.label}
+                        </Typography>
+                    </StyledMenuItem>
                 ))}
             </Menu>
         </>

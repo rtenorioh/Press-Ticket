@@ -1,18 +1,23 @@
-import { Chip, FormControl, InputLabel, MenuItem, Select } from "@mui/material";
+import { Chip, FormControl, MenuItem, Select, Typography, Box } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import React, { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import toastError from "../../errors/toastError";
 import api from "../../services/api";
 
-const ChipsDiv = styled('div')({
+const ChipsDiv = styled('div')(({ theme }) => ({
   display: "flex",
   flexWrap: "wrap",
-});
+  gap: theme.spacing(0.5),
+}));
 
-const StyledChip = styled(Chip)({
-  margin: 2,
-});
+const StyledChip = styled(Chip)(({ theme }) => ({
+  margin: theme.spacing(0.25),
+  borderRadius: theme.spacing(2),
+  '& .MuiChip-label': {
+    fontWeight: 500,
+  }
+}));
 
 const ConectionSelect = ({ selectedWhatsappIds, onChange }) => {
   const [whatsapps, setWhatsapps] = useState([]);
@@ -38,14 +43,16 @@ const ConectionSelect = ({ selectedWhatsappIds, onChange }) => {
   };
 
   return (
-    <div style={{ marginTop: 6 }}>
-      <FormControl fullWidth margin="dense" variant="outlined">
-        <InputLabel>{t("whatsappSelect.inputLabel")}</InputLabel>
+    <Box sx={{ mt: 1 }}>
+      <Typography variant="body2" sx={{ mb: 0.5, fontWeight: 500 }}>
+        {t("whatsappSelect.inputLabel")}
+      </Typography>
+      <FormControl fullWidth variant="outlined">
         <Select
           multiple
-          label={t("whatsappSelect.inputLabel")}
           value={selectedWhatsappIds}
           onChange={handleChange}
+          displayEmpty
           inputProps={{
             'aria-label': t("whatsappSelect.inputLabel"),
           }}
@@ -83,7 +90,7 @@ const ConectionSelect = ({ selectedWhatsappIds, onChange }) => {
           ))}
         </Select>
       </FormControl>
-    </div>
+    </Box>
   );
 };
 

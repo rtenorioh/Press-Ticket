@@ -7,6 +7,7 @@ import cookieParser from "cookie-parser";
 import * as Sentry from "@sentry/node";
 import { logger } from "./utils/logger";
 import updateLastActivity from "./middleware/updateLastActivity";
+import errorLogger from "./middleware/errorLogger";
 
 import "./database";
 import uploadConfig from "./config/upload";
@@ -44,6 +45,7 @@ app.use(routes);
 app.use(updateLastActivity);
 
 app.use(Sentry.Handlers.errorHandler());
+app.use(errorLogger);
 
 app.use(async (err: Error, req: Request, res: Response, next: NextFunction) => {
   if (err instanceof AppError) {

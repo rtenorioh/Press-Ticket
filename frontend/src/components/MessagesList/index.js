@@ -310,7 +310,12 @@ const reducer = (state, action) => {
   }
 
   function ToastDisplay(props) {
-    return <><h4>Mensagem apagada:</h4><p>{props.body}</p></>;
+    return (
+    <>
+      <h4>Mensagem apagada:</h4>
+      <WhatsMarked>{props.body}</WhatsMarked>
+    </>
+    );
   }
 
   if (action.type === "UPDATE_MESSAGE") {
@@ -321,8 +326,7 @@ const reducer = (state, action) => {
     if (messageToUpdate.isDeleted === true) {
       toast.info(<ToastDisplay
         body={messageToUpdate.body}
-      >
-      </ToastDisplay>);
+      />);
     }
 
     if (messageIndex !== -1) {
@@ -460,36 +464,111 @@ const MessagesList = ({ ticketId, isGroup }) => {
     setAnchorEl(null);
   };
 
+  // Função para substituir a mensagem original por uma versão sem a string base64
+  const processLocationMessage = (message) => {
+    if (!message || !message.body) return message;
+    
+    // Se não for uma mensagem de localização, retornar a mensagem original
+    if (message.mediaType !== "location") return message;
+    
+    // Criar uma cópia da mensagem para não modificar a original
+    const processedMessage = { ...message };
+    
+    try {
+      // Extrair as partes da mensagem
+      const parts = message.body.split('|');
+      if (parts.length < 2) return message;
+      
+      // Remover a string base64 da mensagem
+      // Substituir a string base64 por um placeholder
+      processedMessage.locationData = {
+        image: parts[0], // Guardar a imagem base64 em uma propriedade separada
+        link: parts[1],
+        description: parts.length > 2 ? parts[2] : null
+      };
+      
+      // Substituir o body por uma versão sem a string base64
+      processedMessage.body = "[Localização]";
+      
+      return processedMessage;
+    } catch (error) {
+      console.error("Erro ao processar mensagem de localização:", error);
+      return message;
+    }
+  };
+
   const checkMessageMedia = (message) => {
-    if (message.mediaType === "location" && message.body.split('|').length >= 2) {
-      let locationParts = message.body.split('|')
-      let imageLocation = locationParts[0]
-      let linkLocation = locationParts[1]
-
-      let descriptionLocation = null
-
-      if (locationParts.length > 2)
-        descriptionLocation = message.body.split('|')[2]
-
-      return <LocationPreview image={imageLocation} link={linkLocation} description={descriptionLocation} />
+    // Processar a mensagem de localização antes de exibi-la
+    const processedMessage = processLocationMessage(message);
+    
+    if (processedMessage.mediaType === "location" && processedMessage.locationData) {
+      try {
+        // Usar os dados de localização processados
+        const { image, link, description } = processedMessage.locationData;
+        
+        // Renderizar o componente LocationPreview com os dados processados
+        return (
+          <div className="location-container" style={{ width: '100%' }}>
+            <LocationPreview 
+              image={image}
+              link={link}
+              description={description}
+            />
+          </div>
+        );
+      } catch (error) {
+        console.error("Erro ao exibir localização:", error);
+        return null;
+      }
     }
     else if (message.mediaType === "vcard") {
-      let array = message.body.split("\n");
-      let obj = [];
-      let contact = "";
-      for (let index = 0; index < array.length; index++) {
-        const v = array[index];
-        let values = v.split(":");
-        for (let ind = 0; ind < values.length; ind++) {
-          if (values[ind].indexOf("+") !== -1) {
-            obj.push({ number: values[ind] });
-          }
-          if (values[ind].indexOf("FN") !== -1) {
-            contact = values[ind + 1];
+      try {
+        // Tentar processar o body como JSON (novo formato)
+        let contactData = message.body;
+        let contact = "";
+        let numbers = [];
+        
+        if (typeof contactData === 'string') {
+          try {
+            // Verificar se é um JSON válido
+            const parsedData = JSON.parse(contactData);
+            contact = parsedData.name || "";
+            
+            // Processar números
+            if (parsedData.allNumbers && Array.isArray(parsedData.allNumbers)) {
+              numbers = parsedData.allNumbers;
+            } else if (parsedData.number) {
+              numbers = [parsedData.number];
+            }
+          } catch (e) {
+            // Se não for JSON, processar no formato antigo
+            const array = message.body.split("\n");
+            const obj = [];
+            for (let index = 0; index < array.length; index++) {
+              const v = array[index];
+              const values = v.split(":");
+              for (let ind = 0; ind < values.length; ind++) {
+                if (values[ind].indexOf("+") !== -1) {
+                  obj.push({ number: values[ind] });
+                }
+                if (values[ind].indexOf("FN") !== -1) {
+                  contact = values[ind + 1];
+                }
+              }
+            }
+            
+            // Extrair números do formato antigo
+            if (obj.length > 0) {
+              numbers = obj.map(item => item.number);
+            }
           }
         }
+        
+        return <VcardPreview contact={contact} numbers={numbers} />
+      } catch (error) {
+        console.error("Error processing vcard in MessagesList:", error);
+        return <VcardPreview contact="Contato" numbers={["Número não disponível"]} />
       }
-      return <VcardPreview contact={contact} numbers={obj[0].number} />
     }
     else if (message.mediaType === "multi_vcard") {
       if (message.body !== null && message.body !== "") {
@@ -866,7 +945,7 @@ const MessagesList = ({ ticketId, isGroup }) => {
                           color: red[200]
                         }}
                       />
-                      {t("messagesList.message.deleted")}
+                      <WhatsMarked>{t("messagesList.message.deleted")}</WhatsMarked>
                     </span>
                   </div>
                 )}
@@ -876,7 +955,7 @@ const MessagesList = ({ ticketId, isGroup }) => {
                 <MessageItem message={message}>
                   {message.quotedMsg && renderQuotedMessage(message)}
 
-                  {message.mediaType !== "multi_vcard" && <WhatsMarked sx={{ fontSize: 'inherit', lineHeight: 'inherit', display: 'flex', width: '100%' }}>{message.body}</WhatsMarked>}
+                  {message.mediaType !== "multi_vcard" && message.mediaType !== "location" && message.mediaType !== "vcard" && <WhatsMarked sx={{ fontSize: 'inherit', lineHeight: 'inherit', display: 'flex', width: '100%' }}>{message.body}</WhatsMarked>}
                   <MessageTimestamp>
                     {message.isEdited && <span>{t("messagesList.message.edited")} </span>}
                     {format(parseISO(message.createdAt), "HH:mm")}
@@ -916,12 +995,12 @@ const MessagesList = ({ ticketId, isGroup }) => {
                             color: red[200]
                           }}
                         />
-                        {t("messagesList.message.deleted")}
+                        <WhatsMarked>{t("messagesList.message.deleted")}</WhatsMarked>
                       </span>
                     </div>
                   )}
                   {message.quotedMsg && renderQuotedMessage(message)}
-                  {message.mediaType !== "multi_vcard" && <WhatsMarked sx={{ fontSize: 'inherit', lineHeight: 'inherit', display: 'flex', width: '100%' }}>{message.body}</WhatsMarked>}
+                  {message.mediaType !== "multi_vcard" && message.mediaType !== "location" && message.mediaType !== "vcard" && <WhatsMarked sx={{ fontSize: 'inherit', lineHeight: 'inherit', display: 'flex', width: '100%' }}>{message.body}</WhatsMarked>}
                   <MessageTimestamp>
                     {message.isEdited && <span>{t("messagesList.message.edited")} </span>}
                     {format(parseISO(message.createdAt), "HH:mm")}

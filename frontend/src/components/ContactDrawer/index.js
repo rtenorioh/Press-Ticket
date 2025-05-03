@@ -6,8 +6,11 @@ import {
   Typography, 
   Button, 
   Paper, 
-  styled 
+  Divider,
+  Box,
+  Stack
 } from "@mui/material";
+import { styled } from "@mui/material/styles";
 import CloseIcon from "@mui/icons-material/Close";
 import React, { useContext, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -38,7 +41,8 @@ const StyledDrawer = styled(Drawer)(({ theme }) => ({
 const DrawerHeader = styled('div')(({ theme }) => ({
   display: "flex",
   borderBottom: "1px solid rgba(0, 0, 0, 0.12)",
-  backgroundColor: theme.palette.background.default,
+  backgroundColor: theme.palette.primary.main,
+  color: "#fff",
   alignItems: "center",
   padding: theme.spacing(0, 1),
   minHeight: "73px",
@@ -57,25 +61,32 @@ const DrawerContent = styled('div')(({ theme }) => ({
 
 const ContactHeader = styled(Paper)(({ theme }) => ({
   display: "flex",
-  padding: 8,
+  padding: theme.spacing(2),
   flexDirection: "column",
   alignItems: "center",
   justifyContent: "center",
+  borderRadius: theme.shape.borderRadius,
+  boxShadow: "0 2px 5px rgba(0,0,0,0.1)",
   "& > *": {
-    margin: 4,
+    margin: theme.spacing(0.5),
   },
 }));
 
 const ContactDetails = styled(Paper)(({ theme }) => ({
-  marginTop: 8,
-  padding: 8,
+  marginTop: theme.spacing(2),
+  padding: theme.spacing(2),
   display: "flex",
   flexDirection: "column",
+  borderRadius: theme.shape.borderRadius,
+  boxShadow: "0 2px 5px rgba(0,0,0,0.1)",
 }));
 
 const ContactExtraInfo = styled(Paper)(({ theme }) => ({
-  marginTop: 4,
-  padding: 6,
+  marginTop: theme.spacing(1),
+  padding: theme.spacing(1.5),
+  borderRadius: theme.shape.borderRadius,
+  boxShadow: "none",
+  border: `1px solid ${theme.palette.divider}`,
 }));
 
 const ContactDrawer = ({ open, handleDrawerClose, contact, loading }) => {
@@ -97,11 +108,11 @@ const ContactDrawer = ({ open, handleDrawerClose, contact, loading }) => {
     >
       <DrawerHeader>
         <IconButton
-          color="primary"
+          color="inherit"
           onClick={handleDrawerClose}>
           <CloseIcon />
         </IconButton>
-        <Typography style={{ justifySelf: "center" }}>
+        <Typography variant="subtitle1" sx={{ ml: 1, fontWeight: 500 }}>
           {t("contactDrawer.header")}
         </Typography>
       </DrawerHeader>
@@ -132,9 +143,19 @@ const ContactDrawer = ({ open, handleDrawerClose, contact, loading }) => {
               </Typography>
             )}
             <Button
-              variant="outlined"
-              color="primary"
+              variant="contained"
               onClick={() => setModalOpen(true)}
+              sx={{
+                borderRadius: 20,
+                mt: 1,
+                backgroundColor: theme => theme.palette.primary.main,
+                color: '#fff',
+                textTransform: 'uppercase',
+                fontWeight: 'bold',
+                '&:hover': {
+                  backgroundColor: theme => theme.palette.primary.dark,
+                }
+              }}
             >
               {t("contactDrawer.buttons.edit")}
             </Button>
@@ -146,9 +167,10 @@ const ContactDrawer = ({ open, handleDrawerClose, contact, loading }) => {
               onClose={() => setModalOpen(false)}
               contactId={contact.id}
             ></ContactModal>
-            <Typography variant="subtitle1">
+            <Typography variant="subtitle1" sx={{ fontWeight: 500, mb: 1.5, mt: 1 }}>
               {t("contactDrawer.extraInfo")}
             </Typography>
+            <Divider sx={{ mb: 2 }} />
             {contact?.extraInfo?.map(info => (
               <ContactExtraInfo
                 key={info.id}

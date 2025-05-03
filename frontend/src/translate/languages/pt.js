@@ -297,6 +297,61 @@ const messages = {
           title: "Usuários Online"
         },
       },
+      errorLogs: {
+        title: "Logs de Erro",
+        searchPlaceholder: "Buscar por mensagem de erro...",
+        loading: "Carregando logs...",
+        noRecords: "Nenhum log encontrado.",
+        table: {
+          id: "ID",
+          date: "Data",
+          source: "Origem",
+          severity: "Severidade",
+          message: "Mensagem",
+          actions: "Ações"
+        },
+        logDetails: {
+          title: "Detalhes do Log",
+          date: "Data",
+          source: "Origem",
+          severity: "Severidade",
+          component: "Componente",
+          userId: "ID do Usuário",
+          user: "Nome do Usuário",
+          url: "URL",
+          message: "Mensagem",
+          stack: "Stack Trace",
+          userAgent: "Navegador"
+        },
+        filter: {
+          title: "Filtros",
+          source: "Origem",
+          severity: "Severidade",
+          startDate: "Data Inicial",
+          endDate: "Data Final",
+          all: "Todos"
+        },
+        deleteDialog: {
+          title: "Remover Logs Antigos",
+          message: "Esta ação removerá todos os logs com mais de 30 dias. Esta ação não pode ser desfeita. Deseja continuar?"
+        },
+        pagination: {
+          rowsPerPage: "Linhas por página",
+          of: "de"
+        },
+        buttons: {
+          search: "Buscar",
+          filter: "Filtrar",
+          refresh: "Atualizar",
+          download: "Download",
+          deleteOld: "Remover Antigos",
+          close: "Fechar",
+          clearFilters: "Limpar Filtros",
+          cancel: "Cancelar",
+          applyFilters: "Aplicar Filtros",
+          confirm: "Confirmar"
+        }
+      },
       forgotPassword: {
         title: "Esqueceu a Senha?",
         form: {
@@ -335,11 +390,33 @@ const messages = {
           }
         },
       },
+      languageSelector: {
+        title: "Selecione o idioma"
+      },
       locationPreview: {
+        title: "Localização recebida",
         alt: "Localização",
+        latitude: "Latitude",
+        longitude: "Longitude",
         buttons: {
-          view: "Visualizar"
-        }
+          view: "VISUALIZAR"
+        },
+        noCoordinates: "Coordenadas não disponíveis"
+      },
+      multiVcardPreview: {
+        title: "Contatos recebidos",
+        viewAll: "Ver todos os {{count}} contatos"
+      },
+      vcardPreview: {
+        chat: "CONVERSAR",
+        mobile: "Celular",
+        number: "Número",
+        contactName: "Nome do Contato",
+        numberNotAvailable: "Número não disponível",
+        selectNumberTitle: "Selecione um número para conversar",
+        whatsappNumber: "Número com WhatsApp",
+        phoneNumber: "Número de telefone",
+        cancel: "Cancelar"
       },
       login: {
         title: "Faça o seu login agora",
@@ -356,21 +433,22 @@ const messages = {
       mainDrawer: {
         listItems: {
           general: "Geral",
-          dashboard: "Dashboard",
-          connections: "Canais",
-          tickets: "Tickets",
-          contacts: "Contatos",
-          quickAnswers: "Respostas Rápidas",
-          tags: "Tags",
-          queues: "Setores",
           administration: "Administração",
-          users: "Atendentes",
-          settings: "Configurações",
+          apititle: "API",
           api: "Uso da API",
           apidocs: "Documentação",
-          apititle: "API",
           apikey: "API Key",
-          token: "Token"
+          tickets: "Tickets",
+          contacts: "Contatos",
+          dashboard: "Dashboard",
+          quickAnswers: "Respostas Rápidas",
+          tags: "Tags",
+          connections: "Canais",
+          queues: "Setores",
+          users: "Atendentes",
+          settings: "Configurações",
+          system: "Sistema",
+          errorLogs: "Logs de Erro",
         },
         appBar: {
           message: {
@@ -388,6 +466,9 @@ const messages = {
         history: "Histórico",
         delete: "Deletar",
         reply: "Responder",
+        copy: "Copiar",
+        copied: "Mensagem copiada!",
+        copyError: "Erro ao copiar mensagem",
         confirmationModal: {
           title: "Apagar mensagem?",
           message: "Esta ação não pode ser revertida.",
@@ -422,11 +503,20 @@ const messages = {
       },
       messagesInput: {
         placeholderOpen: "Digite uma mensagem",
-        placeholderClosed: "Reabra ou aceite esse ticket para enviar uma mensagem.",
+        placeholderClosed: "Esse ticket está fechado!",
         signMessage: "Assinar",
-        emoji: {
-          searchPlaceholder: "Pesquisar Emojis",
-        },
+        btnSend: "Enviar",
+        btnUploadFile: "Enviar mídia",
+        btnRecord: "Gravar áudio",
+        tooManyFiles: "Número máximo de arquivos excedido. Max: ",
+        dropFilesHere: "Arraste arquivos aqui",
+        buttons: {
+          emoji: "Adicionar emoji",
+          attach: "Anexar arquivo",
+          record: "Gravar áudio",
+          send: "Enviar mensagem"
+        },  
+        clearReply: "Limpar resposta"
       },
       messageVariablesPicker: {
         label: "Variavéis disponíveis",
@@ -440,6 +530,47 @@ const messages = {
           ticket_id: "Ticked ID",
           queue: "Setor",
           connection: "Canal"
+        }
+      },
+      modalImageContact: {
+        alt: "Imagem do contato",
+        toolBar: {
+          rotateLeft: "Girar para esquerda",
+          rotateRight: "Girar para direita",
+          zoomIn: "Zoom in",
+          zoomOut: "Zoom out",
+          resetZoom: "Reset zoom",
+          fullscreen: "Tela cheia",
+          fullscreenExit: "Sair da tela cheia",
+          copyLink: "Copiar link",
+          download: "Baixar imagem"
+        },
+        snackbar: {
+          copyLinkSuccess: "Link copiado com sucesso!",
+          copyLinkError: "Erro ao copiar link. Tente novamente.",
+        }
+      },
+      modalImageCors: {
+        alt: "Imagem do contato",
+        toolBar: {
+          rotateLeft: "Girar para esquerda",
+          rotateRight: "Girar para direita",
+          zoomIn: "Zoom in",
+          zoomOut: "Zoom out",
+          resetZoom: "Reset zoom",
+          fullscreen: "Tela cheia",
+          fullscreenExit: "Sair da tela cheia",
+          copyLink: "Copiar link",
+          download: "Baixar imagem",
+          cancelCrop: "Cancelar recorte",
+          cropImage: "Recortar imagem",
+          disableCompare: "Desativar comparação",
+          compareImages: "Comparar imagens",
+          downloadImage: "Baixar imagem"
+        },
+        snackbar: {
+          copyLinkSuccess: "Link copiado com sucesso!",
+          copyLinkError: "Erro ao copiar link. Tente novamente.",
         }
       },
       newTicketModal: {
@@ -517,7 +648,7 @@ const messages = {
           id: "ID",
           name: "Nome",
           color: "Cor",
-          greeting: "Mensagens",
+          greeting: "Ver mensagens",
           actions: "Ações",
           startWork: "Abertura",
           endWork: "Fechamento",
@@ -535,7 +666,8 @@ const messages = {
           title: "Mensagens",
           greetingMessage: "Mensagem de Saudação",
           absenceMessage: "Mensagem de Ausência",
-          none: "Nenhuma mensagem"
+          none: "Nenhuma mensagem",
+          btnClose: "Fechar",
         }
       },
       queueSelect: {
@@ -945,8 +1077,9 @@ const messages = {
           cancel: "Cancelar"
         },
         acceptModal: {
-          title: "Aceitar Chat",
-          queue: "Selecionar setor"
+          title: "Aceitar Ticket",
+          queue: "Setores",
+          selectQueue: "Selecione um setor"
         },
         errors: {
           ticketAlreadyOpen: "Já existe um ticket aberto para este contato com o atendente {{userName}}."
@@ -967,9 +1100,18 @@ const messages = {
       },
       uploads: {
         titles: {
-          titleUploadMsgDragDrop: " ARRASTE E SOLTE ARQUIVOS NO CAMPO ABAIXO ",
-          titleFileList: "Lista de arquivo(s)"
-        },
+          titleUploadMsgDragDrop: "ARRASTE E SOLTE ARQUIVOS AQUI",
+          titleFileList: "Lista de arquivos"
+        }
+      },
+      uploadModal: {
+        title: "Enviar arquivos",
+        caption: "Legenda",
+        captionPlaceholder: "Adicione uma legenda (opcional)",
+        send: "Enviar",
+        cancel: "Cancelar",
+        remove: "Remover arquivo",
+        pdfError: "Não foi possível carregar o PDF. Por favor, faça o download do arquivo."
       },
       users: {
         title: "Atendentes",

@@ -13,6 +13,7 @@ contactRoutes.post("/contacts", isAuth, ContactController.store);
 contactRoutes.post("/contact", isAuth, ContactController.getContact);
 contactRoutes.put("/contacts/:contactId", isAuth, ContactController.update);
 contactRoutes.delete("/contacts/:contactId", isAuth, ContactController.remove);
+contactRoutes.delete("/contacts", isAuth, ContactController.removeAll);
 
 contactRoutes.get("/v1/contacts", isApiToken('read:contacts'), ContactController.index);
 contactRoutes.get("/v1/contacts/:contactId", isApiToken('read:contacts'), ContactController.show);

@@ -272,37 +272,77 @@ const getGeocode = async (
     where: { key: "apiMaps" }
   });
 
-  const url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${apiKey?.value}`;
+  // Garantir que as coordenadas sejam strings e estejam devidamente escapadas
+  const safeLatitude = encodeURIComponent(String(latitude).trim());
+  const safeLongitude = encodeURIComponent(String(longitude).trim());
+  
+  // Construir a URL com os valores escapados
+  const url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${safeLatitude},${safeLongitude}&key=${encodeURIComponent(apiKey?.value || '')}`;
 
   return new Promise((resolve, reject) => {
-    request(url, { json: true }, (err: any, res: any, body: any) => {
-      if (err) {
-        reject(err);
-      } else if (body.results && body.results.length > 0) {
-        resolve(body.results[0].formatted_address);
-      } else {
-        resolve(`${latitude}, ${longitude}`);
-      }
-    });
+    try {
+      request(url, { json: true }, (err: any, res: any, body: any) => {
+        if (err) {
+          console.error("Erro na requisição da API do Google Maps:", err);
+          reject(err);
+        } else if (body && body.results && body.results.length > 0) {
+          resolve(body.results[0].formatted_address);
+        } else {
+          // Fallback para as coordenadas quando não há resultados
+          resolve(`${latitude}, ${longitude}`);
+        }
+      });
+    } catch (error) {
+      console.error("Erro ao processar requisição de geocodificação:", error);
+      resolve(`${latitude}, ${longitude}`);
+    }
   });
 };
 
 const prepareLocation = async (msg: WbotMessage): Promise<WbotMessage> => {
-  const gmapsUrl = `https://maps.google.com/maps?q=${msg.location.latitude}%2C${msg.location.longitude}&z=17`;
+  // Garantir que as coordenadas sejam strings e estejam devidamente escapadas
+  const safeLatitude = encodeURIComponent(String(msg.location.latitude).trim());
+  const safeLongitude = encodeURIComponent(String(msg.location.longitude).trim());
+  
+  // Construir a URL com os valores escapados
+  const gmapsUrl = `https://maps.google.com/maps?q=${safeLatitude}%2C${safeLongitude}&z=17`;
 
   try {
+    // Verificar se as propriedades de localização existem antes de prosseguir
+    if (!msg.location || !msg.location.latitude || !msg.location.longitude) {
+      throw new Error("Dados de localização incompletos");
+    }
+
+    // Obter o endereço a partir das coordenadas
     const address = await getGeocode(
       Number(msg.location.latitude),
       Number(msg.location.longitude)
     );
 
+    // Garantir que msg.body exista antes de manipulá-lo
+    if (typeof msg.body !== 'string') {
+      msg.body = '';
+    }
+
+    // Formatar a mensagem com a imagem, URL e endereço
     msg.body = `data:image/png;base64,${msg.body}|${gmapsUrl}`;
     msg.body += `|${
       address || `${msg.location.latitude}, ${msg.location.longitude}`
     }`;
   } catch (error) {
     console.error("Erro ao preparar a localização:", error);
-    msg.body += `|${msg.location.latitude}, ${msg.location.longitude}`;
+    
+    // Garantir que msg.body exista antes de manipulá-lo
+    if (typeof msg.body !== 'string') {
+      msg.body = '';
+    }
+    
+    // Em caso de erro, ainda fornecer uma mensagem utilizável
+    if (msg.location && msg.location.latitude && msg.location.longitude) {
+      msg.body = `data:image/png;base64,${msg.body}|${gmapsUrl}|${msg.location.latitude}, ${msg.location.longitude}`;
+    } else {
+      msg.body = `data:image/png;base64,${msg.body}|${gmapsUrl}|Coordenadas não disponíveis`;
+    }
   }
 
   return msg;
@@ -842,32 +882,175 @@ const handleMessage = async (
 
     if (msg.type === "vcard") {
       try {
-        const array = msg.body.split("\n");
-        const obj = [];
-        // eslint-disable-next-line no-shadow
-        let contact = "";
-        for (let index = 0; index < array.length; index++) {
-          const v = array[index];
-          const values = v.split(":");
-          for (let ind = 0; ind < values.length; ind++) {
-            if (values[ind].indexOf("+") !== -1) {
-              obj.push({ number: values[ind] });
+        // Extrair informações do vCard de forma mais robusta
+        const vCardContent = msg.body;
+        const extractedData: {
+          name: string;
+          numbers: string[];
+        } = {
+          name: "",
+          numbers: []
+        };
+        
+        // Extrair o nome (FN)
+        const nameMatch = vCardContent.match(/FN[^:]*:(.*?)(?:\r?\n|$)/i);
+        if (nameMatch && nameMatch[1]) {
+          extractedData.name = nameMatch[1].trim();
+        }
+        
+        // Extrair todos os números de telefone (TEL)
+        const telRegex = /TEL[^:]*:(.*?)(?:\r?\n|$)/gi;
+        let telMatch;
+        while ((telMatch = telRegex.exec(vCardContent)) !== null) {
+          if (telMatch[1] && telMatch[1].trim()) {
+            extractedData.numbers.push(telMatch[1].trim());
+          }
+        }
+        
+        // Extrair números no formato TEL;waid=5522992581997
+        const waidRegex = /TEL;waid=(\d+)/gi;
+        let waidMatch;
+        let hasWaidNumbers = false;
+        
+        while ((waidMatch = waidRegex.exec(vCardContent)) !== null) {
+          if (waidMatch[1] && waidMatch[1].trim()) {
+            // Adicionar o número limpo (apenas dígitos)
+            extractedData.numbers.push("waid=" + waidMatch[1].trim());
+            hasWaidNumbers = true;
+          }
+        }
+        
+        // Se encontrou números no formato waid, não procurar outros formatos
+        // Isso garante que apenas números de WhatsApp válidos sejam salvos
+        if (!hasWaidNumbers) {
+          // Extrair todos os números de telefone (TEL) apenas se não encontrou waid
+          const telRegex = /TEL[^:]*:(.*?)(?:\r?\n|$)/gi;
+          let telMatch;
+          while ((telMatch = telRegex.exec(vCardContent)) !== null) {
+            if (telMatch[1] && telMatch[1].trim()) {
+              extractedData.numbers.push(telMatch[1].trim());
             }
-            if (values[ind].indexOf("FN") !== -1) {
-              contact = values[ind + 1];
+          }
+          
+          // Se não encontrou números pelo padrão TEL, tenta encontrar por +
+          if (extractedData.numbers.length === 0) {
+            const array = vCardContent.split("\n");
+            for (let index = 0; index < array.length; index++) {
+              const line = array[index];
+              if (line.indexOf("+") !== -1) {
+                const parts = line.split(":");
+                for (let ind = 0; ind < parts.length; ind++) {
+                  if (parts[ind].indexOf("+") !== -1) {
+                    extractedData.numbers.push(parts[ind].trim());
+                  }
+                }
+              }
             }
           }
         }
-        // eslint-disable-next-line no-restricted-syntax
-        for await (const ob of obj) {
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          const cont = await CreateContactService({
-            name: contact,
-            number: ob.number.replace(/\D/g, "")
+        
+        // Criar contato(s) no sistema
+        const contactsCreated = [];
+        for (const phoneNumber of extractedData.numbers) {
+          try {
+            // Garantir que phoneNumber seja tratado como string
+            const phoneStr = String(phoneNumber);
+            
+            // Verificar se é um número no formato waid=5522992581997
+            const waidMatch = phoneStr.match(/waid=(\d+)/);
+            
+            // Se for um número waid, extrair o número e salvar
+            // Se não for waid e hasWaidNumbers for true, pular este número
+            if (waidMatch && waidMatch[1]) {
+              const cleanNumber = waidMatch[1];
+              
+              if (cleanNumber) {
+                const cont = await CreateContactService({
+                  name: extractedData.name || "Contato",
+                  number: cleanNumber
+                });
+                contactsCreated.push({
+                  id: cont.id,
+                  name: cont.name,
+                  number: cont.number,
+                  isWaid: true
+                });
+              }
+            } else if (!hasWaidNumbers) {
+              // Se não encontrou nenhum número waid no vCard, processar números normais
+              const cleanNumber = phoneStr.replace(/\D/g, "");
+              
+              if (cleanNumber) {
+                const cont = await CreateContactService({
+                  name: extractedData.name || "Contato",
+                  number: cleanNumber
+                });
+                contactsCreated.push({
+                  id: cont.id,
+                  name: cont.name,
+                  number: cont.number
+                });
+              }
+            }
+          } catch (err) {
+            if (err.message === "ERR_DUPLICATED_CONTACT") {
+              // Garantir que phoneNumber seja tratado como string
+              const phoneStr = String(phoneNumber);
+              
+              // Verificar se é um número no formato waid=5522992581997
+              const waidMatch = phoneStr.match(/waid=(\d+)/);
+              
+              if (waidMatch && waidMatch[1]) {
+                const cleanNumber = waidMatch[1];
+                
+                const cont = await GetContactService({
+                  name: extractedData.name || "Contato",
+                  number: cleanNumber,
+                  email: ""
+                });
+                contactsCreated.push({
+                  id: cont.id,
+                  name: cont.name,
+                  number: cont.number,
+                  isWaid: true
+                });
+              } else if (!hasWaidNumbers) {
+                // Se não encontrou nenhum número waid no vCard, processar números normais
+                const cleanNumber = phoneStr.replace(/\D/g, "");
+                
+                const cont = await GetContactService({
+                  name: extractedData.name || "Contato",
+                  number: cleanNumber,
+                  email: ""
+                });
+                contactsCreated.push({
+                  id: cont.id,
+                  name: cont.name,
+                  number: cont.number
+                });
+              }
+            } else {
+              console.error(`Error processing vCard contact:`, err);
+            }
+          }
+        }
+        
+        // Substituir o corpo da mensagem com os dados estruturados
+        if (contactsCreated.length > 0) {
+          msg.body = JSON.stringify({
+            name: extractedData.name || "Contato",
+            number: contactsCreated[0].number,
+            allNumbers: extractedData.numbers
+          });
+        } else {
+          msg.body = JSON.stringify({
+            name: extractedData.name || "Contato",
+            number: "Número não disponível",
+            allNumbers: []
           });
         }
       } catch (error) {
-        console.log(error);
+        console.error("Error processing vcard:", error);
       }
     }
 

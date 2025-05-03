@@ -10,6 +10,7 @@ import ApiKey from "../pages/ApiKey/";
 import Connections from "../pages/Connections/";
 import Contacts from "../pages/Contacts/";
 import Dashboard from "../pages/Dashboard/";
+import ErrorLogs from "../pages/ErrorLogs/";
 import ForgotPassword from "../pages/ForgotPassword";
 import Login from "../pages/Login/";
 import Queues from "../pages/Queues/";
@@ -54,6 +55,7 @@ const AppRoutes = ({ toggleTheme, onThemeConfigUpdate }) => {
             <Route path="apikey" element={<ApiKey />} />
             <Route path="Queues" element={<Queues />} />
             <Route path="Tags" element={<Tags />} />
+            <Route path="errorLogs" element={<ErrorLogs />} />
           </Route>
         </Routes>
         <ToastContainer 

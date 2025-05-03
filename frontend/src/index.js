@@ -2,6 +2,8 @@ import CssBaseline from "@mui/material/CssBaseline";
 import React from "react";
 import { createRoot } from "react-dom/client";
 import { initializeLoading } from "./utils/showLoading";
+import { setupGlobalErrorHandlers } from "./utils/errorHandler";
+import ErrorBoundary from "./components/ErrorBoundary";
 
 import App from "./App";
 
@@ -9,11 +11,14 @@ const finishLoading = initializeLoading();
 const rootElement = document.getElementById("root");
 const root = createRoot(rootElement);
 
+setupGlobalErrorHandlers();
+
 root.render(
     <CssBaseline>
-        <App />
+        <ErrorBoundary componentName="App">
+            <App />
+        </ErrorBoundary>
     </CssBaseline>
 );
 
-// Aumentado o tempo de espera para garantir que o app esteja carregado
 setTimeout(finishLoading, 1000);

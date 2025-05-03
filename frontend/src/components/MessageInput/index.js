@@ -1,7 +1,9 @@
 import {
   Avatar,
+  Box,
   CircularProgress,
   ClickAwayListener,
+  Divider,
   FormControlLabel,
   Grid,
   Hidden,
@@ -15,7 +17,9 @@ import {
   MenuItem,
   Paper,
   Switch,
-  Typography
+  Tooltip,
+  Typography,
+  Fade
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { green } from "@mui/material/colors";
@@ -49,6 +53,7 @@ import { useParams } from "react-router-dom";
 import { AuthContext } from "../../context/Auth/AuthContext";
 import { EditMessageContext } from "../../context/EditingMessage/EditingMessageContext";
 import { ReplyMessageContext } from "../../context/ReplyingMessage/ReplyingMessageContext";
+import UploadModal from "../UploadModal";
 import toastError from "../../errors/toastError";
 import { useLocalStorage } from "../../hooks/useLocalStorage";
 import api from "../../services/api";
@@ -59,76 +64,130 @@ import StrikethroughSIcon from "@mui/icons-material/StrikethroughS";
 const Mp3Recorder = new MicRecorder({ bitRate: 128 });
 
 const MainWrapper = styled(Paper)(({ theme }) => ({
-  background: "#eee",
+  background: theme.palette.mode === 'dark' ? theme.palette.background.paper : "#f5f5f5",
   display: "flex",
   flexDirection: "column",
   alignItems: "center",
-  borderTop: "1px solid rgba(0, 0, 0, 0.12)",
+  borderTop: `1px solid ${theme.palette.divider}`,
+  borderRadius: 0,
   [theme.breakpoints.down('sm')]: {
     position: "fixed",
     bottom: 0,
     width: "100%",
+    zIndex: 10,
   },
 }));
 
 const AvatarStyled = styled(Avatar)(({ theme }) => ({
   width: "50px",
   height: "50px",
-  borderRadius: "25%",
-  border: `1px solid ${theme.palette.background.paper}`,
+  borderRadius: "12px",
+  border: `1px solid ${theme.palette.divider}`,
+  boxShadow: theme.shadows[1],
 }));
 
-const DropInfo = styled('div')(({ theme, show }) => ({
+const DropInfo = styled(Box)(({ theme, show }) => ({
   background: theme.palette.background.paper,
   color: theme.palette.text.primary,
   display: "flex",
   flexDirection: "column",
   alignItems: "center",
+  justifyContent: "center",
   width: "100%",
-  padding: 15,
+  padding: 16,
   left: 0,
   right: 0,
-  ...(show ? {} : { display: "none" }),
+  borderRadius: "8px 8px 0 0",
+  boxShadow: theme.shadows[3],
+  transition: "all 0.3s ease",
+  position: "absolute",
+  top: 0,
+  zIndex: 10,
+  ...(show ? {
+    opacity: 1,
+    transform: "translateY(0)",
+  } : { 
+    display: "none",
+    opacity: 0,
+    transform: "translateY(20px)"
+  }),
 }));
 
-const FormatMenu = styled('div')(({ theme }) => ({
+const FormatMenu = styled(Box)(({ theme }) => ({
   backgroundColor: theme.palette.background.paper,
   color: theme.palette.text.primary,
-  borderRadius: 30,
-  boxShadow: theme.shadows[2],
-  padding: '4px 8px',
+  borderRadius: 8,
+  boxShadow: theme.shadows[3],
+  padding: '6px 10px',
   display: 'flex',
   alignItems: 'center',
+  gap: '2px',
+  zIndex: 1200,
+  border: `1px solid ${theme.palette.divider}`,
+  '& .MuiIconButton-root': {
+    color: theme.palette.primary.main,
+    '&:hover': {
+      color: theme.palette.primary.dark,
+    }
+  },
 }));
 
 const GridFiles = styled(Grid)(({ theme }) => ({
-  maxHeight: "100%",
-  overflow: "scroll",
-  width: "100%"
+  maxHeight: "300px",
+  overflowY: "auto",
+  overflowX: "hidden",
+  width: "100%",
+  scrollbarWidth: "thin",
+  '&::-webkit-scrollbar': {
+    width: '6px',
+  },
+  '&::-webkit-scrollbar-thumb': {
+    backgroundColor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)',
+    borderRadius: '3px',
+  },
 }));
 
-const NewMessageBox = styled('div')(({ theme }) => ({
+const NewMessageBox = styled(Box)(({ theme }) => ({
   background: theme.palette.background.default,
   width: "100%",
   display: "flex",
-  padding: "7px",
+  padding: "10px 12px",
   alignItems: "center",
+  gap: "8px",
+  '& .MuiIconButton-root': {
+    color: theme.palette.primary.main,
+    '&:hover': {
+      color: theme.palette.primary.dark,
+    }
+  },
+  '& .MuiIconButton-root.Mui-disabled': {
+    color: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.3)' : 'rgba(0, 0, 0, 0.26)',
+  }
 }));
 
-const InputWrapper = styled('div')(({ theme }) => ({
-  padding: 6,
-  marginRight: 7,
+const InputWrapper = styled(Box)(({ theme }) => ({
+  padding: '8px 12px',
   background: theme.palette.background.paper,
   display: "flex",
-  borderRadius: 20,
+  borderRadius: 12,
   flex: 1,
   position: "relative",
+  border: `1px solid ${theme.palette.divider}`,
+  transition: 'all 0.2s ease',
+  '&:focus-within': {
+    borderColor: theme.palette.primary.main,
+    boxShadow: `0 0 0 2px ${theme.palette.primary.main}25`,
+  },
 }));
 
 const InputBaseStyled = styled(InputBase)(({ theme }) => ({
   flex: 1,
   width: "100%",
-  paddingLeft: 10,
+  padding: '0 4px',
+  fontSize: '0.95rem',
+  '& .MuiInputBase-input': {
+    padding: '4px 0',
+  },
 }));
 
 const InputStyled = styled('input')(({ theme }) => ({
@@ -138,100 +197,128 @@ const InputStyled = styled('input')(({ theme }) => ({
 const MediaInputWrapper = styled(Paper)(({ theme }) => ({ 
   maxHeight: "80%",
   display: "flex",
-  padding: "10px 13px",
+  padding: "16px",
   position: "relative",
   justifyContent: "space-between",
   alignItems: "center",
-  backgroundColor: "#eee",
-  borderTop: "1px solid rgba(0, 0, 0, 0.12)",
+  backgroundColor: theme.palette.mode === 'dark' ? theme.palette.background.paper : "#f5f5f5",
+  borderTop: `1px solid ${theme.palette.divider}`,
+  borderRadius: 0,
 }));
 
-const EmojiBoxStyled = styled('div')(({ theme}) => ({
+const EmojiBoxStyled = styled(Box)(({ theme}) => ({
   position: "absolute",
   bottom: 63,
-  width: 40,
-  borderTop: "1px solid #e8e8e8",
+  left: 0,
+  zIndex: 1100,
+  borderRadius: 8,
+  boxShadow: theme.shadows[4],
+  border: `1px solid ${theme.palette.divider}`,
+  overflow: 'hidden',
 }));
 
 const CircularProgressStyled = styled(CircularProgress)(({ theme }) => ({
-  color: green[500],
-  opacity: "70%",
+  color: theme.palette.success.main,
+  opacity: "80%",
   position: "absolute",
-  top: "20%",
+  top: "50%",
   left: "50%",
-  marginLeft: -12,
+  transform: "translate(-50%, -50%)",
 }));
 
-const RecorderWrapper = styled('div')(({ theme }) => ({
+const RecorderWrapper = styled(Box)(({ theme }) => ({
   display: "flex",
   alignItems: "center",
-  alignContent: "middle",
+  justifyContent: "center",
+  gap: "8px",
 }));
 
-const ReplyginMsgWrapper = styled('div')(({ theme }) => ({
+const ReplyingMsgWrapper = styled(Box)(({ theme }) => ({
   display: "flex",
-    width: "100%",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingTop: 8,
-    paddingLeft: 73,
-    paddingRight: 7,
+  width: "100%",
+  alignItems: "center",
+  justifyContent: "space-between",
+  padding: "8px 12px",
 }));
 
-const ReplyginMsgContainer = styled('div')(({ theme }) => ({
+const ReplyingMsgContainer = styled(Box)(({ theme }) => ({
   flex: 1,
-    marginRight: 5,
-    overflowY: "hidden",
-    backgroundColor: "rgba(0, 0, 0, 0.05)",
-    borderRadius: "7.5px",
-    display: "flex",
-    position: "relative",
+  marginRight: 8,
+  overflowY: "hidden",
+  backgroundColor: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.05)',
+  borderRadius: 8,
+  display: "flex",
+  position: "relative",
+  maxHeight: "80px",
 }));
 
-const ReplyginMsgBody = styled('div')(({ theme }) => ({
+const ReplyingMsgBody = styled(Box)(({ theme }) => ({
   padding: 10,
   height: "auto",
   display: "block",
   whiteSpace: "pre-wrap",
   overflow: "hidden",
+  textOverflow: "ellipsis",
+  fontSize: '0.9rem',
 }));
 
-const SideColor = styled('span')(({ theme, messageFromMe }) => ({
-  backgroundColor: messageFromMe ? "#35cd96" : "#6bcbef",
+const SideColor = styled(Box)(({ theme, messageFromMe }) => ({
+  backgroundColor: messageFromMe ? theme.palette.success.main : theme.palette.primary.main,
   flex: "none",
   width: "4px",
+  borderRadius: "4px 0 0 4px",
 }));
   
-const MessageContactName = styled('span')(({ theme }) => ({
+const MessageContactName = styled(Box)(({ theme }) => ({
   display: "flex",
-    color: "#6bcbef",
-    fontWeight: 500,
+  color: theme.palette.primary.main,
+  fontWeight: 600,
+  fontSize: '0.85rem',
+  marginBottom: 2,
 }));
 
 const MessageQuickAnswersWrapper = styled('ul')(({ theme }) => ({
   margin: 0,
   position: "absolute",
-  bottom: "55px",
-  background: theme.palette.background.default,
+  bottom: "60px",
+  background: theme.palette.background.paper,
   padding: 0,
-  border: "none",
+  border: `1px solid ${theme.palette.divider}`,
+  borderRadius: 8,
   left: 0,
   width: "100%",
   maxHeight: "350px",
   overflowY: "auto",
+  boxShadow: theme.shadows[3],
+  zIndex: 1050,
   "& li": {
     listStyle: "none",
     "& a": {
       display: "block",
-      padding: "8px",
+      padding: "10px 12px",
       textOverflow: "ellipsis",
-      overflowY: "hidden",
-      maxHeight: "30px",
+      overflow: "hidden",
+      whiteSpace: "nowrap",
+      fontSize: '0.9rem',
+      color: theme.palette.text.primary,
+      borderBottom: `1px solid ${theme.palette.divider}`,
+      transition: 'all 0.2s ease',
       "&:hover": {
-        background: theme.palette.background.paper,
+        background: theme.palette.action.hover,
         cursor: "pointer",
       },
     },
+    "&:last-child a": {
+      borderBottom: "none",
+    },
+  },
+  scrollbarWidth: "thin",
+  '&::-webkit-scrollbar': {
+    width: '6px',
+  },
+  '&::-webkit-scrollbar-thumb': {
+    backgroundColor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)',
+    borderRadius: '3px',
   },
 }));
 
@@ -253,8 +340,10 @@ const MessageInput = ({ ticketStatus }) => {
   const [settings, setSettings] = useState([]);
   const [signMessage, setSignMessage] = useLocalStorage("signOption", true);
   const [channelType, setChannelType] = useState(null);
+  const [showUploadModal, setShowUploadModal] = useState(false);
   const { t } = useTranslation();
   const theme = useTheme();
+  const mainWrapperRef = useRef(null);
 
   useEffect(() => {
     const handleClickAway = (event) => {
@@ -318,11 +407,61 @@ const MessageInput = ({ ticketStatus }) => {
   }, [ticketId, setReplyingMessage, setEditingMessage]);
 
   useEffect(() => {
-    setTimeout(() => {
+    let timeout;
+    if (onDragEnter) {
+      timeout = setTimeout(() => {
+        setOnDragEnter(false);
+      }, 5000);
+    }
+    return () => {
+      if (timeout) clearTimeout(timeout);
+    };
+  }, [onDragEnter]);
+  
+  // Adicionar event listeners para drag and drop em todo o componente
+  useEffect(() => {
+    const wrapper = mainWrapperRef.current;
+    if (!wrapper) return;
+    
+    const handleDragOver = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setOnDragEnter(true);
+    };
+    
+    const handleDragLeave = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (
+        e.relatedTarget === null ||
+        !wrapper.contains(e.relatedTarget)
+      ) {
+        setOnDragEnter(false);
+      }
+    };
+    
+    const handleDrop = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
       setOnDragEnter(false);
-    }, 10000);
-    // eslint-disable-next-line
-  }, [onDragEnter === true]);
+      
+      if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+        const droppedFiles = Array.from(e.dataTransfer.files);
+        setMedias(droppedFiles);
+        setShowUploadModal(true);
+      }
+    };
+    
+    wrapper.addEventListener('dragover', handleDragOver);
+    wrapper.addEventListener('dragleave', handleDragLeave);
+    wrapper.addEventListener('drop', handleDrop);
+    
+    return () => {
+      wrapper.removeEventListener('dragover', handleDragOver);
+      wrapper.removeEventListener('dragleave', handleDragLeave);
+      wrapper.removeEventListener('drop', handleDrop);
+    };
+  }, []);
 
   const showFormatMenu = () => {
     const selection = window.getSelection();
@@ -330,7 +469,6 @@ const MessageInput = ({ ticketStatus }) => {
     if (!selection?.toString()) {
       menuElement.style.display = 'none';
     } else {
-      // Position the formatting menu near the selection
       const range = selection.getRangeAt(0);
       const rect = range.getBoundingClientRect();
       menuElement.style.display = 'flex';
@@ -496,36 +634,40 @@ const MessageInput = ({ ticketStatus }) => {
     }
     const selectedMedias = Array.from(e.target.files);
     setMedias(selectedMedias);
+    setShowUploadModal(true);
   };
 
   const handleInputPaste = (e) => {
-    if (e.clipboardData.files[0]) {
+    if (e.clipboardData.files && e.clipboardData.files.length > 0) {
       const selectedMedias = Array.from(e.clipboardData.files);
       setMedias(selectedMedias);
+      setShowUploadModal(true);
     }
   };
 
   const handleInputDrop = (e) => {
     e.preventDefault();
-    if (e.dataTransfer.files[0]) {
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
       const selectedMedias = Array.from(e.dataTransfer.files);
       setMedias(selectedMedias);
+      setShowUploadModal(true);
     }
   };
 
-  const handleUploadMedia = async (e) => {
-    if (!e || !e.preventDefault) {
-      console.error("Evento inválido ou não fornecido!");
-      return;
-    }
+  const handleUploadMedia = async (files, caption = '') => {
     setLoading(true);
-    e.preventDefault();
     const formData = new FormData();
-    formData.append("fromMe", true);
-    medias.forEach((media) => {
+    const captionText = caption && caption.trim() !== '' ? caption : '';
+    files.forEach((media) => {
       formData.append("medias", media);
-      formData.append("body", media.name);
     });
+    
+    if (captionText) {
+      formData.append("body", captionText);
+    } else {
+      formData.append("body", files[0].name);
+    }
+    formData.append("fromMe", true);
 
     try {
       if (channelType !== null) {
@@ -538,6 +680,7 @@ const MessageInput = ({ ticketStatus }) => {
     }
     setLoading(false);
     setMedias([]);
+    setShowUploadModal(false);
   };
 
   const handleSendMessage = async () => {
@@ -660,121 +803,71 @@ const MessageInput = ({ ticketStatus }) => {
 
   const renderReplyingMessage = (message) => {
     return (
-      <ReplyginMsgWrapper>
-        <ReplyginMsgContainer>
+      <ReplyingMsgWrapper>
+        <ReplyingMsgContainer>
           <SideColor messageFromMe={message.fromMe} />
-          <ReplyginMsgBody>
+          <ReplyingMsgBody>
             {!message.fromMe && (
               <MessageContactName>
                 {message.contact?.name}
               </MessageContactName>
             )}
             {message.body}
-          </ReplyginMsgBody>
-        </ReplyginMsgContainer>
-        <IconButton
-          aria-label="showRecorder"
-          component="span"
-          disabled={loading || ticketStatus !== "open"}
-          onClick={() => {
-            setReplyingMessage(null);
-            setEditingMessage(null);
-          }}
-        >
-          <Clear sx={{ color: theme.palette.text.primary }} />
-        </IconButton>
-      </ReplyginMsgWrapper>
+          </ReplyingMsgBody>
+        </ReplyingMsgContainer>
+        <Tooltip title={t("messagesInput.buttons.clearReply")} arrow placement="top">
+          <IconButton
+            aria-label="clearReplyingMessage"
+            component="span"
+            disabled={loading || ticketStatus !== "open"}
+            onClick={() => {
+              setReplyingMessage(null);
+              setEditingMessage(null);
+            }}
+            size="small"
+            sx={{
+              backgroundColor: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.09)' : 'rgba(0, 0, 0, 0.04)',
+              '&:hover': {
+                backgroundColor: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.08)',
+              }
+            }}
+          >
+            <Clear fontSize="small" />
+          </IconButton>
+        </Tooltip>
+      </ReplyingMsgWrapper>
     );
   };
 
-  if (medias.length > 0)
-    return (
-      <MediaInputWrapper
-        elevation={0}
-        square
-        onDragEnter={() => setOnDragEnter(true)}
-        onDrop={(e) => handleInputDrop(e)}
-      >
-        <IconButton
-          aria-label="cancel-upload"
-          component="span"
-          onClick={(e) => setMedias([])}
-        >
-          <Cancel sx={{ color: theme.palette.text.primary }} />
-        </IconButton>
-
-        {loading ? (
-          <div>
-            <CircularProgressStyled/>
-          </div>
-        ) : (
-          <GridFiles item>
-            <Typography variant="h6" component="div">
-              {t("uploads.titles.titleFileList")} ({medias.length})
-            </Typography>
-            <List>
-              {medias.map((value, index) => {
-                return (
-                  <ListItem key={index}>
-                    <ListItemAvatar>
-                      <AvatarStyled alt={value.name} src={URL.createObjectURL(value)} />
-                    </ListItemAvatar>
-                    <ListItemText
-                      primary={`${value.name}`}
-                      secondary={`${parseInt(value.size / 1024)} kB`}
-                    />
-                  </ListItem>
-                );
-              })}
-            </List>
-            <InputBase
-              sx={{ width: "0", height: "0" }}
-              inputRef={(input) => {
-                if (input !== null) {
-                  input.focus();
-                }
-              }}
-              onKeyPress={(e) => {
-                if (e.key === "Enter") {
-                  handleUploadMedia(e);
-                }
-              }}
-              defaultValue={medias[0].name}
-            />
-          </GridFiles>
-        )}
-        <IconButton
-          aria-label="send-upload"
-          component="span"
-          onClick={handleUploadMedia}
-          disabled={loading}
-        >
-          <Send sx={{ color: theme.palette.text.primary }} />
-        </IconButton>
-      </MediaInputWrapper>
-    );
-  else {
-    return (
+  return (
       <MainWrapper
+        ref={mainWrapperRef}
         square
         elevation={0}
-        onDragEnter={() => setOnDragEnter(true)}
-        onDrop={(e) => handleInputDrop(e)}
+        sx={{ position: 'relative' }}
       >
-        <DropInfo show={onDragEnter}>
-          {t("uploads.titles.titleUploadMsgDragDrop")}
-        </DropInfo>
+        <Fade in={onDragEnter}>
+          <DropInfo show={onDragEnter}>
+            {t("uploads.titles.titleUploadMsgDragDrop")}
+          </DropInfo>
+        </Fade>
         {(replyingMessage && renderReplyingMessage(replyingMessage)) || (editingMessage && renderReplyingMessage(editingMessage))}
         <NewMessageBox>
           <Hidden only={["sm", "xs"]}>
-            <IconButton
-              aria-label="emojiPicker"
-              component="span"
-              disabled={loading || recording || ticketStatus !== "open"}
-              onClick={(e) => setShowEmoji((prevState) => !prevState)}
-            >
-              <Mood sx={{ color: theme.palette.text.primary }} />
-            </IconButton>
+            <Tooltip title={t("messagesInput.buttons.emoji")} arrow placement="top">
+              <span>
+                <IconButton
+                  aria-label="emojiPicker"
+                  component="span"
+                  disabled={loading || recording || ticketStatus !== "open"}
+                  onClick={(e) => setShowEmoji((prevState) => !prevState)}
+                  color={showEmoji ? "primary" : "default"}
+                  size="medium"
+                >
+                  <Mood />
+                </IconButton>
+              </span>
+            </Tooltip>
             {showEmoji ? (
               <EmojiBoxStyled>
                 <ClickAwayListener onClickAway={(e) => setShowEmoji(false)}>
@@ -804,18 +897,23 @@ const MessageInput = ({ ticketStatus }) => {
             />
 
             <label htmlFor="upload-button">
-              <IconButton
-                aria-label="upload"
-                component="span"
-                disabled={loading || recording || ticketStatus !== "open"}
-                onMouseOver={() => setOnDragEnter(true)}
-              >
-                <AttachFile sx={{ color: theme.palette.text.primary }} />
-              </IconButton>
+              <Tooltip title={t("messagesInput.buttons.attach")} arrow placement="top">
+                <span>
+                  <IconButton
+                    aria-label="upload"
+                    component="span"
+                    disabled={loading || recording || ticketStatus !== "open"}
+                    size="medium"
+                    // Estilo aplicado globalmente no NewMessageBox
+                  >
+                    <AttachFile />
+                  </IconButton>
+                </span>
+              </Tooltip>
             </label>
             {canSignMessage() && (
             <FormControlLabel
-              sx={{ marginRight: 7, color: "primary" }}
+              sx={{ marginRight: 7 }}
               label={t("messagesInput.signMessage")}
               labelPlacement="start"
               control={
@@ -965,49 +1063,70 @@ const MessageInput = ({ ticketStatus }) => {
               <IconButton 
                 size="small" 
                 onClick={() => formatText('*','*')}
-                sx={{ padding: '6px', margin: '0 2px' }}
+                sx={{ 
+                  padding: '6px', 
+                  margin: '0 2px'
+                }}
               >
                 <FormatBoldIcon />
               </IconButton>
               <IconButton 
                 size="small" 
                 onClick={() => formatText('_','_')}
-                sx={{ padding: '6px', margin: '0 2px' }}
+                sx={{ 
+                  padding: '6px', 
+                  margin: '0 2px'
+                }}
               >
                 <FormatItalicIcon />
               </IconButton>
               <IconButton 
                 size="small" 
                 onClick={() => formatText('~','~')}
-                sx={{ padding: '6px', margin: '0 2px' }}
+                sx={{ 
+                  padding: '6px', 
+                  margin: '0 2px'
+                }}
               >
                 <StrikethroughSIcon />
               </IconButton>
               <IconButton 
                 size="small" 
                 onClick={formatCode}
-                sx={{ padding: '6px', margin: '0 2px' }}
+                sx={{ 
+                  padding: '6px', 
+                  margin: '0 2px'
+                }}
               >
                 <Code />
               </IconButton>
               <IconButton 
                 size="small" 
                 onClick={formatListNumbered}
-                sx={{ padding: '6px', margin: '0 2px' }}
+                sx={{ 
+                  padding: '6px', 
+                  margin: '0 2px'
+                }}
               >
                 <FormatListNumbered />
               </IconButton>
               <IconButton 
                 size="small" 
                 onClick={formatListBulleted}
-                sx={{ padding: '6px', margin: '0 2px' }}
+                sx={{ 
+                  padding: '6px', 
+                  margin: '0 2px'
+                }}
               >
                 <FormatListBulleted />
               </IconButton>
               <IconButton 
                 size="small" 
                 onClick={formatQuote}
-                sx={{ padding: '6px', margin: '0 2px' }}
+                sx={{ 
+                  padding: '6px', 
+                  margin: '0 2px'
+                }}
               >
                 <FormatQuote />
               </IconButton>
@@ -1032,14 +1151,29 @@ const MessageInput = ({ ticketStatus }) => {
             )}
           </InputWrapper>
           {inputMessage ? (
-            <IconButton
-              aria-label="sendMessage"
-              component="span"
-              onClick={handleSendMessage}
-              disabled={loading}
-            >
-              <Send sx={{ color: theme.palette.text.primary }} />
-            </IconButton>
+            <Tooltip title={t("messagesInput.buttons.send")} arrow placement="top">
+              <span>
+                <IconButton
+                  aria-label="sendMessage"
+                  component="span"
+                  onClick={handleSendMessage}
+                  disabled={loading}
+                  color="primary"
+                  sx={{
+                    backgroundColor: theme.palette.primary.main,
+                    color: theme.palette.primary.contrastText,
+                    '&:hover': {
+                      backgroundColor: theme.palette.primary.dark,
+                    },
+                    '&.Mui-disabled': {
+                      backgroundColor: theme.palette.action.disabledBackground,
+                    }
+                  }}
+                >
+                  <Send />
+                </IconButton>
+              </span>
+            </Tooltip>
           ) : recording ? (
             <RecorderWrapper>
               <IconButton
@@ -1069,19 +1203,34 @@ const MessageInput = ({ ticketStatus }) => {
               </IconButton>
             </RecorderWrapper>
           ) : (
-            <IconButton
-              aria-label="showRecorder"
-              component="span"
-              disabled={loading || ticketStatus !== "open"}
-              onClick={handleStartRecording}
-            >
-              <Mic sx={{ color: theme.palette.text.primary }} />
-            </IconButton>
+            <Tooltip title={t("messagesInput.buttons.record")} arrow placement="top">
+              <span>
+                <IconButton
+                  aria-label="showRecorder"
+                  component="span"
+                  disabled={loading || ticketStatus !== "open"}
+                  onClick={handleStartRecording}
+                  size="medium"
+                >
+                  <Mic />
+                </IconButton>
+              </span>
+            </Tooltip>
           )}
         </NewMessageBox>
+        {/* Modal de Upload */}
+        <UploadModal 
+          open={showUploadModal}
+          onClose={() => {
+            setShowUploadModal(false);
+            setMedias([]);
+          }}
+          files={medias}
+          onSend={handleUploadMedia}
+          loading={loading}
+        />
       </MainWrapper>
     );
-  }
 };
 
 MessageInput.propTypes = {

@@ -95,7 +95,7 @@ const ComponentSettings = ({ settings, getSettingValue, handleChangeBooleanSetti
         {
             title: t("settings.general.userInterface"),
             settings: booleanSettings.filter(s => [
-                'sideMenu', 'quickAnswer', 'signOption', 'listItemSpy', 'call'
+                'quickAnswer', 'signOption', 'listItemSpy', 'call'
             ].includes(s.key))
         },
         {

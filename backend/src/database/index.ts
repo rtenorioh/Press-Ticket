@@ -3,6 +3,7 @@ import ApiToken from "../models/ApiToken";
 import Contact from "../models/Contact";
 import ContactCustomField from "../models/ContactCustomField";
 import ContactTag from "../models/ContactTag";
+import ErrorLog from "../models/ErrorLog";
 import Integration from "../models/Integration";
 import Message from "../models/Message";
 import OldMessage from "../models/OldMessage";
@@ -43,7 +44,8 @@ const models = [
   OldMessage,
   Personalization,
   UserSession,
-  ApiToken
+  ApiToken,
+  ErrorLog
 ];
 
 sequelize.addModels(models);

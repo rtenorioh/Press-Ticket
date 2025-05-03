@@ -23,6 +23,7 @@ import SettingsOutlined from "@mui/icons-material/SettingsOutlined";
 import SyncAlt from "@mui/icons-material/SyncAlt";
 import VpnKeyRounded from "@mui/icons-material/VpnKeyRounded";
 import WhatsApp from "@mui/icons-material/WhatsApp";
+import BugReportOutlined from "@mui/icons-material/BugReportOutlined";
 import { useTranslation } from "react-i18next";
 import { Can } from "../components/Can";
 import { AuthContext } from "../context/Auth/AuthContext";
@@ -265,6 +266,18 @@ const MainListItems = (props) => {
                 primary={t("mainDrawer.listItems.apikey")}
                 icon={<VpnKeyRounded />}
                 active={location.pathname === '/apikey'}
+                drawerClose={drawerClose}
+              />
+              <DividerStyled />
+              <SubheaderStyled inset>
+                {t("mainDrawer.listItems.system")}
+              </SubheaderStyled>
+              <DividerStyled />
+              <ListItemLink
+                to="/errorLogs"
+                primary={t("mainDrawer.listItems.errorLogs")}
+                icon={<BugReportOutlined />}
+                active={location.pathname === '/errorLogs'}
                 drawerClose={drawerClose}
               />
             </>

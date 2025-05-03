@@ -1,273 +1,195 @@
 import {
-	Button,
-	CircularProgress,
-	Dialog,
-	DialogActions,
-	DialogContent,
-	DialogTitle,
-	Grid,
-	ListItemText,
-	MenuItem,
-	Select,
-	TextField
+  Button,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  FormControl,
+  MenuItem,
+  Select,
+  Divider,
+  Stack,
+  Typography
 } from "@mui/material";
-import Autocomplete, {
-	createFilterOptions,
-} from "@mui/material/Autocomplete";
-import React, { useContext, useEffect, useState } from "react";
+import { styled, useTheme } from "@mui/material/styles";
+import React, { useCallback, useContext, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { toast } from "react-toastify";
 import { AuthContext } from "../../context/Auth/AuthContext";
 import toastError from "../../errors/toastError";
 import api from "../../services/api";
-import ButtonWithSpinner from "../ButtonWithSpinner";
-import ContactModal from "../ContactModal";
 
-const filter = createFilterOptions({
-	trim: true,
-});
+const StyledDialog = styled(Dialog)(({ theme }) => ({
+  '& .MuiDialogTitle-root': {
+    backgroundColor: theme.palette.primary.main,
+    color: '#fff',
+    '& .MuiTypography-root': {
+      fontWeight: 500,
+    },
+    padding: theme.spacing(2),
+  },
+  '& .MuiDialogContent-root': {
+    padding: theme.spacing(3),
+  },
+  '& .MuiDialogActions-root': {
+    padding: theme.spacing(2),
+    backgroundColor: '#f5f5f5',
+  },
+}));
 
 const NewTicketModalPageContact = ({ modalOpen, onClose, initialContact }) => {
-	const { t } = useTranslation();
-	const [options, setOptions] = useState([]);
-	const [loading, setLoading] = useState(false);
-	const [searchParam, setSearchParam] = useState("");
-	const [selectedContact, setSelectedContact] = useState(null);
-	const [selectedQueue, setSelectedQueue] = useState("");
-	const [newContact, setNewContact] = useState({});
-	const [contactModalOpen, setContactModalOpen] = useState(false);
-	const { user } = useContext(AuthContext);
+  const { t } = useTranslation();
+  const theme = useTheme();
+  const { user } = useContext(AuthContext);
+  const [selectedQueue, setSelectedQueue] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [settings, setSettings] = useState([]);
+  const [contact, setContact] = useState(initialContact || null);
 
-	useEffect(() => {
-		if (initialContact?.id !== undefined) {
-			setOptions([initialContact]);
-			setSelectedContact(initialContact);
-		}
-	}, [initialContact]);
+  useEffect(() => {
+    setContact(initialContact || null);
+  }, [initialContact]);
 
-	useEffect(() => {
-		if (!modalOpen || searchParam.length < 3) {
-			setLoading(false);
-			return;
-		}
-		setLoading(true);
-		const delayDebounceFn = setTimeout(() => {
-			const fetchContacts = async () => {
-				try {
-					const { data } = await api.get("contacts", {
-						params: { searchParam },
-					});
-					setOptions(data.contacts);
-					setLoading(false);
-				} catch (err) {
-					setLoading(false);
-					toastError(err);
-				}
-			};
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const { data } = await api.get("/settings");
+        setSettings(data);
+      } catch (err) {
+        toastError(err);
+      }
+    };
+    fetchSettings();
+  }, []);
 
-			fetchContacts();
-		}, 500);
-		return () => clearTimeout(delayDebounceFn);
-	}, [searchParam, modalOpen]);
+  const handleClose = useCallback(() => {
+    onClose();
+    setSelectedQueue("");
+  }, [onClose]);
 
-	const handleClose = () => {
-		onClose();
-		setSearchParam("");
-		setSelectedContact(null);
-	};
+  const handleCreateTicket = useCallback(async () => {
+    console.log("Contato recebido no modal:", contact);
+    if (!contact?.id) {
+      toastError({ message: "Contato sem ID! Não é possível criar o ticket." });
+      return;
+    }
+    if (selectedQueue === "" && user?.profile !== 'admin') {
+      toastError({ message: t("newTicketModalContactPage.queue") });
+      return;
+    }
+    setLoading(true);
+    try {
+      const queueId = selectedQueue !== "" ? selectedQueue : null;
+      const { data: ticket } = await api.post("/tickets", {
+        contactId: contact.id,
+        queueId,
+        userId: user?.id,
+        status: "open",
+      });
+      setLoading(false);
+      onClose(ticket);
+    } catch (err) {
+      setLoading(false);
+      toastError(err);
+    }
+  }, [contact, selectedQueue, user, t, onClose]);
 
-	const handleSaveTicket = async contactId => {
-		if (!contactId) return;
-		if (selectedQueue === "" && user?.profile !== 'admin') {
-			toast.error(t("newTicketModalContactPage.queue"));
-			return;
-		}
-		setLoading(true);
-		try {
-			const queueId = selectedQueue !== "" ? selectedQueue : null;
-			const { data: ticket } = await api.post("/tickets", {
-				contactId: contactId,
-				queueId,
-				userId: user?.id,
-				status: "open",
-			});
-			onClose(ticket);
-		} catch (err) {
-			toastError(err);
-		}
-		setLoading(false);
-	};
+  return (
+    <StyledDialog
+      open={modalOpen}
+      onClose={handleClose}
+      aria-labelledby="create-ticket-dialog-title"
+      aria-describedby="create-ticket-dialog-description"
+      maxWidth="sm"
+      fullWidth
+      PaperProps={{
+        sx: {
+          borderRadius: 2,
+          boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
+        }
+      }}
+    >
+      <DialogTitle id="create-ticket-dialog-title">
+        <Stack direction="row" alignItems="center">
+          {t("newTicketModal.title")}
+        </Stack>
+      </DialogTitle>
+      <DialogContent>
+        <FormControl variant="outlined" sx={{ width: "100%", mt: 2 }}>
+          <Typography variant="body2" sx={{ mb: 1, fontWeight: 500 }}>
+            {t("ticketsList.acceptModal.queue")}
+          </Typography>
+          <Select
+            value={selectedQueue}
+            sx={{ width: "100%" }}
+            onChange={(e) => setSelectedQueue(e.target.value)}
+            variant="outlined"
+            displayEmpty
+          >
+            <MenuItem value={''}>
+              <em>{t("ticketsList.acceptModal.selectQueue")}</em>
+            </MenuItem>
+            {user?.queues?.map((queue) => (
+              <MenuItem key={queue.id} value={queue.id}>{queue.name}</MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+        {contact && (
+          <Typography variant="body2" sx={{ mt: 3 }}>
+            <strong>{t("contacts.name")}:</strong> {contact.name}<br />
+            <strong>{t("contacts.number")}:</strong> {contact.number}
+          </Typography>
+        )}
+      </DialogContent>
+      <Divider />
+      <DialogActions sx={{ padding: 2, gap: 1, display: 'flex', justifyContent: 'flex-end' }}>
+        <Button
+          onClick={handleClose}
+          disabled={loading}
+          variant="contained"
+          size="large"
+          sx={{
+            borderRadius: 20,
+            backgroundColor: '#e0e0e0',
+            color: '#757575',
+            minWidth: '120px',
+            textTransform: 'uppercase',
+            fontWeight: 'bold',
+            transition: 'all 0.3s ease',
+            '&:hover': {
+              backgroundColor: '#d5d5d5',
+            }
+          }}
+        >
+          {t("newTicketModal.buttons.cancel")}
+        </Button>
+        <Button
+          variant="contained"
+          type="button"
+          disabled={selectedQueue === "" || !contact}
+          onClick={handleCreateTicket}
+          size="large"
+          sx={{
+            position: "relative",
+            borderRadius: 20,
+            minWidth: '120px',
+            backgroundColor: theme.palette.primary.main,
+            textTransform: 'uppercase',
+            fontWeight: 'bold',
+            transition: 'all 0.3s ease',
+            '&:hover': {
+              backgroundColor: theme.palette.primary.dark
+            }
+          }}
+        >
+          {loading ? (
+            <CircularProgress size={24} color="inherit" sx={{ position: 'absolute' }} />
+          ) : t("newTicketModal.buttons.ok")}
+        </Button>
+      </DialogActions>
+    </StyledDialog>
+  );
 
-	const handleSelectOption = (e, newValue) => {
-		if (newValue?.number) {
-			setSelectedContact(newValue);
-		} else if (newValue?.name) {
-			setNewContact({ name: newValue.name });
-			setContactModalOpen(true);
-		}
-	};
-
-	const handleCloseContactModal = () => {
-		setContactModalOpen(false);
-	};
-
-	const handleAddNewContactTicket = contact => {
-		handleSaveTicket(contact.id);
-	};
-
-	const createAddContactOption = (filterOptions, params) => {
-		const filtered = filter(filterOptions, params);
-
-		if (params.inputValue !== "" && !loading && searchParam.length >= 3) {
-			filtered.push({
-				name: `${params.inputValue}`,
-			});
-		}
-
-		return filtered;
-	};
-
-	const renderOption = (props, option) => {
-		if (option.number) {
-			return <li {...props}>{`${option.name} - ${option.number}`}</li>;
-		} else {
-			return <li {...props}>{`${t("newTicketModalContactPage.add")} ${option.name}`}</li>;
-		}
-	};
-
-	const renderOptionLabel = option => {
-		if (option.number) {
-			return `${option.name} - ${option.number}`;
-		} else {
-			return `${option.name}`;
-		}
-	};
-
-	const renderContactAutocomplete = () => {
-		if (initialContact === undefined || initialContact.id === undefined) {
-			return (
-				<Grid xs={12} item>
-					<Autocomplete
-						fullWidth
-						options={options}
-						loading={loading}
-						clearOnBlur
-						autoHighlight
-						freeSolo
-						clearOnEscape
-						getOptionLabel={renderOptionLabel}
-						renderOption={renderOption}
-						filterOptions={createAddContactOption}
-						onChange={(e, newValue) => handleSelectOption(e, newValue)}
-						renderInput={params => (
-							<TextField
-								{...params}
-								label={t("newTicketModalContactPage.fieldLabel")}
-								variant="outlined"
-								autoFocus
-								onChange={e => setSearchParam(e.target.value)}
-								onKeyPress={e => {
-									if (loading || !selectedContact) return;
-									else if (e.key === "Enter") {
-										handleSaveTicket(selectedContact.id);
-									}
-								}}
-								InputProps={{
-									...params.InputProps,
-									endAdornment: (
-										<React.Fragment>
-											{loading ? (
-												<CircularProgress color="inherit" size={20} />
-											) : null}
-											{params.InputProps.endAdornment}
-										</React.Fragment>
-									),
-								}}
-							/>
-						)}
-					/>
-				</Grid>
-			)
-		}
-		return null;
-	}
-
-	return (
-		<>
-			<ContactModal
-				open={contactModalOpen}
-				initialValues={newContact}
-				onClose={handleCloseContactModal}
-				onSave={handleAddNewContactTicket}
-			></ContactModal>
-			<Dialog open={modalOpen} onClose={handleClose}>
-				<DialogTitle id="form-dialog-title">
-					{t("newTicketModal.title")}
-				</DialogTitle>
-				<DialogContent dividers>
-					<Grid style={{ width: 300 }} container spacing={2}>
-						{renderContactAutocomplete()}
-						<Grid xs={12} item>
-							<Select
-								fullWidth
-								displayEmpty
-								variant="outlined"
-								value={selectedQueue}
-								onChange={(e) => {
-									setSelectedQueue(e.target.value)
-								}}
-								MenuProps={{
-									anchorOrigin: {
-										vertical: "bottom",
-										horizontal: "left",
-									},
-									transformOrigin: {
-										vertical: "top",
-										horizontal: "left",
-									},
-									getContentAnchorEl: null,
-								}}
-								renderValue={() => {
-									if (selectedQueue === "") {
-										return "Selecione uma fila"
-									}
-									const queue = user?.queues?.find(q => q.id === selectedQueue)
-									return queue?.name
-								}}
-							>
-								{user?.queues?.length > 0 &&
-									user?.queues?.map((queue, key) => (
-										<MenuItem dense key={key} value={queue?.id}>
-											<ListItemText primary={queue?.name} />
-										</MenuItem>
-									))}
-							</Select>
-						</Grid>
-					</Grid>
-				</DialogContent>
-				<DialogActions>
-					<Button
-						onClick={handleClose}
-						color="secondary"
-						disabled={loading}
-						variant="outlined"
-					>
-						{t("newTicketModal.buttons.cancel")}
-					</Button>
-					<ButtonWithSpinner
-						variant="contained"
-						type="button"
-						disabled={!selectedContact}
-						onClick={() => handleSaveTicket(selectedContact.id)}
-						color="primary"
-						loading={loading}
-					>
-						{t("newTicketModal.buttons.ok")}
-					</ButtonWithSpinner>
-				</DialogActions>
-			</Dialog>
-		</>
-	);
 };
 
 export default NewTicketModalPageContact;

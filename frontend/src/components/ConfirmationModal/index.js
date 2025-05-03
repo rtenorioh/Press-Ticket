@@ -1,73 +1,106 @@
-import Button from "@mui/material/Button";
-import Dialog from "@mui/material/Dialog";
-import DialogActions from "@mui/material/DialogActions";
-import DialogContent from "@mui/material/DialogContent";
-import DialogTitle from "@mui/material/DialogTitle";
-import Typography from "@mui/material/Typography";
-import { styled } from "@mui/material/styles";
-import { Cancel, CheckCircle } from "@mui/icons-material";
+import {
+	Button,
+	Dialog,
+	DialogActions,
+	DialogContent,
+	DialogTitle,
+	Typography,
+	Divider,
+	Stack
+} from "@mui/material";
+import { styled, useTheme } from "@mui/material/styles";
 import React from "react";
 import { useTranslation } from "react-i18next";
 
-const DialogTitleStyled = styled(DialogTitle)(({ theme }) => ({
-	backgroundColor: theme.palette.background.default,
-	color: theme.palette.text.primary,
-}));
-
-const DialogActionsStyled = styled(DialogActions)(({ theme }) => ({
-	justifyContent: "space-between",
-	padding: theme.spacing(2),
-}));
-
-const CancelButton = styled(Button)(({ theme }) => ({
-	color: theme.palette.error.main,
-}));
-
-const ConfirmButton = styled(Button)(({ theme }) => ({
-	backgroundColor: theme.palette.primary.main,
-	color: theme.palette.primary.contrastText,
-	"&:hover": {
-		backgroundColor: theme.palette.primary.dark,
+const StyledDialog = styled(Dialog)(({ theme }) => ({
+	'& .MuiDialogTitle-root': {
+		backgroundColor: theme.palette.primary.main,
+		color: '#fff',
+		'& .MuiTypography-root': {
+			fontWeight: 500,
+		},
+		padding: theme.spacing(2),
+	},
+	'& .MuiDialogContent-root': {
+		padding: theme.spacing(3),
+	},
+	'& .MuiDialogActions-root': {
+		padding: theme.spacing(2),
+		backgroundColor: '#f5f5f5',
 	},
 }));
 
 const ConfirmationModal = ({ title, children, open, onClose, onConfirm }) => {
 	const { t } = useTranslation();
+	const theme = useTheme();
 
 	return (
-		<Dialog
+		<StyledDialog
 			open={open}
 			onClose={() => onClose(false)}
 			aria-labelledby="confirm-dialog"
 			maxWidth="sm"
 			fullWidth
+			PaperProps={{
+				sx: {
+					borderRadius: 2,
+					boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
+				}
+			}}
 		>
-			<DialogTitleStyled id="confirm-dialog">
-				{title}
-			</DialogTitleStyled>
-			<DialogContent dividers>
-				<Typography>{children}</Typography>
+			<DialogTitle id="confirm-dialog">
+				<Stack direction="row" alignItems="center">
+					{title}
+				</Stack>
+			</DialogTitle>
+			<DialogContent>
+				<Typography sx={{ mt: 1 }}>{children}</Typography>
 			</DialogContent>
-			<DialogActionsStyled>
-				<CancelButton
-					variant="outlined"
+			<Divider />
+			<DialogActions sx={{ padding: 2, gap: 1, display: 'flex', justifyContent: 'flex-end' }}>
+				<Button
+					variant="contained"
 					onClick={() => onClose(false)}
-					startIcon={<Cancel />}
+					size="large"
+					sx={{
+						borderRadius: 20,
+						backgroundColor: '#e0e0e0',
+						color: '#757575',
+						minWidth: '120px',
+						textTransform: 'uppercase',
+						fontWeight: 'bold',
+						transition: 'all 0.3s ease',
+						'&:hover': {
+							backgroundColor: '#d5d5d5',
+						}
+					}}
 				>
 					{t("confirmationModal.buttons.cancel")}
-				</CancelButton>
-				<ConfirmButton
+				</Button>
+				<Button
 					variant="contained"
 					onClick={() => {
 						onClose(false);
 						onConfirm();
 					}}
-					startIcon={<CheckCircle />}
+					size="large"
+					sx={{
+						position: "relative",
+						borderRadius: 20,
+						minWidth: '120px',
+						backgroundColor: theme.palette.primary.main,
+						textTransform: 'uppercase',
+						fontWeight: 'bold',
+						transition: 'all 0.3s ease',
+						'&:hover': {
+							backgroundColor: theme.palette.primary.dark
+						}
+					}}
 				>
 					{t("confirmationModal.buttons.confirm")}
-				</ConfirmButton>
-			</DialogActionsStyled>
-		</Dialog>
+				</Button>
+			</DialogActions>
+		</StyledDialog>
 	);
 };
 

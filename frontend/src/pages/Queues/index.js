@@ -386,9 +386,9 @@ const Queues = () => {
               onClick={handleCloseMessageModal}
               variant="contained"
               color="primary"
-              sx={{ borderRadius: 2 }}
+              sx={{ borderRadius: 20 }}
             >
-              {t("close")}
+              {t("queues.messagesModal.btnClose")}
             </Button>
           </Box>
         </Box>
