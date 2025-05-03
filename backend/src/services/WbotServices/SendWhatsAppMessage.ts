@@ -108,6 +108,27 @@ const SendWhatsAppMessage = async ({
     );
 
     await ticket.update({ lastMessage: body });
+    
+    const messageData = {
+      id: sentMessage.id.id,
+      ticketId: ticket.id,
+      contactId: undefined,
+      body: body,
+      fromMe: true,
+      mediaType: "chat",
+      read: true,
+      quotedMsgId: quotedMsg?.id,
+      userId: ticket.userId
+    };
+
+    const CreateMessageService = require("../MessageServices/CreateMessageService").default;
+    
+    try {
+      await CreateMessageService({ messageData });
+    } catch (err) {
+      console.error("Erro ao salvar mensagem no banco de dados:", err);
+    }
+    
     return sentMessage;
   } catch (err) {
     console.error("Erro ao enviar mensagem:", err);

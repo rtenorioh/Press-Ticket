@@ -34,12 +34,31 @@ const SendWhatsAppMedia = async ({
     );
 
     await ticket.update({ lastMessage: body || media.filename });
+    
+    const messageData = {
+      id: sentMessage.id.id,
+      ticketId: ticket.id,
+      contactId: undefined,
+      body: body || media.filename,
+      fromMe: true,
+      mediaType: media.mimetype.split("/")[0],
+      read: true,
+      userId: ticket.userId
+    };
+
+    const CreateMessageService = require("../MessageServices/CreateMessageService").default;
+    
+    try {
+      await CreateMessageService({ messageData });
+    } catch (err) {
+      console.error("Erro ao salvar mensagem de mídia no banco de dados:", err);
+    }
 
     fs.unlinkSync(media.path);
 
     return sentMessage;
   } catch (err) {
-    console.log(err);
+    console.error("Erro ao enviar mídia:", err);
     throw new AppError("ERR_SENDING_WAPP_MSG");
   }
 };

@@ -4,6 +4,7 @@ import { getIO } from "../libs/socket";
 import Message from "../models/Message";
 import CountMessagesService from "../services/MessageServices/CountMessagesService";
 import ListMessagesService from "../services/MessageServices/ListMessagesService";
+import MarkMessagesAsReadService from "../services/MessageServices/MarkMessagesAsReadService";
 import ShowTicketService from "../services/TicketServices/ShowTicketService";
 import DeleteWhatsAppMessage from "../services/WbotServices/DeleteWhatsAppMessage";
 import EditWhatsAppMessage from "../services/WbotServices/EditWhatsAppMessage";
@@ -91,6 +92,18 @@ export const remove = async (
   });
 
   return res.send();
+};
+
+export const markAsRead = async (req: Request, res: Response): Promise<Response> => {
+  const { ticketId } = req.params;
+
+  try {
+    await MarkMessagesAsReadService({ ticketId });
+    return res.status(200).json({ message: "Mensagens marcadas como lidas com sucesso" });
+  } catch (error) {
+    console.error("Erro ao marcar mensagens como lidas:", error);
+    return res.status(500).json({ error: "Erro ao marcar mensagens como lidas" });
+  }
 };
 
 export const count = async (req: Request, res: Response): Promise<Response> => {

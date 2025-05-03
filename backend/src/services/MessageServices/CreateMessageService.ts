@@ -21,67 +21,79 @@ interface Request {
 const CreateMessageService = async ({
   messageData
 }: Request): Promise<Message> => {
-  if (messageData.mediaType === "multi_vcard") {
+  try {
 
-    if (typeof messageData.body === 'string') {
-      try {
-        const parsedBody = JSON.parse(messageData.body);
-        if (Array.isArray(parsedBody)) {
-          console.log("Array length:", parsedBody.length);
-          console.log("First item:", parsedBody[0]);
+    if (messageData.mediaType === "multi_vcard") {
+      if (typeof messageData.body === 'string') {
+        try {
+          const parsedBody = JSON.parse(messageData.body);
+          if (Array.isArray(parsedBody)) {
+            console.log("Array length:", parsedBody.length);
+            console.log("First item:", parsedBody[0]);
+          }
+        } catch (error) {
+          console.error("Error parsing message body:", error);
         }
-      } catch (error) {
-        console.error("Error parsing message body:", error);
       }
     }
-  }
-  
-  await Message.upsert(messageData);
+    
+    const existingMessage = await Message.findByPk(messageData.id);
+    if (existingMessage) {
+      console.log("Mensagem já existe no banco de dados, atualizando:", messageData.id);
+    } else {
+      console.log("Criando nova mensagem no banco de dados:", messageData.id);
+    }
+    
+    await Message.upsert(messageData);
 
-  const message = await Message.findByPk(messageData.id, {
-    include: [
-      "contact",
-      {
-        model: Ticket,
-        as: "ticket",
-        include: [
-          "contact",
-          "queue",
-          {
-            model: Whatsapp,
-            as: "whatsapp",
-            attributes: ["name", "color"]
-          }
-        ]
-      },
-      {
-        model: Message,
-        as: "quotedMsg",
-        include: ["contact"]
-      },
-      {
-        model: OldMessage,
-        as: "oldMessages"
-      }
-    ]
-  });
-
-  if (!message) {
-    throw new Error("ERR_CREATING_MESSAGE");
-  }
-
-  const io = getIO();
-  io.to(message.ticketId.toString())
-    .to(message.ticket.status)
-    .to("notification")
-    .emit("appMessage", {
-      action: "create",
-      message,
-      ticket: message.ticket,
-      contact: message.ticket.contact
+    const message = await Message.findByPk(messageData.id, {
+      include: [
+        "contact",
+        {
+          model: Ticket,
+          as: "ticket",
+          include: [
+            "contact",
+            "queue",
+            {
+              model: Whatsapp,
+              as: "whatsapp",
+              attributes: ["name", "color"]
+            }
+          ]
+        },
+        {
+          model: Message,
+          as: "quotedMsg",
+          include: ["contact"]
+        },
+        {
+          model: OldMessage,
+          as: "oldMessages"
+        }
+      ]
     });
 
-  return message;
+    if (!message) {
+      throw new Error("ERR_CREATING_MESSAGE");
+    }
+
+    const io = getIO();
+    io.to(message.ticketId.toString())
+      .to(message.ticket.status)
+      .to("notification")
+      .emit("appMessage", {
+        action: "create",
+        message,
+        ticket: message.ticket,
+        contact: message.ticket.contact
+      });
+
+    return message;
+  } catch (error) {
+    console.error("Erro ao criar/atualizar mensagem:", error);
+    throw error;
+  }
 };
 
 export default CreateMessageService;

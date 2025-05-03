@@ -5,17 +5,42 @@ import { logger } from "../utils/logger";
 import GetTicketWbot from "./GetTicketWbot";
 
 const SetTicketMessagesAsRead = async (ticket: Ticket): Promise<void> => {
+  const unreadMessages = await Message.findAll({
+    where: {
+      ticketId: ticket.id,
+      read: false,
+      fromMe: false
+    }
+  });
+
   await Message.update(
-    { read: true },
+    { read: true, ack: 3 },
     {
       where: {
         ticketId: ticket.id,
-        read: false
+        read: false,
+        fromMe: false
       }
     }
   );
 
   await ticket.update({ unreadMessages: 0 });
+  
+  if (unreadMessages.length > 0) {
+    
+    const io = getIO();
+    
+    unreadMessages.forEach(message => {
+      io.to(ticket.id.toString()).emit("appMessage", {
+        action: "update",
+        message: {
+          ...message.toJSON(),
+          read: true,
+          ack: 3
+        }
+      });
+    });
+  }
 
   try {
     const wbot = await GetTicketWbot(ticket);

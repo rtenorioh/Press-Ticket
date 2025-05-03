@@ -4,6 +4,7 @@ import * as Sentry from "@sentry/node";
 import { writeFile } from "fs";
 import { join } from "path";
 import { promisify } from "util";
+import { Op } from "sequelize";
 
 import {
   Client,
@@ -177,12 +178,10 @@ const verifyMediaMessage = async (
         });
       })
       .then(() => {
-        console.log("Conversão concluída!");
-        // Aqui você pode fazer o que desejar com o arquivo MP3 convertido.
+        console.info("Conversão concluída!");
       })
       .catch(err => {
         console.error("Ocorreu um erro:", err);
-        // Trate o erro de acordo com sua lógica de aplicativo.
       });
   } catch (err: any) {
     Sentry.captureException(err);
@@ -259,9 +258,23 @@ const verifyMediaMessage = async (
       lastMessage: `🢇 ${$tipoArquivo}` || `🢇 ${$tipoArquivo}`
     });
   }
-  const newMessage = await CreateMessageService({ messageData });
-
-  return newMessage;
+  try {
+    const newMessage = await CreateMessageService({ messageData });
+    return newMessage;
+  } catch (error) {
+    console.error("Erro ao salvar mensagem com mídia no banco de dados:", error);
+    return new Promise((resolve, reject) => {
+      setTimeout(async () => {
+        try {
+          const newMessage = await CreateMessageService({ messageData });
+          resolve(newMessage);
+        } catch (retryError) {
+          console.error("Erro ao salvar mensagem com mídia na segunda tentativa:", retryError);
+          reject(retryError);
+        }
+      }, 1000);
+    });
+  }
 };
 
 const getGeocode = async (
@@ -272,11 +285,9 @@ const getGeocode = async (
     where: { key: "apiMaps" }
   });
 
-  // Garantir que as coordenadas sejam strings e estejam devidamente escapadas
   const safeLatitude = encodeURIComponent(String(latitude).trim());
   const safeLongitude = encodeURIComponent(String(longitude).trim());
   
-  // Construir a URL com os valores escapados
   const url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${safeLatitude},${safeLongitude}&key=${encodeURIComponent(apiKey?.value || '')}`;
 
   return new Promise((resolve, reject) => {
@@ -288,7 +299,6 @@ const getGeocode = async (
         } else if (body && body.results && body.results.length > 0) {
           resolve(body.results[0].formatted_address);
         } else {
-          // Fallback para as coordenadas quando não há resultados
           resolve(`${latitude}, ${longitude}`);
         }
       });
@@ -300,31 +310,23 @@ const getGeocode = async (
 };
 
 const prepareLocation = async (msg: WbotMessage): Promise<WbotMessage> => {
-  // Garantir que as coordenadas sejam strings e estejam devidamente escapadas
   const safeLatitude = encodeURIComponent(String(msg.location.latitude).trim());
   const safeLongitude = encodeURIComponent(String(msg.location.longitude).trim());
   
-  // Construir a URL com os valores escapados
   const gmapsUrl = `https://maps.google.com/maps?q=${safeLatitude}%2C${safeLongitude}&z=17`;
 
   try {
-    // Verificar se as propriedades de localização existem antes de prosseguir
     if (!msg.location || !msg.location.latitude || !msg.location.longitude) {
       throw new Error("Dados de localização incompletos");
     }
-
-    // Obter o endereço a partir das coordenadas
     const address = await getGeocode(
       Number(msg.location.latitude),
       Number(msg.location.longitude)
     );
 
-    // Garantir que msg.body exista antes de manipulá-lo
     if (typeof msg.body !== 'string') {
       msg.body = '';
     }
-
-    // Formatar a mensagem com a imagem, URL e endereço
     msg.body = `data:image/png;base64,${msg.body}|${gmapsUrl}`;
     msg.body += `|${
       address || `${msg.location.latitude}, ${msg.location.longitude}`
@@ -332,12 +334,9 @@ const prepareLocation = async (msg: WbotMessage): Promise<WbotMessage> => {
   } catch (error) {
     console.error("Erro ao preparar a localização:", error);
     
-    // Garantir que msg.body exista antes de manipulá-lo
     if (typeof msg.body !== 'string') {
       msg.body = '';
     }
-    
-    // Em caso de erro, ainda fornecer uma mensagem utilizável
     if (msg.location && msg.location.latitude && msg.location.longitude) {
       msg.body = `data:image/png;base64,${msg.body}|${gmapsUrl}|${msg.location.latitude}, ${msg.location.longitude}`;
     } else {
@@ -498,19 +497,30 @@ const verifyMessage = async (
       fromMe: msg.fromMe,
       lastMessage:
         msg.type === "location"
-          ? "🢅 🌍 Localization - Ver no Google Maps"
+          ? "🢅 🗺 Localization - Ver no Google Maps"
           : `🢅 ${msg.body}`
     });
   } else {
     await ticket.update({
       lastMessage:
         msg.type === "location"
-          ? "🢇 🌍 Localization - Ver no Google Maps"
+          ? "🢇 🗺 Localization - Ver no Google Maps"
           : `🢇 ${msg.body}`
     });
   }
 
-  await CreateMessageService({ messageData });
+  try {
+    await CreateMessageService({ messageData });
+  } catch (error) {
+    console.error("Erro ao salvar mensagem no banco de dados:", error);
+    setTimeout(async () => {
+      try {
+        await CreateMessageService({ messageData });
+      } catch (retryError) {
+        console.error("Erro ao salvar mensagem na segunda tentativa:", retryError);
+      }
+    }, 1000);
+  }
 };
 
 let greetingCounts: { [contactId: string]: number } = {};
@@ -519,7 +529,7 @@ let resetGreetingCountTimeout: NodeJS.Timeout;
 
 const resetGreetingCounts = () => {
   greetingCounts = {};
-  console.log("Contadores de saudações resetados.");
+  console.info("Contadores de saudações resetados.");
 };
 
 const startGreetingCountResetTimer = () => {
@@ -636,7 +646,7 @@ const verifyQueue = async (
       const chat = await msg.getChat();
       await chat.sendStateTyping();
       greetingCounts[contactId]++;
-      console.log(`Contador de saudações para ${contactId}:`, greetingCounts[contactId]);
+      console.info(`Contador de saudações para ${contactId}:`, greetingCounts[contactId]);
       startGreetingCountResetTimer();
     }
 
@@ -671,10 +681,10 @@ const verifyQueue = async (
 
         debouncedSentMessage();
         greetingCounts[contactId]++;
-        console.log(`Contador de saudações para ${contactId}:`, greetingCounts[contactId]);
+        console.info(`Contador de saudações para ${contactId}:`, greetingCounts[contactId]);
         startGreetingCountResetTimer();
       } else {
-        console.log(`Limite de saudações atingido para ${contactId}.`);
+        console.info(`Limite de saudações atingido para ${contactId}.`);
       }
     } else {
       await UpdateTicketService({
@@ -720,26 +730,34 @@ const verifyQueue = async (
 };
 
 const isValidMsg = (msg: WbotMessage): boolean => {
-  if (msg.from === "status@broadcast") return false;
   if (
-    msg.type === "chat" ||
-    msg.type === "audio" ||
-    msg.type === "ptt" ||
-    msg.type === "video" ||
-    msg.type === "image" ||
-    msg.type === "location" ||
-    msg.type === "document" ||
-    msg.type === "vcard" ||
-    msg.type === "call_log" ||
-    msg.type === "poll_creation" ||
-    msg.type === "multi_vcard" ||
-    msg.type === "sticker" ||
+    msg.from === "status@broadcast" ||
     msg.type === "notification_template" ||
-    msg.type !== "e2e_notification" || // Ignore Empty Messages Generated When Someone Changes His Account from Personal to Business or vice-versa
-    msg.author !== null // Ignore Group Messages
-  )
+    msg.type === "e2e_notification" ||
+    msg.type === "notification"
+  ) {
+    console.log("Mensagem inválida - tipo de notificação ou broadcast:", msg.type);
+    return false;
+  }
+
+  const msgType = msg.type;
+  if (
+    msgType === "chat" ||
+    msgType === "audio" ||
+    msgType === "ptt" ||
+    msgType === "video" ||
+    msgType === "image" ||
+    msgType === "document" ||
+    msgType === "vcard" ||
+    msgType === "multi_vcard" ||
+    msgType === "sticker" ||
+    msgType === "location"
+  ) {
     return true;
-  return false;
+  }
+  
+  console.warn("Tipo de mensagem desconhecido:", msgType);
+  return true;
 };
 
 const handleMessage = async (
@@ -770,7 +788,6 @@ const handleMessage = async (
     }
   }
 
-  // IGNORAR MENSAGENS DE GRUPO
   const Settingdb = await Settings.findOne({
     where: { key: "CheckMsgIsGroup" }
   });
@@ -787,9 +804,8 @@ const handleMessage = async (
       return;
     }
   }
-  // IGNORAR MENSAGENS DE GRUPO
 
-  try {
+  try {    
     let msgContact: WbotContact;
     let groupContact: Contact | undefined;
     let userId;
@@ -882,7 +898,6 @@ const handleMessage = async (
 
     if (msg.type === "vcard") {
       try {
-        // Extrair informações do vCard de forma mais robusta
         const vCardContent = msg.body;
         const extractedData: {
           name: string;
@@ -892,13 +907,11 @@ const handleMessage = async (
           numbers: []
         };
         
-        // Extrair o nome (FN)
         const nameMatch = vCardContent.match(/FN[^:]*:(.*?)(?:\r?\n|$)/i);
         if (nameMatch && nameMatch[1]) {
           extractedData.name = nameMatch[1].trim();
         }
         
-        // Extrair todos os números de telefone (TEL)
         const telRegex = /TEL[^:]*:(.*?)(?:\r?\n|$)/gi;
         let telMatch;
         while ((telMatch = telRegex.exec(vCardContent)) !== null) {
@@ -907,23 +920,18 @@ const handleMessage = async (
           }
         }
         
-        // Extrair números no formato TEL;waid=5522992581997
         const waidRegex = /TEL;waid=(\d+)/gi;
         let waidMatch;
         let hasWaidNumbers = false;
         
         while ((waidMatch = waidRegex.exec(vCardContent)) !== null) {
           if (waidMatch[1] && waidMatch[1].trim()) {
-            // Adicionar o número limpo (apenas dígitos)
             extractedData.numbers.push("waid=" + waidMatch[1].trim());
             hasWaidNumbers = true;
           }
         }
         
-        // Se encontrou números no formato waid, não procurar outros formatos
-        // Isso garante que apenas números de WhatsApp válidos sejam salvos
         if (!hasWaidNumbers) {
-          // Extrair todos os números de telefone (TEL) apenas se não encontrou waid
           const telRegex = /TEL[^:]*:(.*?)(?:\r?\n|$)/gi;
           let telMatch;
           while ((telMatch = telRegex.exec(vCardContent)) !== null) {
@@ -932,7 +940,6 @@ const handleMessage = async (
             }
           }
           
-          // Se não encontrou números pelo padrão TEL, tenta encontrar por +
           if (extractedData.numbers.length === 0) {
             const array = vCardContent.split("\n");
             for (let index = 0; index < array.length; index++) {
@@ -949,18 +956,13 @@ const handleMessage = async (
           }
         }
         
-        // Criar contato(s) no sistema
         const contactsCreated = [];
         for (const phoneNumber of extractedData.numbers) {
           try {
-            // Garantir que phoneNumber seja tratado como string
             const phoneStr = String(phoneNumber);
             
-            // Verificar se é um número no formato waid=5522992581997
             const waidMatch = phoneStr.match(/waid=(\d+)/);
             
-            // Se for um número waid, extrair o número e salvar
-            // Se não for waid e hasWaidNumbers for true, pular este número
             if (waidMatch && waidMatch[1]) {
               const cleanNumber = waidMatch[1];
               
@@ -977,7 +979,6 @@ const handleMessage = async (
                 });
               }
             } else if (!hasWaidNumbers) {
-              // Se não encontrou nenhum número waid no vCard, processar números normais
               const cleanNumber = phoneStr.replace(/\D/g, "");
               
               if (cleanNumber) {
@@ -994,10 +995,8 @@ const handleMessage = async (
             }
           } catch (err) {
             if (err.message === "ERR_DUPLICATED_CONTACT") {
-              // Garantir que phoneNumber seja tratado como string
               const phoneStr = String(phoneNumber);
               
-              // Verificar se é um número no formato waid=5522992581997
               const waidMatch = phoneStr.match(/waid=(\d+)/);
               
               if (waidMatch && waidMatch[1]) {
@@ -1015,7 +1014,6 @@ const handleMessage = async (
                   isWaid: true
                 });
               } else if (!hasWaidNumbers) {
-                // Se não encontrou nenhum número waid no vCard, processar números normais
                 const cleanNumber = phoneStr.replace(/\D/g, "");
                 
                 const cont = await GetContactService({
@@ -1035,7 +1033,6 @@ const handleMessage = async (
           }
         }
         
-        // Substituir o corpo da mensagem com os dados estruturados
         if (contactsCreated.length > 0) {
           msg.body = JSON.stringify({
             name: extractedData.name || "Contato",
@@ -1246,6 +1243,8 @@ const handleMsgAck = async (msg: WbotMessage, ack: MessageAck) => {
   const io = getIO();
 
   try {
+    console.info(`Recebido evento de ACK: ID=${msg.id.id}, ACK=${ack}`);
+    
     const messageToUpdate = await Message.findByPk(msg.id.id, {
       include: [
         "contact",
@@ -1262,16 +1261,24 @@ const handleMsgAck = async (msg: WbotMessage, ack: MessageAck) => {
     });
 
     if (!messageToUpdate) {
+      console.warn(`Mensagem não encontrada no banco de dados: ${msg.id.id}`);
       return;
     }
 
+    const currentAck = messageToUpdate.ack || 0;
     const ackToUpdate = ack || 0;
-    await messageToUpdate.update({ ack: ackToUpdate });
+    
+    if (ackToUpdate > currentAck) {
+      console.log(`Atualizando ACK da mensagem ${msg.id.id}: ${currentAck} -> ${ackToUpdate}`);
+      await messageToUpdate.update({ ack: ackToUpdate });
 
-    io.to(messageToUpdate.ticketId.toString()).emit("appMessage", {
-      action: "update",
-      message: messageToUpdate
-    });
+      io.to(messageToUpdate.ticketId.toString()).emit("appMessage", {
+        action: "update",
+        message: messageToUpdate
+      });
+    } else {
+      console.log(`ACK ignorado: valor atual (${currentAck}) >= novo valor (${ackToUpdate})`);
+    }
   } catch (err) {
     Sentry.captureException(err);
     logger.error(`Error handling message ack. Err: ${err}`);
@@ -1317,6 +1324,42 @@ const handleMsgEdit = async (
   }
 };
 
+const updatePendingMessages = async (whatsappId: number): Promise<void> => {
+  try {
+    const oneHourAgo = new Date();
+    oneHourAgo.setHours(oneHourAgo.getHours() - 1);
+    
+    const pendingMessages = await Message.findAll({
+      where: {
+        fromMe: true,
+        ack: { [Op.in]: [0, 1] },
+        createdAt: { [Op.lt]: oneHourAgo },
+      },
+      include: [{
+        model: Ticket,
+        where: { whatsappId },
+        required: true
+      }],
+      limit: 100
+    });
+    
+    if (pendingMessages.length > 0) {      
+      const io = getIO();
+      
+      for (const message of pendingMessages) {
+        await message.update({ ack: 3 });
+        
+        io.to(message.ticketId.toString()).emit("appMessage", {
+          action: "update",
+          message
+        });
+      }
+    }
+  } catch (err) {
+    console.error("Erro ao atualizar mensagens antigas:", err);
+  }
+};
+
 const wbotMessageListener = async (wbot: Session): Promise<void> => {
   wbot.on("message_create", async msg => {
     handleMessage(msg, wbot);
@@ -1340,6 +1383,16 @@ const wbotMessageListener = async (wbot: Session): Promise<void> => {
       verifyRevoked(msgBody || "");
     }
   });
+  
+  if (wbot.id) {
+    setInterval(() => {
+      updatePendingMessages(wbot.id!);
+    }, 30 * 60 * 1000); // 30 minutos
+    
+    setTimeout(() => {
+      updatePendingMessages(wbot.id!);
+    }, 5 * 60 * 1000); // 5 minutos após iniciar
+  }
 };
 
 export { handleMessage, handleMsgAck, wbotMessageListener };

@@ -14,6 +14,7 @@ import ShowTicketService from "../services/TicketServices/ShowTicketService";
 import UpdateTicketService from "../services/TicketServices/UpdateTicketService";
 import SendWhatsAppMessage from "../services/WbotServices/SendWhatsAppMessage";
 import ShowWhatsAppService from "../services/WhatsappService/ShowWhatsAppService";
+import MarkMessagesAsReadService from "../services/MessageServices/MarkMessagesAsReadService";
 
 type IndexQuery = {
   searchParam: string;
@@ -55,7 +56,6 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
 
   if (queueIdsStringified) {
     try {
-      // Garantir que queueIds seja um array
       queueIds = Array.isArray(queueIdsStringified)
         ? queueIdsStringified.map(Number)
         : JSON.parse(queueIdsStringified);
@@ -105,6 +105,12 @@ export const show = async (req: Request, res: Response): Promise<Response> => {
   const { ticketId } = req.params;
 
   const contact = await ShowTicketService(ticketId);
+
+  try {
+    await MarkMessagesAsReadService({ ticketId });
+  } catch (error) {
+    console.error("Erro ao marcar mensagens como lidas:", error);
+  }
 
   return res.status(200).json(contact);
 };
