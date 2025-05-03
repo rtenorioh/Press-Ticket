@@ -102,7 +102,7 @@ finalizar() {
     {
         echo " "
         echo "**************************************************************"
-        echo "*                 PRESS TICKET®® - INSTALAÇÃO                *"
+        echo "*                 PRESS TICKET® - INSTALAÇÃO                *"
         echo "**************************************************************"
         echo " Versão Instalada: $VERSION                           "
         echo " Fuso Horário: $SELECTED_TZ                                 "
@@ -289,7 +289,7 @@ sleep 3
 {
     echo " "
     echo "**************************************************************"
-    echo "*               PRESS TICKET®® - LOG DE INSTALAÇÃO           *"
+    echo "*               PRESS TICKET® - LOG DE INSTALAÇÃO           *"
     echo "**************************************************************"
     echo " Versão a ser instalada: $VERSION                           "
     echo " Fuso Horário: $SELECTED_TZ                                 "
@@ -461,13 +461,13 @@ fi
 # Seção 4: Instalação do Node.js e Dependências
 
 # Baixando Node.js 20.x
-echo -e "${COLOR}Baixando Node.js 20.x...${RESET}" | tee -a "$LOG_FILE"
-curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash - | tee -a "$LOG_FILE"
+echo -e "${COLOR}Baixando Node.js 22.x...${RESET}" | tee -a "$LOG_FILE"
+curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash - | tee -a "$LOG_FILE"
 if [ $? -eq 0 ]; then
-    echo -e "${GREEN}Node.js 20.x baixado com sucesso.${RESET}" | tee -a "$LOG_FILE"
+    echo -e "${GREEN}Node.js 22.x baixado com sucesso.${RESET}" | tee -a "$LOG_FILE"
 else
-    echo -e "${RED}Erro ao baixar Node.js 20.x. Verifique sua conexão com a internet.${RESET}"
-    finalizar "${RED}Erro ao baixar Node.js 20.x. Verifique sua conexão com a internet.${RESET}" 1
+    echo -e "${RED}Erro ao baixar Node.js 22.x. Verifique sua conexão com a internet.${RESET}"
+    finalizar "${RED}Erro ao baixar Node.js 22.x. Verifique sua conexão com a internet.${RESET}" 1
 fi
 
 # Instalando Node.js
