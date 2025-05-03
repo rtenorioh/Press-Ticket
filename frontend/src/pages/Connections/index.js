@@ -42,6 +42,7 @@ import React, { useCallback, useContext, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import ToastManager from "../../utils/toastManager";
 import ConfirmationModal from "../../components/ConfirmationModal";
 import MainContainer from "../../components/MainContainer";
 import MainHeader from "../../components/MainHeader";
@@ -365,27 +366,14 @@ const Connections = () => {
 				setLoadingActions(prev => ({ ...prev, [whatsAppId]: 'disconnect' }));
 				setActionMessages(prev => ({ ...prev, [whatsAppId]: 'Desconectando sessão...' }));
 				
-				const disconnectToastId = toast.info('Desconectando sessão do WhatsApp...', {
-					autoClose: false,
-					closeButton: false,
-					draggable: false,
-				});
-				
+				ToastManager.info('Desconectando sessão do WhatsApp...', `disconnect-${whatsAppId}`, { autoClose: false });
+			
 				await api.delete(`/whatsappsession/${whatsAppId}`);
 				
-				toast.update(disconnectToastId, {
-					render: 'Sessão desconectada com sucesso! Aguarde...',
-					type: toast.TYPE.SUCCESS,
-				});
+				setLoadingActions(prev => ({ ...prev, [whatsAppId]: undefined }));
+				setActionMessages(prev => ({ ...prev, [whatsAppId]: undefined }));
 				
-				setTimeout(() => {
-					setLoadingActions(prev => ({ ...prev, [whatsAppId]: undefined }));
-					setActionMessages(prev => ({ ...prev, [whatsAppId]: undefined }));
-					
-					toast.dismiss(disconnectToastId);
-					
-					toast.success('Sessão desconectada com sucesso!');
-				}, 3000);
+				ToastManager.success('Sessão desconectada com sucesso!', `disconnect-success-${whatsAppId}`);
 			} catch (err) {
 				toastError(err, t);
 				setLoadingActions(prev => ({ ...prev, [whatsAppId]: undefined }));
@@ -398,27 +386,14 @@ const Connections = () => {
 				setLoadingActions(prev => ({ ...prev, [whatsAppId]: 'delete' }));
 				setActionMessages(prev => ({ ...prev, [whatsAppId]: 'Excluindo canal...' }));
 				
-				const deleteToastId = toast.info('Excluindo canal do WhatsApp...', {
-					autoClose: false,
-					closeButton: false,
-					draggable: false,
-				});
+				ToastManager.info('Excluindo canal do WhatsApp...', `delete-${whatsAppId}`, { autoClose: false });
 				
 				await api.delete(`/whatsapp/${whatsAppId}`);
 				
-				toast.update(deleteToastId, {
-					render: 'Canal excluído com sucesso! Aguarde...',
-					type: toast.TYPE.SUCCESS,
-				});
+				setLoadingActions(prev => ({ ...prev, [whatsAppId]: undefined }));
+				setActionMessages(prev => ({ ...prev, [whatsAppId]: undefined }));
 				
-				setTimeout(() => {
-					setLoadingActions(prev => ({ ...prev, [whatsAppId]: undefined }));
-					setActionMessages(prev => ({ ...prev, [whatsAppId]: undefined }));
-					
-					toast.dismiss(deleteToastId);
-					
-					toast.success(t("connections.toasts.deleted"));
-				}, 3000);
+				ToastManager.success('Canal excluído com sucesso!', `delete-success-${whatsAppId}`);
 			} catch (err) {
 				toastError(err);
 				setLoadingActions(prev => ({ ...prev, [whatsAppId]: undefined }));
