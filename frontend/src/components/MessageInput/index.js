@@ -418,7 +418,6 @@ const MessageInput = ({ ticketStatus }) => {
     };
   }, [onDragEnter]);
   
-  // Adicionar event listeners para drag and drop em todo o componente
   useEffect(() => {
     const wrapper = mainWrapperRef.current;
     if (!wrapper) return;
@@ -713,6 +712,12 @@ const MessageInput = ({ ticketStatus }) => {
     setLoading(false);
     setReplyingMessage(null);
     setEditingMessage(null);
+    
+    setTimeout(() => {
+      if (inputRef.current) {
+        inputRef.current.focus();
+      }
+    }, 100);
   };
 
   const handleStartRecording = async () => {
@@ -904,7 +909,6 @@ const MessageInput = ({ ticketStatus }) => {
                     component="span"
                     disabled={loading || recording || ticketStatus !== "open"}
                     size="medium"
-                    // Estilo aplicado globalmente no NewMessageBox
                   >
                     <AttachFile />
                   </IconButton>
