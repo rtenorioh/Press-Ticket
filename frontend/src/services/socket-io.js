@@ -9,7 +9,6 @@ const connectToSocket = () => {
             return null;
         }
 
-        // Tenta fazer o parse do token
         let parsedToken;
         try {
             parsedToken = JSON.parse(token);
@@ -18,7 +17,6 @@ const connectToSocket = () => {
             return null;
         }
 
-        // Verifica se o token está expirado
         try {
             const tokenData = JSON.parse(atob(parsedToken.split('.')[1]));
             if (tokenData.exp * 1000 < Date.now()) {
@@ -54,8 +52,8 @@ const connectToSocket = () => {
                 error.message.includes("jwt malformed")) {
                 console.warn("Problema com o token, desconectando socket");
                 socket.disconnect();
-                localStorage.removeItem("token"); // Remove o token inválido
-                window.location.reload(); // Força um reload para limpar o estado
+                localStorage.removeItem("token");
+                window.location.reload();
             }
         });
 

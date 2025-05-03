@@ -83,7 +83,6 @@ const ComponentSettings = ({ settings, getSettingValue, handleChangeBooleanSetti
         settingsChunks.push(booleanSettings.slice(i, i + 8));
     }
 
-    // Agrupar configurações por categorias para melhor organização
     const groupedSettings = [
         {
             title: t("settings.general.ticketManagement"),

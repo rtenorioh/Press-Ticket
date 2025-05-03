@@ -68,7 +68,6 @@ const NewTicketModalPageContact = ({ modalOpen, onClose, initialContact }) => {
   }, [onClose]);
 
   const handleCreateTicket = useCallback(async () => {
-    console.log("Contato recebido no modal:", contact);
     if (!contact?.id) {
       toastError({ message: "Contato sem ID! Não é possível criar o ticket." });
       return;

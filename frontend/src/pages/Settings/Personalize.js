@@ -76,7 +76,7 @@ const StyledCard = styled(Card)(({ theme }) => ({
     borderRadius: theme.shape.borderRadius,
     boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
     transition: "all 0.2s ease",
-    overflow: "visible", // Garante que o botão de excluir não seja cortado
+    overflow: "visible",
     "&:hover": {
         backgroundColor: theme.palette.action.hover,
         boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
@@ -93,7 +93,7 @@ const CardMedia = styled('div')({
     top: 0,
     left: 0,
     zIndex: 1,
-    pointerEvents: "none", // Permite que os cliques passem através do CardMedia
+    pointerEvents: "none",
 });
 
 const DeleteIconButton = styled(IconButton)(({ theme }) => ({
@@ -440,20 +440,14 @@ const PersonalizeSettings = ({ toggleTheme, onThemeConfigUpdate }) => {
 
             if (response.status === 200) {
                 toast.success(`Cores do tema ${theme} salvas com sucesso!`);
-                // Usar onThemeConfigUpdate para atualizar a configuração do tema
                 if (typeof onThemeConfigUpdate === 'function') {
                     onThemeConfigUpdate(theme, colorsToSave);
                 }
                 
-                // Verificar se a função toggleTheme existe e é uma função
                 if (toggleTheme && typeof toggleTheme === 'function') {
-                    // Se estamos no tema atual, precisamos alternar para aplicar as mudanças
                     const currentTheme = localStorage.getItem('theme') || 'light';
                     if (currentTheme === theme) {
                         try {
-                            // Aplicar as mudanças sem alternar o tema
-                            // Em vez de alternar duas vezes, vamos apenas atualizar a página
-                            // após um pequeno atraso para garantir que as configurações sejam salvas
                             setTimeout(() => {
                                 window.location.reload();
                             }, 1000);

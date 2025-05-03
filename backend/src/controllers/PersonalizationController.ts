@@ -52,8 +52,6 @@ export const createOrUpdateLogos = async (
 ): Promise<Response> => {
   try {
     const { theme } = req.params;
-    console.log("Recebendo requisição de upload para tema:", theme);
-    console.log("Arquivos recebidos:", req.files);
 
     const personalizationData: PersonalizationData = {
       theme
@@ -64,15 +62,12 @@ export const createOrUpdateLogos = async (
 
       if (files.favico && files.favico.length > 0) {
         personalizationData.favico = path.basename(files.favico[0].path);
-        console.log("Arquivo favico processado:", personalizationData.favico);
       }
       if (files.logo && files.logo.length > 0) {
         personalizationData.logo = path.basename(files.logo[0].path);
-        console.log("Arquivo logo processado:", personalizationData.logo);
       }
       if (files.logoTicket && files.logoTicket.length > 0) {
         personalizationData.logoTicket = path.basename(files.logoTicket[0].path);
-        console.log("Arquivo logoTicket processado:", personalizationData.logoTicket);
       }
     }
 
@@ -154,7 +149,6 @@ export const deleteLogo = async (
       try {
         if (fs.existsSync(filePath)) {
           fs.unlinkSync(filePath);
-          console.log(`Arquivo ${filePath} deletado com sucesso`);
         }
       } catch (err) {
         console.error(`Erro ao deletar arquivo ${filePath}:`, err);

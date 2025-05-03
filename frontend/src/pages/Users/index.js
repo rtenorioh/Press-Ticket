@@ -402,7 +402,7 @@ const Users = () => {
                 sx={{
                   borderRadius: 2,
                   px: { xs: 1, sm: 2 },
-                  height: '40px', // Mesma altura do campo de pesquisa
+                  height: '40px',
                   minWidth: '40px',
                   display: 'flex',
                   alignItems: 'center',
