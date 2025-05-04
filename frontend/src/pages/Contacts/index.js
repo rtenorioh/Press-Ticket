@@ -225,11 +225,15 @@ const Contacts = () => {
 
         if (ticketData.hasOpenTicket) {
           const assignedUserName = ticketData.ticket?.user?.name || "Atendente desconhecido";
+          const assignedUserChannel = ticketData.ticket?.whatsapp?.name || "Canal desconhecido";
+          const ticketCreatedAt = ticketData.ticket?.createdAt ? new Date(ticketData.ticket.createdAt).toLocaleDateString('pt-BR') : "Data desconhecida";
 
           setLoading(false);
           toastError({
             message: t("contacts.errors.ticketAlreadyOpen", {
               userName: assignedUserName,
+              userChannel: assignedUserChannel,
+              ticketCreatedAt: ticketCreatedAt,
             }),
           });
           return;

@@ -113,11 +113,15 @@ const AcceptTicketWithouSelectQueue = ({ modalOpen, onClose, ticketId }) => {
 			const openTicket = await checkOpenTickets(contactId);
 			if (openTicket) {
 				const assignedUserName = openTicket.user?.name || "Atendente desconhecido";
+				const assignedUserChannel = openTicket.whatsapp?.name || "Canal desconhecido";
+				const ticketCreatedAt = openTicket.createdAt ? new Date(openTicket.createdAt).toLocaleDateString('pt-BR') : "Data desconhecida";
 
 				setLoading(false);
 				toastError({
 					message: t("ticketsList.errors.ticketAlreadyOpen", {
 						userName: assignedUserName,
+						userChannel: assignedUserChannel,
+						ticketCreatedAt: ticketCreatedAt,
 					}),
 				});
 				return;

@@ -153,7 +153,7 @@ const messages = {
           deletedAll: "Todos contatos excluídos com sucesso!",
         },
         errors: {
-          ticketAlreadyOpen: "Já existe um ticket aberto para este contato, atribuído a {{userName}}."
+          ticketAlreadyOpen: "Já existe um ticket aberto para este contato, atribuído ao Atendente: *{{userName}}* no Canal: *{{userChannel}}* criado em: *{{ticketCreatedAt}}*."
         },
         searchPlaceholder: "Pesquisar...",
         confirmationModal: {
@@ -1082,7 +1082,7 @@ const messages = {
           selectQueue: "Selecione um setor"
         },
         errors: {
-          ticketAlreadyOpen: "Já existe um ticket aberto para este contato com o atendente {{userName}}."
+          ticketAlreadyOpen: "Já existe um ticket aberto para este contato, atribuído ao Atendente: *{{userName}}* no Canal: *{{userChannel}}* criado em: *{{ticketCreatedAt}}*."
         }
       },
       ticketOptionsMenu: {

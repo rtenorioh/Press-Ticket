@@ -189,10 +189,17 @@ export const checkOpenTickets = async (
         ticket: {
           id: openTicket.id,
           status: openTicket.status,
+          createdAt: openTicket.createdAt,
           user: openTicket.user
             ? {
                 id: openTicket.user.id,
                 name: openTicket.user.name
+              }
+            : null,
+          whatsapp: openTicket.whatsapp
+            ? {
+                id: openTicket.whatsapp.id,
+                name: openTicket.whatsapp.name
               }
             : null
         }

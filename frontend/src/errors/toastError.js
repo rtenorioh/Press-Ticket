@@ -1,4 +1,5 @@
 import { toast } from "react-toastify";
+import WhatsMarked from "react-whatsmarked";
 
 const toastError = (err, t) => {
 	const errorMsg =
@@ -10,11 +11,11 @@ const toastError = (err, t) => {
 			? t(translatedMsgKey)
 			: errorMsg;
 
-		toast.error(translatedMsg, {
+		toast.error(<WhatsMarked>{translatedMsg}</WhatsMarked>, {
 			toastId: errorMsg,
 		});
 	} else if (err?.message) {
-		toast.error(err.message, {
+		toast.error(<WhatsMarked>{err.message}</WhatsMarked>, {
 			toastId: err.message,
 		});
 	} else {
@@ -22,7 +23,7 @@ const toastError = (err, t) => {
 			? t("backendErrors.genericError")
 			: "An unexpected error occurred!";
 
-		toast.error(fallbackMsg, {
+		toast.error(<WhatsMarked>{fallbackMsg}</WhatsMarked>, {
 			toastId: "genericError",
 		});
 	}
