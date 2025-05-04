@@ -8,6 +8,19 @@ if [ "$EUID" -ne 0 ]; then
     exit 1
 fi
 
+# Verificar se há pelo menos 3GB de memória RAM livre
+FREE_MEM=$(free -m | awk '/^Mem:/ {print $7}')
+MIN_MEM=3000 # 3GB em MB
+
+if [ "$FREE_MEM" -lt "$MIN_MEM" ]; then
+    echo "Erro: É necessário ter pelo menos 3GB de memória RAM livre para continuar."
+    echo "Memória livre atual: ${FREE_MEM}MB"
+    echo "Libere mais memória e tente novamente."
+    exit 1
+fi
+
+echo "Verificação de memória: OK (${FREE_MEM}MB livre)"
+
 COLOR="\e[38;5;92m"
 GREEN="\e[32m"
 YELLOW="\e[33m"
@@ -460,7 +473,7 @@ fi
 
 # Seção 4: Instalação do Node.js e Dependências
 
-# Baixando Node.js 20.x
+# Baixando Node.js 22.x
 echo -e "${COLOR}Baixando Node.js 22.x...${RESET}" | tee -a "$LOG_FILE"
 curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash - | tee -a "$LOG_FILE"
 if [ $? -eq 0 ]; then
@@ -659,6 +672,9 @@ fi
 echo -e "${COLOR}Criando o arquivo .env com as configurações...${RESET}" | tee -a "$LOG_FILE"
 cat <<EOF >"$DEPLOY_HOME/$NOME_EMPRESA/backend/.env"
 NODE_ENV=production
+
+# Nome da Empresa
+COMPANY_NAME=$NOME_EMPRESA
 
 # URLs e Portas
 BACKEND_URL=https://$URL_BACKEND

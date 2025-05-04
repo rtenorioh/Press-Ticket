@@ -21,6 +21,7 @@ import PeopleAltOutlined from "@mui/icons-material/PeopleAltOutlined";
 import QuestionAnswerOutlined from "@mui/icons-material/QuestionAnswerOutlined";
 import SettingsOutlined from "@mui/icons-material/SettingsOutlined";
 import SyncAlt from "@mui/icons-material/SyncAlt";
+import StorageIcon from "@mui/icons-material/Storage";
 import VpnKeyRounded from "@mui/icons-material/VpnKeyRounded";
 import WhatsApp from "@mui/icons-material/WhatsApp";
 import BugReportOutlined from "@mui/icons-material/BugReportOutlined";
@@ -278,6 +279,13 @@ const MainListItems = (props) => {
                 primary={t("mainDrawer.listItems.errorLogs")}
                 icon={<BugReportOutlined />}
                 active={location.pathname === '/errorLogs'}
+                drawerClose={drawerClose}
+              />
+              <ListItemLink
+                to="/diskSpace"
+                primary={t("mainDrawer.listItems.diskSpace")}
+                icon={<StorageIcon />}
+                active={location.pathname === '/diskSpace'}
                 drawerClose={drawerClose}
               />
             </>

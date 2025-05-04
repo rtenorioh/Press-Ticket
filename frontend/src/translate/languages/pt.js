@@ -297,6 +297,19 @@ const messages = {
           title: "Usuários Online"
         },
       },
+      diskSpace: {
+        title: "Espaço em Disco",
+        systemFolder: "Pasta do Sistema",
+        used: "utilizado",
+        healthy: "Saudável",
+        warning: "Atenção",
+        critical: "Crítico",
+        folderSize: "Tamanho da Pasta",
+        freeSpace: "Espaço Livre",
+        totalSpace: "Espaço Total",
+        criticalWarning: "Atenção: O espaço em disco está em estado crítico. Recomendamos liberar espaço imediatamente para evitar problemas no sistema.",
+        warningMessage: "Atenção: O espaço em disco está ficando limitado. Considere liberar espaço para evitar problemas futuros.",
+      },
       errorLogs: {
         title: "Logs de Erro",
         searchPlaceholder: "Buscar por mensagem de erro...",
@@ -449,6 +462,7 @@ const messages = {
           settings: "Configurações",
           system: "Sistema",
           errorLogs: "Logs de Erro",
+          diskSpace: "Espaço em Disco",
         },
         appBar: {
           message: {

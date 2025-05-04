@@ -1,4 +1,18 @@
 #!/bin/bash
+
+# Verificar se há pelo menos 3GB de memória RAM livre
+FREE_MEM=$(free -m | awk '/^Mem:/ {print $7}')
+MIN_MEM=3000 # 3GB em MB
+
+if [ "$FREE_MEM" -lt "$MIN_MEM" ]; then
+    echo "Erro: É necessário ter pelo menos 3GB de memória RAM livre para continuar."
+    echo "Memória livre atual: ${FREE_MEM}MB"
+    echo "Libere mais memória e tente novamente."
+    exit 1
+fi
+
+echo "Verificação de memória: OK (${FREE_MEM}MB livre)"
+
 # Obter a versão automaticamente
 VERSION=$(git ls-remote --tags https://github.com/rtenorioh/Press-Ticket.git | awk -F/ '{print $NF}' | sort -V | tail -n1 || echo "unknown")
 
@@ -374,6 +388,17 @@ if [ -f "$ENV_FILE" ]; then
             sed -i '1iNODE_ENV=production' "$ENV_FILE"
             echo "A variável NODE_ENV=production foi adicionada no início do arquivo .env." | tee -a "$LOG_FILE"
         fi
+    fi
+    
+    # Verifica se a variável COMPANY_NAME existe no arquivo .env
+    if grep -q "^COMPANY_NAME=" "$ENV_FILE"; then
+        echo "A variável COMPANY_NAME já existe no arquivo .env. Nenhuma alteração necessária." | tee -a "$LOG_FILE"
+    else
+        # Obter o nome da empresa a partir do diretório atual
+        NOME_EMPRESA=$(basename "$(dirname "$ENV_FILE")")
+        echo "# Nome da Empresa" >> "$ENV_FILE"
+        echo "COMPANY_NAME=$NOME_EMPRESA" >> "$ENV_FILE"
+        echo "A variável COMPANY_NAME=$NOME_EMPRESA foi adicionada ao arquivo .env com sucesso." | tee -a "$LOG_FILE"
     fi
 
     # Verifica se a variável WEBHOOK existe no arquivo .env

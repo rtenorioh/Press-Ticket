@@ -108,10 +108,10 @@ su deploy
 
 ## Seção 4: Instalação do Node.js e Dependências
 
-### 4.1 Baixando Node.js 20.x
+### 4.1 Baixando Node.js 22.x
 
 ```
-curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
 ```
 
 ### 4.2 Instalando Node.js
@@ -185,6 +185,9 @@ openssl rand -base64 32
 ```bash
 NODE_ENV=production
 
+#Nome da Empresa
+COMPANY_NAME=press_ticket
+
 #URLs e Portas
 BACKEND_URL=https://back.pressticket.com.br
 FRONTEND_URL=https://ticket.pressticket.com.br
@@ -212,8 +215,8 @@ EMAIL_USER=seu.email@gmail.com
 EMAIL_PASS=suasenha
 
 #ID do PM2 do Frontend e Backend para poder ser restartado na tela de Conexões
-PM2_FRONTEND=0
-PM2_BACKEND=1
+PM2_FRONTEND=1
+PM2_BACKEND=0
 
 #Modo DEMO que evita alterar algumas funções, para ativar: ON
 DEMO=OFF
