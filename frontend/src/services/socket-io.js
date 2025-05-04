@@ -1,7 +1,13 @@
 import openSocket from "socket.io-client";
 import { getBackendUrl } from "../config";
 
+let socketInstance = null;
+
 const connectToSocket = () => {
+    if (socketInstance && socketInstance.connected) {
+        return socketInstance;
+    }
+
     try {
         const token = localStorage.getItem("token");
         if (!token) {
@@ -18,7 +24,7 @@ const connectToSocket = () => {
         }
 
         try {
-            const tokenData = JSON.parse(atob(parsedToken.split('.')[1]));
+            const tokenData = JSON.parse(atob(parsedToken.split('.')[ 1 ]));
             if (tokenData.exp * 1000 < Date.now()) {
                 console.warn("Token expirado, socket não será inicializado");
                 return null;
@@ -28,45 +34,67 @@ const connectToSocket = () => {
             return null;
         }
 
-        const socket = openSocket(getBackendUrl(), {
-            transports: ["websocket"],
+        if (socketInstance) {
+            socketInstance.disconnect();
+        }
+        socketInstance = openSocket(getBackendUrl(), {
+            transports: ["websocket", "polling"],
             query: {
                 token: parsedToken
             },
             reconnection: true,
-            reconnectionDelay: 5000,
-            reconnectionAttempts: 5,
-            forceNew: false,
-            timeout: 10000
+            reconnectionDelay: 2000,
+            reconnectionAttempts: 10,
+            forceNew: true,
+            timeout: 20000
         });
 
-        socket.on("connect", () => {
+        socketInstance.on("connect", () => {
             console.log("Socket conectado com sucesso");
-        });
-
-        socket.on("connect_error", (error) => {
-            console.error("Erro na conexão do socket:", error.message);
-            
-            if (error.message.includes("jwt expired") || 
-                error.message.includes("invalid token") || 
-                error.message.includes("jwt malformed")) {
-                console.warn("Problema com o token, desconectando socket");
-                socket.disconnect();
-                localStorage.removeItem("token");
+            const event = new CustomEvent('socketConnected');
+            window.dispatchEvent(event);
+            if (localStorage.getItem('forceReloadTickets') === 'true') {
+                localStorage.removeItem('forceReloadTickets');
                 window.location.reload();
             }
         });
 
-        socket.on("disconnect", (reason) => {
-            console.log("Socket desconectado:", reason);
-            if (reason === "io server disconnect" || 
-                reason === "forced close" || 
-                reason === "ping timeout") {
-                socket.disconnect();
+        socketInstance.on("connect_error", (error) => {
+            console.error("Erro na conexão do socket:", error.message);
+            if (error.message.includes("jwt expired") || 
+                error.message.includes("invalid token") || 
+                error.message.includes("jwt malformed")) {
+                console.warn("Problema com o token, desconectando socket");
+                socketInstance.disconnect();
+                localStorage.removeItem("token");
+                window.location.reload();
+            } else {
+                setTimeout(() => {
+                    if (socketInstance) {
+                        socketInstance.connect();
+                    }
+                }, 3000);
             }
         });
 
-        return socket;
+        socketInstance.on("disconnect", (reason) => {
+            console.log("Socket desconectado:", reason);           
+            const event = new CustomEvent('socketDisconnected', { detail: { reason } });
+            window.dispatchEvent(event);
+            localStorage.setItem('forceReloadTickets', 'true');
+            if (reason === "io server disconnect" || 
+                reason === "forced close" || 
+                reason === "ping timeout") {
+                setTimeout(() => {
+                    if (socketInstance) {
+                        console.log("Tentando reconectar socket após desconexão:", reason);
+                        socketInstance.connect();
+                    }
+                }, 3000);
+            }
+        });
+
+        return socketInstance;
     } catch (err) {
         console.error("Erro ao conectar socket:", err);
         return null;
