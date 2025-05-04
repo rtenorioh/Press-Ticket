@@ -93,6 +93,16 @@ const ErrorLogService = {
     }
   },
 
+  async findById(id) {
+    try {
+      const response = await api.get(`/error-logs/${id}`);
+      return response;
+    } catch (error) {
+      console.error(`Erro ao buscar detalhes do log ${id}:`, error);
+      throw error;
+    }
+  },
+
   async cleanupOldLogs(days = 30) {
     try {
       const response = await api.delete(`/error-logs/cleanup?days=${days}`);
@@ -100,6 +110,54 @@ const ErrorLogService = {
     } catch (error) {
       console.error("Erro ao limpar logs antigos:", error);
       return { message: "Não foi possível limpar os logs antigos" };
+    }
+  },
+
+  async deleteOldLogs(days = 30) {
+    try {
+      const response = await api.delete(`/error-logs/cleanup?days=${days}`);
+      return response.data;
+    } catch (error) {
+      console.error("Erro ao excluir logs antigos:", error);
+      throw error;
+    }
+  },
+
+  async downloadLogs(params = {}) {
+    try {
+      const { data } = await api.get("/error-logs", { params });
+      
+      if (!data || !data.logs || !data.logs.length) {
+        throw new Error("Nenhum log encontrado para download");
+      }
+      
+      const textContent = this.generateTextFile(data.logs);
+      const blob = new Blob([textContent], { type: "text/plain;charset=utf-8" });
+      
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", `press-ticket-logs-${new Date().toISOString().split("T")[0]}.txt`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      
+      return { success: true, message: "Logs baixados com sucesso" };
+    } catch (error) {
+      console.error("Erro ao baixar logs:", error);
+      throw error;
+    }
+  },
+
+  getLocalLogById(id) {
+    try {
+      const localLogs = JSON.parse(localStorage.getItem("errorLogs") || "[]");
+      const log = localLogs.find(log => log.id === parseInt(id));
+      return log || null;
+    } catch (error) {
+      console.error(`Erro ao buscar log local ${id}:`, error);
+      return null;
     }
   },
 
