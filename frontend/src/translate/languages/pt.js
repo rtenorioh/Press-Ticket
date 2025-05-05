@@ -310,6 +310,27 @@ const messages = {
         criticalWarning: "Atenção: O espaço em disco está em estado crítico. Recomendamos liberar espaço imediatamente para evitar problemas no sistema.",
         warningMessage: "Atenção: O espaço em disco está ficando limitado. Considere liberar espaço para evitar problemas futuros.",
       },
+      memoryUsage: {
+        title: "Uso de Memória RAM",
+        systemMemory: "Memória do Sistema",
+        used: "utilizado",
+        healthy: "Saudável",
+        warning: "Atenção",
+        critical: "Crítico",
+        totalMemory: "Memória Total",
+        usedMemory: "Memória Utilizada",
+        freeMemory: "Memória Livre",
+        cachedMemory: "Memória em Cache",
+        availableMemory: "Memória Disponível",
+        criticalWarning: "Atenção: O uso de memória RAM está em estado crítico. Recomendamos reiniciar alguns serviços ou o sistema para evitar problemas.",
+        warningMessage: "Atenção: O uso de memória RAM está alto. Monitore o sistema para evitar problemas de desempenho.",
+        topProcesses: "Processos com Maior Consumo",
+        pid: "PID",
+        process: "Processo",
+        memoryUsage: "Uso de Memória",
+        percentage: "Porcentagem",
+        noProcesses: "Nenhum processo encontrado."
+      },
       errorLogs: {
         title: "Logs de Erro",
         searchPlaceholder: "Buscar por mensagem de erro...",
@@ -463,6 +484,8 @@ const messages = {
           system: "Sistema",
           errorLogs: "Logs de Erro",
           diskSpace: "Espaço em Disco",
+          memoryUsage: "Uso de Memória RAM",
+          logout: "Sair",
         },
         appBar: {
           message: {
