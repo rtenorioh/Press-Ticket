@@ -18,6 +18,7 @@ import DashboardOutlined from "@mui/icons-material/DashboardOutlined";
 import LocalOffer from "@mui/icons-material/LocalOffer";
 import MenuBook from "@mui/icons-material/MenuBook";
 import MemoryIcon from '@mui/icons-material/Memory';
+import CpuIcon from '@mui/icons-material/DeveloperBoard';
 import PeopleAltOutlined from "@mui/icons-material/PeopleAltOutlined";
 import QuestionAnswerOutlined from "@mui/icons-material/QuestionAnswerOutlined";
 import SettingsOutlined from "@mui/icons-material/SettingsOutlined";
@@ -294,6 +295,13 @@ const MainListItems = (props) => {
                 primary={t("mainDrawer.listItems.memoryUsage")}
                 icon={<MemoryIcon />}
                 active={location.pathname === '/memoryUsage'}
+                drawerClose={drawerClose}
+              />
+              <ListItemLink
+                to="/cpuUsage"
+                primary={t("mainDrawer.listItems.cpuUsage")}
+                icon={<CpuIcon />}
+                active={location.pathname === '/cpuUsage'}
                 drawerClose={drawerClose}
               />
             </>

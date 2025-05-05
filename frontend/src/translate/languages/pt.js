@@ -189,6 +189,22 @@ const messages = {
         copy: "Copiar",
         copied: "Copiado"
       },
+      cpuUsage: {
+        title: "Uso de CPU",
+        infoIcon: "CPU do Sistema",
+        modelCPU: "Modelo",
+        cores: "Núcleos",
+        threads: "Threads",
+        frequency: "Frequência",
+        uptime: "Uptime",
+        topProcesses: "Processos com Maior Consumo de CPU",
+        pid: "PID",
+        process: "Processo",
+        user: "Usuário",
+        cpuUsage: "Uso de CPU",
+        cpuTime: "Tempo de CPU",
+        noProcessesFound: "Nenhum processo encontrado",
+      },
       dashboard: {
         messages: {
           inAttendance: {
@@ -485,6 +501,7 @@ const messages = {
           errorLogs: "Logs de Erro",
           diskSpace: "Espaço em Disco",
           memoryUsage: "Uso de Memória RAM",
+          cpuUsage: "Uso de CPU",
           logout: "Sair",
         },
         appBar: {

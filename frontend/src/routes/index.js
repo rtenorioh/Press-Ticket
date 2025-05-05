@@ -9,6 +9,7 @@ import ApiDocs from "../pages/ApiDocs/";
 import ApiKey from "../pages/ApiKey/";
 import Connections from "../pages/Connections/";
 import Contacts from "../pages/Contacts/";
+import CpuUsage from "../pages/CpuUsage/";
 import Dashboard from "../pages/Dashboard/";
 import DiskSpace from "../pages/DiskSpace/";
 import MemoryUsage from "../pages/MemoryUsage/";
@@ -60,6 +61,7 @@ const AppRoutes = ({ toggleTheme, onThemeConfigUpdate }) => {
             <Route path="errorLogs" element={<ErrorLogs />} />
             <Route path="diskSpace" element={<DiskSpace />} />
             <Route path="memoryUsage" element={<MemoryUsage />} />
+            <Route path="cpuUsage" element={<CpuUsage />} />
           </Route>
         </Routes>
         <ToastContainer 
