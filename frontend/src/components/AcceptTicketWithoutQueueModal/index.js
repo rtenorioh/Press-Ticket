@@ -177,7 +177,7 @@ const AcceptTicketWithouSelectQueue = ({ modalOpen, onClose, ticketId }) => {
 						<MenuItem value={''}>
 							<em>{t("ticketsList.acceptModal.selectQueue")}</em>
 						</MenuItem>
-						{user.queues.map((queue) => (
+						{user?.queues?.map((queue) => (
 							<MenuItem key={queue.id} value={queue.id}>{queue.name}</MenuItem>
 						))}
 					</Select>

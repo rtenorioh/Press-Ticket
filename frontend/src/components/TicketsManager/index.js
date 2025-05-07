@@ -395,11 +395,11 @@ const TicketsManager = () => {
       </TabPanelStyled>
       <TabPanelStyled value={tab} name="closed">
       <TicketsList
-          status="open"
+          status="closed"
           showAll={showAllTickets}
           selectedQueueIds={selectedQueueIds}
-          updateCount={(val) => setOpenCount(val)}
-          style={applyPanelStyle("open")}
+          updateCount={(val) => setClosedCount(val)}
+          style={applyPanelStyle("closed")}
         />
         <TicketsList
           status="pending"
@@ -407,12 +407,6 @@ const TicketsManager = () => {
           selectedQueueIds={selectedQueueIds}
           updateCount={(val) => setPendingCount(val)}
           style={applyPanelStyle("pending")}
-        />
-        <TicketsList
-          status="closed"
-          selectedQueueIds={selectedQueueIds}
-          updateCount={(val) => setClosedCount(val)}
-          style={applyPanelStyle("closed")}
         />
       </TabPanelStyled>
       <TabPanelStyled value={tab} name="search">

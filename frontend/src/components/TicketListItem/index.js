@@ -251,7 +251,7 @@ const TicketListItem = ({ ticket, filteredTags }) => {
 	const queueName = selectedTicket => {
 		let name = null;
 		let color = null;
-		user.queues.forEach(userQueue => {
+		user?.queues?.forEach(userQueue => {
 			if (userQueue.id === selectedTicket.queueId) {
 				name = userQueue.name;
 				color = userQueue.color;

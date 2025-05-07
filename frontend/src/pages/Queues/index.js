@@ -260,7 +260,7 @@ const Queues = () => {
             {loading ? (
               <TableRowSkeleton columns={7} />
             ) : (
-              queues.map((queue) => (
+              queues?.map((queue) => (
                 <StyledTableRow key={queue.id}>
                   <StyledTableCell align="center">{queue.id}</StyledTableCell>
                   <StyledTableCell align="center">{queue.name}</StyledTableCell>

@@ -131,7 +131,7 @@ const NotificationsPopOver = () => {
 		socket.on("connect", () => socket.emit("joinNotification"));
 
 		socket.on("appMessage", (data) => {
-			const UserQueues = user.queues.findIndex(
+			const UserQueues = user?.queues?.findIndex(
 				(users) => users.id === data.ticket.queueId
 			);
 			if (

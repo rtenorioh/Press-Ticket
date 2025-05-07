@@ -177,7 +177,7 @@ const TransferTicketModal = ({ modalOpen, onClose, ticketid, ticketWhatsappId })
               label={t("transferTicketModal.fieldQueuePlaceholder")}
             >
               <MenuItem value={''}>&nbsp;</MenuItem>
-              {queues.map((queue) => (
+              {queues?.map((queue) => (
                 <MenuItem key={queue.id} value={queue.id}>{queue.name}</MenuItem>
               ))}
             </Select>

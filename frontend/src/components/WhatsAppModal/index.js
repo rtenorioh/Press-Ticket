@@ -223,7 +223,7 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
 				const { data } = await api.get(`whatsapp/${whatsAppId}`);
 				setWhatsApp(data);
 				setColor(data?.color)
-				const whatsQueueIds = data.queues?.map(queue => queue.id);
+				const whatsQueueIds = data?.queues?.map(queue => queue.id);
 				setSelectedQueueIds(whatsQueueIds);
 			} catch (err) {
 				toastError(err);

@@ -150,7 +150,7 @@ const UserModal = ({ open, onClose, userId }) => {
 				setUser(prevState => {
 					return { ...prevState, ...data };
 				});
-				const userQueueIds = data.queues?.map(queue => queue.id);
+				const userQueueIds = data?.queues?.map(queue => queue.id);
 				setSelectedQueueIds(userQueueIds);
 				const userWhatsappIds = data.whatsapps?.map(whatsapp => whatsapp.id);
 				setSelectedWhatsappIds(userWhatsappIds);

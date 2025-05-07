@@ -64,7 +64,7 @@ const QueueSelect = ({ selectedQueueIds, onChange }) => {
 						<ChipsContainer>
 							{selected?.length > 0 &&
 								selected.map(id => {
-									const queue = queues.find(q => q.id === id);
+									const queue = queues?.find(q => q.id === id);
 									return queue ? (
 										<StyledChip
 											key={id}
@@ -77,7 +77,7 @@ const QueueSelect = ({ selectedQueueIds, onChange }) => {
 						</ChipsContainer>
 					)}
 				>
-					{queues.map(queue => (
+					{queues?.map(queue => (
 						<MenuItem key={queue.id} value={queue.id}>
 							{queue.name}
 						</MenuItem>

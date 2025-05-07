@@ -5,6 +5,11 @@ import authConfig from "../config/auth";
 import AppError from "../errors/AppError";
 import { logger } from "../utils/logger";
 import User from "../models/User";
+import Ticket from "../models/Ticket";
+import { Op } from "sequelize";
+import Contact from "../models/Contact";
+import WhatsApp from "../models/Whatsapp";
+import Queue from "../models/Queue";
 
 interface TokenPayload {
   id: string;
@@ -17,6 +22,12 @@ interface TokenPayload {
 interface UserStatus {
   userId: number;
   online: boolean;
+}
+
+interface GetTicketsData {
+  userId: string;
+  status?: string;
+  showAll?: boolean;
 }
 
 let io: SocketIO;
@@ -208,6 +219,97 @@ export const initIO = (httpServer: Server): void => {
         socketId: socket.id
       });
       socket.join(status);
+    });
+
+    // Novo evento para sincronizar tickets após reconexão
+    socket.on("getTickets", async (data: GetTicketsData) => {
+      try {
+        logger.info("Solicitação de sincronização de tickets", {
+          userId: data.userId,
+          status: data.status,
+          showAll: data.showAll,
+          socketId: socket.id
+        });
+
+        const { id: userId } = verify(token as string, authConfig.secret) as TokenPayload;
+        
+        // Verificar se o usuário solicitante é o mesmo do token
+        if (userId !== data.userId && data.userId) {
+          logger.warn("Tentativa de acesso a tickets de outro usuário", {
+            tokenUserId: userId,
+            requestedUserId: data.userId,
+            socketId: socket.id
+          });
+          return;
+        }
+
+        // Buscar o usuário para verificar o perfil
+        const user = await User.findByPk(userId);
+        if (!user) {
+          logger.warn("Usuário não encontrado ao sincronizar tickets", {
+            userId,
+            socketId: socket.id
+          });
+          return;
+        }
+
+        // Construir a query para buscar os tickets
+        const whereCondition: any = {};
+        
+        // Filtrar por status se fornecido
+        if (data.status) {
+          whereCondition.status = data.status;
+        }
+
+        // Se não for admin e não for showAll, mostrar apenas tickets do usuário
+        if (user.profile !== "admin" && !data.showAll) {
+          whereCondition.userId = userId;
+        }
+
+        // Buscar os tickets com relacionamentos
+        const tickets = await Ticket.findAll({
+          where: whereCondition,
+          include: [
+            {
+              model: Contact,
+              as: "contact",
+              attributes: ["id", "name", "number", "profilePicUrl"]
+            },
+            {
+              model: Queue,
+              as: "queue",
+              attributes: ["id", "name", "color"]
+            },
+            {
+              model: WhatsApp,
+              as: "whatsapp",
+              attributes: ["name"]
+            },
+            {
+              model: User,
+              as: "user",
+              attributes: ["id", "name"]
+            }
+          ],
+          order: [["updatedAt", "DESC"]],
+          limit: 50 // Limitar para evitar sobrecarga
+        });
+
+        logger.info("Tickets sincronizados com sucesso", {
+          userId,
+          count: tickets.length,
+          socketId: socket.id
+        });
+
+        // Emitir os tickets para o usuário
+        socket.emit("ticketList", { tickets });
+
+      } catch (err) {
+        logger.error("Erro ao sincronizar tickets", {
+          error: err.message,
+          socketId: socket.id
+        });
+      }
     });
   });
 

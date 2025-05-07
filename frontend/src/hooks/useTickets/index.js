@@ -14,8 +14,7 @@ const useTickets = ({
     userId,
     queueIds,
     withUnreadMessages,
-    all,
-    lastUpdate
+    all
 }) => {
     const { t } = useTranslation();
     const [loading, setLoading] = useState(true);
@@ -169,7 +168,6 @@ const useTickets = ({
         queueIds,
         withUnreadMessages,
         all,
-        lastUpdate,
         t
     ]);
 

@@ -56,45 +56,19 @@ const reducer = (state, action) => {
 	if (action.type === "LOAD_TICKETS") {
 		const newTickets = action.payload;
 
-		if (action.reset) {
-			try {
-				const ticketsStorage = localStorage.getItem('tickets') 
-					? JSON.parse(localStorage.getItem('tickets')) 
-					: {};
-				
-				ticketsStorage[action.status || 'all'] = newTickets;
-				localStorage.setItem('tickets', JSON.stringify(ticketsStorage));
-				console.log(`Salvando ${newTickets.length} tickets para status: ${action.status || 'all'}`);
-			} catch (err) {
-				console.error('Erro ao salvar tickets no localStorage:', err);
-			}
-			return [...newTickets];
-		}
-
-		const ticketsMap = new Map();
-
-		state.forEach((ticket) => {
-			ticketsMap.set(ticket.id, ticket);
-		});
-
 		newTickets.forEach((ticket) => {
-			ticketsMap.set(ticket.id, ticket);
+			const ticketIndex = state.findIndex((t) => t.id === ticket.id);
+			if (ticketIndex !== -1) {
+				state[ticketIndex] = ticket;
+				if (ticket.unreadMessages > 0) {
+					state.unshift(state.splice(ticketIndex, 1)[0]);
+				}
+			} else {
+				state.push(ticket);
+			}
 		});
 
-		const allTickets = Array.from(ticketsMap.values());
-		try {
-			const ticketsStorage = localStorage.getItem('tickets') 
-				? JSON.parse(localStorage.getItem('tickets')) 
-				: {};
-			
-			ticketsStorage[action.status || 'all'] = allTickets;
-			localStorage.setItem('tickets', JSON.stringify(ticketsStorage));
-			console.log(`Atualizando ${allTickets.length} tickets para status: ${action.status || 'all'}`);
-		} catch (err) {
-			console.error('Erro ao atualizar tickets no localStorage:', err);
-		}
-
-		return allTickets;
+		return [...state];
 	}
 
 	if (action.type === "RESET_UNREAD") {
@@ -118,17 +92,6 @@ const reducer = (state, action) => {
 			state.unshift(ticket);
 		}
 
-		try {
-			const ticketsStorage = localStorage.getItem('tickets') 
-				? JSON.parse(localStorage.getItem('tickets')) 
-				: {};
-			
-			ticketsStorage[action.status || 'all'] = [...state];
-			localStorage.setItem('tickets', JSON.stringify(ticketsStorage));
-		} catch (err) {
-			console.error('Erro ao atualizar tickets no localStorage:', err);
-		}
-
 		return [...state];
 	}
 
@@ -141,17 +104,6 @@ const reducer = (state, action) => {
 			state.unshift(state.splice(ticketIndex, 1)[0]);
 		} else {
 			state.unshift(ticket);
-		}
-
-		try {
-			const ticketsStorage = localStorage.getItem('tickets') 
-				? JSON.parse(localStorage.getItem('tickets')) 
-				: {};
-			
-			ticketsStorage[action.status || 'all'] = [...state];
-			localStorage.setItem('tickets', JSON.stringify(ticketsStorage));
-		} catch (err) {
-			console.error('Erro ao atualizar tickets no localStorage:', err);
 		}
 
 		return [...state];
@@ -198,16 +150,33 @@ const TicketsList = (props) => {
 	const { profile, queues } = user || {};
 	const [settings, setSettings] = useState([]);
 	const [filteredTags, setFilteredTags] = useState([]);
-	const [lastUpdate, setLastUpdate] = useState(Date.now());
 
 	const handleTagFilter = (tags) => {
 		setFilteredTags(tags);
 	};
 
-useEffect(() => {
+	useEffect(() => {
 		dispatch({ type: "RESET" });
 		setPageNumber(1);
-		setLastUpdate(Date.now());
+		
+		// Tentar carregar tickets do localStorage enquanto aguarda a resposta da API
+		try {
+			const cachedTicketsData = localStorage.getItem(`tickets_${status}`);
+			if (cachedTicketsData) {
+				const { tickets: cachedTickets, timestamp } = JSON.parse(cachedTicketsData);
+				
+				// Verificar se os dados em cache não são muito antigos (menos de 30 minutos)
+				const now = new Date().getTime();
+				const thirtyMinutesInMs = 30 * 60 * 1000;
+				
+				if (now - timestamp < thirtyMinutesInMs && Array.isArray(cachedTickets) && cachedTickets.length > 0) {
+					console.log(`Carregando ${cachedTickets.length} tickets do cache para status ${status}`);
+					dispatch({ type: "LOAD_TICKETS", payload: cachedTickets });
+				}
+			}
+		} catch (err) {
+			console.error("Erro ao carregar tickets do cache", err);
+		}
 	}, [status, searchParam, dispatch, showAll, selectedQueueIds, tags]);
 
 	const { tickets, hasMore, loading } = useTickets({
@@ -217,7 +186,6 @@ useEffect(() => {
 		showAll,
 		tags: JSON.stringify(tags),
 		queueIds: JSON.stringify(selectedQueueIds),
-		lastUpdate,
 	});
 
 	useEffect(() => {
@@ -242,73 +210,35 @@ useEffect(() => {
 		};
 		const allticket = settings && settings.length > 0 && getSettingValue("allTicket") === "enabled";
 
-		if (tickets.length === 0 && ticketsList.length === 0) {
-			console.log(`Nenhum ticket encontrado para status: ${status}, tentando carregar do localStorage`);
-			
-			try {
-				const ticketsStorage = localStorage.getItem('tickets');
-				if (ticketsStorage) {
-					const parsedStorage = JSON.parse(ticketsStorage);
-					if (parsedStorage[status] && parsedStorage[status].length > 0) {
-						console.log(`Carregando ${parsedStorage[status].length} tickets do localStorage para status: ${status}`);
-						dispatch({ 
-							type: "LOAD_TICKETS", 
-							payload: parsedStorage[status],
-							reset: true,
-							status: status
-						});
-						return;
-					} else {
-						console.log(`Nenhum ticket encontrado no localStorage para status: ${status}`);
-					}
-				}
-			} catch (err) {
-				console.error('Erro ao carregar tickets do localStorage:', err);
-			}
-		}
-
 		if (allticket === true) {
+
 			if (profile === "") {
-				dispatch({ type: "LOAD_TICKETS", payload: filteredTickets, status: status });
+				dispatch({ type: "LOAD_TICKETS", payload: filteredTickets });
+
 			} else {
-				dispatch({ type: "LOAD_TICKETS", payload: tickets, status: status });
+				dispatch({ type: "LOAD_TICKETS", payload: tickets });
 			}
 		} else {
+
 			if (profile === "user") {
-				dispatch({ type: "LOAD_TICKETS", payload: filteredTickets, status: status });
+				dispatch({ type: "LOAD_TICKETS", payload: filteredTickets });
+
 			} else {
-				dispatch({ type: "LOAD_TICKETS", payload: tickets, status: status });
+				dispatch({ type: "LOAD_TICKETS", payload: tickets });
 			}
 		}
 		// eslint-disable-next-line
-	}, [tickets, status, searchParam, queues, profile, ticketsList, lastUpdate]);
+	}, [tickets, status, searchParam, queues, profile]);
 
 	useEffect(() => {
+		// Obter uma instância do socket
 		const socket = openSocket();
 		if (!socket) {
-			console.warn("Não foi possível conectar ao socket, tentando carregar tickets do localStorage");
-			
-			try {
-				const ticketsStorage = localStorage.getItem('tickets');
-				if (ticketsStorage) {
-					const parsedStorage = JSON.parse(ticketsStorage);
-					if (parsedStorage[status] && parsedStorage[status].length > 0) {
-						console.log(`Carregando ${parsedStorage[status].length} tickets do localStorage para status: ${status}`);
-						dispatch({ 
-							type: "LOAD_TICKETS", 
-							payload: parsedStorage[status],
-							reset: true,
-							status: status
-						});
-					}
-				}
-			} catch (err) {
-				console.error('Erro ao carregar tickets do localStorage:', err);
-			}
-			
+			console.error("Não foi possível conectar ao socket");
 			return;
 		}
 
+		// Funções auxiliares para verificar permissões de tickets
 		const shouldUpdateTicket = (ticket) =>
 			(!ticket.userId || ticket.userId === user?.id || showAll) &&
 			(!ticket.queueId || selectedQueueIds.indexOf(ticket.queueId) > -1);
@@ -316,119 +246,139 @@ useEffect(() => {
 		const notBelongsToUserQueues = (ticket) =>
 			ticket.queueId && selectedQueueIds.indexOf(ticket.queueId) === -1;
 
-		const joinTicketRooms = () => {
-			console.log(`Entrando na sala de tickets: ${status || 'notification'}`);
-			if (status) {
-				socket.emit("joinTickets", status);
-			} else {
-				socket.emit("joinNotification");
-			}
-		};
-
-		if (socket.connected) {
-			joinTicketRooms();
-		}
-		const connectHandler = () => {
-			console.log("Socket conectado, entrando nas salas de tickets");
-			joinTicketRooms();
-			setPageNumber(1);
-			setLastUpdate(Date.now());
-		};
-
-		const ticketHandler = (data) => {
-			console.log("Evento de ticket recebido:", data.action);
-			if (data.action === "updateUnread") {
-				dispatch({
-					type: "RESET_UNREAD",
-					payload: data.ticketId,
-					status: status
-				});
-			}
-
-			if (data.action === "update" && shouldUpdateTicket(data.ticket)) {
-				dispatch({
-					type: "UPDATE_TICKET",
-					payload: data.ticket,
-					status: status
-				});
-			}
-
-			if (data.action === "update" && notBelongsToUserQueues(data.ticket)) {
-				dispatch({ 
-					type: "DELETE_TICKET", 
-					payload: data.ticket.id,
-					status: status
-				});
-			}
-
-			if (data.action === "delete") {
-				dispatch({ 
-					type: "DELETE_TICKET", 
-					payload: data.ticketId,
-					status: status
-				});
-			}
-		};
-
-		const appMessageHandler = (data) => {
-			if (data.action === "create" && shouldUpdateTicket(data.ticket)) {
-				dispatch({
-					type: "UPDATE_TICKET_UNREAD_MESSAGES",
-					payload: data.ticket,
-					status: status
-				});
-			}
-		};
-
-		const contactHandler = (data) => {
-			if (data.action === "update") {
-				dispatch({
-					type: "UPDATE_TICKET_CONTACT",
-					payload: data.contact,
-					status: status
-				});
-			}
-		};
-
-		socket.on("connect", connectHandler);
-		socket.on("ticket", ticketHandler);
-		socket.on("appMessage", appMessageHandler);
-		socket.on("contact", contactHandler);
-
-		const reconnectInterval = setInterval(() => {
-			if (socket.connected) {
-				joinTicketRooms();
-			} else {
-				console.log("Socket desconectado, tentando reconectar...");
-				socket.connect();
-			}
-		}, 10000);
-
-		const handleSocketConnected = () => {
-			console.log("Evento socketConnected recebido, recarregando tickets");
-			setLastUpdate(Date.now());
-		};
-		
-		const handleSocketDisconnected = (event) => {
-			console.log("Evento socketDisconnected recebido, motivo:", event.detail?.reason);
-			localStorage.setItem('lastTicketStatus', status);
-		};
-		
-		window.addEventListener('socketConnected', handleSocketConnected);
-		window.addEventListener('socketDisconnected', handleSocketDisconnected);
-		
-		return () => {
-			console.log("Desmontando componente TicketsList, limpando listeners");
-			clearInterval(reconnectInterval);
-			socket.off("connect", connectHandler);
-			socket.off("ticket", ticketHandler);
-			socket.off("appMessage", appMessageHandler);
-			socket.off("contact", contactHandler);
+		// Função para registrar todos os eventos do socket
+		const registerSocketEvents = () => {
+			// Evento de conexão
+			socket.on("connect", () => {
+				console.log("Socket conectado no TicketsList");
+				
+				// Entrar na sala de tickets com base no status
+				if (status) {
+					socket.emit("joinTickets", status);
+					
+					// Solicitar tickets atualizados após conexão
+					if (user?.id) {
+						socket.emit("getTickets", { status, userId: user.id, showAll });
+					}
+				} else {
+					socket.emit("joinNotification");
+				}
+			});
 			
-			window.removeEventListener('socketConnected', handleSocketConnected);
-			window.removeEventListener('socketDisconnected', handleSocketDisconnected);
+			// Evento de reconexão
+			socket.on("reconnect", () => {
+				console.log("Socket reconectado no TicketsList");
+				
+				// Entrar na sala de tickets novamente após reconexão
+				if (status) {
+					socket.emit("joinTickets", status);
+					
+					// Solicitar tickets atualizados após reconexão
+					if (user?.id) {
+						socket.emit("getTickets", { status, userId: user.id, showAll });
+					}
+				} else {
+					socket.emit("joinNotification");
+				}
+			});
+
+			// Evento de atualização de ticket
+			socket.on("ticket", (data) => {
+				if (data.action === "updateUnread") {
+					dispatch({
+						type: "RESET_UNREAD",
+						payload: data.ticketId,
+					});
+				}
+
+				if (data.action === "update" && shouldUpdateTicket(data.ticket)) {
+					dispatch({
+						type: "UPDATE_TICKET",
+						payload: data.ticket,
+					});
+				}
+
+				if (data.action === "update" && notBelongsToUserQueues(data.ticket)) {
+					dispatch({ type: "DELETE_TICKET", payload: data.ticket.id });
+				}
+
+				if (data.action === "delete") {
+					dispatch({ type: "DELETE_TICKET", payload: data.ticketId });
+				}
+			});
+
+			// Evento de nova mensagem
+			socket.on("appMessage", (data) => {
+				if (data.action === "create" && shouldUpdateTicket(data.ticket)) {
+					dispatch({
+						type: "UPDATE_TICKET_UNREAD_MESSAGES",
+						payload: data.ticket,
+					});
+				}
+			});
+
+			// Evento de atualização de contato
+			socket.on("contact", (data) => {
+				if (data.action === "update") {
+					dispatch({
+						type: "UPDATE_TICKET_CONTACT",
+						payload: data.contact,
+					});
+				}
+			});
+			
+			// Evento de sincronização de tickets (novo evento)
+			socket.on("ticketList", (data) => {
+				if (data && Array.isArray(data.tickets)) {
+					console.log("Recebendo lista de tickets atualizada", data.tickets.length);
+					
+					// Filtrar tickets pelo status atual se necessário
+					const filteredTickets = status 
+						? data.tickets.filter(ticket => ticket.status === status)
+						: data.tickets;
+					
+					if (filteredTickets.length > 0) {
+						console.log(`Carregando ${filteredTickets.length} tickets com status ${status}`);
+						dispatch({ type: "LOAD_TICKETS", payload: filteredTickets });
+						
+						// Salvar os tickets no localStorage para persistência
+						try {
+							const ticketsToStore = {
+								tickets: filteredTickets,
+								status,
+								timestamp: new Date().getTime()
+							};
+							localStorage.setItem(`tickets_${status}`, JSON.stringify(ticketsToStore));
+						} catch (err) {
+							console.error("Erro ao salvar tickets no localStorage", err);
+						}
+					}
+				}
+			});
+			};
+
+		// Registrar eventos do socket
+		registerSocketEvents();
+
+		// Verificar se o socket está conectado, caso contrário, tentar reconectar
+		if (!socket.connected) {
+			console.log("Socket não está conectado, tentando reconectar...");
+			socket.connect();
+		}
+
+		// Limpar eventos ao desmontar o componente
+		return () => {
+			console.log("Limpando eventos do socket no TicketsList");
+			socket.off("connect");
+			socket.off("reconnect");
+			socket.off("ticket");
+			socket.off("appMessage");
+			socket.off("contact");
+			socket.off("ticketList");
+			// Não desconectar o socket aqui, apenas remover os listeners
+			// para evitar problemas com outros componentes que usam o mesmo socket
 		};
-	}, [status, showAll, user, selectedQueueIds, dispatch, pageNumber]);
+	}, [status, showAll, user, selectedQueueIds]);
 
 	useEffect(() => {
 		if (typeof updateCount === "function") {

@@ -280,7 +280,7 @@ const NewTicketModal = ({ modalOpen, onClose }) => {
 									<MenuItem value="">
 										{t("newTicketModal.select.none")}
 									</MenuItem>
-									{user?.queues.map((queue) => (
+									{user?.queues?.map((queue) => (
 										<MenuItem key={queue.id} value={queue.id}>
 											{queue.name}
 										</MenuItem>
