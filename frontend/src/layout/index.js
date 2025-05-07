@@ -18,7 +18,6 @@ import MenuIcon from '@mui/icons-material/Menu';
 import React, { useContext, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useLocation } from "react-router-dom";
-import packageJson from "../../package.json";
 import defaultLogo from '../assets/logo.jpg';
 import { getImageUrl } from '../helpers/imageHelper';
 import BackdropLoading from "../components/BackdropLoading";
@@ -127,7 +126,6 @@ const SystemCss = styled('div')(({ theme }) => ({
 const LoggedInLayout = ({ children, toggleTheme, onThemeConfigUpdate }) => {
   const { t } = useTranslation();
   const location = useLocation();
-  const systemVersion = packageJson.systemVersion;
   const [userModalOpen, setUserModalOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -216,32 +214,6 @@ const LoggedInLayout = ({ children, toggleTheme, onThemeConfigUpdate }) => {
 
     fetchLogo();
   }, [themeStorage, onThemeConfigUpdate]);
-
-  useEffect(() => {
-    const compareVersions = async () => {
-      const latest = await fetchLatestRelease();
-
-      if (latest) {
-        setLatestVersion(latest);
-        if (systemVersion < latest) {
-          console.warn(`Uma nova versão está disponível: ${latest}. Atualize para a versão mais recente.`);
-        }
-      }
-    };
-
-    compareVersions();
-  }, [systemVersion]);
-
-  const fetchLatestRelease = async () => {
-    try {
-      const response = await fetch("https://api.github.com/repos/rtenorioh/Press-Ticket/releases/latest");
-      const data = await response.json();
-      return data.tag_name;
-    } catch (error) {
-      console.error("Erro ao buscar a versão mais recente no GitHub:", error);
-      return null;
-    }
-  };
 
   useEffect(() => {
 
@@ -424,35 +396,6 @@ const LoggedInLayout = ({ children, toggleTheme, onThemeConfigUpdate }) => {
               <MenuItem onClick={handleClickLogout} sx={{ py: 1.5, px: 2.5, borderRadius: 1, mx: 0.5, my: 0.5 }}>
                 {t("mainDrawer.appBar.user.logout")}
               </MenuItem>
-              <Divider />
-              <SystemCss>
-                <Link
-                  color="inherit"
-                  href={companyData.url || "https://github.com/rtenorioh/Press-Ticket"}
-                  sx={{ 
-                    display: "flex", 
-                    alignItems: "center", 
-                    marginTop: 0,
-                    textDecoration: 'none',
-                    '&:hover': { opacity: 0.9 }
-                  }}
-                >
-                  {latestVersion && latestVersion > systemVersion ? (
-                    <span style={{ color: "#eee8aa", display: 'flex', alignItems: 'center' }}>
-                      <Tooltip title="Entrar em contato com o Suporte para solicitar Atualização!" arrow placement="left-start" >
-                        <Info fontSize="small" sx={{ color: "#fff000", mr: 0.5 }}/>
-                      </Tooltip>
-                    </span>
-                  ) : (
-                    <span style={{ color: "green", display: 'flex', alignItems: 'center' }}>
-                      <Tooltip title="Versão atualizada!" arrow placement="left-start" >
-                        <CheckCircle fontSize="small" sx={{ color: "#00ff00", mr: 0.5 }}/>
-                      </Tooltip>
-                    </span>
-                  )}
-                  <span style={{ fontWeight: 500 }}>{systemVersion}</span>
-                </Link>
-              </SystemCss>
             </Menu>
           </div>
         </StyledToolbar>

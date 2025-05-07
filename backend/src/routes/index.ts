@@ -1,6 +1,7 @@
 import { Router } from "express";
 
 import apiRoutes from "./apiRoutes";
+import versionRoutes from "./versionRoutes";
 import apiTokenRoutes from "./apiTokenRoutes";
 import authRoutes from "./authRoutes";
 import contactRoutes from "./contactRoutes";
@@ -43,5 +44,6 @@ routes.use(systemRoutes);
 routes.use(personalizationRoutes);
 routes.use(apiTokenRoutes);
 routes.use("/error-logs", errorLogRoutes);
+routes.use(versionRoutes);
 
 export default routes;

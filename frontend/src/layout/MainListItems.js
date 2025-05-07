@@ -27,10 +27,12 @@ import StorageIcon from "@mui/icons-material/Storage";
 import VpnKeyRounded from "@mui/icons-material/VpnKeyRounded";
 import WhatsApp from "@mui/icons-material/WhatsApp";
 import BugReportOutlined from "@mui/icons-material/BugReportOutlined";
+import SystemUpdateIcon from "@mui/icons-material/SystemUpdate";
 import { useTranslation } from "react-i18next";
 import { Can } from "../components/Can";
 import { AuthContext } from "../context/Auth/AuthContext";
 import { WhatsAppsContext } from "../context/WhatsApp/WhatsAppsContext";
+import api from "../services/api";
 
 const IconStyled = styled(ListItemIcon)(({ theme, active }) => ({
   color: active ? theme.palette.primary.contrastText : theme.palette.text.secondary,
@@ -135,6 +137,7 @@ const MainListItems = (props) => {
   const { whatsApps } = useContext(WhatsAppsContext);
   const { user } = useContext(AuthContext);
   const [connectionWarning, setConnectionWarning] = useState(false);
+  const [versionWarning, setVersionWarning] = useState(false);
   const { t } = useTranslation();
 
   useEffect(() => {
@@ -158,6 +161,29 @@ const MainListItems = (props) => {
     }, 2000);
     return () => clearTimeout(delayDebounceFn);
   }, [whatsApps]);
+
+  useEffect(() => {
+    const checkVersion = async () => {
+      try {
+        const { data } = await api.get("/version");
+        if (data && data.needsUpdate) {
+          setVersionWarning(true);
+        } else {
+          setVersionWarning(false);
+        }
+      } catch (err) {
+        console.error("Erro ao verificar versão:", err);
+        setVersionWarning(false);
+      }
+    };
+    
+    checkVersion();
+    
+    // Verificar a cada 24 horas
+    const interval = setInterval(checkVersion, 24 * 60 * 60 * 1000);
+    
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <div onClick={drawerClose ? drawerClose : undefined}>
@@ -302,6 +328,17 @@ const MainListItems = (props) => {
                 primary={t("mainDrawer.listItems.cpuUsage")}
                 icon={<CpuIcon />}
                 active={location.pathname === '/cpuUsage'}
+                drawerClose={drawerClose}
+              />
+              <ListItemLink
+                to="/versionCheck"
+                primary={t("mainDrawer.listItems.versionCheck")}
+                icon={
+                  <StyledBadge badgeContent={versionWarning ? "!" : 0} color="error" overlap="rectangular">
+                    <SystemUpdateIcon />
+                  </StyledBadge>
+                }
+                active={location.pathname === '/versionCheck'}
                 drawerClose={drawerClose}
               />
             </>

@@ -11,6 +11,7 @@ import Connections from "../pages/Connections/";
 import Contacts from "../pages/Contacts/";
 import CpuUsage from "../pages/CpuUsage/";
 import Dashboard from "../pages/Dashboard/";
+import VersionCheck from "../pages/VersionCheck/";
 import DiskSpace from "../pages/DiskSpace/";
 import MemoryUsage from "../pages/MemoryUsage/";
 import ErrorLogs from "../pages/ErrorLogs/";
@@ -62,6 +63,7 @@ const AppRoutes = ({ toggleTheme, onThemeConfigUpdate }) => {
             <Route path="diskSpace" element={<DiskSpace />} />
             <Route path="memoryUsage" element={<MemoryUsage />} />
             <Route path="cpuUsage" element={<CpuUsage />} />
+            <Route path="versionCheck" element={<VersionCheck />} />
           </Route>
         </Routes>
         <ToastContainer 

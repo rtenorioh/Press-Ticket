@@ -502,6 +502,7 @@ const messages = {
           diskSpace: "Espaço em Disco",
           memoryUsage: "Uso de Memória RAM",
           cpuUsage: "Uso de CPU",
+          versionCheck: "Verificação de Versão",
           logout: "Sair",
         },
         appBar: {
@@ -1284,6 +1285,25 @@ const messages = {
       },
       whatsappSelect: {
         inputLabel: "Canais",
+      },
+      versionCheck: {
+        title: "Verificação de Versão",
+        checkUpdates: "Verificar Atualizações",
+        statusTitle: "Status da Versão do Sistema",
+        currentVersion: "Sua Versão",
+        latestVersion: "Última Versão",
+        upToDate: "Sua versão está atualizada",
+        upToDateTitle: "Parabéns! Sistema Atualizado",
+        upToDateMessage: "Seu sistema está com a versão mais recente disponível. Você está aproveitando todos os recursos e correções de segurança mais recentes.",
+        outdated: "Sua versão está desatualizada",
+        latestAvailable: "Versão mais recente disponível",
+        updateAvailable: "Atualização Disponível",
+        updateMessage: "Uma nova versão do sistema está disponível. Entre em contato com o administrador do sistema para solicitar a atualização.",
+        repositoryLink: "Repositório do projeto",
+        repository: "GitHub",
+        updateLink: "Atualizador Automático",
+        update: "Manual de Atualização",
+        success: "Informações de versão atualizadas com sucesso!"
       },
       backendErrors: {
         ERR_CREATING_MESSAGE: "Erro ao criar mensagem no banco de dados.",

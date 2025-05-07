@@ -29,6 +29,7 @@ const rules = {
 			"ticket-options:transferWhatsapp",
 			"contacts-page:deleteContact",
 			"settings:personalize",
+			"version-check:show"
 		],
 	}
 };
