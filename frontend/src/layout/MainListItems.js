@@ -52,19 +52,36 @@ const ListItemStyled = styled('li')(({ theme }) => ({
 }));
 
 const SubheaderStyled = styled(ListSubheader)(({ theme }) => ({
-  background: 'none',
+  background: theme.palette.background.paper,
   fontWeight: 700,
   fontSize: '1rem',
-  color: theme.palette.text.primary,
+  color: theme.palette.primary.main,
   lineHeight: '28px',
-  padding: theme.spacing(0.5, 2, 0.5, 2),
+  padding: theme.spacing(1, 2),
   letterSpacing: '0.5px',
   textAlign: 'center',
+  position: 'sticky',
+  top: 0,
+  zIndex: 10,
+  boxShadow: '0 2px 4px rgba(0,0,0,0.08)',
+  marginTop: theme.spacing(1),
+  marginBottom: theme.spacing(1),
+  borderRadius: theme.spacing(1),
+  '&::before': {
+    content: '""',
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    height: '100%',
+    backgroundColor: 'inherit',
+    zIndex: -1,
+  }
 }));
 
 const DividerStyled = styled(Divider)(({ theme }) => ({
   backgroundColor: theme.palette.divider,
-  margin: theme.spacing(0.5, 0),
+  margin: theme.spacing(0.5, 2),
+  opacity: 0.6,
 }));
 
 const ActiveItemStyled = styled(ListItem)(({ theme }) => ({
