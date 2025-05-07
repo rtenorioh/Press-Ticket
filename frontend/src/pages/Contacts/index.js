@@ -118,6 +118,7 @@ const Contacts = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { user } = useContext(AuthContext);
+  const defaultImage = '/default-profile.png';
   const [loading, setLoading] = useState(false);
   const [pageNumber, setPageNumber] = useState(1);
   const [searchParam, setSearchParam] = useState("");
@@ -494,7 +495,7 @@ const Contacts = () => {
                 .map((contact) => (
                   <TableRow key={contact.id}>
                     <TableCell sx={{ paddingRight: 0 }}>
-                      <AvatarStyled src={contact.profilePicUrl} alt="contact_image" />
+                      <AvatarStyled src={contact?.profilePicUrl || defaultImage} alt="contact_image" />
                     </TableCell>
                     <TableCell>{contact.name}</TableCell>
                     <TableCell align="center">
