@@ -771,6 +771,35 @@ fi
 
 echo -e "${GREEN}Email do MasterAdmin obtido com sucesso: $MASTERADMIN_EMAIL.${RESET}" | tee -a "$LOG_FILE"
 
+# Atualizando a URL do servidor no arquivo swagger.json
+echo -e "${COLOR}Atualizando a URL do servidor no arquivo swagger.json...${RESET}" | tee -a "$LOG_FILE"
+
+SWAGGER_FILE="$DEPLOY_HOME/$NOME_EMPRESA/backend/src/swagger.json"
+
+if [ -f "$SWAGGER_FILE" ]; then
+    # Fazer backup do arquivo swagger.json
+    SWAGGER_BACKUP="$SWAGGER_FILE.bak"
+    cp "$SWAGGER_FILE" "$SWAGGER_BACKUP"
+    
+    # Substituir a URL do servidor no arquivo swagger.json
+    if ! sed -i "s|\"url\": \"https://apiback.pressticket.com.br\"|\"url\": \"$BACKEND_URL\"|g" "$SWAGGER_FILE"; then
+        echo -e "${RED}Erro ao atualizar a URL do servidor no arquivo swagger.json.${RESET}" | tee -a "$LOG_FILE"
+        if mv "$SWAGGER_BACKUP" "$SWAGGER_FILE"; then
+            echo -e "${YELLOW}Arquivo swagger.json restaurado com sucesso.${RESET}" | tee -a "$LOG_FILE"
+        else
+            echo -e "${RED}Falha ao restaurar o arquivo swagger.json. Verifique manualmente.${RESET}" | tee -a "$LOG_FILE"
+        fi
+        echo -e "${YELLOW}Prosseguindo com a instalação, mas a URL do servidor não foi atualizada.${RESET}" | tee -a "$LOG_FILE"
+    else
+        echo -e "${GREEN}URL do servidor no arquivo swagger.json atualizada com sucesso para: $BACKEND_URL.${RESET}" | tee -a "$LOG_FILE"
+        # Remover o backup se a substituição foi bem-sucedida
+        rm -f "$SWAGGER_BACKUP"
+    fi
+else
+    echo -e "${RED}Arquivo swagger.json não encontrado em $SWAGGER_FILE.${RESET}" | tee -a "$LOG_FILE"
+    echo -e "${YELLOW}Prosseguindo com a instalação, mas a URL do servidor não foi atualizada.${RESET}" | tee -a "$LOG_FILE"
+fi
+
 # Instalando as dependências
 echo -e "${COLOR}Instalando dependências do backend...${RESET}" | tee -a "$LOG_FILE"
 
