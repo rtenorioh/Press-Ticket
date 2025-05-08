@@ -8,9 +8,16 @@ import InputAdornment from '@mui/material/InputAdornment';
 import Link from '@mui/material/Link';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
-import { styled } from '@mui/material/styles';
+import Paper from '@mui/material/Paper';
+import Card from '@mui/material/Card';
+import CardContent from '@mui/material/CardContent';
+import Divider from '@mui/material/Divider';
+import { styled, alpha } from '@mui/material/styles';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
+import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined';
+import EmailOutlinedIcon from '@mui/icons-material/EmailOutlined';
+import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import { Field, Form, Formik } from "formik";
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -34,20 +41,78 @@ const Copyright = ({ companyName, companyUrl }) => {
 	);
 };
 
-const FormContainer = styled('div')(({ theme }) => ({
-	marginTop: theme.spacing(8),
-	display: "flex",
-	flexDirection: "column",
-	alignItems: "center",
+const LoginCard = styled(Card)(({ theme }) => ({
+	borderRadius: 12,
+	boxShadow: '0 8px 40px rgba(0, 0, 0, 0.12)',
+	overflow: 'visible',
+	position: 'relative',
+	width: '100%',
+	maxWidth: 450,
+	padding: theme.spacing(2, 3),
+	[theme.breakpoints.up('sm')]: {
+		padding: theme.spacing(3, 4),
+	},
+}));
+
+const LogoContainer = styled('div')(({ theme }) => ({
+	display: 'flex',
+	justifyContent: 'center',
+	marginBottom: theme.spacing(4),
+	'& img': {
+		height: 80,
+		[theme.breakpoints.up('sm')]: {
+			height: 100,
+		},
+	},
 }));
 
 const StyledForm = styled(Form)(({ theme }) => ({
 	width: "100%",
-	marginTop: theme.spacing(3),
+	marginTop: theme.spacing(2),
 }));
 
-const SubmitButton = styled(Button)(({ theme }) => ({
+const StyledDiv = styled('div')(({ theme }) => ({
+	minHeight: '100vh',
+	display: "flex",
+	flexDirection: "column",
+	alignItems: "center",
+	justifyContent: "center",
+	padding: theme.spacing(3),
+	backgroundColor: theme.palette.background.default,
+}));
+
+const StyledButton = styled(Button)(({ theme }) => ({
 	margin: theme.spacing(3, 0, 2),
+	borderRadius: 50,
+	padding: theme.spacing(1.2),
+	textTransform: 'none',
+	fontWeight: 600,
+	fontSize: '1rem',
+	boxShadow: '0 4px 10px rgba(0, 0, 0, 0.1)',
+	transition: 'all 0.3s ease',
+	'&:hover': {
+		boxShadow: '0 6px 15px rgba(0, 0, 0, 0.15)',
+		transform: 'translateY(-2px)'
+	},
+}));
+
+const StyledTextField = styled(TextField)(({ theme }) => ({
+	marginBottom: theme.spacing(2),
+	'& .MuiOutlinedInput-root': {
+		borderRadius: 8,
+		'&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+			borderWidth: 2,
+		},
+	},
+}));
+
+const LinksContainer = styled(Grid)(({ theme }) => ({
+	marginTop: theme.spacing(2),
+}));
+
+const CopyrightContainer = styled(Box)(({ theme }) => ({
+	marginTop: theme.spacing(4),
+	textAlign: 'center',
 }));
 
 const UserSchema = Yup.object().shape({
@@ -146,30 +211,38 @@ const SignUp = () => {
 	};
 
 	return (
-		<Container component="main" maxWidth="xs">
+		<>
 			<CssBaseline />
-			<FormContainer>
-				<img src={getImageUrl(companyData.logo)} alt="logo" sx={{ height: 120, marginBottom: 20 }} />
-				<Typography component="h1" variant="h5">
-					{t("signup.title")}
-				</Typography>
-				<Formik
-					initialValues={user}
-					enableReinitialize={true}
-					validationSchema={UserSchema}
-					onSubmit={(values, actions) => {
-						setTimeout(() => {
-							handleSignUp(values);
-							actions.setSubmitting(false);
-						}, 400);
-					}}
-				>
-					{({ touched, errors, isSubmitting }) => (
-						<StyledForm>
-							<Grid container spacing={2}>
-								<Grid item xs={12}>
+			<StyledDiv>
+				<LoginCard elevation={0}>
+					<CardContent sx={{ padding: 0 }}>
+						<LogoContainer>
+							<img src={getImageUrl(companyData.logo)} alt="logo" />
+						</LogoContainer>
+						
+						<Typography component="h1" variant="h5" align="center" fontWeight="600" gutterBottom>
+							{t("signup.title")}
+						</Typography>
+						
+						<Typography variant="body2" color="textSecondary" align="center" sx={{ mb: 3 }}>
+							{t("signup.subtitle", "Crie sua conta para acessar o sistema")}
+						</Typography>
+						
+						<Formik
+							initialValues={user}
+							enableReinitialize={true}
+							validationSchema={UserSchema}
+							onSubmit={(values, actions) => {
+								setTimeout(() => {
+									handleSignUp(values);
+									actions.setSubmitting(false);
+								}, 400);
+							}}
+						>
+							{({ touched, errors, isSubmitting }) => (
+								<StyledForm>
 									<Field
-										as={TextField}
+										as={StyledTextField}
 										autoComplete="name"
 										name="name"
 										error={touched.name && Boolean(errors.name)}
@@ -179,12 +252,17 @@ const SignUp = () => {
 										id="name"
 										label={t("signup.form.name")}
 										autoFocus
+										InputProps={{
+											startAdornment: (
+												<InputAdornment position="start">
+													<PersonOutlineOutlinedIcon color="action" />
+												</InputAdornment>
+											),
+										}}
 									/>
-								</Grid>
 
-								<Grid item xs={12}>
 									<Field
-										as={TextField}
+										as={StyledTextField}
 										variant="outlined"
 										fullWidth
 										id="email"
@@ -193,11 +271,17 @@ const SignUp = () => {
 										error={touched.email && Boolean(errors.email)}
 										helperText={touched.email && errors.email}
 										autoComplete="email"
+										InputProps={{
+											startAdornment: (
+												<InputAdornment position="start">
+													<EmailOutlinedIcon color="action" />
+												</InputAdornment>
+											),
+										}}
 									/>
-								</Grid>
-								<Grid item xs={12}>
+									
 									<Field
-										as={TextField}
+										as={StyledTextField}
 										variant="outlined"
 										fullWidth
 										name="password"
@@ -208,46 +292,65 @@ const SignUp = () => {
 										label={t("signup.form.password")}
 										type={showPassword ? 'text' : 'password'}
 										InputProps={{
+											startAdornment: (
+												<InputAdornment position="start">
+													<LockOutlinedIcon color="action" />
+												</InputAdornment>
+											),
 											endAdornment: (
 												<InputAdornment position="end">
 													<IconButton
 														aria-label="toggle password visibility"
 														onClick={() => setShowPassword((e) => !e)}
+														edge="end"
 													>
-														{showPassword ? <VisibilityOff color="secondary" /> : <Visibility color="secondary" />}
+														{showPassword ? <VisibilityOff /> : <Visibility />}
 													</IconButton>
 												</InputAdornment>
 											)
 										}}
 									/>
-								</Grid>
-							</Grid>
-							<SubmitButton
-								type="submit"
-								fullWidth
-								variant="contained"
-								color="primary"
-							>
-								{t("signup.buttons.submit")}
-							</SubmitButton>
-							<Grid container justifyContent="flex-end">
-								<Grid item>
-									<Link
-										href="#"
-										variant="body2"
-										component={RouterLink}
-										to="/login"
+									
+									<StyledButton
+										type="submit"
+										fullWidth
+										variant="contained"
+										color="primary"
+										disableElevation
 									>
-										{t("signup.buttons.login")}
-									</Link>
-								</Grid>
-							</Grid>
-						</StyledForm>
-					)}
-				</Formik>
-			</FormContainer>
-			<Box mt={5}><Copyright companyName={companyData.name} companyUrl={companyData.url} /></Box>
-		</Container>
+										{t("signup.buttons.submit")}
+									</StyledButton>
+									
+									<Divider sx={{ my: 2 }}>
+										<Typography variant="caption" color="textSecondary">
+											{t("signup.or", "ou")}
+										</Typography>
+									</Divider>
+									
+									<LinksContainer container justifyContent="center">
+										<Grid item>
+											<Link
+												component={RouterLink}
+												to="/login"
+												variant="body2"
+												color="primary"
+												underline="hover"
+											>
+												{t("signup.buttons.login")}
+											</Link>
+										</Grid>
+									</LinksContainer>
+								</StyledForm>
+							)}
+						</Formik>
+					</CardContent>
+				</LoginCard>
+				
+				<CopyrightContainer>
+					<Copyright companyName={companyData.name} companyUrl={companyData.url} />
+				</CopyrightContainer>
+			</StyledDiv>
+		</>
 	);
 };
 
