@@ -6,6 +6,10 @@
 @searchParam = nome_ou_numero
 @pageNumber = 1
 @tags = 1,2,3
+@queueId = 1
+@tagId = 1
+@ticketId = 1
+@whatsappId = 1
 
 ### ============================================================
 ### ROTAS DE MENSAGENS
@@ -143,3 +147,333 @@ Content-Type: application/json
 {
   "name": "Test Contact"
 }
+
+### ============================================================
+### ROTAS DE Setores
+### ============================================================
+
+### (Listar Setores) Teste da Rota GET /v1/queue
+GET {{baseUrl}}/v1/queue
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+### (Criar Setor) Teste da Rota POST /v1/queue
+POST {{baseUrl}}/v1/queue
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+{
+  "name": "Setor de Teste API",
+  "color": "#FF0000"
+}
+
+### (Obter Setor) Teste da Rota GET /v1/queue/{queueId}
+GET {{baseUrl}}/v1/queue/{{queueId}}
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+### (Atualizar Setor) Teste da Rota PUT /v1/queue/{queueId}
+PUT {{baseUrl}}/v1/queue/{{queueId}}
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+{
+  "name": "Setor Atualizado API",
+  "color": "#00FF00"
+}
+
+### (Excluir Setor) Teste da Rota DELETE /v1/queue/{queueId}
+DELETE {{baseUrl}}/v1/queue/{{queueId}}
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+### ============================================================
+### ROTAS DE TAGS
+### ============================================================
+
+### (Listar Tags) Teste da Rota GET /v1/tags
+GET {{baseUrl}}/v1/tags
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+### (Listar Tags Simplificado) Teste da Rota GET /v1/tags/list
+GET {{baseUrl}}/v1/tags/list
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+### (Criar Tag) Teste da Rota POST /v1/tags
+POST {{baseUrl}}/v1/tags
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+{
+  "name": "Tag de Teste API",
+  "color": "#0000FF"
+}
+
+### (Obter Tag) Teste da Rota GET /v1/tags/{tagId}
+GET {{baseUrl}}/v1/tags/{{tagId}}
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+### (Atualizar Tag) Teste da Rota PUT /v1/tags/{tagId}
+PUT {{baseUrl}}/v1/tags/{{tagId}}
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+{
+  "name": "Tag Atualizada API",
+  "color": "#00FFFF"
+}
+
+### (Excluir Tag) Teste da Rota DELETE /v1/tags/{tagId}
+DELETE {{baseUrl}}/v1/tags/{{tagId}}
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+### (Sincronizar Tags) Teste da Rota POST /v1/tags/sync
+POST {{baseUrl}}/v1/tags/sync
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+{
+  "tags": [1, 2, 3],
+  "ticketId": 1
+}
+
+### ============================================================
+### ROTAS DE TICKETS
+### ============================================================
+
+### (Listar Tickets) Teste da Rota GET /v1/tickets
+GET {{baseUrl}}/v1/tickets
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+### (Listar Tickets com Parâmetros) Teste da Rota GET /v1/tickets com parâmetros
+GET {{baseUrl}}/v1/tickets?status=open&searchParam={{searchParam}}&pageNumber={{pageNumber}}&tags={{tags}}
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+### (Obter Ticket) Teste da Rota GET /v1/tickets/{ticketId}
+GET {{baseUrl}}/v1/tickets/{{ticketId}}
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+### (Criar Ticket) Teste da Rota POST /v1/tickets
+POST {{baseUrl}}/v1/tickets
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+{
+  "contactId": 1,
+  "status": "open",
+  "queueId": 1,
+  "userId": 1
+}
+
+### (Atualizar Ticket) Teste da Rota PUT /v1/tickets/{ticketId}
+PUT {{baseUrl}}/v1/tickets/{{ticketId}}
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+{
+  "status": "pending",
+  "queueId": 2,
+  "userId": 1
+}
+
+### (Excluir Ticket) Teste da Rota DELETE /v1/tickets/{ticketId}
+DELETE {{baseUrl}}/v1/tickets/{{ticketId}}
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+### (Verificar Tickets Abertos) Teste da Rota GET /v1/tickets/contact/{contactId}/open
+GET {{baseUrl}}/v1/tickets/contact/{{contactId}}/open
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+### Listar tickets de um contato específico
+GET {{baseUrl}}/v1/tickets/contact/{{contactId}}/open
+Content-Type: application/json
+x-api-token: {{apiToken}}
+
+### Listar todas as conexões WhatsApp
+GET {{baseUrl}}/v1/whatsapp
+Content-Type: application/json
+x-api-token: {{apiToken}}
+
+### Obter uma conexão WhatsApp específica
+GET {{baseUrl}}/v1/whatsapp/{{whatsappId}}
+Content-Type: application/json
+x-api-token: {{apiToken}}
+
+### Criar uma nova conexão WhatsApp
+POST {{baseUrl}}/v1/whatsapp
+Content-Type: application/json
+x-api-token: {{apiToken}}
+
+{
+  "name": "Conexão API",
+  "isDefault": false,
+  "greetingMessage": "Olá, como posso ajudar?",
+  "farewellMessage": "Obrigado pelo contato!",
+  "queueIds": [1, 2]
+}
+
+### Atualizar uma conexão WhatsApp
+PUT {{baseUrl}}/v1/whatsapp/{{whatsappId}}
+Content-Type: application/json
+x-api-token: {{apiToken}}
+
+{
+  "name": "Conexão API Atualizada",
+  "isDefault": false,
+  "greetingMessage": "Olá, como posso ajudar hoje?",
+  "farewellMessage": "Obrigado pelo contato! Volte sempre.",
+  "queueIds": [1, 2, 3]
+}
+
+### Excluir uma conexão WhatsApp
+DELETE {{baseUrl}}/v1/whatsapp/{{whatsappId}}
+Content-Type: application/json
+x-api-token: {{apiToken}}
+
+### Reiniciar uma conexão WhatsApp
+POST {{baseUrl}}/v1/whatsapp/{{whatsappId}}/restart
+Content-Type: application/json
+x-api-token: {{apiToken}}
+
+### Desligar uma conexão WhatsApp
+POST {{baseUrl}}/v1/whatsapp/{{whatsappId}}/shutdown
+Content-Type: application/json
+x-api-token: {{apiToken}}
+
+### ============================================================
+### ROTAS DE SESSÕES DE WHATSAPP
+### ============================================================
+
+### Variáveis para Sessões de WhatsApp
+@whatsappSessionId = 1
+
+### Criar uma nova sessão WhatsApp
+POST {{baseUrl}}/v1/whatsappsession
+Content-Type: application/json
+x-api-token: {{apiToken}}
+
+{
+  "whatsappId": {{whatsappId}},
+  "qrcode": "data:image/png;base64,...",
+  "status": "CONNECTED"
+}
+
+### Atualizar uma sessão WhatsApp
+PUT {{baseUrl}}/v1/whatsappsession/{{whatsappSessionId}}
+Content-Type: application/json
+x-api-token: {{apiToken}}
+
+{
+  "whatsappId": {{whatsappId}},
+  "qrcode": "data:image/png;base64,...",
+  "status": "DISCONNECTED"
+}
+
+### Excluir uma sessão WhatsApp
+DELETE {{baseUrl}}/v1/whatsappsession/{{whatsappSessionId}}
+Content-Type: application/json
+x-api-token: {{apiToken}}
+
+### (Fechar Todos os Tickets) Teste da Rota PUT /v1/tickets/close-all
+PUT {{baseUrl}}/v1/tickets/close-all
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+{
+  "status": "closed"
+}
+
+### ============================================================
+### ROTAS DE WHATSAPP
+### ============================================================
+
+### (Listar Conexões WhatsApp) Teste da Rota GET /v1/whatsapp
+GET {{baseUrl}}/v1/whatsapp
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+### (Criar Conexão WhatsApp) Teste da Rota POST /v1/whatsapp
+POST {{baseUrl}}/v1/whatsapp
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+{
+  "name": "Conexão API",
+  "isDefault": false,
+  "greetingMessage": "Olá, como posso ajudar?",
+  "farewellMessage": "Obrigado pelo contato!",
+  "queueIds": [1, 2]
+}
+
+### (Obter Conexão WhatsApp) Teste da Rota GET /v1/whatsapp/{whatsappId}
+GET {{baseUrl}}/v1/whatsapp/{{whatsappId}}
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+### (Atualizar Conexão WhatsApp) Teste da Rota PUT /v1/whatsapp/{whatsappId}
+PUT {{baseUrl}}/v1/whatsapp/{{whatsappId}}
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+{
+  "name": "Conexão API Atualizada",
+  "isDefault": false,
+  "greetingMessage": "Olá, como posso ajudar hoje?",
+  "farewellMessage": "Obrigado pelo contato! Volte sempre.",
+  "queueIds": [1, 2, 3]
+}
+
+### (Excluir Conexão WhatsApp) Teste da Rota DELETE /v1/whatsapp/{whatsappId}
+DELETE {{baseUrl}}/v1/whatsapp/{{whatsappId}}
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+### (Reiniciar Conexão WhatsApp) Teste da Rota POST /v1/whatsapp/{whatsappId}/restart
+POST {{baseUrl}}/v1/whatsapp/{{whatsappId}}/restart
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+### (Desligar Conexão WhatsApp) Teste da Rota POST /v1/whatsapp/{whatsappId}/shutdown
+POST {{baseUrl}}/v1/whatsapp/{{whatsappId}}/shutdown
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+### ============================================================
+### ROTAS DE SESSÃO DO WHATSAPP
+### ============================================================
+
+### (Criar Sessão WhatsApp) Teste da Rota POST /v1/whatsappsession/{whatsappId}
+POST {{baseUrl}}/v1/whatsappsession/{{whatsappId}}
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+{
+  "qrcode": "data:image/png;base64,QRCODE_BASE64_AQUI",
+  "status": "CONNECTED",
+  "whatsappId": {{whatsappId}}
+}
+
+### (Atualizar Sessão WhatsApp) Teste da Rota PUT /v1/whatsappsession/{whatsappId}
+PUT {{baseUrl}}/v1/whatsappsession/{{whatsappId}}
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+{
+  "qrcode": "data:image/png;base64,NOVO_QRCODE_BASE64_AQUI",
+  "status": "QRCODE",
+  "whatsappId": {{whatsappId}}
+}
+
+### (Excluir Sessão WhatsApp) Teste da Rota DELETE /v1/whatsappsession/{whatsappId}
+DELETE {{baseUrl}}/v1/whatsappsession/{{whatsappId}}
+x-api-token: {{apiToken}}
+Content-Type: application/json

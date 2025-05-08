@@ -436,21 +436,21 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "name": {
-                    "type": "string",
-                    "description": "Nome do contato para busca"
-                  },
                   "number": {
                     "type": "string",
-                    "description": "Número do contato para busca"
+                    "description": "Número do contato no formato DDI+DDD+NÚMERO (ex: 5522999999999)"
                   },
-                  "address": {
+                  "name": {
                     "type": "string",
-                    "description": "Endereço do contato para busca"
+                    "description": "Nome do contato"
                   },
                   "email": {
                     "type": "string",
-                    "description": "Email do contato para busca"
+                    "description": "Email do contato"
+                  },
+                  "address": {
+                    "type": "string",
+                    "description": "Endereço do contato"
                   }
                 }
               },
@@ -462,7 +462,7 @@
                 },
                 "byName": {
                   "value": {
-                    "name": "Test Contact"
+                    "name": "Nome do Contato"
                   }
                 }
               }
@@ -471,7 +471,7 @@
         },
         "responses": {
           "200": {
-            "description": "Contato encontrado com sucesso"
+            "description": "Contato encontrado"
           },
           "401": {
             "description": "Token inválido ou não fornecido"
@@ -481,6 +481,1537 @@
           },
           "404": {
             "description": "Contato não encontrado"
+          },
+          "500": {
+            "description": "Erro interno!"
+          }
+        }
+      }
+    },
+    "/v1/queue": {
+      "get": {
+        "summary": "Listar Setores",
+        "description": "Listar todos os setores via API\n\nPermissões requeridas: `read:queue`",
+        "tags": [
+          "Setores"
+        ],
+        "security": [
+          {
+            "apiToken": [
+              "read:queue"
+            ]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de setores"
+          },
+          "401": {
+            "description": "Token inválido ou não fornecido"
+          },
+          "403": {
+            "description": "Token não tem permissão 'read:queue'"
+          },
+          "500": {
+            "description": "Erro interno!"
+          }
+        }
+      },
+      "post": {
+        "summary": "Criar Setor",
+        "description": "Criar um novo setor via API\n\nPermissões requeridas: `create:queue`",
+        "tags": [
+          "Setores"
+        ],
+        "security": [
+          {
+            "apiToken": [
+              "create:queue"
+            ]
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "Nome do setor"
+                  },
+                  "color": {
+                    "type": "string",
+                    "description": "Cor do setor em formato hexadecimal (ex: #FF0000)"
+                  }
+                },
+                "required": [
+                  "name",
+                  "color"
+                ]
+              },
+              "examples": {
+                "queue": {
+                  "value": {
+                    "name": "Setor de Teste API",
+                    "color": "#FF0000"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Setor criado com sucesso"
+          },
+          "401": {
+            "description": "Token inválido ou não fornecido"
+          },
+          "403": {
+            "description": "Token não tem permissão 'create:queue'"
+          },
+          "500": {
+            "description": "Erro interno!"
+          }
+        }
+      }
+    },
+    "/v1/queue/{queueId}": {
+      "get": {
+        "summary": "Obter Setor",
+        "description": "Obter detalhes de um setor específico via API\n\nPermissões requeridas: `read:queue`",
+        "tags": [
+          "Setores"
+        ],
+        "security": [
+          {
+            "apiToken": [
+              "read:queue"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "queueId",
+            "in": "path",
+            "description": "ID do Setor",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Setor encontrado"
+          },
+          "401": {
+            "description": "Token inválido ou não fornecido"
+          },
+          "403": {
+            "description": "Token não tem permissão 'read:queue'"
+          },
+          "404": {
+            "description": "Setor não encontrado"
+          },
+          "500": {
+            "description": "Erro interno!"
+          }
+        }
+      },
+      "put": {
+        "summary": "Atualizar Setor",
+        "description": "Atualizar um setor específico via API\n\nPermissões requeridas: `update:queue`",
+        "tags": [
+          "Setores"
+        ],
+        "security": [
+          {
+            "apiToken": [
+              "update:queue"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "queueId",
+            "in": "path",
+            "description": "ID do setor",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "Nome do setor"
+                  },
+                  "color": {
+                    "type": "string",
+                    "description": "Cor do setor em formato hexadecimal (ex: #FF0000)"
+                  }
+                }
+              },
+              "examples": {
+                "queue": {
+                  "value": {
+                    "name": "Setor Atualizado API",
+                    "color": "#00FF00"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Setor atualizado com sucesso"
+          },
+          "401": {
+            "description": "Token inválido ou não fornecido"
+          },
+          "403": {
+            "description": "Token não tem permissão 'update:queue'"
+          },
+          "404": {
+            "description": "Setor não encontrado"
+          },
+          "500": {
+            "description": "Erro interno!"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Excluir Setor",
+        "description": "Excluir um setor específico via API\n\nPermissões requeridas: `delete:queue`",
+        "tags": [
+          "Setores"
+        ],
+        "security": [
+          {
+            "apiToken": [
+              "delete:queue"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "queueId",
+            "in": "path",
+            "description": "ID do setor",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Setor excluído com sucesso"
+          },
+          "401": {
+            "description": "Token inválido ou não fornecido"
+          },
+          "403": {
+            "description": "Token não tem permissão 'delete:queue'"
+          },
+          "404": {
+            "description": "Setor não encontrado"
+          },
+          "500": {
+            "description": "Erro interno!"
+          }
+        }
+      }
+    },
+    "/v1/tags": {
+      "get": {
+        "summary": "Listar Tags",
+        "description": "Listar todas as tags via API\n\nPermissões requeridas: `read:tags`",
+        "tags": [
+          "Tags"
+        ],
+        "security": [
+          {
+            "apiToken": [
+              "read:tags"
+            ]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de tags"
+          },
+          "401": {
+            "description": "Token inválido ou não fornecido"
+          },
+          "403": {
+            "description": "Token não tem permissão 'read:tags'"
+          },
+          "500": {
+            "description": "Erro interno!"
+          }
+        }
+      },
+      "post": {
+        "summary": "Criar Tag",
+        "description": "Criar uma nova tag via API\n\nPermissões requeridas: `create:tags`",
+        "tags": [
+          "Tags"
+        ],
+        "security": [
+          {
+            "apiToken": [
+              "create:tags"
+            ]
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "Nome da tag"
+                  },
+                  "color": {
+                    "type": "string",
+                    "description": "Cor da tag em formato hexadecimal (ex: #0000FF)"
+                  }
+                },
+                "required": [
+                  "name",
+                  "color"
+                ]
+              },
+              "examples": {
+                "tag": {
+                  "value": {
+                    "name": "Tag de Teste API",
+                    "color": "#0000FF"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tag criada com sucesso"
+          },
+          "401": {
+            "description": "Token inválido ou não fornecido"
+          },
+          "403": {
+            "description": "Token não tem permissão 'create:tags'"
+          },
+          "500": {
+            "description": "Erro interno!"
+          }
+        }
+      }
+    },
+    "/v1/tags/list": {
+      "get": {
+        "summary": "Listar Tags Simplificado",
+        "description": "Listar todas as tags em formato simplificado via API\n\nPermissões requeridas: `read:tags`",
+        "tags": [
+          "Tags"
+        ],
+        "security": [
+          {
+            "apiToken": [
+              "read:tags"
+            ]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista simplificada de tags"
+          },
+          "401": {
+            "description": "Token inválido ou não fornecido"
+          },
+          "403": {
+            "description": "Token não tem permissão 'read:tags'"
+          },
+          "500": {
+            "description": "Erro interno!"
+          }
+        }
+      }
+    },
+    "/v1/tags/{tagId}": {
+      "get": {
+        "summary": "Obter Tag",
+        "description": "Obter detalhes de uma tag específica via API\n\nPermissões requeridas: `read:tags`",
+        "tags": [
+          "Tags"
+        ],
+        "security": [
+          {
+            "apiToken": [
+              "read:tags"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "tagId",
+            "in": "path",
+            "description": "ID da tag",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Tag encontrada"
+          },
+          "401": {
+            "description": "Token inválido ou não fornecido"
+          },
+          "403": {
+            "description": "Token não tem permissão 'read:tags'"
+          },
+          "404": {
+            "description": "Tag não encontrada"
+          },
+          "500": {
+            "description": "Erro interno!"
+          }
+        }
+      },
+      "put": {
+        "summary": "Atualizar Tag",
+        "description": "Atualizar uma tag específica via API\n\nPermissões requeridas: `update:tags`",
+        "tags": [
+          "Tags"
+        ],
+        "security": [
+          {
+            "apiToken": [
+              "update:tags"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "tagId",
+            "in": "path",
+            "description": "ID da tag",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "Nome da tag"
+                  },
+                  "color": {
+                    "type": "string",
+                    "description": "Cor da tag em formato hexadecimal (ex: #00FFFF)"
+                  }
+                }
+              },
+              "examples": {
+                "tag": {
+                  "value": {
+                    "name": "Tag Atualizada API",
+                    "color": "#00FFFF"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tag atualizada com sucesso"
+          },
+          "401": {
+            "description": "Token inválido ou não fornecido"
+          },
+          "403": {
+            "description": "Token não tem permissão 'update:tags'"
+          },
+          "404": {
+            "description": "Tag não encontrada"
+          },
+          "500": {
+            "description": "Erro interno!"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Excluir Tag",
+        "description": "Excluir uma tag específica via API\n\nPermissões requeridas: `delete:tags`",
+        "tags": [
+          "Tags"
+        ],
+        "security": [
+          {
+            "apiToken": [
+              "delete:tags"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "tagId",
+            "in": "path",
+            "description": "ID da tag",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Tag excluída com sucesso"
+          },
+          "401": {
+            "description": "Token inválido ou não fornecido"
+          },
+          "403": {
+            "description": "Token não tem permissão 'delete:tags'"
+          },
+          "404": {
+            "description": "Tag não encontrada"
+          },
+          "500": {
+            "description": "Erro interno!"
+          }
+        }
+      }
+    },
+    "/v1/tags/sync": {
+      "post": {
+        "summary": "Sincronizar Tags",
+        "description": "Sincronizar tags com um ticket específico via API\n\nPermissões requeridas: `create:tags`",
+        "tags": [
+          "Tags"
+        ],
+        "security": [
+          {
+            "apiToken": [
+              "create:tags"
+            ]
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "tags": {
+                    "type": "array",
+                    "items": {
+                      "type": "integer"
+                    },
+                    "description": "Array com os IDs das tags a serem sincronizadas"
+                  },
+                  "ticketId": {
+                    "type": "integer",
+                    "description": "ID do ticket para sincronizar as tags"
+                  }
+                },
+                "required": [
+                  "tags",
+                  "ticketId"
+                ]
+              },
+              "examples": {
+                "sync": {
+                  "value": {
+                    "tags": [1, 2, 3],
+                    "ticketId": 1
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tags sincronizadas com sucesso"
+          },
+          "401": {
+            "description": "Token inválido ou não fornecido"
+          },
+          "403": {
+            "description": "Token não tem permissão 'create:tags'"
+          },
+          "404": {
+            "description": "Ticket não encontrado"
+          },
+          "500": {
+            "description": "Erro interno!"
+          }
+        }
+      }
+    },
+    "/v1/tickets": {
+      "get": {
+        "summary": "Listar Tickets",
+        "description": "Listar todos os tickets via API\n\nPermissões requeridas: `read:tickets`",
+        "tags": [
+          "Tickets"
+        ],
+        "security": [
+          {
+            "apiToken": [
+              "read:tickets"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "description": "Status do ticket (open, pending, closed)",
+            "schema": {
+              "type": "string",
+              "enum": ["open", "pending", "closed"]
+            }
+          },
+          {
+            "name": "searchParam",
+            "in": "query",
+            "description": "Termo para busca",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "pageNumber",
+            "in": "query",
+            "description": "Número da página para paginação",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "tags",
+            "in": "query",
+            "description": "IDs das tags separados por vírgula (ex: 1,2,3)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de tickets"
+          },
+          "401": {
+            "description": "Token inválido ou não fornecido"
+          },
+          "403": {
+            "description": "Token não tem permissão 'read:tickets'"
+          },
+          "500": {
+            "description": "Erro interno!"
+          }
+        }
+      },
+      "post": {
+        "summary": "Criar Ticket",
+        "description": "Criar um novo ticket via API\n\nPermissões requeridas: `create:tickets`",
+        "tags": [
+          "Tickets"
+        ],
+        "security": [
+          {
+            "apiToken": [
+              "create:tickets"
+            ]
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "contactId": {
+                    "type": "integer",
+                    "description": "ID do contato"
+                  },
+                  "status": {
+                    "type": "string",
+                    "description": "Status do ticket (open, pending, closed)",
+                    "enum": ["open", "pending", "closed"]
+                  },
+                  "queueId": {
+                    "type": "integer",
+                    "description": "ID do setor"
+                  },
+                  "userId": {
+                    "type": "integer",
+                    "description": "ID do usuário responsável"
+                  }
+                },
+                "required": [
+                  "contactId",
+                  "status"
+                ]
+              },
+              "examples": {
+                "ticket": {
+                  "value": {
+                    "contactId": 1,
+                    "status": "open",
+                    "queueId": 1,
+                    "userId": 1
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Ticket criado com sucesso"
+          },
+          "401": {
+            "description": "Token inválido ou não fornecido"
+          },
+          "403": {
+            "description": "Token não tem permissão 'create:tickets'"
+          },
+          "500": {
+            "description": "Erro interno!"
+          }
+        }
+      }
+    },
+    "/v1/tickets/close-all": {
+      "put": {
+        "summary": "Fechar Todos os Tickets",
+        "description": "Fechar todos os tickets via API\n\nPermissões requeridas: `update:tickets`",
+        "tags": [
+          "Tickets"
+        ],
+        "security": [
+          {
+            "apiToken": [
+              "update:tickets"
+            ]
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "description": "Status para definir nos tickets (geralmente 'closed')",
+                    "enum": ["closed"]
+                  }
+                },
+                "required": [
+                  "status"
+                ]
+              },
+              "examples": {
+                "closeAll": {
+                  "value": {
+                    "status": "closed"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tickets fechados com sucesso"
+          },
+          "401": {
+            "description": "Token inválido ou não fornecido"
+          },
+          "403": {
+            "description": "Token não tem permissão 'update:tickets'"
+          },
+          "500": {
+            "description": "Erro interno!"
+          }
+        }
+      }
+    },
+    "/v1/tickets/{ticketId}": {
+      "get": {
+        "summary": "Obter Ticket",
+        "description": "Obter detalhes de um ticket específico via API\n\nPermissões requeridas: `read:tickets`",
+        "tags": [
+          "Tickets"
+        ],
+        "security": [
+          {
+            "apiToken": [
+              "read:tickets"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "ticketId",
+            "in": "path",
+            "description": "ID do ticket",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Ticket encontrado"
+          },
+          "401": {
+            "description": "Token inválido ou não fornecido"
+          },
+          "403": {
+            "description": "Token não tem permissão 'read:tickets'"
+          },
+          "404": {
+            "description": "Ticket não encontrado"
+          },
+          "500": {
+            "description": "Erro interno!"
+          }
+        }
+      },
+      "put": {
+        "summary": "Atualizar Ticket",
+        "description": "Atualizar um ticket específico via API\n\nPermissões requeridas: `update:tickets`",
+        "tags": [
+          "Tickets"
+        ],
+        "security": [
+          {
+            "apiToken": [
+              "update:tickets"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "ticketId",
+            "in": "path",
+            "description": "ID do ticket",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "description": "Status do ticket (open, pending, closed)",
+                    "enum": ["open", "pending", "closed"]
+                  },
+                  "queueId": {
+                    "type": "integer",
+                    "description": "ID do setor"
+                  },
+                  "userId": {
+                    "type": "integer",
+                    "description": "ID do usuário responsável"
+                  }
+                }
+              },
+              "examples": {
+                "ticket": {
+                  "value": {
+                    "status": "pending",
+                    "queueId": 2,
+                    "userId": 1
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Ticket atualizado com sucesso"
+          },
+          "401": {
+            "description": "Token inválido ou não fornecido"
+          },
+          "403": {
+            "description": "Token não tem permissão 'update:tickets'"
+          },
+          "404": {
+            "description": "Ticket não encontrado"
+          },
+          "500": {
+            "description": "Erro interno!"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Excluir Ticket",
+        "description": "Excluir um ticket específico via API\n\nPermissões requeridas: `delete:tickets`",
+        "tags": [
+          "Tickets"
+        ],
+        "security": [
+          {
+            "apiToken": [
+              "delete:tickets"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "ticketId",
+            "in": "path",
+            "description": "ID do ticket",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Ticket excluído com sucesso"
+          },
+          "401": {
+            "description": "Token inválido ou não fornecido"
+          },
+          "403": {
+            "description": "Token não tem permissão 'delete:tickets'"
+          },
+          "404": {
+            "description": "Ticket não encontrado"
+          },
+          "500": {
+            "description": "Erro interno!"
+          }
+        }
+      }
+    },
+    "/v1/tickets/contact/{contactId}/open": {
+      "get": {
+        "summary": "Verificar Tickets Abertos",
+        "description": "Verificar tickets abertos de um contato específico via API\n\nPermissões requeridas: `read:tickets`",
+        "tags": [
+          "Tickets"
+        ],
+        "security": [
+          {
+            "apiToken": [
+              "read:tickets"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "contactId",
+            "in": "path",
+            "description": "ID do contato",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Tickets abertos encontrados"
+          },
+          "401": {
+            "description": "Token inválido ou não fornecido"
+          },
+          "403": {
+            "description": "Token não tem permissão 'read:tickets'"
+          },
+          "404": {
+            "description": "Contato não encontrado"
+          },
+          "500": {
+            "description": "Erro interno!"
+          }
+        }
+      }
+    },
+    "/v1/whatsapp": {
+      "get": {
+        "summary": "Listar Conexões WhatsApp",
+        "description": "Listar todas as conexões WhatsApp via API\n\nPermissões requeridas: `read:whatsapp`",
+        "tags": [
+          "WhatsApp"
+        ],
+        "security": [
+          {
+            "apiToken": [
+              "read:whatsapp"
+            ]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de conexões WhatsApp"
+          },
+          "401": {
+            "description": "Token inválido ou não fornecido"
+          },
+          "403": {
+            "description": "Token não tem permissão 'read:whatsapp'"
+          },
+          "500": {
+            "description": "Erro interno!"
+          }
+        }
+      },
+      "post": {
+        "summary": "Criar Conexão WhatsApp",
+        "description": "Criar uma nova conexão WhatsApp via API\n\nPermissões requeridas: `create:whatsapp`",
+        "tags": [
+          "WhatsApp"
+        ],
+        "security": [
+          {
+            "apiToken": [
+              "create:whatsapp"
+            ]
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "Nome da conexão"
+                  },
+                  "isDefault": {
+                    "type": "boolean",
+                    "description": "Se é a conexão padrão"
+                  },
+                  "greetingMessage": {
+                    "type": "string",
+                    "description": "Mensagem de saudação"
+                  },
+                  "farewellMessage": {
+                    "type": "string",
+                    "description": "Mensagem de despedida"
+                  },
+                  "queueIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "integer"
+                    },
+                    "description": "IDs dos setores associados"
+                  }
+                },
+                "required": [
+                  "name"
+                ]
+              },
+              "examples": {
+                "whatsapp": {
+                  "value": {
+                    "name": "Conexão API",
+                    "isDefault": false,
+                    "greetingMessage": "Olá, como posso ajudar?",
+                    "farewellMessage": "Obrigado pelo contato!",
+                    "queueIds": [1, 2]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Conexão WhatsApp criada com sucesso"
+          },
+          "401": {
+            "description": "Token inválido ou não fornecido"
+          },
+          "403": {
+            "description": "Token não tem permissão 'create:whatsapp'"
+          },
+          "500": {
+            "description": "Erro interno!"
+          }
+        }
+      }
+    },
+    "/v1/whatsapp/{whatsappId}": {
+      "get": {
+        "summary": "Obter Conexão WhatsApp",
+        "description": "Obter detalhes de uma conexão WhatsApp específica via API\n\nPermissões requeridas: `read:whatsapp`",
+        "tags": [
+          "WhatsApp"
+        ],
+        "security": [
+          {
+            "apiToken": [
+              "read:whatsapp"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "whatsappId",
+            "in": "path",
+            "description": "ID da conexão WhatsApp",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Conexão WhatsApp encontrada"
+          },
+          "401": {
+            "description": "Token inválido ou não fornecido"
+          },
+          "403": {
+            "description": "Token não tem permissão 'read:whatsapp'"
+          },
+          "404": {
+            "description": "Conexão WhatsApp não encontrada"
+          },
+          "500": {
+            "description": "Erro interno!"
+          }
+        }
+      },
+      "put": {
+        "summary": "Atualizar Conexão WhatsApp",
+        "description": "Atualizar uma conexão WhatsApp específica via API\n\nPermissões requeridas: `update:whatsapp`",
+        "tags": [
+          "WhatsApp"
+        ],
+        "security": [
+          {
+            "apiToken": [
+              "update:whatsapp"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "whatsappId",
+            "in": "path",
+            "description": "ID da conexão WhatsApp",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "Nome da conexão"
+                  },
+                  "isDefault": {
+                    "type": "boolean",
+                    "description": "Se é a conexão padrão"
+                  },
+                  "greetingMessage": {
+                    "type": "string",
+                    "description": "Mensagem de saudação"
+                  },
+                  "farewellMessage": {
+                    "type": "string",
+                    "description": "Mensagem de despedida"
+                  },
+                  "queueIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "integer"
+                    },
+                    "description": "IDs dos setores associados"
+                  }
+                }
+              },
+              "examples": {
+                "whatsapp": {
+                  "value": {
+                    "name": "Conexão API Atualizada",
+                    "isDefault": false,
+                    "greetingMessage": "Olá, como posso ajudar hoje?",
+                    "farewellMessage": "Obrigado pelo contato! Volte sempre.",
+                    "queueIds": [1, 2, 3]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Conexão WhatsApp atualizada com sucesso"
+          },
+          "401": {
+            "description": "Token inválido ou não fornecido"
+          },
+          "403": {
+            "description": "Token não tem permissão 'update:whatsapp'"
+          },
+          "404": {
+            "description": "Conexão WhatsApp não encontrada"
+          },
+          "500": {
+            "description": "Erro interno!"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Excluir Conexão WhatsApp",
+        "description": "Excluir uma conexão WhatsApp específica via API\n\nPermissões requeridas: `delete:whatsapp`",
+        "tags": [
+          "WhatsApp"
+        ],
+        "security": [
+          {
+            "apiToken": [
+              "delete:whatsapp"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "whatsappId",
+            "in": "path",
+            "description": "ID da conexão WhatsApp",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Conexão WhatsApp excluída com sucesso"
+          },
+          "401": {
+            "description": "Token inválido ou não fornecido"
+          },
+          "403": {
+            "description": "Token não tem permissão 'delete:whatsapp'"
+          },
+          "404": {
+            "description": "Conexão WhatsApp não encontrada"
+          },
+          "500": {
+            "description": "Erro interno!"
+          }
+        }
+      }
+    },
+    "/v1/whatsapp/{whatsappId}/restart": {
+      "post": {
+        "summary": "Reiniciar Conexão WhatsApp",
+        "description": "Reiniciar uma conexão WhatsApp específica via API\n\nPermissões requeridas: `update:whatsapp`",
+        "tags": [
+          "WhatsApp"
+        ],
+        "security": [
+          {
+            "apiToken": [
+              "update:whatsapp"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "whatsappId",
+            "in": "path",
+            "description": "ID da conexão WhatsApp",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Conexão WhatsApp reiniciada com sucesso"
+          },
+          "401": {
+            "description": "Token inválido ou não fornecido"
+          },
+          "403": {
+            "description": "Token não tem permissão 'update:whatsapp'"
+          },
+          "404": {
+            "description": "Conexão WhatsApp não encontrada"
+          },
+          "500": {
+            "description": "Erro interno!"
+          }
+        }
+      }
+    },
+    "/v1/whatsapp/{whatsappId}/shutdown": {
+      "post": {
+        "summary": "Desligar Conexão WhatsApp",
+        "description": "Desligar uma conexão WhatsApp específica via API\n\nPermissões requeridas: `update:whatsapp`",
+        "tags": [
+          "WhatsApp"
+        ],
+        "security": [
+          {
+            "apiToken": [
+              "update:whatsapp"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "whatsappId",
+            "in": "path",
+            "description": "ID da conexão WhatsApp",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Conexão WhatsApp desligada com sucesso"
+          },
+          "401": {
+            "description": "Token inválido ou não fornecido"
+          },
+          "403": {
+            "description": "Token não tem permissão 'update:whatsapp'"
+          },
+          "404": {
+            "description": "Conexão WhatsApp não encontrada"
+          },
+          "500": {
+            "description": "Erro interno!"
+          }
+        }
+      }
+    },
+    "/v1/whatsappsession": {
+      "post": {
+        "summary": "Criar Sessão WhatsApp",
+        "description": "Criar uma nova sessão WhatsApp via API\n\nPermissões requeridas: `create:whatsappsession`",
+        "tags": [
+          "WhatsApp Session"
+        ],
+        "security": [
+          {
+            "apiToken": [
+              "create:whatsappsession"
+            ]
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "whatsappId": {
+                    "type": "integer",
+                    "description": "ID da conexão WhatsApp"
+                  },
+                  "qrcode": {
+                    "type": "string",
+                    "description": "QR Code para a sessão"
+                  },
+                  "status": {
+                    "type": "string",
+                    "description": "Status da sessão"
+                  }
+                },
+                "required": [
+                  "whatsappId"
+                ]
+              },
+              "examples": {
+                "whatsappsession": {
+                  "value": {
+                    "whatsappId": 1,
+                    "qrcode": "data:image/png;base64,...",
+                    "status": "CONNECTED"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Sessão WhatsApp criada com sucesso"
+          },
+          "401": {
+            "description": "Token inválido ou não fornecido"
+          },
+          "403": {
+            "description": "Token não tem permissão 'create:whatsappsession'"
+          },
+          "500": {
+            "description": "Erro interno!"
+          }
+        }
+      }
+    },
+    "/v1/whatsappsession/{whatsappSessionId}": {
+      "put": {
+        "summary": "Atualizar Sessão WhatsApp",
+        "description": "Atualizar uma sessão WhatsApp específica via API\n\nPermissões requeridas: `update:whatsappsession`",
+        "tags": [
+          "WhatsApp Session"
+        ],
+        "security": [
+          {
+            "apiToken": [
+              "update:whatsappsession"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "whatsappSessionId",
+            "in": "path",
+            "description": "ID da sessão WhatsApp",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "whatsappId": {
+                    "type": "integer",
+                    "description": "ID da conexão WhatsApp"
+                  },
+                  "qrcode": {
+                    "type": "string",
+                    "description": "QR Code para a sessão"
+                  },
+                  "status": {
+                    "type": "string",
+                    "description": "Status da sessão"
+                  }
+                }
+              },
+              "examples": {
+                "whatsappsession": {
+                  "value": {
+                    "whatsappId": 1,
+                    "qrcode": "data:image/png;base64,...",
+                    "status": "DISCONNECTED"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Sessão WhatsApp atualizada com sucesso"
+          },
+          "401": {
+            "description": "Token inválido ou não fornecido"
+          },
+          "403": {
+            "description": "Token não tem permissão 'update:whatsappsession'"
+          },
+          "404": {
+            "description": "Sessão WhatsApp não encontrada"
+          },
+          "500": {
+            "description": "Erro interno!"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Excluir Sessão WhatsApp",
+        "description": "Excluir uma sessão WhatsApp específica via API\n\nPermissões requeridas: `delete:whatsappsession`",
+        "tags": [
+          "WhatsApp Session"
+        ],
+        "security": [
+          {
+            "apiToken": [
+              "delete:whatsappsession"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "whatsappSessionId",
+            "in": "path",
+            "description": "ID da sessão WhatsApp",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sessão WhatsApp excluída com sucesso"
+          },
+          "401": {
+            "description": "Token inválido ou não fornecido"
+          },
+          "403": {
+            "description": "Token não tem permissão 'delete:whatsappsession'"
+          },
+          "404": {
+            "description": "Sessão WhatsApp não encontrada"
           },
           "500": {
             "description": "Erro interno!"

@@ -10,17 +10,38 @@ const messages = {
         },
         categories: {
           contacts: "Contatos",
-          messages: "Mensagens"
+          messages: "Mensagens",
+          queues: "Setores",
+          tags: "Tags",
+          tickets: "Tickets",
+          whatsapp: "WhatsApp",
+          whatsappSession: "Sessões de WhatsApp"
         },
         permissions: {
-          createMessages: "Enviar Mensagens",
-          createMedias: "Enviar Mídia",
-          readWhatsapps: "Visualizar Conexões",
-          updateWhatsapps: "Editar Conexões",
           createContacts: "Criar Contatos",
           readContacts: "Visualizar Contatos",
           updateContacts: "Editar Contatos",
-          deleteContacts: "Deletar Contatos"
+          deleteContacts: "Deletar Contatos",
+          createMessages: "Enviar Mensagens",
+          createQueue: "Criar Setores",
+          readQueue: "Visualizar Setores",
+          updateQueue: "Editar Setores",
+          deleteQueue: "Deletar Setores",
+          createTags: "Criar Tags",
+          readTags: "Visualizar Tags",
+          updateTags: "Editar Tags",
+          deleteTags: "Deletar Tags",
+          createTickets: "Criar Tickets",
+          readTickets: "Visualizar Tickets",
+          updateTickets: "Editar Tickets",
+          deleteTickets: "Deletar Tickets",
+          createWhatsapp: "Criar Conexões",
+          readWhatsapp: "Visualizar Conexões",
+          updateWhatsapp: "Editar Conexões",
+          deleteWhatsapp: "Deletar Conexões",
+          createWhatsappSession: "Criar Sessões",
+          updateWhatsappSession: "Editar Sessões",
+          deleteWhatsappSession: "Deletar Sessões"
         },
         messages: {
           success: {
@@ -32,7 +53,8 @@ const messages = {
             create: "Erro ao criar token",
             delete: "Erro ao deletar token",
             nameExists: "Já existe um token com este nome"
-          }
+          },
+          noTokens: "Nenhum token encontrado"
         },
         modal: {
           title: "Criar novo token",
@@ -41,7 +63,9 @@ const messages = {
           permissionsRequired: "Selecione ao menos uma permissão",
           buttons: {
             cancel: "Cancelar",
-            save: "Salvar"
+            save: "Salvar",
+            selectAll: "Selecionar Todas",
+            unselectAll: "Desmarcar Todas"
           }
         },
         confirmationModal: {
