@@ -144,6 +144,7 @@ const ModalImageCors = ({ imageUrl, allImages = [], currentIndex = 0, isDeleted 
   const [fetching, setFetching] = useState(true);
   const [blobUrl, setBlobUrl] = useState("");
   const [error, setError] = useState(false);
+  const blobUrlRef = useRef("");
   const [open, setOpen] = useState(false);
   const [rotation, setRotation] = useState(0);
   const [scale, setScale] = useState(1);
@@ -176,6 +177,10 @@ const ModalImageCors = ({ imageUrl, allImages = [], currentIndex = 0, isDeleted 
         const url = window.URL.createObjectURL(
           new Blob([data], { type: headers["content-type"] })
         );
+        if (blobUrlRef.current) {
+          window.URL.revokeObjectURL(blobUrlRef.current);
+        }
+        blobUrlRef.current = url;
         setBlobUrl(url);
         setFetching(false);
       } catch (err) {
@@ -188,11 +193,12 @@ const ModalImageCors = ({ imageUrl, allImages = [], currentIndex = 0, isDeleted 
     fetchImage();
     
     return () => {
-      if (blobUrl) {
-        window.URL.revokeObjectURL(blobUrl);
+      if (blobUrlRef.current) {
+        window.URL.revokeObjectURL(blobUrlRef.current);
+        blobUrlRef.current = "";
       }
     };
-  }, [currentImageUrl, imageUrl, blobUrl]);
+  }, [currentImageUrl, imageUrl]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleOpen = () => {
     setOpen(true);
