@@ -1,31 +1,22 @@
 import {
-  Avatar,
   Box,
   CircularProgress,
   ClickAwayListener,
-  Divider,
   FormControlLabel,
-  Grid,
   Hidden,
   IconButton,
   InputBase,
-  List,
-  ListItem,
-  ListItemAvatar,
-  ListItemText,
   Menu,
   MenuItem,
   Paper,
   Switch,
   Tooltip,
-  Typography,
   Fade
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { green } from "@mui/material/colors";
 import {
   AttachFile,
-  Cancel,
   CheckCircleOutline,
   Clear,
   Code,
@@ -78,14 +69,6 @@ const MainWrapper = styled(Paper)(({ theme }) => ({
   },
 }));
 
-const AvatarStyled = styled(Avatar)(({ theme }) => ({
-  width: "50px",
-  height: "50px",
-  borderRadius: "12px",
-  border: `1px solid ${theme.palette.divider}`,
-  boxShadow: theme.shadows[1],
-}));
-
 const DropInfo = styled(Box)(({ theme, show }) => ({
   background: theme.palette.background.paper,
   color: theme.palette.text.primary,
@@ -129,21 +112,6 @@ const FormatMenu = styled(Box)(({ theme }) => ({
     '&:hover': {
       color: theme.palette.primary.dark,
     }
-  },
-}));
-
-const GridFiles = styled(Grid)(({ theme }) => ({
-  maxHeight: "300px",
-  overflowY: "auto",
-  overflowX: "hidden",
-  width: "100%",
-  scrollbarWidth: "thin",
-  '&::-webkit-scrollbar': {
-    width: '6px',
-  },
-  '&::-webkit-scrollbar-thumb': {
-    backgroundColor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)',
-    borderRadius: '3px',
   },
 }));
 
@@ -194,18 +162,6 @@ const InputStyled = styled('input')(({ theme }) => ({
   display: "none",
 }));
 
-const MediaInputWrapper = styled(Paper)(({ theme }) => ({ 
-  maxHeight: "80%",
-  display: "flex",
-  padding: "16px",
-  position: "relative",
-  justifyContent: "space-between",
-  alignItems: "center",
-  backgroundColor: theme.palette.mode === 'dark' ? theme.palette.background.paper : "#f5f5f5",
-  borderTop: `1px solid ${theme.palette.divider}`,
-  borderRadius: 0,
-}));
-
 const EmojiBoxStyled = styled(Box)(({ theme}) => ({
   position: "absolute",
   bottom: 63,
@@ -215,15 +171,6 @@ const EmojiBoxStyled = styled(Box)(({ theme}) => ({
   boxShadow: theme.shadows[4],
   border: `1px solid ${theme.palette.divider}`,
   overflow: 'hidden',
-}));
-
-const CircularProgressStyled = styled(CircularProgress)(({ theme }) => ({
-  color: theme.palette.success.main,
-  opacity: "80%",
-  position: "absolute",
-  top: "50%",
-  left: "50%",
-  transform: "translate(-50%, -50%)",
 }));
 
 const RecorderWrapper = styled(Box)(({ theme }) => ({
@@ -639,15 +586,6 @@ const MessageInput = ({ ticketStatus }) => {
   const handleInputPaste = (e) => {
     if (e.clipboardData.files && e.clipboardData.files.length > 0) {
       const selectedMedias = Array.from(e.clipboardData.files);
-      setMedias(selectedMedias);
-      setShowUploadModal(true);
-    }
-  };
-
-  const handleInputDrop = (e) => {
-    e.preventDefault();
-    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      const selectedMedias = Array.from(e.dataTransfer.files);
       setMedias(selectedMedias);
       setShowUploadModal(true);
     }

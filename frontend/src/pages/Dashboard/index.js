@@ -78,20 +78,6 @@ const CardIconCircle = styled('div')(({ theme, bgcolor }) => ({
   marginBottom: theme.spacing(1),
 }));
 
-const FixedHeightPaper = styled(Paper)(({ theme }) => ({
-	backgroundColor: theme.palette.background.paper,
-	display: "flex",
-	overflow: "auto",
-	flexDirection: "column",
-	height: 240,
-	borderRadius: 18,
-	boxShadow: "0 4px 24px 0 rgba(80, 80, 160, 0.07)",
-	[theme.breakpoints.down('sm')]: {
-		height: 200,
-		padding: theme.spacing(1),
-	},
-}));
-
 const CardText = styled(Typography)(({ theme }) => ({
 	fontSize: "1.2rem",
 	marginLeft: theme.spacing(1),

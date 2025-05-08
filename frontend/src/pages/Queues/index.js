@@ -40,12 +40,6 @@ const MainPaper = styled(Paper)(({ theme }) => ({
   ...theme.scrollbarStyles,
 }));
 
-const CustomTableCell = styled('div')(({ theme }) => ({
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-}));
-
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   padding: theme.spacing(1, 2),
   fontSize: '0.875rem',

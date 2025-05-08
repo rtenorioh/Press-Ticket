@@ -192,7 +192,7 @@ const ModalImageCors = ({ imageUrl, allImages = [], currentIndex = 0, isDeleted 
         window.URL.revokeObjectURL(blobUrl);
       }
     };
-  }, [currentImageUrl, imageUrl]);
+  }, [currentImageUrl, imageUrl, blobUrl]);
 
   const handleOpen = () => {
     setOpen(true);

@@ -1,4 +1,4 @@
-import { Box, Container, Tab, Tabs, Paper, Typography } from '@mui/material';
+import { Box, Container, Tab, Tabs, Paper } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import React, { useContext, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";

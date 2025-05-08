@@ -1,7 +1,7 @@
 import { useTheme } from "@mui/material";
 import { styled, Paper, Box } from "@mui/material";
 import ResponsiveDateFilter from "../../components/ResponsiveDateFilter";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import {
     Bar,
@@ -46,7 +46,7 @@ const ChartMessages = () => {
         return today.toISOString().substring(0, 10);
     });
 
-    async function fetchMessages() {
+    const fetchMessages = useCallback(async () => {
         try {
             const adjustedEndDate = new Date(endDate);
             adjustedEndDate.setDate(adjustedEndDate.getDate() + 1);
@@ -76,13 +76,13 @@ const ChartMessages = () => {
         } catch (err) {
             console.error("Error fetching messages:", err);
         }
-    }
+    }, [startDate, endDate, users, t]);
 
     useEffect(() => {
         if (users?.length > 0) {
             fetchMessages();
         }
-    }, [users, startDate, endDate, t]);
+    }, [users, fetchMessages]);
 
     useEffect(() => {
         if (!socket) return;

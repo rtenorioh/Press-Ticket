@@ -1,9 +1,8 @@
-import { Chip, Box, Typography, Paper } from "@mui/material";
+import { Chip, Box, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import useMessageVariables from "../../hooks/useMessageVariables";
-import OutlinedDiv from "../OutlinedDiv";
 
 const StyledChip = styled(Chip)(({ theme }) => ({
     margin: theme.spacing(0.5),

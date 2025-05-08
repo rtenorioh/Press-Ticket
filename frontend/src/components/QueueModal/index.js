@@ -79,7 +79,6 @@ const StyledTextField = styled(TextField)(({ theme }) => ({
 const QueueModal = ({ open, onClose, queueId }) => {
 	const theme = useTheme();
 	const { t } = useTranslation();
-	const [loading, setLoading] = useState(false);
 
 	const QueueSchema = Yup.object().shape({
 		name: Yup.string()

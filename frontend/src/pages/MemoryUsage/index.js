@@ -100,8 +100,7 @@ const Root = styled('div')(({ theme }) => ({
     maxWidth: '300px',
     whiteSpace: 'nowrap',
     textOverflow: 'ellipsis',
-    display: 'block',
-    textOverflow: 'ellipsis'
+    display: 'block'
   }
 }));
 

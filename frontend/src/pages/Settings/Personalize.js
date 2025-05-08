@@ -8,10 +8,7 @@ import {
     Tabs, 
     TextField, 
     Typography,
-    Paper,
-    Divider,
-    Alert,
-    Tooltip
+    Paper
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -95,23 +92,6 @@ const CardMedia = styled('div')({
     zIndex: 1,
     pointerEvents: "none",
 });
-
-const DeleteIconButton = styled(IconButton)(({ theme }) => ({
-    position: "absolute",
-    top: 4,
-    right: 4,
-    color: theme.palette.error.main,
-    backgroundColor: "rgba(255, 255, 255, 0.8)",
-    padding: 4,
-    borderRadius: "50%",
-    zIndex: 10,
-    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-    "&:hover": {
-        backgroundColor: "rgba(255, 255, 255, 1)",
-        color: theme.palette.error.dark,
-        boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
-    },
-}));
 
 const StyledTextField = styled(TextField)(({ theme }) => ({
     marginBottom: theme.spacing(3),

@@ -74,7 +74,6 @@ function ErrorLogs() {
   const { user } = useAuth();  
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
   const [page, setPage] = useState(0);
   const [rowsPerPage] = useState(10);
   const [hasMore, setHasMore] = useState(true);
@@ -201,7 +200,6 @@ function ErrorLogs() {
       }
       
       setLoading(true);
-      setError(null);
       
       const searchParams = {
         pageNumber: 1,
@@ -242,15 +240,13 @@ function ErrorLogs() {
           setTotalCount(0);
           setHasMore(false);
           setPage(1);
-          setError('Resposta inválida ao carregar logs');
         }
       } catch (apiError) {
         clearTimeout(loadingTimeout);
         throw apiError;
       }
     } catch (error) {
-      setError(`Erro ao carregar logs: ${error.message || 'Erro desconhecido'}`);
-      toast.error(t("errorLogs.fetchError", "Erro ao buscar logs"));
+      toast.error(t("errorLogs.fetchError"));
       
       setLogs([]);
       setTotalCount(0);

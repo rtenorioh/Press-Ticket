@@ -6,7 +6,6 @@ import {
     Bar,
     BarChart,
     CartesianGrid,
-    Label,
     ResponsiveContainer,
     Tooltip,
     XAxis,

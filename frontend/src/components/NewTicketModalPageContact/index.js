@@ -43,24 +43,11 @@ const NewTicketModalPageContact = ({ modalOpen, onClose, initialContact }) => {
   const { user } = useContext(AuthContext);
   const [selectedQueue, setSelectedQueue] = useState("");
   const [loading, setLoading] = useState(false);
-  const [settings, setSettings] = useState([]);
   const [contact, setContact] = useState(initialContact || null);
 
   useEffect(() => {
     setContact(initialContact || null);
   }, [initialContact]);
-
-  useEffect(() => {
-    const fetchSettings = async () => {
-      try {
-        const { data } = await api.get("/settings");
-        setSettings(data);
-      } catch (err) {
-        toastError(err);
-      }
-    };
-    fetchSettings();
-  }, []);
 
   const handleClose = useCallback(() => {
     onClose();

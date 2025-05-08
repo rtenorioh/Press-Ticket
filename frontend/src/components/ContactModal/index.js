@@ -8,8 +8,7 @@ import {
 	IconButton,
 	TextField,
 	Typography,
-	Box,
-	Paper,
+	Box
 } from "@mui/material";
 import { green } from "@mui/material/colors";
 import { styled, useTheme } from "@mui/material/styles";

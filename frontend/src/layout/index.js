@@ -2,16 +2,12 @@ import AppBar from '@mui/material/AppBar';
 import Divider from '@mui/material/Divider';
 import Drawer from '@mui/material/Drawer';
 import IconButton from '@mui/material/IconButton';
-import Link from '@mui/material/Link';
 import List from '@mui/material/List';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import Toolbar from '@mui/material/Toolbar';
-import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
-import { styled } from '@mui/material/styles';
-import CheckCircle from '@mui/icons-material/CheckCircle';
-import Info from '@mui/icons-material/Info';
+import { styled } from '@mui/material/styles';  
 import AccountCircle from '@mui/icons-material/AccountCircle';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import MenuIcon from '@mui/icons-material/Menu';
@@ -117,12 +113,6 @@ const Content = styled('main')(({ theme }) => ({
   marginTop: theme.spacing(6),
 }));
 
-const SystemCss = styled('div')(({ theme }) => ({
-  display: "flex",
-  justifyContent: "center",
-  fontSize: 12,
-}));
-
 const LoggedInLayout = ({ children, toggleTheme, onThemeConfigUpdate }) => {
   const { t } = useTranslation();
   const location = useLocation();
@@ -132,7 +122,6 @@ const LoggedInLayout = ({ children, toggleTheme, onThemeConfigUpdate }) => {
   const { handleLogout, loading } = useContext(AuthContext);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const { user } = useContext(AuthContext);
-  const [latestVersion, setLatestVersion] = useState("");
   const themeStorage = localStorage.getItem("theme");
   const [companyData, setCompanyData] = useState({
     logo: defaultLogo,

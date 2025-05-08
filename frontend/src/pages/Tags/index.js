@@ -86,13 +86,6 @@ const MainPaper = styled(Paper)(({ theme }) => ({
   boxShadow: theme.shadows[1],
 }));
 
-const CustomTableCell = styled(TableCell)(({ theme }) => ({
-  display: "flex",
-  justifyContent: "center",
-  alignItems: "center",
-  padding: theme.spacing(1),
-}));
-
 const SearchContainer = styled(Box)(({ theme }) => ({
   display: "flex",
   alignItems: "center",
