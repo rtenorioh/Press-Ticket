@@ -66,11 +66,6 @@ const VariablesContainer = styled(Box)(({ theme }) => ({
   },
 }));
 
-const VariablesTitle = styled(Typography)(({ theme }) => ({
-  marginBottom: theme.spacing(1),
-  fontWeight: 500,
-}));
-
 const QuickAnswerSchema = Yup.object().shape({
   shortcut: Yup.string()
     .min(2, "Too Short!")
@@ -231,21 +226,13 @@ const QuickAnswersModal = ({
                       placeholder={t("quickAnswersModal.form.message")}
                     />
                   </WithSkeleton>
-                </FieldContainer>
-                
-                <VariablesContainer>
-                  <VariablesTitle variant="body2">
-                    {t("quickAnswersModal.variables")}
-                  </VariablesTitle>
-                  <Paper variant="outlined" sx={{ p: 2, borderRadius: 1 }}>
-                    <WithSkeleton loading={loading}>
-                      <MessageVariablesPicker
-                        disabled={isSubmitting}
-                        onClick={(value) => handleClickMsgVar(value, setFieldValue)}
-                      />
-                    </WithSkeleton>
-                  </Paper>
-                </VariablesContainer>
+                </FieldContainer>                
+                <WithSkeleton loading={loading}>
+                  <MessageVariablesPicker
+                    disabled={isSubmitting}
+                    onClick={(value) => handleClickMsgVar(value, setFieldValue)}
+                  />
+                </WithSkeleton>
               </FormContainer>
             </DialogContent>
             <DialogActions>
