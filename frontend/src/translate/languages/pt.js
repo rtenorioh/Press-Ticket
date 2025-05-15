@@ -501,7 +501,7 @@ const messages = {
         buttons: {
           forgotPassword: "Esqueceu a Senha?",
           submit: "Fazer login",
-          register: "Não tem um conta? Cadastre-se!",
+          register: "Não tem uma conta? Cadastre-se!",
         },
       },
       mainDrawer: {
@@ -522,7 +522,7 @@ const messages = {
           users: "Atendentes",
           settings: "Configurações",
           system: "Sistema",
-          errorLogs: "Logs de Erro",
+          errorLogs: "Log de Erros",
           diskSpace: "Espaço em Disco",
           memoryUsage: "Uso de Memória RAM",
           cpuUsage: "Uso de CPU",

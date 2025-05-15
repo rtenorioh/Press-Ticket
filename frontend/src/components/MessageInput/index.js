@@ -48,6 +48,7 @@ import UploadModal from "../UploadModal";
 import toastError from "../../errors/toastError";
 import { useLocalStorage } from "../../hooks/useLocalStorage";
 import api from "../../services/api";
+import openSocket from "../../services/socket-io";
 import RecordingTimer from "./RecordingTimer";
 import FormatBoldIcon from "@mui/icons-material/FormatBold";
 import FormatItalicIcon from "@mui/icons-material/FormatItalic";
@@ -633,13 +634,50 @@ const MessageInput = ({ ticketStatus }) => {
       quotedMsg: replyingMessage,
     };
     try {
+      let response;
       if (editingMessage !== null) {
-        await api.post(`/messages/edit/${editingMessage.id}`, message);
+        response = await api.post(`/messages/edit/${editingMessage.id}`, message);
       } else {
         if (channelType !== null) {
-          await api.post(`/hub-message/${ticketId}`, message);
+          response = await api.post(`/hub-message/${ticketId}`, message);
         } else {
-          await api.post(`/messages/${ticketId}`, message);
+          response = await api.post(`/messages/${ticketId}`, message);
+        }
+        
+        // Emitir evento local para atualizar a lista de mensagens imediatamente
+        if (response && response.data) {
+          // Criar uma cópia local da mensagem para exibição imediata
+          const messageData = {
+            ...message,
+            id: response.data.id || new Date().getTime().toString(),
+            ticketId: parseInt(ticketId),
+            createdAt: new Date().toISOString(),
+            userId: user?.id,
+            fromMe: true,
+            read: 1
+          };
+          
+          // Disparar evento personalizado para o MessagesList com prioridade alta
+          // Isso garante que a mensagem seja exibida imediatamente
+          setTimeout(() => {
+            const event = new CustomEvent('newMessage', { 
+              detail: { 
+                message: messageData,
+                ticketId: ticketId 
+              } 
+            });
+            document.dispatchEvent(event);
+          }, 0);
+          
+          // Emitir evento via socket para sincronização com outros clientes
+          const socket = openSocket();
+          if (socket) {
+            socket.emit("appMessage", {
+              action: "create",
+              message: messageData,
+              ticket: { id: ticketId }
+            });
+          }
         }
       }
     } catch (err) {

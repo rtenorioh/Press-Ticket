@@ -6,7 +6,6 @@ import {
   DialogTitle,
   Box,
   Typography,
-  Paper
 } from "@mui/material";
 import { styled, useTheme } from "@mui/material/styles";
 import { Form, Formik } from "formik";
@@ -51,19 +50,6 @@ const FieldContainer = styled(Box)(({ theme }) => ({
   flexDirection: "column",
   width: "100%",
   marginBottom: theme.spacing(1),
-}));
-
-const VariablesContainer = styled(Box)(({ theme }) => ({
-  marginTop: theme.spacing(2),
-  '& .MuiButton-root': {
-    margin: theme.spacing(0.5),
-    borderRadius: theme.shape.borderRadius,
-    backgroundColor: '#673ab7',
-    color: 'white',
-    '&:hover': {
-      backgroundColor: '#5e35b1',
-    },
-  },
 }));
 
 const QuickAnswerSchema = Yup.object().shape({

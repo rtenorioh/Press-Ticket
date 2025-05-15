@@ -119,6 +119,8 @@ const QuotedMsgStyled = styled("div")(({ theme }) => ({
   overflow: "hidden",
   fontSize: "13px",
   lineHeight: "1.4",
+  borderRadius: "4px",
+  backgroundColor: "rgba(0, 0, 0, 0.05)",
 }));
 
 const MessageRight = styled("div")(({ theme }) => ({
@@ -269,15 +271,28 @@ const MessageCenter = styled("div")(({ theme }) => ({
 
 const ScrollToBottomButton = styled(IconButton)(({ theme }) => ({
   position: "absolute",
-  bottom: "20px",
-  right: "20px",
-  zIndex: 1000,
-  backgroundColor: "#fff",
-  boxShadow: "0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)",
+  bottom: 25,
+  right: 25,
+  color: theme.palette.primary.main,
+  backgroundColor: theme.palette.background.paper,
+  boxShadow: "0 2px 5px 0 rgba(0, 0, 0, 0.26)",
   "&:hover": {
-    backgroundColor: "#f5f5f5",
+    backgroundColor: theme.palette.background.paper,
   },
-}))
+}));
+
+const style = document.createElement('style');
+style.textContent = `
+  @keyframes highlightMessage {
+    0% { background-color: rgba(0, 128, 0, 0.2); }
+    100% { background-color: transparent; }
+  }
+  
+  .highlight-new-message {
+    animation: highlightMessage 2s ease-out;
+  }
+`;
+document.head.appendChild(style);
 
 const reducer = (state, action) => {
   if (action.type === "LOAD_MESSAGES") {
@@ -306,13 +321,19 @@ const reducer = (state, action) => {
       state.push(newMessage);
     }
 
-    return [...state];
+    const sortedState = [...state].sort((a, b) => {
+      const dateA = new Date(a.createdAt);
+      const dateB = new Date(b.createdAt);
+      return dateA.getTime() - dateB.getTime();
+    });
+
+    return sortedState;
   }
 
   function ToastDisplay(props) {
     return (
     <>
-      <h4>Mensagem apagada:</h4>
+      <h4>"Mensagem apagada"</h4>
       <WhatsMarked>{props.body}</WhatsMarked>
     </>
     );
@@ -377,9 +398,6 @@ const MessagesList = ({ ticketId, isGroup }) => {
             setLoading(false);
           }
 
-          if (pageNumber === 1 && data.messages.length > 1) {
-            scrollToBottom();
-          }
         } catch (err) {
           setLoading(false);
           toastError(err);
@@ -393,23 +411,121 @@ const MessagesList = ({ ticketId, isGroup }) => {
   }, [pageNumber, ticketId]);
 
   useEffect(() => {
+    const processMessage = (data) => {
+      console.log("Mensagem recebida via socket:", data.action, data.message?.id, data);
+      
+      const messageTicketId = data.ticket?.id || data.message?.ticketId;
+      
+      if (messageTicketId && parseInt(messageTicketId) === parseInt(ticketId)) {
+        if (data.action === "create") {
+          const messageExists = messagesList.some(m => m.id === data.message.id);
+          
+          if (!messageExists) {
+            console.log("Adicionando nova mensagem via socket:", data.message.id);
+            
+            dispatch({ type: "ADD_MESSAGE", payload: data.message });
+            
+            setTimeout(() => {
+              scrollToBottom(true);
+              
+              const messageElement = document.getElementById(data.message.id);
+              if (messageElement) {
+                messageElement.classList.add("highlight-new-message");
+                setTimeout(() => {
+                  messageElement.classList.remove("highlight-new-message");
+                }, 2000);
+              }
+            }, 0);
+          }
+        }
+
+        if (data.action === "update") {
+          dispatch({ type: "UPDATE_MESSAGE", payload: data.message });
+        }
+      }
+    };
+    
     const socket = openSocket();
+    
+    if (!socket) {
+      console.error("Não foi possível conectar ao socket");
+      return;
+    }
 
-    socket.on("connect", () => socket.emit("joinChatBox", ticketId));
+    if (socket.connected) {
+      console.log("Socket já conectado, entrando no chatbox:", ticketId);
+      socket.emit("joinChatBox", ticketId);
+    } else {
+      socket.on("connect", () => {
+        console.log("Socket conectado, entrando no chatbox:", ticketId);
+        socket.emit("joinChatBox", ticketId);
+      });
+    }
 
-    socket.on("appMessage", (data) => {
-      if (data.action === "create") {
-        dispatch({ type: "ADD_MESSAGE", payload: data.message });
-        scrollToBottom();
+    socket.off("appMessage");
+    socket.on("appMessage", processMessage);
+
+    const handleNewMessage = (event) => {
+      const { message, ticketId: messageTicketId } = event.detail;
+      
+      if (parseInt(messageTicketId) === parseInt(ticketId)) {
+        console.log("Mensagem recebida via evento personalizado:", message);
+        
+        const messageExists = messagesList.some(m => m.id === message.id);
+        
+        if (!messageExists) {
+          dispatch({ type: "ADD_MESSAGE", payload: message });
+          
+          setTimeout(() => {
+            scrollToBottom(true);
+          }, 0);
+        }
       }
+    };
+    
+    document.addEventListener('newMessage', handleNewMessage);
 
-      if (data.action === "update") {
-        dispatch({ type: "UPDATE_MESSAGE", payload: data.message });
-      }
-    });
+    const refreshInterval = setInterval(() => {
+      const fetchLatestMessages = async () => {
+        try {
+          const { data } = await api.get(`/messages/${ticketId}`, {
+            params: { pageNumber: 1 }
+          });
+          
+          if (data && data.messages && data.messages.length > 0) {
+            let hasNewMessages = false;
+            
+            data.messages.forEach(message => {
+              const messageExists = messagesList.some(m => m.id === message.id);
+              
+              if (!messageExists) {
+                console.log("Adicionando mensagem da verificação periódica:", message.id);
+                dispatch({ type: "ADD_MESSAGE", payload: message });
+                hasNewMessages = true;
+              }
+            });
+            
+            if (hasNewMessages) {
+              setTimeout(() => {
+                scrollToBottom(true);
+              }, 0);
+            }
+          }
+        } catch (err) {
+          console.error("Erro ao buscar mensagens recentes:", err);
+        }
+      };
+      
+      fetchLatestMessages();
+    }, 3000);
 
     return () => {
-      socket.disconnect();
+      console.log("Desconectando socket do chatbox:", ticketId);
+      socket.off("appMessage");
+      socket.off("connect");
+      document.removeEventListener('newMessage', handleNewMessage);
+      clearInterval(refreshInterval);
+      socket.emit("leaveChatBox", ticketId);
     };
   }, [ticketId]);
 
@@ -417,8 +533,14 @@ const MessagesList = ({ ticketId, isGroup }) => {
     setPageNumber((prevPageNumber) => prevPageNumber + 1);
   };
 
-  const scrollToBottom = () => {
-    if (lastMessageRef.current) {
+  const [shouldAutoScroll, setShouldAutoScroll] = useState(false);
+  const [isViewingOldMessages, setIsViewingOldMessages] = useState(false);
+  const lastScrollUpTime = useRef(0);
+  
+  const scrollToBottom = (force = false) => {
+    const scrollUpTimeElapsed = Date.now() - lastScrollUpTime.current > 5000;
+    
+    if (((force && scrollUpTimeElapsed) || shouldAutoScroll) && !isViewingOldMessages && lastMessageRef.current) {
       lastMessageRef.current.scrollIntoView({ behavior: "smooth" });
     }
   };
@@ -435,12 +557,30 @@ const MessagesList = ({ ticketId, isGroup }) => {
     "event_creation"
   ];
 
+  const prevScrollTopRef = useRef(0);
+  
   const handleScroll = (e) => {
-    if (!hasMore) return;
     const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
+    const prevScrollTop = prevScrollTopRef.current;
 
     const scrollPosition = scrollHeight - scrollTop - clientHeight;
+    
+    const isScrollingUp = scrollTop < prevScrollTop;
+    
+    prevScrollTopRef.current = scrollTop;
+    
+    if (isScrollingUp && scrollPosition > 300) {
+      setIsViewingOldMessages(true);
+      lastScrollUpTime.current = Date.now();
+    }
+    
+    if (scrollPosition < 100) {
+      setIsViewingOldMessages(false);
+    }
+    
     setShowScrollButton(scrollPosition > 100);
+    
+    setShouldAutoScroll(scrollPosition < 100);
 
     if (scrollTop === 0) {
       document.getElementById("messagesList").scrollTop = 1;
@@ -450,6 +590,7 @@ const MessagesList = ({ ticketId, isGroup }) => {
       return;
     }
 
+    if (!hasMore) return;
     if (scrollTop < 50) {
       loadMore();
     }
@@ -464,30 +605,23 @@ const MessagesList = ({ ticketId, isGroup }) => {
     setAnchorEl(null);
   };
 
-  // Função para substituir a mensagem original por uma versão sem a string base64
   const processLocationMessage = (message) => {
     if (!message || !message.body) return message;
     
-    // Se não for uma mensagem de localização, retornar a mensagem original
     if (message.mediaType !== "location") return message;
     
-    // Criar uma cópia da mensagem para não modificar a original
     const processedMessage = { ...message };
     
     try {
-      // Extrair as partes da mensagem
       const parts = message.body.split('|');
       if (parts.length < 2) return message;
       
-      // Remover a string base64 da mensagem
-      // Substituir a string base64 por um placeholder
       processedMessage.locationData = {
-        image: parts[0], // Guardar a imagem base64 em uma propriedade separada
+        image: parts[0],
         link: parts[1],
         description: parts.length > 2 ? parts[2] : null
       };
       
-      // Substituir o body por uma versão sem a string base64
       processedMessage.body = "[Localização]";
       
       return processedMessage;
@@ -498,15 +632,12 @@ const MessagesList = ({ ticketId, isGroup }) => {
   };
 
   const checkMessageMedia = (message) => {
-    // Processar a mensagem de localização antes de exibi-la
     const processedMessage = processLocationMessage(message);
     
     if (processedMessage.mediaType === "location" && processedMessage.locationData) {
       try {
-        // Usar os dados de localização processados
         const { image, link, description } = processedMessage.locationData;
         
-        // Renderizar o componente LocationPreview com os dados processados
         return (
           <div className="location-container" style={{ width: '100%' }}>
             <LocationPreview 
@@ -523,25 +654,21 @@ const MessagesList = ({ ticketId, isGroup }) => {
     }
     else if (message.mediaType === "vcard") {
       try {
-        // Tentar processar o body como JSON (novo formato)
         let contactData = message.body;
         let contact = "";
         let numbers = [];
         
         if (typeof contactData === 'string') {
           try {
-            // Verificar se é um JSON válido
             const parsedData = JSON.parse(contactData);
             contact = parsedData.name || "";
             
-            // Processar números
             if (parsedData.allNumbers && Array.isArray(parsedData.allNumbers)) {
               numbers = parsedData.allNumbers;
             } else if (parsedData.number) {
               numbers = [parsedData.number];
             }
           } catch (e) {
-            // Se não for JSON, processar no formato antigo
             const array = message.body.split("\n");
             const obj = [];
             for (let index = 0; index < array.length; index++) {
@@ -557,7 +684,6 @@ const MessagesList = ({ ticketId, isGroup }) => {
               }
             }
             
-            // Extrair números do formato antigo
             if (obj.length > 0) {
               numbers = obj.map(item => item.number);
             }
@@ -794,32 +920,29 @@ const MessagesList = ({ ticketId, isGroup }) => {
     return (
       <div
         onClick={() => scrollToMessage(message.quotedMsg.id)}
-        sx={{
+        style={{
           margin: "3px 0px 6px 0px",
           overflow: "hidden",
-          backgroundColor: "#f0f0f0",
+          backgroundColor: message.fromMe ? "#cfe9ba" : "#f0f0f0",
           borderRadius: "7.5px",
           display: "flex",
           position: "relative",
           cursor: "pointer",
           fontSize: "13px",
-          ...(message.fromMe && {
-            backgroundColor: "#cfe9ba",
-          }),
+          border: "1px solid rgba(0, 0, 0, 0.08)",
+          boxShadow: "0 1px 1px rgba(0, 0, 0, 0.1)"
         }}
       >
         <div
-      sx={{
+        style={{
             flex: "none",
             width: "4px",
             backgroundColor: message.quotedMsg?.fromMe ? "#35cd96" : "#6bcbef",
           }}></div>
         <QuotedMsgStyled>
-          {!message.quotedMsg?.fromMe && (
-            <MessageContactNameStyled>
-              {message.quotedMsg?.contact?.name}
-            </MessageContactNameStyled>
-          )}
+          <MessageContactNameStyled style={{ fontWeight: 'bold', color: message.quotedMsg?.fromMe ? '#35cd96' : '#6bcbef' }}>
+            {!message.quotedMsg?.fromMe ? message.quotedMsg?.contact?.name : 'Você'}
+          </MessageContactNameStyled>
           {message.quotedMsg.mediaType === "audio" && (
             <DownloadMedia>
               <audio controls>
@@ -849,7 +972,9 @@ const MessagesList = ({ ticketId, isGroup }) => {
           {message.quotedMsg.mediaType === "image" ? (
             <ModalImageCors imageUrl={message.quotedMsg.mediaUrl} />
           ) : (
-            message.quotedMsg?.body
+            <div style={{ marginTop: '4px', color: 'rgba(0, 0, 0, 0.7)' }}>
+              {message.quotedMsg?.body}
+            </div>
           )}
         </QuotedMsgStyled>
       </div>
@@ -953,7 +1078,7 @@ const MessagesList = ({ ticketId, isGroup }) => {
                   || message.mediaType === "multi_vcard"
                 ) && checkMessageMedia(message)}
                 <MessageItem message={message}>
-                  {message.quotedMsg && renderQuotedMessage(message)}
+                  {message.quotedMsg && <div style={{ marginBottom: '8px' }}>{renderQuotedMessage(message)}</div>}
 
                   {message.mediaType !== "multi_vcard" && message.mediaType !== "location" && message.mediaType !== "vcard" && <WhatsMarked sx={{ fontSize: 'inherit', lineHeight: 'inherit', display: 'flex', width: '100%' }}>{message.body}</WhatsMarked>}
                   <MessageTimestamp>
@@ -999,7 +1124,7 @@ const MessagesList = ({ ticketId, isGroup }) => {
                       </span>
                     </div>
                   )}
-                  {message.quotedMsg && renderQuotedMessage(message)}
+                  {message.quotedMsg && <div style={{ marginBottom: '8px' }}>{renderQuotedMessage(message)}</div>}
                   {message.mediaType !== "multi_vcard" && message.mediaType !== "location" && message.mediaType !== "vcard" && <WhatsMarked sx={{ fontSize: 'inherit', lineHeight: 'inherit', display: 'flex', width: '100%' }}>{message.body}</WhatsMarked>}
                   <MessageTimestamp>
                     {message.isEdited && <span>{t("messagesList.message.edited")} </span>}
@@ -1028,13 +1153,17 @@ const MessagesList = ({ ticketId, isGroup }) => {
       />
       <MessagesListStyled
         id="messagesList"
+        className="messages-list-scrollable"
         onScroll={handleScroll}
       >
         {messagesList.length > 0 ? renderMessages() : []}
         <div ref={lastMessageRef} />
       </MessagesListStyled>
       <ScrollToBottomButton
-        onClick={scrollToBottom}
+        onClick={() => {
+          setIsViewingOldMessages(false);
+          scrollToBottom(true);
+        }}
         size="small"
         sx={{ display: showScrollButton ? "flex" : "none" }}
       >

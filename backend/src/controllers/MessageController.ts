@@ -49,17 +49,26 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     await SetTicketMessagesAsRead(ticket);
   }
 
+  let messageId: string | undefined;
+
   if (medias) {
-    await Promise.all(
+    const mediaMessages = await Promise.all(
       medias.map(async (media: Express.Multer.File) => {
-        await SendWhatsAppMedia({ media, ticket, body });
+        const sentMessage = await SendWhatsAppMedia({ media, ticket, body });
+        return sentMessage;
       })
     );
+    if (mediaMessages && mediaMessages.length > 0) {
+      messageId = mediaMessages[0].id.id;
+    }
   } else {
-    await SendWhatsAppMessage({ body, ticket, quotedMsg });
+    const sentMessage = await SendWhatsAppMessage({ body, ticket, quotedMsg });
+    if (sentMessage) {
+      messageId = sentMessage.id.id;
+    }
   }
 
-  return res.send();
+  return res.json({ id: messageId });
 };
 
 export const edit = async (req: Request, res: Response): Promise<Response> => {
