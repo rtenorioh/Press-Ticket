@@ -23,15 +23,19 @@ const Root = styled('div')(({ theme }) => ({
   height: "100%",
   position: "relative",
   overflow: "hidden",
+  borderRadius: theme.shape.borderRadius,
 }));
 
 const TicketInfoContainer = styled('div')(({ theme }) => ({
   backgroundColor: theme.palette.background.default,
   maxWidth: "50%",
   flexBasis: "50%",
+  display: "flex",
+  alignItems: "center",
   [theme.breakpoints.down('sm')]: {
-    maxWidth: "80%",
-    flexBasis: "80%",
+    maxWidth: "100%",
+    flexBasis: "100%",
+    order: 1,
   },
 }));
 
@@ -40,10 +44,23 @@ const TicketActionButtonsContainer = styled('div')(({ theme }) => ({
   maxWidth: "50%",
   flexBasis: "50%",
   display: "flex",
+  justifyContent: "flex-end",
+  alignItems: "center",
   [theme.breakpoints.down('sm')]: {
     maxWidth: "100%",
     flexBasis: "100%",
     marginBottom: "5px",
+    order: 2,
+    justifyContent: "center",
+  },
+}));
+
+const HeaderWrapper = styled('div')(({ theme }) => ({
+  display: "flex",
+  flexWrap: "nowrap",
+  width: "100%",
+  [theme.breakpoints.down('sm')]: {
+    flexDirection: "column",
   },
 }));
 
@@ -147,16 +164,18 @@ const Ticket = () => {
         open={drawerOpen}
       >
         <TicketHeader loading={loading}>
-          <TicketInfoContainer>
-            <TicketInfo
-              contact={contact}
-              ticket={ticket}
-              onClick={handleDrawerOpen}
-            />
-          </TicketInfoContainer>
-          <TicketActionButtonsContainer>
-            <TicketActionButtons ticket={ticket} />
-          </TicketActionButtonsContainer>
+          <HeaderWrapper>
+            <TicketInfoContainer>
+              <TicketInfo
+                contact={contact}
+                ticket={ticket}
+                onClick={handleDrawerOpen}
+              />
+            </TicketInfoContainer>
+            <TicketActionButtonsContainer>
+              <TicketActionButtons ticket={ticket} />
+            </TicketActionButtonsContainer>
+          </HeaderWrapper>
         </TicketHeader>
         <ReplyMessageProvider>
           <EditMessageProvider>

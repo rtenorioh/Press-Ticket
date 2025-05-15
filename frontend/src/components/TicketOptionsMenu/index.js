@@ -1,4 +1,5 @@
-import { Menu, MenuItem } from "@mui/material";
+import { Menu, MenuItem, ListItemIcon, ListItemText, styled } from "@mui/material";
+import { SwapHoriz, Delete } from "@mui/icons-material";
 import React, { useContext, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { AuthContext } from "../../context/Auth/AuthContext";
@@ -7,6 +8,18 @@ import api from "../../services/api";
 import { Can } from "../Can";
 import ConfirmationModal from "../ConfirmationModal";
 import TransferTicketModal from "../TransferTicketModal";
+
+const StyledMenuItem = styled(MenuItem)(({ theme }) => ({
+	padding: theme.spacing(1, 2),
+	"&:hover": {
+		backgroundColor: theme.palette.grey[100],
+	},
+}));
+
+const MenuItemIcon = styled(ListItemIcon)(({ theme }) => ({
+	minWidth: "40px",
+	color: theme.palette.primary.main,
+}));
 
 const TicketOptionsMenu = ({ ticket, menuOpen, handleClose, anchorEl }) => {
 	const { t } = useTranslation();
@@ -62,16 +75,22 @@ const TicketOptionsMenu = ({ ticket, menuOpen, handleClose, anchorEl }) => {
 				open={menuOpen}
 				onClose={handleClose}
 			>
-				<MenuItem onClick={handleOpenTransferModal}>
-					{t("ticketOptionsMenu.transfer")}
-				</MenuItem>
+				<StyledMenuItem onClick={handleOpenTransferModal}>
+					<MenuItemIcon>
+						<SwapHoriz />
+					</MenuItemIcon>
+					<ListItemText primary={t("ticketOptionsMenu.transfer")} />
+				</StyledMenuItem>
 				<Can
 					role={user.profile}
 					perform="ticket-options:deleteTicket"
 					yes={() => (
-						<MenuItem onClick={handleOpenConfirmationModal}>
-							{t("ticketOptionsMenu.delete")}
-						</MenuItem>
+						<StyledMenuItem onClick={handleOpenConfirmationModal}>
+							<MenuItemIcon>
+								<Delete />
+							</MenuItemIcon>
+							<ListItemText primary={t("ticketOptionsMenu.delete")} />
+						</StyledMenuItem>
 					)}
 				/>
 			</Menu>
