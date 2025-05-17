@@ -1,6 +1,9 @@
 import { Avatar, CardHeader, Typography, Box, Tooltip, useMediaQuery, useTheme, Chip } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { Person, AccountTreeOutlined } from "@mui/icons-material";
+import { Person, AccountTreeOutlined, LocalOffer } from "@mui/icons-material";
+import { useState, useEffect } from "react";
+import api from "../../services/api";
+import toastError from "../../errors/toastError";
 import React from "react";
 import { useTranslation } from "react-i18next";
 
@@ -24,6 +27,7 @@ const StyledAvatar = styled(Avatar)(({ theme }) => ({
 
 const StyledCardHeader = styled(CardHeader)(({ theme }) => ({
 	padding: theme.spacing(1, 2),
+	backgroundColor: theme.palette.background.paper,
 	[theme.breakpoints.down("sm")]: {
 		padding: theme.spacing(0.5, 1),
 	},
@@ -64,11 +68,59 @@ const InfoChip = styled(Chip)(({ theme }) => ({
 	},
 }));
 
+const TagIcon = styled(LocalOffer)(({ color, theme }) => ({
+	fontSize: '14px',
+	color: color || theme.palette.primary.main,
+	margin: '0 2px',
+	transition: 'all 0.2s ease',
+	'&:hover': {
+		transform: 'scale(1.2)'
+	}
+}));
+
+const TagsContainer = styled(Box)(({ theme }) => ({
+	display: 'flex',
+	alignItems: 'center',
+	marginLeft: theme.spacing(1),
+	gap: '3px',
+	flex: 'none',
+}));
+
+const TagCounter = styled(Box)(({ theme }) => ({
+	fontSize: '10px',
+	fontWeight: 'bold',
+	color: theme.palette.text.secondary,
+	background: theme.palette.mode === 'dark' ? theme.palette.background.default : theme.palette.grey[200],
+	borderRadius: '10px',
+	padding: '1px 6px',
+	marginLeft: '2px',
+	display: 'flex',
+	alignItems: 'center',
+	justifyContent: 'center',
+}));
+
 const TicketInfo = ({ contact, ticket, onClick }) => {
 	const { t } = useTranslation();
 	const theme = useTheme();
 	const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 	const defaultImage = '/default-profile.png';
+	const [contactTags, setContactTags] = useState([]);
+
+	useEffect(() => {
+		const fetchContactTags = async () => {
+			try {
+				if (ticket && ticket.id) {
+					const { data } = await api.get(`/tickets/${ticket.id}`);
+					if (data?.contact?.tags) {
+						setContactTags(data.contact.tags);
+					}
+				}
+			} catch (err) {
+				toastError(err);
+			}
+		};
+		fetchContactTags();
+	}, [ticket]);
 
 	const assignedTo = ticket.user ? ticket.user.name : t("messagesList.header.noAssignedUser");
 	const queueName = ticket.queue ? ticket.queue.name : t("messagesList.header.noQueue");
@@ -92,6 +144,29 @@ const TicketInfo = ({ contact, ticket, onClick }) => {
 						label={`#${ticket.id}`}
 						variant="filled"
 					/>
+					{contactTags && contactTags.length > 0 && (
+						<TagsContainer>
+							{contactTags.slice(0, 10).map((tag) => (
+								<Tooltip 
+									key={tag.id} 
+									title={tag.name} 
+									arrow 
+									placement="top"
+								>
+									<TagIcon style={{ color: tag.color }} />
+								</Tooltip>
+							))}
+							{contactTags.length > 10 && (
+								<Tooltip 
+									title={`${contactTags.length - 10} mais ${contactTags.length - 10 === 1 ? 'tag' : 'tags'}`}
+									arrow 
+									placement="top"
+								>
+									<TagCounter>+{contactTags.length - 5}</TagCounter>
+								</Tooltip>
+							)}
+						</TagsContainer>
+					)}
 				</TicketTitle>
 			}
 			subheader={

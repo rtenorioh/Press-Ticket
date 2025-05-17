@@ -1,6 +1,8 @@
 const messages = {
   pt: {
     translations: {
+      all: "Todos",
+      none: "Nenhum",
       apiKey: {
         title: "Gerenciador de Tokens",
         button: {
@@ -372,7 +374,7 @@ const messages = {
         noProcesses: "Nenhum processo encontrado."
       },
       errorLogs: {
-        title: "Logs de Erro",
+        title: "Log de Erros",
         searchPlaceholder: "Buscar por mensagem de erro...",
         loading: "Carregando logs...",
         noRecords: "Nenhum log encontrado.",
@@ -1067,6 +1069,7 @@ const messages = {
         buttons: {
           newTicket: "Novo Ticket",
           closed: "Finalizar",
+          refresh: "Atualizar"
         },
         menu: {
           all: "Todos os Tickets",
@@ -1110,6 +1113,7 @@ const messages = {
         },
         buttons: {
           showAll: "Todos",
+          queues: "Setores"
         },
         confirmationModal: {
           closeTicket: {

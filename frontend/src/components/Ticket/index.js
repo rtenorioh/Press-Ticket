@@ -27,7 +27,7 @@ const Root = styled('div')(({ theme }) => ({
 }));
 
 const TicketInfoContainer = styled('div')(({ theme }) => ({
-  backgroundColor: theme.palette.background.default,
+  backgroundColor: theme.palette.background.paper,
   maxWidth: "50%",
   flexBasis: "50%",
   display: "flex",
@@ -40,7 +40,7 @@ const TicketInfoContainer = styled('div')(({ theme }) => ({
 }));
 
 const TicketActionButtonsContainer = styled('div')(({ theme }) => ({
-  backgroundColor: theme.palette.background.default,
+  backgroundColor: theme.palette.background.paper,
   maxWidth: "50%",
   flexBasis: "50%",
   display: "flex",
@@ -59,6 +59,7 @@ const HeaderWrapper = styled('div')(({ theme }) => ({
   display: "flex",
   flexWrap: "nowrap",
   width: "100%",
+  backgroundColor: theme.palette.background.paper,
   [theme.breakpoints.down('sm')]: {
     flexDirection: "column",
   },
@@ -70,6 +71,7 @@ const MainWrapper = styled(Paper)(({ theme, open }) => ({
   display: "flex",
   flexDirection: "column",
   overflow: "hidden",
+  backgroundColor: theme.palette.background.paper,
   borderTopLeftRadius: 0,
   borderBottomLeftRadius: 0,
   borderLeft: "0",

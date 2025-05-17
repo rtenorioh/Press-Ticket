@@ -93,8 +93,8 @@ const MessageLeft = styled("div")(({ theme }) => ({
     right: 0,
   },
   whiteSpace: "pre-wrap",
-  backgroundColor: "#ffffff",
-  color: "#303030",
+  backgroundColor: theme.palette.background.paper,
+  color: theme.palette.text.primary,
   alignSelf: "flex-start",
   borderTopLeftRadius: 0,
   borderTopRightRadius: 8,
@@ -120,7 +120,7 @@ const QuotedMsgStyled = styled("div")(({ theme }) => ({
   fontSize: "13px",
   lineHeight: "1.4",
   borderRadius: "4px",
-  backgroundColor: "rgba(0, 0, 0, 0.05)",
+  backgroundColor: theme.palette.action.hover,
 }));
 
 const MessageRight = styled("div")(({ theme }) => ({
@@ -138,8 +138,8 @@ const MessageRight = styled("div")(({ theme }) => ({
       right: 0,
     },
     whiteSpace: "pre-wrap",
-    backgroundColor: "#dcf8c6",
-    color: "#303030",
+    backgroundColor: theme.palette.mode === 'dark' ? theme.palette.primary.dark + '30' : theme.palette.success.light + '60',
+    color: theme.palette.text.primary,
     alignSelf: "flex-end",
     borderTopLeftRadius: 8,
     borderTopRightRadius: 8,
@@ -149,7 +149,7 @@ const MessageRight = styled("div")(({ theme }) => ({
     paddingRight: 5,
     paddingTop: 5,
     paddingBottom: 0,
-    boxShadow: theme.mode === "light" ? "0 1px 1px #b3b3b3" : "0 1px 1px #000000",
+    boxShadow: theme.shadows[1],
     transition: "background-color 0.5s ease-in-out",
     fontSize: "14px",
     wordBreak: "break-word",
@@ -158,7 +158,7 @@ const MessageRight = styled("div")(({ theme }) => ({
 const IconButtonStyled = styled(IconButton)(({ theme }) => ({
   display: "none",
   position: "relative",
-  color: "#999",
+  color: theme.palette.text.secondary,
   zIndex: 1,
   backgroundColor: "inherit",
   opacity: "90%",
@@ -167,7 +167,7 @@ const IconButtonStyled = styled(IconButton)(({ theme }) => ({
 
 const MessageContactNameStyled = styled("span")(({ theme }) => ({
   display: "flex",
-  color: "#6bcbef",
+  color: theme.palette.primary.main,
   fontWeight: 500,
   fontSize: "13px",
   marginBottom: "3px",
@@ -194,10 +194,10 @@ const MessageItem = styled("div")(({ theme, message }) => ({
 const VideoStyled = styled("video")(({ theme }) => ({
   width: 250,
   maxHeight: 445,
-  borderTopLeftRadius: 8,
-  borderTopRightRadius: 8,
-  borderBottomLeftRadius: 8,
-  borderBottomRightRadius: 8,
+  borderRadius: 8,
+  backgroundColor: theme.palette.mode === 'dark' ? theme.palette.background.paper : theme.palette.common.white,
+  border: `1px solid ${theme.palette.mode === 'dark' ? theme.palette.divider : 'rgba(0, 0, 0, 0.1)'}`,
+  boxShadow: theme.shadows[1],
 }));
 
 const MessageTimestamp = styled("span")(({ theme }) => ({
@@ -205,7 +205,7 @@ const MessageTimestamp = styled("span")(({ theme }) => ({
   position: "absolute",
   bottom: 0,
   right: 5,
-  color: "#999",
+  color: theme.palette.text.secondary,
   lineHeight: "1.5",
   marginBottom: "3px",
   paddingTop: "0",
@@ -219,20 +219,20 @@ const MessageTimestamp = styled("span")(({ theme }) => ({
 
 const DailyTimestamp = styled("span")(({ theme }) => ({
   alignItems: "center",
-    textAlign: "center",
-    alignSelf: "center",
-    width: "110px",
-    backgroundColor: "#e1f3fb",
-    margin: "10px auto",
-    borderRadius: "10px",
-    boxShadow: "0 1px 1px #b3b3b3",
-    fontSize: "13px",
-    display: "flex",
-    justifyContent: "center",
+  textAlign: "center",
+  alignSelf: "center",
+  width: "110px",
+  backgroundColor: theme.palette.mode === 'dark' ? theme.palette.primary.dark + '20' : theme.palette.primary.light + '20',
+  margin: "10px auto",
+  borderRadius: theme.shape.borderRadius,
+  boxShadow: theme.shadows[1],
+  fontSize: "13px",
+  display: "flex",
+  justifyContent: "center",
 }));
 
 const DailyTimestampText = styled("div")(({ theme }) => ({
-  color: "#808888",
+  color: theme.palette.text.secondary,
   padding: 8,
   alignSelf: "center",
   marginLeft: "0px",

@@ -1,4 +1,4 @@
-import { IconButton, styled, Box, Tooltip, useMediaQuery, useTheme } from "@mui/material";
+import { IconButton, styled, Box, Tooltip } from "@mui/material";
 import { MoreVert, Replay, CheckCircle, ArrowBack, Done } from "@mui/icons-material";
 import React, { useContext, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -6,7 +6,6 @@ import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../../context/Auth/AuthContext";
 import toastError from "../../errors/toastError";
 import api from "../../services/api";
-import ButtonWithSpinner from "../ButtonWithSpinner";
 import { Can } from "../Can";
 import TicketOptionsMenu from "../TicketOptionsMenu";
 import ConfirmationModal from "../ConfirmationModal";
@@ -41,7 +40,9 @@ const ActionIconButton = styled(IconButton)(({ theme, color }) => ({
 	boxShadow: "0 1px 3px rgba(0,0,0,0.12)",
 	transition: "all 0.2s ease",
 	"&:hover": {
-		backgroundColor: color === "primary" ? theme.palette.primary.dark : theme.palette.grey[200],
+		backgroundColor: color === "primary" 
+			? theme.palette.primary.dark 
+			: theme.palette.mode === "dark" ? theme.palette.action.hover : theme.palette.grey[200],
 		boxShadow: "0 3px 6px rgba(0,0,0,0.15)",
 	},
 	[theme.breakpoints.down("sm")]: {
@@ -81,8 +82,6 @@ const LoadingIconButton = ({ loading, color, onClick, children, title }) => {
 const TicketActionButtons = ({ ticket }) => {
 	const { t } = useTranslation();
 	const navigate = useNavigate();
-	const theme = useTheme();
-	const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 	const [anchorEl, setAnchorEl] = useState(null);
 	const [loading, setLoading] = useState(false);
 	const [confirmationOpen, setConfirmationOpen] = useState(false);

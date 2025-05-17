@@ -1,6 +1,5 @@
 import {
   Badge,
-  Button,
   FormControlLabel,
   Paper,
   Switch,
@@ -8,16 +7,22 @@ import {
   Tabs,
   Tooltip,
   Menu,
-  MenuItem
+  MenuItem,
+  Box,
+  IconButton,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import {
-  AddCircleOutline,
   CheckCircle,
-  HighlightOffRounded,
   HourglassEmptyRounded,
   MoveToInbox,
-  Search
+  Search,
+  FilterList,
+  Add,
+  Close,
+  Refresh
 } from "@mui/icons-material";
 import React, { useContext, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -26,7 +31,7 @@ import { Can } from "../Can";
 import NewTicketModal from "../NewTicketModal";
 import TabPanel from "../TabPanel";
 import TicketsList from "../TicketsList";
-import TicketsQueueSelect from "../TicketsQueueSelect";
+import QueueMenuItems from "../QueueMenuItems";
 import toastError from "../../errors/toastError";
 import api from "../../services/api";
 import { toast } from "react-toastify";
@@ -38,8 +43,10 @@ const TicketWrapperStyled = styled(Paper)(({ theme }) => ({
   height: "100%",
   flexDirection: "column",
   overflow: "hidden",
-  borderTopRightRadius: 0,
-  borderBottomRightRadius: 0,
+  borderRadius: theme.shape.borderRadius,
+  boxShadow: theme.shadows[2],
+  border: "none",
+  backgroundColor: theme.palette.background.default,
 }));
 
 const TabPanelStyled = styled(TabPanel)(({ theme }) => ({
@@ -48,46 +55,149 @@ const TabPanelStyled = styled(TabPanel)(({ theme }) => ({
   height: "100%",
   flexDirection: "column",
   overflow: "hidden",
-  borderTopRightRadius: 0,
-  borderBottomRightRadius: 0,
+  borderRadius: 0,
+  backgroundColor: theme.palette.background.default,
 }));
 
-  const SearchContainerStyled = styled(Paper)(({ theme }) => ({
-    display: "flex",
-    padding: "10px",
-    borderBottom: "2px solid rgba(0, 0, 0, .12)",
-  }));
-
-  const SearchIconStyled = styled(Search)(({ theme }) => ({
-    color: theme.palette.primary.main,
-    marginLeft: 6,
-    marginRight: 6,
-    alignSelf: "center",
-  }));
- 
-  const SearchInputStyled = styled("input")(theme => ({
-    flex: 1,
-    border: "none",
-    borderRadius: 25,
-    padding: "10px",
-    outline: "none",
-  }));
-
-  const TabsHeaderStyled = styled(Paper)(({ theme }) => ({
-    flex: "none",
-    backgroundColor: theme.palette.background.default,
-  }));
-
-  const TicketOptionsBoxStyled = styled(Paper)(({ theme }) => ({
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    backgroundColor: theme.palette.background.paper,
+const SearchContainerStyled = styled(Paper)(({ theme }) => ({
+  display: "flex",
+  alignItems: "center",
+  padding: theme.spacing(1.5, 2),
+  borderBottom: "none",
+  backgroundColor: theme.palette.background.paper,
+  position: "relative",
+  boxShadow: theme.shadows[1],
+  "&::after": {
+    content: '""',
+    position: "absolute",
+    bottom: 0,
+    left: theme.spacing(2),
+    right: theme.spacing(2),
+    height: "1px",
+    backgroundColor: theme.palette.divider,
+  },
+  [theme.breakpoints.down("sm")]: {
     padding: theme.spacing(1),
-  }));
+  },
+}));
+
+const SearchIconStyled = styled(Search)(({ theme }) => ({
+  color: theme.palette.primary.main,
+  marginRight: theme.spacing(1),
+  fontSize: "1.2rem",
+}));
+ 
+const SearchInputStyled = styled("input")(({ theme }) => ({
+  flex: 1,
+  border: "none",
+  borderRadius: theme.shape.borderRadius,
+  padding: theme.spacing(1, 1.5),
+  outline: "none",
+  backgroundColor: theme.palette.action.hover,
+  color: theme.palette.text.primary,
+  fontSize: "0.9rem",
+  transition: "all 0.2s ease",
+  "&:focus": {
+    backgroundColor: theme.palette.background.paper,
+    boxShadow: `0 0 0 2px ${theme.palette.primary.main}30`,
+  },
+  [theme.breakpoints.down("sm")]: {
+    padding: theme.spacing(0.8, 1.2),
+  },
+}));
+
+const TabsHeaderStyled = styled(Paper)(({ theme }) => ({
+  flex: "none",
+  backgroundColor: theme.palette.background.paper,
+  boxShadow: "none",
+  borderRadius: 0,
+  position: "relative",
+  zIndex: 1,
+  "& .MuiTabs-indicator": {
+    height: 3,
+    borderRadius: "3px 3px 0 0",
+  },
+  "& .MuiTab-root": {
+    minHeight: 48,
+    transition: "all 0.2s ease",
+    fontWeight: 500,
+    "&:hover": {
+      backgroundColor: theme.palette.action.hover,
+    },
+  },
+}));
+
+const TicketOptionsBoxStyled = styled(Paper)(({ theme }) => ({
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
+  flexWrap: "wrap",
+  backgroundColor: theme.palette.background.paper,
+  padding: theme.spacing(1.2, 2),
+  boxShadow: theme.shadows[1],
+  borderRadius: 0,
+  gap: theme.spacing(1),
+  [theme.breakpoints.down("sm")]: {
+    padding: theme.spacing(1),
+    justifyContent: "center",
+  },
+}));
+
+const ActionButton = styled(IconButton)(({ theme, color = "default" }) => ({
+  borderRadius: "8px",
+  padding: theme.spacing(1),
+  backgroundColor: color === "primary" ? 
+    `${theme.palette.primary.main}20` : 
+    theme.palette.action.hover,
+  color: color === "primary" ? theme.palette.primary.main : theme.palette.text.secondary,
+  transition: "all 0.2s ease",
+  marginRight: theme.spacing(1),
+  "&:hover": {
+    backgroundColor: color === "primary" ? 
+      `${theme.palette.primary.main}40` : 
+      theme.palette.action.selected,
+    transform: "translateY(-2px)",
+  },
+  [theme.breakpoints.down("sm")]: {
+    padding: theme.spacing(0.8),
+    marginRight: theme.spacing(0.5),
+  },
+}));
+
+const StyledBadge = styled(Badge)(({ theme }) => ({
+  "& .MuiBadge-badge": {
+    backgroundColor: theme.palette.secondary.main,
+    color: theme.palette.secondary.contrastText,
+    fontWeight: "bold",
+    boxShadow: `0 0 0 2px ${theme.palette.background.paper}`,
+    "&::after": {
+      position: "absolute",
+      top: 0,
+      left: 0,
+      width: "100%",
+      height: "100%",
+      borderRadius: "50%",
+      animation: "ripple 1.2s infinite ease-in-out",
+      border: "1px solid currentColor",
+      content: '""',
+    },
+  },
+  "@keyframes ripple": {
+    "0%": {
+      transform: "scale(.8)",
+      opacity: 1,
+    },
+    "100%": {
+      transform: "scale(2.4)",
+      opacity: 0,
+    },
+  },
+}));
 
 const TicketsManager = () => {
   const { t } = useTranslation();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const [searchParam, setSearchParam] = useState("");
   const [tab, setTab] = useState("open");
   const [newTicketModalOpen, setNewTicketModalOpen] = useState(false);
@@ -102,6 +212,7 @@ const TicketsManager = () => {
   const userQueueIds = user?.queues?.map((q) => q.id);
   const [settings, setSettings] = useState([]);
   const [selectedQueueIds, setSelectedQueueIds] = useState(userQueueIds || []);
+  const [filterMenuAnchorEl, setFilterMenuAnchorEl] = useState(null);
 
   useEffect(() => {
     if (user?.profile.toUpperCase() === "ADMIN") {
@@ -197,7 +308,6 @@ const TicketsManager = () => {
   return (
     <TicketWrapperStyled
       elevation={0}
-      variant="outlined"
     >
       <NewTicketModal
         modalOpen={newTicketModalOpen}
@@ -221,7 +331,7 @@ const TicketsManager = () => {
           ? t("ticketsManager.confirmationModal.closeOpenMessage")
           : t("ticketsManager.confirmationModal.closePendingMessage")}
       </ConfirmationModal>
-      <SearchContainerStyled elevation={0} square>
+      <SearchContainerStyled elevation={0}>
         <SearchIconStyled />
         <SearchInputStyled
           type="text"
@@ -229,129 +339,198 @@ const TicketsManager = () => {
           value={searchParam}
           onChange={handleSearch}
         />
+        <Tooltip title={t("ticketsManager.buttons.newTicket")} arrow placement="top">
+          <ActionButton 
+            color="primary"
+            onClick={() => setNewTicketModalOpen(true)}
+          >
+            <Add fontSize="small" />
+          </ActionButton>
+        </Tooltip>
       </SearchContainerStyled>
-      <TabsHeaderStyled elevation={0} square >
+      <TabsHeaderStyled elevation={0}>
         <Tabs
           value={tab}
           onChange={handleChangeTab}
           variant="fullWidth"
           indicatorColor="primary"
           textColor="primary"
-          aria-label="icon label tabs example"
+          aria-label="ticket tabs"
         >          
           <Tab
             value={"open"}
             icon={
-              <Badge
-                sx={{right: 0}}
+              <StyledBadge
                 badgeContent={openCount}
-                overlap="rectangular"
-                max={999999}
+                overlap="circular"
+                max={999}
                 color="secondary"
               >
                 <Tooltip title={t("tickets.tabs.open.title")} placement="top" arrow>
                   <MoveToInbox />
                 </Tooltip>
-              </Badge>
+              </StyledBadge>
             }
-            sx={{ minWidth: 120, width: 120 }}
+            sx={{ minWidth: 100, width: "auto" }}
           /> 
           {canTabsSettings("tabsPending") && (         
             <Tab
               value={"pending"}
               icon={
-                <Badge
-                  sx={{right: 0}}
+                <StyledBadge
                   badgeContent={pendingCount}
-                  overlap="rectangular"
-                  max={999999}
+                  overlap="circular"
+                  max={999}
                   color="secondary"
                 >
                   <Tooltip title={t("tickets.tabs.pending.title")} placement="top" arrow>
                     <HourglassEmptyRounded />
                   </Tooltip>
-                </Badge>
+                </StyledBadge>
               }
-              sx={{ minWidth: 120, width: 120 }}
+              sx={{ minWidth: 100, width: "auto" }}
             />
           )}
           {canTabsSettings("tabsClosed") && (
             <Tab
               value={"closed"}
               icon={
-                <Badge
-                  sx={{right: 0}}
+                <StyledBadge
                   badgeContent={closedCount}
-                  overlap="rectangular"
-                  max={999999}
+                  overlap="circular"
+                  max={999}
                   color="secondary"
                 >
                   <Tooltip title={t("tickets.tabs.closed.title")} placement="top" arrow>
                     <CheckCircle />
                   </Tooltip>
-                </Badge>
+                </StyledBadge>
               }  
-              sx={{ minWidth: 120, width: 120 }}
+              sx={{ minWidth: 100, width: "auto" }}
             />
           )}
         </Tabs>  
       </TabsHeaderStyled>
-      <TicketOptionsBoxStyled square elevation={0}>
-        <Tooltip title={t("ticketsManager.buttons.newTicket")} placement="top" arrow>
-          <Button
-            variant="outlined"
-            color="primary"
-            onClick={() => setNewTicketModalOpen(true)}
+      <TicketOptionsBoxStyled elevation={0}>
+        <Box sx={{ display: "flex", alignItems: "center" }}>
+          <Tooltip title={t("ticketsManager.buttons.closed")} placement="top" arrow>
+            <ActionButton
+              onClick={(event) => setAnchorEl(event.currentTarget)}
+            >
+              <Close fontSize="small" />
+            </ActionButton>
+          </Tooltip>
+          <Tooltip title={t("ticketsManager.buttons.refresh")} placement="top" arrow>
+            <ActionButton
+              onClick={() => {
+                setTab(tab => tab === "open" ? "pending" : "open");
+                setTimeout(() => setTab("open"), 100);
+              }}
+            >
+              <Refresh fontSize="small" />
+            </ActionButton>
+          </Tooltip>
+          <Menu
+            anchorEl={anchorEl}
+            keepMounted
+            open={Boolean(anchorEl)}
+            onClose={() => setAnchorEl(null)}
+            PaperProps={{
+              elevation: 2,
+              sx: {
+                borderRadius: theme.shape.borderRadius,
+                minWidth: "180px",
+                padding: "4px 0",
+                backgroundColor: theme.palette.background.paper,
+                "& .MuiMenuItem-root": {
+                  padding: "8px 16px",
+                  transition: "all 0.2s ease",
+                  "&:hover": {
+                    backgroundColor: theme.palette.action.hover,
+                  },
+                },
+              },
+            }}
           >
-            <AddCircleOutline />
-          </Button>
-        </Tooltip>
-        <Tooltip title={t("ticketsManager.buttons.closed")} placement="top" arrow>
-          <Button
-            variant="outlined"
-            color="primary"
-            onClick={(event) => setAnchorEl(event.currentTarget)}
-          >
-            <HighlightOffRounded />
-          </Button>
-        </Tooltip>
-        <Menu
-          anchorEl={anchorEl}
-          keepMounted
-          open={Boolean(anchorEl)}
-          onClose={() => setAnchorEl(null)}
-        >
-          <MenuItem onClick={() => handleOpenConfirmation("all")}>{t("ticketsManager.menu.all")}</MenuItem>
-          <MenuItem onClick={() => handleOpenConfirmation("open")}>{t("ticketsManager.menu.open")}</MenuItem>
-          <MenuItem onClick={() => handleOpenConfirmation("pending")}>{t("ticketsManager.menu.pending")}</MenuItem>
-        </Menu>
-        <Can
-          role={user?.profile || ""}
-          perform="tickets-manager:showall"
-          yes={() => (
-            <FormControlLabel
-              label={t("tickets.buttons.showAll")}
-              labelPlacement="start"
-              control={
-                <Switch
-                  size="small"
-                  checked={showAllTickets}
-                  onChange={() =>
-                    setShowAllTickets((prevState) => !prevState)
+            <MenuItem onClick={() => handleOpenConfirmation("all")}>{t("ticketsManager.menu.all")}</MenuItem>
+            <MenuItem onClick={() => handleOpenConfirmation("open")}>{t("ticketsManager.menu.open")}</MenuItem>
+            <MenuItem onClick={() => handleOpenConfirmation("pending")}>{t("ticketsManager.menu.pending")}</MenuItem>
+          </Menu>
+        </Box>
+
+        <Box sx={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: 1 }}>
+          <Can
+            role={user?.profile || ""}
+            perform="tickets-manager:showall"
+            yes={() => (
+              <FormControlLabel
+                label={isMobile ? "" : t("tickets.buttons.showAll")}
+                labelPlacement="start"
+                control={
+                  <Switch
+                    size="small"
+                    checked={showAllTickets}
+                    onChange={() =>
+                      setShowAllTickets((prevState) => !prevState)
+                    }
+                    name="showAllTickets"
+                    color="primary"
+                  />
+                }
+              />
+            )}
+          />
+          <Box sx={{ display: "flex", alignItems: "center" }}>
+            <Tooltip title={t("tickets.buttons.queues")} placement="top" arrow>
+              <ActionButton
+                onClick={(event) => setFilterMenuAnchorEl(event.currentTarget)}
+              >
+                <FilterList fontSize="small" />
+              </ActionButton>
+            </Tooltip>
+            <Menu
+              anchorEl={filterMenuAnchorEl}
+              keepMounted
+              open={Boolean(filterMenuAnchorEl)}
+              onClose={() => setFilterMenuAnchorEl(null)}
+              PaperProps={{
+                elevation: 3,
+                sx: {
+                  borderRadius: theme.shape.borderRadius,
+                  minWidth: "220px",
+                  padding: "4px",
+                  backgroundColor: theme.palette.background.paper,
+                  boxShadow: theme.shadows[3],
+                  border: `1px solid ${theme.palette.divider}`,
+                  overflow: 'visible',
+                  '&:before': {
+                    content: '""',
+                    display: 'block',
+                    position: 'absolute',
+                    top: 0,
+                    right: 14,
+                    width: 10,
+                    height: 10,
+                    bgcolor: theme.palette.background.paper,
+                    transform: 'translateY(-50%) rotate(45deg)',
+                    zIndex: 0,
+                    borderLeft: `1px solid ${theme.palette.divider}`,
+                    borderTop: `1px solid ${theme.palette.divider}`
                   }
-                  name="showAllTickets"
-                  color="primary"
-                />
-              }
-            />
-          )}
-        />
-        <TicketsQueueSelect
-          sx={{ marginLeft: 6 }}
-          selectedQueueIds={selectedQueueIds}
-          userQueues={user?.queues}
-          onChange={(values) => setSelectedQueueIds(values)}
-        />
+                },
+              }}
+              transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+              anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+            >
+              <QueueMenuItems
+                selectedQueueIds={selectedQueueIds}
+                userQueues={user?.queues}
+                onChange={(values) => setSelectedQueueIds(values)}
+                onClose={() => setFilterMenuAnchorEl(null)}
+              />
+            </Menu>
+          </Box>
+        </Box>
       </TicketOptionsBoxStyled>
       <TabPanelStyled value={tab} name="open">
         <TicketWrapperStyled>

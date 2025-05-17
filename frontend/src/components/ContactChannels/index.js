@@ -1,27 +1,28 @@
-import { IconButton, Tooltip } from "@mui/material";
+import { IconButton, Tooltip, useTheme } from "@mui/material";
 import { Email, Facebook, Instagram, Sms, Telegram } from "@mui/icons-material";
 import React from "react";
 
 const ContactChannels = ({ contact, handleSaveTicket, setContactTicket, setNewTicketModalOpen }) => {
+    const theme = useTheme();
     const channels = [
         {
             id: contact.telegramId,
             label: "Telegram",
-            color: "#0088cc",
+            color: theme.palette.mode === 'dark' ? theme.palette.info.light : "#0088cc",
             Icon: Telegram,
             action: () => handleSaveTicket(contact.id),
         },
         {
             id: contact.messengerId,
             label: "Facebook",
-            color: "#3b5998",
+            color: theme.palette.mode === 'dark' ? theme.palette.primary.light : "#3b5998",
             Icon: Facebook,
             action: () => handleSaveTicket(contact.id),
         },
         {
             id: contact.instagramId,
             label: "Instagram",
-            color: "#cd486b",
+            color: theme.palette.mode === 'dark' ? theme.palette.secondary.light : "#cd486b",
             Icon: Instagram,
             action: () => {
                 setContactTicket(contact);
@@ -31,14 +32,14 @@ const ContactChannels = ({ contact, handleSaveTicket, setContactTicket, setNewTi
         {
             id: contact.email,
             label: "Email",
-            color: "#004f9f",
+            color: theme.palette.mode === 'dark' ? theme.palette.info.main : "#004f9f",
             Icon: Email,
             action: () => handleSaveTicket(contact.id),
         },
         {
             id: contact.webchatId,
             label: "WebChat",
-            color: "#EB6D58",
+            color: theme.palette.mode === 'dark' ? theme.palette.warning.light : "#EB6D58",
             Icon: Sms,
             action: () => handleSaveTicket(contact.id),
         },

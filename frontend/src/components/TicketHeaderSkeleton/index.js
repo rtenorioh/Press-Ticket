@@ -4,9 +4,9 @@ import { Avatar, Card, CardHeader, Skeleton, styled } from "@mui/material";
 
 const TicketHeaderCard = styled(Card)(({ theme }) => ({
 	display: "flex",
-	backgroundColor: "#eee",
+	backgroundColor: theme.palette.mode === "dark" ? theme.palette.background.paper : theme.palette.grey[100],
 	flex: "none",
-	borderBottom: "1px solid rgba(0, 0, 0, 0.12)",
+	borderBottom: `1px solid ${theme.palette.divider}`,
 }));
 
 const TicketHeaderSkeleton = () => {

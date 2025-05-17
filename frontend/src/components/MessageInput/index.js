@@ -14,7 +14,6 @@ import {
   Fade
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { green } from "@mui/material/colors";
 import {
   AttachFile,
   CheckCircleOutline,
@@ -1163,11 +1162,11 @@ const MessageInput = ({ ticketStatus }) => {
                 disabled={loading}
                 onClick={handleCancelAudio}
               >
-                <HighlightOff sx={{ color: "red" }} />
+                <HighlightOff sx={{ color: theme.palette.error.main }} />
               </IconButton>
               {loading ? (
                 <div>
-                  <CircularProgress sx={{ color: green[500], opacity: "70%" }} />
+                  <CircularProgress sx={{ color: theme.palette.success.main, opacity: "70%" }} />
                 </div>
               ) : (
                 <RecordingTimer />
@@ -1179,7 +1178,7 @@ const MessageInput = ({ ticketStatus }) => {
                 onClick={handleUploadAudio}
                 disabled={loading}
               >
-                <CheckCircleOutline sx={{ color: "green" }} />
+                <CheckCircleOutline sx={{ color: theme.palette.success.main }} />
               </IconButton>
             </RecorderWrapper>
           ) : (

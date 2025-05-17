@@ -1,7 +1,7 @@
 import Grid from "@mui/material/Grid";
-
 import Paper from "@mui/material/Paper";
-import { styled } from "@mui/material/styles";
+import Typography from "@mui/material/Typography";
+import { styled, useTheme } from "@mui/material/styles";
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
@@ -13,23 +13,33 @@ import api from "../../services/api";
 
 const ChatContainer = styled('div')(({ theme }) => ({
   flex: 1,
-  height: `calc(97% - 48px)`,
+  height: `calc(100% - 48px)`,
   overflowY: "hidden",
-  margin: theme.spacing(1),
+  margin: theme.spacing(1.5),
+  borderRadius: theme.shape.borderRadius,
+  boxShadow: theme.shadows[3],
 }));
 
 const ChatPapper = styled('div')(({ theme }) => ({
   display: "flex",
   height: "100%",
+  backgroundColor: theme.palette.background.default,
+  borderRadius: theme.shape.borderRadius,
+  overflow: "hidden",
 }));
 
 const WelcomeMsg = styled(Paper)(({ theme }) => ({
   backgroundColor: theme.palette.background.paper,
   display: "flex",
-  justifyContent: "space-evenly",
+  flexDirection: "column",
+  justifyContent: "center",
   alignItems: "center",
   height: "100%",
   textAlign: "center",
+  borderRadius: theme.shape.borderRadius,
+  padding: theme.spacing(3),
+  boxShadow: "none",
+  gap: theme.spacing(3),
 }));
 
 const Chat = () => {
@@ -62,6 +72,8 @@ const Chat = () => {
     fetchLogo();
   }, [themeStorage]);
 
+  const theme = useTheme();
+
   return (
     <ChatContainer>
       <ChatPapper>
@@ -75,24 +87,52 @@ const Chat = () => {
               height: "100%",
               flexDirection: "column",
               overflowY: "hidden",
+              borderRight: `1px solid ${theme.palette.divider}`,
               ...(ticketId && { display: { xs: "none", sm: "flex" } })
             }}
           >
             <TicketsManager />
           </Grid>
-          <Grid item xs={12} md={8} sx={{ display: "flex", height: "100%", flexDirection: "column" }}>
+          <Grid 
+            item 
+            xs={12} 
+            md={8} 
+            sx={{ 
+              display: "flex", 
+              height: "100%", 
+              flexDirection: "column",
+              backgroundColor: theme.palette.background.paper,
+            }}>
             {ticketId ? (
               <>
                 <Ticket />
               </>
             ) : (
               <WelcomeMsg sx={{ display: { xs: 'none', sm: 'none', md: 'flex' } }}>
-                <span>
-                  <center>
-                    <img src={getImageUrl(logo)} width="50%" alt="logo" />
-                  </center>
+                {logo && (
+                  <img 
+                    src={getImageUrl(logo)} 
+                    style={{ 
+                      maxWidth: "60%", 
+                      maxHeight: "180px", 
+                      objectFit: "contain",
+                      marginBottom: "16px",
+                      filter: theme => theme.palette.mode === 'dark' ? 'drop-shadow(0 0 8px rgba(255,255,255,0.2))' : 'drop-shadow(0 0 8px rgba(0,0,0,0.1))'
+                    }} 
+                    alt="logo" 
+                  />
+                )}
+                <Typography 
+                  variant="h6" 
+                  sx={{ 
+                    fontWeight: 500, 
+                    color: theme => theme.palette.text.secondary,
+                    maxWidth: "80%",
+                    lineHeight: 1.5
+                  }}
+                >
                   {t("chat.noTicketMessage")}
-                </span>
+                </Typography>
               </WelcomeMsg>
             )}
           </Grid>
