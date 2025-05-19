@@ -258,7 +258,16 @@ const TicketListItem = ({ ticket, filteredTags }) => {
 
 	const [settings, setSettings] = useState([]);
 	const [spy, setSpy] = useState([]);
+	const [currentTicket, setCurrentTicket] = useState(ticket);
 	const defaultImage = '/default-profile.png';
+	
+	// Atualizar o estado local quando o ticket for atualizado externamente
+	useEffect(() => {
+		if (JSON.stringify(ticket) !== JSON.stringify(currentTicket)) {
+			console.log("Ticket atualizado no TicketListItem:", ticket);
+			setCurrentTicket(ticket);
+		}
+	}, [ticket]);
 
 	useEffect(() => {
 		isMounted.current = true;
@@ -272,7 +281,7 @@ const TicketListItem = ({ ticket, filteredTags }) => {
 					}
 				} catch (err) {
 					if (isMounted.current) {
-						toastError(err);
+						toastError(err, t);
 					}
 				}
 			};
@@ -561,13 +570,12 @@ const TicketListItem = ({ ticket, filteredTags }) => {
 								title={
 									<Typography>
 										<WhatsMarked sx={{ wordBreak: 'break-word' }}>
-											{ticket.lastMessage
-												? ticket.lastMessage.replace("🢇", "").replace("🢅", "")
+											{currentTicket.lastMessage
+												? currentTicket.lastMessage.replace("🢇", "").replace("🢅", "")
 												: ""}
 										</WhatsMarked>
 									</Typography>
 								}
-								placement="bottom"
 								arrow
 							>
 								<Typography
@@ -579,12 +587,12 @@ const TicketListItem = ({ ticket, filteredTags }) => {
 								>
 									<Box sx={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
 										{(() => {
-											if (ticket.lastMessage) {
-												if (ticket.lastMessage.includes("🢅") === true) {
+											if (currentTicket.lastMessage) {
+												if (currentTicket.lastMessage.includes("🢅") === true) {
 													return (
 														<img src={sendIcon} alt="Msg Enviada" width="12px" style={{ flexShrink: 0 }} />
 													)
-												} else if (ticket.lastMessage.includes("🢇") === true) {
+												} else if (currentTicket.lastMessage.includes("🢇") === true) {
 													return (
 														<img src={receiveIcon} alt="Msg Recebida" width="12px" style={{ flexShrink: 0 }} />
 													)
@@ -592,11 +600,11 @@ const TicketListItem = ({ ticket, filteredTags }) => {
 											}
 											return null;
 										})()}
-										{ticket.lastMessage ? (
-											<WhatsMarked sx={{ wordBreak: 'break-word', display: 'inline' }}>
-												{ticket.lastMessage.slice(0, 30).replace("🢇", "").replace("🢅", "") + 
-												(ticket.lastMessage.length > 30 ? " ..." : "").replace("🢇", "").replace("🢅", "")}
-											</WhatsMarked>
+										{currentTicket.lastMessage ? (
+									<WhatsMarked sx={{ wordBreak: 'break-word', display: 'inline' }}>
+										{currentTicket.lastMessage.slice(0, 30).replace("🢇", "").replace("🢅", "") + 
+										(currentTicket.lastMessage.length > 30 ? " ..." : "").replace("🢇", "").replace("🢅", "")}
+									</WhatsMarked>
 										) : (
 											<br />
 										)}

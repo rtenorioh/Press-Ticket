@@ -568,7 +568,8 @@ const messages = {
             return: "Retornar",
             resolve: "Finalizar",
             reopen: "Reabrir",
-            accept: "Aceitar"
+            accept: "Aceitar",
+            options: "Opções"
           },
         },
         message: {
@@ -945,8 +946,8 @@ const messages = {
             },
           },
           queueLength: {
-            name: "Permitir enviar saudação com 1 Setor",
-            note: "Se habilitado, irá permitir enviar a mensagem de saudação apenas com 1 setor",
+            name: "Permitir enviar saudação do canal com 1 Setor",
+            note: "Se habilitado, irá permitir enviar a mensagem de saudação do canal apenas com 1 setor",
             options: {
               enabled: "Ativado",
               disabled: "Desativado",

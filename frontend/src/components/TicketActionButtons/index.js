@@ -1,5 +1,5 @@
 import { IconButton, styled, Box, Tooltip } from "@mui/material";
-import { MoreVert, Replay, CheckCircle, ArrowBack, Done } from "@mui/icons-material";
+import { MoreVert, Replay, CheckCircle, ArrowBack, ClearOutlined } from "@mui/icons-material";
 import React, { useContext, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
@@ -149,7 +149,7 @@ const TicketActionButtons = ({ ticket }) => {
 						loading={loading}
 						onClick={e => handleUpdateTicketStatus(e, "pending", null)}
 					>
-						<ArrowBack />
+						<Replay />
 					</LoadingIconButton>
 					<LoadingIconButton
 						title={t("messagesList.header.buttons.resolve")}
@@ -157,7 +157,7 @@ const TicketActionButtons = ({ ticket }) => {
 						color="primary"
 						onClick={handleCloseTicket}
 					>
-						<Done />
+						<ClearOutlined />
 					</LoadingIconButton>
 					<ConfirmationModal
 						title={t("tickets.confirmationModal.closeTicket.title")}
