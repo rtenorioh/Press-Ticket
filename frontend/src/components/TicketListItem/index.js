@@ -181,7 +181,7 @@ const TicketQueueColor = styled('span')(({ theme, color }) => ({
 	borderTopLeftRadius: theme.shape.borderRadius,
 	borderBottomLeftRadius: theme.shape.borderRadius,
 	transition: 'width 0.2s ease',
-	'${StyledListItem}:hover &': {
+	[`${StyledListItem}:hover &`]: {
 		width: "10px"
 	}
 }));
@@ -202,15 +202,6 @@ const ChipRadiusDot = styled(Chip)(({ theme }) => ({
 		transform: 'translateY(-1px)',
 		boxShadow: theme.shadows[1]
 	}
-}));
-
-const SecondaryContentSecond = styled('span')(({ theme }) => ({
-	display: 'flex',
-	marginTop: 2,
-	alignItems: "flex-start",
-	flexWrap: "wrap",
-	flexDirection: "row",
-	alignContent: "flex-start",
 }));
 
 const ContactName = styled('span')(({ theme }) => ({
@@ -261,13 +252,11 @@ const TicketListItem = ({ ticket, filteredTags }) => {
 	const [currentTicket, setCurrentTicket] = useState(ticket);
 	const defaultImage = '/default-profile.png';
 	
-	// Atualizar o estado local quando o ticket for atualizado externamente
 	useEffect(() => {
 		if (JSON.stringify(ticket) !== JSON.stringify(currentTicket)) {
-			console.log("Ticket atualizado no TicketListItem:", ticket);
 			setCurrentTicket(ticket);
 		}
-	}, [ticket]);
+	}, [ticket, currentTicket]);
 
 	useEffect(() => {
 		isMounted.current = true;
@@ -275,7 +264,7 @@ const TicketListItem = ({ ticket, filteredTags }) => {
 		setTimeout(() => {
 			const fetchTicket = async () => {
 				try {
-					const { data } = await api.get("/tickets/" + ticket.id);
+					await api.get("/tickets/" + ticket.id);
 					if (isMounted.current) {
 	
 					}
@@ -291,7 +280,7 @@ const TicketListItem = ({ ticket, filteredTags }) => {
 		return () => {
 			isMounted.current = false;
 		};
-	}, [ticket.id, user, navigate]);
+	}, [ticket.id, user, navigate, t]);
 
 	useEffect(() => {
 		return () => {

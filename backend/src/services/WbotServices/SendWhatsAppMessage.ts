@@ -76,10 +76,47 @@ const SendWhatsAppMessage = async ({
     await ticket.update({ lastMessage: body });
     return sentMessage;
   }
+  
+  if (ticket.isGroup) {
+    try {
+      const sentMessage = await wbot.sendMessage(
+        `${ticket.contact.number}@g.us`,
+        formatBody(body, ticket),
+        { linkPreview: false }
+      );
+
+      await ticket.update({ lastMessage: body });
+      
+      const messageData = {
+        id: sentMessage.id.id,
+        ticketId: ticket.id,
+        contactId: undefined,
+        body: body,
+        fromMe: true,
+        mediaType: "chat",
+        read: true,
+        quotedMsgId: quotedMsg?.id,
+        userId: ticket.userId
+      };
+
+      const CreateMessageService = require("../MessageServices/CreateMessageService").default;
+      
+      try {
+        await CreateMessageService({ messageData });
+      } catch (err) {
+        console.error("Erro ao salvar mensagem no banco de dados:", err);
+      }
+      
+      return sentMessage;
+    } catch (err) {
+      console.error("Erro ao enviar mensagem para grupo:", err);
+      throw new AppError("ERR_SENDING_WAPP_MSG");
+    }
+  }
 
   let quotedMsgSerializedId: string | undefined;
 
-  if (quotedMsg && !ticket.isGroup) {
+  if (quotedMsg) {
     try {
       await GetWbotMessage(ticket, quotedMsg.id);
       quotedMsgSerializedId = SerializeWbotMsgId(ticket, quotedMsg);

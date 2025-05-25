@@ -87,10 +87,11 @@ const ContactExtraInfo = styled(Paper)(({ theme }) => ({
   border: `1px solid ${theme.palette.divider}`,
 }));
 
-const ContactDrawer = ({ open, handleDrawerClose, contact, loading }) => {
+const ContactDrawer = ({ open, handleDrawerClose, contact, loading, isGroup, messageContact }) => {
   const { user } = useContext(AuthContext);
   const [modalOpen, setModalOpen] = useState(false);
   const { t } = useTranslation();
+  const displayContact = isGroup && messageContact ? messageContact : contact;
 
   return (
     <StyledDrawer
@@ -119,44 +120,44 @@ const ContactDrawer = ({ open, handleDrawerClose, contact, loading }) => {
       ) : (
         <DrawerContent>
           <ContactHeader square variant="outlined">
-            <ModalImageContatc imageUrl={contact.profilePicUrl} />
+            <ModalImageContatc imageUrl={displayContact.profilePicUrl} />
             <Typography>
-              {contact.name}
-              <CopyToClipboard content={contact.name} color="secondary" />
+              {displayContact.name}
+              <CopyToClipboard content={displayContact.name} color="secondary" />
             </Typography>
             <Typography>
-              <Link href={`tel:${user?.isTricked === "enabled" ? contact?.number : contact?.number.slice(0, -4) + "****"}`}>{user?.isTricked === "enabled" ? contact?.number : contact?.number.slice(0, -4) + "****"}</Link>
-              <CopyToClipboard content={user?.isTricked === "enabled" ? contact?.number : contact?.number.slice(0, -4) + "****"} color="secondary" />
+              <Link href={`tel:${user?.isTricked === "enabled" ? displayContact?.number : displayContact?.number.slice(0, -4) + "****"}`}>{user?.isTricked === "enabled" ? displayContact?.number : displayContact?.number.slice(0, -4) + "****"}</Link>
+              <CopyToClipboard content={user?.isTricked === "enabled" ? displayContact?.number : displayContact?.number.slice(0, -4) + "****"} color="secondary" />
             </Typography>
-            {contact.address && (
+            {displayContact.address && (
               <Typography>
-                {contact.address}
-                <CopyToClipboard content={contact?.address} color="secondary" />
+                {displayContact.address}
+                <CopyToClipboard content={displayContact?.address} color="secondary" />
               </Typography>
             )}
-            {contact.email && (
+            {displayContact.email && (
               <Typography>
-                <Link href={`mailto:${contact?.email}`}>{contact?.email}</Link>
-                <CopyToClipboard content={contact?.email} color="secondary" />
+                <Link href={`mailto:${displayContact?.email}`}>{displayContact?.email}</Link>
+                <CopyToClipboard content={displayContact?.email} color="secondary" />
               </Typography>
             )}
-            <Button
-              variant="contained"
-              onClick={() => setModalOpen(true)}
-              sx={{
-                borderRadius: 20,
-                mt: 1,
-                backgroundColor: theme => theme.palette.primary.main,
-                color: '#fff',
-                textTransform: 'uppercase',
-                fontWeight: 'bold',
-                '&:hover': {
-                  backgroundColor: theme => theme.palette.primary.dark,
-                }
-              }}
-            >
-              {t("contactDrawer.buttons.edit")}
-            </Button>
+              <Button
+                variant="contained"
+                onClick={() => setModalOpen(true)}
+                sx={{
+                  borderRadius: 20,
+                  mt: 1,
+                  backgroundColor: theme => theme.palette.primary.main,
+                  color: '#fff',
+                  textTransform: 'uppercase',
+                  fontWeight: 'bold',
+                  '&:hover': {
+                    backgroundColor: theme => theme.palette.primary.dark,
+                  }
+                }}
+              >
+                {t("contactDrawer.buttons.edit")}
+              </Button>
           </ContactHeader>
           <TagsContainer contact={contact} sx={{ marginTop: 2 }} />
           <ContactDetails square variant="outlined">
@@ -169,7 +170,7 @@ const ContactDrawer = ({ open, handleDrawerClose, contact, loading }) => {
               {t("contactDrawer.extraInfo")}
             </Typography>
             <Divider sx={{ mb: 2 }} />
-            {contact?.extraInfo?.map(info => (
+            {displayContact?.extraInfo?.map(info => (
               <ContactExtraInfo
                 key={info.id}
                 square

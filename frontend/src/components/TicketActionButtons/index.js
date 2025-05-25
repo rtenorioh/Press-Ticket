@@ -1,5 +1,5 @@
 import { IconButton, styled, Box, Tooltip } from "@mui/material";
-import { MoreVert, Replay, CheckCircle, ArrowBack, ClearOutlined } from "@mui/icons-material";
+import { MoreVert, Replay, CheckCircle, ClearOutlined } from "@mui/icons-material";
 import React, { useContext, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";

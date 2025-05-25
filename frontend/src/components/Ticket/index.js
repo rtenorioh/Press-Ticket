@@ -98,6 +98,7 @@ const Ticket = () => {
   const [loading, setLoading] = useState(true);
   const [contact, setContact] = useState({});
   const [ticket, setTicket] = useState({});
+  const [messageContact, setMessageContact] = useState(null);
 
   useEffect(() => {
     setLoading(true);
@@ -150,12 +151,18 @@ const Ticket = () => {
     };
   }, [ticketId, navigate]);
 
-  const handleDrawerOpen = () => {
+  const handleDrawerOpen = (messageContactData) => {
+    if (ticket.isGroup && messageContactData) {
+      setMessageContact(messageContactData);
+    } else {
+      setMessageContact(null);
+    }
     setDrawerOpen(true);
   };
 
   const handleDrawerClose = () => {
     setDrawerOpen(false);
+    setMessageContact(null);
   };
 
   return (
@@ -184,6 +191,7 @@ const Ticket = () => {
             <MessagesList
               ticketId={ticketId}
               isGroup={ticket.isGroup}
+              onClick={handleDrawerOpen}
             ></MessagesList>
             <MessageInput ticketStatus={ticket.status} />
           </EditMessageProvider>
@@ -194,6 +202,8 @@ const Ticket = () => {
         handleDrawerClose={handleDrawerClose}
         contact={contact}
         loading={loading}
+        isGroup={ticket.isGroup}
+        messageContact={messageContact}
       />
     </Root>
   );

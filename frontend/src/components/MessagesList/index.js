@@ -25,7 +25,7 @@ import {
   isSameDay,
   parseISO
 } from "date-fns";
-import React, { useEffect, useReducer, useRef, useState } from "react";
+import React, { useCallback, useEffect, useReducer, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 import toastError from "../../errors/toastError";
@@ -171,6 +171,32 @@ const MessageContactNameStyled = styled("span")(({ theme }) => ({
   fontWeight: 500,
   fontSize: "13px",
   marginBottom: "3px",
+}));
+
+const ContactImageContainer = styled("div")(({ theme }) => ({
+  display: "flex",
+  alignItems: "center",
+  marginBottom: "3px",
+}));
+
+const ContactImage = styled("img")(({ theme }) => ({
+  width: "30px",
+  height: "30px",
+  borderRadius: "7px",
+  marginRight: "5px",
+  objectFit: "cover",
+  border: `2px solid ${theme.palette.primary.light}`,
+  boxShadow: "0 3px 8px rgba(0,0,0,0.15)",
+	transition: "all 0.3s ease",
+	"&:hover": {
+		transform: "scale(1.05)",
+		boxShadow: "0 5px 12px rgba(0,0,0,0.2)",
+	},
+	[theme.breakpoints.down("sm")]: {
+		width: "42px",
+		height: "42px",
+		borderRadius: "12px",
+	},
 }));
 
 const MessageItem = styled("div")(({ theme, message }) => ({
@@ -362,7 +388,7 @@ const reducer = (state, action) => {
   }
 };
 
-const MessagesList = ({ ticketId, isGroup }) => {
+const MessagesList = ({ ticketId, isGroup, onClick }) => {
   const [messagesList, dispatch] = useReducer(reducer, []);
   const [pageNumber, setPageNumber] = useState(1);
   const [hasMore, setHasMore] = useState(false);
@@ -375,6 +401,10 @@ const MessagesList = ({ ticketId, isGroup }) => {
   const messageOptionsMenuOpen = Boolean(anchorEl);
   const currentTicketId = useRef(ticketId);
   const theme = useTheme();
+  const [shouldAutoScroll, setShouldAutoScroll] = useState(false);
+  const [isViewingOldMessages, setIsViewingOldMessages] = useState(false);
+  const lastScrollUpTime = useRef(0);
+  const defaultImage = '/default-profile.png';
 
   useEffect(() => {
     dispatch({ type: "RESET" });
@@ -409,6 +439,14 @@ const MessagesList = ({ ticketId, isGroup }) => {
       clearTimeout(delayDebounceFn);
     };
   }, [pageNumber, ticketId]);
+
+  const scrollToBottom = useCallback((force = false) => {
+    const scrollUpTimeElapsed = Date.now() - lastScrollUpTime.current > 5000;
+    
+    if (((force && scrollUpTimeElapsed) || shouldAutoScroll) && !isViewingOldMessages && lastMessageRef.current) {
+      lastMessageRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [shouldAutoScroll, isViewingOldMessages, lastMessageRef, lastScrollUpTime]);
 
   useEffect(() => {
     const processMessage = (data) => {
@@ -527,22 +565,10 @@ const MessagesList = ({ ticketId, isGroup }) => {
       clearInterval(refreshInterval);
       socket.emit("leaveChatBox", ticketId);
     };
-  }, [ticketId]);
+  }, [ticketId, messagesList, scrollToBottom]);
 
   const loadMore = () => {
     setPageNumber((prevPageNumber) => prevPageNumber + 1);
-  };
-
-  const [shouldAutoScroll, setShouldAutoScroll] = useState(false);
-  const [isViewingOldMessages, setIsViewingOldMessages] = useState(false);
-  const lastScrollUpTime = useRef(0);
-  
-  const scrollToBottom = (force = false) => {
-    const scrollUpTimeElapsed = Date.now() - lastScrollUpTime.current > 5000;
-    
-    if (((force && scrollUpTimeElapsed) || shouldAutoScroll) && !isViewingOldMessages && lastMessageRef.current) {
-      lastMessageRef.current.scrollIntoView({ behavior: "smooth" });
-    }
   };
 
   const unsupportedMediaTypes = [
@@ -901,20 +927,20 @@ const MessagesList = ({ ticketId, isGroup }) => {
     }
   };
 
-  const checkScroll = () => {
+  const checkScroll = useCallback(() => {
     const messagesList = document.getElementById("messagesList");
     if (messagesList) {
       const { scrollTop, scrollHeight, clientHeight } = messagesList;
       const scrollPosition = scrollHeight - scrollTop - clientHeight;
       setShowScrollButton(scrollPosition > 100);
     }
-  };
+  }, [setShowScrollButton]);
 
   useEffect(() => {
     if (!loading && messagesList.length > 0) {
       checkScroll();
     }
-  }, [loading, messagesList]);
+  }, [loading, messagesList, checkScroll, scrollToBottom]);
 
   const renderQuotedMessage = (message) => {
     return (
@@ -1002,9 +1028,15 @@ const MessagesList = ({ ticketId, isGroup }) => {
                   <ExpandMore />
                 </IconButtonStyled>
                 {isGroup && (
-                  <MessageContactNameStyled>
-                    {message.contact?.name}
-                  </MessageContactNameStyled>
+                  <ContactImageContainer
+                    onClick={() => onClick(message.contact)}
+                    sx={{ cursor: "pointer" }}
+                  >                    
+                    <ContactImage src={message.contact.profilePicUrl || defaultImage} alt={message.contact?.name} />
+                    <MessageContactNameStyled>
+                      {message.contact?.name}
+                    </MessageContactNameStyled>
+                  </ContactImageContainer>
                 )}
                 <div>
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 17" width="20" height="17">
@@ -1024,9 +1056,15 @@ const MessagesList = ({ ticketId, isGroup }) => {
               {renderNumberTicket(message, index)}
               <MessageLeft id={message.id} sx={{ backgroundColor: "#E1F5FEEB" }}>
                 {isGroup && (
-                  <MessageContactNameStyled>
-                    {message.contact?.name}
-                  </MessageContactNameStyled>
+                  <ContactImageContainer
+                    onClick={() => onClick(message.contact)}
+                    sx={{ cursor: "pointer" }}
+                  >
+                    <ContactImage src={message.contact.profilePicUrl || defaultImage} alt={message.contact?.name} />
+                    <MessageContactNameStyled>
+                      {message.contact?.name}
+                    </MessageContactNameStyled>
+                  </ContactImageContainer>
                 )}
                 <b>{t("messagesList.message.type")}</b>: <i>{message.mediaType}</i> <br />
                 {t("messagesList.message.notCompatibleWithSystem")} <br />
@@ -1055,9 +1093,15 @@ const MessagesList = ({ ticketId, isGroup }) => {
                   <ExpandMore />
                 </IconButtonStyled>
                 {isGroup && (
-                  <MessageContactNameStyled>
-                    {message.contact?.name}
-                  </MessageContactNameStyled>
+                  <ContactImageContainer
+                    onClick={() => onClick(message.contact)}
+                    sx={{ cursor: "pointer" }}
+                  >
+                    <ContactImage src={message.contact.profilePicUrl || defaultImage} alt={message.contact?.name} />
+                    <MessageContactNameStyled>
+                      {message.contact?.name}
+                    </MessageContactNameStyled>
+                  </ContactImageContainer>
                 )}
                 {message.isDeleted && (
                   <div>

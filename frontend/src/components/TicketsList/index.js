@@ -218,7 +218,7 @@ const TicketsList = (props) => {
 		dispatch({ type: "RESET" });
 		setPageNumber(1);
 		
-		const cleaned = cleanupLocalStorage();
+		cleanupLocalStorage();
 		
 		try {
 			const cachedTicketsData = localStorage.getItem(`tickets_${status}`);
