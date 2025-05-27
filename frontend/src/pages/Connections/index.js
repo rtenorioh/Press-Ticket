@@ -51,6 +51,7 @@ import QrcodeModal from "../../components/QrcodeModal";
 import TableRowSkeleton from "../../components/TableRowSkeleton";
 import Title from "../../components/Title";
 import WhatsAppModal from "../../components/WhatsAppModal";
+import NotificameHubModal from "../../components/NotificameHubModal";
 import { AuthContext } from "../../context/Auth/AuthContext";
 import { WhatsAppsContext } from "../../context/WhatsApp/WhatsAppsContext";
 import toastError from "../../errors/toastError";
@@ -131,6 +132,7 @@ const Connections = () => {
 	const { user } = useContext(AuthContext);
 	const { whatsApps, loading } = useContext(WhatsAppsContext);
 	const [whatsAppModalOpen, setWhatsAppModalOpen] = useState(false);
+	const [notificameHubModalOpen, setNotificameHubModalOpen] = useState(false);
 	const [qrModalOpen, setQrModalOpen] = useState(false);
 	const [selectedWhatsApp, setSelectedWhatsApp] = useState(null);
 	const [confirmModalOpen, setConfirmModalOpen] = useState(false);
@@ -314,6 +316,14 @@ const Connections = () => {
 		setSelectedWhatsApp(null);
 		setWhatsAppModalOpen(true);
 	};
+
+	const handleOpenNotificameHubModal = () => {
+		setNotificameHubModalOpen(true);
+	};
+
+	const handleCloseNotificameHubModal = useCallback(() => {
+		setNotificameHubModalOpen(false);
+	}, []);
 
 	const handleCloseWhatsAppModal = useCallback(() => {
 		setWhatsAppModalOpen(false);
@@ -707,6 +717,10 @@ const Connections = () => {
 				onClose={handleCloseWhatsAppModal}
 				whatsAppId={!qrModalOpen && selectedWhatsApp?.id}
 			/>
+			<NotificameHubModal
+				open={notificameHubModalOpen}
+				onClose={handleCloseNotificameHubModal}
+			/>
 			<MainHeader>
 				<Title>{t("connections.title")} {whatsApps.length > 0 ? `(${whatsApps.length})` : ""}</Title>
 				<MainHeaderButtonsWrapper>
@@ -724,7 +738,7 @@ const Connections = () => {
 							<SyncOutlined />
 						</Button>
 					</Tooltip>
-					<Tooltip title={t("connections.buttons.add")}>
+					<Tooltip title={t("connections.buttons.wwebjs")}>
 						<Button
 							variant="contained"
 							color="primary"
@@ -732,9 +746,23 @@ const Connections = () => {
 							sx={{
 								borderRadius: 2,
 								px: { xs: 1, sm: 2 },
+								mr: 1
 							}}
 						>
 							<WhatsApp />
+						</Button>
+					</Tooltip>
+					<Tooltip title={t("connections.buttons.hub")}>
+						<Button
+							variant="contained"
+							color="secondary"
+							onClick={handleOpenNotificameHubModal}
+							sx={{
+								borderRadius: 2,
+								px: { xs: 1, sm: 2 },
+							}}
+						>
+							<Sms />
 						</Button>
 					</Tooltip>
 				</MainHeaderButtonsWrapper>

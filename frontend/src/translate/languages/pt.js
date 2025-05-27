@@ -109,7 +109,8 @@ const messages = {
           disconnectMessage: "Tem certeza? Você precisará ler o QR Code novamente.",
         },
         buttons: {
-          add: "Adicionar",
+          wwebjs: "Adicionar",
+          hub: "Hub",
           shutdown: "Excluir",
           restart: "Restart",
           disconnect: "Desconectar",
@@ -1273,6 +1274,30 @@ const messages = {
           cancel: "Cancelar",
         },
         success: "Atendente salvo com sucesso.",
+      },
+      notificameHubModal: {
+        title: "Ativar Canais NotificameHub",
+        form: {
+          name: "Nome",
+          namePlaceholder: "Digite o nome da conexão",
+          channelSelection: "Seleção de Canal",
+          selectChannel: "Selecionar Canal",
+          selectChannelPlaceholder: "Selecione um canal",
+          mainInfo: "Informações Principais"
+        },
+        integration: {
+          title: "Integração de Canais",
+          description: "Para ativar <strong>Facebook</strong>, <strong>Instagram</strong>, <strong>Telegram</strong> e <strong>WebChat</strong>, cadastre-se pelo botão abaixo, depois adquirir os canais desejados usando o cupom abaixo. Insira o token da sua <strong>Account</strong> na página de Integrações para finalizar a integração.",
+          discount: "Use o cupom abaixo para <strong>50% de desconto</strong> na compra dos canais!",
+          copied: "Copiado!",
+          copy: "Copiar cupom",
+          register: "REALIZE O CADASTRO AQUI"
+        },
+        buttons: {
+          add: "Adicionar",
+          cancel: "Cancelar"
+        },
+        success: "Canal ativado com sucesso."
       },
       whatsappModal: {
         title: {
