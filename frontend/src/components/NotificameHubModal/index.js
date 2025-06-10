@@ -310,7 +310,7 @@ const NotificameHubModal = ({ open, onClose }) => {
 
 									<CouponBox>
 										<CouponText variant="subtitle1">
-											PRESS60
+											PRESS40
 										</CouponText>
 										<CopyToClipboard text="PRESS60" onCopy={handleCopy}>
 											<Tooltip title={copySuccess ? t("notificameHubModal.integration.copied") : t("notificameHubModal.integration.copy")}>

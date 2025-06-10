@@ -1290,8 +1290,8 @@ const messages = {
         },
         integration: {
           title: "Integração de Canais",
-          description: "Para ativar <strong>Facebook</strong>, <strong>Instagram</strong>, <strong>Telegram</strong> e <strong>WebChat</strong>, cadastre-se pelo botão abaixo, depois adquirir os canais desejados usando o cupom abaixo. Insira o token da sua <strong>Account</strong> na página de Integrações para finalizar a integração.",
-          discount: "Use o cupom abaixo para <strong>50% de desconto</strong> na compra dos canais!",
+          description: "Para ativar <strong>Facebook</strong>, <strong>Instagram</strong>, <strong>Telegram</strong> e <strong>WebChat</strong>, cadastre-se pelo botão abaixo, depois de adquirir os canais desejados usando o cupom abaixo. Insira o token da sua <strong>Account</strong> na página de Integrações para finalizar a integração.",
+          discount: "Use o cupom abaixo para ter cada canal por <strong>R$ 50,00</strong>!",
           copied: "Copiado!",
           copy: "Copiar cupom",
           register: "REALIZE O CADASTRO AQUI"
