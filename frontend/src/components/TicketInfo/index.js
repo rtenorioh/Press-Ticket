@@ -1,6 +1,6 @@
 import { Avatar, CardHeader, Typography, Box, Tooltip, useMediaQuery, useTheme, Chip } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { Person, AccountTreeOutlined, LocalOffer } from "@mui/icons-material";
+import { Person, AccountTreeOutlined, LocalOffer, SyncAlt } from "@mui/icons-material";
 import { useState, useEffect } from "react";
 import api from "../../services/api";
 import toastError from "../../errors/toastError";
@@ -124,6 +124,7 @@ const TicketInfo = ({ contact, ticket, onClick }) => {
 
 	const assignedTo = ticket.user ? ticket.user.name : t("messagesList.header.noAssignedUser");
 	const queueName = ticket.queue ? ticket.queue.name : t("messagesList.header.noQueue");
+	const channelName = ticket.whatsapp ? ticket.whatsapp.name : t("messagesList.header.noChannel");
 
 	return (
 		<StyledCardHeader
@@ -178,10 +179,10 @@ const TicketInfo = ({ contact, ticket, onClick }) => {
 						mt: 0.5,
 						flexWrap: "wrap"
 					}}>
-						<Tooltip title={t("messagesList.header.assignedTo")} arrow placement="top">
+						<Tooltip title={t("messagesList.header.channel")} arrow placement="top">
 							<InfoChip 
-								icon={<Person fontSize="small" />}
-								label={assignedTo}
+								icon={<SyncAlt color="primary" />}
+								label={channelName}
 								size="small"
 								variant="outlined"
 							/>
@@ -190,6 +191,14 @@ const TicketInfo = ({ contact, ticket, onClick }) => {
 							<InfoChip 
 								icon={<AccountTreeOutlined fontSize="small" />}
 								label={queueName}
+								size="small"
+								variant="outlined"
+							/>
+						</Tooltip>
+						<Tooltip title={t("messagesList.header.assignedTo")} arrow placement="top">
+							<InfoChip 
+								icon={<Person fontSize="small" />}
+								label={assignedTo}
 								size="small"
 								variant="outlined"
 							/>

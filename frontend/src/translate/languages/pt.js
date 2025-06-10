@@ -566,6 +566,9 @@ const messages = {
         header: {
           assignedTo: "Responsável",
           queue: "Setor",
+          channel: "Canal",
+          noAssignedUser: "Nenhum",
+          noChannel: "Nenhum",
           noQueue: "Nenhum",
           buttons: {
             return: "Retornar",
