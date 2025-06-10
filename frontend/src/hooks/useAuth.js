@@ -35,9 +35,23 @@ const useAuth = () => {
                 return;
             }
 
-            const token = localStorage.getItem("token");
-            if (token) {
+            const tokenStr = localStorage.getItem("token");
+            if (tokenStr) {
                 try {
+                    const token = JSON.parse(tokenStr);
+                    api.defaults.headers.Authorization = `Bearer ${token}`;
+                    
+                    try {
+                        const userStr = localStorage.getItem("user");
+                        if (userStr) {
+                            const storedUser = JSON.parse(userStr);
+                            setUser(storedUser);
+                            setIsAuth(true);
+                        }
+                    } catch (parseErr) {
+                        console.error("Erro ao carregar usuário do localStorage:", parseErr);
+                    }
+
                     const { data } = await api.post("/auth/refresh_token");
                     api.defaults.headers.Authorization = `Bearer ${data.token}`;
                     localStorage.setItem("token", JSON.stringify(data.token));
@@ -63,6 +77,7 @@ const useAuth = () => {
 
                         delete api.defaults.headers.Authorization;
                     } else {
+                        console.error("Erro ao atualizar token:", err);
                         handleLogout();
                     }
                 }
@@ -72,22 +87,6 @@ const useAuth = () => {
 
         checkAuth();
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
-
-    useEffect(() => {
-        const token = localStorage.getItem("token");
-        if (token) {
-            try {
-                const { user: storedUser } = JSON.parse(
-                    localStorage.getItem("user") || "{}"
-                );
-                setIsAuth(true);
-                setUser(storedUser);
-            } catch (err) {
-                toastError(err);
-            }
-        }
-        setLoading(false);
     }, []);
 
     const handleLogin = async (userData) => {

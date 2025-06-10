@@ -74,7 +74,13 @@ api.interceptors.request.use(
           return Promise.reject(err);
         }
       } else {
-        config.headers.Authorization = `Bearer ${JSON.parse(token)}`;
+        try {
+          const parsedToken = JSON.parse(token);
+          config.headers.Authorization = `Bearer ${parsedToken}`;
+        } catch (err) {
+          console.error("Erro ao processar token:", err);
+          config.headers.Authorization = `Bearer ${token}`;
+        }
       }
     }
     return config;
