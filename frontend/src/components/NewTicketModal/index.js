@@ -90,6 +90,8 @@ const NewTicketModal = ({ modalOpen, onClose }) => {
 		onClose();
 		setSearchParam("");
 		setSelectedContact(null);
+		setSelectedWhatsapp("");
+		setSelectedQueue("");
 	};
 
 	const checkOpenTickets = useCallback(async (contactId) => {
@@ -109,7 +111,10 @@ const NewTicketModal = ({ modalOpen, onClose }) => {
 	}, []);
 
 	const handleSaveTicket = async (contactId) => {
-		if (!contactId) return;
+		if (!contactId || !selectedWhatsapp || !selectedQueue) {
+			toast.error("É necessário selecionar um contato, um canal e um setor");
+			return;
+		}
 
 		setLoading(true);
 
@@ -323,7 +328,7 @@ const NewTicketModal = ({ modalOpen, onClose }) => {
 					<ButtonWithSpinner
 						variant="contained"
 						type="button"
-						disabled={!selectedContact || !selectedQueue}
+						disabled={!selectedContact || !selectedQueue || !selectedWhatsapp}
 						onClick={() => handleSaveTicket(selectedContact.id)}
 						color="primary"
 						loading={loading}

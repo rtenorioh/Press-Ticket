@@ -17,7 +17,6 @@ import {
 import { green } from '@mui/material/colors';
 import { styled } from '@mui/material/styles';
 import { useTheme } from '@mui/material/styles';
-import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import ColorLensIcon from '@mui/icons-material/ColorLens';
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
 import EditIcon from '@mui/icons-material/Edit';
