@@ -1,4 +1,4 @@
-import { Chip, Paper, TextField, Autocomplete } from "@mui/material";
+import { Chip, Paper, TextField, Autocomplete, createFilterOptions } from "@mui/material";
 import { isArray, isString } from "lodash";
 import React, { useEffect, useState } from "react";
 import toastError from "../../errors/toastError";
@@ -9,6 +9,8 @@ export function TagsContainer({ contact }) {
     const { t } = useTranslation();
     const [tags, setTags] = useState([]);
     const [selecteds, setSelecteds] = useState([]);
+    
+    const filter = createFilterOptions();
 
     const colorGenerator = () => {
         const randomColor = '#' + Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0');
@@ -35,10 +37,20 @@ export function TagsContainer({ contact }) {
 
     const syncTags = async (data) => {
         try {
-            const { data: responseData } = await api.post(`/tags/sync`, data);
+            const payload = {
+                ...data,
+                tags: Array.isArray(data.tags) ? data.tags : []
+            };
+            
+            const { data: responseData } = await api.post(`/tags/sync`, payload);
             return responseData;
         } catch (err) {
-            toastError(err, t);
+            if (err.response?.data?.error === "Nenhuma tag válida fornecida") {
+                console.log("Removendo todas as tags do contato");
+                return { message: "Tags removidas com sucesso" };
+            } else {
+                toastError(err, t);
+            }
         }
     }
 
@@ -54,9 +66,10 @@ export function TagsContainer({ contact }) {
         }
     }, [contact]);
 
-    const onChange = async (value, reason) => {
+    const onChange = async (event, value, reason) => {
         let optionsChanged = []
-        if (reason === 'create-option') {
+        
+        if (reason === 'createOption') {
             if (isArray(value)) {
                 for (let item of value) {
                     if (isString(item)) {
@@ -68,9 +81,14 @@ export function TagsContainer({ contact }) {
                 }
             }
             await loadTags();
+        } else if (reason === 'removeOption' || reason === 'clear') {
+            optionsChanged = Array.isArray(value) ? value : [];
         } else {
-            optionsChanged = value;
+            optionsChanged = value || [];
         }
+        
+        if (!optionsChanged) optionsChanged = [];
+        
         setSelecteds(optionsChanged);
         await syncTags({ contactId: contact.id, tags: optionsChanged });
     }
@@ -81,25 +99,45 @@ export function TagsContainer({ contact }) {
                 multiple
                 size="small"
                 options={tags}
-                value={selecteds}
+                value={selecteds || []}
                 freeSolo
-                onChange={(e, v, r) => onChange(v, r)}
-                getOptionLabel={(option) => option.name}
+                selectOnFocus
+                handleHomeEndKeys
+                clearOnBlur
+                clearOnEscape
+                onChange={(e, v, r) => onChange(e, v, r)}
+                getOptionLabel={(option) => typeof option === 'string' ? option : option.name}
+                filterOptions={(options, params) => {
+                    const filtered = filter(options, params);
+                    const { inputValue } = params;
+                    const isExisting = options.some((option) => inputValue === option.name);
+                    if (inputValue !== '' && !isExisting) {
+                        filtered.push(inputValue);
+                    }
+                    
+                    return filtered;
+                }}
                 renderTags={(value, getTagProps) =>
-                    value.map((option, index) => (
-                        <Chip
-                            key={option?.name}
-                            variant="outlined"
-                            sx={{
-                                backgroundColor: option.color || colorGenerator(),
-                                textShadow: '1px 1px 1px #000',
-                                color: 'white',
-                            }}
-                            label={option.name}
-                            {...getTagProps({ index })}
-                            size="small"
-                        />
-                    ))
+                    value.map((option, index) => {
+                        const isString = typeof option === 'string';
+                        const tagName = isString ? option : option.name;
+                        const tagColor = isString ? colorGenerator() : option.color || colorGenerator();
+                        
+                        return (
+                            <Chip
+                                key={isString ? `tag-${index}` : option.name}
+                                variant="outlined"
+                                sx={{
+                                    backgroundColor: tagColor,
+                                    textShadow: '1px 1px 1px #000',
+                                    color: 'white',
+                                }}
+                                label={tagName}
+                                {...getTagProps({ index })}
+                                size="small"
+                            />
+                        );
+                    })
                 }
                 renderInput={(params) => (
                     <TextField {...params} variant="outlined" placeholder="Tags" />

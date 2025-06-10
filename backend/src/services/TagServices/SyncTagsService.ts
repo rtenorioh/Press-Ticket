@@ -33,10 +33,6 @@ const SyncTags = async (data: Request): Promise<Contact | null> => {
       return null;
     }).filter(id => id !== null) as number[];
 
-    if (tagIds.length === 0) {
-      throw new AppError("Nenhuma tag válida fornecida", 400);
-    }
-
     const existingTags = await Tag.findAll({
       where: {
         id: tagIds
