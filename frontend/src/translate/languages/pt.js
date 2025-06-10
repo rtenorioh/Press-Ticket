@@ -737,6 +737,7 @@ const messages = {
           name: "Nome",
           color: "Cor",
           greeting: "Ver mensagens",
+          workHours: "Horários",
           actions: "Ações",
           startWork: "Abertura",
           endWork: "Fechamento",
@@ -755,6 +756,11 @@ const messages = {
           greetingMessage: "Mensagem de Saudação",
           absenceMessage: "Mensagem de Ausência",
           none: "Nenhuma mensagem",
+          btnClose: "Fechar",
+        },
+        timeModal: {
+          title: "Horários de Trabalho",
+          notSet: "Não definido",
           btnClose: "Fechar",
         }
       },

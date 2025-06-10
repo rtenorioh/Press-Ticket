@@ -394,6 +394,7 @@ const messages = {
           name: "Name",
           color: "Color",
           greeting: "Greeting message",
+          workHours: "Working Hours",
           actions: "Actions",
           startWork: "Start",
           endWork: "End",
@@ -404,6 +405,18 @@ const messages = {
         confirmationModal: {
           deleteTitle: "Delete",
           deleteMessage: "Are you sure? This action cannot be undone! Tickets in this sector will remain but will not have a sector assigned anymore.",
+        },
+        messagesModal: {
+          title: "Messages",
+          greetingMessage: "Greeting Message",
+          absenceMessage: "Absence Message",
+          none: "No message",
+          btnClose: "Close",
+        },
+        timeModal: {
+          title: "Working Hours",
+          notSet: "Not defined",
+          btnClose: "Close",
         },
       },
       queueSelect: {

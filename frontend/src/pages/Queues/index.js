@@ -1,5 +1,6 @@
 import Box from '@mui/material/Box';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import Modal from '@mui/material/Modal';
 import Divider from '@mui/material/Divider';
 import Button from '@mui/material/Button';
@@ -122,6 +123,8 @@ const Queues = () => {
   const [deletingQueue, setDeletingQueue] = useState(null);
   const [messageModalOpen, setMessageModalOpen] = useState(false);
   const [selectedQueueMessages, setSelectedQueueMessages] = useState({ greetingMessage: '', absenceMessage: '' });
+  const [timeModalOpen, setTimeModalOpen] = useState(false);
+  const [selectedQueueTimes, setSelectedQueueTimes] = useState({ startWork: '', endWork: '' });
 
   const handleOpenMessageModal = (queue) => {
     setSelectedQueueMessages({
@@ -134,6 +137,19 @@ const Queues = () => {
   const handleCloseMessageModal = () => {
     setMessageModalOpen(false);
     setSelectedQueueMessages({ greetingMessage: '', absenceMessage: '' });
+  };
+  
+  const handleOpenTimeModal = (queue) => {
+    setSelectedQueueTimes({
+      startWork: queue.startWork,
+      endWork: queue.endWork
+    });
+    setTimeModalOpen(true);
+  };
+
+  const handleCloseTimeModal = () => {
+    setTimeModalOpen(false);
+    setSelectedQueueTimes({ startWork: '', endWork: '' });
   };
 
   useEffect(() => {
@@ -245,8 +261,7 @@ const Queues = () => {
               <StyledTableCell align="center">{t("queues.table.name")}</StyledTableCell>
               <StyledTableCell align="center">{t("queues.table.color")}</StyledTableCell>
               <StyledTableCell align="center">{t("queues.table.greeting")}</StyledTableCell>
-              <StyledTableCell align="center">{t("queues.table.startWork")}</StyledTableCell>
-              <StyledTableCell align="center">{t("queues.table.endWork")}</StyledTableCell>
+              <StyledTableCell align="center">{t("queues.table.workHours")}</StyledTableCell>
               <StyledTableCell align="center">{t("queues.table.actions")}</StyledTableCell>
             </TableRow>
           </TableHead>
@@ -276,8 +291,21 @@ const Queues = () => {
                       </IconButton>
                     </Tooltip>
                   </StyledTableCell>
-                  <StyledTableCell align="center">{queue.startWork}</StyledTableCell>
-                  <StyledTableCell align="center">{queue.endWork}</StyledTableCell>
+                  <StyledTableCell align="center">
+                    <Tooltip 
+                      title={t("queues.timeModal.title")} 
+                      arrow 
+                      placement="top"
+                    >
+                      <IconButton 
+                        onClick={() => handleOpenTimeModal(queue)} 
+                        size="small"
+                        sx={{ color: 'primary.main' }}
+                      >
+                        <AccessTimeIcon />
+                      </IconButton>
+                    </Tooltip>
+                  </StyledTableCell>
                   <StyledTableCell align="center">
                     <ActionButtons>
                       <Tooltip title={t("queues.table.edit")} arrow placement="top">
@@ -383,6 +411,93 @@ const Queues = () => {
               sx={{ borderRadius: 20 }}
             >
               {t("queues.messagesModal.btnClose")}
+            </Button>
+          </Box>
+        </Box>
+      </Modal>
+      
+      <Modal
+        open={timeModalOpen}
+        onClose={handleCloseTimeModal}
+        closeAfterTransition
+      >
+        <Box
+          sx={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: 400,
+            maxWidth: '90%',
+            bgcolor: 'background.paper',
+            boxShadow: 24,
+            p: 3,
+            borderRadius: theme => theme.shape.borderRadius,
+          }}
+        >
+          <Typography variant="h6" component="h2" sx={{ fontWeight: 600 }}>
+            {t("queues.timeModal.title")}
+          </Typography>
+          <Divider sx={{ my: 2 }} />
+          
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <Typography variant="subtitle1" sx={{ fontWeight: 500, color: 'primary.main' }}>
+                {t("queues.table.startWork")}:
+              </Typography>
+              <Paper 
+                variant="outlined" 
+                sx={{ 
+                  p: 2, 
+                  width: '50%',
+                  bgcolor: 'background.default',
+                  borderRadius: theme => theme.shape.borderRadius,
+                  textAlign: 'center'
+                }}
+              >
+                <Typography variant="body1" fontWeight="500">
+                  {selectedQueueTimes.startWork || (
+                    <Typography component="span" color="text.secondary" fontStyle="italic">
+                      {t("queues.timeModal.notSet")}
+                    </Typography>
+                  )}
+                </Typography>
+              </Paper>
+            </Box>
+            
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <Typography variant="subtitle1" sx={{ fontWeight: 500, color: 'primary.main' }}>
+                {t("queues.table.endWork")}:
+              </Typography>
+              <Paper 
+                variant="outlined" 
+                sx={{ 
+                  p: 2, 
+                  width: '50%',
+                  bgcolor: 'background.default',
+                  borderRadius: theme => theme.shape.borderRadius,
+                  textAlign: 'center'
+                }}
+              >
+                <Typography variant="body1" fontWeight="500">
+                  {selectedQueueTimes.endWork || (
+                    <Typography component="span" color="text.secondary" fontStyle="italic">
+                      {t("queues.timeModal.notSet")}
+                    </Typography>
+                  )}
+                </Typography>
+              </Paper>
+            </Box>
+          </Box>
+          
+          <Box sx={{ mt: 3, display: 'flex', justifyContent: 'flex-end' }}>
+            <Button 
+              onClick={handleCloseTimeModal}
+              variant="contained"
+              color="primary"
+              sx={{ borderRadius: 20 }}
+            >
+              {t("queues.timeModal.btnClose")}
             </Button>
           </Box>
         </Box>
