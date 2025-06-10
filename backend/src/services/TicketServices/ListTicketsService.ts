@@ -16,7 +16,7 @@ interface Request {
   endDate?: string;
   showAll?: string;
   isAdmin?: boolean;
-  userId: string;
+  userId?: string;
   withUnreadMessages?: string;
   queueIds: number[];
   all?: string;
@@ -38,13 +38,24 @@ const ListTicketsService = async ({
   isAdmin,
   userId,
   withUnreadMessages,
-  queueIds,
+  queueIds = [],
   all
 }: Request): Promise<Response> => {
-  let whereCondition: any = {
-    [Op.or]: [{ userId }, { status: "pending" }],
-    queueId: { [Op.or]: [queueIds, null] }
-  };
+  try {
+  let whereCondition: any = {};
+  
+  // Se userId for fornecido, filtramos por userId ou tickets pendentes
+  if (userId) {
+    whereCondition = {
+      [Op.or]: [{ userId }, { status: "pending" }],
+      queueId: { [Op.or]: [queueIds, null] }
+    };
+  } else {
+    // Caso contrário, não filtramos por userId (caso da API)
+    whereCondition = {
+      queueId: { [Op.or]: [queueIds, null] }
+    };
+  }
 
   let includeCondition: Includeable[] = [
     {
@@ -149,7 +160,7 @@ const ListTicketsService = async ({
     };
   }
 
-  if (!isAdmin && !allTicketsEnabled) {
+  if (!isAdmin && !allTicketsEnabled && userId) {
     whereCondition = {
       ...whereCondition,
       userId
@@ -190,6 +201,10 @@ const ListTicketsService = async ({
     count,
     hasMore
   };
+  } catch (error) {
+    console.error("Erro ao listar tickets:", error);
+    throw error;
+  }
 };
 
 export default ListTicketsService;

@@ -4,20 +4,20 @@ import formatBody from "../helpers/Mustache";
 import { getIO } from "../libs/socket";
 import Contact from "../models/Contact";
 import Ticket from "../models/Ticket";
-import ShowQueueService from "../services/QueueService/ShowQueueService";
 import CheckOpenTicketsService from "../services/TicketServices/CheckOpenTicketsService";
 import CloseTicketsService from "../services/TicketServices/CloseTicketsService";
 import CreateTicketService from "../services/TicketServices/CreateTicketService";
 import DeleteTicketService from "../services/TicketServices/DeleteTicketService";
 import ListTicketsService from "../services/TicketServices/ListTicketsService";
+import ShowQueueService from "../services/QueueService/ShowQueueService";
 import ShowTicketService from "../services/TicketServices/ShowTicketService";
 import UpdateTicketService from "../services/TicketServices/UpdateTicketService";
 import SendWhatsAppMessage from "../services/WbotServices/SendWhatsAppMessage";
 import ShowWhatsAppService from "../services/WhatsappService/ShowWhatsAppService";
 import MarkMessagesAsReadService from "../services/MessageServices/MarkMessagesAsReadService";
 
-type IndexQuery = {
-  searchParam: string;
+interface IndexQuery {
+  searchParam?: string;
   pageNumber: string;
   status: string;
   startDate?: string;
@@ -25,6 +25,7 @@ type IndexQuery = {
   showAll: string;
   withUnreadMessages: string;
   queueIds: string;
+  tags?: string;
   all?: string;
 };
 
@@ -37,49 +38,84 @@ interface TicketData {
 }
 
 export const index = async (req: Request, res: Response): Promise<Response> => {
-  const {
-    pageNumber,
-    status,
-    startDate,
-    endDate,
-    searchParam,
-    showAll,
-    queueIds: queueIdsStringified,
-    withUnreadMessages,
-    all
-  } = req.query as IndexQuery;
+  try {
+    const pageNumber = req.query.pageNumber as string;
+    const status = req.query.status as string;
+    const startDate = req.query.startDate as string;
+    const endDate = req.query.endDate as string;
+    const searchParam = req.query.searchParam as string;
+    const showAll = req.query.showAll as string;
+    const queueIdsStringified = req.query.queueIds as string;
+    const withUnreadMessages = req.query.withUnreadMessages as string;
+    const all = req.query.all as string;
 
-  const userId = req.user.id;
-  const isAdmin = req.user.profile === "admin";
+    let userId = "0";
+    let isAdmin = false;
 
-  let queueIds: number[] = [];
+    const isApiRequest = req.path.startsWith('/v1/');
+    if (isApiRequest || 'apiToken' in req) {
+      isAdmin = true;
+    } 
 
-  if (queueIdsStringified) {
-    try {
-      queueIds = Array.isArray(queueIdsStringified)
-        ? queueIdsStringified.map(Number)
-        : JSON.parse(queueIdsStringified);
-    } catch (error) {
-      console.error("Erro ao fazer JSON.parse:", error.message);
-      return res.status(400).json({ error: "Invalid JSON format for queueIds" });
+    else if (req.user) {
+      userId = req.user.id.toString();
+      isAdmin = req.user.profile === "admin";
+    } 
+
+    else {
+      return res.status(401).json({ error: "Não autorizado" });
     }
+
+    let queueIds: number[] = [];
+
+    if (queueIdsStringified) {
+      try {
+        queueIds = Array.isArray(queueIdsStringified)
+          ? queueIdsStringified.map(Number)
+          : JSON.parse(queueIdsStringified);
+      } catch (error) {
+        console.error("Erro ao fazer JSON.parse:", error.message);
+        return res.status(400).json({ error: "Formato JSON inválido para queueIds" });
+      }
+    }
+
+    if ((startDate && !endDate) || (!startDate && endDate)) {
+      return res.status(400).json({ error: "Ambas as datas de início e fim devem ser fornecidas" });
+    }
+
+    if (startDate && endDate) {
+      const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+      if (!dateRegex.test(startDate) || !dateRegex.test(endDate)) {
+        return res.status(400).json({ error: "Formato de data inválido. Use YYYY-MM-DD" });
+      }
+    }
+
+    try {
+      const apiUserId = isApiRequest ? undefined : userId;
+      
+      const { tickets, count, hasMore } = await ListTicketsService({
+        searchParam,
+        pageNumber,
+        status,
+        startDate,
+        endDate,
+        showAll,
+        isAdmin,
+        userId: apiUserId,
+        queueIds,
+        withUnreadMessages,
+        all
+      });
+
+      return res.status(200).json({ tickets, count, hasMore });
+    } catch (serviceError) {
+      console.error("Erro no serviço de listagem de tickets:", serviceError);
+      return res.status(500).json({ error: "Erro ao processar a listagem de tickets" });
+    }
+  } catch (error) {
+    console.error("Erro ao listar tickets:", error);
+    return res.status(500).json({ error: "Erro interno ao listar tickets" });
   }
-
-  const { tickets, count, hasMore } = await ListTicketsService({
-    searchParam,
-    pageNumber,
-    status,
-    startDate,
-    endDate,
-    showAll,
-    isAdmin,
-    userId,
-    queueIds,
-    withUnreadMessages,
-    all
-  });
-
-  return res.status(200).json({ tickets, count, hasMore });
 };
 
 export const store = async (req: Request, res: Response): Promise<Response> => {
@@ -220,16 +256,28 @@ export const closeTickets = async (
   res: Response
 ): Promise<Response> => {
   const { status } = req.query;
-  const userId = parseInt(req.user.id);
+  
+  let userId: number;
+  
+  const isApiRequest = req.path.startsWith('/v1/');
+  if (isApiRequest || 'apiToken' in req) {
+    userId = 1;
+  } 
+  else if (req.user) {
+    userId = parseInt(req.user.id);
+  } 
+  else {
+    return res.status(401).json({ error: "Não autorizado" });
+  }
 
   try {
-    let whereCondition = {};
+    let whereCondition: any = {};
 
     if (status === "open") {
       whereCondition = { status: "open" };
     } else if (status === "pending") {
       whereCondition = { status: "pending" };
-    } else if (status === "all") {
+    } else {
       whereCondition = {
         status: {
           [Op.or]: ["open", "pending"]
@@ -237,6 +285,7 @@ export const closeTickets = async (
       };
     }
 
+    // Verificar se existem tickets com o status especificado
     const tickets = await Ticket.findAll({
       where: whereCondition,
       include: [
@@ -247,8 +296,13 @@ export const closeTickets = async (
       ]
     });
 
-    if (!tickets.length) {
-      return res.status(400).json({ error: "No tickets found to close" });
+    // Se não encontrar tickets, retornar mensagem mais amigável
+    if (!tickets || !tickets.length) {
+      console.log(`Nenhum ticket encontrado para fechar com o filtro:`, whereCondition);
+      return res.status(404).json({ 
+        error: "ERR_NO_TICKET_FOUND",
+        message: `Nenhum ticket ${status ? `com status ${status}` : ''} encontrado para fechar` 
+      });
     }
 
     await CloseTicketsService({
@@ -268,6 +322,7 @@ export const closeTickets = async (
       count: tickets.length
     });
   } catch (err) {
-    return res.status(400).json({ error: err.message });
+    console.error("Erro ao fechar tickets:", err);
+    return res.status(500).json({ error: "Error closing tickets" });
   }
 };

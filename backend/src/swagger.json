@@ -6,11 +6,11 @@
     "contact": {
       "email": "robson.tenorio@gmail.com"
     },
-    "version": "1.0.0"
+    "version": "1.2.0"
   },
   "servers": [
     {
-      "url": "https://apiback.pressticket.com.br",
+      "url": "https://devapi.pressticket.com.br",
       "description": "API Press Ticket®"
     }
   ],
@@ -147,6 +147,109 @@
         }
       }
     },
+    "/v1/messages/{messageId}/media": {
+      "get": {
+        "summary": "Obter Mídia em Base64",
+        "description": "Obter mídia em formato base64 a partir do ID da mensagem\n\nPermissões requeridas: `read:messages`",
+        "tags": [
+          "Messages"
+        ],
+        "security": [
+          {
+            "apiToken": [
+              "read:messages"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "messageId",
+            "in": "path",
+            "description": "ID da mensagem que contém a mídia",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Mídia obtida com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "description": "Indica se a operação foi bem-sucedida"
+                    },
+                    "message": {
+                      "type": "string",
+                      "description": "Mensagem de sucesso"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "messageId": {
+                          "type": "string",
+                          "description": "ID da mensagem"
+                        },
+                        "mediaType": {
+                          "type": "string",
+                          "description": "Tipo da mídia (image, video, audio, document)"
+                        },
+                        "mimeType": {
+                          "type": "string",
+                          "description": "Tipo MIME da mídia"
+                        },
+                        "filename": {
+                          "type": "string",
+                          "description": "Nome do arquivo da mídia"
+                        },
+                        "base64Data": {
+                          "type": "string",
+                          "description": "Dados da mídia em formato base64 com prefixo data:mimeType;base64,"
+                        }
+                      }
+                    }
+                  }
+                },
+                "examples": {
+                  "media": {
+                    "value": {
+                      "success": true,
+                      "message": "Mídia obtida com sucesso",
+                      "data": {
+                        "mediaType": "image",
+                        "filename": "1622548798765_imagem.jpg",
+                        "mimeType": "image/jpeg",                        
+                        "base64Data": "/9j/4AAQSkZJRgABAQAAAQABAAD/2wBD..."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "A mensagem não possui mídia"
+          },
+          "401": {
+            "description": "Token inválido ou não fornecido"
+          },
+          "403": {
+            "description": "Token não tem permissão 'read:messages'"
+          },
+          "404": {
+            "description": "Mensagem ou arquivo de mídia não encontrado"
+          },
+          "500": {
+            "description": "Erro interno do servidor"
+          }
+        }
+      }
+    },
     "/v1/contacts": {
       "get": {
         "summary": "Listar Contatos",
@@ -262,6 +365,87 @@
           },
           "403": {
             "description": "Token não tem permissão 'create:contacts'"
+          },
+          "500": {
+            "description": "Erro interno!"
+          }
+        }
+      }
+    },
+    "/v1/contacts/{contactId}/tags": {
+      "put": {
+        "summary": "Atualizar Tags do Contato",
+        "description": "Atualizar as tags de um contato específico via API\n\nPermissões requeridas: `update:contacts`",
+        "tags": [
+          "Contacts"
+        ],
+        "security": [
+          {
+            "apiToken": [
+              "update:contacts"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "contactId",
+            "in": "path",
+            "description": "ID do contato para atualizar as tags",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "tags": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer",
+                          "description": "ID da tag"
+                        }
+                      },
+                      "required": ["id"]
+                    },
+                    "description": "Lista de IDs das tags a serem associadas ao contato"
+                  }
+                },
+                "required": ["tags"]
+              },
+              "examples": {
+                "tags": {
+                  "value": {
+                    "tags": [
+                      { "id": 1 },
+                      { "id": 2 },
+                      { "id": 3 }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tags do contato atualizadas com sucesso"
+          },
+          "401": {
+            "description": "Token inválido ou não fornecido"
+          },
+          "403": {
+            "description": "Token não tem permissão 'update:contacts'"
+          },
+          "404": {
+            "description": "Contato não encontrado"
           },
           "500": {
             "description": "Erro interno!"
@@ -439,18 +623,6 @@
                   "number": {
                     "type": "string",
                     "description": "Número do contato no formato DDI+DDD+NÚMERO (ex: 5522999999999)"
-                  },
-                  "name": {
-                    "type": "string",
-                    "description": "Nome do contato"
-                  },
-                  "email": {
-                    "type": "string",
-                    "description": "Email do contato"
-                  },
-                  "address": {
-                    "type": "string",
-                    "description": "Endereço do contato"
                   }
                 }
               },
@@ -458,11 +630,6 @@
                 "byNumber": {
                   "value": {
                     "number": "5522999999999"
-                  }
-                },
-                "byName": {
-                  "value": {
-                    "name": "Nome do Contato"
                   }
                 }
               }
@@ -1009,7 +1176,7 @@
     "/v1/tags/sync": {
       "post": {
         "summary": "Sincronizar Tags",
-        "description": "Sincronizar tags com um ticket específico via API\n\nPermissões requeridas: `create:tags`",
+        "description": "Sincronizar tags com um contato específico via API\n\nPermissões requeridas: `create:tags`",
         "tags": [
           "Tags"
         ],
@@ -1033,21 +1200,21 @@
                     },
                     "description": "Array com os IDs das tags a serem sincronizadas"
                   },
-                  "ticketId": {
+                  "contactId": {
                     "type": "integer",
-                    "description": "ID do ticket para sincronizar as tags"
+                    "description": "ID do contato para sincronizar as tags"
                   }
                 },
                 "required": [
                   "tags",
-                  "ticketId"
+                  "contactId"
                 ]
               },
               "examples": {
                 "sync": {
                   "value": {
                     "tags": [1, 2, 3],
-                    "ticketId": 1
+                    "contactId": 1
                   }
                 }
               }
@@ -1056,7 +1223,14 @@
         },
         "responses": {
           "200": {
-            "description": "Tags sincronizadas com sucesso"
+            "description": "Tags sincronizadas com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Contact"
+                }
+              }
+            }
           },
           "401": {
             "description": "Token inválido ou não fornecido"
@@ -1065,7 +1239,7 @@
             "description": "Token não tem permissão 'create:tags'"
           },
           "404": {
-            "description": "Ticket não encontrado"
+            "description": "Contato não encontrado"
           },
           "500": {
             "description": "Erro interno!"
@@ -1114,149 +1288,94 @@
             }
           },
           {
-            "name": "tags",
+            "name": "startDate",
             "in": "query",
-            "description": "IDs das tags separados por vírgula (ex: 1,2,3)",
+            "description": "Data inicial para filtro (formato YYYY-MM-DD)",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "endDate",
+            "in": "query",
+            "description": "Data final para filtro (formato YYYY-MM-DD)",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "showAll",
+            "in": "query",
+            "description": "Mostrar todos os tickets (true/false)",
+            "schema": {
+              "type": "string",
+              "enum": ["true", "false"]
+            }
+          },
+          {
+            "name": "queueIds",
+            "in": "query",
+            "description": "IDs dos setores para filtrar, formato JSON array ou separados por vírgula",
             "schema": {
               "type": "string"
+            }
+          },
+          {
+            "name": "withUnreadMessages",
+            "in": "query",
+            "description": "Filtrar tickets com mensagens não lidas (true/false)",
+            "schema": {
+              "type": "string",
+              "enum": ["true", "false"]
+            }
+          },
+          {
+            "name": "all",
+            "in": "query",
+            "description": "Retornar todos os tickets sem paginação (true/false)",
+            "schema": {
+              "type": "string",
+              "enum": ["true", "false"]
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "Lista de tickets"
+            "description": "Lista de tickets",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "tickets": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Ticket"
+                      }
+                    },
+                    "count": {
+                      "type": "integer",
+                      "description": "Total de tickets encontrados"
+                    },
+                    "hasMore": {
+                      "type": "boolean",
+                      "description": "Indica se há mais páginas de resultados"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Erro de validação dos parâmetros"
           },
           "401": {
             "description": "Token inválido ou não fornecido"
           },
           "403": {
             "description": "Token não tem permissão 'read:tickets'"
-          },
-          "500": {
-            "description": "Erro interno!"
-          }
-        }
-      },
-      "post": {
-        "summary": "Criar Ticket",
-        "description": "Criar um novo ticket via API\n\nPermissões requeridas: `create:tickets`",
-        "tags": [
-          "Tickets"
-        ],
-        "security": [
-          {
-            "apiToken": [
-              "create:tickets"
-            ]
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "contactId": {
-                    "type": "integer",
-                    "description": "ID do contato"
-                  },
-                  "status": {
-                    "type": "string",
-                    "description": "Status do ticket (open, pending, closed)",
-                    "enum": ["open", "pending", "closed"]
-                  },
-                  "queueId": {
-                    "type": "integer",
-                    "description": "ID do setor"
-                  },
-                  "userId": {
-                    "type": "integer",
-                    "description": "ID do usuário responsável"
-                  }
-                },
-                "required": [
-                  "contactId",
-                  "status"
-                ]
-              },
-              "examples": {
-                "ticket": {
-                  "value": {
-                    "contactId": 1,
-                    "status": "open",
-                    "queueId": 1,
-                    "userId": 1
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Ticket criado com sucesso"
-          },
-          "401": {
-            "description": "Token inválido ou não fornecido"
-          },
-          "403": {
-            "description": "Token não tem permissão 'create:tickets'"
-          },
-          "500": {
-            "description": "Erro interno!"
-          }
-        }
-      }
-    },
-    "/v1/tickets/close-all": {
-      "put": {
-        "summary": "Fechar Todos os Tickets",
-        "description": "Fechar todos os tickets via API\n\nPermissões requeridas: `update:tickets`",
-        "tags": [
-          "Tickets"
-        ],
-        "security": [
-          {
-            "apiToken": [
-              "update:tickets"
-            ]
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "status": {
-                    "type": "string",
-                    "description": "Status para definir nos tickets (geralmente 'closed')",
-                    "enum": ["closed"]
-                  }
-                },
-                "required": [
-                  "status"
-                ]
-              },
-              "examples": {
-                "closeAll": {
-                  "value": {
-                    "status": "closed"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Tickets fechados com sucesso"
-          },
-          "401": {
-            "description": "Token inválido ou não fornecido"
-          },
-          "403": {
-            "description": "Token não tem permissão 'update:tickets'"
           },
           "500": {
             "description": "Erro interno!"
@@ -1748,6 +1867,101 @@
         }
       }
     },
+    "/v1/whatsapp/check-number": {
+      "post": {
+        "summary": "Verificar Número no WhatsApp",
+        "description": "Verifica se um número está registrado no WhatsApp sem criar um contato\n\nPermissões requeridas: `read:whatsapp`",
+        "tags": [
+          "WhatsApp"
+        ],
+        "security": [
+          {
+            "apiToken": [
+              "read:whatsapp"
+            ]
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "number"
+                ],
+                "properties": {
+                  "number": {
+                    "type": "string",
+                    "description": "Número a ser verificado no formato DDI+DDD+NÚMERO (ex: 5522999999999)"
+                  }
+                }
+              },
+              "examples": {
+                "check": {
+                  "value": {
+                    "number": "5522999999999"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Verificação concluída com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "exists": {
+                      "type": "boolean",
+                      "description": "Indica se o número está registrado no WhatsApp"
+                    },
+                    "number": {
+                      "type": "string",
+                      "description": "Número verificado"
+                    },
+                    "message": {
+                      "type": "string",
+                      "description": "Mensagem descritiva sobre o resultado da verificação"
+                    }
+                  }
+                },
+                "examples": {
+                  "exists": {
+                    "value": {
+                      "exists": true,
+                      "number": "5522999999999",
+                      "message": "Número registrado no WhatsApp"
+                    }
+                  },
+                  "notExists": {
+                    "value": {
+                      "exists": false,
+                      "number": "5522999999999",
+                      "message": "Número não registrado no WhatsApp"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Formato de número inválido"
+          },
+          "401": {
+            "description": "Token inválido ou não fornecido"
+          },
+          "403": {
+            "description": "Token não tem permissão 'read:whatsapp'"
+          },
+          "500": {
+            "description": "Erro ao verificar número. Verifique se há uma conexão WhatsApp ativa."
+          }
+        }
+      }
+    },
     "/v1/whatsapp/{whatsappId}/restart": {
       "post": {
         "summary": "Reiniciar Conexão WhatsApp",
@@ -1836,12 +2050,240 @@
         }
       }
     },
-    "/v1/whatsappsession": {
+    "/v1/whatsapp/{whatsappId}/qrcode": {
+      "get": {
+        "summary": "Obter QR Code da Conexão WhatsApp",
+        "description": "Retorna o QR Code da conexão WhatsApp para escaneamento via API\n\nPermissões requeridas: `read:whatsapp`",
+        "tags": [
+          "WhatsApp"
+        ],
+        "security": [
+          {
+            "apiToken": [
+              "read:whatsapp"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "whatsappId",
+            "in": "path",
+            "description": "ID da conexão WhatsApp",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "QR Code da conexão WhatsApp",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "qrcode": {
+                      "type": "string",
+                      "description": "String do QR Code para ser exibido ou convertido em imagem"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token inválido ou não fornecido"
+          },
+          "403": {
+            "description": "Token não tem permissão 'read:whatsapp'"
+          },
+          "404": {
+            "description": "Conexão WhatsApp não encontrada ou QR Code não disponível"
+          },
+          "500": {
+            "description": "Erro interno!"
+          }
+        }
+      }
+    },
+    "/v1/whatsappsession/{whatsappId}": {
       "post": {
+        "summary": "Criar Sessão do WhatsApp",
+        "description": "Cria uma nova sessão do WhatsApp para o ID especificado\n\nPermissões requeridas: `create:whatsappsession`",
+        "tags": [
+          "WhatsAppSession"
+        ],
+        "security": [
+          {
+            "apiToken": [
+              "create:whatsappsession"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "whatsappId",
+            "in": "path",
+            "description": "ID da conexão WhatsApp",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "qrcode": {
+                    "type": "string",
+                    "description": "QR Code para conexão"
+                  },
+                  "status": {
+                    "type": "string",
+                    "description": "Status da sessão"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Sessão criada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WhatsAppSession"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token inválido ou não fornecido"
+          },
+          "403": {
+            "description": "Token não tem permissão 'create:whatsappsession'"
+          },
+          "404": {
+            "description": "WhatsApp não encontrado"
+          }
+        }
+      },
+      "put": {
+        "summary": "Atualizar Sessão do WhatsApp",
+        "description": "Atualiza uma sessão do WhatsApp existente\n\nPermissões requeridas: `update:whatsappsession`",
+        "tags": [
+          "WhatsAppSession"
+        ],
+        "security": [
+          {
+            "apiToken": [
+              "update:whatsappsession"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "whatsappId",
+            "in": "path",
+            "description": "ID da conexão WhatsApp",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "qrcode": {
+                    "type": "string",
+                    "description": "QR Code para conexão"
+                  },
+                  "status": {
+                    "type": "string",
+                    "description": "Status da sessão"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Sessão atualizada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WhatsAppSession"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token inválido ou não fornecido"
+          },
+          "403": {
+            "description": "Token não tem permissão 'update:whatsappsession'"
+          },
+          "404": {
+            "description": "WhatsApp não encontrado"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Remover Sessão do WhatsApp",
+        "description": "Remove uma sessão do WhatsApp existente\n\nPermissões requeridas: `delete:whatsappsession`",
+        "tags": [
+          "WhatsAppSession"
+        ],
+        "security": [
+          {
+            "apiToken": [
+              "delete:whatsappsession"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "whatsappId",
+            "in": "path",
+            "description": "ID da conexão WhatsApp",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sessão removida com sucesso"
+          },
+          "401": {
+            "description": "Token inválido ou não fornecido"
+          },
+          "403": {
+            "description": "Token não tem permissão 'delete:whatsappsession'"
+          },
+          "404": {
+            "description": "WhatsApp não encontrado"
+          }
+        }
+      }
+    },
+    "/v1/whatsappsession": {
+      "get": {
         "summary": "Criar Sessão WhatsApp",
         "description": "Criar uma nova sessão WhatsApp via API\n\nPermissões requeridas: `create:whatsappsession`",
         "tags": [
-          "WhatsApp Session"
+          "WhatsAppSession"
         ],
         "security": [
           {
@@ -1906,7 +2348,7 @@
         "summary": "Atualizar Sessão WhatsApp",
         "description": "Atualizar uma sessão WhatsApp específica via API\n\nPermissões requeridas: `update:whatsappsession`",
         "tags": [
-          "WhatsApp Session"
+          "WhatsAppSession"
         ],
         "security": [
           {
@@ -1980,7 +2422,7 @@
         "summary": "Excluir Sessão WhatsApp",
         "description": "Excluir uma sessão WhatsApp específica via API\n\nPermissões requeridas: `delete:whatsappsession`",
         "tags": [
-          "WhatsApp Session"
+          "WhatsAppSession"
         ],
         "security": [
           {
@@ -2022,6 +2464,60 @@
   },
   "components": {
     "schemas": {
+      "WhatsAppSession": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string",
+            "description": "Ação realizada na sessão",
+            "enum": ["create", "update", "delete"]
+          },
+          "session": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "description": "ID da instância do WhatsApp"
+              },
+              "name": {
+                "type": "string",
+                "description": "Nome da instância do WhatsApp"
+              },
+              "status": {
+                "type": "string",
+                "description": "Status da conexão",
+                "enum": ["OPENING", "CONNECTED", "DISCONNECTED", "QRCODE", "TIMEOUT", "CLOSED"]
+              },
+              "qrcode": {
+                "type": "string",
+                "description": "QR Code para conexão (quando disponível)",
+                "nullable": true
+              },
+              "number": {
+                "type": "string",
+                "description": "Número de telefone associado à instância"
+              },
+              "isDefault": {
+                "type": "boolean",
+                "description": "Indica se é a instância padrão"
+              },
+              "createdAt": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "updatedAt": {
+                "type": "string",
+                "format": "date-time"
+              }
+            }
+          },
+          "message": {
+            "type": "string",
+            "description": "Mensagem informativa sobre a operação",
+            "nullable": true
+          }
+        }
+      },
       "SendMessage": {
         "type": "object",
         "required": [
@@ -2051,6 +2547,54 @@
           "whatsappId": {
             "type": "integer",
             "description": "ID da conexão do WhatsApp"
+          }
+        }
+      },
+      "Ticket": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "ID do ticket"
+          },
+          "status": {
+            "type": "string",
+            "description": "Status do ticket (open, pending, closed)",
+            "enum": ["open", "pending", "closed"]
+          },
+          "unreadMessages": {
+            "type": "integer",
+            "description": "Número de mensagens não lidas"
+          },
+          "lastMessage": {
+            "type": "string",
+            "description": "Conteúdo da última mensagem"
+          },
+          "contactId": {
+            "type": "integer",
+            "description": "ID do contato associado ao ticket"
+          },
+          "contact": {
+            "$ref": "#/components/schemas/Contact",
+            "description": "Dados do contato associado ao ticket"
+          },
+          "queueId": {
+            "type": "integer",
+            "description": "ID do setor associado ao ticket"
+          },
+          "userId": {
+            "type": "integer",
+            "description": "ID do usuário responsável pelo ticket"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Data de criação do ticket"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Data da última atualização do ticket"
           }
         }
       },

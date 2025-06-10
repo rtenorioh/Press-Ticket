@@ -72,22 +72,36 @@ export const update = async (
   req: Request,
   res: Response
 ): Promise<Response> => {
-  if (req.user.profile !== "admin") {
-    throw new AppError("ERR_NO_PERMISSION", 403);
+  try {
+    const isApiRequest = req.originalUrl.includes('/v1/');
+    
+    if (!isApiRequest && req.user && req.user.profile !== "admin") {
+      throw new AppError("ERR_NO_PERMISSION", 403);
+    }
+
+    const { tagId } = req.params;
+    const tagData = req.body;
+
+    if (!tagData.name && !tagData.color) {
+      throw new AppError("É necessário fornecer pelo menos um campo para atualização (nome ou cor)", 400);
+    }
+
+    const tag = await UpdateService({ tagData, id: tagId });
+
+    const io = getIO();
+    io.emit("tag", {
+      action: "update",
+      tag
+    });
+
+    return res.status(200).json(tag);
+  } catch (error) {
+    if (error instanceof AppError) {
+      return res.status(error.statusCode).json({ error: error.message });
+    }
+    console.error("Erro ao atualizar tag:", error);
+    return res.status(500).json({ error: "Erro interno do servidor" });
   }
-
-  const { tagId } = req.params;
-  const tagData = req.body;
-
-  const tag = await UpdateService({ tagData, id: tagId });
-
-  const io = getIO();
-  io.emit("tag", {
-    action: "update",
-    tag
-  });
-
-  return res.status(200).json(tag);
 };
 
 export const remove = async (
@@ -126,16 +140,29 @@ export const list = async (req: Request, res: Response): Promise<Response> => {
   return res.json(tags);
 };
 
-export const syncTags = async (req: Request, res: Response): Promise<any> => {
+export const syncTags = async (req: Request, res: Response): Promise<Response> => {
   const data = req.body;
 
   try {
-    if (data) {
-      const tags = await SyncTagService(data);
-
-      return res.json(tags);
+    if (!data) {
+      return res.status(400).json({ error: "Dados não fornecidos" });
     }
+
+    const contact = await SyncTagService(data);
+    
+    const io = getIO();
+    io.emit("contact", {
+      action: "update",
+      contact
+    });
+
+    return res.status(200).json(contact);
   } catch (err) {
-    throw new AppError("ERR_SYNC_TAGS", 500);
+    if (err instanceof AppError) {
+      return res.status(err.statusCode).json({ error: err.message });
+    }
+    
+    console.error("Erro ao sincronizar tags:", err);
+    return res.status(500).json({ error: "Erro ao sincronizar tags" });
   }
 };

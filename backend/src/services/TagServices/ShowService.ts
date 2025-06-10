@@ -4,33 +4,42 @@ import AppError from "../../errors/AppError";
 import Contact from "../../models/Contact";
 
 const TagService = async (id: string | number): Promise<Tag> => {
-  const tag = await Tag.findByPk(id, {
-    attributes: {
+  try {
+    const tagExists = await Tag.findByPk(id);
+    
+    if (!tagExists) {
+      throw new AppError("ERR_NO_TAG_FOUND", 404);
+    }
+    
+    const tag = await Tag.findByPk(id, {
       include: [
-        [Sequelize.fn("COUNT", Sequelize.col("contacts.id")), "contactsCount"]
-      ]
-    },
-    group: [
-      "Tag.id",
-      "contacts.ContactTag.tagId",
-      "contacts.ContactTag.contactId",
-      "contacts.ContactTag.createdAt",
-      "contacts.ContactTag.updatedAt"
-    ],
-    include: [
-      {
-        model: Contact,
-        as: "contacts",
-        attributes: []
+        {
+          model: Contact,
+          as: "contacts",
+          attributes: [],
+          through: { attributes: [] }
+        }
+      ],
+      attributes: {
+        include: [
+          [Sequelize.fn("COUNT", Sequelize.col("contacts.id")), "contactsCount"]
+        ]
+      },
+      group: ["Tag.id"]
+    });
+    
+    return tag!;
+  } catch (error) {
+    if (error.message !== "ERR_NO_TAG_FOUND") {
+      console.error("Erro ao buscar tag com contagem:", error);
+      const tagBasic = await Tag.findByPk(id);
+      if (!tagBasic) {
+        throw new AppError("ERR_NO_TAG_FOUND", 404);
       }
-    ]
-  });
-
-  if (!tag) {
-    throw new AppError("ERR_NO_TAG_FOUND", 404);
+      return tagBasic;
+    }
+    throw error;
   }
-
-  return tag;
 };
 
 export default TagService;

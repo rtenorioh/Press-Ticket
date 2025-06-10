@@ -155,87 +155,13 @@ const TicketsList = (props) => {
 		setFilteredTags(tags);
 	};
 
-	const cleanupLocalStorage = () => {
-		try {
-			const allStatuses = ['open', 'pending', 'closed'];
-			const ticketMap = new Map();
-			
-			allStatuses.forEach(statusType => {
-				const storageKey = `tickets_${statusType}`;
-				const storedData = localStorage.getItem(storageKey);
-				
-				if (storedData) {
-					try {
-						const parsedData = JSON.parse(storedData);
-						if (parsedData.tickets && Array.isArray(parsedData.tickets)) {
-							parsedData.tickets.forEach(ticket => {
-								if (ticket.id && ticket.status) {
-									if (!ticketMap.has(ticket.id) || 
-										(new Date(ticket.updatedAt) > new Date(ticketMap.get(ticket.id).updatedAt))) {
-										ticketMap.set(ticket.id, ticket);
-									}
-								}
-							});
-						}
-					} catch (parseErr) {
-						console.error(`Erro ao analisar tickets do status ${statusType}`, parseErr);
-					}
-				}
-			});
-			
-			const ticketsByStatus = {
-				open: [],
-				pending: [],
-				closed: []
-			};
-			
-			ticketMap.forEach(ticket => {
-				if (ticket.status && ticketsByStatus[ticket.status]) {
-					ticketsByStatus[ticket.status].push(ticket);
-				}
-			});
-			
-			allStatuses.forEach(statusType => {
-				const ticketsForStatus = ticketsByStatus[statusType] || [];
-				const ticketsToStore = {
-					tickets: ticketsForStatus,
-					status: statusType,
-					timestamp: new Date().getTime()
-				};
-				
-				localStorage.setItem(`tickets_${statusType}`, JSON.stringify(ticketsToStore));
-				console.log(`Reorganizados ${ticketsForStatus.length} tickets para status ${statusType}`);
-			});
-			
-			return true;
-		} catch (err) {
-			console.error("Erro ao limpar e reorganizar o localStorage", err);
-			return false;
-		}
-	};
+	// Função de limpeza removida para evitar uso do localStorage
 
 	useEffect(() => {
 		dispatch({ type: "RESET" });
 		setPageNumber(1);
 		
-		cleanupLocalStorage();
-		
-		try {
-			const cachedTicketsData = localStorage.getItem(`tickets_${status}`);
-			if (cachedTicketsData) {
-				const { tickets: cachedTickets, timestamp } = JSON.parse(cachedTicketsData);
-				
-				const now = new Date().getTime();
-				const thirtyMinutesInMs = 30 * 60 * 1000;
-				
-				if (now - timestamp < thirtyMinutesInMs && Array.isArray(cachedTickets) && cachedTickets.length > 0) {
-					console.log(`Carregando ${cachedTickets.length} tickets do cache para status ${status}`);
-					dispatch({ type: "LOAD_TICKETS", payload: cachedTickets });
-				}
-			}
-		} catch (err) {
-			console.error("Erro ao carregar tickets do cache", err);
-		}
+		// Carregamento inicial feito apenas via API, sem usar localStorage
 	}, [status, searchParam, dispatch, showAll, selectedQueueIds, tags]);
 
 	const { tickets, hasMore, loading } = useTickets({
@@ -332,40 +258,7 @@ const TicketsList = (props) => {
 				}
 			});
 
-			const removeTicketFromLocalStorage = (ticketId, fromStatus) => {
-				try {
-					const storageKey = `tickets_${fromStatus}`;
-					const storedData = localStorage.getItem(storageKey);
-					
-					if (storedData) {
-						const parsedData = JSON.parse(storedData);
-						if (parsedData.tickets && Array.isArray(parsedData.tickets)) {
-							const updatedTickets = parsedData.tickets.filter(t => t.id !== ticketId);
-							
-							if (updatedTickets.length !== parsedData.tickets.length) {
-								const updatedData = {
-									...parsedData,
-									tickets: updatedTickets,
-									timestamp: new Date().getTime()
-								};
-								localStorage.setItem(storageKey, JSON.stringify(updatedData));
-								console.log(`Ticket ${ticketId} removido do localStorage para status ${fromStatus}`);
-							}
-						}
-					}
-				} catch (err) {
-					console.error(`Erro ao remover ticket ${ticketId} do localStorage:`, err);
-				}
-			};
-			
-			const removeTicketFromOtherStatuses = (ticketId, currentStatus) => {
-				const allStatuses = ['open', 'pending', 'closed'];
-				allStatuses.forEach(statusType => {
-					if (statusType !== currentStatus) {
-						removeTicketFromLocalStorage(ticketId, statusType);
-					}
-				});
-			};
+			// Funções de manipulação do localStorage removidas
 
 			socket.on("ticket", (data) => {
 				if (data.action === "updateUnread") {
@@ -376,9 +269,7 @@ const TicketsList = (props) => {
 				}
 
 				if (data.action === "update" && shouldUpdateTicket(data.ticket)) {
-					if (data.ticket && data.ticket.status) {
-						removeTicketFromOtherStatuses(data.ticket.id, data.ticket.status);
-					}
+					// Manipulação simplificada sem localStorage
 					
 					dispatch({
 						type: "UPDATE_TICKET",
@@ -387,15 +278,13 @@ const TicketsList = (props) => {
 				}
 
 				if (data.action === "update" && notBelongsToUserQueues(data.ticket)) {
-					if (data.ticket && data.ticket.id) {
-						removeTicketFromOtherStatuses(data.ticket.id, null);
-					}
+					// Manipulação simplificada sem localStorage
 					
 					dispatch({ type: "DELETE_TICKET", payload: data.ticket.id });
 				}
 
 				if (data.action === "delete") {
-					removeTicketFromOtherStatuses(data.ticketId, null);
+					// Manipulação simplificada sem localStorage
 					
 					dispatch({ type: "DELETE_TICKET", payload: data.ticketId });
 				}
@@ -406,37 +295,7 @@ const TicketsList = (props) => {
 					console.log("Nova mensagem recebida:", data.message);
 					console.log("Atualizando ticket com nova mensagem:", data.ticket);
 					
-					// Atualizar o ticket no localStorage também para garantir consistência
-					if (data.ticket && data.ticket.id && data.ticket.status) {
-						try {
-							const storageKey = `tickets_${data.ticket.status}`;
-							const storedData = localStorage.getItem(storageKey);
-							
-							if (storedData) {
-								const parsedData = JSON.parse(storedData);
-								if (parsedData.tickets && Array.isArray(parsedData.tickets)) {
-									// Atualizar o ticket no array
-									const updatedTickets = parsedData.tickets.map(t => {
-										if (t.id === data.ticket.id) {
-											return data.ticket; // Substituir pelo ticket atualizado
-										}
-										return t;
-									});
-									
-									const updatedData = {
-										...parsedData,
-										tickets: updatedTickets,
-										timestamp: new Date().getTime()
-									};
-									
-									localStorage.setItem(storageKey, JSON.stringify(updatedData));
-									console.log(`Ticket ${data.ticket.id} atualizado no localStorage com nova mensagem`);
-								}
-							}
-						} catch (err) {
-							console.error(`Erro ao atualizar ticket ${data.ticket.id} no localStorage:`, err);
-						}
-					}
+					// Atualização simplificada sem localStorage
 					
 					dispatch({
 						type: "UPDATE_TICKET_UNREAD_MESSAGES",
@@ -465,61 +324,6 @@ const TicketsList = (props) => {
 					if (filteredTickets.length > 0) {
 						console.log(`Carregando ${filteredTickets.length} tickets com status ${status}`);
 						dispatch({ type: "LOAD_TICKETS", payload: filteredTickets });
-						
-						if (status) {
-							filteredTickets.forEach(ticket => {
-								if (ticket.id) {
-									removeTicketFromOtherStatuses(ticket.id, status);
-								}
-							});
-						}
-						
-						try {
-							const existingData = localStorage.getItem(`tickets_${status}`);
-							let existingTickets = [];
-							
-							if (existingData) {
-								try {
-									const parsed = JSON.parse(existingData);
-									if (parsed.tickets && Array.isArray(parsed.tickets)) {
-										existingTickets = parsed.tickets;
-									}
-								} catch (parseErr) {
-									console.error("Erro ao analisar tickets existentes", parseErr);
-								}
-							}
-							
-							const ticketMap = new Map();
-							
-							existingTickets.forEach(ticket => {
-								if (ticket.id) {
-									ticketMap.set(ticket.id, ticket);
-								}
-							});
-							
-							filteredTickets.forEach(ticket => {
-								if (ticket.id) {
-									ticketMap.set(ticket.id, ticket);
-								}
-							});
-							
-							const mergedTickets = Array.from(ticketMap.values());
-							
-							const finalTickets = status 
-								? mergedTickets.filter(t => t.status === status)
-								: mergedTickets;
-							
-							const ticketsToStore = {
-								tickets: finalTickets,
-								status,
-								timestamp: new Date().getTime()
-							};
-							
-							localStorage.setItem(`tickets_${status}`, JSON.stringify(ticketsToStore));
-							console.log(`Salvos ${finalTickets.length} tickets no localStorage para status ${status}`);
-						} catch (err) {
-							console.error("Erro ao salvar tickets no localStorage", err);
-						}
 					}
 				}
 			});

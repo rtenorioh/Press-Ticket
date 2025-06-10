@@ -773,18 +773,46 @@ const handleMessage = async (
   });
 
   if (Integrationdb?.value) {
+    // Buscar o ticket antes de enviar para o n8n
+    const contact = await verifyContact(msg.fromMe ? await wbot.getContactById(msg.to) : await msg.getContact());
+    
+    const chat = await msg.getChat();
+    let groupContact;
+    
+    if (chat.isGroup) {
+      const msgGroupContact = msg.fromMe ? await wbot.getContactById(msg.to) : await wbot.getContactById(msg.from);
+      groupContact = await verifyContact(msgGroupContact);
+    }
+    
+    const unreadMessages = msg.fromMe ? 0 : chat.unreadCount;
+    
+    const ticket = await FindOrCreateTicketService(
+      contact,
+      wbot.id!,
+      unreadMessages,
+      undefined,
+      undefined,
+      groupContact
+    );
+    
     const options = {
       method: "POST",
       url: Integrationdb?.value,
       headers: {
         "Content-Type": "application/json"
       },
-      json: msg
+      json: {
+        message: msg,
+        ticket: ticket
+      }
     };
+    
     try {
       await request(options); 
     } catch (error) {
-      throw new Error(error);
+      console.error("Erro ao enviar dados para o n8n:", error);
+      // Usar throw new Error pode interromper o fluxo de processamento da mensagem
+      // É melhor apenas logar o erro
     }
   }
 

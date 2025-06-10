@@ -240,6 +240,7 @@ const ApiKey = () => {
             
             // Mensagens
             'create:messages': t("apiKey.permissions.createMessages"),
+            'read:messages': t("apiKey.permissions.readMessages"),
             
             // Setores
             'create:queue': t("apiKey.permissions.createQueue"),
@@ -433,7 +434,7 @@ const ApiKey = () => {
                                         // Caso contrário, marca todas
                                         const allPermissions = [
                                             'create:contacts', 'read:contacts', 'update:contacts', 'delete:contacts',
-                                            'create:messages',
+                                            'create:messages', 'read:messages',
                                             'create:queue', 'read:queue', 'update:queue', 'delete:queue',
                                             'create:tags', 'read:tags', 'update:tags', 'delete:tags',
                                             'create:tickets', 'read:tickets', 'update:tickets', 'delete:tickets',
@@ -506,7 +507,7 @@ const ApiKey = () => {
                             </AccordionSummary>
                             <AccordionDetails sx={{ pt: 2 }}>
                                 <Grid container spacing={1}>
-                                    {['create:messages'].map((permission) => (
+                                    {['create:messages', 'read:messages'].map((permission) => (
                                         <Grid item xs={12} sm={6} key={permission}>
                                             <FormControlLabel
                                                 control={

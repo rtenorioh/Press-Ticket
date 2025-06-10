@@ -14,6 +14,7 @@ import GetContactService from "../services/ContactServices/GetContactService";
 import CheckIsValidContact from "../services/WbotServices/CheckIsValidContact";
 import CheckContactNumber from "../services/WbotServices/CheckNumber";
 import GetProfilePicUrl from "../services/WbotServices/GetProfilePicUrl";
+import SyncTagsService from "../services/TagServices/SyncTagsService";
 
 type IndexQuery = {
   searchParam: string;
@@ -63,14 +64,26 @@ export const getContact = async (
 ): Promise<Response> => {
   const { name, number, address, email } = req.body as IndexGetContactQuery;
 
-  const contact = await GetContactService({
-    name,
-    number,
-    address,
-    email
-  });
+  // Verificar se pelo menos um parâmetro de busca foi fornecido
+  if (!name && !number && !address && !email) {
+    return res.status(400).json({ error: "Pelo menos um parâmetro de busca deve ser fornecido" });
+  }
 
-  return res.status(200).json(contact);
+  try {
+    const contact = await GetContactService({
+      name,
+      number,
+      address,
+      email
+    });
+
+    return res.status(200).json(contact);
+  } catch (error) {
+    if (error.message === "CONTACT_NOT_FIND") {
+      return res.status(404).json({ error: "Contato não encontrado" });
+    }
+    return res.status(500).json({ error: error.message });
+  }
 };
 
 export const store = async (req: Request, res: Response): Promise<Response> => {
@@ -90,10 +103,28 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     throw new AppError(err.message);
   }
 
-  await CheckIsValidContact(newContact.number);
-  const validNumber: any = await CheckContactNumber(newContact.number);
+  const isApiRequest = req.originalUrl.includes('/v1/');
+  let validNumber: string = newContact.number;
+  let profilePicUrl: string | undefined = undefined;
 
-  const profilePicUrl = await GetProfilePicUrl(validNumber);
+  if (!isApiRequest) {
+    try {
+      await CheckIsValidContact(newContact.number);
+      validNumber = await CheckContactNumber(newContact.number);
+      profilePicUrl = await GetProfilePicUrl(validNumber);
+    } catch (err) {
+      throw new AppError(err.message);
+    }
+  } else {
+    // Para requisições da API, tenta validar o número, mas não falha se não conseguir
+    try {
+      const checkedNumber = await CheckContactNumber(newContact.number);
+      validNumber = checkedNumber;
+      profilePicUrl = await GetProfilePicUrl(validNumber);
+    } catch (error) {
+      console.log("Erro ao validar contato da API, continuando com o número original", error);
+    }
+  }
 
   let { name } = newContact;
   let number = validNumber;
@@ -186,4 +217,39 @@ export const removeAll = async (
   await DeleteAllContactService();
 
   return res.send();
+};
+
+export const updateTags = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  const { contactId } = req.params;
+  const { tags } = req.body;
+
+  const schema = Yup.object().shape({
+    tags: Yup.array().of(
+      Yup.object().shape({
+        id: Yup.number().required()
+      })
+    ).required()
+  });
+
+  try {
+    await schema.validate({ tags });
+  } catch (err) {
+    throw new AppError(err.message);
+  }
+
+  const contact = await SyncTagsService({
+    tags,
+    contactId: +contactId
+  });
+
+  const io = getIO();
+  io.emit("contact", {
+    action: "update",
+    contact
+  });
+
+  return res.status(200).json(contact);
 };

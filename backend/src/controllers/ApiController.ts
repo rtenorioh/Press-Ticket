@@ -257,3 +257,69 @@ export const sendMedia = async (req: Request, res: Response): Promise<Response> 
 
   return res.send({ resp });
 };
+
+export const getMediaBase64 = async (req: Request, res: Response): Promise<Response> => {
+  const { messageId } = req.params;
+  const fs = require('fs');
+  const path = require('path');
+
+  try {
+    const message = await Message.findByPk(messageId);
+    
+    if (!message) {
+      throw new AppError("Mensagem não encontrada", 404);
+    }
+
+    if (!message.mediaUrl) {
+      throw new AppError("Esta mensagem não possui mídia", 400);
+    }
+
+    const mediaUrlParts = message.mediaUrl.split('/');
+    const filename = mediaUrlParts[mediaUrlParts.length - 1];
+    
+    const publicFolder = path.resolve(__dirname, "..", "..", "public");
+    const filePath = path.join(publicFolder, filename);
+
+    if (!fs.existsSync(filePath)) {
+      throw new AppError("Arquivo de mídia não encontrado no servidor", 404);
+    }
+
+    const fileBuffer = fs.readFileSync(filePath);
+    const base64Data = fileBuffer.toString('base64');
+
+    let mimeType = '';
+    switch (message.mediaType) {
+      case 'image':
+        mimeType = 'image/jpeg';
+        break;
+      case 'video':
+        mimeType = 'video/mp4';
+        break;
+      case 'audio':
+        mimeType = 'audio/ogg';
+        break;
+      case 'document':
+        mimeType = 'application/pdf';
+        break;
+      default:
+        mimeType = 'application/octet-stream';
+    }
+
+    return res.json({
+      success: true,
+      data: {
+        mediaType: message.mediaType,
+        filename,
+        mimeType,        
+        base64Data: `data:${mimeType};base64,${base64Data}`
+      }
+    });
+  } catch (err: any) {
+    if (err instanceof AppError) {
+      return res.status(err.statusCode).json({ error: err.message });
+    }
+    
+    console.error("Erro ao obter mídia em base64:", err);
+    return res.status(500).json({ error: "Erro interno do servidor" });
+  }
+};

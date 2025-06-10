@@ -18,28 +18,41 @@ interface Request {
 const UpdateUserService = async ({
   tagData,
   id
-}: Request): Promise<Tag | undefined> => {
-  const tag = await ShowService(id);
-
-  const schema = Yup.object().shape({
-    name: Yup.string().min(3)
-  });
-
-  const { name, color } = tagData;
-
+}: Request): Promise<Tag> => {
   try {
-    await schema.validate({ name });
-  } catch (err: any) {
-    throw new AppError(err.message);
+    const tag = await ShowService(id);
+    const { name, color } = tagData;
+    
+    if (name) {
+      const schema = Yup.object().shape({
+        name: Yup.string().min(3, "O nome da tag deve ter pelo menos 3 caracteres")
+      });
+
+      try {
+        await schema.validate({ name });
+      } catch (err: any) {
+        throw new AppError(err.message, 400);
+      }
+    }
+
+    const updateData: TagData = {};
+    
+    if (name !== undefined) updateData.name = name;
+    if (color !== undefined) updateData.color = color;
+
+    await tag.update(updateData);
+
+    await tag.reload();
+    
+    return tag;
+  } catch (error) {
+    if (error instanceof AppError) {
+      throw error;
+    }
+    
+    console.error("Erro ao atualizar tag:", error);
+    throw new AppError("Erro ao atualizar tag. Verifique os dados e tente novamente.", 500);
   }
-
-  await tag.update({
-    name,
-    color
-  });
-
-  await tag.reload();
-  return tag;
 };
 
 export default UpdateUserService;

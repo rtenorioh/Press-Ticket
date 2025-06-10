@@ -314,6 +314,7 @@ const TicketListItem = ({ ticket, filteredTags }) => {
 	const handleAcepptTicket = async id => {
 		setLoading(true);
 		try {
+			console.log(`Aceitando ticket ${id}: mudando status para 'open'`);
 			await api.put(`/tickets/${id}`, {
 				status: "open",
 				userId: user?.id,
@@ -352,6 +353,7 @@ const TicketListItem = ({ ticket, filteredTags }) => {
 	const handleReopenTicket = async (id) => {
 		setLoading(true);
 		try {
+			console.log(`Reabrindo ticket ${id}: mudando status para 'open'`);
 			await api.put(`/tickets/${id}`, {
 				status: "open",
 				userId: user?.id,
@@ -369,6 +371,7 @@ const TicketListItem = ({ ticket, filteredTags }) => {
 	const handleViewTicket = async (id) => {
 		setLoading(true);
 		try {
+			console.log(`Movendo ticket ${id} para 'pending'`);
 			await api.put(`/tickets/${id}`, {
 				status: "pending",
 			});
@@ -385,6 +388,7 @@ const TicketListItem = ({ ticket, filteredTags }) => {
 	const handleClosedTicket = async id => {
 		setLoading(true);
 		try {
+			console.log(`Fechando ticket ${id}: mudando status para 'closed'`);
 			await api.put(`/tickets/${id}`, {
 				status: "closed",
 				userId: user?.id,

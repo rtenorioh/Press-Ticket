@@ -9,6 +9,7 @@ import * as TagController from "../controllers/TagController";
 import * as TicketController from "../controllers/TicketController";
 import * as WhatsAppController from "../controllers/WhatsAppController";
 import WhatsAppSessionController from "../controllers/WhatsAppSessionController";
+import * as WhatsAppNumberController from "../controllers/WhatsAppNumberController";
 import isApiToken from "../middleware/isApiToken";
 
 const upload = multer(uploadConfig);
@@ -18,6 +19,7 @@ const openApiRouter = express.Router();
 // Rotas de mensagens
 openApiRouter.post("/messages/send", isApiToken('create:messages'), ApiController.sendMessage);
 openApiRouter.post("/messages/send-media", isApiToken('create:messages'), upload.array("medias"), ApiController.sendMedia);
+openApiRouter.get("/messages/:messageId/media", isApiToken('read:messages'), ApiController.getMediaBase64);
 
 // Rotas de contatos
 openApiRouter.get("/contacts", isApiToken('read:contacts'), ContactController.index);
@@ -25,9 +27,10 @@ openApiRouter.post("/contacts", isApiToken('create:contacts'), ContactController
 openApiRouter.get("/contacts/:contactId", isApiToken('read:contacts'), ContactController.show);
 openApiRouter.put("/contacts/:contactId", isApiToken('update:contacts'), ContactController.update);
 openApiRouter.delete("/contacts/:contactId", isApiToken('delete:contacts'), ContactController.remove);
-openApiRouter.post("/contact", isApiToken('create:contacts'), ContactController.getContact);
+openApiRouter.post("/contact", isApiToken('read:contacts'), ContactController.getContact);
+openApiRouter.put("/contacts/:contactId/tags", isApiToken('update:contacts'), ContactController.updateTags);
 
-// Rotas de filas
+// Rotas de setores
 openApiRouter.get("/queue", isApiToken('read:queue'), QueueController.index);
 openApiRouter.post("/queue", isApiToken('create:queue'), QueueController.store);
 openApiRouter.get("/queue/:queueId", isApiToken('read:queue'), QueueController.show);
@@ -60,6 +63,8 @@ openApiRouter.put("/whatsapp/:whatsappId", isApiToken('update:whatsapp'), WhatsA
 openApiRouter.delete("/whatsapp/:whatsappId", isApiToken('delete:whatsapp'), WhatsAppController.remove);
 openApiRouter.post("/whatsapp/:whatsappId/restart", isApiToken('update:whatsapp'), WhatsAppController.restart);
 openApiRouter.post("/whatsapp/:whatsappId/shutdown", isApiToken('update:whatsapp'), WhatsAppController.shutdown);
+openApiRouter.get("/whatsapp/:whatsappId/qrcode", isApiToken('read:whatsapp'), WhatsAppController.getQrCode);
+openApiRouter.post("/whatsapp/check-number", isApiToken('read:whatsapp'), WhatsAppNumberController.checkNumber);
 
 // Rotas de Sessão do WhatsApp
 openApiRouter.post("/whatsappsession/:whatsappId", isApiToken('create:whatsappsession'), WhatsAppSessionController.store);

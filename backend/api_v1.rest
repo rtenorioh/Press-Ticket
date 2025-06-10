@@ -1,5 +1,5 @@
 @baseUrl = https://devapi.pressticket.com.br
-@apiToken = c3f307b2-8a56-4a9a-91a7-0d9675f4c6d7
+@apiToken = a7753eab-63ae-49ad-9af8-67dd6152289a
 
 ### Variáveis para testes
 @contactId = 1
@@ -9,7 +9,7 @@
 @queueId = 1
 @tagId = 1
 @ticketId = 1
-@whatsappId = 1
+@whatsappId = 8
 
 ### ============================================================
 ### ROTAS DE MENSAGENS
@@ -21,11 +21,11 @@ x-api-token: {{apiToken}}
 Content-Type: application/json
 
 {
-  "number": "5522992463080",
+  "number": "5522999999999",
   "body": "Mensagem de teste via API",
   "userId": 1,
   "queueId": 2,
-  "whatsappId": 1
+  "whatsappId": 4
 }
 
 ### (Envio de Mensagens com Mídia) Teste da Rota POST /v1/messages/send-media
@@ -346,6 +346,11 @@ x-api-token: {{apiToken}}
 
 ### Desligar uma conexão WhatsApp
 POST {{baseUrl}}/v1/whatsapp/{{whatsappId}}/shutdown
+Content-Type: application/json
+x-api-token: {{apiToken}}
+
+### Obter QR Code de uma conexão WhatsApp
+GET {{baseUrl}}/v1/whatsapp/{{whatsappId}}/qrcode
 Content-Type: application/json
 x-api-token: {{apiToken}}
 

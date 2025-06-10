@@ -10,6 +10,8 @@ import ListWhatsAppsService from "../services/WhatsappService/ListWhatsAppsServi
 import RestartWhatsAppService from "../services/WhatsappService/RestartWhatsAppService";
 import ShowWhatsAppService from "../services/WhatsappService/ShowWhatsAppService";
 import UpdateWhatsAppService from "../services/WhatsappService/UpdateWhatsAppService";
+// Vamos usar a biblioteca qrcode-terminal que já está instalada no projeto
+import qrCode from "qrcode-terminal";
 
 interface WhatsappData {
   name: string;
@@ -150,41 +152,34 @@ export const restart = async (
   }
 };
 
-export const shutdown = async (
-  req: Request,
-  res: Response
-): Promise<Response> => {
+export const shutdown = async (req: Request, res: Response): Promise<Response> => {
   const { whatsappId } = req.params;
 
-  if (!whatsappId) {
-    return res.status(400).json({ message: "WhatsApp ID is required." });
+  try {
+    await shutdownWbot(whatsappId);
+    return res.status(200).json({ message: "Whatsapp disconnected." });
+  } catch (err) {
+    return res.status(500).json({ message: err.message });
   }
+};
+
+export const getQrCode = async (req: Request, res: Response): Promise<Response> => {
+  const { whatsappId } = req.params;
 
   try {
-    console.log(`Iniciando shutdown para WhatsApp ID: ${whatsappId}`);
-
-    await shutdownWbot(whatsappId);
-    console.log(
-      `Shutdown realizado com sucesso para WhatsApp ID: ${whatsappId}`
-    );
-
-    const io = getIO();
-    io.emit("whatsapp", {
-      action: "update",
-      whatsappId
-    });
-    console.log("Evento emitido com sucesso via WebSocket.");
-
-    return res.status(200).json({
-      message: "WhatsApp session shutdown successfully."
-    });
-  } catch (error) {
-    console.error("Erro ao desligar o WhatsApp:", error);
-
-    return res.status(500).json({
-      message: "Failed to shutdown WhatsApp session.",
-      error: (error as Error).message
-    });
+    const whatsapp = await ShowWhatsAppService(whatsappId);
+    
+    if (!whatsapp) {
+      throw new AppError("ERR_NO_WHATSAPP_FOUND", 404);
+    }
+    
+    if (!whatsapp.qrcode) {
+      throw new AppError("ERR_WHATSAPP_NOT_INITIALIZED_OR_ALREADY_CONNECTED", 404);
+    }
+    
+    return res.status(200).json({ qrcode: whatsapp.qrcode });
+  } catch (err) {
+    return res.status(500).json({ message: err.message });
   }
 };
 

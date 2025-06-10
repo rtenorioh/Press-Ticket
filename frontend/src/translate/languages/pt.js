@@ -25,6 +25,7 @@ const messages = {
           updateContacts: "Editar Contatos",
           deleteContacts: "Deletar Contatos",
           createMessages: "Enviar Mensagens",
+          readMessages: "Visualizar Mensagens",
           createQueue: "Criar Setores",
           readQueue: "Visualizar Setores",
           updateQueue: "Editar Setores",
@@ -1031,6 +1032,7 @@ const messages = {
       tags: {
         title: "Tags",
         table: {
+          id: "ID",
           name: "Tags",
           color: "Cor",
           contacts: "Contatos",

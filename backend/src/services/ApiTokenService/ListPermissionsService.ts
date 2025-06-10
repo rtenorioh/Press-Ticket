@@ -9,7 +9,7 @@ const DEFAULT_PERMISSIONS = [
     
     // Mensagens
     'create:messages',
-    'create:medias',
+    'read:messages',
     
     // Filas/Setores
     'create:queue',
