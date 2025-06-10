@@ -18,6 +18,8 @@ import Autocomplete, {
 import React, { useCallback, useContext, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import WhatsMarked from "react-whatsmarked";
 import { AuthContext } from "../../context/Auth/AuthContext";
 import toastError from "../../errors/toastError";
 import api from "../../services/api";
@@ -121,16 +123,35 @@ const NewTicketModal = ({ modalOpen, onClose }) => {
 					const assignedUserName = openTicket.user?.name || "Atendente desconhecido";
 					const assignedUserChannel = openTicket.whatsapp?.name || "Canal desconhecido";
 					const ticketCreatedAt = openTicket.createdAt ? new Date(openTicket.createdAt).toLocaleDateString('pt-BR') : "Data desconhecida";
+					const ticketUserId = openTicket.user?.id;
 
-					setLoading(false);
-					toastError({
-						message: t("ticketsList.errors.ticketAlreadyOpen", {
-							userName: assignedUserName,
-							userChannel: assignedUserChannel,
-							ticketCreatedAt: ticketCreatedAt,
-						}),
-					});
-					return;
+					if (ticketUserId === user?.id) {
+						toast.info(
+							<WhatsMarked>
+								{t("contacts.toasts.redirectTicket")}
+							</WhatsMarked>,
+							{
+								toastId: "redirecting-to-ticket",
+							}
+						);
+
+						setLoading(false);
+						setTimeout(() => {
+							navigate(`/tickets/${openTicket.id}`);
+							handleClose();
+						}, 3000);
+						return;
+					} else {
+						setLoading(false);
+						toastError({
+							message: t("ticketsList.errors.ticketAlreadyOpen", {
+								userName: assignedUserName,
+								userChannel: assignedUserChannel,
+								ticketCreatedAt: ticketCreatedAt,
+							}),
+						});
+						return;
+					}
 				}
 			}
 

@@ -179,6 +179,7 @@ const messages = {
         toasts: {
           deleted: "Contato excluído com sucesso!",
           deletedAll: "Todos contatos excluídos com sucesso!",
+          redirectTicket: "Você já possui um ticket aberto para este contato. Redirecionando..."
         },
         errors: {
           ticketAlreadyOpen: "Já existe um ticket aberto para este contato, atribuído ao Atendente: *{{userName}}* no Canal: *{{userChannel}}* criado em: *{{ticketCreatedAt}}*."
@@ -1381,7 +1382,7 @@ const messages = {
         ERR_NO_WAPP_FOUND: "Nenhum WhatsApp encontrado com este ID.",
         ERR_NO_OTHER_WHATSAPP: "Deve haver pelo menos um WhatsApp padrão.",
         ERR_OUT_OF_HOURS: "Fora do Horário de Expediente!",
-        ERR_OPEN_USER_TICKET: "Já existe um ticket aberto para este contato com ",
+        ERR_OPEN_USER_TICKET: "Já existe um ticket aberto para este contato com o atendente: ",
         ERR_OTHER_OPEN_TICKET: "Já existe um ticket aberto para este contato.",
         ERR_NONE_USER_TICKET: "Já existe um ticket aberto para este contato sem atendente.",
         ERR_SESSION_EXPIRED: "Sessão expirada. Por favor entre.",

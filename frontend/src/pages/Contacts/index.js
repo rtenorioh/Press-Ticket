@@ -29,6 +29,7 @@ import { CSVLink } from "react-csv";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import WhatsMarked from "react-whatsmarked";
 
 import { Can } from "../../components/Can";
 import ConfirmationModal from "../../components/ConfirmationModal/";
@@ -217,18 +218,32 @@ const Contacts = () => {
 
     setLoading(true);
 
+    const { data: settingsData } = await api.get("/settings");
+    const openTicketsSetting = settingsData.find(s => s.key === "openTickets")?.value;
+    const { data: ticketData } = await api.get(`/tickets/contact/${contactId}/open`);
+    const assignedUserName = ticketData.ticket?.user?.name || "Atendente desconhecido";
+    const assignedUserChannel = ticketData.ticket?.whatsapp?.name || "Canal desconhecido";
+    const ticketCreatedAt = ticketData.ticket?.createdAt ? new Date(ticketData.ticket.createdAt).toLocaleDateString('pt-BR') : "Data desconhecida";
+
     try {
-      const { data: settingsData } = await api.get("/settings");
-      const openTicketsSetting = settingsData.find(s => s.key === "openTickets")?.value;
-
-      if (openTicketsSetting === "enabled") {
-        const { data: ticketData } = await api.get(`/tickets/contact/${contactId}/open`);
-
-        if (ticketData.hasOpenTicket) {
-          const assignedUserName = ticketData.ticket?.user?.name || "Atendente desconhecido";
-          const assignedUserChannel = ticketData.ticket?.whatsapp?.name || "Canal desconhecido";
-          const ticketCreatedAt = ticketData.ticket?.createdAt ? new Date(ticketData.ticket.createdAt).toLocaleDateString('pt-BR') : "Data desconhecida";
-
+      
+      if (openTicketsSetting === "enabled" || ticketData.hasOpenTicket) {
+        if (ticketData.ticket?.user?.id === user?.id) {
+          toast.info(
+            <WhatsMarked>
+              {t("contacts.toasts.redirectTicket")}
+            </WhatsMarked>,
+            {
+              toastId: "redirecting-to-ticket",
+            }
+          );
+        
+          setLoading(false);
+          setTimeout(() => {
+            navigate(`/tickets/${ticketData.ticket.id}`);
+          }, 3000);
+          return;
+        } else {
           setLoading(false);
           toastError({
             message: t("contacts.errors.ticketAlreadyOpen", {
@@ -249,7 +264,14 @@ const Contacts = () => {
 
       navigate(`/tickets/${data.id}`);
     } catch (err) {
-      toastError(err, t);
+      console.error(err);
+      toastError({
+        message: t("contacts.errors.ticketAlreadyOpen", {
+          userName: assignedUserName,
+          userChannel: assignedUserChannel,
+          ticketCreatedAt: ticketCreatedAt,
+        }),
+      });
     } finally {
       setLoading(false);
     }

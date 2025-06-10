@@ -155,13 +155,9 @@ const TicketsList = (props) => {
 		setFilteredTags(tags);
 	};
 
-	// Função de limpeza removida para evitar uso do localStorage
-
 	useEffect(() => {
 		dispatch({ type: "RESET" });
 		setPageNumber(1);
-		
-		// Carregamento inicial feito apenas via API, sem usar localStorage
 	}, [status, searchParam, dispatch, showAll, selectedQueueIds, tags]);
 
 	const { tickets, hasMore, loading } = useTickets({
@@ -258,8 +254,6 @@ const TicketsList = (props) => {
 				}
 			});
 
-			// Funções de manipulação do localStorage removidas
-
 			socket.on("ticket", (data) => {
 				if (data.action === "updateUnread") {
 					dispatch({
@@ -269,38 +263,35 @@ const TicketsList = (props) => {
 				}
 
 				if (data.action === "update" && shouldUpdateTicket(data.ticket)) {
-					// Manipulação simplificada sem localStorage
-					
-					dispatch({
-						type: "UPDATE_TICKET",
-						payload: data.ticket,
-					});
+					if (status && data.ticket.status !== status) {
+						dispatch({ type: "DELETE_TICKET", payload: data.ticket.id });
+					} else {
+						dispatch({
+							type: "UPDATE_TICKET",
+							payload: data.ticket,
+						});
+					}
 				}
 
 				if (data.action === "update" && notBelongsToUserQueues(data.ticket)) {
-					// Manipulação simplificada sem localStorage
-					
 					dispatch({ type: "DELETE_TICKET", payload: data.ticket.id });
 				}
 
 				if (data.action === "delete") {
-					// Manipulação simplificada sem localStorage
-					
 					dispatch({ type: "DELETE_TICKET", payload: data.ticketId });
 				}
 			});
 
 			socket.on("appMessage", (data) => {
 				if (data.action === "create" && shouldUpdateTicket(data.ticket)) {
-					console.log("Nova mensagem recebida:", data.message);
-					console.log("Atualizando ticket com nova mensagem:", data.ticket);
-					
-					// Atualização simplificada sem localStorage
-					
-					dispatch({
-						type: "UPDATE_TICKET_UNREAD_MESSAGES",
-						payload: data.ticket,
-					});
+					if (status && data.ticket.status !== status) {
+						dispatch({ type: "DELETE_TICKET", payload: data.ticket.id });
+					} else {
+						dispatch({
+							type: "UPDATE_TICKET_UNREAD_MESSAGES",
+							payload: data.ticket,
+						});
+					}
 				}
 			});
 
