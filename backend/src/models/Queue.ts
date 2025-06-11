@@ -45,6 +45,15 @@ class Queue extends Model<Queue> {
   @Column
   absenceMessage: string;
 
+  @Column
+  startBreak: string;
+
+  @Column
+  endBreak: string;
+
+  @Column
+  breakMessage: string;
+
   @CreatedAt
   createdAt: Date;
 

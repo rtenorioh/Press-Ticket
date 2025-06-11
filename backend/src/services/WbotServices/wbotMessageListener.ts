@@ -577,26 +577,53 @@ const verifyQueue = async (
   const choosenQueue = queues[+selectedOption - 1];
 
   if (choosenQueue) {
-    const Hr = new Date();
-
-    const hh: number = Hr.getHours() * 60 * 60;
-    const mm: number = Hr.getMinutes() * 60;
-    const hora = hh + mm;
-
-    const inicio: string = choosenQueue.startWork;
-    const hhinicio = Number(inicio.split(":")[0]) * 60 * 60;
-    const mminicio = Number(inicio.split(":")[1]) * 60;
-    const horainicio = hhinicio + mminicio;
-
-    const termino: string = choosenQueue.endWork;
-    const hhtermino = Number(termino.split(":")[0]) * 60 * 60;
-    const mmtermino = Number(termino.split(":")[1]) * 60;
-    const horatermino = hhtermino + mmtermino;
-
-    if (hora < horainicio || hora > horatermino) {
+    const now = new Date();
+    const currentHour = now.getHours();
+    const currentMinute = now.getMinutes();
+    const currentTimeInMinutes = currentHour * 60 + currentMinute;
+    
+    const startWorkParts = choosenQueue.startWork.split(':');
+    const startWorkHour = parseInt(startWorkParts[0], 10);
+    const startWorkMinute = parseInt(startWorkParts[1], 10);
+    const startWorkInMinutes = startWorkHour * 60 + startWorkMinute;
+    
+    const endWorkParts = choosenQueue.endWork.split(':');
+    const endWorkHour = parseInt(endWorkParts[0], 10);
+    const endWorkMinute = parseInt(endWorkParts[1], 10);
+    const endWorkInMinutes = endWorkHour * 60 + endWorkMinute;
+    
+    let isBreakTime = false;
+    if (choosenQueue.startBreak && choosenQueue.endBreak) {
+      try {
+        const startBreakParts = choosenQueue.startBreak.split(':');
+        const startBreakHour = parseInt(startBreakParts[0], 10);
+        const startBreakMinute = parseInt(startBreakParts[1], 10);
+        const startBreakInMinutes = startBreakHour * 60 + startBreakMinute;
+        
+        const endBreakParts = choosenQueue.endBreak.split(':');
+        const endBreakHour = parseInt(endBreakParts[0], 10);
+        const endBreakMinute = parseInt(endBreakParts[1], 10);
+        const endBreakInMinutes = endBreakHour * 60 + endBreakMinute;
+        
+        if (currentTimeInMinutes >= startBreakInMinutes && currentTimeInMinutes <= endBreakInMinutes) {
+          isBreakTime = true;
+        }
+      } catch (error) {
+        console.error('Erro ao processar horário de intervalo:', error);
+        isBreakTime = false;
+      }
+    }
+    const isOutsideWorkHours = currentTimeInMinutes < startWorkInMinutes || currentTimeInMinutes > endWorkInMinutes;
+    
+    if (isBreakTime || isOutsideWorkHours) {
       const chat = await msg.getChat();
       await chat.sendStateTyping();
-      const body = formatBody(`\u200e${choosenQueue.absenceMessage}`, ticket);
+      
+      const messageToSend = isBreakTime && choosenQueue.breakMessage 
+        ? choosenQueue.breakMessage 
+        : choosenQueue.absenceMessage;
+      
+      const body = formatBody(`\u200e${messageToSend}`, ticket);
       const debouncedSentMessage = debounce(
         async () => {
           const sentMessage = await wbot.sendMessage(

@@ -9,6 +9,9 @@ interface QueueData {
   startWork?: string;
   endWork?: string;
   absenceMessage?: string;
+  startBreak?: string;
+  endBreak?: string;
+  breakMessage?: string;
 }
 
 const CreateQueueService = async (queueData: QueueData): Promise<Queue> => {

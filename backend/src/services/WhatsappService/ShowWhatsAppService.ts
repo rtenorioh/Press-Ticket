@@ -8,7 +8,7 @@ const ShowWhatsAppService = async (id: string | number): Promise<Whatsapp> => {
       {
         model: Queue,
         as: "queues",
-        attributes: ["id", "name", "color", "greetingMessage", "startWork", "endWork", "absenceMessage"]
+        attributes: ["id", "name", "color", "greetingMessage", "startWork", "endWork", "absenceMessage", "startBreak", "endBreak", "breakMessage"]
       }
     ],
     order: [["queues", "name", "ASC"]]

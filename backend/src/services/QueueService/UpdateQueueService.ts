@@ -11,6 +11,9 @@ interface QueueData {
   startWork?: string;
   endWork?: string;
   absenceMessage?: string;
+  startBreak?: string;
+  endBreak?: string;
+  breakMessage?: string;
 }
 
 const UpdateQueueService = async (

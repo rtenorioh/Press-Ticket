@@ -93,6 +93,9 @@ const QueueModal = ({ open, onClose, queueId }) => {
 		startWork: Yup.string(),
 		endWork: Yup.string(),
 		absenceMessage: Yup.string(),
+		startBreak: Yup.string().nullable(),
+		endBreak: Yup.string().nullable(),
+		breakMessage: Yup.string().nullable(),
 	});
 
 	const initialState = {
@@ -102,6 +105,9 @@ const QueueModal = ({ open, onClose, queueId }) => {
 		startWork: "00:00",
 		endWork: "23:59",
 		absenceMessage: "",
+		startBreak: "00:00",
+		endBreak: "00:00",
+		breakMessage: "",
 	};
 
 	const [colorPickerModalOpen, setColorPickerModalOpen] = useState(false);
@@ -318,10 +324,80 @@ const QueueModal = ({ open, onClose, queueId }) => {
 										/>
 									</Grid>
 									<Grid item xs={12}>
+										<Typography variant="subtitle1" color="textSecondary" sx={{ mb: 1 }}>
+											{t("queueModal.form.breakTitle")}
+										</Typography>
+									</Grid>
+									<Grid container item spacing={2}>
+										<Grid item xs={6}>
+											<Field
+												as={StyledTextField}
+												label={t("queueModal.form.startBreak")}
+												type="time"
+												InputLabelProps={{
+													shrink: true,
+												}}
+												inputProps={{
+													step: 300, // 5 minutes
+												}}
+												fullWidth
+												name="startBreak"
+												error={touched.startBreak && Boolean(errors.startBreak)}
+												helperText={touched.startBreak && errors.startBreak}
+												variant="outlined"
+												margin="dense"
+												InputProps={{
+													sx: { borderRadius: 2 }
+												}}
+											/>
+										</Grid>
+										<Grid item xs={6}>
+											<Field
+												as={StyledTextField}
+												label={t("queueModal.form.endBreak")}
+												type="time"
+												InputLabelProps={{
+													shrink: true,
+												}}
+												inputProps={{
+													step: 300, // 5 minutes
+												}}
+												fullWidth
+												name="endBreak"
+												error={touched.endBreak && Boolean(errors.endBreak)}
+												helperText={touched.endBreak && errors.endBreak}
+												variant="outlined"
+												margin="dense"
+												InputProps={{
+													sx: { borderRadius: 2 }
+												}}
+											/>
+										</Grid>
+									</Grid>
+									<Grid item xs={12}>
+										<Field
+											as={StyledTextField}
+											label={t("queueModal.form.breakMessage")}
+											type="text"
+											multiline
+											minRows={2}
+											fullWidth
+											name="breakMessage"
+											error={touched.breakMessage && Boolean(errors.breakMessage)}
+											helperText={touched.breakMessage && errors.breakMessage}
+											variant="outlined"
+											margin="dense"
+											placeholder={t("queueModal.form.breakMessagePlaceholder")}
+											InputProps={{
+												sx: { borderRadius: 2 }
+											}}
+										/>
+									</Grid>
+									<Grid item xs={12}>
 										<Field
 											as={StyledTextField}
 											label={t("queueModal.form.absenceMessage")}
-											type="absenceMessage"
+											type="text"
 											multiline
 											minRows={2}
 											fullWidth

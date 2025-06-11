@@ -720,6 +720,11 @@ const messages = {
           endWork: "Fechamento",
           absenceMessage: "Mensagem de ausência",
           absenceMessagePlaceholder: "Digite a mensagem que será enviada quando o setor estiver fechado",
+          breakTitle: "Horário de Intervalo",
+          startBreak: "Início do intervalo",
+          endBreak: "Fim do intervalo",
+          breakMessage: "Mensagem de intervalo",
+          breakMessagePlaceholder: "Digite a mensagem que será enviada quando o setor estiver em intervalo",
         },
         buttons: {
           okAdd: "Adicionar",

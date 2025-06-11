@@ -122,34 +122,37 @@ const Queues = () => {
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
   const [deletingQueue, setDeletingQueue] = useState(null);
   const [messageModalOpen, setMessageModalOpen] = useState(false);
-  const [selectedQueueMessages, setSelectedQueueMessages] = useState({ greetingMessage: '', absenceMessage: '' });
+  const [selectedQueueMessages, setSelectedQueueMessages] = useState({ greetingMessage: '', absenceMessage: '', breakMessage: '' });
   const [timeModalOpen, setTimeModalOpen] = useState(false);
-  const [selectedQueueTimes, setSelectedQueueTimes] = useState({ startWork: '', endWork: '' });
+  const [selectedQueueTimes, setSelectedQueueTimes] = useState({ startWork: '', endWork: '', startBreak: '', endBreak: '' });
 
   const handleOpenMessageModal = (queue) => {
     setSelectedQueueMessages({
       greetingMessage: queue.greetingMessage,
-      absenceMessage: queue.absenceMessage
+      absenceMessage: queue.absenceMessage,
+      breakMessage: queue.breakMessage
     });
     setMessageModalOpen(true);
   };
 
   const handleCloseMessageModal = () => {
     setMessageModalOpen(false);
-    setSelectedQueueMessages({ greetingMessage: '', absenceMessage: '' });
+    setSelectedQueueMessages({ greetingMessage: '', absenceMessage: '', breakMessage: '' });
   };
   
   const handleOpenTimeModal = (queue) => {
     setSelectedQueueTimes({
       startWork: queue.startWork,
-      endWork: queue.endWork
+      endWork: queue.endWork,
+      startBreak: queue.startBreak,
+      endBreak: queue.endBreak
     });
     setTimeModalOpen(true);
   };
 
   const handleCloseTimeModal = () => {
     setTimeModalOpen(false);
-    setSelectedQueueTimes({ startWork: '', endWork: '' });
+    setSelectedQueueTimes({ startWork: '', endWork: '', startBreak: '', endBreak: '' });
   };
 
   useEffect(() => {
@@ -402,6 +405,27 @@ const Queues = () => {
               )}
             </Typography>
           </Paper>
+
+          <Typography variant="subtitle1" sx={{ fontWeight: 500, color: 'primary.main', mb: 1 }}>
+            {t("queueModal.form.breakMessage")}:
+          </Typography>
+          <Paper 
+            variant="outlined" 
+            sx={{ 
+              p: 2, 
+              mb: 2, 
+              bgcolor: 'background.default',
+              borderRadius: theme => theme.shape.borderRadius,
+            }}
+          >
+            <Typography variant="body2">
+              {selectedQueueMessages.breakMessage || (
+                <Typography component="span" color="text.secondary" fontStyle="italic">
+                  {t("queues.messagesModal.none")}
+                </Typography>
+              )}
+            </Typography>
+          </Paper>
           
           <Box sx={{ mt: 3, display: 'flex', justifyContent: 'flex-end' }}>
             <Button 
@@ -481,6 +505,58 @@ const Queues = () => {
               >
                 <Typography variant="body1" fontWeight="500">
                   {selectedQueueTimes.endWork || (
+                    <Typography component="span" color="text.secondary" fontStyle="italic">
+                      {t("queues.timeModal.notSet")}
+                    </Typography>
+                  )}
+                </Typography>
+              </Paper>
+            </Box>
+
+            <Typography variant="subtitle1" sx={{ fontWeight: 600, color: 'secondary.main', mt: 2, mb: 1 }}>
+              {t("queueModal.form.breakTitle")}
+            </Typography>
+
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <Typography variant="subtitle1" sx={{ fontWeight: 500, color: 'primary.main' }}>
+                {t("queueModal.form.startBreak")}:
+              </Typography>
+              <Paper 
+                variant="outlined" 
+                sx={{ 
+                  p: 2, 
+                  width: '50%',
+                  bgcolor: 'background.default',
+                  borderRadius: theme => theme.shape.borderRadius,
+                  textAlign: 'center'
+                }}
+              >
+                <Typography variant="body1" fontWeight="500">
+                  {selectedQueueTimes.startBreak || (
+                    <Typography component="span" color="text.secondary" fontStyle="italic">
+                      {t("queues.timeModal.notSet")}
+                    </Typography>
+                  )}
+                </Typography>
+              </Paper>
+            </Box>
+            
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <Typography variant="subtitle1" sx={{ fontWeight: 500, color: 'primary.main' }}>
+                {t("queueModal.form.endBreak")}:
+              </Typography>
+              <Paper 
+                variant="outlined" 
+                sx={{ 
+                  p: 2, 
+                  width: '50%',
+                  bgcolor: 'background.default',
+                  borderRadius: theme => theme.shape.borderRadius,
+                  textAlign: 'center'
+                }}
+              >
+                <Typography variant="body1" fontWeight="500">
+                  {selectedQueueTimes.endBreak || (
                     <Typography component="span" color="text.secondary" fontStyle="italic">
                       {t("queues.timeModal.notSet")}
                     </Typography>
