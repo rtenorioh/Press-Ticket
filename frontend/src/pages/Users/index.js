@@ -1,6 +1,7 @@
 import {
   Box,
   Button,
+  Divider,
   Fade,
   IconButton,
   InputAdornment,
@@ -12,7 +13,8 @@ import {
   TableHead,
   TableRow,
   TextField,
-  Tooltip
+  Tooltip,
+  Typography,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import AddCircleOutline from "@mui/icons-material/AddCircleOutline";
@@ -24,6 +26,7 @@ import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import Lock from "@mui/icons-material/Lock";
 import LockOpen from "@mui/icons-material/LockOpen";
 import Search from "@mui/icons-material/Search";
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import React, { useEffect, useReducer, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -179,6 +182,8 @@ const Users = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [modalContent, setModalContent] = useState([]);
   const [modalTitle, setModalTitle] = useState("");
+  const [scheduleModalOpen, setScheduleModalOpen] = useState(false);
+  const [selectedUserSchedule, setSelectedUserSchedule] = useState(null);
 
   useEffect(() => {
     dispatch({ type: "RESET" });
@@ -301,8 +306,105 @@ const Users = () => {
     setModalOpen(false);
   };
 
+  const handleOpenScheduleModal = (user) => {
+    setSelectedUserSchedule(user);
+    setScheduleModalOpen(true);
+  };
+
+  const handleCloseScheduleModal = () => {
+    setSelectedUserSchedule(null);
+    setScheduleModalOpen(false);
+  };
+
   return (
     <MainContainer>
+      <Modal
+        open={scheduleModalOpen}
+        onClose={handleCloseScheduleModal}
+        closeAfterTransition
+      >
+        <Box
+          sx={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: 400,
+            maxWidth: '90%',
+            bgcolor: 'background.paper',
+            boxShadow: 24,
+            p: 3,
+            borderRadius: theme => theme.shape.borderRadius,
+          }}
+        >
+          <Typography variant="h6" component="h2" sx={{ fontWeight: 600 }}>
+            {t("users.schedule.title")}
+          </Typography>
+          <Divider sx={{ my: 2 }} />
+          
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <Typography variant="subtitle1" sx={{ fontWeight: 500, color: 'primary.main' }}>
+                {t("users.schedule.opening")}:
+              </Typography>
+              <Paper 
+                variant="outlined" 
+                sx={{ 
+                  p: 2, 
+                  width: '50%',
+                  bgcolor: 'background.default',
+                  borderRadius: theme => theme.shape.borderRadius,
+                  textAlign: 'center'
+                }}
+              >
+                <Typography variant="body1" fontWeight="500">
+                  {selectedUserSchedule?.startWork || (
+                    <Typography component="span" color="text.secondary" fontStyle="italic">
+                      00:00
+                    </Typography>
+                  )}
+                </Typography>
+              </Paper>
+            </Box>
+            
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <Typography variant="subtitle1" sx={{ fontWeight: 500, color: 'primary.main' }}>
+                {t("users.schedule.closing")}:
+              </Typography>
+              <Paper 
+                variant="outlined" 
+                sx={{ 
+                  p: 2, 
+                  width: '50%',
+                  bgcolor: 'background.default',
+                  borderRadius: theme => theme.shape.borderRadius,
+                  textAlign: 'center'
+                }}
+              >
+                <Typography variant="body1" fontWeight="500">
+                  {selectedUserSchedule?.endWork || (
+                    <Typography component="span" color="text.secondary" fontStyle="italic">
+                      23:59
+                    </Typography>
+                  )}
+                </Typography>
+              </Paper>
+            </Box>
+          </Box>
+          
+          <Box sx={{ mt: 3, display: 'flex', justifyContent: 'flex-end' }}>
+            <Button 
+              onClick={handleCloseScheduleModal}
+              variant="contained"
+              color="primary"
+              sx={{ borderRadius: 20 }}
+            >
+              {t("users.buttons.close")}
+            </Button>
+          </Box>
+        </Box>
+      </Modal>
+      
       <Modal
         open={modalOpen}
         onClose={handleCloseModal}
@@ -444,10 +546,7 @@ const Users = () => {
                 {t("users.table.queue")}
               </StyledTableCell>
               <StyledTableCell align="center">
-                {t("users.table.startWork")}
-              </StyledTableCell>
-              <StyledTableCell align="center">
-                {t("users.table.endWork")}
+                {t("users.table.schedule")}
               </StyledTableCell>
               <StyledTableCell align="center">
                 {t("users.table.actions")}
@@ -498,8 +597,17 @@ const Users = () => {
                         </IconButton>
                       </Tooltip>
                     </StyledTableCell>
-                    <StyledTableCell align="center">{user.startWork}</StyledTableCell>
-                    <StyledTableCell align="center">{user.endWork}</StyledTableCell>
+                    <StyledTableCell align="center">
+                      <Tooltip title={t("users.table.viewSchedule")} arrow placement="top">
+                        <IconButton
+                          size="small"
+                          onClick={() => handleOpenScheduleModal(user)}
+                          sx={{ color: 'primary.main' }}
+                        >
+                          <AccessTimeIcon />
+                        </IconButton>
+                      </Tooltip>
+                    </StyledTableCell>
                     <StyledTableCell align="center">
                       <ActionButtons>
                         <Tooltip title={user.active ? t("users.actions.deactivate") : t("users.actions.activate")} arrow placement="top">

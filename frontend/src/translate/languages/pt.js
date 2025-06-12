@@ -1218,22 +1218,34 @@ const messages = {
       users: {
         title: "Atendentes",
         searchPlaceholder: "Pesquisar...",
+        status: {
+          online: "Online",
+          offline: "Offline"
+        },
         table: {
           id: "ID",
           name: "Nome",
           status: "Status",
-          email: "E-mail",
+          email: "Email",
           profile: "Perfil",
           whatsapp: "Canal",
           queue: "Setor",
-          viewChannels: "Visualizar Canais",
-          viewQueues: "Visualizar Setores",
-          startWork: "Horário inicial",
-          endWork: "Horário final",
+          startWork: "Horário Inicial",
+          endWork: "Horário Final",
+          schedule: "Horários",
           actions: "Ações",
+          viewChannels: "Ver Canais",
+          viewQueues: "Ver Setores",
+          viewSchedule: "Ver Horários"
+        },
+        schedule: {
+          title: "Horários de Trabalho",
+          opening: "Abertura",
+          closing: "Fechamento",
         },
         buttons: {
           add: "Adicionar atendente",
+          close: "Fechar"
         },
         modalTitle: {
           channel: "Canais",
