@@ -27,12 +27,25 @@ export const setupGlobalErrorHandlers = () => {
 
   const originalConsoleError = console.error;
   console.error = (...args) => {
-    originalConsoleError.apply(console, args);
+    if (args && args.length > 0) {
+      originalConsoleError.apply(console, args);
+    } else {
+      originalConsoleError.call(console, "Erro sem detalhes");
+      return;
+    }
     
     try {
+      if (!args || args.length === 0) {
+        return;
+      }
+      
       const firstArg = args[0];
       
-      if (firstArg && typeof firstArg === "string" && 
+      if (!firstArg) {
+        return;
+      }
+      
+      if (typeof firstArg === "string" && 
           (firstArg.includes("Falha ao registrar erro") || 
            firstArg.includes("Erro ao tentar registrar erro"))) {
         return;
@@ -48,8 +61,8 @@ export const setupGlobalErrorHandlers = () => {
       } else if (typeof firstArg === "string" && args.length > 1 && args[1] instanceof Error) {
         const error = args[1];
         ErrorLogService.logError({
-          message: `${firstArg} ${error.message || ""}`,
-          stack: error.stack,
+          message: `${firstArg} ${error && error.message ? error.message : ""}`,
+          stack: error && error.stack ? error.stack : "",
           component: "console.error",
           severity: "warning"
         });

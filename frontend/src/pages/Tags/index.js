@@ -126,9 +126,9 @@ const Tags = () => {
       setHasMore(data.hasMore);
       setLoading(false);
     } catch (err) {
-      toastError(err);
+      toastError(err, t);
     }
-  }, [searchParam, pageNumber]);
+  }, [searchParam, pageNumber, t]);
 
   useEffect(() => {
     dispatch({ type: "RESET" });
@@ -166,9 +166,13 @@ const Tags = () => {
     setTagModalOpen(true);
   };
 
-  const handleCloseTagModal = () => {
+  const handleCloseTagModal = (tagData) => {
     setSelectedTag(null);
     setTagModalOpen(false);
+    
+    if (tagData) {
+      dispatch({ type: "UPDATE_TAGS", payload: tagData });
+    }
   };
 
   const handleSearch = (event) => {
@@ -184,32 +188,23 @@ const Tags = () => {
     try {
       await api.delete(`/tags/${tagId}`);
       toast.success(t("tags.toasts.deleted"));
+      
+      dispatch({ type: "DELETE_TAG", payload: tagId });
     } catch (err) {
-      toastError(err);
+      toastError(err, t);
     }
     setDeletingTag(null);
-    setSearchParam("");
-    setPageNumber(1);
-
-    dispatch({ type: "RESET" });
-    setPageNumber(1);
-    await fetchTags();
   };
 
   const handleDeleteAllTags = async () => {
     try {
       await api.delete(`/tags`);
       toast.success(t("tags.toasts.deletedAll"));
+      dispatch({ type: "RESET" });
     } catch (err) {
-      toastError(err);
+      toastError(err, t);
     }
     setDeletingAllTags(null);
-    setSearchParam("");
-    setPageNumber();
-
-    dispatch({ type: "RESET" });
-    setPageNumber(1);
-    await fetchTags();
   };
 
   const loadMore = () => {
@@ -352,7 +347,7 @@ const Tags = () => {
                       }}
                     />
                   </TableCell>
-                  <TableCell align="center">{tag.contacttag.length ? (<span>{tag.contacttag.length}</span>) : <span>0</span>}</TableCell>
+                  <TableCell align="center">{tag.contacttag && tag.contacttag.length > 0 ? (<span>{tag.contacttag.length}</span>) : <span>0</span>}</TableCell>
                   <TableCell align="center">
                     <IconButton
                       size="small"

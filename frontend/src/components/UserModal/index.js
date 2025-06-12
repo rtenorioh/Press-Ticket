@@ -30,7 +30,6 @@ import {
 } from "formik";
 import React, { useContext, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import * as Yup from "yup";
 import { AuthContext } from "../../context/Auth/AuthContext";
@@ -138,7 +137,6 @@ const UserModal = ({ open, onClose, userId }) => {
 	const [showPassword, setShowPassword] = useState(false);
 	const startWorkRef = useRef();
 	const endWorkRef = useRef();
-	const navigate = useNavigate();
 
 	useEffect(() => {
 		const fetchUser = async () => {

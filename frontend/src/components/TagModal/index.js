@@ -150,19 +150,28 @@ const TagModal = ({ open, onClose, tagId, reload }) => {
     const handleSaveTag = async values => {
         const tagData = { ...values, userId: user.id };
         try {
+            let response;
             if (tagId) {
-                await api.put(`/tags/${tagId}`, tagData);
+                response = await api.put(`/tags/${tagId}`, tagData);
             } else {
-                await api.post("/tags", tagData);
+                response = await api.post("/tags", tagData);
             }
             toast.success(t("tagModal.success"));
-            if (typeof reload == 'function') {
-                reload();
+            
+            if (onClose && response && response.data) {
+                const tagResponse = {
+                    id: response.data.id || tagId,
+                    name: response.data.name || values.name,
+                    color: response.data.color || values.color,
+                    userId: response.data.userId || user.id
+                };
+                onClose(tagResponse);
             }
         } catch (err) {
             toastError(err);
+        } finally {
+            handleClose();
         }
-        handleClose();
     };
 
     return (
