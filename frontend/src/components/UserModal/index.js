@@ -168,14 +168,16 @@ const UserModal = ({ open, onClose, userId }) => {
 	const handleSaveUser = async values => {
 		const userData = { ...values, whatsappIds: selectedWhatsappIds, queueIds: selectedQueueIds };
 		try {
+			let response;
 			if (userId) {
-				await api.put(`/users/${userId}`, userData);
+				response = await api.put(`/users/${userId}`, userData);
 			} else {
-				await api.post("/users", userData);
+				response = await api.post("/users", userData);
 			}
 			toast.success(t("userModal.success"));
-			// Usando navigate para recarregar a página
-			navigate(0);
+			if (onClose) {
+				onClose(response.data);
+			}
 		} catch (err) {
 			toastError(err, t);
 		}

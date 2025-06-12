@@ -84,7 +84,7 @@ const reducer = (state, action) => {
   if (action.type === "DELETE_USER") {
     const userId = action.payload;
 
-    const userIndex = state.findIndex((u) => u.id === userId);
+    const userIndex = state.findIndex((u) => u.id === parseInt(userId));
     if (userIndex !== -1) {
       state.splice(userIndex, 1);
     }
@@ -246,9 +246,13 @@ const Users = () => {
     setUserModalOpen(true);
   };
 
-  const handleCloseUserModal = () => {
+  const handleCloseUserModal = (userData) => {
     setSelectedUsers([]);
     setUserModalOpen(false);
+    
+    if (userData) {
+      dispatch({ type: "UPDATE_USERS", payload: userData });
+    }
   };
 
   const handleSearch = (event) => {
@@ -264,12 +268,12 @@ const Users = () => {
     try {
       await api.delete(`/users/${user.id}`);
       toast.success(t("users.toasts.deleted"));
+      dispatch({ type: "DELETE_USER", payload: user.id });
     } catch (err) {
       toastError(err);
     }
     setDeletingUser(null);
-    setSearchParam("");
-    setPageNumber(1);
+    setConfirmModalOpen(false);
   };
 
   const handleToggleActive = async (user) => {
