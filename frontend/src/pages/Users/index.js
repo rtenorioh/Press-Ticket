@@ -21,12 +21,11 @@ import AddCircleOutline from "@mui/icons-material/AddCircleOutline";
 import TaskAltIcon from '@mui/icons-material/TaskAlt';
 import DeleteOutline from "@mui/icons-material/DeleteOutline";
 import Edit from "@mui/icons-material/Edit";
-import HighlightOff from "@mui/icons-material/HighlightOff";
-import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
-import Lock from "@mui/icons-material/Lock";
-import LockOpen from "@mui/icons-material/LockOpen";
+import CancelOutlined from "@mui/icons-material/CancelOutlined";
 import Search from "@mui/icons-material/Search";
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import HighlightOff from "@mui/icons-material/HighlightOff";
 import React, { useEffect, useReducer, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -614,9 +613,9 @@ const Users = () => {
                           <IconButton
                             size="small"
                             onClick={() => handleToggleActive(user)}
-                            sx={{ color: user.active ? 'secondary.main' : 'success.main' }}
+                            sx={{ color: user.active ? 'success.main' : 'error.main' }}
                           >
-                            {user.active ? <Lock /> : <LockOpen />}
+                            {user.active ? <TaskAltIcon /> : <CancelOutlined />}
                           </IconButton>
                         </Tooltip>
                         <Tooltip title={t("users.actions.edit")} arrow placement="top">

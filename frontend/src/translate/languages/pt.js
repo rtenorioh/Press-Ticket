@@ -1264,13 +1264,9 @@ const messages = {
           deleteTitle: "Excluir",
           deleteMessage: "Todos os dados do atendente serão perdidos. Os tickets abertos deste atendente serão movidos para a espera.",
         },
-        status: {
-          online: "Online",
-          offline: "Offline",
-        },
         actions: {
-          activate: "Ativado",
-          deactivate: "Desativado",
+          activate: "Ativar usuário",
+          deactivate: "Desativar usuário",
           edit: "Editar",
           delete: "Excluir",
         }
