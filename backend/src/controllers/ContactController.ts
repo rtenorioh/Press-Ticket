@@ -5,6 +5,7 @@ import { getIO } from "../libs/socket";
 import CreateContactService from "../services/ContactServices/CreateContactService";
 import DeleteAllContactService from "../services/ContactServices/DeleteAllContactService";
 import DeleteContactService from "../services/ContactServices/DeleteContactService";
+import ExportContactsService from "../services/ContactServices/ExportContactsService";
 import ListContactsService from "../services/ContactServices/ListContactsService";
 import ShowContactService from "../services/ContactServices/ShowContactService";
 import UpdateContactService from "../services/ContactServices/UpdateContactService";
@@ -252,4 +253,41 @@ export const updateTags = async (
   });
 
   return res.status(200).json(contact);
+};
+
+export const exportContacts = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  const { searchParam, tags } = req.query as IndexQuery;
+
+  const tagIds = tags ? tags.split(",").map(tag => Number(tag)) : [];
+
+  try {
+    const { contacts } = await ExportContactsService({
+      searchParam,
+      tags: tagIds
+    });
+
+    console.log(`Exportando ${contacts.length} contatos`);
+
+    if (contacts.length === 0) {
+      return res.status(404).json({ error: "ERR_NO_CONTACT_FOUND" });
+    }
+
+    const exportData = contacts.map(contact => ({
+      id: contact.id,
+      name: contact.name || "",
+      number: contact.number || "",
+      email: contact.email || "",
+      address: contact.address || "",
+      tags: contact.tags ? contact.tags.map(tag => tag.name).join(", ") : "",
+      createdAt: contact.createdAt ? new Date(contact.createdAt).toLocaleDateString('pt-BR') : ""
+    }));
+
+    return res.status(200).json(exportData);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: "Internal server error" });
+  }
 };

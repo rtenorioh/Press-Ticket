@@ -763,7 +763,7 @@ const isValidMsg = (msg: WbotMessage): boolean => {
     msg.type === "e2e_notification" ||
     msg.type === "notification"
   ) {
-    console.log("Mensagem inválida - tipo de notificação ou broadcast:", msg.type);
+    console.log("Mensagem recebida - tipo de notificação ou broadcast:", msg.type);
     return false;
   }
 

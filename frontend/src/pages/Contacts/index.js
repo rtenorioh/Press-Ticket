@@ -312,7 +312,58 @@ const Contacts = () => {
       await api.post("/contacts/import");
       navigate(0);
     } catch (err) {
-      toastError(err);
+      toastError(err, t);
+    }
+  };
+
+  const handleExportContacts = async () => {
+    setLoading(true);
+    try {
+      const params = {};
+      if (searchParam) {
+        params.searchParam = searchParam;
+      }
+      if (filteredTags && filteredTags.length > 0) {
+        params.tags = filteredTags.map(tag => tag.id).join(",");
+      }
+
+      const { data } = await api.get("/contacts/export", { params });
+      
+      if (!data || data.length === 0) {
+        toast.info(t("contacts.toasts.noContactsToExport"));
+        setLoading(false);
+        return;
+      }
+
+      const csvContent = [
+        'ID;Nome;Número;Email;Endereço;Tags;Data de Criação'
+      ].concat(
+        data.map(contact => 
+          [contact.id, contact.name, contact.number, contact.email, contact.address, contact.tags, contact.createdAt].join(';')
+        )
+      ).join('\n');
+      
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      
+      const element = document.createElement('a');
+      element.href = url;
+      element.download = 'pressticket-contacts-export.csv';
+      document.body.appendChild(element);
+      element.click();
+      document.body.removeChild(element);
+      
+      toast.success(t("contacts.toasts.exportSuccess"));
+    } catch (err) {
+      console.error(err, t);
+      if (err.response && err.response.status === 404 && 
+          err.response.data && err.response.data.error === "ERR_NO_CONTACT_FOUND") {
+        toast.info(t("contacts.toasts.noContactsFound"));
+      } else {
+        toastError(err, t);
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -429,36 +480,14 @@ const Contacts = () => {
             </Tooltip>
             <Tooltip title={t("contacts.buttons.export")} disabled={loading}>
               <span style={{ display: 'inline-block' }}>
-                {contacts && contacts.length > 0 ? (
-                  <CSVLinkStyled
-                    separator=";"
-                    filename={'pressticket-contacts.csv'}
-                    data={contacts.map((contact) => ({
-                      name: contact.name,
-                      number: contact.number,
-                      address: contact.address,
-                      email: contact.email,
-                    }))}
-                  >
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      disabled={loading}
-                      sx={{ maxWidth: "36px", maxHeight: "36px", padding: 1 }}
-                    >
-                      <Archive />
-                    </Button>
-                  </CSVLinkStyled>
-                ) : (
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    disabled={true}
-                    sx={{ maxWidth: "36px", maxHeight: "36px", padding: 1 }}
-                  >
-                    <Archive />
-                  </Button>
-                )}
+                <ButtonStyled
+                  variant="contained"
+                  color="primary"
+                  disabled={loading}
+                  onClick={handleExportContacts}
+                >
+                  <Archive />
+                </ButtonStyled>
               </span>
             </Tooltip>
             <Can

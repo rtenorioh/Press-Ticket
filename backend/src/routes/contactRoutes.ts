@@ -8,6 +8,7 @@ import * as ImportPhoneContactsController from "../controllers/ImportPhoneContac
 const contactRoutes = express.Router();
 
 contactRoutes.get("/contacts", isAuth, ContactController.index);
+contactRoutes.get("/contacts/export", isAuth, ContactController.exportContacts);
 contactRoutes.get("/contacts/:contactId", isAuth, ContactController.show);
 contactRoutes.post("/contacts", isAuth, ContactController.store);
 contactRoutes.post("/contact", isAuth, ContactController.getContact);
@@ -16,6 +17,7 @@ contactRoutes.delete("/contacts/:contactId", isAuth, ContactController.remove);
 contactRoutes.delete("/contacts", isAuth, ContactController.removeAll);
 
 contactRoutes.get("/v1/contacts", isApiToken('read:contacts'), ContactController.index);
+contactRoutes.get("/v1/contacts/export", isApiToken('read:contacts'), ContactController.exportContacts);
 contactRoutes.get("/v1/contacts/:contactId", isApiToken('read:contacts'), ContactController.show);
 contactRoutes.post("/v1/contacts", isApiToken('create:contacts'), ContactController.store);
 contactRoutes.post("/v1/contact", isApiToken('create:contacts'), ContactController.getContact);

@@ -179,10 +179,13 @@ const messages = {
         toasts: {
           deleted: "Contato excluído com sucesso!",
           deletedAll: "Todos contatos excluídos com sucesso!",
-          redirectTicket: "Você já possui um ticket aberto para este contato. Redirecionando..."
+          redirectTicket: "Você já possui um ticket aberto para este contato. Redirecionando...",
+          exportSuccess: "Contatos exportados com sucesso!",
+          noContactsToExport: "Não há contatos para exportar."
         },
         errors: {
-          ticketAlreadyOpen: "Já existe um ticket aberto para este contato, atribuído ao Atendente: *{{userName}}* no Canal: *{{userChannel}}* criado em: *{{ticketCreatedAt}}*."
+          ticketAlreadyOpen: "Já existe um ticket aberto para este contato, atribuído ao Atendente: *{{userName}}* no Canal: *{{userChannel}}* criado em: *{{ticketCreatedAt}}*.",
+          exportError: "Erro ao exportar contatos."
         },
         searchPlaceholder: "Pesquisar...",
         confirmationModal: {
