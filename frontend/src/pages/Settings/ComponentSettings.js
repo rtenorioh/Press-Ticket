@@ -81,22 +81,22 @@ const ComponentSettings = ({ settings, getSettingValue, handleChangeBooleanSetti
 
     const groupedSettings = [
         {
-            title: t("settings.general.ticketManagement"),
+            title: t("settings.general.systemBehavior"),
             settings: booleanSettings.filter(s => [
-                'allTicket', 'CheckMsgIsGroup', 'closeTicketApi', 'ASC', 'created', 'openTickets', 
-                'tabsPending', 'tabsClosed', 'queueLength'
+                'userCreation'
             ].includes(s.key))
         },
         {
             title: t("settings.general.userInterface"),
             settings: booleanSettings.filter(s => [
-                'quickAnswer', 'signOption', 'listItemSpy', 'call'
+                'quickAnswer', 'signOption', 'listItemSpy', 'tabsPending', 'tabsClosed',
             ].includes(s.key))
         },
         {
-            title: t("settings.general.systemBehavior"),
+            title: t("settings.general.ticketManagement"),
             settings: booleanSettings.filter(s => [
-                'userCreation'
+                'allTicket', 'CheckMsgIsGroup', 'closeTicketApi', 'ASC', 'created', 'openTickets', 
+                'queueLength', 'call'
             ].includes(s.key))
         }
     ];

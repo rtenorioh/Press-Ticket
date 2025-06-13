@@ -122,6 +122,16 @@ const Settings = ({ toggleTheme, onThemeConfigUpdate }) => {
 			await api.put(`/settings/${settingKey}`, {
 				value: selectedValue,
 			});
+			
+			setSettings((prevState) => {
+				const aux = [...prevState];
+				const settingIndex = aux.findIndex((s) => s.key === settingKey);
+				if (settingIndex !== -1) {
+					aux[settingIndex].value = selectedValue;
+				}
+				return aux;
+			});
+			
 			toast.success(t("settings.success"));
 		} catch (err) {
 			toastError(err);
@@ -136,6 +146,16 @@ const Settings = ({ toggleTheme, onThemeConfigUpdate }) => {
 			await api.put(`/settings/${settingKey}`, {
 				value: selectedValue,
 			});
+			
+			setSettings((prevState) => {
+				const aux = [...prevState];
+				const settingIndex = aux.findIndex((s) => s.key === settingKey);
+				if (settingIndex !== -1) {
+					aux[settingIndex].value = selectedValue;
+				}
+				return aux;
+			});
+			
 			toast.success(t("settings.success"));
 		} catch (err) {
 			toastError(err);

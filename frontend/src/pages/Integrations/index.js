@@ -95,12 +95,21 @@ const Integrations = () => {
 				value: selectedValue,
 			});
 			toast.success(t("integrations.success"));
+			
 			setMaskedValues((prevState) => ({
 				...prevState,
 				[integrationKey]: maskValue(selectedValue),
 			}));
+			
+			setIntegrations((prevIntegrations) => 
+				prevIntegrations.map((integration) => 
+					integration.key === integrationKey 
+						? { ...integration, value: selectedValue } 
+						: integration
+				)
+			);
 		} catch (err) {
-			toastError(err);
+			toastError(err, t);
 		}
 	};
 
