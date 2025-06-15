@@ -220,6 +220,21 @@ const TicketsManager = () => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+  
+  useEffect(() => {
+    const checkTabChange = () => {
+      const changeTabRequest = localStorage.getItem("pressticket:changeTab");
+      if (changeTabRequest) {
+        console.log("Mudando para a aba:", changeTabRequest);
+        setTab(changeTabRequest);
+        localStorage.removeItem("pressticket:changeTab");
+      }
+    };
+    
+    checkTabChange();
+    const intervalId = setInterval(checkTabChange, 1000);
+    return () => clearInterval(intervalId);
+  }, []);
 
   useEffect(() => {
     const fetchSettings = async () => {
@@ -550,6 +565,7 @@ const TicketsManager = () => {
           />
           <TicketsList
             status="closed"
+            showAll={showAllTickets}
             selectedQueueIds={selectedQueueIds}
             updateCount={(val) => setClosedCount(val)}
             style={applyPanelStyle("closed")}

@@ -38,7 +38,7 @@ import toastError from "../../errors/toastError";
 import api from "../../services/api";
 import AcceptTicketWithouSelectQueue from "../AcceptTicketWithoutQueueModal";
 import ConfirmationModal from "../ConfirmationModal";
-
+import openSocket from "../../services/socket-io";
 import WhatsMarked from "react-whatsmarked";
 
 const StyledListItem = styled(ListItem)(({ theme }) => ({
@@ -246,7 +246,7 @@ const TicketListItem = ({ ticket, filteredTags }) => {
 	const { user } = useContext(AuthContext);
 	const [acceptTicketWithouSelectQueueOpen, setAcceptTicketWithouSelectQueueOpen] = useState(false);
 	const [confirmationOpen, setConfirmationOpen] = useState(false);
-
+	const [tag, setTag] = useState([]);
 	const [settings, setSettings] = useState([]);
 	const [spy, setSpy] = useState([]);
 	const [currentTicket, setCurrentTicket] = useState(ticket);
@@ -264,9 +264,9 @@ const TicketListItem = ({ ticket, filteredTags }) => {
 		setTimeout(() => {
 			const fetchTicket = async () => {
 				try {
-					await api.get("/tickets/" + ticket.id);
+					const { data } = await api.get("/tickets/" + ticket.id);
 					if (isMounted.current) {
-	
+						setTag(data?.contact?.tags);
 					}
 				} catch (err) {
 					if (isMounted.current) {
@@ -304,11 +304,15 @@ const TicketListItem = ({ ticket, filteredTags }) => {
 		fetchSettings();
 	  }, []);
 
-	// Mantemos a funcionalidade de filtro por tags, mas simplificamos
-	if (filteredTags && filteredTags.length > 0) {
-		// Se há tags filtradas mas não temos como verificar, melhor exibir o ticket
-		// As tags agora são exibidas apenas no TicketInfo
-		// return null;
+	const filterTicketByTags = () => {
+		if (!filteredTags || filteredTags.length === 0) return true;
+		if (!tag || tag.length === 0) return false;
+
+		return filteredTags.every(filterTag => tag.some(t => t.id === filterTag.id));
+	}
+
+	if (!filterTicketByTags()) {
+		return null;
 	}
 
 	const handleAcepptTicket = async id => {
@@ -319,6 +323,21 @@ const TicketListItem = ({ ticket, filteredTags }) => {
 				status: "open",
 				userId: user?.id,
 			});
+			
+			const socket = openSocket();
+			if (socket) {
+				socket.emit("ticket", {
+					action: "update",
+					ticketId: id,
+					ticket: {
+						...ticket,
+						status: "open"
+					}
+				});
+			}
+			
+			localStorage.setItem("pressticket:changeTab", "open");
+			
 			navigate(`/tickets/${id}`);
 		} catch (err) {
 			if (isMounted.current) {
@@ -358,14 +377,28 @@ const TicketListItem = ({ ticket, filteredTags }) => {
 				status: "open",
 				userId: user?.id,
 			});
+			
+			const socket = openSocket();
+			if (socket) {
+				socket.emit("ticket", {
+					action: "update",
+					ticketId: id,
+					ticket: {
+						...ticket,
+						status: "open"
+					}
+				});
+			}
+			
+			navigate(`/tickets/${id}`);
 		} catch (err) {
 			setLoading(false);
 			toastError(err);
+		} finally {
+			if (isMounted.current) {
+				setLoading(false);
+			}
 		}
-		if (isMounted.current) {
-			setLoading(false);
-		}
-		navigate(`/tickets/${id}`);
 	};
 
 	const handleViewTicket = async (id) => {
@@ -385,22 +418,36 @@ const TicketListItem = ({ ticket, filteredTags }) => {
 		navigate(`/tickets/${id}`);
 	};
 
-	const handleClosedTicket = async id => {
+	const handleClosedTicket = async (id, status) => { 
 		setLoading(true);
 		try {
 			console.log(`Fechando ticket ${id}: mudando status para 'closed'`);
 			await api.put(`/tickets/${id}`, {
 				status: "closed",
 				userId: user?.id,
+				queueId: ticket?.queueId || null,
 			});
+			
+			const socket = openSocket();
+			if (socket) {
+				socket.emit("ticket", {
+					action: "update",
+					ticketId: id,
+					ticket: {
+						...ticket,
+						status: "closed"
+					}
+				});
+			}
+			
+			navigate("/tickets");
 		} catch (err) {
-			setLoading(false);
-			toastError(err);
+			toastError(err, t);
+		} finally {
+			if (isMounted.current) {
+				setLoading(false);
+			}
 		}
-		if (isMounted.current) {
-			setLoading(false);
-		}
-		navigate(`/tickets/${id}`);
 	};
 
 	const handleSelectTicket = id => {
@@ -412,7 +459,7 @@ const TicketListItem = ({ ticket, filteredTags }) => {
 	};
 
 	const handleConfirmClose = () => {
-		handleClosedTicket(ticket.id);
+		handleClosedTicket(ticket.id, "closed");
 	};
 
 	const canTabsSettings = (ts) => {

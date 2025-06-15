@@ -62,13 +62,20 @@ const FindOrCreateTicketService = async (
     const listSettingsService = await ListSettingsServiceOne({
       key: "timeCreateNewTicket"
     });
-    const timeCreateNewTicket = listSettingsService?.value;
-
+    
+    const timeCreateNewTicket = listSettingsService?.value 
+      ? parseInt(listSettingsService.value, 10) 
+      : 60;
+    
+    if (isNaN(timeCreateNewTicket)) {
+      console.error("Valor inválido para timeCreateNewTicket:", listSettingsService?.value);
+    }
+    
     ticket = await Ticket.findOne({
       where: {
         updatedAt: {
           [Op.between]: [
-            +subSeconds(new Date(), Number(timeCreateNewTicket)),
+            +subSeconds(new Date(), timeCreateNewTicket),
             +new Date()
           ]
         },

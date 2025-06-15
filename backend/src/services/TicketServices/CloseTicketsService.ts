@@ -27,8 +27,7 @@ const CloseTicketsService = async ({
       (async () => {
         await ticket.update({
           status: "closed",
-          userId,
-          queueId: null
+          userId
         });
 
         if (ticket.status === "closed" && ticket.isGroup === false) {

@@ -99,18 +99,10 @@ const TicketActionButtons = ({ ticket }) => {
 	const handleUpdateTicketStatus = async (e, status, userId) => {
 		setLoading(true);
 		try {
-			if (status === "closed") {
-				await api.put(`/tickets/${ticket.id}`, {
-					status: status,
-					userId: userId || null,
-					queueId: null,
-				});
-			} else {
-				await api.put(`/tickets/${ticket.id}`, {
-					status: status,
-					userId: userId || null,
-				});
-			}
+			await api.put(`/tickets/${ticket.id}`, {
+				status: status,
+				userId: userId || null
+			});
 			setLoading(false);
 			if (status === "open") {
 				navigate(`/tickets/${ticket.id}`);
