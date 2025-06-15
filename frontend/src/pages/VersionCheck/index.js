@@ -11,7 +11,8 @@ import {
   Box, 
   Button,
   CircularProgress,
-  Link
+  Link,
+  Divider
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
@@ -106,7 +107,10 @@ const VersionCheck = () => {
   const [versionInfo, setVersionInfo] = useState({
     currentVersion: "",
     latestVersion: "",
-    needsUpdate: false
+    needsUpdate: false,
+    whatsappLibVersion: "",
+    whatsappLibLatestVersion: "",
+    whatsappLibNeedsUpdate: false
   });
 
   useEffect(() => {
@@ -157,9 +161,7 @@ const VersionCheck = () => {
       </MainHeader>
       <MainPaper variant="outlined">
         <Container maxWidth="lg">
-          <Typography variant="h6" gutterBottom>
-            {t("versionCheck.statusTitle")}
-          </Typography>
+
           
           {loading ? (
             <Box display="flex" justifyContent="center" my={8}>
@@ -167,6 +169,9 @@ const VersionCheck = () => {
             </Box>
           ) : (
             <>
+              <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>
+                {t("versionCheck.statusTitle")}
+              </Typography>
               <CardWrapper container spacing={4}>
                 <Grid item xs={12} md={6}>
                   <VersionCard status={versionInfo.needsUpdate ? "outdated" : "updated"}>
@@ -267,6 +272,104 @@ const VersionCheck = () => {
                       </Typography>
                       <Typography variant="body1" paragraph>
                         {t("versionCheck.upToDateMessage")}
+                      </Typography>
+                    </div>
+                  </Box>
+                </MessageBox>
+              )}
+              
+              <Divider sx={{ my: 4 }} />
+              
+              <Typography variant="h6" gutterBottom>
+                {t("versionCheck.whatsappLibTitle")}
+              </Typography>
+              <CardWrapper container spacing={4}>
+                <Grid item xs={12} md={6}>
+                  <VersionCard status={versionInfo.whatsappLibNeedsUpdate ? "outdated" : "updated"}>
+                    <VersionIcon status={versionInfo.whatsappLibNeedsUpdate ? "outdated" : "updated"}>
+                      {versionInfo.whatsappLibNeedsUpdate ? (
+                        <ErrorIcon />
+                      ) : (
+                        <CheckCircleIcon />
+                      )}
+                    </VersionIcon>
+                    <CardContent>
+                      <Typography variant="h6" color="textSecondary" gutterBottom>
+                        {t("versionCheck.whatsappLibCurrentVersion")}
+                      </Typography>
+                      <VersionValue color={versionInfo.whatsappLibNeedsUpdate ? "error" : "success"}>
+                        {versionInfo.whatsappLibVersion || "N/A"}
+                      </VersionValue>
+                      <Typography variant="body2" color="textSecondary" sx={{ mb: 1 }}>
+                        {versionInfo.whatsappLibNeedsUpdate 
+                          ? t("versionCheck.whatsappLibOutdated")
+                          : t("versionCheck.whatsappLibUpToDate")}
+                      </Typography>
+                    </CardContent>
+                  </VersionCard>
+                </Grid>
+                
+                <Grid item xs={12} md={6}>
+                  <VersionCard status="latest">
+                    <VersionIcon status="latest">
+                      <CheckCircleIcon />
+                    </VersionIcon>
+                    <CardContent>
+                      <Typography variant="h6" color="textSecondary" gutterBottom>
+                        {t("versionCheck.whatsappLibLatestVersion")}
+                      </Typography>
+                      <VersionValue>
+                        {versionInfo.whatsappLibLatestVersion || "N/A"}
+                      </VersionValue>
+                      <Typography variant="body2" color="textSecondary" sx={{ mb: 1 }}>
+                        {t("versionCheck.whatsappLibLatestAvailable")}
+                      </Typography>
+                    </CardContent>
+                  </VersionCard>
+                </Grid>
+              </CardWrapper>
+
+              {versionInfo.whatsappLibNeedsUpdate ? (
+                <MessageBox type="warning">
+                  <Box display="flex" alignItems="flex-start">
+                    <ErrorIcon color="warning" style={{ marginRight: 16, marginTop: 4 }} />
+                    <div>
+                      <Typography variant="h6" gutterBottom>
+                        {t("versionCheck.whatsappLibUpdateAvailable")}
+                      </Typography>
+                      <Typography variant="body1" paragraph>
+                        {t("versionCheck.whatsappLibUpdateMessage")}
+                      </Typography>
+                      <Can
+                        role={user?.profile}
+                        perform="version-check:show"
+                        yes={() => (
+                          <>
+                            <Typography variant="body2" color="textSecondary">
+                              <Link 
+                                href="https://github.com/pedroslopez/whatsapp-web.js/releases" 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                              >
+                                {t("versionCheck.whatsappLibRepository")}
+                              </Link>
+                            </Typography>
+                          </>
+                        )}
+                      />
+                    </div>
+                  </Box>
+                </MessageBox>
+              ) : (
+                <MessageBox type="success">
+                  <Box display="flex" alignItems="flex-start">
+                    <CheckCircleIcon color="success" style={{ marginRight: 16, marginTop: 4 }} />
+                    <div>
+                      <Typography variant="h6" gutterBottom>
+                        {t("versionCheck.whatsappLibUpToDateTitle")}
+                      </Typography>
+                      <Typography variant="body1" paragraph>
+                        {t("versionCheck.whatsappLibUpToDateMessage")}
                       </Typography>
                     </div>
                   </Box>

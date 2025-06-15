@@ -1,4 +1,4 @@
-  import React, { useContext, useEffect, useReducer, useState } from "react";
+import React, { useContext, useEffect, useReducer, useState } from "react";
 import {
   Avatar,
   Button,
@@ -25,7 +25,6 @@ import {
   Search,
   WhatsApp
 } from "@mui/icons-material";
-import { CSVLink } from "react-csv";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -97,10 +96,6 @@ const PaperStyled = styled(Paper)(({ theme }) => ({
   margin: theme.spacing(1),
   overflowY: "scroll",
   ...theme.scrollbarStyles,
-}));
-
-const CSVLinkStyled = styled(CSVLink)(({ theme }) => ({
-  textDecoration: 'none'
 }));
 
 const AvatarStyled = styled(Avatar)(({ theme }) => ({
@@ -357,7 +352,7 @@ const Contacts = () => {
     } catch (err) {
       console.error(err, t);
       if (err.response && err.response.status === 404 && 
-          err.response.data && err.response.data.error === "ERR_NO_CONTACT_FOUND") {
+        err.response.data && err.response.data.error === "ERR_NO_CONTACT_FOUND") {
         toast.info(t("contacts.toasts.noContactsFound"));
       } else {
         toastError(err, t);

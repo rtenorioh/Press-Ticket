@@ -1385,7 +1385,18 @@ const messages = {
         repository: "GitHub",
         updateLink: "Atualizador Automático",
         update: "Manual de Atualização",
-        success: "Informações de versão atualizadas com sucesso!"
+        success: "Informações de versão atualizadas com sucesso!",
+        whatsappLibTitle: "Versão da Biblioteca WhatsApp",
+        whatsappLibCurrentVersion: "Versão Atual da Biblioteca",
+        whatsappLibLatestVersion: "Última Versão Disponível",
+        whatsappLibUpToDate: "Biblioteca atualizada",
+        whatsappLibOutdated: "Biblioteca desatualizada",
+        whatsappLibLatestAvailable: "Versão mais recente disponível",
+        whatsappLibRepository: "Ver no GitHub",
+        whatsappLibUpToDateTitle: "Biblioteca WhatsApp Atualizada",
+        whatsappLibUpToDateMessage: "Sua biblioteca WhatsApp está com a versão mais recente disponível. Você está aproveitando todos os recursos e correções de segurança mais recentes.",
+        whatsappLibUpdateAvailable: "Atualização da Biblioteca Disponível",
+        whatsappLibUpdateMessage: "Uma nova versão da biblioteca WhatsApp está disponível. Entre em contato com o administrador do sistema para solicitar a atualização."
       },
       backendErrors: {
         ERR_CREATING_MESSAGE: "Erro ao criar mensagem no banco de dados.",
