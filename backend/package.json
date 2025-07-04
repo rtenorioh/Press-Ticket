@@ -58,8 +58,9 @@
     "socket.io": "^3.0.5",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^4.6.3",
+    "typescript": "^4.9.5",
     "uuid": "^8.3.2",
-    "whatsapp-web.js": "^1.27.0",
+    "whatsapp-web.js": "^1.31.0",
     "yup": "^0.32.8"
   },
   "devDependencies": {
@@ -101,8 +102,7 @@
     "supertest": "^5.0.0",
     "ts-jest": "^26.4.1",
     "ts-node": "^10.9.2",
-    "ts-node-dev": "^1.0.0-pre.63",
-    "typescript": "^4.9.5"
+    "ts-node-dev": "^1.0.0-pre.63"
   },
   "engines": {
     "node": ">=18.0.0"

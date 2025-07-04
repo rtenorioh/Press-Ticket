@@ -1,4 +1,5 @@
 import { Sequelize } from "sequelize-typescript";
+import ActivityLog from "../models/ActivityLog";
 import ApiToken from "../models/ApiToken";
 import Contact from "../models/Contact";
 import ContactCustomField from "../models/ContactCustomField";
@@ -45,7 +46,8 @@ const models = [
   Personalization,
   UserSession,
   ApiToken,
-  ErrorLog
+  ErrorLog,
+  ActivityLog
 ];
 
 sequelize.addModels(models);

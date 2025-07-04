@@ -10,6 +10,7 @@ import DeleteQuickAnswerService from "../services/QuickAnswerService/DeleteQuick
 import DeleteAllQuickAnswerService from "../services/QuickAnswerService/DeleteAllQuickAnswerService";
 
 import AppError from "../errors/AppError";
+import { createActivityLog, ActivityActions, EntityTypes } from "../services/ActivityLogService";
 
 type IndexQuery = {
   searchParam: string;
@@ -48,6 +49,20 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
 
   const quickAnswer = await CreateQuickAnswerService({
     ...newQuickAnswer
+  });
+
+  const logUserId = req.user?.id || 1;
+  
+  await createActivityLog({
+    userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
+    action: ActivityActions.CREATE,
+    description: `Resposta rápida "${quickAnswer.shortcut}" criada`,
+    entityType: EntityTypes.QUICKANSWER,
+    entityId: quickAnswer.id,
+    additionalData: {
+      shortcut: quickAnswer.shortcut,
+      message: quickAnswer.message
+    }
   });
 
   const io = getIO();
@@ -91,6 +106,17 @@ export const update = async (
     quickAnswerId
   });
 
+  const logUserId = req.user?.id || 1;
+  
+  await createActivityLog({
+    userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
+    action: ActivityActions.UPDATE,
+    description: `Resposta rápida "${quickAnswer.shortcut}" atualizada`,
+    entityType: EntityTypes.QUICKANSWER,
+    entityId: quickAnswer.id,
+    additionalData: quickAnswerData
+  });
+
   const io = getIO();
   io.emit("quickAnswer", {
     action: "update",
@@ -106,7 +132,23 @@ export const remove = async (
 ): Promise<Response> => {
   const { quickAnswerId } = req.params;
 
+  const quickAnswerToDelete = await ShowQuickAnswerService(quickAnswerId);
+  
   await DeleteQuickAnswerService(quickAnswerId);
+  
+  const logUserId = req.user?.id || 1;
+  
+  await createActivityLog({
+    userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
+    action: ActivityActions.DELETE,
+    description: `Resposta rápida "${quickAnswerToDelete.shortcut}" excluída`,
+    entityType: EntityTypes.QUICKANSWER,
+    entityId: parseInt(quickAnswerId),
+    additionalData: {
+      shortcut: quickAnswerToDelete.shortcut,
+      message: quickAnswerToDelete.message
+    }
+  });
 
   const io = getIO();
   io.emit("quickAnswer", {
@@ -121,9 +163,20 @@ export const removeAll = async (
   req: Request,
   res: Response
 ): Promise<Response> => {
-  const { quickAnswerId } = req.params;
-
   await DeleteAllQuickAnswerService();
+  
+  const logUserId = req.user?.id || 1;
+  
+  await createActivityLog({
+    userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
+    action: ActivityActions.DELETE,
+    description: `Todas as respostas rápidas foram excluídas`,
+    entityType: EntityTypes.QUICKANSWER,
+    entityId: 0,
+    additionalData: {
+      massDelete: true
+    }
+  });
 
   return res.status(200).json({ message: "All Quick Answer deleted" });
 };

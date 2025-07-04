@@ -7,6 +7,7 @@ import LoggedInLayout from "../layout";
 import Api from "../pages/Api/";
 import ApiDocs from "../pages/ApiDocs/";
 import ApiKey from "../pages/ApiKey/";
+import Documentation from "../pages/Documentation/";
 import Connections from "../pages/Connections/";
 import Contacts from "../pages/Contacts/";
 import CpuUsage from "../pages/CpuUsage/";
@@ -21,6 +22,13 @@ import Queues from "../pages/Queues/";
 import QuickAnswers from "../pages/QuickAnswers/";
 import ResetPassword from "../pages/ResetPassword";
 import Settings from "../pages/Settings/";
+import Backup from "../pages/Backup";
+import ActivityLogs from "../pages/ActivityLogs";
+import NetworkStatus from "../pages/NetworkStatus";
+import QueueMonitor from "../pages/QueueMonitor";
+import DatabaseStatus from "../pages/DatabaseStatus";
+import SystemHealth from "../pages/SystemHealth";
+import SystemUpdate from "../pages/SystemUpdate";
 import Signup from "../pages/Signup/";
 import Tags from "../pages/Tags";
 import Tickets from "../pages/Tickets/";
@@ -48,6 +56,7 @@ const AppRoutes = ({ toggleTheme, onThemeConfigUpdate }) => {
             } />
           }>
             <Route index element={<Dashboard />} />
+            <Route path="documentation" element={<Documentation />} />
             <Route path="tickets/:ticketId?" element={<Tickets />} />
             <Route path="connections" element={<Connections />} />
             <Route path="contacts" element={<Contacts />} />
@@ -63,6 +72,13 @@ const AppRoutes = ({ toggleTheme, onThemeConfigUpdate }) => {
             <Route path="diskSpace" element={<DiskSpace />} />
             <Route path="memoryUsage" element={<MemoryUsage />} />
             <Route path="cpuUsage" element={<CpuUsage />} />
+            <Route path="backup" element={<Backup />} />
+            <Route path="activity-logs" element={<ActivityLogs />} />
+            <Route path="network-status" element={<NetworkStatus />} />
+            <Route path="queue-monitor" element={<QueueMonitor />} />
+            <Route path="databaseStatus" element={<DatabaseStatus />} />
+            <Route path="system-health" element={<SystemHealth />} />
+            <Route path="system-update" element={<SystemUpdate />} />
             <Route path="versionCheck" element={<VersionCheck />} />
           </Route>
         </Routes>

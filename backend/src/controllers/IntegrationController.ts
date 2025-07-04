@@ -5,6 +5,7 @@ import { getIO } from "../libs/socket";
 
 import ListIntegrationsService from "../services/IntegrationServices/ListIntegrationsService";
 import UpdateIntegrationService from "../services/IntegrationServices/UpdateIntegrationService";
+import { createActivityLog, ActivityActions, EntityTypes } from "../services/ActivityLogService";
 
 export const index = async (req: Request, res: Response): Promise<Response> => {
   if (req.user.profile === "") {
@@ -30,6 +31,22 @@ export const update = async (
     key,
     value
   });
+
+  const logUserId = req.user?.id || 1;
+  
+  if (integration) {
+    await createActivityLog({
+      userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
+      action: ActivityActions.UPDATE,
+      description: `Integração "${key}" atualizada`,
+      entityType: EntityTypes.INTEGRATION,
+      entityId: integration.id,
+      additionalData: {
+        key: integration.key,
+        value: integration.value
+      }
+    });
+  }
 
   const io = getIO();
   io.emit("integrations", {

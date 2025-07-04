@@ -10,9 +10,16 @@ import { messages as japaneseMessages } from "./ja";
 import { messages as portugueseMessages } from "./pt";
 import { messages as russianMessages } from "./ru";
 import { messages as chineseMessages } from "./zh";
+import documentationMessages from "./pt-documentation";
 
 const messages = {
-	pt: portugueseMessages.pt,
+	pt: {
+		...portugueseMessages.pt,
+		translations: {
+			...portugueseMessages.pt.translations,
+			...documentationMessages
+		}
+	},
 	en: englishMessages.en,
 	es: spanishMessages.es,
 	fr: frenchMessages.fr,

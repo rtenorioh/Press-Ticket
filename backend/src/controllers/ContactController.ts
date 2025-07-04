@@ -16,6 +16,7 @@ import CheckIsValidContact from "../services/WbotServices/CheckIsValidContact";
 import CheckContactNumber from "../services/WbotServices/CheckNumber";
 import GetProfilePicUrl from "../services/WbotServices/GetProfilePicUrl";
 import SyncTagsService from "../services/TagServices/SyncTagsService";
+import { createActivityLog, ActivityActions, EntityTypes } from "../services/ActivityLogService";
 
 type IndexQuery = {
   searchParam: string;
@@ -117,7 +118,6 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
       throw new AppError(err.message);
     }
   } else {
-    // Para requisições da API, tenta validar o número, mas não falha se não conseguir
     try {
       const checkedNumber = await CheckContactNumber(newContact.number);
       validNumber = checkedNumber;
@@ -140,6 +140,21 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     email,
     extraInfo,
     profilePicUrl
+  });
+
+  const logUserId = req.user?.id || 1;
+  
+  await createActivityLog({
+    userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
+    action: ActivityActions.CREATE,
+    description: `Contato ${contact.name} (${contact.number}) criado`,
+    entityType: EntityTypes.CONTACT,
+    entityId: contact.id,
+    additionalData: {
+      name: contact.name,
+      number: contact.number,
+      email: contact.email
+    }
   });
 
   const io = getIO();
@@ -184,6 +199,16 @@ export const update = async (
   const { contactId } = req.params;
 
   const contact = await UpdateContactService({ contactData, contactId });
+  const logUserId = req.user?.id || 1;
+  
+  await createActivityLog({
+    userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
+    action: ActivityActions.UPDATE,
+    description: `Contato ${contact.name} (${contact.number}) atualizado`,
+    entityType: EntityTypes.CONTACT,
+    entityId: contact.id,
+    additionalData: contactData
+  });
 
   const io = getIO();
   io.emit("contact", {
@@ -200,7 +225,23 @@ export const remove = async (
 ): Promise<Response> => {
   const { contactId } = req.params;
 
+  const contactToDelete = await ShowContactService(contactId);
+  
   await DeleteContactService(contactId);
+  const logUserId = req.user?.id || 1;
+  
+  await createActivityLog({
+    userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
+    action: ActivityActions.DELETE,
+    description: `Contato ${contactToDelete.name} (${contactToDelete.number}) excluído`,
+    entityType: EntityTypes.CONTACT,
+    entityId: parseInt(contactId),
+    additionalData: {
+      name: contactToDelete.name,
+      number: contactToDelete.number,
+      email: contactToDelete.email
+    }
+  });
 
   const io = getIO();
   io.emit("contact", {
@@ -216,6 +257,18 @@ export const removeAll = async (
   res: Response
 ): Promise<Response> => {
   await DeleteAllContactService();
+  const logUserId = req.user?.id || 1;
+  
+  await createActivityLog({
+    userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
+    action: ActivityActions.DELETE,
+    description: `Todos os contatos foram excluídos`,
+    entityType: EntityTypes.CONTACT,
+    entityId: 0,
+    additionalData: {
+      massDelete: true
+    }
+  });
 
   return res.send();
 };
@@ -245,6 +298,21 @@ export const updateTags = async (
     tags,
     contactId: +contactId
   });
+  
+  const logUserId = req.user?.id || 1;
+  
+  if (contact) {
+    await createActivityLog({
+      userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
+      action: ActivityActions.UPDATE,
+      description: `Tags do contato ${contact.name} atualizadas`,
+      entityType: EntityTypes.CONTACT,
+      entityId: contact.id,
+      additionalData: {
+        tags: tags.map((tag: { id: number }) => ({ id: tag.id }))
+      }
+    });
+  }
 
   const io = getIO();
   io.emit("contact", {

@@ -1,6 +1,8 @@
 import React, { useEffect, useState, useContext } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
+import { getVersionInfo, updateWhatsappLib } from "../../services/versionService";
 import { 
   Container, 
   Paper, 
@@ -19,13 +21,11 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import ErrorIcon from "@mui/icons-material/Error";
 import SystemUpdateIcon from "@mui/icons-material/SystemUpdate";
 import { AuthContext } from "../../context/Auth/AuthContext";
-import { getVersionInfo } from "../../services/versionService";
 import MainContainer from "../../components/MainContainer";
 import MainHeader from "../../components/MainHeader";
 import MainHeaderButtonsWrapper from "../../components/MainHeaderButtonsWrapper";
 import Title from "../../components/Title";
 import toastError from "../../errors/toastError";
-import { Can } from "../../components/Can";
 
 const MainPaper = styled(Paper)(({ theme }) => ({
   flex: 1,
@@ -102,15 +102,18 @@ const MessageBox = styled(Paper)(({ theme, type }) => ({
 
 const VersionCheck = () => {
   const { t } = useTranslation();
-  const { user } = useContext(AuthContext);
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
+  const [updatingLib, setUpdatingLib] = useState(false);
+  const [countdown, setCountdown] = useState(0);
   const [versionInfo, setVersionInfo] = useState({
     currentVersion: "",
     latestVersion: "",
     needsUpdate: false,
     whatsappLibVersion: "",
     whatsappLibLatestVersion: "",
-    whatsappLibNeedsUpdate: false
+    whatsappLibNeedsUpdate: false,
+    whatsappLibLatestReleaseDate: null
   });
 
   useEffect(() => {
@@ -143,6 +146,192 @@ const VersionCheck = () => {
     }
   };
 
+  const refreshPage = () => {
+    window.location.reload();
+  };
+
+  const createCountdownToast = (seconds, initialMessage, finalMessage, onComplete = null, reload = false) => {
+    let secondsRemaining = seconds;
+    let intervalId = null;
+    let toastId = null;
+
+    const showToast = () => {
+      if (toastId) {
+        toast.update(toastId, {
+          render: `${initialMessage} ${secondsRemaining} segundos...`,
+          type: "info",
+          autoClose: false,
+          closeButton: false,
+          position: "top-right"
+        });
+      } else {
+        toastId = toast.info(`${initialMessage} ${secondsRemaining} segundos...`, {
+          autoClose: false,
+          closeButton: false,
+          draggable: false,
+          position: "top-right"
+        });
+      }
+    };
+
+    const startCountdown = () => {
+      showToast();
+
+      intervalId = setInterval(() => {
+        secondsRemaining -= 1;
+        
+        showToast();
+
+        if (secondsRemaining <= 0) {
+          clearInterval(intervalId);
+          
+          if (toastId) {
+            toast.dismiss(toastId);
+          }
+          
+          toast.success(finalMessage, {
+            position: "top-right"
+          });
+          
+          if (onComplete && typeof onComplete === 'function') {
+            onComplete();
+          }
+          
+          if (reload) {
+            setTimeout(() => {
+              refreshPage();
+            }, 1000);
+          }
+        }
+      }, 1000);
+
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          resolve();
+        }, (secondsRemaining + 1) * 1000);
+      });
+    };
+
+    const cancelCountdown = () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+      if (toastId) {
+        toast.dismiss(toastId);
+      }
+    };
+
+    return {
+      startCountdown,
+      cancelCountdown
+    };
+  };
+
+  useEffect(() => {
+    let countdownController = null;
+    
+    if (countdown > 0) {
+      countdownController = createCountdownToast(
+        countdown,
+        "A página será recarregada em",
+        "Recarregando página agora...",
+        null,
+        true
+      );
+      
+      countdownController.startCountdown();
+    }
+    
+    return () => {
+      if (countdownController) {
+        countdownController.cancelCountdown();
+      }
+    };
+  }, [countdown]);
+
+  const handleUpdateWhatsappLib = async () => {
+    try {
+      setUpdatingLib(true);
+      toast.dismiss();
+      
+      const prepToastId = toast.info('Preparando para atualizar a biblioteca WhatsApp...', {
+        autoClose: false,
+        position: "top-right",
+        closeButton: false
+      });
+      
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      toast.update(prepToastId, {
+        render: 'Iniciando atualização da biblioteca WhatsApp...',
+        type: 'info',
+        autoClose: false,
+        position: "top-right",
+        closeButton: false
+      });
+      
+      try {
+        const result = await updateWhatsappLib();
+        
+        toast.dismiss(prepToastId);
+        
+        if (result.success) {
+          toast.success(`Biblioteca WhatsApp atualizada com sucesso para a versão v${result.newVersion || 'mais recente'}. O servidor está sendo reiniciado para aplicar as mudanças.`, {
+            autoClose: 5000,
+            position: "top-right",
+            toastId: 'update-success'
+          });
+          
+          setTimeout(() => {
+            setCountdown(30);
+          }, 1000);
+          
+          await new Promise(resolve => setTimeout(resolve, 2000));
+          
+          try {
+            const data = await getVersionInfo();
+            setVersionInfo(data);
+          } catch (versionError) {
+            console.error('Erro ao obter informações de versão após atualização:', versionError);
+          }
+        } else {
+          toast.error(`Erro ao atualizar biblioteca: ${result.error || 'Erro desconhecido'}`, {
+            autoClose: false,
+            position: "top-right"
+          });
+        }
+      } catch (apiError) {
+        toast.dismiss(prepToastId);
+        
+        console.error('Erro na chamada da API:', apiError);
+        
+        if (apiError.message && apiError.message.includes('Network Error')) {
+          toast.info('O servidor está sendo reiniciado após a atualização da biblioteca...', {
+            autoClose: 5000,
+            position: "top-right"
+          });
+          
+          setTimeout(() => {
+            setCountdown(30);
+          }, 1000);
+        } else {
+          toast.error('Erro de conexão ao tentar atualizar a biblioteca. A atualização pode ter sido iniciada, mas não foi possível confirmar. Por favor, atualize a página em alguns segundos para verificar o status.', {
+            autoClose: false,
+            position: "top-right"
+          });
+        }
+      }
+    } catch (err) {
+      console.error('Erro geral:', err);
+      toast.error('Ocorreu um erro inesperado. Por favor, tente novamente em alguns instantes.', {
+        autoClose: false,
+        position: "top-right"
+      });
+    } finally {
+      setUpdatingLib(false);
+    }
+  };
+
   return (
     <MainContainer>
       <MainHeader>
@@ -162,7 +351,6 @@ const VersionCheck = () => {
       <MainPaper variant="outlined">
         <Container maxWidth="lg">
 
-          
           {loading ? (
             <Box display="flex" justifyContent="center" my={8}>
               <CircularProgress />
@@ -229,12 +417,30 @@ const VersionCheck = () => {
                       <Typography variant="body1" paragraph>
                         {t("versionCheck.updateMessage")}
                       </Typography>
-                      <Can
-                        role={user?.profile}
-                        perform="version-check:show"
-                        yes={() => (
-                          <>
-                            <Typography variant="body2" color="textSecondary">
+                      <Box mt={2} mb={2}>
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          startIcon={<SystemUpdateIcon />}
+                          onClick={() => navigate("/systemUpdate")}
+                          fullWidth
+                          size="large"
+                          sx={{
+                            borderRadius: 2,
+                            py: 1,
+                            fontWeight: "bold",
+                            boxShadow: 3,
+                            '&:hover': {
+                              transform: 'translateY(-2px)',
+                              boxShadow: 4,
+                            },
+                            transition: 'all 0.3s ease'
+                          }}
+                        >
+                          {t("versionCheck.updateNow") || "Atualizar Agora"}
+                        </Button>
+                      </Box>
+                      <Typography variant="body2" color="textSecondary">
                               {t("versionCheck.repositoryLink")}: 
                               <Link 
                                 href="https://github.com/rtenorioh/Press-Ticket" 
@@ -256,9 +462,6 @@ const VersionCheck = () => {
                                 {t("versionCheck.update")}
                               </Link>
                             </Typography>
-                          </>
-                        )}
-                      />
                     </div>
                   </Box>
                 </MessageBox>
@@ -298,7 +501,7 @@ const VersionCheck = () => {
                         {t("versionCheck.whatsappLibCurrentVersion")}
                       </Typography>
                       <VersionValue color={versionInfo.whatsappLibNeedsUpdate ? "error" : "success"}>
-                        {versionInfo.whatsappLibVersion || "N/A"}
+                        v{versionInfo.whatsappLibVersion || "N/A"}
                       </VersionValue>
                       <Typography variant="body2" color="textSecondary" sx={{ mb: 1 }}>
                         {versionInfo.whatsappLibNeedsUpdate 
@@ -319,11 +522,16 @@ const VersionCheck = () => {
                         {t("versionCheck.whatsappLibLatestVersion")}
                       </Typography>
                       <VersionValue>
-                        {versionInfo.whatsappLibLatestVersion || "N/A"}
+                        v{versionInfo.whatsappLibLatestVersion || "N/A"}
                       </VersionValue>
                       <Typography variant="body2" color="textSecondary" sx={{ mb: 1 }}>
                         {t("versionCheck.whatsappLibLatestAvailable")}
                       </Typography>
+                      {versionInfo.whatsappLibLatestReleaseDate && (
+                        <Typography variant="body2" color="textSecondary" sx={{ mt: 1, fontStyle: "italic" }}>
+                          Disponibilizada em: {new Date(versionInfo.whatsappLibLatestReleaseDate).toLocaleDateString('pt-BR')}
+                        </Typography>
+                      )}
                     </CardContent>
                   </VersionCard>
                 </Grid>
@@ -340,23 +548,41 @@ const VersionCheck = () => {
                       <Typography variant="body1" paragraph>
                         {t("versionCheck.whatsappLibUpdateMessage")}
                       </Typography>
-                      <Can
-                        role={user?.profile}
-                        perform="version-check:show"
-                        yes={() => (
-                          <>
-                            <Typography variant="body2" color="textSecondary">
-                              <Link 
-                                href="https://github.com/pedroslopez/whatsapp-web.js/releases" 
-                                target="_blank" 
-                                rel="noopener noreferrer"
-                              >
-                                {t("versionCheck.whatsappLibRepository")}
-                              </Link>
-                            </Typography>
-                          </>
-                        )}
-                      />
+                      
+                      <Box mt={2} mb={2}>
+                        <Button
+                          variant="contained"
+                          color="warning"
+                          onClick={handleUpdateWhatsappLib}
+                          disabled={updatingLib}
+                          startIcon={updatingLib ? <CircularProgress size={20} color="inherit" /> : <SystemUpdateIcon />}
+                          fullWidth
+                          size="medium"
+                          sx={{
+                            borderRadius: 2,
+                            py: 1,
+                            fontWeight: "bold",
+                            boxShadow: 2,
+                            '&:hover': {
+                              transform: 'translateY(-2px)',
+                              boxShadow: 3,
+                            },
+                            transition: 'all 0.3s ease'
+                          }}
+                        >
+                          {updatingLib ? "Atualizando..." : "Atualizar Biblioteca"}
+                        </Button>
+                      </Box>
+                      
+                      <Typography variant="body2" color="textSecondary">
+                        <Link 
+                          href="https://github.com/pedroslopez/whatsapp-web.js/releases" 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                        >
+                          {t("versionCheck.whatsappLibRepository")}
+                        </Link>
+                      </Typography>
                     </div>
                   </Box>
                 </MessageBox>

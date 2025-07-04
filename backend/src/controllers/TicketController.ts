@@ -15,6 +15,7 @@ import UpdateTicketService from "../services/TicketServices/UpdateTicketService"
 import SendWhatsAppMessage from "../services/WbotServices/SendWhatsAppMessage";
 import ShowWhatsAppService from "../services/WhatsappService/ShowWhatsAppService";
 import MarkMessagesAsReadService from "../services/MessageServices/MarkMessagesAsReadService";
+import { createActivityLog, ActivityActions, EntityTypes } from "../services/ActivityLogService";
 
 interface IndexQuery {
   searchParam?: string;
@@ -130,6 +131,18 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     whatsappId
   });
 
+  const logUserId = req.user?.id || 1;
+  const contact = await Contact.findByPk(contactId);
+  
+  await createActivityLog({
+    userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
+    action: ActivityActions.CREATE,
+    description: `Ticket #${ticket.id} criado para o contato ${contact?.name || contactId}`,
+    entityType: EntityTypes.TICKET,
+    entityId: ticket.id,
+    additionalData: { status, queueId, whatsappId }
+  });
+
   const io = getIO();
   io.to(ticket.status).emit("ticket", {
     action: "update",
@@ -165,6 +178,33 @@ export const update = async (
     ticketId
   });
 
+  const logUserId = req.user?.id || 1;
+  let logAction = ActivityActions.UPDATE;
+  let logDescription = `Ticket #${ticket.id} atualizado`;
+  
+  if (ticketData.transf) {
+    logAction = ActivityActions.TRANSFER;
+    const queue = await ShowQueueService(ticketData.queueId);
+    logDescription = `Ticket #${ticket.id} transferido para a fila ${queue?.name || ticketData.queueId}`;
+  }
+  
+  if (ticket.status === "closed") {
+    logAction = ActivityActions.CLOSE;
+    logDescription = `Ticket #${ticket.id} fechado`;
+  } else if (ticketData.status === "open" && ticket.status !== ticketData.status) {
+    logAction = ActivityActions.REOPEN;
+    logDescription = `Ticket #${ticket.id} reaberto`;
+  }
+  
+  await createActivityLog({
+    userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
+    action: logAction,
+    description: logDescription,
+    entityType: EntityTypes.TICKET,
+    entityId: ticket.id,
+    additionalData: ticketData
+  });
+
   if (ticketData.transf) {
     const { greetingMessage } = await ShowQueueService(ticketData.queueId);
     if (greetingMessage) {
@@ -195,7 +235,23 @@ export const remove = async (
 ): Promise<Response> => {
   const { ticketId } = req.params;
 
+  const ticketToDelete = await ShowTicketService(ticketId);
+  
   const ticket = await DeleteTicketService(ticketId);
+  const logUserId = req.user?.id || 1;
+  
+  await createActivityLog({
+    userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
+    action: ActivityActions.DELETE,
+    description: `Ticket #${ticketId} excluído`,
+    entityType: EntityTypes.TICKET,
+    entityId: parseInt(ticketId),
+    additionalData: {
+      contactId: ticketToDelete.contactId,
+      status: ticketToDelete.status,
+      lastMessage: ticketToDelete.lastMessage
+    }
+  });
 
   const io = getIO();
   io.to(ticket.status).to(ticketId).to("notification").emit("ticket", {
@@ -287,7 +343,6 @@ export const closeTickets = async (
       };
     }
 
-    // Verificar se existem tickets com o status especificado
     const tickets = await Ticket.findAll({
       where: whereCondition,
       include: [
@@ -298,7 +353,6 @@ export const closeTickets = async (
       ]
     });
 
-    // Se não encontrar tickets, retornar mensagem mais amigável
     if (!tickets || !tickets.length) {
       console.log(`Nenhum ticket encontrado para fechar com o filtro:`, whereCondition);
       return res.status(404).json({ 

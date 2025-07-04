@@ -7,6 +7,7 @@ import { SendRefreshToken } from "../helpers/SendRefreshToken";
 import User from "../models/User";
 import { RefreshTokenService } from "../services/AuthServices/RefreshTokenService";
 import AuthUserService from "../services/UserServices/AuthUserService";
+import { createActivityLog, ActivityActions, EntityTypes } from "../services/ActivityLogService";
 
 export const store = async (req: Request, res: Response): Promise<Response> => {
   const { email, password } = req.body;
@@ -14,6 +15,15 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
   const { token, serializedUser, refreshToken } = await AuthUserService({
     email,
     password
+  });
+
+  await createActivityLog({
+    userId: serializedUser.id,
+    action: ActivityActions.LOGIN,
+    description: `Usuário ${serializedUser.name} realizou login no sistema`,
+    entityType: EntityTypes.USER,
+    entityId: serializedUser.id,
+    additionalData: { email: serializedUser.email }
   });
 
   SendRefreshToken(res, refreshToken);
@@ -54,6 +64,15 @@ export const remove = async (
     const user = await User.findByPk(id);
     if (user) {
       await user.update({ online: false });
+      
+      await createActivityLog({
+        userId: user.id,
+        action: ActivityActions.LOGOUT,
+        description: `Usuário ${user.name} realizou logout do sistema`,
+        entityType: EntityTypes.USER,
+        entityId: user.id,
+        additionalData: {}
+      });
       
       const io = require("../libs/socket").getIO();
       io.emit("userSessionUpdate", {

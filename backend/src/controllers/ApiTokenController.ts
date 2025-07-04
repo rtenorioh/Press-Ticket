@@ -7,6 +7,7 @@ import FindByNameService from "../services/ApiTokenService/FindByNameService";
 import ListApiTokenService from "../services/ApiTokenService/ListApiTokenService";
 import ListPermissionsService from "../services/ApiTokenService/ListPermissionsService";
 import ShowApiTokenService from "../services/ApiTokenService/ShowApiTokenService";
+import { createActivityLog, ActivityActions, EntityTypes } from "../services/ActivityLogService";
 
 export const index = async (req: Request, res: Response): Promise<Response> => {
     const { pageNumber, pageSize } = req.query;
@@ -52,6 +53,20 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
         permissions: JSON.stringify(permissions)
     });
 
+    const logUserId = req.user?.id || 1;
+    
+    await createActivityLog({
+        userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
+        action: ActivityActions.CREATE,
+        description: `Token de API "${token.name}" criado`,
+        entityType: EntityTypes.APITOKEN,
+        entityId: token.id,
+        additionalData: {
+            name: token.name,
+            permissions: permissions
+        }
+    });
+
     return res.status(200).json(token);
 };
 
@@ -66,7 +81,22 @@ export const show = async (req: Request, res: Response): Promise<Response> => {
 export const remove = async (req: Request, res: Response): Promise<Response> => {
     const { id } = req.params;
 
+    const tokenToDelete = await ShowApiTokenService(+id);
+    
     await DeleteApiTokenService(+id);
+    
+    const logUserId = req.user?.id || 1;
+    
+    await createActivityLog({
+        userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
+        action: ActivityActions.DELETE,
+        description: `Token de API "${tokenToDelete.name}" excluído`,
+        entityType: EntityTypes.APITOKEN,
+        entityId: +id,
+        additionalData: {
+            name: tokenToDelete.name
+        }
+    });
 
     return res.status(200).json({ message: "Token deleted" });
 };

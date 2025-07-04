@@ -10,6 +10,7 @@ interface VersionInfo {
   whatsappLibVersion: string | null;
   whatsappLibLatestVersion: string | null;
   whatsappLibNeedsUpdate: boolean;
+  whatsappLibLatestReleaseDate: string | null;
 }
 
 const fetchLatestVersion = async (): Promise<string | null> => {
@@ -38,7 +39,12 @@ const getWhatsappLibVersion = (): string | null => {
   }
 };
 
-const fetchWhatsappLibLatestVersion = async (): Promise<string | null> => {
+interface WhatsappLibVersionInfo {
+  version: string | null;
+  releaseDate: string | null;
+}
+
+const fetchWhatsappLibLatestVersion = async (): Promise<WhatsappLibVersionInfo> => {
   try {
     const response = await axios.get(
       "https://api.github.com/repos/pedroslopez/whatsapp-web.js/releases"
@@ -47,20 +53,30 @@ const fetchWhatsappLibLatestVersion = async (): Promise<string | null> => {
     const stableReleases = response.data.filter((release: any) => !release.prerelease);
     
     if (stableReleases.length > 0) {
-      return stableReleases[0].tag_name.replace("v", "");
+      return {
+        version: stableReleases[0].tag_name.replace("v", ""),
+        releaseDate: stableReleases[0].published_at
+      };
     }
     
-    return null;
+    return {
+      version: null,
+      releaseDate: null
+    };
   } catch (error) {
     console.error("Erro ao buscar a versão mais recente da biblioteca whatsapp-web.js:", error);
-    return null;
+    return {
+      version: null,
+      releaseDate: null
+    };
   }
 };
 
 export const getVersionInfo = async (): Promise<VersionInfo> => {
   const latestVersion = await fetchLatestVersion();
   const whatsappLibVersion = getWhatsappLibVersion();
-  const whatsappLibLatestVersion = await fetchWhatsappLibLatestVersion();
+  const whatsappLibInfo = await fetchWhatsappLibLatestVersion();
+  const whatsappLibLatestVersion = whatsappLibInfo.version;
   
   const needsUpdate = latestVersion 
     ? systemVersion.localeCompare(latestVersion, undefined, { numeric: true, sensitivity: 'base' }) < 0
@@ -76,6 +92,7 @@ export const getVersionInfo = async (): Promise<VersionInfo> => {
     needsUpdate,
     whatsappLibVersion,
     whatsappLibLatestVersion,
-    whatsappLibNeedsUpdate
+    whatsappLibNeedsUpdate,
+    whatsappLibLatestReleaseDate: whatsappLibInfo.releaseDate
   };
 };

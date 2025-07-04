@@ -1,9 +1,16 @@
 import { Router } from "express";
 
+import activityLogRoutes from "./activityLogRoutes";
 import apiRoutes from "./apiRoutes";
 import versionRoutes from "./versionRoutes";
 import apiTokenRoutes from "./apiTokenRoutes";
 import authRoutes from "./authRoutes";
+import backupRoutes from "./backupRoutes";
+import networkMonitorRoutes from "./networkMonitorRoutes";
+import systemCleanupRoutes from "./systemCleanupRoutes";
+import queueMonitorRoutes from "./queueMonitorRoutes";
+import systemHealthRoutes from "./systemHealthRoutes";
+import systemUpdateRoutes from "./systemUpdateRoutes";
 import contactRoutes from "./contactRoutes";
 import errorLogRoutes from "./errorLogRoutes";
 import hubChannelRoutes from "./hubChannelRoutes";
@@ -45,5 +52,12 @@ routes.use(personalizationRoutes);
 routes.use(apiTokenRoutes);
 routes.use("/error-logs", errorLogRoutes);
 routes.use(versionRoutes);
+routes.use(backupRoutes);
+routes.use(activityLogRoutes);
+routes.use(networkMonitorRoutes);
+routes.use(systemCleanupRoutes);
+routes.use(queueMonitorRoutes);
+routes.use(systemHealthRoutes);
+routes.use(systemUpdateRoutes);
 
 export default routes;

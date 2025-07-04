@@ -5,6 +5,7 @@ import DeleteQueueService from "../services/QueueService/DeleteQueueService";
 import ListQueuesService from "../services/QueueService/ListQueuesService";
 import ShowQueueService from "../services/QueueService/ShowQueueService";
 import UpdateQueueService from "../services/QueueService/UpdateQueueService";
+import { createActivityLog, ActivityActions, EntityTypes } from "../services/ActivityLogService";
 
 export const index = async (req: Request, res: Response): Promise<Response> => {
   const queues = await ListQueuesService();
@@ -25,6 +26,22 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     startBreak, 
     endBreak, 
     breakMessage 
+  });
+
+  const logUserId = req.user?.id || 1;
+  
+  await createActivityLog({
+    userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
+    action: ActivityActions.CREATE,
+    description: `Setor ${queue.name} criado`,
+    entityType: EntityTypes.QUEUE,
+    entityId: queue.id,
+    additionalData: {
+      name,
+      color,
+      startWork,
+      endWork
+    }
   });
 
   const io = getIO();
@@ -51,6 +68,16 @@ export const update = async (
   const { queueId } = req.params;
 
   const queue = await UpdateQueueService(queueId, req.body);
+  const logUserId = req.user?.id || 1;
+  
+  await createActivityLog({
+    userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
+    action: ActivityActions.UPDATE,
+    description: `Setor ${queue.name} atualizado`,
+    entityType: EntityTypes.QUEUE,
+    entityId: queue.id,
+    additionalData: req.body
+  });
 
   const io = getIO();
   io.emit("queue", {
@@ -67,7 +94,22 @@ export const remove = async (
 ): Promise<Response> => {
   const { queueId } = req.params;
 
+  const queueToDelete = await ShowQueueService(queueId);
+  
   await DeleteQueueService(queueId);
+  const logUserId = req.user?.id || 1;
+  
+  await createActivityLog({
+    userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
+    action: ActivityActions.DELETE,
+    description: `Setor ${queueToDelete.name} excluído`,
+    entityType: EntityTypes.QUEUE,
+    entityId: parseInt(queueId),
+    additionalData: {
+      name: queueToDelete.name,
+      color: queueToDelete.color
+    }
+  });
 
   const io = getIO();
   io.emit("queue", {

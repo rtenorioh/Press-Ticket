@@ -10,8 +10,7 @@ import ListWhatsAppsService from "../services/WhatsappService/ListWhatsAppsServi
 import RestartWhatsAppService from "../services/WhatsappService/RestartWhatsAppService";
 import ShowWhatsAppService from "../services/WhatsappService/ShowWhatsAppService";
 import UpdateWhatsAppService from "../services/WhatsappService/UpdateWhatsAppService";
-// Vamos usar a biblioteca qrcode-terminal que já está instalada no projeto
-import qrCode from "qrcode-terminal";
+import { createActivityLog, ActivityActions, EntityTypes } from "../services/ActivityLogService";
 
 interface WhatsappData {
   name: string;
@@ -57,6 +56,21 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
   });
 
   StartWhatsAppSession(whatsapp);
+  
+  const logUserId = req.user?.id || 1;
+  
+  await createActivityLog({
+    userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
+    action: ActivityActions.CREATE,
+    description: `Conexão WhatsApp ${whatsapp.name} criada`,
+    entityType: EntityTypes.WHATSAPP,
+    entityId: whatsapp.id,
+    additionalData: {
+      name: whatsapp.name,
+      isDefault: whatsapp.isDefault,
+      status: whatsapp.status
+    }
+  });
 
   const io = getIO();
   io.emit("whatsapp", {
@@ -94,6 +108,17 @@ export const update = async (
     whatsappId
   });
 
+  const logUserId = req.user?.id || 1;
+  
+  await createActivityLog({
+    userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
+    action: ActivityActions.UPDATE,
+    description: `Conexão WhatsApp ${whatsapp.name} atualizada`,
+    entityType: EntityTypes.WHATSAPP,
+    entityId: whatsapp.id,
+    additionalData: whatsappData
+  });
+
   const io = getIO();
   io.emit("whatsapp", {
     action: "update",
@@ -116,8 +141,24 @@ export const remove = async (
 ): Promise<Response> => {
   const { whatsappId } = req.params;
 
+  const whatsappToDelete = await ShowWhatsAppService(whatsappId);
+  
   await DeleteWhatsAppService(whatsappId);
   removeWbot(+whatsappId);
+  
+  const logUserId = req.user?.id || 1;
+  
+  await createActivityLog({
+    userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
+    action: ActivityActions.DELETE,
+    description: `Conexão WhatsApp ${whatsappToDelete.name} excluída`,
+    entityType: EntityTypes.WHATSAPP,
+    entityId: parseInt(whatsappId),
+    additionalData: {
+      name: whatsappToDelete.name,
+      status: whatsappToDelete.status
+    }
+  });
 
   const io = getIO();
   io.emit("whatsapp", {

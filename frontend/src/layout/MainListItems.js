@@ -28,6 +28,15 @@ import VpnKeyRounded from "@mui/icons-material/VpnKeyRounded";
 import WhatsApp from "@mui/icons-material/WhatsApp";
 import BugReportOutlined from "@mui/icons-material/BugReportOutlined";
 import SystemUpdateIcon from "@mui/icons-material/SystemUpdate";
+import SystemUpdateAltIcon from "@mui/icons-material/SystemUpdateAlt";
+import DatabaseIcon from "@mui/icons-material/Storage";
+import BackupIcon from "@mui/icons-material/Backup";
+import HistoryIcon from "@mui/icons-material/History";
+import NetworkCheckIcon from "@mui/icons-material/NetworkCheck";
+import QueueIcon from "@mui/icons-material/Queue";
+import QueueMonitorIcon from '@mui/icons-material/Assessment';
+import SystemHealthIcon from '@mui/icons-material/HealthAndSafety';
+import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import { useTranslation } from "react-i18next";
 import { Can } from "../components/Can";
 import { AuthContext } from "../context/Auth/AuthContext";
@@ -245,6 +254,13 @@ const MainListItems = (props) => {
         active={location.pathname === '/tags'}
         drawerClose={drawerClose}
       />
+      <ListItemLink
+        to="/documentation"
+        primary={t("documentation.menuItem")}
+        icon={<HelpOutlineIcon />}
+        active={location.pathname === '/documentation'}
+        drawerClose={drawerClose}
+      />
       {user?.profile && (
         <Can
           role={user?.profile}
@@ -256,17 +272,6 @@ const MainListItems = (props) => {
                   {t("mainDrawer.listItems.administration")}
                 </SubheaderStyled>
               <DividerStyled />
-              <ListItemLink
-                to="/connections"
-                primary={t("mainDrawer.listItems.connections")}
-                icon={
-                  <StyledBadge badgeContent={connectionWarning ? "!" : 0} color="error" overlap="rectangular">
-                    <SyncAlt />
-                  </StyledBadge>
-                }
-                active={location.pathname === '/connections'}
-                drawerClose={drawerClose}
-              />
               <ListItemLink
                 to="/users"
                 primary={t("mainDrawer.listItems.users")}
@@ -282,24 +287,35 @@ const MainListItems = (props) => {
                 drawerClose={drawerClose}
               />
               <ListItemLink
+                to="/connections"
+                primary={t("mainDrawer.listItems.connections")}
+                icon={
+                  <StyledBadge badgeContent={connectionWarning ? "!" : 0} color="error" overlap="rectangular">
+                    <SyncAlt />
+                  </StyledBadge>
+                }
+                active={location.pathname === '/connections'}
+                drawerClose={drawerClose}
+              />
+              <ListItemLink
+                to="queue-monitor"
+                primary={t("mainDrawer.listItems.queueMonitor")}
+                icon={<QueueMonitorIcon />}
+                active={location.pathname === '/queue-monitor'}
+                drawerClose={drawerClose}
+              />  
+              <ListItemLink
                 to="/settings"
                 primary={t("mainDrawer.listItems.settings")}
                 icon={<SettingsOutlined />}
                 active={location.pathname === '/settings'}
                 drawerClose={drawerClose}
-              />
+              />                          
               <DividerStyled />
               <SubheaderStyled inset>
                 {t("mainDrawer.listItems.apititle")}
               </SubheaderStyled>
               <DividerStyled />
-              <ListItemLink
-                to="/api"
-                primary={t("mainDrawer.listItems.api")}
-                icon={<Code />}
-                active={location.pathname === '/api'}
-                drawerClose={drawerClose}
-              />
               <ListItemLink
                 to="/apidocs"
                 primary={t("mainDrawer.listItems.apidocs")}
@@ -314,16 +330,30 @@ const MainListItems = (props) => {
                 active={location.pathname === '/apikey'}
                 drawerClose={drawerClose}
               />
+              <ListItemLink
+                to="/api"
+                primary={t("mainDrawer.listItems.api")}
+                icon={<Code />}
+                active={location.pathname === '/api'}
+                drawerClose={drawerClose}
+              />             
               <DividerStyled />
               <SubheaderStyled inset>
                 {t("mainDrawer.listItems.system")}
               </SubheaderStyled>
               <DividerStyled />
               <ListItemLink
-                to="/errorLogs"
-                primary={t("mainDrawer.listItems.errorLogs")}
-                icon={<BugReportOutlined />}
-                active={location.pathname === '/errorLogs'}
+                to="/memoryUsage"
+                primary={t("mainDrawer.listItems.memoryUsage")}
+                icon={<MemoryIcon />}
+                active={location.pathname === '/memoryUsage'}
+                drawerClose={drawerClose}
+              />
+              <ListItemLink
+                to="cpuUsage"
+                primary={t("mainDrawer.listItems.cpuUsage")}
+                icon={<CpuIcon />}
+                active={location.pathname === '/cpuUsage'}
                 drawerClose={drawerClose}
               />
               <ListItemLink
@@ -334,21 +364,54 @@ const MainListItems = (props) => {
                 drawerClose={drawerClose}
               />
               <ListItemLink
-                to="/memoryUsage"
-                primary={t("mainDrawer.listItems.memoryUsage")}
-                icon={<MemoryIcon />}
-                active={location.pathname === '/memoryUsage'}
+                to="databaseStatus"
+                primary={t("mainDrawer.listItems.databaseStatus")}
+                icon={<DatabaseIcon />}
+                active={location.pathname === '/databaseStatus'}
                 drawerClose={drawerClose}
               />
               <ListItemLink
-                to="/cpuUsage"
-                primary={t("mainDrawer.listItems.cpuUsage")}
-                icon={<CpuIcon />}
-                active={location.pathname === '/cpuUsage'}
+                to="network-status"
+                primary={t("mainDrawer.listItems.networkStatus")}
+                icon={<NetworkCheckIcon />}
+                active={location.pathname === '/network-status'}
+                drawerClose={drawerClose}
+              />
+              <DividerStyled />
+              <SubheaderStyled inset>
+                {t("mainDrawer.listItems.maintenance")}
+              </SubheaderStyled>
+              <DividerStyled />
+              <ListItemLink
+                to="backup"
+                primary={t("mainDrawer.listItems.backup")}
+                icon={<BackupIcon />}
+                active={location.pathname === '/backup'}
                 drawerClose={drawerClose}
               />
               <ListItemLink
-                to="/versionCheck"
+                to="/errorLogs"
+                primary={t("mainDrawer.listItems.errorLogs")}
+                icon={<BugReportOutlined />}
+                active={location.pathname === '/errorLogs'}
+                drawerClose={drawerClose}
+              />
+              <ListItemLink
+                to="activity-logs"
+                primary={t("mainDrawer.listItems.activityLogs")}
+                icon={<HistoryIcon />}
+                active={location.pathname === '/activity-logs'}
+                drawerClose={drawerClose}
+              />
+              <ListItemLink
+                to="system-update"
+                primary={t("mainDrawer.listItems.systemUpdate")}
+                icon={<SystemUpdateAltIcon />}
+                active={location.pathname === '/system-update'}
+                drawerClose={drawerClose}
+              />
+              <ListItemLink
+                to="versionCheck"
                 primary={t("mainDrawer.listItems.versionCheck")}
                 icon={
                   <StyledBadge badgeContent={versionWarning ? "!" : 0} color="error" overlap="rectangular">

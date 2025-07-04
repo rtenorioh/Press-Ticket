@@ -12,6 +12,7 @@ import ShowService from "../services/TagServices/ShowService";
 import SimpleListService from "../services/TagServices/SimpleListService";
 import SyncTagService from "../services/TagServices/SyncTagsService";
 import UpdateService from "../services/TagServices/UpdateService";
+import { createActivityLog, ActivityActions, EntityTypes } from "../services/ActivityLogService";
 
 type IndexQuery = {
   searchParam?: string;
@@ -51,6 +52,20 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     color
   });
 
+  const logUserId = req.user?.id || 1;
+  
+  await createActivityLog({
+    userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
+    action: ActivityActions.CREATE,
+    description: `Tag ${tag.name} criada`,
+    entityType: EntityTypes.TAG,
+    entityId: tag.id,
+    additionalData: {
+      name: tag.name,
+      color: tag.color
+    }
+  });
+
   const io = getIO();
   io.emit("tag", {
     action: "create",
@@ -88,6 +103,17 @@ export const update = async (
 
     const tag = await UpdateService({ tagData, id: tagId });
 
+    const logUserId = req.user?.id || 1;
+    
+    await createActivityLog({
+      userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
+      action: ActivityActions.UPDATE,
+      description: `Tag ${tag.name} atualizada`,
+      entityType: EntityTypes.TAG,
+      entityId: tag.id,
+      additionalData: tagData
+    });
+
     const io = getIO();
     io.emit("tag", {
       action: "update",
@@ -110,7 +136,23 @@ export const remove = async (
 ): Promise<Response> => {
   const { tagId } = req.params;
 
+  const tagToDelete = await ShowService(tagId);
+  
   await DeleteService(tagId);
+  
+  const logUserId = req.user?.id || 1;
+  
+  await createActivityLog({
+    userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
+    action: ActivityActions.DELETE,
+    description: `Tag ${tagToDelete.name} excluída`,
+    entityType: EntityTypes.TAG,
+    entityId: parseInt(tagId),
+    additionalData: {
+      name: tagToDelete.name,
+      color: tagToDelete.color
+    }
+  });
 
   const io = getIO();
   io.emit("tag", {
@@ -125,9 +167,21 @@ export const removeAll = async (
   req: Request,
   res: Response
 ): Promise<Response> => {
-  const { tagId } = req.params;
 
   await DeleteAllService();
+  
+  const logUserId = req.user?.id || 1;
+  
+  await createActivityLog({
+    userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
+    action: ActivityActions.DELETE,
+    description: `Todas as tags foram excluídas`,
+    entityType: EntityTypes.TAG,
+    entityId: 0,
+    additionalData: {
+      massDelete: true
+    }
+  });
 
   return res.send();
 };

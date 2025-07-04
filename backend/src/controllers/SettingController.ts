@@ -5,6 +5,7 @@ import { getIO } from "../libs/socket";
 
 import ListSettingsService from "../services/SettingServices/ListSettingsService";
 import UpdateSettingService from "../services/SettingServices/UpdateSettingService";
+import { createActivityLog, ActivityActions, EntityTypes } from "../services/ActivityLogService";
 
 export const index = async (req: Request, res: Response): Promise<Response> => {
   if (req.user.profile === "") {
@@ -30,6 +31,22 @@ export const update = async (
     key,
     value
   });
+
+  const logUserId = req.user?.id || 1;
+  
+  if (setting) {
+    await createActivityLog({
+      userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
+      action: ActivityActions.UPDATE,
+      description: `Configuração "${key}" atualizada`,
+      entityType: EntityTypes.SETTING,
+      entityId: setting.id,
+      additionalData: {
+        key: setting.key,
+        value: setting.value
+      }
+    });
+  }
 
   const io = getIO();
   io.emit("settings", {

@@ -10,6 +10,7 @@ import * as TicketController from "../controllers/TicketController";
 import * as WhatsAppController from "../controllers/WhatsAppController";
 import WhatsAppSessionController from "../controllers/WhatsAppSessionController";
 import * as WhatsAppNumberController from "../controllers/WhatsAppNumberController";
+import * as ActivityLogController from "../controllers/ActivityLogController";
 import isApiToken from "../middleware/isApiToken";
 
 const upload = multer(uploadConfig);
@@ -70,5 +71,11 @@ openApiRouter.post("/whatsapp/check-number", isApiToken('read:whatsapp'), WhatsA
 openApiRouter.post("/whatsappsession/:whatsappId", isApiToken('create:whatsappsession'), WhatsAppSessionController.store);
 openApiRouter.put("/whatsappsession/:whatsappId", isApiToken('update:whatsappsession'), WhatsAppSessionController.update);
 openApiRouter.delete("/whatsappsession/:whatsappId", isApiToken('delete:whatsappsession'), WhatsAppSessionController.remove);
+
+// Rotas de Logs de Atividade
+openApiRouter.get("/activity-logs", isApiToken('read:activity-logs'), ActivityLogController.index);
+openApiRouter.get("/activity-logs/actions", isApiToken('read:activity-logs'), ActivityLogController.actions);
+openApiRouter.get("/activity-logs/entities", isApiToken('read:activity-logs'), ActivityLogController.entities);
+openApiRouter.get("/activity-logs/:id/details", isApiToken('read:activity-logs'), ActivityLogController.show);
 
 export default openApiRouter;

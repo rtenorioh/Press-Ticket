@@ -2,6 +2,13 @@ import { exec } from "child_process";
 import path from "path";
 import { logger } from "../../utils/logger";
 
+interface FolderSizeInfo {
+  path: string;
+  name: string;
+  size: string;
+  sizeBytes: number;
+}
+
 interface DiskSpaceInfo {
   folderName: string;
   folderPath: string;
@@ -12,6 +19,7 @@ interface DiskSpaceInfo {
   totalSpace: string;
   totalSpaceBytes: number;
   usedPercentage: number;
+  largestFolders: FolderSizeInfo[];
 }
 
 export const getDiskSpaceInfo = async (): Promise<DiskSpaceInfo> => {
@@ -23,6 +31,80 @@ export const getDiskSpaceInfo = async (): Promise<DiskSpaceInfo> => {
 
   // Caminho da pasta do sistema atual
   const folderPath = path.resolve("/home/deploy", companyName);
+
+  // Função para obter as 10 maiores pastas, incluindo subpastas
+  const getLargestFolders = () => {
+    return new Promise<FolderSizeInfo[]>((resolve, reject) => {
+      // Usar find para localizar todos os diretórios e du para obter o tamanho
+      // -type d para encontrar apenas diretórios
+      // -not -path "*/node_modules/*" para excluir node_modules que geralmente é muito grande
+      // -not -path "*/dist/*" para excluir pasta dist
+      exec(`find ${folderPath} -type d -not -path "*/node_modules/*" -not -path "*/build/*" -not -path "*/dist/*" | xargs du -sh | sort -hr | head -n 20`, (error, stdout, stderr) => {
+        if (error) {
+          logger.error(`Erro ao obter as maiores pastas: ${error.message}`);
+          reject(error);
+          return;
+        }
+        
+        const lines = stdout.trim().split("\n");
+        const folders: FolderSizeInfo[] = [];
+        let processedCount = 0;
+        
+        // Se não houver pastas, resolver com array vazio
+        if (lines.length === 0) {
+          resolve([]);
+          return;
+        }
+        
+        for (const line of lines) {
+          const parts = line.trim().split(/\s+/);
+          if (parts.length >= 2) {
+            const size = parts[0];
+            // O caminho pode conter espaços, então juntamos o resto
+            const folderPath = parts.slice(1).join(" ");
+            const name = path.relative(path.resolve("/home/deploy", companyName), folderPath);
+            
+            // Obter o tamanho em bytes para ordenação
+            exec(`du -sb "${folderPath}"`, (error, stdout, stderr) => {
+              if (error) {
+                logger.error(`Erro ao obter tamanho em bytes: ${error.message}`);
+                processedCount++;
+                
+                if (processedCount === lines.length) {
+                  folders.sort((a, b) => b.sizeBytes - a.sizeBytes);
+                  resolve(folders);
+                }
+                return;
+              }
+              
+              const bytesOutput = stdout.trim();
+              const sizeBytes = parseInt(bytesOutput.split(/\s+/)[0]);
+              
+              folders.push({
+                path: folderPath,
+                name: name || path.basename(folderPath), // Usar nome relativo ou basename se não for possível
+                size,
+                sizeBytes
+              });
+              
+              processedCount++;
+              if (processedCount === lines.length) {
+                // Ordenar por tamanho em bytes (decrescente)
+                folders.sort((a, b) => b.sizeBytes - a.sizeBytes);
+                resolve(folders);
+              }
+            });
+          } else {
+            processedCount++;
+            if (processedCount === lines.length) {
+              folders.sort((a, b) => b.sizeBytes - a.sizeBytes);
+              resolve(folders);
+            }
+          }
+        }
+      });
+    });
+  };
   
   // Obter tamanho da pasta do sistema
   const getFolderSize = () => {
@@ -103,9 +185,10 @@ export const getDiskSpaceInfo = async (): Promise<DiskSpaceInfo> => {
   };
   
   // Executar as funções para obter as informações
-  const [folderInfo, diskInfo] = await Promise.all([
+  const [folderInfo, diskInfo, largestFolders] = await Promise.all([
     getFolderSize(),
-    getDiskFreeSpace()
+    getDiskFreeSpace(),
+    getLargestFolders()
   ]);
   
   // Calcular a porcentagem de uso
@@ -120,6 +203,7 @@ export const getDiskSpaceInfo = async (): Promise<DiskSpaceInfo> => {
     freeSpaceBytes: diskInfo.freeBytes,
     totalSpace: diskInfo.total,
     totalSpaceBytes: diskInfo.totalBytes,
-    usedPercentage
+    usedPercentage,
+    largestFolders
   };
 };

@@ -9,6 +9,7 @@ import DeleteUserService from "../services/UserServices/DeleteUserService";
 import ListUsersService from "../services/UserServices/ListUsersService";
 import ShowUserService from "../services/UserServices/ShowUserService";
 import UpdateUserService from "../services/UserServices/UpdateUserService";
+import { createActivityLog, ActivityActions, EntityTypes } from "../services/ActivityLogService";
 
 type IndexQuery = {
   searchParam: string;
@@ -68,6 +69,20 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     active
   });
 
+  const logUserId = req.user?.id || 1;
+  
+  await createActivityLog({
+    userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
+    action: ActivityActions.CREATE,
+    description: `Usuário ${user.name} (${user.email}) criado com perfil ${user.profile}`,
+    entityType: EntityTypes.USER,
+    entityId: user.id,
+    additionalData: {
+      email: user.email,
+      profile: user.profile
+    }
+  });
+
   const io = getIO();
   io.emit("user", {
     action: "create",
@@ -105,6 +120,18 @@ export const update = async (
   const userData = req.body;
 
   const user = await UpdateUserService({ userData, userId });
+  const logUserId = req.user?.id || 1;
+  
+  if (user) {
+    await createActivityLog({
+      userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
+      action: ActivityActions.UPDATE,
+      description: `Usuário ${user.name} (${user.email}) atualizado`,
+      entityType: EntityTypes.USER,
+      entityId: user.id,
+      additionalData: userData
+    });
+  }
 
   const io = getIO();
   io.emit("user", {
@@ -129,7 +156,22 @@ export const remove = async (
     throw new AppError("ERR_NO_PERMISSION", 403);
   }
 
+  const userToDelete = await ShowUserService(userId);
+  
   await DeleteUserService(userId);
+  const logUserId = req.user?.id || 1;
+  
+  await createActivityLog({
+    userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
+    action: ActivityActions.DELETE,
+    description: `Usuário ${userToDelete.name} (${userToDelete.email}) excluído`,
+    entityType: EntityTypes.USER,
+    entityId: parseInt(userId),
+    additionalData: {
+      email: userToDelete.email,
+      profile: userToDelete.profile
+    }
+  });
 
   const io = getIO();
   io.emit("user", {
