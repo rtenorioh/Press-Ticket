@@ -11,7 +11,7 @@ const DEFAULT_PERMISSIONS = [
     'create:messages',
     'read:messages',
     
-    // Filas/Setores
+    // Setores
     'create:queue',
     'read:queue',
     'update:queue',
@@ -38,7 +38,39 @@ const DEFAULT_PERMISSIONS = [
     // Sessões de WhatsApp
     'create:whatsappsession',
     'update:whatsappsession',
-    'delete:whatsappsession'
+    'delete:whatsappsession',
+    
+    // Logs de Atividade
+    'read:activity-logs',
+    
+    // Backups
+    'create:backups',
+    'read:backups',
+    'update:backups',
+    'delete:backups',
+    
+    // Logs de Erro
+    'create:error-logs',
+    'read:error-logs',
+    'delete:error-logs',
+    
+    // Monitoramento de Rede
+    'read:network-status',
+    
+    // Monitoramento de Setores
+    'read:queue-monitor',
+    
+    // Atualização do Sistema
+    'read:system-update',
+    'write:system-update',
+    
+    // Versão e Biblioteca WhatsApp
+    'read:version',
+    'write:whatsapp-lib',
+    
+    // Sistema e Recursos
+    'write:system',
+    'read:system-resources'
 ];
 
 const ListPermissionsService = async (): Promise<string[]> => {

@@ -17,7 +17,15 @@ const messages = {
           tags: "Tags",
           tickets: "Tickets",
           whatsapp: "WhatsApp",
-          whatsappSession: "Sessões de WhatsApp"
+          whatsappSession: "Sessões de WhatsApp",
+          activityLogs: "Logs de Atividade",
+          backups: "Backups",
+          errorLogs: "Logs de Erro",
+          networkStatus: "Monitoramento de Rede",
+          queueMonitor: "Monitoramento de Filas",
+          systemUpdate: "Atualização do Sistema",
+          versionWhatsapp: "Versão e Biblioteca WhatsApp",
+          systemResources: "Sistema e Recursos"
         },
         permissions: {
           createContacts: "Criar Contatos",
@@ -44,7 +52,23 @@ const messages = {
           deleteWhatsapp: "Deletar Conexões",
           createWhatsappSession: "Criar Sessões",
           updateWhatsappSession: "Editar Sessões",
-          deleteWhatsappSession: "Deletar Sessões"
+          deleteWhatsappSession: "Deletar Sessões",
+          readActivityLogs: "Visualizar Logs de Atividade",
+          createBackups: "Criar Backups",
+          readBackups: "Visualizar Backups",
+          updateBackups: "Restaurar Backups",
+          deleteBackups: "Deletar Backups",
+          createErrorLogs: "Registrar Logs de Erro",
+          readErrorLogs: "Visualizar Logs de Erro",
+          deleteErrorLogs: "Limpar Logs de Erro",
+          readNetworkStatus: "Visualizar Status da Rede",
+          readQueueMonitor: "Visualizar Monitoramento de Filas",
+          readSystemUpdate: "Verificar Atualizações do Sistema",
+          writeSystemUpdate: "Instalar Atualizações do Sistema",
+          readVersion: "Consultar Versão do Sistema",
+          writeWhatsappLib: "Atualizar Biblioteca do WhatsApp",
+          writeSystem: "Reiniciar Serviços do Sistema",
+          readSystemResources: "Monitorar Recursos do Sistema"
         },
         messages: {
           success: {

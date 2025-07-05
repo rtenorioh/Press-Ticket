@@ -14,7 +14,7 @@ const ApiDocs = () => {
 
 	return (
 		<Root>
-			<iframe title="Doc da API" src={urlapi} height='500' width='100%' frameBorder="0" />
+			<iframe title="Doc da API" src={urlapi} height='550' width='100%' frameBorder="0" />
 		</Root>
 	);
 };

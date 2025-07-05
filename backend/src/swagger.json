@@ -2460,10 +2460,1600 @@
           }
         }
       }
+    },
+    "/v1/activity-logs": {
+      "get": {
+        "summary": "Listar Logs de Atividade",
+        "description": "Listar logs de atividade do sistema via API\n\nPermissões requeridas: `read:activity-logs`",
+        "tags": [
+          "ActivityLogs"
+        ],
+        "security": [
+          {
+            "apiToken": [
+              "read:activity-logs"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "startDate",
+            "in": "query",
+            "description": "Data inicial para filtrar logs (formato YYYY-MM-DD)",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "endDate",
+            "in": "query",
+            "description": "Data final para filtrar logs (formato YYYY-MM-DD)",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "userId",
+            "in": "query",
+            "description": "ID do usuário para filtrar logs",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "action",
+            "in": "query",
+            "description": "Tipo de ação para filtrar logs",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Limite de registros por página",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 10
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Deslocamento para paginação",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de logs de atividade",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "logs": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/ActivityLog"
+                      }
+                    },
+                    "count": {
+                      "type": "integer",
+                      "description": "Total de logs encontrados"
+                    },
+                    "hasMore": {
+                      "type": "boolean",
+                      "description": "Indica se há mais logs além dos retornados"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token inválido ou não fornecido"
+          },
+          "403": {
+            "description": "Token não tem permissão 'read:activity-logs'"
+          },
+          "500": {
+            "description": "Erro interno!"
+          }
+        }
+      }
+    },
+    "/v1/activity-logs/actions": {
+      "get": {
+        "summary": "Listar Tipos de Ações",
+        "description": "Listar todos os tipos de ações disponíveis para logs de atividade\n\nPermissões requeridas: `read:activity-logs`",
+        "tags": [
+          "ActivityLogs"
+        ],
+        "security": [
+          {
+            "apiToken": [
+              "read:activity-logs"
+            ]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de tipos de ações",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "enum": ["login", "logout", "create", "update", "delete", "transfer", "accept", "close", "reopen"]
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token inválido ou não fornecido"
+          },
+          "403": {
+            "description": "Token não tem permissão 'read:activity-logs'"
+          },
+          "500": {
+            "description": "Erro interno!"
+          }
+        }
+      }
+    },
+    "/v1/activity-logs/entities": {
+      "get": {
+        "summary": "Listar Tipos de Entidades",
+        "description": "Listar todos os tipos de entidades disponíveis para logs de atividade\n\nPermissões requeridas: `read:activity-logs`",
+        "tags": [
+          "ActivityLogs"
+        ],
+        "security": [
+          {
+            "apiToken": [
+              "read:activity-logs"
+            ]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de tipos de entidades",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "enum": ["ticket", "contact", "user", "whatsapp", "queue", "tag", "quickanswer", "backup", "apitoken", "setting", "integration"]
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token inválido ou não fornecido"
+          },
+          "403": {
+            "description": "Token não tem permissão 'read:activity-logs'"
+          },
+          "500": {
+            "description": "Erro interno!"
+          }
+        }
+      }
+    },
+    "/v1/activity-logs/{id}/details": {
+      "get": {
+        "summary": "Obter Detalhes de Entidade",
+        "description": "Obter detalhes de uma entidade específica relacionada a um log de atividade\n\nPermissões requeridas: `read:activity-logs`",
+        "tags": [
+          "ActivityLogs"
+        ],
+        "security": [
+          {
+            "apiToken": [
+              "read:activity-logs"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID do log de atividade",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "entityType",
+            "in": "query",
+            "description": "Tipo da entidade",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": ["ticket", "contact", "user", "whatsapp", "queue", "tag", "quickanswer", "backup", "apitoken", "setting", "integration"]
+            }
+          },
+          {
+            "name": "entityId",
+            "in": "query",
+            "description": "ID da entidade",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Detalhes da entidade",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "description": "Os detalhes retornados dependem do tipo de entidade"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Tipo de entidade e ID são obrigatórios"
+          },
+          "401": {
+            "description": "Token inválido ou não fornecido"
+          },
+          "403": {
+            "description": "Token não tem permissão 'read:activity-logs'"
+          },
+          "404": {
+            "description": "Detalhes da entidade não encontrados"
+          },
+          "500": {
+            "description": "Erro interno!"
+          }
+        }
+      }
+    },
+    "/v1/backups": {
+      "get": {
+        "summary": "Listar Backups",
+        "description": "Listar todos os backups disponíveis via API\n\nPermissões requeridas: `read:backups`",
+        "tags": [
+          "Backups"
+        ],
+        "security": [
+          {
+            "apiToken": [
+              "read:backups"
+            ]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de backups",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "filename": {
+                        "type": "string"
+                      },
+                      "size": {
+                        "type": "integer"
+                      },
+                      "createdAt": {
+                        "type": "string",
+                        "format": "date-time"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Não autorizado"
+          }
+        }
+      },
+      "post": {
+        "summary": "Criar Backup",
+        "description": "Criar um novo backup via API\n\nPermissões requeridas: `create:backups`",
+        "tags": [
+          "Backups"
+        ],
+        "security": [
+          {
+            "apiToken": [
+              "create:backups"
+            ]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Backup criado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    },
+                    "backup": {
+                      "type": "object",
+                      "properties": {
+                        "filename": {
+                          "type": "string"
+                        },
+                        "size": {
+                          "type": "integer"
+                        },
+                        "createdAt": {
+                          "type": "string",
+                          "format": "date-time"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Não autorizado"
+          },
+          "500": {
+            "description": "Erro ao criar backup"
+          }
+        }
+      }
+    },
+    "/v1/backups/{filename}": {
+      "get": {
+        "summary": "Baixar Backup",
+        "description": "Baixar um arquivo de backup específico via API\n\nPermissões requeridas: `read:backups`",
+        "tags": [
+          "Backups"
+        ],
+        "security": [
+          {
+            "apiToken": [
+              "read:backups"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "filename",
+            "in": "path",
+            "description": "Nome do arquivo de backup",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Arquivo de backup",
+            "content": {
+              "application/gzip": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Backup não encontrado"
+          },
+          "401": {
+            "description": "Não autorizado"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Excluir Backup",
+        "description": "Excluir um arquivo de backup específico via API\n\nPermissões requeridas: `delete:backups`",
+        "tags": [
+          "Backups"
+        ],
+        "security": [
+          {
+            "apiToken": [
+              "delete:backups"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "filename",
+            "in": "path",
+            "description": "Nome do arquivo de backup",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Backup excluído com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Backup não encontrado"
+          },
+          "401": {
+            "description": "Não autorizado"
+          }
+        }
+      }
+    },
+    "/v1/backups/{filename}/restore": {
+      "post": {
+        "summary": "Restaurar Backup",
+        "description": "Restaurar um backup específico via API\n\nPermissões requeridas: `update:backups`",
+        "tags": [
+          "Backups"
+        ],
+        "security": [
+          {
+            "apiToken": [
+              "update:backups"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "filename",
+            "in": "path",
+            "description": "Nome do arquivo de backup",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Backup restaurado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Backup não encontrado"
+          },
+          "401": {
+            "description": "Não autorizado"
+          },
+          "500": {
+            "description": "Erro ao restaurar backup"
+          }
+        }
+      }
+    },
+    "/v1/error-logs": {
+      "get": {
+        "summary": "Listar Logs de Erro",
+        "description": "Listar todos os logs de erro via API\n\nPermissões requeridas: `read:error-logs`",
+        "tags": [
+          "ErrorLogs"
+        ],
+        "security": [
+          {
+            "apiToken": [
+              "read:error-logs"
+            ]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de logs de erro",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "integer"
+                      },
+                      "message": {
+                        "type": "string"
+                      },
+                      "stack": {
+                        "type": "string"
+                      },
+                      "url": {
+                        "type": "string"
+                      },
+                      "userAgent": {
+                        "type": "string"
+                      },
+                      "createdAt": {
+                        "type": "string",
+                        "format": "date-time"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Não autorizado"
+          }
+        }
+      },
+      "post": {
+        "summary": "Registrar Log de Erro",
+        "description": "Registrar um novo log de erro via API\n\nPermissões requeridas: `create:error-logs`",
+        "tags": [
+          "ErrorLogs"
+        ],
+        "security": [
+          {
+            "apiToken": [
+              "create:error-logs"
+            ]
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "message": {
+                    "type": "string",
+                    "description": "Mensagem de erro"
+                  },
+                  "stack": {
+                    "type": "string",
+                    "description": "Stack trace do erro"
+                  },
+                  "url": {
+                    "type": "string",
+                    "description": "URL onde ocorreu o erro"
+                  },
+                  "userAgent": {
+                    "type": "string",
+                    "description": "User Agent do navegador"
+                  }
+                },
+                "required": ["message"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Log de erro registrado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "stack": {
+                      "type": "string"
+                    },
+                    "url": {
+                      "type": "string"
+                    },
+                    "userAgent": {
+                      "type": "string"
+                    },
+                    "createdAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Não autorizado"
+          },
+          "400": {
+            "description": "Dados inválidos"
+          }
+        }
+      }
+    },
+    "/v1/error-logs/{id}": {
+      "get": {
+        "summary": "Obter Log de Erro",
+        "description": "Obter detalhes de um log de erro específico via API\n\nPermissões requeridas: `read:error-logs`",
+        "tags": [
+          "ErrorLogs"
+        ],
+        "security": [
+          {
+            "apiToken": [
+              "read:error-logs"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID do log de erro",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Detalhes do log de erro",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "stack": {
+                      "type": "string"
+                    },
+                    "url": {
+                      "type": "string"
+                    },
+                    "userAgent": {
+                      "type": "string"
+                    },
+                    "createdAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Log de erro não encontrado"
+          },
+          "401": {
+            "description": "Não autorizado"
+          }
+        }
+      }
+    },
+    "/v1/error-logs/cleanup": {
+      "delete": {
+        "summary": "Limpar Logs de Erro Antigos",
+        "description": "Limpar logs de erro antigos via API\n\nPermissões requeridas: `delete:error-logs`",
+        "tags": [
+          "ErrorLogs"
+        ],
+        "security": [
+          {
+            "apiToken": [
+              "delete:error-logs"
+            ]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Logs de erro antigos removidos com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    },
+                    "count": {
+                      "type": "integer",
+                      "description": "Número de logs removidos"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Não autorizado"
+          }
+        }
+      }
+    },
+    "/v1/network-status": {
+      "get": {
+        "summary": "Obter Status da Rede",
+        "description": "Obter informações sobre o status da rede via API\n\nPermissões requeridas: `read:network-status`",
+        "tags": [
+          "NetworkMonitor"
+        ],
+        "security": [
+          {
+            "apiToken": [
+              "read:network-status"
+            ]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Informações de status da rede",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "connections": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "status": {
+                            "type": "string"
+                          },
+                          "lastCheck": {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          "ping": {
+                            "type": "number"
+                          }
+                        }
+                      }
+                    },
+                    "serverStatus": {
+                      "type": "object",
+                      "properties": {
+                        "uptime": {
+                          "type": "number"
+                        },
+                        "memoryUsage": {
+                          "type": "object"
+                        },
+                        "cpuUsage": {
+                          "type": "number"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Não autorizado"
+          }
+        }
+      }
+    },
+    "/v1/queue-monitor": {
+      "get": {
+        "summary": "Obter Monitoramento de Filas",
+        "description": "Obter informações sobre o monitoramento de filas via API\n\nPermissões requeridas: `read:queue-monitor`",
+        "tags": [
+          "QueueMonitor"
+        ],
+        "security": [
+          {
+            "apiToken": [
+              "read:queue-monitor"
+            ]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Informações de monitoramento de filas",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "queues": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "color": {
+                            "type": "string"
+                          },
+                          "activeTickets": {
+                            "type": "integer"
+                          },
+                          "waitingTickets": {
+                            "type": "integer"
+                          },
+                          "avgWaitTime": {
+                            "type": "number"
+                          },
+                          "users": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "id": {
+                                  "type": "integer"
+                                },
+                                "name": {
+                                  "type": "string"
+                                },
+                                "activeTickets": {
+                                  "type": "integer"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "summary": {
+                      "type": "object",
+                      "properties": {
+                        "totalQueues": {
+                          "type": "integer"
+                        },
+                        "totalActiveTickets": {
+                          "type": "integer"
+                        },
+                        "totalWaitingTickets": {
+                          "type": "integer"
+                        },
+                        "avgWaitTime": {
+                          "type": "number"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Não autorizado"
+          }
+        }
+      }
+    },
+    "/v1/system-update/check": {
+      "get": {
+        "summary": "Verificar Atualizações do Sistema",
+        "description": "Verifica se há atualizações disponíveis para o sistema\n\nPermissões requeridas: `read:system-update`",
+        "tags": [
+          "SystemUpdate"
+        ],
+        "security": [
+          {
+            "apiToken": [
+              "read:system-update"
+            ]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Informações sobre atualizações disponíveis",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "available": {
+                      "type": "boolean"
+                    },
+                    "currentVersion": {
+                      "type": "string"
+                    },
+                    "latestVersion": {
+                      "type": "string"
+                    },
+                    "releaseNotes": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Não autorizado"
+          }
+        }
+      }
+    },
+    "/v1/system-update/install": {
+      "post": {
+        "summary": "Instalar Atualizações do Sistema",
+        "description": "Inicia o processo de instalação de atualizações do sistema\n\nPermissões requeridas: `write:system-update`",
+        "tags": [
+          "SystemUpdate"
+        ],
+        "security": [
+          {
+            "apiToken": [
+              "write:system-update"
+            ]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Instalação iniciada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Não autorizado"
+          },
+          "400": {
+            "description": "Erro ao iniciar a instalação"
+          }
+        }
+      }
+    },
+    "/v1/system-update/status": {
+      "get": {
+        "summary": "Obter Status da Atualização",
+        "description": "Obtém o status atual do processo de atualização do sistema\n\nPermissões requeridas: `read:system-update`",
+        "tags": [
+          "SystemUpdate"
+        ],
+        "security": [
+          {
+            "apiToken": [
+              "read:system-update"
+            ]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Status da atualização",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "enum": ["idle", "checking", "downloading", "installing", "completed", "failed"]
+                    },
+                    "progress": {
+                      "type": "number"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "error": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Não autorizado"
+          }
+        }
+      }
+    },
+    "/v1/system-update/backups": {
+      "get": {
+        "summary": "Listar Backups do Sistema",
+        "description": "Lista os backups disponíveis do sistema\n\nPermissões requeridas: `read:system-update`",
+        "tags": [
+          "SystemUpdate"
+        ],
+        "security": [
+          {
+            "apiToken": [
+              "read:system-update"
+            ]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de backups",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "fileName": {
+                        "type": "string"
+                      },
+                      "size": {
+                        "type": "number"
+                      },
+                      "createdAt": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "version": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Não autorizado"
+          }
+        }
+      }
+    },
+    "/v1/system-update/restore/{backupFileName}": {
+      "post": {
+        "summary": "Restaurar Sistema a partir de Backup",
+        "description": "Restaura o sistema a partir de um backup específico\n\nPermissões requeridas: `write:system-update`",
+        "tags": [
+          "SystemUpdate"
+        ],
+        "parameters": [
+          {
+            "name": "backupFileName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Nome do arquivo de backup"
+          }
+        ],
+        "security": [
+          {
+            "apiToken": [
+              "write:system-update"
+            ]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Restauração iniciada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Não autorizado"
+          },
+          "404": {
+            "description": "Backup não encontrado"
+          },
+          "400": {
+            "description": "Erro ao iniciar a restauração"
+          }
+        }
+      }
+    },
+    "/v1/version": {
+      "get": {
+        "summary": "Obter Versão do Sistema",
+        "description": "Obtém a versão atual do sistema\n\nPermissões requeridas: `read:version`",
+        "tags": [
+          "Version"
+        ],
+        "security": [
+          {
+            "apiToken": [
+              "read:version"
+            ]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Versão obtida com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "version": {
+                      "type": "string",
+                      "example": "v1.13.2"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Não autorizado"
+          },
+          "500": {
+            "description": "Erro ao obter versão",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "Erro ao obter versão do sistema"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/whatsapp-lib/update": {
+      "post": {
+        "summary": "Atualizar Biblioteca do WhatsApp",
+        "description": "Atualiza a biblioteca do WhatsApp para a versão mais recente\n\nPermissões requeridas: `write:whatsapp-lib`",
+        "tags": [
+          "WhatsAppLibrary"
+        ],
+        "security": [
+          {
+            "apiToken": [
+              "write:whatsapp-lib"
+            ]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Biblioteca atualizada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Biblioteca do WhatsApp atualizada com sucesso"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Não autorizado"
+          },
+          "500": {
+            "description": "Erro ao atualizar biblioteca",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "Erro ao atualizar biblioteca do WhatsApp"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/restartpm2": {
+      "post": {
+        "summary": "Reiniciar Serviços PM2",
+        "description": "Reinicia os serviços do sistema gerenciados pelo PM2\n\nPermissões requeridas: `write:system`",
+        "tags": [
+          "System"
+        ],
+        "security": [
+          {
+            "apiToken": [
+              "write:system"
+            ]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Serviços reiniciados com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Serviços reiniciados com sucesso"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Não autorizado"
+          },
+          "500": {
+            "description": "Erro ao reiniciar serviços",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "example": "Erro ao reiniciar serviços"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/disk-space": {
+      "get": {
+        "summary": "Obter Espaço em Disco",
+        "description": "Obtém informações sobre o espaço em disco do sistema\n\nPermissões requeridas: `read:system-resources`",
+        "tags": [
+          "System"
+        ],
+        "security": [
+          {
+            "apiToken": [
+              "read:system-resources"
+            ]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Informações de espaço em disco obtidas com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "diskSpace": {
+                      "type": "object",
+                      "properties": {
+                        "free": {
+                          "type": "string",
+                          "example": "10.5 GB"
+                        },
+                        "size": {
+                          "type": "string",
+                          "example": "50 GB"
+                        },
+                        "used": {
+                          "type": "string",
+                          "example": "39.5 GB"
+                        },
+                        "percent": {
+                          "type": "number",
+                          "example": 79
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Não autorizado"
+          },
+          "500": {
+            "description": "Erro ao obter informações de espaço em disco"
+          }
+        }
+      }
+    },
+    "/v1/memory-usage": {
+      "get": {
+        "summary": "Obter Uso de Memória",
+        "description": "Obtém informações sobre o uso de memória do sistema\n\nPermissões requeridas: `read:system-resources`",
+        "tags": [
+          "System"
+        ],
+        "security": [
+          {
+            "apiToken": [
+              "read:system-resources"
+            ]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Informações de uso de memória obtidas com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "memory": {
+                      "type": "object",
+                      "properties": {
+                        "free": {
+                          "type": "string",
+                          "example": "2.5 GB"
+                        },
+                        "total": {
+                          "type": "string",
+                          "example": "8 GB"
+                        },
+                        "used": {
+                          "type": "string",
+                          "example": "5.5 GB"
+                        },
+                        "percent": {
+                          "type": "number",
+                          "example": 68.75
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Não autorizado"
+          },
+          "500": {
+            "description": "Erro ao obter informações de uso de memória"
+          }
+        }
+      }
+    },
+    "/v1/cpu-usage": {
+      "get": {
+        "summary": "Obter Uso de CPU",
+        "description": "Obtém informações sobre o uso de CPU do sistema\n\nPermissões requeridas: `read:system-resources`",
+        "tags": [
+          "System"
+        ],
+        "security": [
+          {
+            "apiToken": [
+              "read:system-resources"
+            ]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Informações de uso de CPU obtidas com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "cpuUsage": {
+                      "type": "number",
+                      "example": 45.2
+                    },
+                    "cpuFree": {
+                      "type": "number",
+                      "example": 54.8
+                    },
+                    "cpuCores": {
+                      "type": "number",
+                      "example": 4
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Não autorizado"
+          },
+          "500": {
+            "description": "Erro ao obter informações de uso de CPU"
+          }
+        }
+      }
+    },
+    "/v1/database-status": {
+      "get": {
+        "summary": "Obter Status do Banco de Dados",
+        "description": "Obtém informações sobre o status do banco de dados\n\nPermissões requeridas: `read:system-resources`",
+        "tags": [
+          "System"
+        ],
+        "security": [
+          {
+            "apiToken": [
+              "read:system-resources"
+            ]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Status do banco de dados obtido com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "connected"
+                    },
+                    "version": {
+                      "type": "string",
+                      "example": "10.5.8-MariaDB"
+                    },
+                    "maxConnections": {
+                      "type": "number",
+                      "example": 100
+                    },
+                    "activeConnections": {
+                      "type": "number",
+                      "example": 5
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Não autorizado"
+          },
+          "500": {
+            "description": "Erro ao obter status do banco de dados"
+          }
+        }
+      }
     }
   },
   "components": {
     "schemas": {
+      "ActivityLog": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "ID do log de atividade"
+          },
+          "userId": {
+            "type": "integer",
+            "description": "ID do usuário que realizou a ação"
+          },
+          "user": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer"
+              },
+              "name": {
+                "type": "string"
+              },
+              "email": {
+                "type": "string"
+              }
+            }
+          },
+          "action": {
+            "type": "string",
+            "description": "Tipo de ação realizada",
+            "enum": ["login", "logout", "create", "update", "delete", "transfer", "accept", "close", "reopen"]
+          },
+          "description": {
+            "type": "string",
+            "description": "Descrição da atividade"
+          },
+          "entityType": {
+            "type": "string",
+            "description": "Tipo de entidade relacionada à atividade",
+            "enum": ["ticket", "contact", "user", "whatsapp", "queue", "tag", "quickanswer", "backup", "apitoken", "setting", "integration"]
+          },
+          "entityId": {
+            "type": "integer",
+            "description": "ID da entidade relacionada à atividade"
+          },
+          "additionalData": {
+            "type": "object",
+            "description": "Dados adicionais relacionados à atividade"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Data e hora de criação do log"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Data e hora da última atualização do log"
+          }
+        }
+      },
       "WhatsAppSession": {
         "type": "object",
         "properties": {
