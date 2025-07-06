@@ -23,6 +23,7 @@ import * as DiskSpaceController from "../controllers/DiskSpaceController";
 import * as MemoryUsageController from "../controllers/MemoryUsageController";
 import * as CpuUsageController from "../controllers/CpuUsageController";
 import * as DatabaseMonitorController from "../controllers/DatabaseMonitorController";
+import * as VideoController from "../controllers/VideoController";
 import isApiToken from "../middleware/isApiToken";
 
 const upload = multer(uploadConfig);
@@ -126,5 +127,12 @@ openApiRouter.get("/disk-space", isApiToken('read:system-resources'), DiskSpaceC
 openApiRouter.get("/memory-usage", isApiToken('read:system-resources'), MemoryUsageController.getMemoryUsage);
 openApiRouter.get("/cpu-usage", isApiToken('read:system-resources'), CpuUsageController.cpuUsage);
 openApiRouter.get("/database-status", isApiToken('read:system-resources'), DatabaseMonitorController.getDatabaseStatus);
+
+// Rotas de Vídeo
+openApiRouter.get("/videos", isApiToken('read:videos'), VideoController.index);
+openApiRouter.get("/videos/:id", isApiToken('read:videos'), VideoController.show);
+openApiRouter.post("/videos", isApiToken('write:videos'), VideoController.store);
+openApiRouter.put("/videos/:id", isApiToken('write:videos'), VideoController.update);
+openApiRouter.delete("/videos/:id", isApiToken('write:videos'), VideoController.remove);
 
 export default openApiRouter;

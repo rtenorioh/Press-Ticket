@@ -22,10 +22,11 @@ const messages = {
           backups: "Backups",
           errorLogs: "Logs de Erro",
           networkStatus: "Monitoramento de Rede",
-          queueMonitor: "Monitoramento de Filas",
+          queueMonitor: "Monitoramento de Setores",
           systemUpdate: "Atualização do Sistema",
           versionWhatsapp: "Versão e Biblioteca WhatsApp",
-          systemResources: "Sistema e Recursos"
+          systemResources: "Sistema e Recursos",
+          videos: "Vídeos"
         },
         permissions: {
           createContacts: "Criar Contatos",
@@ -68,7 +69,9 @@ const messages = {
           readVersion: "Consultar Versão do Sistema",
           writeWhatsappLib: "Atualizar Biblioteca do WhatsApp",
           writeSystem: "Reiniciar Serviços do Sistema",
-          readSystemResources: "Monitorar Recursos do Sistema"
+          readSystemResources: "Monitorar Recursos do Sistema",
+          readVideos: "Visualizar Vídeos",
+          writeVideos: "Gerenciar Vídeos"
         },
         messages: {
           success: {

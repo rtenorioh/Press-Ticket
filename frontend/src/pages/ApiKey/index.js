@@ -288,7 +288,7 @@ const ApiKey = () => {
             // Monitoramento de Rede
             'read:network-status': t("apiKey.permissions.readNetworkStatus"),
             
-            // Monitoramento de Filas
+            // Monitoramento de Setor
             'read:queue-monitor': t("apiKey.permissions.readQueueMonitor"),
             
             // Atualização do Sistema
@@ -301,7 +301,11 @@ const ApiKey = () => {
             
             // Sistema e Recursos
             'write:system': t("apiKey.permissions.writeSystem"),
-            'read:system-resources': t("apiKey.permissions.readSystemResources")
+            'read:system-resources': t("apiKey.permissions.readSystemResources"),
+            
+            // Vídeos
+            'read:videos': t("apiKey.permissions.readVideos"),
+            'write:videos': t("apiKey.permissions.writeVideos")
         };
         return names[permission] || permission;
     };
@@ -981,6 +985,40 @@ const ApiKey = () => {
                             <AccordionDetails sx={{ pt: 2 }}>
                                 <Grid container spacing={1}>
                                     {['write:system', 'read:system-resources'].map((permission) => (
+                                        <Grid item xs={12} sm={6} key={permission}>
+                                            <FormControlLabel
+                                                control={
+                                                    <Checkbox
+                                                        checked={newToken.permissions.includes(permission)}
+                                                        onChange={() => handlePermissionChange(permission)}
+                                                        color="primary"
+                                                        size="small"
+                                                    />
+                                                }
+                                                label={<Typography variant="body2">{renderPermissionName(permission)}</Typography>}
+                                            />
+                                        </Grid>
+                                    ))}
+                                </Grid>
+                            </AccordionDetails>
+                        </Accordion>
+
+                        {/* Acordeão de Vídeos */}
+                        <Accordion sx={{ mb: 1, boxShadow: '0 1px 3px rgba(0,0,0,0.1)', borderRadius: '4px !important', '&:before': { display: 'none' } }}>
+                            <AccordionSummary
+                                expandIcon={<ExpandMoreIcon />}
+                                sx={{ 
+                                    backgroundColor: theme.palette.background.default,
+                                    borderRadius: '4px',
+                                }}
+                            >
+                                <Typography variant="subtitle2" fontWeight={500}>
+                                    {t("apiKey.categories.videos")}
+                                </Typography>
+                            </AccordionSummary>
+                            <AccordionDetails sx={{ pt: 2 }}>
+                                <Grid container spacing={1}>
+                                    {['read:videos', 'write:videos'].map((permission) => (
                                         <Grid item xs={12} sm={6} key={permission}>
                                             <FormControlLabel
                                                 control={

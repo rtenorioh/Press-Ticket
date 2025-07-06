@@ -15,11 +15,20 @@ import ListVideosService from "../services/VideoServices/ListVideosService";
 import CreateVideoService from "../services/VideoServices/CreateVideoService";
 import UpdateVideoService from "../services/VideoServices/UpdateVideoService";
 import DeleteVideoService from "../services/VideoServices/DeleteVideoService";
+import ShowVideoService from "../services/VideoServices/ShowVideoService";
 
 export const index = async (req: Request, res: Response): Promise<Response> => {
   const { searchParam } = req.query;
-  const { id: userId } = req.user;
-  const isAdmin = req.user.profile === "admin";
+  
+  // Verificar se é uma requisição via API token ou usuário normal
+  let userId = "1"; // ID padrão para API token
+  let isAdmin = true; // API token tem acesso de admin por padrão
+  
+  // Se req.user existir, usar as informações do usuário
+  if (req.user) {
+    userId = req.user.id;
+    isAdmin = req.user.profile === "admin";
+  }
 
   const videos = await ListVideosService({
     searchParam: searchParam as string,
@@ -49,16 +58,7 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
 export const show = async (req: Request, res: Response): Promise<Response> => {
   const { id } = req.params;
 
-  const video = await UpdateVideoService({
-    videoId: id,
-    videoData: req.body
-  });
-
-  const io = getIO();
-  io.emit("video", {
-    action: "update",
-    video
-  });
+  const video = await ShowVideoService({ id });
 
   return res.status(200).json(video);
 };

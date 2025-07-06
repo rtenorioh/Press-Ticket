@@ -3991,6 +3991,381 @@
           }
         }
       }
+    },
+    "/v1/videos": {
+      "get": {
+        "summary": "Listar Vídeos",
+        "description": "Obtém a lista de todos os vídeos cadastrados\n\nPermissões requeridas: `read:videos`",
+        "tags": [
+          "Videos"
+        ],
+        "security": [
+          {
+            "apiToken": [
+              "read:videos"
+            ]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de vídeos obtida com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "integer",
+                        "example": 1
+                      },
+                      "title": {
+                        "type": "string",
+                        "example": "Tutorial de Instalação"
+                      },
+                      "description": {
+                        "type": "string",
+                        "example": "Como instalar o sistema passo a passo"
+                      },
+                      "url": {
+                        "type": "string",
+                        "example": "https://example.com/video.mp4"
+                      },
+                      "createdAt": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "updatedAt": {
+                        "type": "string",
+                        "format": "date-time"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Não autorizado"
+          },
+          "500": {
+            "description": "Erro ao obter lista de vídeos"
+          }
+        }
+      },
+      "post": {
+        "summary": "Criar Vídeo",
+        "description": "Cria um novo vídeo no sistema\n\nPermissões requeridas: `write:videos`",
+        "tags": [
+          "Videos"
+        ],
+        "security": [
+          {
+            "apiToken": [
+              "write:videos"
+            ]
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "example": "Tutorial de Instalação"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Como instalar o sistema passo a passo"
+                  },
+                  "url": {
+                    "type": "string",
+                    "example": "https://example.com/video.mp4"
+                  }
+                },
+                "required": [
+                  "title",
+                  "url"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Vídeo criado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer",
+                      "example": 1
+                    },
+                    "title": {
+                      "type": "string",
+                      "example": "Tutorial de Instalação"
+                    },
+                    "description": {
+                      "type": "string",
+                      "example": "Como instalar o sistema passo a passo"
+                    },
+                    "url": {
+                      "type": "string",
+                      "example": "https://example.com/video.mp4"
+                    },
+                    "createdAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "updatedAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Não autorizado"
+          },
+          "400": {
+            "description": "Dados inválidos"
+          },
+          "500": {
+            "description": "Erro ao criar vídeo"
+          }
+        }
+      }
+    },
+    "/v1/videos/{id}": {
+      "get": {
+        "summary": "Obter Vídeo",
+        "description": "Obtém os detalhes de um vídeo específico\n\nPermissões requeridas: `read:videos`",
+        "tags": [
+          "Videos"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID do vídeo",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "security": [
+          {
+            "apiToken": [
+              "read:videos"
+            ]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Vídeo encontrado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer",
+                      "example": 1
+                    },
+                    "title": {
+                      "type": "string",
+                      "example": "Tutorial de Instalação"
+                    },
+                    "description": {
+                      "type": "string",
+                      "example": "Como instalar o sistema passo a passo"
+                    },
+                    "url": {
+                      "type": "string",
+                      "example": "https://example.com/video.mp4"
+                    },
+                    "createdAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "updatedAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Não autorizado"
+          },
+          "404": {
+            "description": "Vídeo não encontrado"
+          },
+          "500": {
+            "description": "Erro ao obter vídeo"
+          }
+        }
+      },
+      "put": {
+        "summary": "Atualizar Vídeo",
+        "description": "Atualiza os dados de um vídeo existente\n\nPermissões requeridas: `write:videos`",
+        "tags": [
+          "Videos"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID do vídeo",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "security": [
+          {
+            "apiToken": [
+              "write:videos"
+            ]
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "example": "Tutorial de Instalação Atualizado"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Como instalar o sistema passo a passo - versão atualizada"
+                  },
+                  "url": {
+                    "type": "string",
+                    "example": "https://example.com/video-updated.mp4"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Vídeo atualizado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer",
+                      "example": 1
+                    },
+                    "title": {
+                      "type": "string",
+                      "example": "Tutorial de Instalação Atualizado"
+                    },
+                    "description": {
+                      "type": "string",
+                      "example": "Como instalar o sistema passo a passo - versão atualizada"
+                    },
+                    "url": {
+                      "type": "string",
+                      "example": "https://example.com/video-updated.mp4"
+                    },
+                    "createdAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "updatedAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Não autorizado"
+          },
+          "404": {
+            "description": "Vídeo não encontrado"
+          },
+          "400": {
+            "description": "Dados inválidos"
+          },
+          "500": {
+            "description": "Erro ao atualizar vídeo"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Excluir Vídeo",
+        "description": "Remove um vídeo do sistema\n\nPermissões requeridas: `write:videos`",
+        "tags": [
+          "Videos"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID do vídeo",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "security": [
+          {
+            "apiToken": [
+              "write:videos"
+            ]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Vídeo excluído com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Vídeo excluído com sucesso"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Não autorizado"
+          },
+          "404": {
+            "description": "Vídeo não encontrado"
+          },
+          "500": {
+            "description": "Erro ao excluir vídeo"
+          }
+        }
+      }
     }
   },
   "components": {

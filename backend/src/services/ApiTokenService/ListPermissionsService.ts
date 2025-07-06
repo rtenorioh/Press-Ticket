@@ -70,7 +70,11 @@ const DEFAULT_PERMISSIONS = [
     
     // Sistema e Recursos
     'write:system',
-    'read:system-resources'
+    'read:system-resources',
+    
+    // Vídeos
+    'read:videos',
+    'write:videos'
 ];
 
 const ListPermissionsService = async (): Promise<string[]> => {
