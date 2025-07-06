@@ -29,6 +29,7 @@ import ContactPhoneOutlined from "@mui/icons-material/ContactPhoneOutlined";
 import QuestionAnswerOutlined from "@mui/icons-material/QuestionAnswerOutlined";
 import LocalOffer from "@mui/icons-material/LocalOffer";
 import SyncAlt from "@mui/icons-material/SyncAlt";
+import VideoLibraryOutlined from "@mui/icons-material/VideoLibraryOutlined";
 import PeopleAltOutlined from "@mui/icons-material/PeopleAltOutlined";
 import AccountTreeOutlined from "@mui/icons-material/AccountTreeOutlined";
 import SettingsOutlined from "@mui/icons-material/SettingsOutlined";
@@ -183,6 +184,12 @@ const Documentation = () => {
           description: t("documentation.general.tags"),
           icon: <LocalOffer />,
           path: "/tags"
+        },
+        {
+          name: t("mainDrawer.listItems.videos"),
+          description: t("documentation.general.videos"),
+          icon: <VideoLibraryOutlined />,
+          path: "/videos"
         }
       ]
     },

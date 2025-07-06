@@ -10,7 +10,8 @@ const documentationMessages = {
       tickets: "Na área de Tickets você gerencia todas as conversas com seus clientes. É possível atender, transferir para outros atendentes ou setores, e finalizar atendimentos quando resolvidos.",
       contacts: "A seção de Contatos permite cadastrar e gerenciar informações de seus clientes. Você pode organizar os contatos com tags personalizadas.",
       quickAnswers: "As Respostas Rápidas são mensagens pré-definidas que agilizam seu atendimento. Crie atalhos de texto para respostas frequentes e economize tempo durante as conversas.",
-      tags: "Com as Tags você organiza e categoriza contatos de forma eficiente. Crie etiquetas coloridas personalizadas que facilitam a busca e filtragem de seus contatos."
+      tags: "Com as Tags você organiza e categoriza contatos de forma eficiente. Crie etiquetas coloridas personalizadas que facilitam a busca e filtragem de seus contatos.",
+      videos: "A seção de Vídeos permite gerenciar e compartilhar conteúdo em vídeo com sua equipe. Adicione vídeos do YouTube, controle quais usuários podem visualizá-los, organize-os em formato de galeria ou lista, e reproduza-os diretamente na plataforma sem precisar sair do sistema."
     },
     administration: {
       title: "Administração",
