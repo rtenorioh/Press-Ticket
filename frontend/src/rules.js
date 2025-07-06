@@ -15,7 +15,8 @@ const rules = {
 			"ticket-options:transferWhatsapp",
 			"contacts-page:deleteContact",
 			"documentation-admin:view",
-			"documentation-api:view"
+			"documentation-api:view",
+			"videos:create"
 		],
 	},
 	masteradmin: {

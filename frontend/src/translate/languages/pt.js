@@ -576,6 +576,7 @@ const messages = {
           general: "Geral",
           administration: "Administração",
           apititle: "API",
+          videos: "Vídeos informativos",
           api: "Uso da API",
           apidocs: "Documentação da API",
           apikey: "Gerenciador da API",
@@ -1477,6 +1478,52 @@ const messages = {
         query: "Consulta",
         noQuery: "Nenhuma consulta",
         noActiveProcesses: "Nenhum processo ativo encontrado"
+      },
+      videos: {
+        title: "Vídeos Informativos",
+        searchPlaceholder: "Buscar por título...",
+        loading: "Carregando vídeos...",
+        noRecords: "Nenhum vídeo encontrado.",
+        table: {
+          title: "Título",
+          status: "Status",
+          visibility: "Visibilidade",
+          actions: "Ações"
+        },
+        active: "Ativo",
+        inactive: "Inativo",
+        allUsers: "Todos os usuários",
+        buttons: {
+          add: "Adicionar Vídeo",
+          edit: "Editar",
+          delete: "Excluir",
+          cards: "Ver Cards",
+          table: "Ver Tabela",
+          save: "Salvar",
+          cancel: "Cancelar"
+        },
+        dialog: {
+          add: "Adicionar Vídeo",
+          edit: "Editar Vídeo",
+          title: "Título",
+          url: "URL do YouTube",
+          urlHelp: "Insira a URL completa do vídeo do YouTube",
+          active: "Ativo",
+          users: "Usuários que podem ver",
+          usersHelp: "Se nenhum usuário for selecionado, todos poderão ver o vídeo",
+          preview: "Pré-visualização"
+        },
+        toasts: {
+          added: "Vídeo adicionado com sucesso!",
+          updated: "Vídeo atualizado com sucesso!",
+          deleted: "Vídeo excluído com sucesso!",
+          required: "Por favor, preencha todos os campos obrigatórios.",
+          invalidUrl: "URL de vídeo inválida!",
+        },
+        confirmationModal: {
+          deleteTitle: "Excluir Vídeo",
+          deleteMessage: "Tem certeza que deseja excluir este vídeo? Esta ação não pode ser desfeita."
+        }
       },
       systemHealth: {
         title: "Painel de Saúde do Sistema",

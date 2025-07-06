@@ -18,6 +18,8 @@ import User from "../models/User";
 import UserQueue from "../models/UserQueue";
 import UserSession from "../models/UserSession";
 import UserWhatsapp from "../models/UserWhatsapp";
+import Video from "../models/Video";
+import VideoUser from "../models/VideoUser";
 import Whatsapp from "../models/Whatsapp";
 import WhatsappQueue from "../models/WhatsappQueue";
 
@@ -47,7 +49,9 @@ const models = [
   UserSession,
   ApiToken,
   ErrorLog,
-  ActivityLog
+  ActivityLog,
+  Video,
+  VideoUser
 ];
 
 sequelize.addModels(models);

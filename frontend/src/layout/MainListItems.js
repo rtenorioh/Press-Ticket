@@ -27,6 +27,7 @@ import StorageIcon from "@mui/icons-material/Storage";
 import VpnKeyRounded from "@mui/icons-material/VpnKeyRounded";
 import WhatsApp from "@mui/icons-material/WhatsApp";
 import BugReportOutlined from "@mui/icons-material/BugReportOutlined";
+import VideoLibraryIcon from "@mui/icons-material/VideoLibrary";
 import SystemUpdateIcon from "@mui/icons-material/SystemUpdate";
 import SystemUpdateAltIcon from "@mui/icons-material/SystemUpdateAlt";
 import DatabaseIcon from "@mui/icons-material/Storage";
@@ -259,6 +260,13 @@ const MainListItems = (props) => {
         primary={t("documentation.menuItem")}
         icon={<HelpOutlineIcon />}
         active={location.pathname === '/documentation'}
+        drawerClose={drawerClose}
+      />
+      <ListItemLink
+        to="/videos"
+        primary={t("mainDrawer.listItems.videos")}
+        icon={<VideoLibraryIcon />}
+        active={location.pathname === '/videos'}
         drawerClose={drawerClose}
       />
       {user?.profile && (

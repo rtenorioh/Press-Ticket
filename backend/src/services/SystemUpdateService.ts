@@ -68,10 +68,8 @@ const saveUpdateStatus = async (): Promise<void> => {
 
 const getCurrentVersion = async (): Promise<string> => {
   try {
-    const packageJsonPath = path.join(process.cwd(), "package.json");
-    const packageData = await readFile(packageJsonPath, "utf8");
-    const packageJson = JSON.parse(packageData);
-    return packageJson.version || "0.0.0";
+    const { systemVersion } = await import("../config/version");
+    return systemVersion.startsWith("v") ? systemVersion.substring(1) : systemVersion;
   } catch (error: any) {
     logger.error(`Erro ao obter versão atual: ${error.message}`);
     return "0.0.0";
@@ -193,73 +191,58 @@ export const downloadAndInstallUpdate = async (updateInfo: UpdateInfo): Promise<
 
     await exec(`cp -R ${extractDir}/* .`);
 
-    // Instalando dependências do backend
     updateStatus.message = "Instalando dependências do backend...";
     updateStatus.progress = 50;
     await saveUpdateStatus();
     await exec("npm install");
     
-    // Executando build do backend
     updateStatus.message = "Compilando backend...";
     updateStatus.progress = 60;
     await saveUpdateStatus();
     await exec("npm run build");
     
-    // Executando migrações
     updateStatus.message = "Executando migrações...";
     updateStatus.progress = 65;
     await saveUpdateStatus();
     await exec("npx sequelize db:migrate");
     
-    // Executando seeders
     updateStatus.message = "Executando seeders...";
     updateStatus.progress = 70;
     await saveUpdateStatus();
     await exec("npx sequelize db:seed:all");
     
-    // Atualizando frontend
     updateStatus.status = "building";
     updateStatus.message = "Atualizando frontend...";
     updateStatus.progress = 75;
     await saveUpdateStatus();
     
-    // Navegando para o diretório do frontend
     const frontendDir = path.join(process.cwd(), "../frontend");
     
-    // Instalando dependências do frontend
     updateStatus.message = "Instalando dependências do frontend...";
     updateStatus.progress = 80;
     await saveUpdateStatus();
     await exec("npm install", { cwd: frontendDir });
     
-    // Executando build do frontend
     updateStatus.message = "Compilando frontend...";
     updateStatus.progress = 85;
     await saveUpdateStatus();
     await exec("npm run build", { cwd: frontendDir });
     
-    // Reiniciando serviços
     updateStatus.message = "Reiniciando serviços...";
     updateStatus.progress = 90;
     await saveUpdateStatus();
     
-    // Carregando variáveis de ambiente para obter IDs do PM2
     dotenv.config();
     const pm2FrontendId = process.env.PM2_FRONTEND || "1";
     const pm2BackendId = process.env.PM2_BACKEND || "0";
     
     try {
-      // Reiniciando backend
       await exec(`pm2 restart ${pm2BackendId} --update-env`);
-      
-      // Reiniciando frontend
       await exec(`pm2 restart ${pm2FrontendId} --update-env`);
     } catch (pmError: any) {
       logger.warn(`Aviso ao reiniciar serviços PM2: ${pmError.message}`);
-      // Continuamos mesmo se houver erro no PM2, pois a atualização já foi feita
     }
     
-    // Limpando diretório temporário
     await exec(`rm -rf ${tempDir}`);
 
     updateStatus.status = "completed";

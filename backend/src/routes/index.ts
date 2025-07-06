@@ -1,6 +1,7 @@
 import { Router } from "express";
 
 import activityLogRoutes from "./activityLogRoutes";
+import videoRoutes from "./videoRoutes";
 import apiRoutes from "./apiRoutes";
 import versionRoutes from "./versionRoutes";
 import apiTokenRoutes from "./apiTokenRoutes";
@@ -59,5 +60,6 @@ routes.use(systemCleanupRoutes);
 routes.use(queueMonitorRoutes);
 routes.use(systemHealthRoutes);
 routes.use(systemUpdateRoutes);
+routes.use(videoRoutes);
 
 export default routes;
