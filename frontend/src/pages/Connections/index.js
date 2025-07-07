@@ -56,6 +56,7 @@ import { AuthContext } from "../../context/Auth/AuthContext";
 import { WhatsAppsContext } from "../../context/WhatsApp/WhatsAppsContext";
 import toastError from "../../errors/toastError";
 import api from "../../services/api";
+import openSocket from "../../services/socket-io";
 
 const MainPaper = styled(Paper)(({ theme }) => ({
 	flex: 1,
@@ -328,6 +329,22 @@ const Connections = () => {
 	const handleCloseWhatsAppModal = useCallback(() => {
 		setWhatsAppModalOpen(false);
 		setSelectedWhatsApp(null);
+		
+		const fetchWhatsApps = async () => {
+			try {
+				const { data } = await api.get("/whatsapp/");
+				const socket = openSocket();
+				data.forEach(whatsapp => {
+					socket.emit("whatsapp", {
+						action: "update",
+						whatsapp
+					});
+				});
+			} catch (err) {
+				toastError(err);
+			}
+		};
+		fetchWhatsApps();
 	}, [setSelectedWhatsApp, setWhatsAppModalOpen]);
 
 	const handleOpenQrModal = whatsApp => {

@@ -28,6 +28,7 @@ import { toast } from "react-toastify";
 import * as Yup from "yup";
 import toastError from "../../errors/toastError";
 import api from "../../services/api";
+import openSocket from "../../services/socket-io";
 import QueueSelect from "../QueueSelect";
 
 const Root = styled('div')(({ theme }) => ({
@@ -150,7 +151,12 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
 			if (whatsAppId) {
 				await api.put(`/whatsapp/${whatsAppId}`, whatsappData);
 			} else {
-				await api.post("/whatsapp", whatsappData);
+				const { data } = await api.post("/whatsapp", whatsappData);
+				const socket = openSocket();
+				socket.emit("whatsapp", {
+					action: "update",
+					whatsapp: data
+				});
 			}
 			toast.success(t("whatsappModal.success"));
 			handleClose();
