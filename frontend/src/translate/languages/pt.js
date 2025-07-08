@@ -506,10 +506,7 @@ const messages = {
           backToLogin: "Voltar ao Login"
         },
         success: "Se um e-mail válido foi encontrado, um link para redefinição de senha foi enviado!",
-        error: {
-          invalidEmail: "Por favor, insira um e-mail válido.",
-          generic: "Erro ao solicitar redefinição de senha. Tente novamente mais tarde."
-        }
+        error: "Erro ao solicitar redefinição de senha. Tente novamente mais tarde."
       },
       integrations: {
         success: "Integração salva com sucesso.",

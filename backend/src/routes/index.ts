@@ -29,6 +29,7 @@ import ticketRoutes from "./ticketRoutes";
 import userRoutes from "./userRoutes";
 import whatsappRoutes from "./whatsappRoutes";
 import whatsappSessionRoutes from "./whatsappSessionRoutes";
+import whatsappNotificationRoutes from "./whatsappNotificationRoutes";
 
 const routes = Router();
 
@@ -48,6 +49,7 @@ routes.use(integrationRoutes);
 routes.use(hubChannelRoutes);
 routes.use(hubMessageRoutes);
 routes.use(hubWebhookRoutes);
+routes.use(whatsappNotificationRoutes);
 routes.use(systemRoutes);
 routes.use(personalizationRoutes);
 routes.use(apiTokenRoutes);

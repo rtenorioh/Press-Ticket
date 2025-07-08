@@ -38,7 +38,7 @@ import PowerSettingsNewIcon from "@mui/icons-material/PowerSettingsNew";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import VisibilityIcon from "@mui/icons-material/Visibility"; 
 import { format, parseISO } from "date-fns";
-import React, { useCallback, useContext, useState } from "react";
+import React, { useCallback, useContext, useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -149,8 +149,82 @@ const Connections = () => {
 	);
 	const [loadingActions, setLoadingActions] = useState({});
 	const [actionMessages, setActionMessages] = useState({});
+	const [lastNotificationTime, setLastNotificationTime] = useState({});
 
 	const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+	const checkDisconnectedChannels = useCallback(async () => {
+		try {
+			if (!whatsApps || whatsApps.length === 0) return;
+
+			const now = Date.now();
+			const disconnectedChannels = whatsApps.filter(whatsApp => {
+				if (whatsApp.status !== "CONNECTED") {
+					const lastTime = lastNotificationTime[whatsApp.id] || 0;
+					if (now - lastTime > 1800000) {
+						return true;
+					}
+				}
+				return false;
+			});
+
+			for (const channel of disconnectedChannels) {
+				await api.post(`/whatsapp-notification/${channel.id}`);
+				
+				setLastNotificationTime(prev => ({
+					...prev,
+					[channel.id]: now
+				}));
+			}
+		} catch (err) {
+			console.error("Erro ao verificar canais desconectados:", err);
+		}
+	}, [whatsApps, lastNotificationTime]);
+
+	useEffect(() => {
+		const interval = setInterval(() => {
+			checkDisconnectedChannels();
+		}, 1800000);
+		checkDisconnectedChannels();
+
+		return () => clearInterval(interval);
+	}, [checkDisconnectedChannels]);
+
+	useEffect(() => {
+		const socket = openSocket();
+
+		socket.on("checkDisconnectedChannels", () => {
+			checkDisconnectedChannels();
+		});
+
+		socket.on("whatsapp", async (data) => {
+			if (data.action === "update" && data.whatsapp) {
+				const { whatsapp } = data;
+				
+				if (whatsapp.status !== "CONNECTED") {
+					const now = Date.now();
+					const lastTime = lastNotificationTime[whatsapp.id] || 0;
+					
+					if (now - lastTime > 300000) {
+						try {
+							await api.post(`/whatsapp-notification/${whatsapp.id}`);
+							
+							setLastNotificationTime(prev => ({
+								...prev,
+								[whatsapp.id]: now
+							}));
+						} catch (err) {
+							console.error("Erro ao notificar sobre canal desconectado:", err);
+						}
+					}
+				}
+			}
+		});
+
+		return () => {
+			socket.disconnect();
+		};
+	}, [checkDisconnectedChannels, lastNotificationTime]);
 
 	const createCountdownToast = (seconds, initialMessage, finalMessage, onComplete = null, reload = false) => {
 		let secondsRemaining = seconds;

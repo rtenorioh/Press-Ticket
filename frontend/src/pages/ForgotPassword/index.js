@@ -134,7 +134,7 @@ const ForgotPassword = () => {
                     }
                 }
             } catch (err) {
-                toastError(err);
+                toastError(err, t);
             }
         };
 
@@ -172,7 +172,7 @@ const ForgotPassword = () => {
                 }
 
             } catch (err) {
-                toastError(err);
+                toastError(err, t);
             }
         };
 

@@ -21,6 +21,7 @@ import UserWhatsapp from "../models/UserWhatsapp";
 import Video from "../models/Video";
 import VideoUser from "../models/VideoUser";
 import Whatsapp from "../models/Whatsapp";
+import WhatsappNotification from "../models/WhatsappNotification";
 import WhatsappQueue from "../models/WhatsappQueue";
 
 // eslint-disable-next-line
@@ -34,6 +35,7 @@ const models = [
   Ticket,
   Message,
   Whatsapp,
+  WhatsappNotification,
   ContactCustomField,
   Setting,
   Queue,
