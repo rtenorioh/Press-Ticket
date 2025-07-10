@@ -22,7 +22,7 @@ export function TagsContainer({ contact }) {
             const { data: responseData } = await api.post(`/tags`, data);
             return responseData;
         } catch (err) {
-            toastError(err);
+            toastError(err, t);
         }
     }
 
@@ -31,7 +31,7 @@ export function TagsContainer({ contact }) {
             const { data } = await api.get(`/tags/list`);
             setTags(data);
         } catch (err) {
-            toastError(err);
+            toastError(err, t);
         }
     }
 
@@ -120,12 +120,12 @@ export function TagsContainer({ contact }) {
                 renderTags={(value, getTagProps) =>
                     value.map((option, index) => {
                         const isString = typeof option === 'string';
-                        const tagName = isString ? option : option.name;
-                        const tagColor = isString ? colorGenerator() : option.color || colorGenerator();
+                        const tagName = isString ? option : option?.name;
+                        const tagColor = isString ? colorGenerator() : option?.color || colorGenerator();
                         
                         return (
                             <Chip
-                                key={isString ? `tag-${index}` : option.name}
+                                key={isString ? `tag-${index}` : option?.name}
                                 variant="outlined"
                                 sx={{
                                     backgroundColor: tagColor,
