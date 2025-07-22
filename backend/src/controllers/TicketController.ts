@@ -16,19 +16,14 @@ import SendWhatsAppMessage from "../services/WbotServices/SendWhatsAppMessage";
 import ShowWhatsAppService from "../services/WhatsappService/ShowWhatsAppService";
 import MarkMessagesAsReadService from "../services/MessageServices/MarkMessagesAsReadService";
 import { createActivityLog, ActivityActions, EntityTypes } from "../services/ActivityLogService";
+import CountTicketsService from "../services/TicketServices/CountTicketsService";
 
-interface IndexQuery {
-  searchParam?: string;
-  pageNumber: string;
-  status: string;
-  startDate?: string;
-  endDate?: string;
-  showAll: string;
-  withUnreadMessages: string;
-  queueIds: string;
-  tags?: string;
-  all?: string;
-};
+interface AuthenticatedRequest extends Request {
+  user: {
+    id: string;
+    profile: string;
+  };
+}
 
 interface TicketData {
   contactId: number;
@@ -380,5 +375,49 @@ export const closeTickets = async (
   } catch (err) {
     console.error("Erro ao fechar tickets:", err);
     return res.status(500).json({ error: "Error closing tickets" });
+  }
+};
+
+export const count = async (req: AuthenticatedRequest, res: Response): Promise<Response> => {
+  try {
+    const { queueIds, showAll } = req.query;
+    
+    let userId: number | null = null;
+    let isAdmin = false;
+    
+    // Verificar se é uma requisição de API ou se o usuário é admin
+    const isApiRequest = req.path.startsWith('/v1/');
+    if (isApiRequest || 'apiToken' in req) {
+      isAdmin = true;
+    } else {
+      userId = parseInt(req.user.id);
+      isAdmin = req.user.profile === "admin" || req.user.profile === "masteradmin";
+    }
+    
+    // Converter queueIds de string para array se necessário
+    let queueIdsArray: number[] = [];
+    if (queueIds) {
+      queueIdsArray = JSON.parse(queueIds as string);
+    }
+    
+    // Determinar se deve mostrar todos os tickets
+    const showAllTickets = showAll === "true" || isAdmin;
+    
+    const timestamp = new Date().toISOString();
+    console.log(`[BACK_COUNT_REQUEST][${timestamp}] Requisição de contagem: showAll=${showAllTickets}, userId=${userId}, isAdmin=${isAdmin}`);
+    
+    // Chamar o serviço de contagem
+    const counts = await CountTicketsService({
+      queueIds: queueIdsArray,
+      showAll: showAllTickets,
+      userId
+    });
+    
+    console.log(`[BACK_COUNT_RESPONSE][${timestamp}] Resposta de contagem:`, counts);
+    
+    return res.status(200).json(counts);
+  } catch (err: any) {
+    console.error(`[BACK_COUNT_ERROR] Erro ao contar tickets:`, err);
+    return res.status(500).json({ error: err.message });
   }
 };

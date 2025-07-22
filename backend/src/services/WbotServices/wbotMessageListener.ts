@@ -791,8 +791,28 @@ const handleMessage = async (
   msg: WbotMessage,
   wbot: Session
 ): Promise<void> => {
-  if (!isValidMsg(msg)) {
-    return;
+  try {
+    logger.info(`[MSG_RECEBIDA] Nova mensagem recebida: ID=${msg.id?.id || 'unknown'}, Timestamp=${new Date().toISOString()}`);
+    
+    // Log detalhado do objeto da mensagem para debug
+    logger.info(`[MSG_DETALHES] Detalhes básicos: ${JSON.stringify({
+      id: msg.id,
+      fromMe: msg.fromMe,
+      from: msg.from,
+      to: msg.to,
+      type: msg.type,
+      timestamp: msg.timestamp,
+      hasMedia: msg.hasMedia
+    })}`);
+    
+    if (!isValidMsg(msg)) {
+      logger.info(`[MSG_IGNORADA] Mensagem ignorada por não ser válida: ID=${msg.id?.id || 'unknown'}`);
+      return;
+    }
+    
+    logger.info(`[MSG_PROCESSANDO] Iniciando processamento da mensagem: ID=${msg.id?.id || 'unknown'}`);
+  } catch (err) {
+    logger.error(`[MSG_ERRO_LOG] Erro ao registrar logs iniciais: ${err}`);
   }
 
   const Integrationdb = await Integration.findOne({
@@ -1287,7 +1307,28 @@ const handleMessage = async (
     await CreateOrUpdateContactService(contactData);
   } catch (err) {
     Sentry.captureException(err);
-    logger.error(`Error handling whatsapp message: Err: ${err}`);
+    logger.error(`[MSG_ERRO] Erro ao processar mensagem do WhatsApp. ID=${msg?.id?.id || 'unknown'}, Erro: ${err}`);
+    
+    // Log detalhado do erro para facilitar depuração
+    logger.error(`[MSG_ERRO_DETALHES] Stack trace: ${err.stack || 'Sem stack trace'}`);
+    
+    // Registrar informações adicionais sobre a mensagem que causou o erro
+    try {
+      logger.error(`[MSG_ERRO_CONTEXTO] Contexto da mensagem com erro: ${JSON.stringify({
+        id: msg?.id?.id || 'unknown',
+        fromMe: msg?.fromMe,
+        from: msg?.from,
+        to: msg?.to,
+        body: msg?.body?.substring(0, 100) || 'Sem corpo',
+        type: msg?.type,
+        timestamp: msg?.timestamp,
+        hasMedia: msg?.hasMedia
+      })}`);
+    } catch (logErr) {
+      logger.error(`[MSG_ERRO_LOG] Erro ao tentar registrar detalhes do erro: ${logErr}`);
+    }
+  } finally {
+    logger.info(`[MSG_FINALIZADA] Processamento da mensagem finalizado: ID=${msg?.id?.id || 'unknown'}, Timestamp=${new Date().toISOString()}`);
   }
 };
 
@@ -1296,9 +1337,20 @@ const handleMsgAck = async (msg: WbotMessage, ack: MessageAck) => {
   await new Promise(r => setTimeout(r, 500));
 
   const io = getIO();
+  const timestamp = new Date().toISOString();
 
   try {
-    console.info(`Recebido evento de ACK: ID=${msg.id.id}, ACK=${ack}`);
+    logger.info(`[ACK_EVENTO] Recebido evento de ACK: ID=${msg.id.id}, ACK=${ack}, Timestamp=${timestamp}`);
+    console.info(`[ACK_EVENTO] Recebido evento de ACK: ID=${msg.id.id}, ACK=${ack}, Timestamp=${timestamp}`);
+    
+    // Log detalhado do objeto da mensagem para debug
+    logger.info(`[ACK_DETALHES] Detalhes da mensagem: ${JSON.stringify({
+      id: msg.id,
+      fromMe: msg.fromMe,
+      to: msg.to,
+      deviceType: msg.deviceType,
+      timestamp: msg.timestamp
+    })}`);
     
     const messageToUpdate = await Message.findByPk(msg.id.id, {
       include: [
@@ -1316,27 +1368,88 @@ const handleMsgAck = async (msg: WbotMessage, ack: MessageAck) => {
     });
 
     if (!messageToUpdate) {
-      console.warn(`Mensagem não encontrada no banco de dados: ${msg.id.id}`);
+      logger.warn(`[ACK_ERRO] Mensagem não encontrada no banco de dados: ${msg.id.id}`);
+      console.warn(`[ACK_ERRO] Mensagem não encontrada no banco de dados: ${msg.id.id}`);
       return;
     }
 
-    const currentAck = messageToUpdate.ack || 0;
-    const ackToUpdate = ack || 0;
+    // Log dos detalhes da mensagem encontrada no banco
+    logger.info(`[ACK_DB] Mensagem encontrada no banco: ID=${messageToUpdate.id}, TicketId=${messageToUpdate.ticketId}, Atual ACK=${messageToUpdate.ack}, Read=${messageToUpdate.read}`);
     
+    const currentAck = messageToUpdate.ack || 0;
+    let ackToUpdate = ack || 0;
+    
+    // Log para depuração da relação entre read e ack
+    if (messageToUpdate.read === true && ackToUpdate < 3 && messageToUpdate.fromMe) {
+      logger.info(`[ACK_DEBUG] Mensagem marcada como lida (read=true), mas ACK=${ackToUpdate}. Mantendo ACK original conforme documentação.`);
+    }
+    
+    // Verificar se o ACK precisa ser atualizado - apenas se o novo valor for maior que o atual
     if (ackToUpdate > currentAck) {
-      console.log(`Atualizando ACK da mensagem ${msg.id.id}: ${currentAck} -> ${ackToUpdate}`);
+      logger.info(`[ACK_ATUALIZACAO] Atualizando ACK da mensagem ${msg.id.id}: ${currentAck} -> ${ackToUpdate}`);
+      console.log(`[ACK_ATUALIZACAO] Atualizando ACK da mensagem ${msg.id.id}: ${currentAck} -> ${ackToUpdate}`);
+      
+      // Registrar timestamp antes da atualização
+      const beforeUpdate = new Date().getTime();
       await messageToUpdate.update({ ack: ackToUpdate });
+      const afterUpdate = new Date().getTime();
+      
+      logger.info(`[ACK_PERFORMANCE] Tempo para atualizar ACK no banco: ${afterUpdate - beforeUpdate}ms`);
 
+      // Registrar timestamp antes do envio via socket
+      const beforeEmit = new Date().getTime();
       io.to(messageToUpdate.ticketId.toString()).emit("appMessage", {
         action: "update",
         message: messageToUpdate
       });
+      const afterEmit = new Date().getTime();
+      
+      logger.info(`[ACK_SOCKET] Socket emitido para ticket ${messageToUpdate.ticketId}, tempo: ${afterEmit - beforeEmit}ms`);
     } else {
-      console.log(`ACK ignorado: valor atual (${currentAck}) >= novo valor (${ackToUpdate})`);
+      logger.info(`[ACK_IGNORADO] ACK ignorado: valor atual (${currentAck}) >= novo valor (${ackToUpdate})`);
+      console.log(`[ACK_IGNORADO] ACK ignorado: valor atual (${currentAck}) >= novo valor (${ackToUpdate})`);
+    }
+    
+    // Verificar se há outras mensagens do mesmo ticket que precisam ser sincronizadas
+    // Apenas quando o ACK for 2 ou maior (recebido no dispositivo ou lido)
+    if (ackToUpdate >= 2) {
+      try {
+        logger.info(`[ACK_BATCH_CHECK] Verificando outras mensagens do ticket ${messageToUpdate.ticketId} para sincronização`);
+        
+        // Buscar outras mensagens anteriores do mesmo ticket e atualizar o ACK
+        const messagesToUpdate = await Message.findAll({
+          where: {
+            ticketId: messageToUpdate.ticketId,
+            id: { [Op.lt]: messageToUpdate.id },
+            ack: { [Op.lt]: ackToUpdate }
+          },
+          order: [['createdAt', 'DESC']]
+        });
+        
+        if (messagesToUpdate.length > 0) {
+          logger.info(`[ACK_BATCH_UPDATE] Encontradas ${messagesToUpdate.length} mensagens para atualização em lote`);
+          
+          // Atualizar mensagens em lote
+          for (const msg of messagesToUpdate) {
+            await msg.update({ ack: ackToUpdate >= 3 ? 3 : 2 });
+            
+            // Emitir evento para cada mensagem atualizada
+            io.to(msg.ticketId.toString()).emit("appMessage", {
+              action: "update",
+              message: msg
+            });
+          }
+          
+          logger.info(`[ACK_BATCH_COMPLETE] Atualização em lote concluída`);
+        }
+      } catch (batchErr) {
+        logger.error(`[ACK_BATCH_ERROR] Erro ao processar atualização em lote: ${batchErr}`);
+      }
     }
   } catch (err) {
     Sentry.captureException(err);
-    logger.error(`Error handling message ack. Err: ${err}`);
+    logger.error(`[ACK_ERRO] Erro ao processar ACK da mensagem. ID=${msg?.id?.id || 'unknown'}, ACK=${ack}, Erro: ${err}`);
+    console.error(`[ACK_ERRO] Erro ao processar ACK da mensagem. ID=${msg?.id?.id || 'unknown'}, ACK=${ack}, Erro: ${err}`);
   }
 };
 

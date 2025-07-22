@@ -36,6 +36,7 @@ import toastError from "../../errors/toastError";
 import api from "../../services/api";
 import { toast } from "react-toastify";
 import ConfirmationModal from "../ConfirmationModal";
+import openSocket from "../../services/socket-io";
 
 const TicketWrapperStyled = styled(Paper)(({ theme }) => ({
   position: "relative",
@@ -249,6 +250,96 @@ const TicketsManager = () => {
     };
     fetchSettings();
   }, []);
+  
+  // Efeito para configurar a escuta de eventos socket para atualização dos contadores
+  useEffect(() => {
+    const socket = openSocket();
+    
+    // Função para atualizar contadores via API
+    const updateTicketCounts = async () => {
+      try {
+        const timestamp = new Date().toISOString();
+        console.log(`[FRONT_COUNTERS_UPDATE][${timestamp}] Atualizando contadores de tickets via API`);
+        
+        // Buscar contagem de tickets por status
+        const { data } = await api.get('/tickets/count');
+        
+        if (data) {
+          console.log(`[FRONT_COUNTERS_RESULT][${timestamp}] Contadores atualizados:`, data);
+          // Atualizar contadores com os valores recebidos
+          setOpenCount(data.open || 0);
+          setPendingCount(data.pending || 0);
+          setClosedCount(data.closed || 0);
+        }
+      } catch (err) {
+        console.error(`[FRONT_COUNTERS_ERROR] Erro ao atualizar contadores:`, err);
+      }
+    };
+    
+    // Atualizar contadores inicialmente
+    updateTicketCounts();
+    
+    // Configurar escuta de eventos que podem afetar os contadores
+    socket.on("connect", () => {
+      console.log(`[FRONT_COUNTERS_SOCKET] Socket conectado, inscrevendo em eventos de contagem`);
+      socket.emit("subscribeTicketCounter");
+    });
+    
+    socket.on("disconnect", () => {
+      console.log(`[FRONT_COUNTERS_SOCKET] Socket desconectado`);
+    });
+    
+    socket.on("reconnect", () => {
+      console.log(`[FRONT_COUNTERS_SOCKET] Socket reconectado, inscrevendo em eventos de contagem`);
+      socket.emit("subscribeTicketCounter");
+      // Atualizar contadores após reconexão
+      updateTicketCounts();
+    });
+    
+    // Escutar eventos específicos que afetam os contadores
+    socket.on("ticket", (data) => {
+      const timestamp = new Date().toISOString();
+      
+      if (data.action === "updateCounter") {
+        console.log(`[FRONT_COUNTERS_EVENT][${timestamp}] Recebido evento de atualização de contador`);
+        if (data.counters) {
+          console.log(`[FRONT_COUNTERS_DATA][${timestamp}] Novos valores:`, data.counters);
+          setOpenCount(data.counters.open || 0);
+          setPendingCount(data.counters.pending || 0);
+          setClosedCount(data.counters.closed || 0);
+        }
+      }
+      
+      // Para outros eventos de ticket que podem afetar os contadores
+      if (["update", "delete", "create"].includes(data.action)) {
+        // Atualizar contadores após um breve delay para garantir que o backend processou a mudança
+        setTimeout(() => {
+          updateTicketCounts();
+        }, 1000);
+      }
+    });
+    
+    // Escutar eventos de novas mensagens que podem afetar os contadores
+    socket.on("appMessage", (data) => {
+      if (data.action === "create" && data.ticket) {
+        // Atualizar contadores após um breve delay
+        setTimeout(() => {
+          updateTicketCounts();
+        }, 1000);
+      }
+    });
+    
+    // Configurar intervalo para atualização periódica dos contadores
+    const counterInterval = setInterval(() => {
+      updateTicketCounts();
+    }, 60000); // Atualiza a cada 1 minuto
+    
+    return () => {
+      socket.disconnect();
+      clearInterval(counterInterval);
+    };
+  }, []);
+
 
   const handleSearch = (e) => {
     const searchedTerm = e.target.value.toLowerCase();

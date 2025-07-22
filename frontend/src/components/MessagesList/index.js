@@ -4,7 +4,9 @@ import {
   CircularProgress,
   Divider,
   IconButton,
-  styled
+  styled,
+  Tooltip,
+  Fab
 } from "@mui/material";
 import {
   blue,
@@ -15,9 +17,12 @@ import {
   Block,
   Done,
   DoneAll,
+  Error,
   ExpandMore,
   GetApp,
-  KeyboardArrowDown
+  KeyboardArrowDown,
+  Refresh,
+  SyncProblem
 } from "@mui/icons-material";
 
 import {
@@ -366,9 +371,40 @@ const reducer = (state, action) => {
   }
 
   if (action.type === "UPDATE_MESSAGE") {
+    const timestamp = new Date().toISOString();
     const messageToUpdate = action.payload;
+    
+    console.log(`[FRONT_REDUCER_UPDATE][${timestamp}] Atualizando mensagem no reducer: ID=${messageToUpdate.id}, ACK=${messageToUpdate.ack}`);
 
     const messageIndex = state.findIndex((m) => m.id === messageToUpdate.id);
+    
+    if (messageIndex !== -1) {
+      const oldMessage = state[messageIndex];
+      console.log(`[FRONT_REDUCER_FOUND][${timestamp}] Mensagem encontrada no índice ${messageIndex}. ACK anterior=${oldMessage.ack}, Novo ACK=${messageToUpdate.ack}`);
+      
+      if (oldMessage.ack !== messageToUpdate.ack) {
+        console.log(`[FRONT_REDUCER_ACK_MUDOU][${timestamp}] ACK mudou de ${oldMessage.ack} para ${messageToUpdate.ack}. Forçando atualização.`);
+        
+        // Criando um novo array com todos os elementos, substituindo a mensagem atualizada
+        // Isso garante que o React detecte a mudança e re-renderize o componente
+        const newState = [...state];
+        newState[messageIndex] = { 
+          ...oldMessage,  // Mantém propriedades originais
+          ...messageToUpdate,  // Sobrescreve com novas propriedades
+          _forceUpdate: Date.now()  // Adiciona propriedade para forçar detecção de mudança
+        };
+        
+        console.log(`[FRONT_REDUCER_NOVO_ESTADO][${timestamp}] Novo estado criado com _forceUpdate=${newState[messageIndex]._forceUpdate}`);
+        return newState;
+      } else {
+        // Mesmo que o ACK não tenha mudado, ainda atualizamos outras propriedades
+        const newState = [...state];
+        newState[messageIndex] = { ...oldMessage, ...messageToUpdate };
+        return newState;
+      }
+    } else {
+      console.warn(`[FRONT_REDUCER_NOT_FOUND][${timestamp}] Mensagem com ID ${messageToUpdate.id} não encontrada no estado`);
+    }
 
     if (messageToUpdate.isDeleted === true) {
       toast.info(<ToastDisplay
@@ -376,10 +412,7 @@ const reducer = (state, action) => {
       />);
     }
 
-    if (messageIndex !== -1) {
-      state[messageIndex] = messageToUpdate;
-    }
-
+    // Retornando um novo array para garantir que o React detecte a mudança
     return [...state];
   }
 
@@ -394,6 +427,8 @@ const MessagesList = ({ ticketId, isGroup, onClick }) => {
   const [hasMore, setHasMore] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showScrollButton, setShowScrollButton] = useState(false);
+  const [syncingMessages, setSyncingMessages] = useState(false);
+  const [showSyncButton, setShowSyncButton] = useState(false);
   const lastMessageRef = useRef();
   const { t } = useTranslation();
   const [selectedMessage, setSelectedMessage] = useState({});
@@ -405,6 +440,7 @@ const MessagesList = ({ ticketId, isGroup, onClick }) => {
   const [isViewingOldMessages, setIsViewingOldMessages] = useState(false);
   const lastScrollUpTime = useRef(0);
   const defaultImage = '/default-profile.png';
+  const lastSocketEventTime = useRef(Date.now());
 
   useEffect(() => {
     dispatch({ type: "RESET" });
@@ -450,58 +486,146 @@ const MessagesList = ({ ticketId, isGroup, onClick }) => {
 
   useEffect(() => {
     const processMessage = (data) => {
-      console.log("Mensagem recebida via socket:", data.action, data.message?.id, data);
+      const timestamp = new Date().toISOString();
+      console.log(`[FRONT_MSG_RECEBIDA][${timestamp}] Mensagem recebida via socket: Ação=${data.action}, ID=${data.message?.id}`);
+      console.log(`[FRONT_MSG_DETALHES][${timestamp}] Detalhes da mensagem:`, {
+        action: data.action,
+        messageId: data.message?.id,
+        body: data.message?.body?.substring(0, 50),
+        fromMe: data.message?.fromMe,
+        ack: data.message?.ack,
+        timestamp: data.message?.createdAt || data.message?.timestamp
+      });
+      
+      // Atualiza o timestamp do último evento socket recebido
+      lastSocketEventTime.current = Date.now();
+      setShowSyncButton(false);
       
       const messageTicketId = data.ticket?.id || data.message?.ticketId;
       
-      if (messageTicketId && parseInt(messageTicketId) === parseInt(ticketId)) {
+      // Garantir que ambos os IDs sejam strings para comparação consistente
+      const messageTicketIdStr = messageTicketId ? String(messageTicketId).trim() : null;
+      const currentTicketIdStr = ticketId ? String(ticketId).trim() : null;
+      
+      console.log(`[FRONT_MSG_COMPARACAO][${timestamp}] Comparando IDs: messageTicketId=${messageTicketIdStr}, ticketId=${currentTicketIdStr}`);
+      
+      if (messageTicketIdStr && currentTicketIdStr && messageTicketIdStr === currentTicketIdStr) {
+        console.log(`[FRONT_MSG_TICKET][${timestamp}] Mensagem pertence ao ticket atual: ${ticketId}`);
+        
         if (data.action === "create") {
           const messageExists = messagesList.some(m => m.id === data.message.id);
           
           if (!messageExists) {
-            console.log("Adicionando nova mensagem via socket:", data.message.id);
+            console.log(`[FRONT_MSG_NOVA][${timestamp}] Adicionando nova mensagem via socket: ${data.message.id}`);
+            console.log(`[FRONT_MSG_ESTADO][${timestamp}] Estado atual da lista antes da adição: ${messagesList.length} mensagens`);
             
-            dispatch({ type: "ADD_MESSAGE", payload: data.message });
-            
-            setTimeout(() => {
-              scrollToBottom(true);
+            try {
+              dispatch({ type: "ADD_MESSAGE", payload: data.message });
+              console.log(`[FRONT_MSG_DISPATCH][${timestamp}] Dispatch ADD_MESSAGE realizado com sucesso`);
               
-              const messageElement = document.getElementById(data.message.id);
-              if (messageElement) {
-                messageElement.classList.add("highlight-new-message");
-                setTimeout(() => {
-                  messageElement.classList.remove("highlight-new-message");
-                }, 2000);
+              // Marcar mensagem como lida se não for do usuário (fromMe === false)
+              if (!data.message.fromMe) {
+                console.log(`[FRONT_MSG_MARK_READ][${timestamp}] Marcando mensagens do ticket ${ticketId} como lidas após receber nova mensagem`);
+                
+                try {
+                  api.post(`/messages/${ticketId}/read`)
+                    .then(() => {
+                      console.log(`[FRONT_MSG_MARK_READ_SUCCESS][${timestamp}] Mensagens marcadas como lidas com sucesso`);
+                    })
+                    .catch((readError) => {
+                      console.error(`[FRONT_MSG_MARK_READ_ERROR][${timestamp}] Erro ao marcar mensagens como lidas:`, readError);
+                    });
+                } catch (apiError) {
+                  console.error(`[FRONT_MSG_MARK_READ_ERROR][${timestamp}] Erro ao chamar API para marcar mensagens como lidas:`, apiError);
+                }
               }
-            }, 0);
+              
+              setTimeout(() => {
+                try {
+                  scrollToBottom(true);
+                  console.log(`[FRONT_MSG_SCROLL][${timestamp}] Scroll para o final realizado`);
+                  
+                  const messageElement = document.getElementById(data.message.id);
+                  if (messageElement) {
+                    messageElement.classList.add("highlight-new-message");
+                    console.log(`[FRONT_MSG_HIGHLIGHT][${timestamp}] Highlight adicionado à mensagem ${data.message.id}`);
+                    setTimeout(() => {
+                      messageElement.classList.remove("highlight-new-message");
+                    }, 2000);
+                  } else {
+                    console.log(`[FRONT_MSG_ERRO][${timestamp}] Elemento da mensagem ${data.message.id} não encontrado no DOM`);
+                  }
+                } catch (scrollError) {
+                  console.error(`[FRONT_MSG_ERRO_SCROLL][${timestamp}] Erro ao fazer scroll:`, scrollError);
+                }
+              }, 0);
+            } catch (dispatchError) {
+              console.error(`[FRONT_MSG_ERRO_DISPATCH][${timestamp}] Erro ao fazer dispatch:`, dispatchError);
+            }
+          } else {
+            console.log(`[FRONT_MSG_DUPLICADA][${timestamp}] Mensagem ${data.message.id} já existe na lista, ignorando`);
           }
         }
 
         if (data.action === "update") {
-          dispatch({ type: "UPDATE_MESSAGE", payload: data.message });
+          console.log(`[FRONT_ACK_ATUALIZACAO][${timestamp}] Atualizando mensagem: ${data.message.id}, ACK=${data.message.ack}`);
+          try {
+            dispatch({ type: "UPDATE_MESSAGE", payload: data.message });
+            console.log(`[FRONT_ACK_DISPATCH][${timestamp}] Dispatch UPDATE_MESSAGE realizado com sucesso`);
+          } catch (updateError) {
+            console.error(`[FRONT_ACK_ERRO][${timestamp}] Erro ao atualizar mensagem:`, updateError);
+          }
         }
+      } else {
+        console.log(`[FRONT_MSG_IGNORADA][${timestamp}] Mensagem ignorada, não pertence ao ticket atual. MessageTicketId=${messageTicketId}, TicketId=${ticketId}`);
       }
     };
     
     const socket = openSocket();
+    const timestamp = new Date().toISOString();
     
     if (!socket) {
-      console.error("Não foi possível conectar ao socket");
+      console.error(`[FRONT_SOCKET_ERRO][${timestamp}] Não foi possível conectar ao socket`);
       return;
     }
 
+    // Remover listeners antigos para evitar duplicação
+    socket.off("appMessage");
+    
+    // Registrar o novo listener com tratamento de erro
+    socket.on("appMessage", (data) => {
+      try {
+        console.log(`[FRONT_SOCKET_EVENTO][${timestamp}] Evento appMessage recebido:`, {
+          action: data.action,
+          messageId: data.message?.id,
+          ticketId: data.ticket?.id || data.message?.ticketId,
+          ack: data.message?.ack
+        });
+        processMessage(data);
+      } catch (error) {
+        console.error(`[FRONT_SOCKET_ERRO_PROCESSAMENTO][${timestamp}] Erro ao processar evento appMessage:`, error);
+      }
+    });
+    
+    // Verificar estado da conexão e entrar na sala do ticket
     if (socket.connected) {
-      console.log("Socket já conectado, entrando no chatbox:", ticketId);
+      console.log(`[FRONT_SOCKET_CONECTADO][${timestamp}] Socket já conectado, entrando no chatbox: ${ticketId}`);
       socket.emit("joinChatBox", ticketId);
+      
+      // Solicitar estado atual das mensagens do ticket
+      console.log(`[FRONT_SOCKET_SYNC_REQUEST][${timestamp}] Solicitando sincronização de mensagens para o ticket: ${ticketId}`);
+      socket.emit("syncMessages", { ticketId });
     } else {
+      console.log(`[FRONT_SOCKET_DESCONECTADO][${timestamp}] Socket desconectado, aguardando conexão...`);
       socket.on("connect", () => {
-        console.log("Socket conectado, entrando no chatbox:", ticketId);
+        console.log(`[FRONT_SOCKET_RECONECTADO][${timestamp}] Socket conectado, entrando no chatbox: ${ticketId}`);
         socket.emit("joinChatBox", ticketId);
+        
+        // Solicitar estado atual das mensagens do ticket após reconexão
+        console.log(`[FRONT_SOCKET_RESYNC_REQUEST][${timestamp}] Solicitando sincronização de mensagens após reconexão para o ticket: ${ticketId}`);
+        socket.emit("syncMessages", { ticketId });
       });
     }
-
-    socket.off("appMessage");
-    socket.on("appMessage", processMessage);
 
     const handleNewMessage = (event) => {
       const { message, ticketId: messageTicketId } = event.detail;
@@ -523,39 +647,78 @@ const MessagesList = ({ ticketId, isGroup, onClick }) => {
     
     document.addEventListener('newMessage', handleNewMessage);
 
+    // Controle para evitar requisições simultâneas
+    let isPollingActive = true;
+    
     const refreshInterval = setInterval(() => {
+      const timestamp = new Date().toISOString();
+      
+      // Verificar se houve atualização recente via socket (menos de 5 segundos)
+      const timeSinceLastSocketUpdate = Date.now() - lastSocketEventTime.current;
+      
+      // Mostrar botão de sincronização se não houver eventos socket por mais de 30 segundos
+      if (timeSinceLastSocketUpdate > 30000) {
+        setShowSyncButton(true);
+        console.log(`[FRONT_SYNC_BUTTON][${timestamp}] Mostrando botão de sincronização, último evento socket foi há ${Math.floor(timeSinceLastSocketUpdate/1000)}s`);
+      }
+      
+      if (timeSinceLastSocketUpdate < 5000) {
+        console.log(`[FRONT_POLLING_SKIP][${timestamp}] Pulando verificação periódica, atualização via socket recente (${Math.floor(timeSinceLastSocketUpdate/1000)}s atrás)`);
+        return;
+      }
+      
+      if (!isPollingActive) {
+        console.log(`[FRONT_POLLING_BUSY][${timestamp}] Pulando verificação periódica, consulta anterior em andamento`);
+        return;
+      }
+      
       const fetchLatestMessages = async () => {
         try {
+          isPollingActive = false;
+          console.log(`[FRONT_POLLING_START][${timestamp}] Iniciando verificação periódica para o ticket ${ticketId}`);
+          
           const { data } = await api.get(`/messages/${ticketId}`, {
             params: { pageNumber: 1 }
           });
           
           if (data && data.messages && data.messages.length > 0) {
             let hasNewMessages = false;
+            let updatedMessages = 0;
             
             data.messages.forEach(message => {
-              const messageExists = messagesList.some(m => m.id === message.id);
+              const existingMessageIndex = messagesList.findIndex(m => m.id === message.id);
               
-              if (!messageExists) {
-                console.log("Adicionando mensagem da verificação periódica:", message.id);
+              if (existingMessageIndex === -1) {
+                console.log(`[FRONT_POLLING_NOVA][${timestamp}] Adicionando nova mensagem da verificação periódica: ${message.id}`);
                 dispatch({ type: "ADD_MESSAGE", payload: message });
                 hasNewMessages = true;
+              } else if (messagesList[existingMessageIndex].ack !== message.ack) {
+                console.log(`[FRONT_POLLING_ACK][${timestamp}] Atualizando ACK via polling: ID=${message.id}, ACK anterior=${messagesList[existingMessageIndex].ack}, Novo ACK=${message.ack}`);
+                dispatch({ type: "UPDATE_MESSAGE", payload: message });
+                updatedMessages++;
               }
             });
             
             if (hasNewMessages) {
+              console.log(`[FRONT_POLLING_SCROLL][${timestamp}] Novas mensagens encontradas, fazendo scroll`);
               setTimeout(() => {
                 scrollToBottom(true);
               }, 0);
             }
+            
+            if (updatedMessages > 0) {
+              console.log(`[FRONT_POLLING_UPDATED][${timestamp}] ${updatedMessages} mensagens tiveram ACK atualizado via polling`);
+            }
           }
         } catch (err) {
-          console.error("Erro ao buscar mensagens recentes:", err);
+          console.error(`[FRONT_POLLING_ERRO][${timestamp}] Erro ao buscar mensagens recentes:`, err);
+        } finally {
+          isPollingActive = true;
         }
       };
       
       fetchLatestMessages();
-    }, 3000);
+    }, 5000); // Aumentado para 5 segundos para reduzir a carga no servidor
 
     return () => {
       console.log("Desconectando socket do chatbox:", ticketId);
@@ -629,6 +792,92 @@ const MessagesList = ({ ticketId, isGroup, onClick }) => {
 
   const handleCloseMessageOptionsMenu = (e) => {
     setAnchorEl(null);
+  };
+
+  // Função para forçar sincronização manual de mensagens
+  const handleSyncMessages = async () => {
+    const timestamp = new Date().toISOString();
+    console.log(`[FRONT_SYNC_MANUAL][${timestamp}] Iniciando sincronização manual de mensagens para o ticket ${ticketId}`);
+    
+    try {
+      setSyncingMessages(true);
+      
+      // 1. Reconectar socket se necessário
+      const socket = openSocket();
+      if (socket) {
+        console.log(`[FRONT_SYNC_SOCKET][${timestamp}] Reconectando ao socket e re-entrando no chatbox`);
+        socket.emit("leaveChatBox", ticketId);
+        socket.emit("joinChatBox", ticketId);
+        socket.emit("syncMessages", { ticketId });
+      }
+      
+      // 2. Buscar mensagens mais recentes via API
+      console.log(`[FRONT_SYNC_API][${timestamp}] Buscando mensagens mais recentes via API`);
+      const { data } = await api.get(`/messages/${ticketId}`, {
+        params: { pageNumber: 1 }
+      });
+      
+      if (data && data.messages && data.messages.length > 0) {
+        console.log(`[FRONT_SYNC_RESULT][${timestamp}] Recebidas ${data.messages.length} mensagens da API`);
+        
+        // Atualizar mensagens existentes e adicionar novas
+        let newMessages = 0;
+        let updatedMessages = 0;
+        
+        data.messages.forEach(message => {
+          const existingMessageIndex = messagesList.findIndex(m => m.id === message.id);
+          
+          if (existingMessageIndex === -1) {
+            dispatch({ type: "ADD_MESSAGE", payload: message });
+            newMessages++;
+          } else if (JSON.stringify(messagesList[existingMessageIndex]) !== JSON.stringify(message)) {
+            dispatch({ type: "UPDATE_MESSAGE", payload: message });
+            updatedMessages++;
+          }
+        });
+        
+        console.log(`[FRONT_SYNC_STATS][${timestamp}] Sincronização concluída: ${newMessages} novas mensagens, ${updatedMessages} mensagens atualizadas`);
+        
+        // Fazer scroll para a última mensagem se houver novas
+        if (newMessages > 0) {
+          setTimeout(() => {
+            scrollToBottom(true);
+          }, 300);
+        }
+        
+        // Marcar mensagens como lidas
+        if (newMessages > 0) {
+          try {
+            await api.post(`/messages/${ticketId}/read`);
+            console.log(`[FRONT_SYNC_READ][${timestamp}] Mensagens marcadas como lidas após sincronização`);
+          } catch (readError) {
+            console.error(`[FRONT_SYNC_READ_ERROR][${timestamp}] Erro ao marcar mensagens como lidas:`, readError);
+          }
+        }
+        
+        // Notificar usuário sobre o resultado
+        if (newMessages > 0) {
+          toast.success(`${newMessages} novas mensagens sincronizadas`);
+        } else if (updatedMessages > 0) {
+          toast.info(`${updatedMessages} mensagens atualizadas`);
+        } else {
+          toast.info("Nenhuma nova mensagem encontrada");
+        }
+      } else {
+        console.log(`[FRONT_SYNC_EMPTY][${timestamp}] Nenhuma mensagem retornada pela API`);
+        toast.info("Nenhuma nova mensagem encontrada");
+      }
+      
+      // Atualizar timestamp para evitar que o botão apareça logo após sincronização
+      lastSocketEventTime.current = Date.now();
+      setShowSyncButton(false);
+      
+    } catch (error) {
+      console.error(`[FRONT_SYNC_ERROR][${timestamp}] Erro durante sincronização manual:`, error);
+      toast.error("Erro ao sincronizar mensagens. Tente novamente.");
+    } finally {
+      setSyncingMessages(false);
+    }
   };
 
   const processLocationMessage = (message) => {
@@ -795,45 +1044,53 @@ const MessagesList = ({ ticketId, isGroup, onClick }) => {
   };
 
   const renderMessageAck = (message) => {
+    const timestamp = new Date().toISOString();
+    
+    // Seguindo exatamente a documentação da biblioteca whatsapp-web.js:
+    // ACK_ERROR: -1
+    // ACK_PENDING: 0
+    // ACK_SERVER: 1
+    // ACK_DEVICE: 2
+    // ACK_READ: 3
+    // ACK_PLAYED: 4
+    
+    if (!message.fromMe) {
+      // Não exibir ticks para mensagens recebidas
+      return null;
+    }
+    
+    if (message.ack === -1) {
+      console.log(`[FRONT_RENDER_ACK_ERROR][${timestamp}] Mensagem ${message.id} com ACK=-1 (erro)`);
+      return <Error fontSize="small" sx={{ fontSize: 16, verticalAlign: "middle", color: "red" }} />;
+    }
+    
     if (message.ack === 0) {
+      console.log(`[FRONT_RENDER_ACK_0][${timestamp}] Mensagem ${message.id} com ACK=0 (relógio/pendente)`);
       return <AccessTime fontSize="small" sx={{ fontSize: 16, verticalAlign: "middle" }} />;
     }
+    
     if (message.ack === 1) {
+      console.log(`[FRONT_RENDER_ACK_1][${timestamp}] Mensagem ${message.id} com ACK=1 (servidor/um tick)`);
       return <Done fontSize="small" sx={{ fontSize: 16, verticalAlign: "middle" }} />;
     }
+    
     if (message.ack === 2) {
+      console.log(`[FRONT_RENDER_ACK_2][${timestamp}] Mensagem ${message.id} com ACK=2 (dispositivo/dois ticks)`);
       return <DoneAll fontSize="small" sx={{ fontSize: 16, verticalAlign: "middle" }} />;
     }
+    
     if (message.ack === 3 || message.ack === 4) {
+      console.log(`[FRONT_RENDER_ACK_3_4][${timestamp}] Mensagem ${message.id} com ACK=${message.ack} (lido/reproduzido/dois ticks azuis)`);
       return <DoneAll fontSize="small" sx={{ fontSize: 16, verticalAlign: "middle", color: blue[500] }} />;
     }
+    
+    // Caso de ACK com valor não esperado
+    console.warn(`[FRONT_RENDER_ACK_INVALIDO][${timestamp}] Mensagem ${message.id} com valor de ACK inválido: ${message.ack}`);
+    return <AccessTime fontSize="small" sx={{ fontSize: 16, verticalAlign: "middle", color: "orange" }} />;
   };
-
+  
   const renderDailyTimestamps = (message, index) => {
     if (index === 0) {
-      return (
-        <DailyTimestamp key={`timestamp-${message.id}`}>
-          <DailyTimestampText>
-            {format(parseISO(messagesList[index].createdAt), "dd/MM/yyyy")}
-          </DailyTimestampText>
-        </DailyTimestamp>
-      );
-    }
-    if (index < messagesList.length - 1) {
-      let messageDay = parseISO(messagesList[index].createdAt);
-      let previousMessageDay = parseISO(messagesList[index - 1].createdAt);
-
-      if (!isSameDay(messageDay, previousMessageDay)) {
-        return (
-          <DailyTimestamp key={`timestamp-${message.id}`}>
-            <DailyTimestampText>
-              {format(parseISO(messagesList[index].createdAt), "dd/MM/yyyy")}
-            </DailyTimestampText>
-          </DailyTimestamp>
-        );
-      }
-    }
-    if (index === messagesList.length - 1) {
       return (
         <div
           key={`ref-${message.createdAt}`}
@@ -959,12 +1216,49 @@ const MessagesList = ({ ticketId, isGroup, onClick }) => {
           boxShadow: "0 1px 1px rgba(0, 0, 0, 0.1)"
         }}
       >
+        {showScrollButton && (
+          <IconButton
+            onClick={scrollToBottom}
+            sx={{
+              position: "absolute",
+              bottom: "70px",
+              right: "20px",
+              backgroundColor: theme.palette.primary.main,
+              color: "white",
+              '&:hover': {
+                backgroundColor: theme.palette.primary.dark,
+              },
+              boxShadow: "0px 3px 5px -1px rgba(0,0,0,0.2), 0px 6px 10px 0px rgba(0,0,0,0.14), 0px 1px 18px 0px rgba(0,0,0,0.12)"
+            }}
+          >
+            <KeyboardArrowDown />
+          </IconButton>
+        )}
+        {showSyncButton && (
+          <Tooltip title="Sincronizar mensagens" placement="left">
+            <Fab
+              color="primary"
+              size="medium"
+              onClick={handleSyncMessages}
+              disabled={syncingMessages}
+              sx={{
+                position: "absolute",
+                bottom: "130px",
+                right: "20px",
+                boxShadow: "0px 3px 5px -1px rgba(0,0,0,0.2), 0px 6px 10px 0px rgba(0,0,0,0.14), 0px 1px 18px 0px rgba(0,0,0,0.12)"
+              }}
+            >
+              {syncingMessages ? <CircularProgress size={24} color="inherit" /> : <Refresh />}
+            </Fab>
+          </Tooltip>
+        )}
         <div
-        style={{
+          style={{
             flex: "none",
             width: "4px",
             backgroundColor: message.quotedMsg?.fromMe ? "#35cd96" : "#6bcbef",
-          }}></div>
+          }}
+        ></div>
         <QuotedMsgStyled>
           <MessageContactNameStyled style={{ fontWeight: 'bold', color: message.quotedMsg?.fromMe ? '#35cd96' : '#6bcbef' }}>
             {!message.quotedMsg?.fromMe ? message.quotedMsg?.contact?.name : 'Você'}

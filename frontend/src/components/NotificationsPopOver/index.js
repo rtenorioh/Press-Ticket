@@ -149,12 +149,23 @@ const NotificationsPopOver = () => {
 					return [data.ticket, ...prevState];
 				});
 
+				// Para tickets com status 'pending', sempre notificar, exceto se o ticket já estiver aberto
+				const isPendingTicket = data.ticket.status === "pending";
+				
+				// Verificar se o usuário é admin ou masteradmin
+				const isAdminUser = user?.profile === "admin" || user?.profile === "masteradmin";
+				
 				const shouldNotNotify =
-					(data.message.ticketId === ticketIdUrl &&
-						document.visibilityState === "visible") ||
-					(data.ticket.userId && data.ticket.userId !== user?.id);
+					// Não notificar se o ticket já está aberto e a página está visível
+					(data.message.ticketId === ticketIdUrl && document.visibilityState === "visible") ||
+					// Não notificar se o ticket tem um usuário atribuído que não é o usuário atual
+					// E o usuário não é admin/masteradmin
+					(!isPendingTicket && data.ticket.userId && data.ticket.userId !== user?.id && !isAdminUser);
 
 				if (shouldNotNotify) return;
+				
+				// Adicionar log para depuração
+				console.log(`[NOTIFICAÇÃO] Exibindo notificação para ticket ${data.ticket.id}, status: ${data.ticket.status}`);
 
 				handleNotifications(data);
 			}

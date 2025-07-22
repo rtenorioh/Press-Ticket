@@ -5,6 +5,7 @@ import Ticket from "../../models/Ticket";
 import User from "../../models/User";
 import Whatsapp from "../../models/Whatsapp";
 import ShowContactService from "../ContactServices/ShowContactService";
+import EmitTicketCounterService from "./EmitTicketCounterService";
 
 interface Request {
   contactId: number;
@@ -53,6 +54,18 @@ const CreateTicketService = async ({
 
   if (!ticket) {
     throw new AppError("ERR_CREATING_TICKET");
+  }
+
+  // Emitir atualização dos contadores de tickets para todos os usuários
+  const timestamp = new Date().toISOString();
+  console.log(`[BACK_CREATE_TICKET][${timestamp}] Atualizando contadores após criação de ticket: ${ticket.id}`);
+  
+  try {
+    // Emitir atualização dos contadores para todos os usuários
+    await EmitTicketCounterService();
+  } catch (err) {
+    console.error(`[BACK_CREATE_TICKET_ERROR][${timestamp}] Erro ao emitir contadores:`, err);
+    // Não interrompe o fluxo em caso de erro na emissão dos contadores
   }
 
   return ticket;

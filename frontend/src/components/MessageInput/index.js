@@ -750,7 +750,7 @@ const MessageInput = ({ ticketStatus }) => {
         await api.post(`/messages/${ticketId}`, formData);
       }
     } catch (err) {
-      toastError(err);
+      toastError(err, t);
     }
 
     setRecording(false);

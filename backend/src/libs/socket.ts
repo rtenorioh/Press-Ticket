@@ -221,6 +221,13 @@ export const initIO = (httpServer: Server): void => {
       socket.join(status);
     });
 
+    socket.on("subscribeTicketCounter", () => {
+      logger.info("Usuário inscrito no canal de contadores de tickets", {
+        socketId: socket.id
+      });
+      socket.join("ticketCounter");
+    });
+
     // Novo evento para sincronizar tickets após reconexão
     socket.on("getTickets", async (data: GetTicketsData) => {
       try {

@@ -128,10 +128,17 @@ export const initWbot = async (whatsapp: Whatsapp): Promise<Session> => {
         sessionCfg = JSON.parse(whatsapp.session);
       }
 
+      let clientSession = `${process.env.COMPANY_NAME}_${whatsapp.id}`;
+      if (!process.env.COMPANY_NAME) {
+        clientSession = `${whatsapp.name}_${whatsapp.id}`;
+      }
+
       const wbot: Session = new Client({
         session: sessionCfg,
-        authStrategy: new LocalAuth({ clientId: `bd_${whatsapp.id}` }),
+        authStrategy: new LocalAuth({ clientId: clientSession }),
         puppeteer: {
+          executablePath: process.env.CHROME_BIN || undefined,
+          browserWSEndpoint: process.env.CHROME_WS || undefined,
           args: [
             "--no-sandbox", // Desativa a sandbox de segurança
             "--disable-setuid-sandbox", // Desativa setuid
@@ -141,6 +148,8 @@ export const initWbot = async (whatsapp: Whatsapp): Promise<Session> => {
             "--no-default-browser-check",
             "--disable-site-isolation-trials",
             "--no-experiments",
+            "--no-first-run",
+            "--no-zygote",
             "--ignore-gpu-blacklist",
             "--ignore-certificate-errors",
             "--ignore-certificate-errors-spki-list",
@@ -165,8 +174,7 @@ export const initWbot = async (whatsapp: Whatsapp): Promise<Session> => {
             "--disable-background-timer-throttling", // Reduz o uso de timers em segundo plano
             "--disable-features=IsolateOrigins,site-per-process", // Otimiza o isolamento de sites
             // "--renderer-process-limit=2", // Limita o número de processos de renderização
-          ],
-          executablePath: process.env.CHROME_BIN || undefined,
+          ]
         },
       });
       

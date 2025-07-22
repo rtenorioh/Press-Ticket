@@ -326,18 +326,26 @@ const TicketListItem = ({ ticket, filteredTags }) => {
 			
 			const socket = openSocket();
 			if (socket) {
+				// Emitir evento de atualização com todas as informações necessárias
+				// Garantir que o userId esteja definido para que o ticket apareça na aba "Atendimento"
 				socket.emit("ticket", {
 					action: "update",
 					ticketId: id,
 					ticket: {
 						...ticket,
-						status: "open"
+						status: "open",
+						userId: user?.id // Garantir que o userId esteja definido
 					}
 				});
+
+				// Forçar uma atualização na lista de tickets da aba "open"
+				socket.emit("joinTickets", "open");
+				socket.emit("getTickets", { status: "open", userId: user?.id, showAll: false });
 			}
 			
 			localStorage.setItem("pressticket:changeTab", "open");
 			
+			// Navegar para o ticket aceito
 			navigate(`/tickets/${id}`);
 		} catch (err) {
 			if (isMounted.current) {

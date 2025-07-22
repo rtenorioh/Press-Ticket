@@ -13,28 +13,51 @@ export const useSocket = () => {
                 globalSocket = openSocket();
                 if (globalSocket) {
                     globalSocket.on('connect', () => {
-                        console.log('Socket conectado');
+                        const timestamp = new Date().toISOString();
+                        console.log(`[FRONT_SOCKET_CONNECT][${timestamp}] Socket conectado com sucesso. ID: ${globalSocket.id}`);
                         setConnected(true);
                     });
 
-                    globalSocket.on('disconnect', () => {
-                        console.log('Socket desconectado');
+                    globalSocket.on('disconnect', (reason) => {
+                        const timestamp = new Date().toISOString();
+                        console.log(`[FRONT_SOCKET_DISCONNECT][${timestamp}] Socket desconectado. Motivo: ${reason}`);
                         setConnected(false);
                     });
 
                     globalSocket.on('error', (error) => {
-                        console.error('Erro no socket:', error);
+                        const timestamp = new Date().toISOString();
+                        console.error(`[FRONT_SOCKET_ERROR][${timestamp}] Erro no socket:`, error);
+                        console.error(`[FRONT_SOCKET_ERROR_STACK][${timestamp}] Stack de erro:`, error?.stack || 'Sem stack disponível');
+                        
                         if (error.message?.includes('insufficient resources')) {
+                            console.warn(`[FRONT_SOCKET_RESOURCE_ERROR][${timestamp}] Erro de recursos insuficientes detectado. Desconectando e reiniciando socket em 5 segundos.`);
                             globalSocket.disconnect();
                             setTimeout(() => {
                                 globalSocket = null;
                                 socketRef.current = null;
+                                console.log(`[FRONT_SOCKET_RESET][${timestamp}] Socket resetado após erro de recursos.`);
                             }, 5000);
                         }
                     });
 
-                    globalSocket.on('reconnect_attempt', () => {
-                        console.log('Tentativa de reconexão do socket');
+                    globalSocket.on('reconnect_attempt', (attemptNumber) => {
+                        const timestamp = new Date().toISOString();
+                        console.log(`[FRONT_SOCKET_RECONNECT][${timestamp}] Tentativa #${attemptNumber} de reconexão do socket`);
+                    });
+                    
+                    globalSocket.on('reconnect', (attemptNumber) => {
+                        const timestamp = new Date().toISOString();
+                        console.log(`[FRONT_SOCKET_RECONNECTED][${timestamp}] Socket reconectado com sucesso após ${attemptNumber} tentativa(s). ID: ${globalSocket.id}`);
+                    });
+                    
+                    globalSocket.on('reconnect_error', (error) => {
+                        const timestamp = new Date().toISOString();
+                        console.error(`[FRONT_SOCKET_RECONNECT_ERROR][${timestamp}] Erro na tentativa de reconexão:`, error);
+                    });
+                    
+                    globalSocket.on('reconnect_failed', () => {
+                        const timestamp = new Date().toISOString();
+                        console.error(`[FRONT_SOCKET_RECONNECT_FAILED][${timestamp}] Falha em todas as tentativas de reconexão do socket.`);
                     });
                 }
             } catch (err) {

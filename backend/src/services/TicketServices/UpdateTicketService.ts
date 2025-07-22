@@ -3,6 +3,7 @@ import SetTicketMessagesAsRead from "../../helpers/SetTicketMessagesAsRead";
 import { getIO } from "../../libs/socket";
 import Ticket from "../../models/Ticket";
 import ShowTicketService from "./ShowTicketService";
+import EmitTicketCounterService from "./EmitTicketCounterService";
 
 interface TicketData {
   status?: string;
@@ -74,6 +75,17 @@ const UpdateTicketService = async ({
       action: "update",
       ticket
     });
+
+  // Emitir atualização dos contadores de tickets para todos os usuários
+  const timestamp = new Date().toISOString();
+  console.log(`[BACK_UPDATE_TICKET][${timestamp}] Atualizando contadores após mudança de status: ${oldStatus} -> ${ticket.status}`);
+  
+  try {
+    // Emitir atualização dos contadores para todos os usuários
+    await EmitTicketCounterService();
+  } catch (err) {
+    console.error(`[BACK_UPDATE_TICKET_ERROR][${timestamp}] Erro ao emitir contadores:`, err);
+  }
 
   return { ticket, oldStatus, oldUserId };
 };

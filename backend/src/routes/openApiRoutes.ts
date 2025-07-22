@@ -62,8 +62,9 @@ openApiRouter.post("/tags/sync", isApiToken('create:tags'), TagController.syncTa
 
 // Rotas de tickets
 openApiRouter.get("/tickets", isApiToken('read:tickets'), TicketController.index);
-openApiRouter.get("/tickets/:ticketId", isApiToken('read:tickets'), TicketController.show);
+openApiRouter.get("/tickets/count", isApiToken('read:tickets'), TicketController.count);
 openApiRouter.post("/tickets", isApiToken('create:tickets'), TicketController.store);
+openApiRouter.get("/tickets/:ticketId", isApiToken('read:tickets'), TicketController.show);
 openApiRouter.put("/tickets/:ticketId", isApiToken('update:tickets'), TicketController.update);
 openApiRouter.delete("/tickets/:ticketId", isApiToken('delete:tickets'), TicketController.remove);
 openApiRouter.get("/tickets/contact/:contactId/open", isApiToken('read:tickets'), TicketController.checkOpenTickets);
