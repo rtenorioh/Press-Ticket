@@ -21,13 +21,10 @@ import {
   ExpandMore,
   GetApp,
   KeyboardArrowDown,
-  Refresh,
-  SyncProblem
 } from "@mui/icons-material";
 
 import {
   format,
-  isSameDay,
   parseISO
 } from "date-fns";
 import React, { useCallback, useEffect, useReducer, useRef, useState } from "react";
@@ -427,8 +424,6 @@ const MessagesList = ({ ticketId, isGroup, onClick }) => {
   const [hasMore, setHasMore] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showScrollButton, setShowScrollButton] = useState(false);
-  const [syncingMessages, setSyncingMessages] = useState(false);
-  const [showSyncButton, setShowSyncButton] = useState(false);
   const lastMessageRef = useRef();
   const { t } = useTranslation();
   const [selectedMessage, setSelectedMessage] = useState({});
@@ -499,7 +494,6 @@ const MessagesList = ({ ticketId, isGroup, onClick }) => {
       
       // Atualiza o timestamp do último evento socket recebido
       lastSocketEventTime.current = Date.now();
-      setShowSyncButton(false);
       
       const messageTicketId = data.ticket?.id || data.message?.ticketId;
       
@@ -656,12 +650,6 @@ const MessagesList = ({ ticketId, isGroup, onClick }) => {
       // Verificar se houve atualização recente via socket (menos de 5 segundos)
       const timeSinceLastSocketUpdate = Date.now() - lastSocketEventTime.current;
       
-      // Mostrar botão de sincronização se não houver eventos socket por mais de 30 segundos
-      if (timeSinceLastSocketUpdate > 30000) {
-        setShowSyncButton(true);
-        console.log(`[FRONT_SYNC_BUTTON][${timestamp}] Mostrando botão de sincronização, último evento socket foi há ${Math.floor(timeSinceLastSocketUpdate/1000)}s`);
-      }
-      
       if (timeSinceLastSocketUpdate < 5000) {
         console.log(`[FRONT_POLLING_SKIP][${timestamp}] Pulando verificação periódica, atualização via socket recente (${Math.floor(timeSinceLastSocketUpdate/1000)}s atrás)`);
         return;
@@ -792,92 +780,6 @@ const MessagesList = ({ ticketId, isGroup, onClick }) => {
 
   const handleCloseMessageOptionsMenu = (e) => {
     setAnchorEl(null);
-  };
-
-  // Função para forçar sincronização manual de mensagens
-  const handleSyncMessages = async () => {
-    const timestamp = new Date().toISOString();
-    console.log(`[FRONT_SYNC_MANUAL][${timestamp}] Iniciando sincronização manual de mensagens para o ticket ${ticketId}`);
-    
-    try {
-      setSyncingMessages(true);
-      
-      // 1. Reconectar socket se necessário
-      const socket = openSocket();
-      if (socket) {
-        console.log(`[FRONT_SYNC_SOCKET][${timestamp}] Reconectando ao socket e re-entrando no chatbox`);
-        socket.emit("leaveChatBox", ticketId);
-        socket.emit("joinChatBox", ticketId);
-        socket.emit("syncMessages", { ticketId });
-      }
-      
-      // 2. Buscar mensagens mais recentes via API
-      console.log(`[FRONT_SYNC_API][${timestamp}] Buscando mensagens mais recentes via API`);
-      const { data } = await api.get(`/messages/${ticketId}`, {
-        params: { pageNumber: 1 }
-      });
-      
-      if (data && data.messages && data.messages.length > 0) {
-        console.log(`[FRONT_SYNC_RESULT][${timestamp}] Recebidas ${data.messages.length} mensagens da API`);
-        
-        // Atualizar mensagens existentes e adicionar novas
-        let newMessages = 0;
-        let updatedMessages = 0;
-        
-        data.messages.forEach(message => {
-          const existingMessageIndex = messagesList.findIndex(m => m.id === message.id);
-          
-          if (existingMessageIndex === -1) {
-            dispatch({ type: "ADD_MESSAGE", payload: message });
-            newMessages++;
-          } else if (JSON.stringify(messagesList[existingMessageIndex]) !== JSON.stringify(message)) {
-            dispatch({ type: "UPDATE_MESSAGE", payload: message });
-            updatedMessages++;
-          }
-        });
-        
-        console.log(`[FRONT_SYNC_STATS][${timestamp}] Sincronização concluída: ${newMessages} novas mensagens, ${updatedMessages} mensagens atualizadas`);
-        
-        // Fazer scroll para a última mensagem se houver novas
-        if (newMessages > 0) {
-          setTimeout(() => {
-            scrollToBottom(true);
-          }, 300);
-        }
-        
-        // Marcar mensagens como lidas
-        if (newMessages > 0) {
-          try {
-            await api.post(`/messages/${ticketId}/read`);
-            console.log(`[FRONT_SYNC_READ][${timestamp}] Mensagens marcadas como lidas após sincronização`);
-          } catch (readError) {
-            console.error(`[FRONT_SYNC_READ_ERROR][${timestamp}] Erro ao marcar mensagens como lidas:`, readError);
-          }
-        }
-        
-        // Notificar usuário sobre o resultado
-        if (newMessages > 0) {
-          toast.success(`${newMessages} novas mensagens sincronizadas`);
-        } else if (updatedMessages > 0) {
-          toast.info(`${updatedMessages} mensagens atualizadas`);
-        } else {
-          toast.info("Nenhuma nova mensagem encontrada");
-        }
-      } else {
-        console.log(`[FRONT_SYNC_EMPTY][${timestamp}] Nenhuma mensagem retornada pela API`);
-        toast.info("Nenhuma nova mensagem encontrada");
-      }
-      
-      // Atualizar timestamp para evitar que o botão apareça logo após sincronização
-      lastSocketEventTime.current = Date.now();
-      setShowSyncButton(false);
-      
-    } catch (error) {
-      console.error(`[FRONT_SYNC_ERROR][${timestamp}] Erro durante sincronização manual:`, error);
-      toast.error("Erro ao sincronizar mensagens. Tente novamente.");
-    } finally {
-      setSyncingMessages(false);
-    }
   };
 
   const processLocationMessage = (message) => {
@@ -1216,42 +1118,6 @@ const MessagesList = ({ ticketId, isGroup, onClick }) => {
           boxShadow: "0 1px 1px rgba(0, 0, 0, 0.1)"
         }}
       >
-        {showScrollButton && (
-          <IconButton
-            onClick={scrollToBottom}
-            sx={{
-              position: "absolute",
-              bottom: "70px",
-              right: "20px",
-              backgroundColor: theme.palette.primary.main,
-              color: "white",
-              '&:hover': {
-                backgroundColor: theme.palette.primary.dark,
-              },
-              boxShadow: "0px 3px 5px -1px rgba(0,0,0,0.2), 0px 6px 10px 0px rgba(0,0,0,0.14), 0px 1px 18px 0px rgba(0,0,0,0.12)"
-            }}
-          >
-            <KeyboardArrowDown />
-          </IconButton>
-        )}
-        {showSyncButton && (
-          <Tooltip title="Sincronizar mensagens" placement="left">
-            <Fab
-              color="primary"
-              size="medium"
-              onClick={handleSyncMessages}
-              disabled={syncingMessages}
-              sx={{
-                position: "absolute",
-                bottom: "130px",
-                right: "20px",
-                boxShadow: "0px 3px 5px -1px rgba(0,0,0,0.2), 0px 6px 10px 0px rgba(0,0,0,0.14), 0px 1px 18px 0px rgba(0,0,0,0.12)"
-              }}
-            >
-              {syncingMessages ? <CircularProgress size={24} color="inherit" /> : <Refresh />}
-            </Fab>
-          </Tooltip>
-        )}
         <div
           style={{
             flex: "none",
