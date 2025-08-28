@@ -493,6 +493,11 @@ const Connections = () => {
 				setActionMessages(prev => ({ ...prev, [whatsAppId]: undefined }));
 				
 				ToastManager.success('Canal excluído com sucesso!', `delete-success-${whatsAppId}`);
+				
+				// Força atualização da lista após exclusão
+				setTimeout(() => {
+					fetchWhatsApps();
+				}, 300);
 			} catch (err) {
 				toastError(err);
 				setLoadingActions(prev => ({ ...prev, [whatsAppId]: undefined }));
