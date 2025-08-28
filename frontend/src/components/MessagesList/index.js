@@ -474,10 +474,19 @@ const MessagesList = ({ ticketId, isGroup, onClick }) => {
   const scrollToBottom = useCallback((force = false) => {
     const scrollUpTimeElapsed = Date.now() - lastScrollUpTime.current > 5000;
     
-    if (((force && scrollUpTimeElapsed) || shouldAutoScroll) && !isViewingOldMessages && lastMessageRef.current) {
+    // Se force for true (botão foi clicado), ignoramos as outras condições
+    if (force) {
+      if (lastMessageRef.current) {
+        // Quando o botão é clicado, fazemos scroll imediatamente
+        lastMessageRef.current.scrollIntoView({ behavior: "auto" });
+        // Resetamos o estado de visualização de mensagens antigas
+        setIsViewingOldMessages(false);
+      }
+    } else if (shouldAutoScroll && !isViewingOldMessages && lastMessageRef.current) {
+      // Para scrolls automáticos (não forçados), mantemos o comportamento original
       lastMessageRef.current.scrollIntoView({ behavior: "smooth" });
     }
-  }, [shouldAutoScroll, isViewingOldMessages, lastMessageRef, lastScrollUpTime]);
+  }, [shouldAutoScroll, isViewingOldMessages, lastMessageRef, lastScrollUpTime, setIsViewingOldMessages]);
 
   useEffect(() => {
     const processMessage = (data) => {
@@ -1097,7 +1106,42 @@ const MessagesList = ({ ticketId, isGroup, onClick }) => {
 
   useEffect(() => {
     if (!loading && messagesList.length > 0) {
-      checkScroll();
+      // Verifica se existem mensagens não lidas
+      const unreadMessages = messagesList.filter(msg => !msg.fromMe && msg.ack < 3);
+      
+      if (unreadMessages.length > 0) {
+        // Se existem mensagens não lidas, rola para a primeira não lida
+        const firstUnreadMessage = unreadMessages[0];
+        const firstUnreadElement = document.getElementById(firstUnreadMessage.id);
+        
+        if (firstUnreadElement) {
+          // Adiciona um indicador visual de mensagens não lidas (semelhante ao WhatsApp)
+          const unreadCount = unreadMessages.length;
+          const unreadIndicator = document.createElement('div');
+          unreadIndicator.innerText = `${unreadCount} ${unreadCount === 1 ? 'mensagem não lida' : 'mensagens não lidas'}`;
+          unreadIndicator.style.backgroundColor = '#fff';
+          unreadIndicator.style.color = '#303030';
+          unreadIndicator.style.padding = '8px 12px';
+          unreadIndicator.style.borderRadius = '16px';
+          unreadIndicator.style.boxShadow = '0 1px 1px rgba(0, 0, 0, 0.1)';
+          unreadIndicator.style.margin = '8px auto';
+          unreadIndicator.style.width = 'fit-content';
+          unreadIndicator.style.textAlign = 'center';
+          unreadIndicator.style.fontSize = '13px';
+          unreadIndicator.style.fontWeight = '500';
+          
+          // Insere o indicador antes da primeira mensagem não lida
+          firstUnreadElement.parentNode.insertBefore(unreadIndicator, firstUnreadElement);
+          
+          // Faz o scroll para a primeira mensagem não lida
+          setTimeout(() => {
+            firstUnreadElement.scrollIntoView({ behavior: 'auto', block: 'start' });
+          }, 100);
+        }
+      } else {
+        // Se não há mensagens não lidas, faz o scroll para a última mensagem
+        checkScroll();
+      }
     }
   }, [loading, messagesList, checkScroll, scrollToBottom]);
 
@@ -1365,8 +1409,12 @@ const MessagesList = ({ ticketId, isGroup, onClick }) => {
       </MessagesListStyled>
       <ScrollToBottomButton
         onClick={() => {
+          // Implementação direta do scroll para o final da lista
+          const messagesContainer = document.querySelector('.messages-list-scrollable');
+          if (messagesContainer) {
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+          }
           setIsViewingOldMessages(false);
-          scrollToBottom(true);
         }}
         size="small"
         sx={{ display: showScrollButton ? "flex" : "none" }}

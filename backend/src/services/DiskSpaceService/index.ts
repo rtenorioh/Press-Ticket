@@ -7,6 +7,8 @@ interface FolderSizeInfo {
   name: string;
   size: string;
   sizeBytes: number;
+  type: 'folder' | 'file';
+  children?: FolderSizeInfo[];
 }
 
 interface DiskSpaceInfo {
@@ -22,6 +24,112 @@ interface DiskSpaceInfo {
   largestFolders: FolderSizeInfo[];
 }
 
+// Função para obter conteúdo de uma pasta específica
+export const getFolderContents = async (folderPath: string): Promise<FolderSizeInfo[]> => {
+  const companyName = process.env.COMPANY_NAME || "";
+  
+  if (!companyName) {
+    throw new Error("COMPANY_NAME não definido no arquivo .env");
+  }
+
+  const basePath = path.resolve("/home/deploy", companyName);
+  
+  // Verificar se o caminho está dentro da pasta permitida
+  const fullPath = path.resolve(basePath, folderPath);
+  if (!fullPath.startsWith(basePath)) {
+    throw new Error("Acesso negado: caminho fora da pasta permitida");
+  }
+
+  return new Promise<FolderSizeInfo[]>((resolve, reject) => {
+    exec(`ls -la "${fullPath}" 2>/dev/null`, (error, stdout, stderr) => {
+      if (error) {
+        resolve([]);
+        return;
+      }
+      
+      const lines = stdout.trim().split('\n').slice(1); // Remove primeira linha (total)
+      const items: FolderSizeInfo[] = [];
+      let processedCount = 0;
+      
+      if (lines.length === 0) {
+        resolve([]);
+        return;
+      }
+      
+      for (const line of lines) {
+        const parts = line.trim().split(/\s+/);
+        if (parts.length < 9) {
+          processedCount++;
+          if (processedCount === lines.length) {
+            resolve(items.sort((a, b) => b.sizeBytes - a.sizeBytes));
+          }
+          continue;
+        }
+        
+        const permissions = parts[0];
+        const fileName = parts.slice(8).join(' ');
+        
+        // Pular arquivos ocultos e especiais
+        if (fileName === '.' || fileName === '..' || 
+            fileName.includes('node_modules') || 
+            fileName.includes('.git') ||
+            fileName.includes('dist') ||
+            fileName.includes('build') ||
+            fileName.includes('coverage')) {
+          processedCount++;
+          if (processedCount === lines.length) {
+            resolve(items.sort((a, b) => b.sizeBytes - a.sizeBytes));
+          }
+          continue;
+        }
+        
+        const itemFullPath = path.join(fullPath, fileName);
+        const isDirectory = permissions.startsWith('d');
+        const relativeName = path.relative(basePath, itemFullPath);
+        
+        // Obter tamanho do item
+        const duCommand = isDirectory ? `du -sb "${itemFullPath}" 2>/dev/null` : `stat -c%s "${itemFullPath}" 2>/dev/null`;
+        
+        exec(duCommand, (error, stdout, stderr) => {
+          if (error) {
+            processedCount++;
+            if (processedCount === lines.length) {
+              resolve(items.sort((a, b) => b.sizeBytes - a.sizeBytes));
+            }
+            return;
+          }
+          
+          const sizeBytes = parseInt(stdout.trim().split(/\s+/)[0]) || 0;
+          
+          // Converter bytes para formato legível
+          const formatSize = (bytes: number): string => {
+            const sizes = ['B', 'K', 'M', 'G', 'T'];
+            if (bytes === 0) return '0B';
+            const i = Math.floor(Math.log(bytes) / Math.log(1024));
+            return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + sizes[i];
+          };
+          
+          const item: FolderSizeInfo = {
+            path: itemFullPath,
+            name: relativeName || fileName,
+            size: formatSize(sizeBytes),
+            sizeBytes,
+            type: isDirectory ? 'folder' : 'file',
+            children: []
+          };
+          
+          items.push(item);
+          processedCount++;
+          
+          if (processedCount === lines.length) {
+            resolve(items.sort((a, b) => b.sizeBytes - a.sizeBytes));
+          }
+        });
+      }
+    });
+  });
+};
+
 export const getDiskSpaceInfo = async (): Promise<DiskSpaceInfo> => {
   const companyName = process.env.COMPANY_NAME || "";
   
@@ -32,77 +140,120 @@ export const getDiskSpaceInfo = async (): Promise<DiskSpaceInfo> => {
   // Caminho da pasta do sistema atual
   const folderPath = path.resolve("/home/deploy", companyName);
 
-  // Função para obter as 10 maiores pastas, incluindo subpastas
+  // Função para obter estrutura completa de pastas e arquivos
   const getLargestFolders = () => {
     return new Promise<FolderSizeInfo[]>((resolve, reject) => {
-      // Usar find para localizar todos os diretórios e du para obter o tamanho
-      // -type d para encontrar apenas diretórios
-      // -not -path "*/node_modules/*" para excluir node_modules que geralmente é muito grande
-      // -not -path "*/dist/*" para excluir pasta dist
-      exec(`find ${folderPath} -type d -not -path "*/node_modules/*" -not -path "*/build/*" -not -path "*/dist/*" | xargs du -sh | sort -hr | head -n 20`, (error, stdout, stderr) => {
-        if (error) {
-          logger.error(`Erro ao obter as maiores pastas: ${error.message}`);
-          reject(error);
-          return;
-        }
+      // Função recursiva para construir a árvore
+      const buildTree = async (dirPath: string, maxDepth: number = 2, currentDepth: number = 0): Promise<FolderSizeInfo[]> => {
+        if (currentDepth >= maxDepth) return [];
         
-        const lines = stdout.trim().split("\n");
-        const folders: FolderSizeInfo[] = [];
-        let processedCount = 0;
-        
-        // Se não houver pastas, resolver com array vazio
-        if (lines.length === 0) {
-          resolve([]);
-          return;
-        }
-        
-        for (const line of lines) {
-          const parts = line.trim().split(/\s+/);
-          if (parts.length >= 2) {
-            const size = parts[0];
-            // O caminho pode conter espaços, então juntamos o resto
-            const folderPath = parts.slice(1).join(" ");
-            const name = path.relative(path.resolve("/home/deploy", companyName), folderPath);
+        return new Promise((resolve, reject) => {
+          exec(`ls -la "${dirPath}" 2>/dev/null`, (error, stdout, stderr) => {
+            if (error) {
+              resolve([]);
+              return;
+            }
             
-            // Obter o tamanho em bytes para ordenação
-            exec(`du -sb "${folderPath}"`, (error, stdout, stderr) => {
-              if (error) {
-                logger.error(`Erro ao obter tamanho em bytes: ${error.message}`);
+            const lines = stdout.trim().split('\n').slice(1); // Remove primeira linha (total)
+            const items: FolderSizeInfo[] = [];
+            let processedCount = 0;
+            
+            if (lines.length === 0) {
+              resolve([]);
+              return;
+            }
+            
+            for (const line of lines) {
+              const parts = line.trim().split(/\s+/);
+              if (parts.length < 9) {
+                processedCount++;
+                if (processedCount === lines.length) {
+                  resolve(items.sort((a, b) => b.sizeBytes - a.sizeBytes));
+                }
+                continue;
+              }
+              
+              const permissions = parts[0];
+              const fileName = parts.slice(8).join(' ');
+              
+              // Pular arquivos ocultos e especiais
+              if (fileName === '.' || fileName === '..' || 
+                  fileName.includes('node_modules') || 
+                  fileName.includes('.git') ||
+                  fileName.includes('dist') ||
+                  fileName.includes('build') ||
+                  fileName.includes('coverage')) {
+                processedCount++;
+                if (processedCount === lines.length) {
+                  resolve(items.sort((a, b) => b.sizeBytes - a.sizeBytes));
+                }
+                continue;
+              }
+              
+              const fullPath = path.join(dirPath, fileName);
+              const isDirectory = permissions.startsWith('d');
+              const relativeName = path.relative(path.resolve("/home/deploy", companyName), fullPath);
+              
+              // Obter tamanho do item
+              const duCommand = isDirectory ? `du -sb "${fullPath}" 2>/dev/null` : `stat -c%s "${fullPath}" 2>/dev/null`;
+              
+              exec(duCommand, async (error, stdout, stderr) => {
+                if (error) {
+                  processedCount++;
+                  if (processedCount === lines.length) {
+                    resolve(items.sort((a, b) => b.sizeBytes - a.sizeBytes));
+                  }
+                  return;
+                }
+                
+                const sizeBytes = parseInt(stdout.trim().split(/\s+/)[0]) || 0;
+                
+                // Converter bytes para formato legível
+                const formatSize = (bytes: number): string => {
+                  const sizes = ['B', 'K', 'M', 'G', 'T'];
+                  if (bytes === 0) return '0B';
+                  const i = Math.floor(Math.log(bytes) / Math.log(1024));
+                  return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + sizes[i];
+                };
+                
+                const item: FolderSizeInfo = {
+                  path: fullPath,
+                  name: relativeName || fileName,
+                  size: formatSize(sizeBytes),
+                  sizeBytes,
+                  type: isDirectory ? 'folder' : 'file',
+                  children: []
+                };
+                
+                // Se for diretório e não atingiu profundidade máxima, buscar filhos
+                if (isDirectory && currentDepth < maxDepth - 1) {
+                  try {
+                    item.children = await buildTree(fullPath, maxDepth, currentDepth + 1);
+                  } catch (err) {
+                    item.children = [];
+                  }
+                }
+                
+                items.push(item);
                 processedCount++;
                 
                 if (processedCount === lines.length) {
-                  folders.sort((a, b) => b.sizeBytes - a.sizeBytes);
-                  resolve(folders);
+                  resolve(items.sort((a, b) => b.sizeBytes - a.sizeBytes));
                 }
-                return;
-              }
-              
-              const bytesOutput = stdout.trim();
-              const sizeBytes = parseInt(bytesOutput.split(/\s+/)[0]);
-              
-              folders.push({
-                path: folderPath,
-                name: name || path.basename(folderPath), // Usar nome relativo ou basename se não for possível
-                size,
-                sizeBytes
               });
-              
-              processedCount++;
-              if (processedCount === lines.length) {
-                // Ordenar por tamanho em bytes (decrescente)
-                folders.sort((a, b) => b.sizeBytes - a.sizeBytes);
-                resolve(folders);
-              }
-            });
-          } else {
-            processedCount++;
-            if (processedCount === lines.length) {
-              folders.sort((a, b) => b.sizeBytes - a.sizeBytes);
-              resolve(folders);
             }
-          }
-        }
-      });
+          });
+        });
+      };
+      
+      // Construir apenas o primeiro nível para carregamento inicial
+      buildTree(folderPath, 1, 0)
+        .then(tree => {
+          // Pegar apenas os 20 maiores itens do primeiro nível
+          const topItems = tree.slice(0, 20);
+          resolve(topItems);
+        })
+        .catch(reject);
     });
   };
   

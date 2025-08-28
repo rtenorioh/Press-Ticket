@@ -12,7 +12,12 @@ import {
   List,
   ListItem,
   ListItemIcon,
-  ListItemText
+  ListItemText,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+  IconButton,
+  Collapse
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
@@ -21,6 +26,13 @@ import FolderIcon from '@mui/icons-material/Folder';
 import WarningIcon from '@mui/icons-material/Warning';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import FolderOpenIcon from '@mui/icons-material/FolderOpen';
+import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
+import CodeIcon from '@mui/icons-material/Code';
+import ImageIcon from '@mui/icons-material/Image';
+import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
+import DescriptionIcon from '@mui/icons-material/Description';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import toastError from '../../errors/toastError';
 import api from '../../services/api';
 import MainContainer from '../../components/MainContainer';
@@ -162,6 +174,8 @@ const DiskSpace = () => {
   const [loading, setLoading] = useState(true);
   const [diskSpace, setDiskSpace] = useState(null);
   const [error, setError] = useState(null);
+  const [expandedFolders, setExpandedFolders] = useState(new Set());
+  const [folderContents, setFolderContents] = useState(new Map());
   
   // Adicionar estilo global para garantir que a página tenha rolagem
   React.useEffect(() => {
@@ -181,11 +195,13 @@ const DiskSpace = () => {
       try {
         setLoading(true);
         const { data } = await api.get('/disk-space');
+        console.log('Dados recebidos do backend:', data);
+        console.log('Maiores pastas:', data.largestFolders);
         setDiskSpace(data);
         setError(null);
       } catch (err) {
         setError(err.message || 'Erro ao carregar informações de espaço em disco');
-        toastError(err);
+        toastError(err, t);
       } finally {
         setLoading(false);
       }
@@ -228,6 +244,78 @@ const DiskSpace = () => {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
   };
 
+  const getFileIcon = (fileName, isFolder) => {
+    if (isFolder) {
+      return <FolderIcon sx={{ color: 'primary.main', fontSize: 18 }} />;
+    }
+    
+    const extension = fileName.split('.').pop()?.toLowerCase();
+    
+    switch (extension) {
+      case 'js':
+      case 'ts':
+      case 'jsx':
+      case 'tsx':
+      case 'html':
+      case 'css':
+      case 'scss':
+      case 'json':
+      case 'xml':
+        return <CodeIcon sx={{ color: 'info.main', fontSize: 18 }} />;
+      case 'jpg':
+      case 'jpeg':
+      case 'png':
+      case 'gif':
+      case 'svg':
+      case 'webp':
+        return <ImageIcon sx={{ color: 'success.main', fontSize: 18 }} />;
+      case 'pdf':
+        return <PictureAsPdfIcon sx={{ color: 'error.main', fontSize: 18 }} />;
+      case 'md':
+      case 'txt':
+      case 'doc':
+      case 'docx':
+        return <DescriptionIcon sx={{ color: 'warning.main', fontSize: 18 }} />;
+      default:
+        return <InsertDriveFileIcon sx={{ color: 'text.secondary', fontSize: 18 }} />;
+    };
+  };
+
+  // Função para carregar conteúdo de uma pasta
+  const loadFolderContents = async (folderPath) => {
+    try {
+      const { data } = await api.get('/folder-contents', {
+        params: { folderPath }
+      });
+      setFolderContents(prev => new Map(prev.set(folderPath, data)));
+      return data;
+    } catch (err) {
+      console.error('Erro ao carregar conteúdo da pasta:', err);
+      toastError(err, t);
+      return [];
+    }
+  };
+
+  // Função para expandir/colapsar pasta
+  const toggleFolder = async (folderPath, isFolder) => {
+    if (!isFolder) return;
+    
+    const newExpanded = new Set(expandedFolders);
+    
+    if (expandedFolders.has(folderPath)) {
+      newExpanded.delete(folderPath);
+    } else {
+      newExpanded.add(folderPath);
+      
+      // Carregar conteúdo se ainda não foi carregado
+      if (!folderContents.has(folderPath)) {
+        await loadFolderContents(folderPath);
+      }
+    }
+    
+    setExpandedFolders(newExpanded);
+  };
+
   return (
     <MainContainer>
       <MainHeader>
@@ -262,7 +350,10 @@ const DiskSpace = () => {
               borderRadius: 2,
               position: 'relative',
               overflow: 'hidden',
-              mb: 3
+              mb: 3,
+              minHeight: '140px',
+              display: 'flex',
+              flexDirection: 'column'
             }}>
               <Box sx={{ 
                 position: 'absolute',
@@ -273,29 +364,60 @@ const DiskSpace = () => {
                 backgroundColor: diskSpace.usedPercentage > 90 ? "error.main" : diskSpace.usedPercentage > 70 ? "warning.main" : "success.main"
               }} />
               
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, mt: 1 }}>
+              <Box sx={{ 
+                display: 'flex', 
+                alignItems: { xs: 'flex-start', sm: 'center' },
+                flexDirection: { xs: 'column', sm: 'row' },
+                padding: '0 16px',
+                paddingTop: '16px',
+                mb: 2, 
+                mt: 1,
+                gap: { xs: 2, sm: 0 }
+              }}>
                 <Box sx={{ 
-                  backgroundColor: diskSpace.usedPercentage > 90 ? "error.light" : diskSpace.usedPercentage > 70 ? "warning.light" : "success.light",
-                  borderRadius: '50%',
-                  p: 1.5,
-                  mr: 2
+                  display: 'flex',
+                  alignItems: 'center',
+                  flex: 1,
+                  minWidth: 0
                 }}>
-                  <FolderIcon sx={{ color: '#fff', fontSize: 30 }} />
+                  <Box sx={{ 
+                    backgroundColor: diskSpace.usedPercentage > 90 ? "error.light" : diskSpace.usedPercentage > 70 ? "warning.light" : "success.light",
+                    borderRadius: '50%',
+                    p: 1.5,
+                    mr: 2,
+                    flexShrink: 0
+                  }}>
+                    <FolderIcon sx={{ color: '#fff', fontSize: 30 }} />
+                  </Box>
+                  <Box sx={{ minWidth: 0, flex: 1 }}>
+                    <Typography 
+                      variant="h5" 
+                      fontWeight="500"
+                      sx={{ 
+                        fontSize: { xs: '1.1rem', sm: '1.5rem' },
+                        wordBreak: 'break-word'
+                      }}
+                    >
+                      {t('diskSpace.systemFolder', { name: diskSpace.folderName }, `Pasta do Sistema: ${diskSpace.folderName}`)}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {formatBytes(diskSpace.folderSizeBytes)} / {diskSpace.totalSpace}
+                    </Typography>
+                  </Box>
                 </Box>
-                <Box>
-                  <Typography variant="h5" fontWeight="500">
-                    {t('diskSpace.systemFolder', { name: diskSpace.folderName }, `Pasta do Sistema: ${diskSpace.folderName}`)}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {formatBytes(diskSpace.folderSizeBytes)} / {diskSpace.totalSpace}
-                  </Typography>
-                </Box>
-                <Box sx={{ ml: 'auto', textAlign: 'right' }}>
+                <Box sx={{ 
+                  textAlign: { xs: 'left', sm: 'right' },
+                  alignSelf: { xs: 'flex-start', sm: 'center' },
+                  ml: { xs: 0, sm: 'auto' }
+                }}>
                   <Typography 
                     variant="h4" 
                     fontWeight="bold" 
                     color={getStatusColor(diskSpace.usedPercentage)}
-                    sx={{ mb: -0.5 }}
+                    sx={{ 
+                      mb: -0.5,
+                      fontSize: { xs: '2rem', sm: '2.125rem' }
+                    }}
                   >
                     {diskSpace.usedPercentage}%
                   </Typography>
@@ -313,7 +435,7 @@ const DiskSpace = () => {
                 </Box>
               </Box>
               
-              <Box sx={{ px: 2, pb: 2, pt: 1 }}>
+              <Box sx={{ px: 2, pb: 2, pt: 1, mt: 'auto' }}>
                 <Tooltip title={`${diskSpace.usedPercentage}% ${t('diskSpace.used')}`}>
                   <LinearProgress 
                     className={classes.progressBar}
@@ -521,135 +643,188 @@ const DiskSpace = () => {
                     fontWeight: 'bold',
                     color: 'text.secondary'
                   }}>
-                    <Typography variant="subtitle2" sx={{ flex: 1 }}>Nome da Pasta</Typography>
+                    <Typography variant="subtitle2" sx={{ flex: 1 }}>Estrutura de Pastas</Typography>
                     <Typography variant="subtitle2" sx={{ width: '80px', textAlign: 'right', mr: 2 }}>Tamanho</Typography>
                     <Typography variant="subtitle2" sx={{ width: '130px', textAlign: 'center' }}>Uso (%)</Typography>
                   </Box>
-                  {diskSpace.largestFolders.map((folder, index) => {
-                    const percentage = Math.round((folder.sizeBytes / diskSpace.folderSizeBytes) * 100);
-                    const pathParts = folder.name.split('/');
-                    const folderName = pathParts[pathParts.length - 1] || folder.name;
-                    const depth = pathParts.length - 1;
-                    
-                    // Criar representação visual do caminho em estilo árvore
-                    return (
-                      <Box key={index} sx={{ mb: 1.5 }}>
-                        <Paper 
-                          elevation={1} 
-                          className={classes.folderTreeItem} 
-                          sx={{ 
-                            pl: depth * 2,
-                            backgroundColor: index % 2 === 0 ? 'background.default' : 'background.paper'
-                          }}
-                        >
-                          <Box className={classes.folderTreeItemText}>
-                            {/* Prefixo da árvore baseado na profundidade */}
-                            {depth > 0 && (
-                              <Box 
-                                component="span" 
-                                sx={{ 
-                                  mr: 1, 
-                                  color: 'primary.main', 
-                                  display: 'inline-block', 
-                                  width: 'auto',
-                                  fontFamily: 'monospace',
-                                  fontWeight: 'bold'
-                                }}
-                              >
-                                {index === diskSpace.largestFolders.length - 1 || depth !== pathParts.length - 1 ? '└── ' : '├── '}
-                              </Box>
-                            )}
-                            <FolderIcon color="primary" sx={{ mr: 1 }} />
-                            <Typography 
-                              variant="body1" 
-                              component="span" 
-                              sx={{ fontWeight: 'medium' }}
-                            >
-                              {folderName}/
-                            </Typography>
-                          </Box>
-                          <Typography 
-                            variant="body2" 
-                            className={classes.folderTreeItemSize}
-                            sx={{ fontWeight: 'bold' }}
-                          >
-                            {folder.size}
-                          </Typography>
-                          <Box className={classes.folderTreeItemPercentage}>
-                            <Box width="80px" mr={1}>
-                              <LinearProgress 
-                                variant="determinate" 
-                                value={percentage} 
-                                color={percentage > 50 ? "error" : percentage > 30 ? "warning" : "primary"}
-                                sx={{ height: 8, borderRadius: 4 }}
-                              />
-                            </Box>
-                            <Typography 
-                              variant="body2" 
-                              sx={{ 
-                                minWidth: '50px',
-                                fontWeight: 'bold',
-                                color: percentage > 50 ? "error.main" : percentage > 30 ? "warning.main" : "primary.main"
-                              }}
-                            >
-                              {percentage}%
-                            </Typography>
-                          </Box>
-                        </Paper>
-                        
-                        {/* Visualização do caminho completo em formato de árvore */}
-                        {pathParts.length > 1 && (
+                  
+                  {/* Pasta raiz dev/ */}
+                  <Box sx={{ mb: 2 }}>
+                    <Paper 
+                      elevation={2} 
+                      sx={{ 
+                        p: 2,
+                        backgroundColor: 'primary.light',
+                        color: 'primary.contrastText',
+                        borderRadius: 2,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between'
+                      }}
+                    >
+                      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                        <FolderOpenIcon sx={{ mr: 1, fontSize: 24 }} />
+                        <Typography variant="h6" fontWeight="bold">
+                          📁 dev/
+                        </Typography>
+                      </Box>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                        <Typography variant="body1" fontWeight="bold">
+                          {diskSpace.folderSize}
+                        </Typography>
+                        <Typography variant="body1" fontWeight="bold">
+                          100%
+                        </Typography>
+                      </Box>
+                    </Paper>
+                  </Box>
+
+                  {/* Árvore de arquivos e pastas com accordion */}
+                  {(() => {
+                    // Função recursiva para renderizar item da árvore
+                    const renderTreeItem = (item, depth = 0) => {
+                      const percentage = Math.round((item.sizeBytes / diskSpace.folderSizeBytes) * 100);
+                      const isFolder = item.type === 'folder';
+                      const fileName = item.name.split('/').pop() || item.name;
+                      const isExpanded = expandedFolders.has(item.name);
+                      const contents = folderContents.get(item.name) || [];
+                      
+                      return (
+                        <Box key={`${item.name}-${item.path}`} sx={{ mb: 0.5 }}>
                           <Paper 
-                            variant="outlined" 
+                            elevation={1} 
                             sx={{ 
-                              pl: (depth + 1) * 2 + 2, 
-                              pr: 2,
-                              py: 0.5,
-                              ml: (depth + 1) * 2,
-                              mb: 1,
-                              mt: 0.5,
-                              display: 'flex',
-                              alignItems: 'center',
+                              backgroundColor: depth % 2 === 0 ? 'background.default' : 'background.paper',
+                              borderLeft: depth > 0 ? '2px solid' : 'none',
+                              borderColor: isFolder ? 'primary.light' : 'info.light',
                               borderRadius: 1,
-                              borderColor: 'primary.light',
-                              backgroundColor: 'background.paper',
-                              maxWidth: 'fit-content'
+                              overflow: 'hidden'
                             }}
                           >
-                            <Box 
-                              component="span" 
-                              sx={{ 
-                                width: '18px', 
-                                height: '18px', 
-                                display: 'inline-flex',
+                            <Box
+                              sx={{
+                                p: 1.5,
+                                pl: 2 + (depth * 2),
+                                display: 'flex',
                                 alignItems: 'center',
-                                justifyContent: 'center',
-                                mr: 1,
-                                fontSize: '0.7rem',
-                                color: 'primary.main',
-                                border: '1px solid',
-                                borderColor: 'primary.light',
-                                borderRadius: '50%',
-                                backgroundColor: 'background.default'
+                                justifyContent: 'space-between',
+                                cursor: isFolder ? 'pointer' : 'default',
+                                transition: 'all 0.2s ease',
+                                '&:hover': {
+                                  backgroundColor: 'action.hover',
+                                  transform: isFolder ? 'translateX(4px)' : 'none'
+                                }
                               }}
+                              onClick={() => toggleFolder(item.name, isFolder)}
                             >
-                              i
+                              <Box sx={{ display: 'flex', alignItems: 'center', flex: 1, minWidth: 0 }}>
+                                {isFolder && (
+                                  <IconButton
+                                    size="small"
+                                    sx={{ 
+                                      mr: 1, 
+                                      p: 0.5,
+                                      transition: 'transform 0.2s ease'
+                                    }}
+                                  >
+                                    {isExpanded ? (
+                                      <ExpandMoreIcon fontSize="small" />
+                                    ) : (
+                                      <ChevronRightIcon fontSize="small" />
+                                    )}
+                                  </IconButton>
+                                )}
+                                
+                                {!isFolder && (
+                                  <Box sx={{ width: 32, mr: 1 }} />
+                                )}
+                                
+                                {isFolder ? (
+                                  isExpanded ? (
+                                    <FolderOpenIcon sx={{ color: 'warning.main', mr: 1, fontSize: 20 }} />
+                                  ) : (
+                                    <FolderIcon sx={{ color: 'primary.main', mr: 1, fontSize: 20 }} />
+                                  )
+                                ) : (
+                                  getFileIcon(fileName, false)
+                                )}
+                                
+                                <Typography 
+                                  variant="body1" 
+                                  sx={{ 
+                                    fontFamily: 'monospace',
+                                    fontWeight: isFolder ? 'bold' : 'medium',
+                                    color: isFolder ? 'warning.dark' : 'text.primary',
+                                    mr: 1
+                                  }}
+                                >
+                                  {fileName}{isFolder ? '/' : ''}
+                                </Typography>
+                                
+                                {!isFolder && (
+                                  <Typography 
+                                    variant="caption" 
+                                    sx={{ 
+                                      color: 'text.secondary',
+                                      fontStyle: 'italic'
+                                    }}
+                                  >
+                                    arquivo
+                                  </Typography>
+                                )}
+                              </Box>
+                              
+                              <Typography 
+                                variant="body2" 
+                                sx={{ 
+                                  fontFamily: 'monospace',
+                                  fontWeight: 'bold',
+                                  minWidth: '60px',
+                                  textAlign: 'right',
+                                  mr: 2
+                                }}
+                              >
+                                {item.size}
+                              </Typography>
+                              
+                              <Box sx={{ display: 'flex', alignItems: 'center', width: '130px' }}>
+                                <Box sx={{ width: '80px', mr: 1 }}>
+                                  <LinearProgress 
+                                    variant="determinate" 
+                                    value={percentage} 
+                                    color={percentage > 50 ? "error" : percentage > 30 ? "warning" : "primary"}
+                                    sx={{ height: 6, borderRadius: 3 }}
+                                  />
+                                </Box>
+                                <Typography 
+                                  variant="body2" 
+                                  sx={{ 
+                                    fontWeight: 'bold',
+                                    minWidth: '40px',
+                                    color: percentage > 50 ? "error.main" : percentage > 30 ? "warning.main" : "primary.main"
+                                  }}
+                                >
+                                  {percentage}%
+                                </Typography>
+                              </Box>
                             </Box>
-                            <Typography 
-                              variant="caption" 
-                              sx={{ 
-                                color: 'text.primary',
-                                fontSize: '0.8rem',
-                                fontStyle: 'italic'
-                              }}
-                            >
-                              Caminho completo: <Box component="span" sx={{ fontWeight: 'medium' }}>{folder.name}</Box>
-                            </Typography>
+                            
+                            {/* Conteúdo expandido */}
+                            {isFolder && (
+                              <Collapse in={isExpanded} timeout="auto" unmountOnExit>
+                                <Box sx={{ pl: 2, pb: 1 }}>
+                                  {contents.map((child) => renderTreeItem(child, depth + 1))}
+                                </Box>
+                              </Collapse>
+                            )}
                           </Paper>
-                        )}
-                      </Box>
-                    );
-                  })}
+                        </Box>
+                      );
+                    };
+
+                    // Renderizar a árvore completa
+                    return diskSpace.largestFolders.map((item) => renderTreeItem(item, 0));
+                  })()}
                 </Box>
               ) : (
                 <Typography variant="body2" color="textSecondary">

@@ -666,6 +666,12 @@ const MessageInput = ({ ticketStatus }) => {
               } 
             });
             document.dispatchEvent(event);
+            
+            // Implementação do scroll automático ao enviar mensagem
+            const messagesContainer = document.querySelector('.messages-list-scrollable');
+            if (messagesContainer) {
+              messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }
           }, 0);
           
           // Emitir evento via socket para sincronização com outros clientes

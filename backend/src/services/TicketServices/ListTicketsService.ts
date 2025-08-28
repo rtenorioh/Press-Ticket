@@ -53,7 +53,7 @@ const ListTicketsService = async ({
   } else {
     // Caso contrário, não filtramos por userId (caso da API)
     whereCondition = {
-      queueId: { [Op.or]: [queueIds, null] }
+      queueId: { [Op.or]: [queueIds] }
     };
   }
 
