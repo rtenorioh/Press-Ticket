@@ -131,7 +131,7 @@ const Connections = () => {
 	const { t } = useTranslation();
 	const navigate = useNavigate();
 	const { user } = useContext(AuthContext);
-	const { whatsApps, loading } = useContext(WhatsAppsContext);
+	const { whatsApps, loading, fetchWhatsApps } = useContext(WhatsAppsContext);
 	const [whatsAppModalOpen, setWhatsAppModalOpen] = useState(false);
 	const [notificameHubModalOpen, setNotificameHubModalOpen] = useState(false);
 	const [qrModalOpen, setQrModalOpen] = useState(false);
@@ -219,6 +219,15 @@ const Connections = () => {
 					}
 				}
 			}
+		});
+
+		// Garantir que o socket permaneça conectado para receber atualizações em tempo real
+		socket.on("connect", () => {
+			console.log("Socket conectado para atualizações em tempo real");
+		});
+
+		socket.on("disconnect", () => {
+			console.log("Socket desconectado");
 		});
 
 		return () => {
@@ -400,26 +409,15 @@ const Connections = () => {
 		setNotificameHubModalOpen(false);
 	}, []);
 
-	const handleCloseWhatsAppModal = useCallback(() => {
+	const handleCloseWhatsAppModal = useCallback(async () => {
 		setWhatsAppModalOpen(false);
 		setSelectedWhatsApp(null);
 		
-		const fetchWhatsApps = async () => {
-			try {
-				const { data } = await api.get("/whatsapp/");
-				const socket = openSocket();
-				data.forEach(whatsapp => {
-					socket.emit("whatsapp", {
-						action: "update",
-						whatsapp
-					});
-				});
-			} catch (err) {
-				toastError(err);
-			}
-		};
-		fetchWhatsApps();
-	}, [setSelectedWhatsApp, setWhatsAppModalOpen]);
+		// Força atualização direta da lista após fechar o modal
+		setTimeout(() => {
+			fetchWhatsApps();
+		}, 300);
+	}, [fetchWhatsApps]);
 
 	const handleOpenQrModal = whatsApp => {
 		setSelectedWhatsApp(whatsApp);

@@ -151,12 +151,8 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
 			if (whatsAppId) {
 				await api.put(`/whatsapp/${whatsAppId}`, whatsappData);
 			} else {
-				const { data } = await api.post("/whatsapp", whatsappData);
-				const socket = openSocket();
-				socket.emit("whatsapp", {
-					action: "update",
-					whatsapp: data
-				});
+				await api.post("/whatsapp", whatsappData);
+				// Removido o emit manual - o backend deve enviar o evento automaticamente
 			}
 			toast.success(t("whatsappModal.success"));
 			handleClose();
