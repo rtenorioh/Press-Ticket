@@ -37,6 +37,7 @@ import WarningIcon from "@mui/icons-material/Warning";
 import RestoreIcon from "@mui/icons-material/Restore";
 import DownloadIcon from "@mui/icons-material/Download";
 import InfoIcon from "@mui/icons-material/Info";
+import Link from "@mui/material/Link";
 
 import api from "../../services/api";
 import MainHeader from "../../components/MainHeader";
@@ -137,6 +138,72 @@ const MarkdownStyled = styled(WhatsMarked)(({ theme }) => ({
   },
 }));
 
+const CardWrapper = styled(Grid)(({ theme }) => ({
+  marginTop: theme.spacing(2),
+}));
+
+const VersionCard = styled(Card)(({ theme, status }) => ({
+  height: "100%",
+  display: "flex",
+  flexDirection: "column",
+  position: "relative",
+  transition: "all 0.3s ease",
+  boxShadow: "0 4px 20px 0 rgba(0,0,0,0.1)",
+  borderRadius: 10,
+  border: status === "updated" || status === "latest" 
+    ? `2px solid ${theme.palette.success.main}`
+    : status === "outdated"
+      ? `2px solid ${theme.palette.error.main}`
+      : `2px solid ${theme.palette.divider}`,
+  backgroundColor: status === "updated" || status === "latest" 
+    ? theme.palette.success.light + "20"
+    : status === "outdated"
+      ? theme.palette.error.light + "20"
+      : theme.palette.background.paper,
+  "&:hover": {
+    boxShadow: "0 8px 30px 0 rgba(0,0,0,0.15)",
+    transform: "translateY(-5px)",
+  }
+}));
+
+const VersionIcon = styled(Box)(({ theme, status }) => ({
+  position: "absolute",
+  top: 15,
+  right: 15,
+  width: 40,
+  height: 40,
+  borderRadius: "50%",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  backgroundColor: status === "updated" || status === "latest" 
+    ? theme.palette.success.main
+    : status === "outdated"
+      ? theme.palette.error.main
+      : theme.palette.success.main,
+  color: "#fff",
+  boxShadow: "0 4px 10px rgba(0,0,0,0.15)",
+}));
+
+const VersionValue = styled(Typography)(({ theme }) => ({
+  fontSize: "2rem",
+  fontWeight: 700,
+  marginTop: theme.spacing(1),
+  marginBottom: theme.spacing(1),
+}));
+
+const MessageBox = styled(Paper)(({ theme, type }) => ({
+  padding: theme.spacing(3),
+  marginTop: theme.spacing(3),
+  backgroundColor: type === "success"
+    ? theme.palette.success.light + "30"
+    : theme.palette.warning.light + "30",
+  borderLeft: type === "success"
+    ? `4px solid ${theme.palette.success.main}`
+    : `4px solid ${theme.palette.warning.main}`,
+  borderRadius: 4,
+}));
+
 const SystemUpdate = () => {
   const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
@@ -193,10 +260,12 @@ const SystemUpdate = () => {
     try {
       const { data } = await api.get("/version");
       
-      // Atualizar apenas a versão atual sem chamar compareVersions aqui
+      // Atualizar a versão atual e outras informações do sistema
       setUpdateInfo(prevState => ({
         ...prevState,
-        currentVersion: data.currentVersion
+        currentVersion: data.currentVersion,
+        latestVersion: data.latestVersion || prevState.latestVersion,
+        needsUpdate: data.needsUpdate || prevState.needsUpdate
       }));
     } catch (err) {
       console.error("Erro ao buscar versão atual:", err);
@@ -450,47 +519,54 @@ const SystemUpdate = () => {
             title={t("systemUpdate.versionInfo")}
           />
           <StyledCardContent>
-            <Grid container spacing={2}>
+            <CardWrapper container spacing={4}>
               <Grid item xs={12} md={6}>
-                <VersionInfo>
-                  <VersionText variant="body1">
-                    {t("systemUpdate.currentVersion")}:
-                  </VersionText>
-                  <Typography variant="body1" fontWeight="bold">
-                    {updateInfo.currentVersion}
-                  </Typography>
-                </VersionInfo>
+                <VersionCard status={updateInfo.needsUpdate ? "outdated" : "updated"}>
+                  <VersionIcon status={updateInfo.needsUpdate ? "outdated" : "updated"}>
+                    {updateInfo.needsUpdate ? (
+                      <WarningIcon />
+                    ) : (
+                      <CheckCircleIcon />
+                    )}
+                  </VersionIcon>
+                  <CardContent>
+                    <Typography variant="h6" color="textSecondary" gutterBottom>
+                      Versão Atual do Sistema
+                    </Typography>
+                    <VersionValue color={updateInfo.needsUpdate ? "error" : "success"}>
+                      {updateInfo.currentVersion || "N/A"}
+                    </VersionValue>
+                    <Typography variant="body2" color="textSecondary" sx={{ mb: 1 }}>
+                      {updateInfo.needsUpdate 
+                        ? "Sistema desatualizado"
+                        : "Sistema atualizado"}
+                    </Typography>
+                  </CardContent>
+                </VersionCard>
               </Grid>
+              
               <Grid item xs={12} md={6}>
-                <VersionInfo>
-                  <VersionText variant="body1">
-                    {t("systemUpdate.latestVersion")}:
-                  </VersionText>
-                  <Typography variant="body1" fontWeight="bold">
-                    v{updateInfo.latestVersion}
-                  </Typography>
-                  {updateInfo.versionsEqual ? (
-                    <UpdateNotAvailableChip
-                      label={t("systemUpdate.systemUpdated")}
-                      size="small"
-                      sx={{ ml: 1 }}
-                    />
-                  ) : updateInfo.needsUpdate ? (
-                    <UpdateAvailableChip
-                      label={t("systemUpdate.updateAvailable")}
-                      size="small"
-                      sx={{ ml: 1 }}
-                    />
-                  ) : (
-                    <UpdateNotAvailableChip
-                      label={t("systemUpdate.upToDate")}
-                      size="small"
-                      sx={{ ml: 1 }}
-                    />
-                  )}
-                </VersionInfo>
+                <VersionCard status="latest">
+                  <VersionIcon status="latest">
+                    <CheckCircleIcon />
+                  </VersionIcon>
+                  <CardContent>
+                    <Typography variant="h6" color="textSecondary" gutterBottom>
+                      Última Versão Disponível
+                    </Typography>
+                    <VersionValue>
+                      {updateInfo.latestVersion || "N/A"}
+                    </VersionValue>
+                    <Typography variant="body2" color="textSecondary" sx={{ mb: 1 }}>
+                      Versão mais recente disponível
+                    </Typography>
+                    <Typography variant="body2" color="textSecondary" sx={{ mt: 1, fontStyle: "italic" }}>
+                      Disponibilizada em: {new Date().toLocaleDateString('pt-BR')} às {new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                    </Typography>
+                  </CardContent>
+                </VersionCard>
               </Grid>
-            </Grid>
+            </CardWrapper>
 
             {updateInfo.lastUpdateCheck && (
               <Typography variant="body2" color="textSecondary" sx={{ mt: 1 }}>
@@ -498,32 +574,96 @@ const SystemUpdate = () => {
               </Typography>
             )}
 
-            {updateInfo.needsUpdate && (
-              <>
-                <Divider sx={{ my: 2 }} />
-                <Typography variant="h6">
-                  {t("systemUpdate.releaseNotes")}
-                </Typography>
-                <Paper variant="outlined" sx={{ maxHeight: 300, overflow: "auto", mt: 2, p: 2, bgcolor: theme => theme.palette.background.default, borderRadius: theme => theme.shape.borderRadius }}>
-                  <MarkdownStyled>{updateInfo.releaseNotes}</MarkdownStyled>
-                </Paper>
-              </>
-            )}
           </StyledCardContent>
-          <CardActions>
-            {updateInfo.needsUpdate && (
-              <Button
-                variant="contained"
-                color="primary"
-                startIcon={<SystemUpdateIcon />}
-                onClick={() => setUpdateDialogOpen(true)}
-                disabled={installingUpdate || updateStatus.status !== "idle"}
-              >
-                {t("systemUpdate.installUpdate")}
-              </Button>
-            )}
-          </CardActions>
         </StyledCard>
+
+        {updateInfo.needsUpdate ? (
+          <MessageBox type="warning">
+            <Box display="flex" alignItems="flex-start">
+              <WarningIcon color="warning" style={{ marginRight: 16, marginTop: 4 }} />
+              <div>
+                <Typography variant="h6" gutterBottom>
+                  Atualização do Sistema Disponível
+                </Typography>
+                <Typography variant="body1" paragraph>
+                  Uma nova versão do Press-Ticket está disponível. Recomendamos atualizar para obter as últimas melhorias e correções.
+                </Typography>
+                
+                {updateInfo.releaseNotes && (
+                  <>
+                    <Typography variant="h6" sx={{ mt: 2, mb: 1 }}>
+                      Notas da Release
+                    </Typography>
+                    <Paper variant="outlined" sx={{ maxHeight: 300, overflow: "auto", p: 2, bgcolor: theme => theme.palette.background.default, borderRadius: theme => theme.shape.borderRadius }}>
+                      <MarkdownStyled>{updateInfo.releaseNotes}</MarkdownStyled>
+                    </Paper>
+                  </>
+                )}
+                
+                <Box mt={2} mb={2}>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    startIcon={<SystemUpdateIcon />}
+                    onClick={() => setUpdateDialogOpen(true)}
+                    disabled={installingUpdate || updateStatus.status !== "idle"}
+                    fullWidth
+                    size="large"
+                    sx={{
+                      borderRadius: 2,
+                      py: 1,
+                      fontWeight: "bold",
+                      boxShadow: 3,
+                      '&:hover': {
+                        transform: 'translateY(-2px)',
+                        boxShadow: 4,
+                      },
+                      transition: 'all 0.3s ease'
+                    }}
+                  >
+                    {t("systemUpdate.installUpdate") || "Instalar Atualização"}
+                  </Button>
+                </Box>
+                <Typography variant="body2" color="textSecondary">
+                  Repositório: 
+                  <Link 
+                    href="https://github.com/rtenorioh/Press-Ticket" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    style={{ marginLeft: 8 }}
+                  >
+                    Press-Ticket no GitHub
+                  </Link>
+                </Typography>
+                <Typography variant="body2" color="textSecondary">
+                  Documentação: 
+                  <Link 
+                    href="https://github.com/rtenorioh/Press-Ticket/blob/main/docs/INSTALL_AUTOMATICO_VPS.md" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    style={{ marginLeft: 8 }}
+                  >
+                    Guia de Atualização
+                  </Link>
+                </Typography>
+              </div>
+            </Box>
+          </MessageBox>
+        ) : (
+          <MessageBox type="success">
+            <Box display="flex" alignItems="flex-start">
+              <CheckCircleIcon color="success" style={{ marginRight: 16, marginTop: 4 }} />
+              <div>
+                <Typography variant="h6" gutterBottom>
+                  Sistema Atualizado
+                </Typography>
+                <Typography variant="body1" paragraph>
+                  Seu sistema Press-Ticket está executando a versão mais recente disponível.
+                </Typography>
+              </div>
+            </Box>
+          </MessageBox>
+        )}
 
         <StyledCard>
           <StyledCardHeader
