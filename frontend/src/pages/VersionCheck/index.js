@@ -2,7 +2,7 @@ import React, { useEffect, useState, useContext } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
-import { getVersionInfo, updateWhatsappLib } from "../../services/versionService";
+import { getVersionInfo, updateWhatsappLib, getReleaseNotes } from "../../services/versionService";
 import { 
   Container, 
   Paper, 
@@ -115,6 +115,8 @@ const VersionCheck = () => {
     whatsappLibNeedsUpdate: false,
     whatsappLibLatestReleaseDate: null
   });
+  const [releaseNotes, setReleaseNotes] = useState(null);
+  const [loadingReleaseNotes, setLoadingReleaseNotes] = useState(false);
 
   useEffect(() => {
     const fetchVersionInfo = async () => {
@@ -122,6 +124,11 @@ const VersionCheck = () => {
         setLoading(true);
         const data = await getVersionInfo();
         setVersionInfo(data);
+        
+        // Buscar release notes se há atualização disponível
+        if (data.whatsappLibNeedsUpdate && data.whatsappLibLatestVersion) {
+          fetchReleaseNotes(data.whatsappLibLatestVersion);
+        }
       } catch (err) {
         toastError(err);
       } finally {
@@ -131,6 +138,18 @@ const VersionCheck = () => {
 
     fetchVersionInfo();
   }, []);
+
+  const fetchReleaseNotes = async (version) => {
+    try {
+      setLoadingReleaseNotes(true);
+      const notes = await getReleaseNotes(version);
+      setReleaseNotes(notes);
+    } catch (err) {
+      console.error('Erro ao buscar release notes:', err);
+    } finally {
+      setLoadingReleaseNotes(false);
+    }
+  };
 
   const handleRefreshVersion = async () => {
     try {
@@ -401,6 +420,9 @@ const VersionCheck = () => {
                       <Typography variant="body2" color="textSecondary" sx={{ mb: 1 }}>
                         {t("versionCheck.latestAvailable")}
                       </Typography>
+                      <Typography variant="body2" color="textSecondary" sx={{ mt: 1, fontStyle: "italic" }}>
+                        Disponibilizada em: {new Date().toLocaleDateString('pt-BR')} às {new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                      </Typography>
                     </CardContent>
                   </VersionCard>
                 </Grid>
@@ -529,13 +551,130 @@ const VersionCheck = () => {
                       </Typography>
                       {versionInfo.whatsappLibLatestReleaseDate && (
                         <Typography variant="body2" color="textSecondary" sx={{ mt: 1, fontStyle: "italic" }}>
-                          Disponibilizada em: {new Date(versionInfo.whatsappLibLatestReleaseDate).toLocaleDateString('pt-BR')}
+                          Disponibilizada em: {new Date(versionInfo.whatsappLibLatestReleaseDate).toLocaleDateString('pt-BR')} às {new Date(versionInfo.whatsappLibLatestReleaseDate).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
                         </Typography>
                       )}
                     </CardContent>
                   </VersionCard>
                 </Grid>
               </CardWrapper>
+
+              {/* Card de Release Notes */}
+              {versionInfo.whatsappLibNeedsUpdate && (
+                <CardWrapper container spacing={4}>
+                  <Grid item xs={12}>
+                    <VersionCard status="latest">
+                      <CardContent>
+                        <Typography variant="h6" color="textSecondary" gutterBottom>
+                          📋 Detalhes da Release
+                        </Typography>
+                        <Box sx={{ mt: 2 }}>
+                          <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1 }}>
+                            v{versionInfo.whatsappLibLatestVersion || "N/A"}
+                          </Typography>
+                          <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
+                            🗓️ Data de lançamento: {versionInfo.whatsappLibLatestReleaseDate ? new Date(versionInfo.whatsappLibLatestReleaseDate).toLocaleDateString('pt-BR') : 'N/A'}
+                          </Typography>
+                          {loadingReleaseNotes ? (
+                            <Box display="flex" alignItems="center" sx={{ mb: 2 }}>
+                              <CircularProgress size={16} sx={{ mr: 1 }} />
+                              <Typography variant="body2" color="textSecondary">
+                                Carregando mudanças da release...
+                              </Typography>
+                            </Box>
+                          ) : releaseNotes ? (
+                            <Box sx={{ mb: 2 }}>
+                              {releaseNotes.body && (
+                                <Box>
+                                  <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mb: 1, color: 'primary.main' }}>
+                                    📋 O que mudou:
+                                  </Typography>
+                                  <Box sx={{ 
+                                    maxHeight: 300, 
+                                    overflowY: 'auto', 
+                                    backgroundColor: 'grey.50', 
+                                    p: 2, 
+                                    borderRadius: 1,
+                                    border: '1px solid',
+                                    borderColor: 'grey.200'
+                                  }}>
+                                    <Typography 
+                                      variant="body2" 
+                                      component="div"
+                                      sx={{ 
+                                        whiteSpace: 'pre-wrap',
+                                        '& ul': { pl: 2, mb: 1 },
+                                        '& li': { mb: 0.5 },
+                                        '& h1, & h2, & h3': { fontWeight: 'bold', mb: 1, mt: 1 },
+                                        '& h2': { fontSize: '1rem' },
+                                        '& h3': { fontSize: '0.9rem' },
+                                        '& a': { color: 'primary.main', textDecoration: 'none' },
+                                        '& code': { 
+                                          backgroundColor: 'grey.100', 
+                                          padding: '2px 4px', 
+                                          borderRadius: '3px',
+                                          fontFamily: 'monospace'
+                                        }
+                                      }}
+                                      dangerouslySetInnerHTML={{ 
+                                        __html: releaseNotes.body
+                                          .replace(/### (.*)/g, '<h3>$1</h3>')
+                                          .replace(/## (.*)/g, '<h2>$1</h2>')
+                                          .replace(/# (.*)/g, '<h1>$1</h1>')
+                                          .replace(/\* (.*)/g, '<li>$1</li>')
+                                          .replace(/(<li>.*<\/li>)/gs, '<ul>$1</ul>')
+                                          .replace(/<\/ul>\s*<ul>/g, '')
+                                          .replace(/`([^`]+)`/g, '<code>$1</code>')
+                                          .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>')
+                                          .replace(/\n\n/g, '<br><br>')
+                                      }}
+                                    />
+                                  </Box>
+                                </Box>
+                              )}
+                            </Box>
+                          ) : (
+                            <Typography variant="body2" sx={{ mb: 2 }}>
+                              📝 Esta versão inclui melhorias de performance, correções de bugs e novos recursos para a biblioteca WhatsApp Web.js.
+                            </Typography>
+                          )}
+                          <Box sx={{ mt: 2 }}>
+                            <Typography variant="body2" color="primary" sx={{ fontWeight: 'bold' }}>
+                              🔗 Links úteis:
+                            </Typography>
+                            <Box sx={{ ml: 2, mt: 1 }}>
+                              <Link 
+                                href={`https://github.com/pedroslopez/whatsapp-web.js/releases/tag/v${versionInfo.whatsappLibLatestVersion}`}
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                sx={{ display: 'block', mb: 0.5 }}
+                              >
+                                📄 Ver release completa no GitHub
+                              </Link>
+                              <Link 
+                                href="https://github.com/pedroslopez/whatsapp-web.js/releases" 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                sx={{ display: 'block', mb: 0.5 }}
+                              >
+                                📋 Todas as releases
+                              </Link>
+                              <Link 
+                                href="https://github.com/pedroslopez/whatsapp-web.js/blob/main/CHANGELOG.md" 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                sx={{ display: 'block' }}
+                              >
+                                📝 Changelog completo
+                              </Link>
+                            </Box>
+                          </Box>
+                        </Box>
+                      </CardContent>
+                    </VersionCard>
+                  </Grid>
+                </CardWrapper>
+              )}
 
               {versionInfo.whatsappLibNeedsUpdate ? (
                 <MessageBox type="warning">
