@@ -169,13 +169,16 @@ const messages = {
         buttons: {
           wwebjs: "Adicionar",
           hub: "Hub",
-          shutdown: "Excluir",
+          shutdown: "Excluir Sessão",
           restart: "Restart",
           disconnect: "Desconectar",
           tryAgain: "Tentar novamente",
           qrcode: "QR CODE",
           newQr: "Novo QR CODE",
           connecting: "Conectando",
+          edit: "Editar Canal",
+          delete: "Excluir Canal",
+          start: "Iniciar Sessão",
         },
         toolTips: {
           disconnected: {

@@ -90,6 +90,15 @@ const useWhatsApps = () => {
 			}
 		});
 
+		// Adicionar listener para eventos de conexão/desconexão
+		socket.on("connect", () => {
+			console.log("WebSocket conectado para atualizações");
+		});
+
+		socket.on("disconnect", () => {
+			console.log("WebSocket desconectado");
+		});
+
 		return () => {
 			socket.disconnect();
 		};

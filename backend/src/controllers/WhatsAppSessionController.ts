@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { getWbot } from "../libs/wbot";
+import { getWbot, removeWbot } from "../libs/wbot";
 import { StartWhatsAppSession } from "../services/WbotServices/StartWhatsAppSession";
 import ShowWhatsAppService from "../services/WhatsappService/ShowWhatsAppService";
 import UpdateWhatsAppService from "../services/WhatsappService/UpdateWhatsAppService";
@@ -33,12 +33,29 @@ const remove = async (req: Request, res: Response): Promise<Response> => {
     const whatsapp = await ShowWhatsAppService(whatsappId);
 
     console.log("Obtendo instância do WhatsApp...");
-    const wbot = getWbot(whatsapp.id);
-
-    console.log("Executando logout...");
-    if (wbot && typeof wbot.logout === "function") {
-      await wbot.logout();
+    try {
+      const wbot = getWbot(whatsapp.id);
+      console.log("Executando logout...");
+      if (wbot && typeof wbot.logout === "function") {
+        await wbot.logout();
+      }
+    } catch (wbotError) {
+      console.log("Sessão não encontrada ou já desconectada, continuando...");
     }
+
+    // Remover sessão da memória
+    removeWbot(whatsapp.id);
+
+    // Atualizar status para DISCONNECTED para evitar reconexão automática
+    await UpdateWhatsAppService({
+      whatsappId,
+      whatsappData: { 
+        status: "DISCONNECTED",
+        qrcode: "",
+        session: "",
+        number: ""
+      }
+    });
 
     console.log("Logout concluído. Respondendo ao cliente...");
     return res.status(200).json({ message: "Session disconnected." });

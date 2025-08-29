@@ -16,6 +16,8 @@ interface WhatsappData {
   queueIds?: number[];
   isDisplay?: boolean;
   color?: string;
+  qrcode?: string;
+  number?: string;
 }
 
 interface Request {
@@ -47,7 +49,9 @@ const UpdateWhatsAppService = async ({
     farewellMessage,
     isDisplay,
     queueIds = [],
-    color
+    color,
+    qrcode,
+    number
   } = whatsappData;
 
   try {
@@ -81,7 +85,9 @@ const UpdateWhatsAppService = async ({
     farewellMessage,
     isDefault,
     isDisplay,
-    color
+    color,
+    qrcode,
+    number
   });
 
   await AssociateWhatsappQueue(whatsapp, queueIds);

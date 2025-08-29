@@ -365,7 +365,7 @@ export const shutdownWbot = async (whatsappId: string): Promise<void> => {
       number: ""
     });
 
-    StartWhatsAppSession(whatsapp);
+    // Removido StartWhatsAppSession para evitar reconexão automática após shutdown
     
   } catch (error) {
     console.error(

@@ -201,6 +201,13 @@ const Connections = () => {
 			if (data.action === "update" && data.whatsapp) {
 				const { whatsapp } = data;
 				
+				// Força atualização da lista quando há mudanças importantes
+				if (whatsapp.status === "CONNECTED" || whatsapp.number) {
+					setTimeout(() => {
+						fetchWhatsApps();
+					}, 500);
+				}
+				
 				if (whatsapp.status !== "CONNECTED") {
 					const now = Date.now();
 					const lastTime = lastNotificationTime[whatsapp.id] || 0;
@@ -221,6 +228,15 @@ const Connections = () => {
 			}
 		});
 
+		socket.on("whatsappSession", (data) => {
+			if (data.action === "update") {
+				// Força atualização quando há mudanças na sessão
+				setTimeout(() => {
+					fetchWhatsApps();
+				}, 500);
+			}
+		});
+
 		// Garantir que o socket permaneça conectado para receber atualizações em tempo real
 		socket.on("connect", () => {
 			console.log("Socket conectado para atualizações em tempo real");
@@ -233,7 +249,7 @@ const Connections = () => {
 		return () => {
 			socket.disconnect();
 		};
-	}, [checkDisconnectedChannels, lastNotificationTime]);
+	}, [checkDisconnectedChannels, lastNotificationTime, fetchWhatsApps]);
 
 	const createCountdownToast = (seconds, initialMessage, finalMessage, onComplete = null, reload = false) => {
 		let secondsRemaining = seconds;
@@ -355,6 +371,9 @@ const Connections = () => {
 				toast.dismiss(startSessionToastId);
 				
 				toast.success('Sessão iniciada com sucesso!');
+				
+				// Força atualização da lista
+				fetchWhatsApps();
 			}, 3000);
 		} catch (err) {
 			toastError(err);
@@ -388,6 +407,9 @@ const Connections = () => {
 				toast.dismiss(qrCodeToastId);
 				
 				toast.success('Novo QR code gerado com sucesso!');
+				
+				// Força atualização da lista
+				fetchWhatsApps();
 			}, 3000);
 		} catch (err) {
 			toastError(err);
@@ -471,8 +493,13 @@ const Connections = () => {
 				
 				setLoadingActions(prev => ({ ...prev, [whatsAppId]: undefined }));
 				setActionMessages(prev => ({ ...prev, [whatsAppId]: undefined }));
-				
+			
 				ToastManager.success('Sessão desconectada com sucesso!', `disconnect-success-${whatsAppId}`);
+			
+				// Força atualização imediata da lista após desconexão
+				setTimeout(() => {
+					fetchWhatsApps();
+				}, 300);
 			} catch (err) {
 				toastError(err, t);
 				setLoadingActions(prev => ({ ...prev, [whatsAppId]: undefined }));
@@ -556,7 +583,7 @@ const Connections = () => {
 				draggable: false,
 			});
 			
-			await api.post(`/whatsapp/${whatsAppId}/start`);
+			await api.post(`/whatsappsession/${whatsAppId}`);
 			
 			toast.dismiss(startToastId);
 			
@@ -606,6 +633,9 @@ const Connections = () => {
 			);
 			
 			await countdownToast.startCountdown();
+			setTimeout(() => {
+				fetchWhatsApps();
+			}, 300);
 		} catch (err) {
 			toastError(err);
 			setLoadingActions(prev => ({ ...prev, [whatsAppId]: undefined }));
@@ -660,15 +690,6 @@ const Connections = () => {
 								onClick={() => handleStartSession(whatsApp?.id)}
 							>
 								<PlayCircleOutline />
-							</IconButton>
-						</Tooltip>
-						<Tooltip title={t("connections.buttons.tryAgain")}>
-							<IconButton
-								size="small"
-								color="primary"
-								onClick={() => handleStartWhatsAppSession(whatsApp.id)}
-							>
-								<Replay />
 							</IconButton>
 						</Tooltip>
 						<Tooltip title={t("connections.buttons.newQr")}>
@@ -955,20 +976,24 @@ const Connections = () => {
 												)}
 											</TableCell>
 											<TableCell align="center">
-												<IconButton
-													size="small"
-													onClick={() => handleEditWhatsApp(whatsApp)}
-												>
-													<Edit color="info" />
-												</IconButton>
-												<IconButton
-													size="small"
-													onClick={e => {
-														handleOpenConfirmationModal("delete", whatsApp.id);
-													}}
-												>
-													<DeleteOutline color="error" />
-												</IconButton>
+												<Tooltip title={t("connections.buttons.edit")}>
+													<IconButton
+														size="small"
+														onClick={() => handleEditWhatsApp(whatsApp)}
+													>
+														<Edit color="info" />
+													</IconButton>
+												</Tooltip>
+												<Tooltip title={t("connections.buttons.delete")}>
+													<IconButton
+														size="small"
+														onClick={e => {
+															handleOpenConfirmationModal("delete", whatsApp.id);
+														}}
+													>
+														<DeleteOutline color="error" />
+													</IconButton>
+												</Tooltip>
 											</TableCell>
 										</TableRow>
 									))}
