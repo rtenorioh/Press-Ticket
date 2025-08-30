@@ -216,6 +216,21 @@ const TicketsManager = () => {
     return () => clearInterval(intervalId);
   }, []);
 
+  // Detectar mudança de aba quando o componente é montado ou quando a aba muda
+  useEffect(() => {
+    const checkTabChange = () => {
+      const changeTabRequest = localStorage.getItem("pressticket:changeTab");
+      if (changeTabRequest && changeTabRequest !== tab) {
+        console.log("Detectada mudança de aba pendente:", changeTabRequest);
+        setTab(changeTabRequest);
+        localStorage.removeItem("pressticket:changeTab");
+      }
+    };
+    
+    // Verificar imediatamente quando a aba atual muda
+    checkTabChange();
+  }, [tab]);
+
   useEffect(() => {
     const fetchSettings = async () => {
       try {

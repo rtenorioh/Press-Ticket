@@ -23,6 +23,7 @@ import WhatsMarked from "react-whatsmarked";
 import { AuthContext } from "../../context/Auth/AuthContext";
 import toastError from "../../errors/toastError";
 import api from "../../services/api";
+import openSocket from "../../services/socket-io";
 import ButtonWithSpinner from "../ButtonWithSpinner";
 import ContactModal from "../ContactModal";
 
@@ -167,6 +168,32 @@ const NewTicketModal = ({ modalOpen, onClose }) => {
 				queueId: selectedQueue,
 				whatsappId: selectedWhatsapp
 			});
+			
+			// Emitir evento WebSocket para atualizar as listas em tempo real
+			setTimeout(() => {
+				const socket = openSocket();
+				if (socket) {
+					socket.emit("ticket", {
+						action: "update",
+						ticketId: ticket.id,
+						ticket: {
+							...ticket,
+							status: "open",
+							userId: user?.id,
+							queueId: selectedQueue,
+							whatsappId: selectedWhatsapp
+						}
+					});
+
+					// Forçar atualização da lista de tickets da aba "open"
+					socket.emit("joinTickets", "open");
+					socket.emit("getTickets", { status: "open", userId: user?.id, showAll: false });
+				}
+			}, 500);
+			
+			// Definir para mudar para a aba de atendimento
+			localStorage.setItem("pressticket:changeTab", "open");
+			
 			navigate(`/tickets/${ticket.id}`);
 		} catch (err) {
 			toastError(err);
