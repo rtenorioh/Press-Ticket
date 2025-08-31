@@ -613,7 +613,7 @@ const MessageInput = ({ ticketStatus }) => {
         await api.post(`/messages/${ticketId}`, formData);
       }
     } catch (err) {
-      toastError(err);
+      toastError(err, t);
     }
     setLoading(false);
     setMedias([]);
@@ -636,6 +636,38 @@ const MessageInput = ({ ticketStatus }) => {
       let response;
       if (editingMessage !== null) {
         response = await api.post(`/messages/edit/${editingMessage.id}`, message);
+        
+        // Emitir evento local para atualizar a mensagem editada imediatamente
+        if (response) {
+          const updatedMessage = {
+            ...editingMessage,
+            body: message.body,
+            isEdited: true,
+            updatedAt: new Date().toISOString(),
+            _forceUpdate: Date.now()
+          };
+          
+          // Disparar evento personalizado para atualização imediata
+          setTimeout(() => {
+            const event = new CustomEvent('updateMessage', { 
+              detail: { 
+                message: updatedMessage,
+                ticketId: ticketId 
+              } 
+            });
+            document.dispatchEvent(event);
+          }, 0);
+          
+          // Emitir evento via socket para sincronização com outros clientes
+          const socket = openSocket();
+          if (socket) {
+            socket.emit("appMessage", {
+              action: "update",
+              message: updatedMessage,
+              ticket: { id: ticketId }
+            });
+          }
+        }
       } else {
         if (channelType !== null) {
           response = await api.post(`/hub-message/${ticketId}`, message);

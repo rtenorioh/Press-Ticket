@@ -38,6 +38,12 @@ const EditWhatsAppMessage = async (
     throw new AppError("ERR_EDITING_WAPP_MSG");
   }
 
+  await message.update({ 
+    body: newBody,
+    isEdited: true,
+    updatedAt: new Date()
+  });
+
   const mostRecentMessage = await Message.findOne({
     where: { ticketId: ticket.id },
     order: [["updatedAt", "DESC"]]
@@ -46,6 +52,16 @@ const EditWhatsAppMessage = async (
   if (mostRecentMessage && mostRecentMessage.id === messageId) {
     await ticket.update({ lastMessage: newBody });
   }
+
+  await message.reload({
+    include: [
+      {
+        model: Ticket,
+        as: "ticket",
+        include: ["contact"]
+      }
+    ]
+  });
 
   return message;
 };
