@@ -371,7 +371,6 @@ const reducer = (state, action) => {
     const timestamp = new Date().toISOString();
     const messageToUpdate = action.payload;
     
-    console.log(`[FRONT_REDUCER_UPDATE][${timestamp}] Atualizando mensagem no reducer: ID=${messageToUpdate.id}, ACK=${messageToUpdate.ack}`);
 
     const messageIndex = state.findIndex((m) => m.id === messageToUpdate.id);
     
@@ -379,22 +378,36 @@ const reducer = (state, action) => {
       const oldMessage = state[messageIndex];
       console.log(`[FRONT_REDUCER_FOUND][${timestamp}] Mensagem encontrada no índice ${messageIndex}. ACK anterior=${oldMessage.ack}, Novo ACK=${messageToUpdate.ack}`);
       
-      if (oldMessage.ack !== messageToUpdate.ack) {
-        console.log(`[FRONT_REDUCER_ACK_MUDOU][${timestamp}] ACK mudou de ${oldMessage.ack} para ${messageToUpdate.ack}. Forçando atualização.`);
+      
+      const ackChanged = oldMessage.ack !== messageToUpdate.ack;
+      const bodyChanged = oldMessage.body !== messageToUpdate.body;
+      const editedChanged = oldMessage.isEdited !== messageToUpdate.isEdited;
+      
+      if (ackChanged || bodyChanged || editedChanged) {
         
-        // Criando um novo array com todos os elementos, substituindo a mensagem atualizada
-        // Isso garante que o React detecte a mudança e re-renderize o componente
         const newState = [...state];
         newState[messageIndex] = { 
-          ...oldMessage,  // Mantém propriedades originais
-          ...messageToUpdate,  // Sobrescreve com novas propriedades
-          _forceUpdate: Date.now()  // Adiciona propriedade para forçar detecção de mudança
+          ...oldMessage,
+          ...messageToUpdate,
+          _forceUpdate: Date.now()
         };
         
         console.log(`[FRONT_REDUCER_NOVO_ESTADO][${timestamp}] Novo estado criado com _forceUpdate=${newState[messageIndex]._forceUpdate}`);
+        
+        if (bodyChanged || editedChanged) {
+          setTimeout(() => {
+            const messageElement = document.getElementById(messageToUpdate.id);
+            if (messageElement) {
+              messageElement.classList.add("highlight-new-message");
+              setTimeout(() => {
+                messageElement.classList.remove("highlight-new-message");
+              }, 2000);
+            }
+          }, 100);
+        }
+        
         return newState;
       } else {
-        // Mesmo que o ACK não tenha mudado, ainda atualizamos outras propriedades
         const newState = [...state];
         newState[messageIndex] = { ...oldMessage, ...messageToUpdate };
         return newState;
@@ -409,7 +422,6 @@ const reducer = (state, action) => {
       />);
     }
 
-    // Retornando um novo array para garantir que o React detecte a mudança
     return [...state];
   }
 
@@ -474,16 +486,12 @@ const MessagesList = ({ ticketId, isGroup, onClick }) => {
   const scrollToBottom = useCallback((force = false) => {
     const scrollUpTimeElapsed = Date.now() - lastScrollUpTime.current > 5000;
     
-    // Se force for true (botão foi clicado), ignoramos as outras condições
     if (force) {
       if (lastMessageRef.current) {
-        // Quando o botão é clicado, fazemos scroll imediatamente
         lastMessageRef.current.scrollIntoView({ behavior: "auto" });
-        // Resetamos o estado de visualização de mensagens antigas
         setIsViewingOldMessages(false);
       }
     } else if (shouldAutoScroll && !isViewingOldMessages && lastMessageRef.current) {
-      // Para scrolls automáticos (não forçados), mantemos o comportamento original
       lastMessageRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [shouldAutoScroll, isViewingOldMessages, lastMessageRef, lastScrollUpTime, setIsViewingOldMessages]);
@@ -501,32 +509,24 @@ const MessagesList = ({ ticketId, isGroup, onClick }) => {
         timestamp: data.message?.createdAt || data.message?.timestamp
       });
       
-      // Atualiza o timestamp do último evento socket recebido
       lastSocketEventTime.current = Date.now();
       
       const messageTicketId = data.ticket?.id || data.message?.ticketId;
       
-      // Garantir que ambos os IDs sejam strings para comparação consistente
       const messageTicketIdStr = messageTicketId ? String(messageTicketId).trim() : null;
       const currentTicketIdStr = ticketId ? String(ticketId).trim() : null;
       
-      console.log(`[FRONT_MSG_COMPARACAO][${timestamp}] Comparando IDs: messageTicketId=${messageTicketIdStr}, ticketId=${currentTicketIdStr}`);
       
       if (messageTicketIdStr && currentTicketIdStr && messageTicketIdStr === currentTicketIdStr) {
-        console.log(`[FRONT_MSG_TICKET][${timestamp}] Mensagem pertence ao ticket atual: ${ticketId}`);
         
         if (data.action === "create") {
           const messageExists = messagesList.some(m => m.id === data.message.id);
           
           if (!messageExists) {
-            console.log(`[FRONT_MSG_NOVA][${timestamp}] Adicionando nova mensagem via socket: ${data.message.id}`);
-            console.log(`[FRONT_MSG_ESTADO][${timestamp}] Estado atual da lista antes da adição: ${messagesList.length} mensagens`);
             
             try {
               dispatch({ type: "ADD_MESSAGE", payload: data.message });
-              console.log(`[FRONT_MSG_DISPATCH][${timestamp}] Dispatch ADD_MESSAGE realizado com sucesso`);
               
-              // Marcar mensagem como lida se não for do usuário (fromMe === false)
               if (!data.message.fromMe) {
                 console.log(`[FRONT_MSG_MARK_READ][${timestamp}] Marcando mensagens do ticket ${ticketId} como lidas após receber nova mensagem`);
                 
@@ -647,8 +647,18 @@ const MessagesList = ({ ticketId, isGroup, onClick }) => {
         }
       }
     };
+
+    const handleUpdateMessage = (event) => {
+      const { message, ticketId: messageTicketId } = event.detail;
+      
+      if (parseInt(messageTicketId) === parseInt(ticketId)) {
+        console.log("Mensagem editada via evento personalizado:", message);
+        dispatch({ type: "UPDATE_MESSAGE", payload: message });
+      }
+    };
     
     document.addEventListener('newMessage', handleNewMessage);
+    document.addEventListener('updateMessage', handleUpdateMessage);
 
     // Controle para evitar requisições simultâneas
     let isPollingActive = true;
@@ -722,6 +732,7 @@ const MessagesList = ({ ticketId, isGroup, onClick }) => {
       socket.off("appMessage");
       socket.off("connect");
       document.removeEventListener('newMessage', handleNewMessage);
+      document.removeEventListener('updateMessage', handleUpdateMessage);
       clearInterval(refreshInterval);
       socket.emit("leaveChatBox", ticketId);
     };
@@ -966,37 +977,29 @@ const MessagesList = ({ ticketId, isGroup, onClick }) => {
     // ACK_PLAYED: 4
     
     if (!message.fromMe) {
-      // Não exibir ticks para mensagens recebidas
       return null;
     }
     
     if (message.ack === -1) {
-      console.log(`[FRONT_RENDER_ACK_ERROR][${timestamp}] Mensagem ${message.id} com ACK=-1 (erro)`);
       return <Error fontSize="small" sx={{ fontSize: 16, verticalAlign: "middle", color: "red" }} />;
     }
     
     if (message.ack === 0) {
-      console.log(`[FRONT_RENDER_ACK_0][${timestamp}] Mensagem ${message.id} com ACK=0 (relógio/pendente)`);
       return <AccessTime fontSize="small" sx={{ fontSize: 16, verticalAlign: "middle" }} />;
     }
     
     if (message.ack === 1) {
-      console.log(`[FRONT_RENDER_ACK_1][${timestamp}] Mensagem ${message.id} com ACK=1 (servidor/um tick)`);
       return <Done fontSize="small" sx={{ fontSize: 16, verticalAlign: "middle" }} />;
     }
     
     if (message.ack === 2) {
-      console.log(`[FRONT_RENDER_ACK_2][${timestamp}] Mensagem ${message.id} com ACK=2 (dispositivo/dois ticks)`);
       return <DoneAll fontSize="small" sx={{ fontSize: 16, verticalAlign: "middle" }} />;
     }
     
     if (message.ack === 3 || message.ack === 4) {
-      console.log(`[FRONT_RENDER_ACK_3_4][${timestamp}] Mensagem ${message.id} com ACK=${message.ack} (lido/reproduzido/dois ticks azuis)`);
       return <DoneAll fontSize="small" sx={{ fontSize: 16, verticalAlign: "middle", color: blue[500] }} />;
     }
     
-    // Caso de ACK com valor não esperado
-    console.warn(`[FRONT_RENDER_ACK_INVALIDO][${timestamp}] Mensagem ${message.id} com valor de ACK inválido: ${message.ack}`);
     return <AccessTime fontSize="small" sx={{ fontSize: 16, verticalAlign: "middle", color: "orange" }} />;
   };
   
@@ -1106,16 +1109,16 @@ const MessagesList = ({ ticketId, isGroup, onClick }) => {
 
   useEffect(() => {
     if (!loading && messagesList.length > 0) {
-      // Verifica se existem mensagens não lidas
+  
       const unreadMessages = messagesList.filter(msg => !msg.fromMe && msg.ack < 3);
       
       if (unreadMessages.length > 0) {
-        // Se existem mensagens não lidas, rola para a primeira não lida
+        
         const firstUnreadMessage = unreadMessages[0];
         const firstUnreadElement = document.getElementById(firstUnreadMessage.id);
         
         if (firstUnreadElement) {
-          // Adiciona um indicador visual de mensagens não lidas (semelhante ao WhatsApp)
+          
           const unreadCount = unreadMessages.length;
           const unreadIndicator = document.createElement('div');
           unreadIndicator.innerText = `${unreadCount} ${unreadCount === 1 ? 'mensagem não lida' : 'mensagens não lidas'}`;
@@ -1130,16 +1133,15 @@ const MessagesList = ({ ticketId, isGroup, onClick }) => {
           unreadIndicator.style.fontSize = '13px';
           unreadIndicator.style.fontWeight = '500';
           
-          // Insere o indicador antes da primeira mensagem não lida
+          
           firstUnreadElement.parentNode.insertBefore(unreadIndicator, firstUnreadElement);
           
-          // Faz o scroll para a primeira mensagem não lida
+          
           setTimeout(() => {
             firstUnreadElement.scrollIntoView({ behavior: 'auto', block: 'start' });
           }, 100);
         }
       } else {
-        // Se não há mensagens não lidas, faz o scroll para a última mensagem
         checkScroll();
       }
     }

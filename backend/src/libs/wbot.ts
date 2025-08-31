@@ -136,6 +136,8 @@ export const initWbot = async (whatsapp: Whatsapp): Promise<Session> => {
       const wbot: Session = new Client({
         session: sessionCfg,
         authStrategy: new LocalAuth({ clientId: clientSession }),
+        browserName: 'Chrome',
+        deviceName: process.env.DEVICE_NAME || 'Press Ticket®',
         puppeteer: {
           executablePath: process.env.CHROME_BIN || undefined,
           browserWSEndpoint: process.env.CHROME_WS || undefined,
@@ -177,7 +179,6 @@ export const initWbot = async (whatsapp: Whatsapp): Promise<Session> => {
           ]
         },
       });
-      
 
       wbot.initialize();
 
@@ -199,8 +200,23 @@ export const initWbot = async (whatsapp: Whatsapp): Promise<Session> => {
         });
       });
 
+      wbot.on('code', (code) => {
+        console.log('Pairing code:', code);
+      });
+
       wbot.on("authenticated", async session => {
         logger.info(`Session: ${sessionName} AUTHENTICATED`);
+        
+        // Salvar a sessão no banco de dados
+        await whatsapp.update({
+          session: JSON.stringify(session),
+          status: "AUTHENTICATED"
+        });
+        
+        io.emit("whatsappSession", {
+          action: "update",
+          session: whatsapp
+        });
       });
 
       wbot.on("auth_failure", async msg => {

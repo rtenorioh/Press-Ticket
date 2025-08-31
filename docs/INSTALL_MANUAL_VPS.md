@@ -185,8 +185,11 @@ openssl rand -base64 32
 ```bash
 NODE_ENV=production
 
-#Nome da Empresa
+#Nome da Instalação
 COMPANY_NAME=press_ticket
+
+#Nome do Dispositivo
+DEVICE_NAME=
 
 #URLs e Portas
 BACKEND_URL=https://back.pressticket.com.br
