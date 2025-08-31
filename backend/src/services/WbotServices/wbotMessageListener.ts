@@ -616,6 +616,14 @@ const verifyQueue = async (
     const isOutsideWorkHours = currentTimeInMinutes < startWorkInMinutes || currentTimeInMinutes > endWorkInMinutes;
     
     if (isBreakTime || isOutsideWorkHours) {
+    
+      if (isBreakTime) {
+        await UpdateTicketService({
+          ticketData: { queueId: choosenQueue.id },
+          ticketId: ticket.id
+        });
+      }
+
       const chat = await msg.getChat();
       await chat.sendStateTyping();
       
