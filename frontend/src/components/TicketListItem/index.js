@@ -318,17 +318,16 @@ const TicketListItem = ({ ticket, filteredTags }) => {
 	const handleAcepptTicket = async id => {
 		setLoading(true);
 		try {
-			console.log(`Aceitando ticket ${id}: mudando status para 'open'`);
+		
 			await api.put(`/tickets/${id}`, {
 				status: "open",
 				userId: user?.id,
 			});
 			
-			// Aguardar um pouco para garantir que a API foi processada
 			setTimeout(() => {
 				const socket = openSocket();
 				if (socket) {
-					// Emitir evento de atualização para remover o ticket da aba atual
+				
 					socket.emit("ticket", {
 						action: "update",
 						ticketId: id,
@@ -340,20 +339,16 @@ const TicketListItem = ({ ticket, filteredTags }) => {
 						}
 					});
 
-					// Forçar atualização das listas de tickets
 					socket.emit("joinTickets", "open");
 					socket.emit("joinTickets", "pending");
 					
-					// Solicitar atualização das listas
 					socket.emit("getTickets", { status: "open", userId: user?.id, showAll: false });
 					socket.emit("getTickets", { status: "pending", userId: user?.id, showAll: false });
 				}
 			}, 500);
 			
-			// Definir para mudar para a aba de abertos
 			localStorage.setItem("pressticket:changeTab", "open");
 			
-			// Navegar diretamente para o ticket na aba de atendimento
 			navigate(`/tickets/${id}`);
 		} catch (err) {
 			if (isMounted.current) {
@@ -388,17 +383,15 @@ const TicketListItem = ({ ticket, filteredTags }) => {
 	const handleReopenTicket = async (id) => {
 		setLoading(true);
 		try {
-			console.log(`Reabrindo ticket ${id}: mudando status para 'open'`);
 			await api.put(`/tickets/${id}`, {
 				status: "open",
 				userId: user?.id,
 			});
 			
-			// Aguardar um pouco para garantir que a API foi processada
 			setTimeout(() => {
 				const socket = openSocket();
 				if (socket) {
-					// Emitir evento de atualização para remover o ticket da aba atual
+			
 					socket.emit("ticket", {
 						action: "update",
 						ticketId: id,
@@ -410,20 +403,16 @@ const TicketListItem = ({ ticket, filteredTags }) => {
 						}
 					});
 
-					// Forçar atualização das listas de tickets
 					socket.emit("joinTickets", "open");
 					socket.emit("joinTickets", "closed");
 					
-					// Solicitar atualização das listas
 					socket.emit("getTickets", { status: "open", userId: user?.id, showAll: false });
 					socket.emit("getTickets", { status: "closed", userId: user?.id, showAll: false });
 				}
 			}, 500);
 			
-			// Definir para mudar para a aba de atendimento
 			localStorage.setItem("pressticket:changeTab", "open");
 			
-			// Navegar para a lista de tickets
 			navigate(`/tickets/${id}`);
 		} catch (err) {
 			toastError(err);
@@ -437,41 +426,77 @@ const TicketListItem = ({ ticket, filteredTags }) => {
 	const handleViewTicket = async (id) => {
 		setLoading(true);
 		try {
-			console.log(`Movendo ticket ${id} para 'pending'`);
 			await api.put(`/tickets/${id}`, {
 				status: "pending",
 			});
 			
-			// Aguardar um pouco para garantir que a API foi processada
 			setTimeout(() => {
 				const socket = openSocket();
 				if (socket) {
-					// Emitir evento de atualização para remover o ticket da aba atual
 					socket.emit("ticket", {
 						action: "update",
 						ticketId: id,
 						ticket: {
 							...ticket,
 							status: "pending",
-							userId: null, // Remover usuário atribuído
+							userId: null,
 							queueId: ticket?.queueId
 						}
 					});
 
-					// Forçar atualização das listas de tickets
 					socket.emit("joinTickets", "pending");
 					socket.emit("joinTickets", "open");
 					
-					// Solicitar atualização das listas
 					socket.emit("getTickets", { status: "pending", userId: user?.id, showAll: false });
 					socket.emit("getTickets", { status: "open", userId: user?.id, showAll: false });
 				}
 			}, 500);
 			
-			// Definir para mudar para a aba de aguardando
+
 			localStorage.setItem("pressticket:changeTab", "pending");
 			
-			// Navegar diretamente para o ticket na aba de aguardando
+			navigate(`/tickets/${id}`);
+		} catch (err) {
+			toastError(err);
+		} finally {
+			if (isMounted.current) {
+				setLoading(false);
+			}
+		}
+	};
+
+	const handleMoveTicket = async (id) => {
+		setLoading(true);
+		try {
+			await api.put(`/tickets/${id}`, {
+				status: "pending",
+			});
+			
+			setTimeout(() => {
+				const socket = openSocket();
+				if (socket) {
+					socket.emit("ticket", {
+						action: "update",
+						ticketId: id,
+						ticket: {
+							...ticket,
+							status: "pending",
+							userId: null,
+							queueId: ticket?.queueId
+						}
+					});
+
+					socket.emit("joinTickets", "pending");
+					socket.emit("joinTickets", "open");
+					
+					socket.emit("getTickets", { status: "pending", userId: user?.id, showAll: false });
+					socket.emit("getTickets", { status: "open", userId: user?.id, showAll: false });
+				}
+			}, 500);
+			
+
+			localStorage.setItem("pressticket:changeTab", "open");
+			
 			navigate(`/tickets`);
 		} catch (err) {
 			toastError(err);
@@ -485,7 +510,7 @@ const TicketListItem = ({ ticket, filteredTags }) => {
 	const handleClosedTicket = async (id, status) => { 
 		setLoading(true);
 		try {
-			console.log(`Fechando ticket ${id}: mudando status para 'closed'`);
+			
 			await api.put(`/tickets/${id}`, {
 				status: "closed",
 				userId: user?.id,
@@ -494,7 +519,11 @@ const TicketListItem = ({ ticket, filteredTags }) => {
 			
 			const socket = openSocket();
 			if (socket) {
-				// Emitir evento de atualização para remover o ticket da aba atual
+				socket.emit("ticket", {
+					action: "delete",
+					ticketId: id
+				});
+				
 				socket.emit("ticket", {
 					action: "update",
 					ticketId: id,
@@ -505,20 +534,21 @@ const TicketListItem = ({ ticket, filteredTags }) => {
 						queueId: ticket?.queueId || null
 					}
 				});
-				
-				// Forçar atualização das listas de tickets
-				socket.emit("joinTickets", "closed");
-				socket.emit("getTickets", { status: "closed", userId: user?.id, showAll: false });
-				
-				// Se estiver em uma aba diferente de "closed", também atualizar essa aba
-				if (ticket.status !== "closed") {
-					socket.emit("joinTickets", ticket.status);
-					socket.emit("getTickets", { status: ticket.status, userId: user?.id, showAll: false });
-				}
 			}
 			
-			// Definir para mudar para a aba de finalizados
-			localStorage.setItem("pressticket:changeTab", "closed");
+			setTimeout(() => {
+				if (socket) {
+					socket.emit("joinTickets", "closed");
+					socket.emit("joinTickets", "open");
+					socket.emit("joinTickets", "pending");
+					
+					socket.emit("getTickets", { status: "closed", userId: user?.id, showAll: false });
+					socket.emit("getTickets", { status: "open", userId: user?.id, showAll: false });
+					socket.emit("getTickets", { status: "pending", userId: user?.id, showAll: false });
+				}
+			}, 500);
+			
+			// localStorage.setItem("pressticket:changeTab", ticket.status);				
 			
 			navigate("/tickets");
 		} catch (err) {
@@ -836,7 +866,7 @@ const TicketListItem = ({ ticket, filteredTags }) => {
 						<Tooltip title={t("ticketsList.items.return")} placement="bottom" arrow>
 							<BottomButton
 								color="primary"
-								onClick={e => handleViewTicket(ticket.id)} >
+								onClick={e => handleMoveTicket(ticket.id)} >
 								<Replay />
 							</BottomButton>
 						</Tooltip>

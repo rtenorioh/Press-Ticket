@@ -165,8 +165,6 @@ const Ticket = () => {
       }
 
       if (data.action === "delete") {
-        console.log(`[FRONT_TICKET_DELETE][${timestamp}] Ticket ${data.ticketId} excluído, redirecionando para lista de tickets`);
-        toast.success("Ticket deleted sucessfully.");
         navigate("/tickets");
       }
     });

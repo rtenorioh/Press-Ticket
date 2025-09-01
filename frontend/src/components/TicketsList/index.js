@@ -243,8 +243,8 @@ const TicketsList = (props) => {
 			// Verificar se o usuário é admin ou masteradmin
 			const isAdmin = user?.profile === "admin" || user?.profile === "masteradmin";
 			
-			// Se for admin/masteradmin e showAll estiver ativo, mostrar todos os tickets
-			if (isAdmin && showAll) {
+			// Se for admin/masteradmin e showAll estiver ativo, mostrar todos os tickets DA ABA ATUAL
+			if (isAdmin && showAll && matchesCurrentStatus) {
 				console.log(`[FRONT_TICKET_ADMIN][${new Date().toISOString()}] Admin/Master com 'Todos' ativo: exibir ticket ${ticket.id}`);
 				return true;
 			}
