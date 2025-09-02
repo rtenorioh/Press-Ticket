@@ -8,7 +8,7 @@ import EmitTicketCounterService from "./EmitTicketCounterService";
 interface TicketData {
   status?: string;
   userId?: number;
-  queueId?: number;
+  queueId?: number | null;
   whatsappId?: number;
 }
 

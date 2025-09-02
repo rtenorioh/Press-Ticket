@@ -617,12 +617,10 @@ const verifyQueue = async (
     
     if (isBreakTime || isOutsideWorkHours) {
     
-      if (isBreakTime) {
-        await UpdateTicketService({
-          ticketData: { queueId: choosenQueue.id },
-          ticketId: ticket.id
-        });
-      }
+      await UpdateTicketService({
+        ticketData: { queueId: choosenQueue.id },
+        ticketId: ticket.id
+      });
 
       const chat = await msg.getChat();
       await chat.sendStateTyping();
@@ -631,7 +629,7 @@ const verifyQueue = async (
         ? choosenQueue.breakMessage 
         : choosenQueue.absenceMessage;
       
-      const body = formatBody(`\u200e${messageToSend}`, ticket);
+      const body = formatBody(`\u200e${messageToSend}\n\n*[ # ]* - Voltar ao Menu Principal`, ticket);
       const debouncedSentMessage = debounce(
         async () => {
           const sentMessage = await wbot.sendMessage(
@@ -967,6 +965,18 @@ const handleMessage = async (
       await verifyMediaMessage(msg, ticket, contact);
     } else {
       await verifyMessage(msg, ticket, contact);
+    }
+
+    const backCommands = ["voltar", "menu", "inicio", "sair", "0", "#"];
+    if (backCommands.includes(msg.body.toLowerCase().trim())) {
+
+      await UpdateTicketService({
+        ticketData: { queueId: null },
+        ticketId: ticket.id
+      });
+
+      await verifyQueue(wbot, msg, ticket, contact);
+      return;
     }
 
     if (
