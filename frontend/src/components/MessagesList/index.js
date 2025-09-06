@@ -1109,43 +1109,9 @@ const MessagesList = ({ ticketId, isGroup, onClick }) => {
 
   useEffect(() => {
     if (!loading && messagesList.length > 0) {
-  
-      const unreadMessages = messagesList.filter(msg => !msg.fromMe && msg.ack < 3);
-      
-      if (unreadMessages.length > 0) {
-        
-        const firstUnreadMessage = unreadMessages[0];
-        const firstUnreadElement = document.getElementById(firstUnreadMessage.id);
-        
-        if (firstUnreadElement) {
-          
-          const unreadCount = unreadMessages.length;
-          const unreadIndicator = document.createElement('div');
-          unreadIndicator.innerText = `${unreadCount} ${unreadCount === 1 ? 'mensagem não lida' : 'mensagens não lidas'}`;
-          unreadIndicator.style.backgroundColor = '#fff';
-          unreadIndicator.style.color = '#303030';
-          unreadIndicator.style.padding = '8px 12px';
-          unreadIndicator.style.borderRadius = '16px';
-          unreadIndicator.style.boxShadow = '0 1px 1px rgba(0, 0, 0, 0.1)';
-          unreadIndicator.style.margin = '8px auto';
-          unreadIndicator.style.width = 'fit-content';
-          unreadIndicator.style.textAlign = 'center';
-          unreadIndicator.style.fontSize = '13px';
-          unreadIndicator.style.fontWeight = '500';
-          
-          
-          firstUnreadElement.parentNode.insertBefore(unreadIndicator, firstUnreadElement);
-          
-          
-          setTimeout(() => {
-            firstUnreadElement.scrollIntoView({ behavior: 'auto', block: 'start' });
-          }, 100);
-        }
-      } else {
-        checkScroll();
-      }
+      checkScroll();
     }
-  }, [loading, messagesList, checkScroll, scrollToBottom]);
+  }, [loading, messagesList, checkScroll]);
 
   const renderQuotedMessage = (message) => {
     return (
