@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -16,11 +16,14 @@ import {
   ListItemSecondaryAction,
   Avatar,
   CircularProgress,
-  Tooltip
+  Tooltip,
+  LinearProgress
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { Close, Delete, Description, PictureAsPdf, InsertDriveFile, Image, Send, CloudUpload } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
+import { useParams } from 'react-router-dom';
+import openSocket from '../../services/socket-io';
 
 const PreviewContainer = styled(Box)(({ theme }) => ({
   display: 'flex',
@@ -101,9 +104,13 @@ const getFileIcon = (file) => {
 
 const UploadModal = ({ open, onClose, files, onSend, loading }) => {
   const { t } = useTranslation();
+  const { ticketId } = useParams();
   const [caption, setCaption] = useState('');
   const [selectedFileIndex, setSelectedFileIndex] = useState(0);
   const [localFiles, setLocalFiles] = useState([]);
+  const [compressionProgress, setCompressionProgress] = useState(0);
+  const [compressionStatus, setCompressionStatus] = useState('');
+  const [isCompressing, setIsCompressing] = useState(false);
   const captionInputRef = useRef(null);
 
   React.useEffect(() => {
@@ -123,6 +130,50 @@ const UploadModal = ({ open, onClose, files, onSend, loading }) => {
       captionInputRef.current.focus();
     }
   }, [open, selectedFileIndex]);
+
+  // Socket listener para progresso de compressão
+  useEffect(() => {
+    if (!ticketId || !open) return;
+
+    const socket = openSocket();
+    
+    const handleCompressionProgress = (data) => {
+      console.log('Evento recebido no frontend:', data);
+      if (data.ticketId === parseInt(ticketId)) {
+        setCompressionProgress(data.progress);
+        setCompressionStatus(data.status);
+        
+        if (data.status === 'starting') {
+          setIsCompressing(true);
+          setCompressionProgress(0);
+        } else if (data.status === 'compressing') {
+          setIsCompressing(true);
+        } else if (data.status === 'completed') {
+          setIsCompressing(false);
+          setCompressionProgress(100);
+          setTimeout(() => {
+            setCompressionProgress(0);
+            setCompressionStatus('');
+          }, 2000);
+        } else if (data.status === 'error') {
+          setIsCompressing(false);
+          setCompressionProgress(0);
+          setCompressionStatus('error');
+        }
+      }
+    };
+
+    // Escutar evento genérico também
+    socket.on(`video-compression-progress-${ticketId}`, handleCompressionProgress);
+    
+    // Debug: verificar se socket está conectado
+    console.log('Socket conectado:', socket.connected);
+    console.log('Escutando evento:', `video-compression-progress-${ticketId}`);
+
+    return () => {
+      socket.off(`video-compression-progress-${ticketId}`, handleCompressionProgress);
+    };
+  }, [ticketId, open]);
 
   const handleRemoveFile = (index) => {
     const newFiles = [...localFiles];
@@ -301,6 +352,32 @@ const UploadModal = ({ open, onClose, files, onSend, loading }) => {
               </FileListContainer>
             )}
             
+            {/* Barra de progresso de compressão */}
+            {isCompressing && (
+              <Box sx={{ mb: 2 }}>
+                <Typography variant="body2" color="primary" sx={{ mb: 1 }}>
+                  {compressionStatus === 'starting' && 'Iniciando compressão do vídeo...'}
+                  {compressionStatus === 'compressing' && `Comprimindo vídeo... ${compressionProgress}%`}
+                  {compressionStatus === 'completed' && 'Compressão concluída!'}
+                  {compressionStatus === 'error' && 'Erro na compressão'}
+                </Typography>
+                <LinearProgress 
+                  variant="determinate" 
+                  value={compressionProgress} 
+                  sx={{
+                    height: 8,
+                    borderRadius: 4,
+                    backgroundColor: (theme) => theme.palette.grey[200],
+                    '& .MuiLinearProgress-bar': {
+                      borderRadius: 4,
+                      backgroundColor: (theme) => 
+                        compressionStatus === 'error' ? theme.palette.error.main : theme.palette.primary.main,
+                    }
+                  }}
+                />
+              </Box>
+            )}
+
             <TextField
               fullWidth
               label={t('uploadModal.caption')}
@@ -311,6 +388,7 @@ const UploadModal = ({ open, onClose, files, onSend, loading }) => {
               inputRef={captionInputRef}
               multiline
               rows={2}
+              disabled={isCompressing}
               onKeyDown={(e) => {
                 if (e.ctrlKey && e.key === 'Enter') {
                   e.preventDefault();
@@ -356,7 +434,7 @@ const UploadModal = ({ open, onClose, files, onSend, loading }) => {
           onClick={onClose}
           variant="outlined"
           color="inherit"
-          disabled={loading}
+          disabled={loading || isCompressing}
           sx={{ 
             borderRadius: 20,
             px: 3,
@@ -370,8 +448,8 @@ const UploadModal = ({ open, onClose, files, onSend, loading }) => {
           onClick={handleSend}
           variant="contained"
           color="primary"
-          disabled={loading}
-          startIcon={loading ? <CircularProgress size={20} /> : <Send />}
+          disabled={loading || isCompressing}
+          startIcon={loading || isCompressing ? <CircularProgress size={20} /> : <Send />}
           sx={{ 
             borderRadius: 20,
             px: 3,
@@ -379,7 +457,7 @@ const UploadModal = ({ open, onClose, files, onSend, loading }) => {
             fontWeight: 500
           }}
         >
-          {t('uploadModal.send')}
+          {isCompressing ? 'Comprimindo...' : t('uploadModal.send')}
         </Button>
       </DialogActions>
     </Dialog>

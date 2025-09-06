@@ -15,10 +15,10 @@ interface Request {
   body?: string;
 }
 
-// Função para comprimir vídeo
-const compressVideo = (inputPath: string, outputPath: string): Promise<void> => {
+// Função para comprimir vídeo com progresso
+const compressVideo = (inputPath: string, outputPath: string, ticketId: number, socketIo?: any): Promise<void> => {
   return new Promise((resolve, reject) => {
-    ffmpeg(inputPath)
+    const command = ffmpeg(inputPath)
       .videoCodec('libx264')
       .audioCodec('aac')
       .size('480x?')
@@ -30,8 +30,38 @@ const compressVideo = (inputPath: string, outputPath: string): Promise<void> => 
         '-preset', 'fast',
         '-crf', '28'
       ])
-      .on('end', () => resolve())
-      .on('error', (err) => reject(err))
+      .on('progress', (progress) => {
+        if (socketIo && progress.percent) {
+          const percent = Math.round(progress.percent);
+          console.log(`Progresso da compressão: ${percent}%`);
+          socketIo.emit(`video-compression-progress-${ticketId}`, {
+            ticketId,
+            progress: percent,
+            status: 'compressing'
+          });
+        }
+      })
+      .on('end', () => {
+        if (socketIo) {
+          socketIo.emit(`video-compression-progress-${ticketId}`, {
+            ticketId,
+            progress: 100,
+            status: 'completed'
+          });
+        }
+        resolve();
+      })
+      .on('error', (err) => {
+        if (socketIo) {
+          socketIo.emit(`video-compression-progress-${ticketId}`, {
+            ticketId,
+            progress: 0,
+            status: 'error',
+            error: err.message
+          });
+        }
+        reject(err);
+      })
       .save(outputPath);
   });
 };
@@ -46,6 +76,9 @@ const SendWhatsAppMedia = async ({
 
   try {
     const wbot = await GetTicketWbot(ticket);
+    
+    // Importar socket.io para emitir eventos de progresso
+    const { getIO } = require("../../libs/socket");
     const hasBody = body
       ? formatBody(body as string, ticket)
       : undefined;
@@ -82,7 +115,17 @@ const SendWhatsAppMedia = async ({
       );
       
       try {
-        await compressVideo(media.path, compressedPath);
+        const io = getIO();
+        
+        // Emitir evento de início da compressão
+        console.log(`Emitindo evento de início para ticket ${ticket.id}`);
+        io.emit(`video-compression-progress-${ticket.id}`, {
+          ticketId: ticket.id,
+          progress: 0,
+          status: 'starting'
+        });
+        
+        await compressVideo(media.path, compressedPath, ticket.id, io);
         finalMediaPath = compressedPath;
         shouldDeleteCompressed = true;
         console.log('Vídeo comprimido com sucesso');
@@ -122,8 +165,8 @@ const SendWhatsAppMedia = async ({
     try {
       const fileData = fs.readFileSync(finalMediaPath, { encoding: 'base64' });
       
-      // Limite do puppeteer para base64 (aproximadamente 10MB em base64)
-      const maxBase64Size = 13000000; // ~10MB
+      // Limite do puppeteer para base64 (aproximadamente 50MB em base64)
+      const maxBase64Size = 67000000; // ~50MB
       if (fileData.length > maxBase64Size) {
         throw new AppError(`Arquivo muito grande para processamento (${(fileData.length / 1000000).toFixed(1)}MB em base64). Tente comprimir o arquivo.`);
       }

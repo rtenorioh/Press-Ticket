@@ -12,5 +12,9 @@ export default {
 
       return cb(null, fileName);
     }
-  })
+  }),
+  
+  limits: {
+    fileSize: 500 * 1024 * 1024 // 500MB
+  }
 };
