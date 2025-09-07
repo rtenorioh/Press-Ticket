@@ -452,6 +452,8 @@ const MessagesList = ({ ticketId, isGroup, onClick }) => {
   useEffect(() => {
     dispatch({ type: "RESET" });
     setPageNumber(1);
+    setShouldAutoScroll(true);
+    setIsViewingOldMessages(false);
 
     currentTicketId.current = ticketId;
   }, [ticketId]);
@@ -469,6 +471,15 @@ const MessagesList = ({ ticketId, isGroup, onClick }) => {
             dispatch({ type: "LOAD_MESSAGES", payload: data.messages });
             setHasMore(data.hasMore);
             setLoading(false);
+            
+            if (pageNumber === 1) {
+              setTimeout(() => {
+                const messagesContainer = document.getElementById('messagesList');
+                if (messagesContainer) {
+                  messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                }
+              }, 100);
+            }
           }
 
         } catch (err) {
@@ -487,12 +498,22 @@ const MessagesList = ({ ticketId, isGroup, onClick }) => {
     const scrollUpTimeElapsed = Date.now() - lastScrollUpTime.current > 5000;
     
     if (force) {
-      if (lastMessageRef.current) {
+      const messagesContainer = document.getElementById('messagesList');
+      if (messagesContainer) {
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        setIsViewingOldMessages(false);
+        setShouldAutoScroll(true);
+      } else if (lastMessageRef.current) {
         lastMessageRef.current.scrollIntoView({ behavior: "auto" });
         setIsViewingOldMessages(false);
       }
-    } else if (shouldAutoScroll && !isViewingOldMessages && lastMessageRef.current) {
-      lastMessageRef.current.scrollIntoView({ behavior: "smooth" });
+    } else if (shouldAutoScroll && !isViewingOldMessages) {
+      const messagesContainer = document.getElementById('messagesList');
+      if (messagesContainer) {
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+      } else if (lastMessageRef.current) {
+        lastMessageRef.current.scrollIntoView({ behavior: "smooth" });
+      }
     }
   }, [shouldAutoScroll, isViewingOldMessages, lastMessageRef, lastScrollUpTime, setIsViewingOldMessages]);
 
@@ -1004,7 +1025,7 @@ const MessagesList = ({ ticketId, isGroup, onClick }) => {
   };
   
   const renderDailyTimestamps = (message, index) => {
-    if (index === 0) {
+    if (index === messagesList.length - 1) {
       return (
         <div
           key={`ref-${message.createdAt}`}
@@ -1110,8 +1131,17 @@ const MessagesList = ({ ticketId, isGroup, onClick }) => {
   useEffect(() => {
     if (!loading && messagesList.length > 0) {
       checkScroll();
+      
+      if (pageNumber === 1 && shouldAutoScroll) {
+        setTimeout(() => {
+          const messagesContainer = document.getElementById('messagesList');
+          if (messagesContainer) {
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+          }
+        }, 200);
+      }
     }
-  }, [loading, messagesList, checkScroll]);
+  }, [loading, messagesList, checkScroll, pageNumber, shouldAutoScroll]);
 
   const renderQuotedMessage = (message) => {
     return (
