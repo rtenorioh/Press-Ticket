@@ -1,5 +1,6 @@
 import { Op } from "sequelize";
 import Ticket from "../../models/Ticket";
+import ListSettingsServiceOne from "../SettingServices/ListSettingsServiceOne";
 
 interface CountTicketsParams {
   queueIds?: number[];
@@ -20,14 +21,12 @@ const CountTicketsService = async ({
 }: CountTicketsParams = {}): Promise<TicketCounts> => {
   try {
     const timestamp = new Date().toISOString();
-    console.log(`[BACK_COUNT_TICKETS][${timestamp}] Iniciando contagem de tickets`);
     
-    // Condições base para todos os status
+    const allTickets = await ListSettingsServiceOne({ key: "allTicket" });
+    const allTicketsEnabled = allTickets?.value === "enabled";
+    
     const baseConditions: any = {};
     
-    // Removida verificação de companyId que não existe no sistema
-    
-    // Condições específicas para cada status
     const openConditions: any = {
       ...baseConditions,
       status: "open"
@@ -43,18 +42,43 @@ const CountTicketsService = async ({
       status: "closed"
     };
     
-    // Filtrar por filas (setores) se especificado
-    if (queueIds && queueIds.length > 0) {
+    if (!showAll && userId) {
+      if (allTicketsEnabled) {
+        openConditions[Op.or] = [
+          { userId },
+          { queueId: { [Op.in]: queueIds } },
+          { queueId: null }
+        ];
+        
+        closedConditions[Op.or] = [
+          { userId },
+          { queueId: { [Op.in]: queueIds } },
+          { queueId: null }
+        ];
+        
+        pendingConditions[Op.or] = [
+          { queueId: { [Op.in]: queueIds } },
+          { queueId: null }
+        ];
+      } else {
+        openConditions[Op.or] = [
+          { userId },
+          { queueId: { [Op.in]: queueIds } }
+        ];
+        
+        closedConditions[Op.or] = [
+          { userId },
+          { queueId: { [Op.in]: queueIds } }
+        ];
+        
+        if (queueIds && queueIds.length > 0) {
+          pendingConditions.queueId = { [Op.in]: queueIds };
+        }
+      }
+    } else if (queueIds && queueIds.length > 0) {
       openConditions.queueId = { [Op.in]: queueIds };
       pendingConditions.queueId = { [Op.in]: queueIds };
       closedConditions.queueId = { [Op.in]: queueIds };
-    }
-    
-    // Filtrar por usuário se não for admin e showAll for false
-    if (!showAll && userId) {
-      openConditions.userId = userId;
-      closedConditions.userId = userId;
-      // Não filtramos tickets pendentes por usuário, pois eles não têm usuário atribuído
     }
     
     // Contar tickets para cada status

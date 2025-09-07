@@ -44,14 +44,12 @@ const ListTicketsService = async ({
   try {
   let whereCondition: any = {};
   
-  // Se userId for fornecido, filtramos por userId ou tickets pendentes
   if (userId) {
     whereCondition = {
       [Op.or]: [{ userId }, { status: "pending" }],
       queueId: { [Op.or]: [queueIds, null] }
     };
   } else {
-    // Caso contrário, não filtramos por userId (caso da API)
     whereCondition = {
       queueId: { [Op.or]: [queueIds] }
     };
@@ -160,11 +158,25 @@ const ListTicketsService = async ({
     };
   }
 
-  if (!isAdmin && !allTicketsEnabled && userId) {
-    whereCondition = {
-      ...whereCondition,
-      userId
-    };
+  if (!isAdmin && userId) {
+    if (allTicketsEnabled) {
+      whereCondition = {
+        ...whereCondition,
+        [Op.or]: [
+          { userId },
+          { queueId: { [Op.in]: queueIds } },
+          { queueId: null, status: "pending" }
+        ]
+      };
+    } else {
+      whereCondition = {
+        ...whereCondition,
+        [Op.or]: [
+          { userId },
+          { queueId: { [Op.in]: queueIds } }
+        ]
+      };
+    }
   }
 
   if (withUnreadMessages === "true") {
