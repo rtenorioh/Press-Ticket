@@ -9,6 +9,7 @@ import api from "../../services/api";
 import { Can } from "../Can";
 import TicketOptionsMenu from "../TicketOptionsMenu";
 import ConfirmationModal from "../ConfirmationModal";
+import AcceptTicketWithouSelectQueue from "../AcceptTicketWithoutQueueModal";
 
 const ActionButtonsContainer = styled(Box)(({ theme }) => ({
 	marginRight: theme.spacing(1),
@@ -85,6 +86,7 @@ const TicketActionButtons = ({ ticket }) => {
 	const [anchorEl, setAnchorEl] = useState(null);
 	const [loading, setLoading] = useState(false);
 	const [confirmationOpen, setConfirmationOpen] = useState(false);
+	const [acceptTicketWithouSelectQueueOpen, setAcceptTicketWithouSelectQueueOpen] = useState(false);
 	const ticketOptionsMenuOpen = Boolean(anchorEl);
 	const { user } = useContext(AuthContext);
 
@@ -121,6 +123,25 @@ const TicketActionButtons = ({ ticket }) => {
 
 	const handleConfirmClose = () => {
 		handleUpdateTicketStatus(null, "closed", user?.id);
+	};
+
+	const handleOpenAcceptTicketWithouSelectQueue = () => {
+		setAcceptTicketWithouSelectQueueOpen(true);
+	};
+
+	const handleAcceptTicket = async (e) => {
+		// Verificar se o ticket tem setor atribuído
+		if (ticket.queue === null || ticket.queue === undefined) {
+			// Se não tem setor, abrir modal para selecionar
+			handleOpenAcceptTicketWithouSelectQueue();
+			localStorage.setItem("pressticket:changeTab", "open");
+			navigate(`/tickets/${ticket.id}`);
+		} else {
+			// Se já tem setor, aceitar diretamente
+			await handleUpdateTicketStatus(e, "open", user?.id);
+			localStorage.setItem("pressticket:changeTab", "open");
+			navigate(`/tickets/${ticket.id}`);
+		}
 	};
 
 	return (
@@ -183,13 +204,18 @@ const TicketActionButtons = ({ ticket }) => {
 								title={t("messagesList.header.buttons.accept")}
 								loading={loading}
 								color="primary"
-								onClick={e => handleUpdateTicketStatus(e, "open", user?.id)}
+								onClick={handleAcceptTicket}
 							>
 								<CheckCircle />
 							</LoadingIconButton>
 						)}
 					</>
 				)}
+			/>
+			<AcceptTicketWithouSelectQueue
+				modalOpen={acceptTicketWithouSelectQueueOpen}
+				onClose={(e) => setAcceptTicketWithouSelectQueueOpen(false)}
+				ticketId={ticket.id}
 			/>
 		</ActionButtonsContainer>
 	);
