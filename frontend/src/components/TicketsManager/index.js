@@ -194,6 +194,24 @@ const TicketsManager = () => {
   const [selectedQueueIds, setSelectedQueueIds] = useState(userQueueIds || []);
   const [filterMenuAnchorEl, setFilterMenuAnchorEl] = useState(null);
 
+  // Função para buscar contadores do backend
+  const fetchTicketCounts = async () => {
+    try {
+      const { data } = await api.get("/tickets/count", {
+        params: {
+          queueIds: selectedQueueIds.length > 0 ? selectedQueueIds.join(",") : undefined,
+          showAll: showAllTickets
+        }
+      });
+      
+      setOpenCount(data.open || 0);
+      setPendingCount(data.pending || 0);
+      setClosedCount(data.closed || 0);
+    } catch (err) {
+      console.error("Erro ao buscar contadores:", err);
+    }
+  };
+
   useEffect(() => {
     if (user?.profile.toUpperCase() === "ADMIN") {
       setShowAllTickets(true);
@@ -244,6 +262,56 @@ const TicketsManager = () => {
     };
     fetchSettings();
   }, []);
+
+  // Buscar contadores iniciais e configurar WebSocket para atualizações em tempo real
+  useEffect(() => {
+    // Buscar contadores iniciais
+    fetchTicketCounts();
+
+    // Configurar WebSocket para atualizações em tempo real
+    const socket = openSocket();
+    if (!socket) {
+      console.error("Não foi possível conectar ao socket para contadores");
+      return;
+    }
+
+    const handleTicketUpdate = (data) => {
+      console.log("[CONTADOR_TEMPO_REAL] Evento de ticket recebido:", data);
+      
+      // Atualizar contadores quando houver mudanças nos tickets
+      if (data.action === "update" || data.action === "create" || data.action === "delete") {
+        fetchTicketCounts();
+      }
+    };
+
+    const handleAppMessage = (data) => {
+      console.log("[CONTADOR_TEMPO_REAL] Evento de mensagem recebido:", data);
+      
+      // Atualizar contadores quando houver novas mensagens
+      if (data.action === "create") {
+        fetchTicketCounts();
+      }
+    };
+
+    // Registrar listeners
+    socket.on("ticket", handleTicketUpdate);
+    socket.on("appMessage", handleAppMessage);
+
+    // Se inscrever para receber eventos de todos os status
+    socket.emit("joinTickets", "open");
+    socket.emit("joinTickets", "pending");
+    socket.emit("joinTickets", "closed");
+
+    return () => {
+      socket.off("ticket", handleTicketUpdate);
+      socket.off("appMessage", handleAppMessage);
+    };
+  }, [selectedQueueIds, showAllTickets]);
+
+  // Atualizar contadores quando filtros mudarem
+  useEffect(() => {
+    fetchTicketCounts();
+  }, [selectedQueueIds, showAllTickets]);
   
 
 

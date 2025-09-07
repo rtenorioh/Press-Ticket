@@ -397,7 +397,11 @@ export const count = async (req: AuthenticatedRequest, res: Response): Promise<R
     // Converter queueIds de string para array se necessário
     let queueIdsArray: number[] = [];
     if (queueIds) {
-      queueIdsArray = JSON.parse(queueIds as string);
+      if (typeof queueIds === 'string') {
+        queueIdsArray = queueIds.split(',').map(id => parseInt(id.trim())).filter(id => !isNaN(id));
+      } else if (Array.isArray(queueIds)) {
+        queueIdsArray = queueIds.map(id => parseInt(id as string)).filter(id => !isNaN(id));
+      }
     }
     
     // Determinar se deve mostrar todos os tickets
