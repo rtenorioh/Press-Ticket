@@ -414,9 +414,11 @@ const TicketsList = (props) => {
 						} catch (error) {
 							console.error(`[FRONT_TICKET_ERRO][${timestamp}] Erro ao deletar ticket:`, error);
 						}
+						return; // Importante: sair da função após remover o ticket
 					}
+					
 					// Se o ticket deve ser adicionado/atualizado na lista atual
-					else if (shouldUpdateTicket(data.ticket)) {
+					if (shouldUpdateTicket(data.ticket)) {
 						console.log(`[FRONT_TICKET_UPDATE_SAME_STATUS][${timestamp}] Atualizando ticket ${data.ticket.id} na lista atual`);
 						try {
 							dispatch({
@@ -499,10 +501,6 @@ const TicketsList = (props) => {
 					// Verificar se o ticket deve ser exibido na lista atual
 					const shouldUpdate = shouldUpdateTicket(data.ticket);
 					console.log(`[FRONT_APP_MSG_DECISION][${timestamp}] Ticket ${data.ticket.id} deve ser atualizado? ${shouldUpdate ? 'Sim' : 'Não'}`);
-					
-					// Verificar se o ticket já existe na lista atual
-					const ticketExists = ticketsList.some(t => t.id === data.ticket.id);
-					console.log(`[FRONT_APP_MSG_CHECK][${timestamp}] Ticket ${data.ticket.id} já existe na lista? ${ticketExists ? 'Sim' : 'Não'}`);
 				}
 				
 				if (data.action === "create") {
@@ -511,36 +509,16 @@ const TicketsList = (props) => {
 					if (data.ticket && shouldUpdateTicket(data.ticket)) {
 						console.log(`[FRONT_APP_MSG_SHOULD_UPDATE][${timestamp}] Ticket ${data.ticket.id} deve ser atualizado na lista`);
 						
-						// Verificar se o ticket já existe na lista
-						const ticketExists = ticketsList.some(t => t.id === data.ticket.id);
-						
-						// Se o ticket tem o mesmo status da aba atual ou é pending (que aparece em todas as abas)
-						if (data.ticket.status === status || (data.ticket.status === "pending" && status !== "closed")) {
-							if (ticketExists) {
-								// Atualizar ticket existente com nova mensagem
-								try {
-									dispatch({
-										type: "UPDATE_TICKET_UNREAD_MESSAGES",
-										payload: data.ticket,
-									});
-									console.log(`[FRONT_APP_MSG_DISPATCH][${timestamp}] Dispatch UPDATE_TICKET_UNREAD_MESSAGES realizado com sucesso`);
-								} catch (error) {
-									console.error(`[FRONT_APP_MSG_ERRO][${timestamp}] Erro ao atualizar mensagens não lidas:`, error);
-								}
-							} else {
-								// Adicionar novo ticket à lista
-								try {
-									dispatch({
-										type: "UPDATE_TICKET",
-										payload: data.ticket,
-									});
-									console.log(`[FRONT_APP_MSG_DISPATCH][${timestamp}] Dispatch UPDATE_TICKET realizado com sucesso`);
-								} catch (error) {
-									console.error(`[FRONT_APP_MSG_ERRO][${timestamp}] Erro ao adicionar ticket:`, error);
-								}
-							}
-						} else {
-							console.log(`[FRONT_APP_MSG_STATUS_MISMATCH][${timestamp}] Status do ticket (${data.ticket.status}) não corresponde à aba atual (${status}). Não adicionando à lista.`);
+						// Sempre atualizar o ticket, independente se já existe ou não
+						// Isso garante sincronização em tempo real como nas notificações
+						try {
+							dispatch({
+								type: "UPDATE_TICKET_UNREAD_MESSAGES",
+								payload: data.ticket,
+							});
+							console.log(`[FRONT_APP_MSG_DISPATCH][${timestamp}] Dispatch UPDATE_TICKET_UNREAD_MESSAGES realizado com sucesso`);
+						} catch (error) {
+							console.error(`[FRONT_APP_MSG_ERRO][${timestamp}] Erro ao atualizar mensagens não lidas:`, error);
 						}
 					} else {
 						console.log(`[FRONT_APP_MSG_NO_UPDATE][${timestamp}] Ticket ${data.ticket?.id} não deve ser atualizado nesta lista`);

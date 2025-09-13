@@ -426,33 +426,10 @@ const TicketListItem = ({ ticket, filteredTags }) => {
 	const handleViewTicket = async (id) => {
 		setLoading(true);
 		try {
-			await api.put(`/tickets/${id}`, {
-				status: "pending",
-			});
+			// Não fazer PUT - apenas navegar para espiar o ticket
+			// Manter status e usuário inalterados
 			
-			setTimeout(() => {
-				const socket = openSocket();
-				if (socket) {
-					socket.emit("ticket", {
-						action: "update",
-						ticketId: id,
-						ticket: {
-							...ticket,
-							status: "pending",
-							userId: null,
-							queueId: ticket?.queueId
-						}
-					});
-
-					socket.emit("joinTickets", "pending");
-					socket.emit("joinTickets", "open");
-					
-					socket.emit("getTickets", { status: "pending", userId: user?.id, showAll: false });
-					socket.emit("getTickets", { status: "open", userId: user?.id, showAll: false });
-				}
-			}, 500);
-			
-
+			// Manter tab pending ativa
 			localStorage.setItem("pressticket:changeTab", "pending");
 			
 			navigate(`/tickets/${id}`);
@@ -548,7 +525,9 @@ const TicketListItem = ({ ticket, filteredTags }) => {
 				}
 			}, 500);
 			
-			// localStorage.setItem("pressticket:changeTab", ticket.status);				
+			// Manter a tab atual ativa após fechar ticket
+			const currentTab = localStorage.getItem("pressticket:changeTab") || "open";
+			localStorage.setItem("pressticket:changeTab", currentTab);
 			
 			navigate("/tickets");
 		} catch (err) {
