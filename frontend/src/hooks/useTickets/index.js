@@ -14,7 +14,8 @@ const useTickets = ({
     userId,
     queueIds,
     withUnreadMessages,
-    all
+    all,
+    isGroup
 }) => {
     const { t } = useTranslation();
     const [loading, setLoading] = useState(true);
@@ -50,7 +51,8 @@ const useTickets = ({
                             userId,
                             queueIds,
                             withUnreadMessages,
-                            all
+                            all,
+                            isGroup
                         },
                     });
                     setTickets(data.tickets);
@@ -168,6 +170,7 @@ const useTickets = ({
         queueIds,
         withUnreadMessages,
         all,
+        isGroup,
         t
     ]);
 

@@ -20,6 +20,7 @@ interface Request {
   withUnreadMessages?: string;
   queueIds: number[];
   all?: string;
+  isGroup?: string;
 }
 
 interface Response {
@@ -39,7 +40,8 @@ const ListTicketsService = async ({
   userId,
   withUnreadMessages,
   queueIds = [],
-  all
+  all,
+  isGroup
 }: Request): Promise<Response> => {
   try {
   let whereCondition: any = {};
@@ -69,7 +71,8 @@ const ListTicketsService = async ({
         "messengerId",
         "instagramId",
         "telegramId",
-        "webchatId"
+        "webchatId",
+        "isGroup"
       ]
     },
     {
@@ -184,6 +187,26 @@ const ListTicketsService = async ({
       ...whereCondition,
       unreadMessages: { [Op.gt]: 0 }
     };
+  }
+
+  // Filtrar por tipo de conversa (grupo ou individual)
+  if (isGroup !== undefined) {
+    if (isGroup === "true") {
+      // Mostrar apenas tickets de grupos
+      whereCondition = {
+        ...whereCondition,
+        "$contact.isGroup$": true
+      };
+    } else if (isGroup === "false") {
+      // Mostrar apenas tickets individuais (não grupos)
+      whereCondition = {
+        ...whereCondition,
+        [Op.or]: [
+          { "$contact.isGroup$": false },
+          { "$contact.isGroup$": null }
+        ]
+      };
+    }
   }
 
   const defaultLimit = 20;

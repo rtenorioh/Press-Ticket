@@ -22,7 +22,8 @@ import {
   FilterList,
   Add,
   Close,
-  Refresh
+  Refresh,
+  Group
 } from "@mui/icons-material";
 import React, { useContext, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -189,6 +190,7 @@ const TicketsManager = () => {
   const [openCount, setOpenCount] = useState(0);
   const [pendingCount, setPendingCount] = useState(0);
   const [closedCount, setClosedCount] = useState(0);
+  const [openGroupsCount, setOpenGroupsCount] = useState(0);
   const userQueueIds = user?.queues?.map((q) => q.id);
   const [settings, setSettings] = useState([]);
   const [selectedQueueIds, setSelectedQueueIds] = useState(userQueueIds || []);
@@ -207,6 +209,7 @@ const TicketsManager = () => {
       setOpenCount(data.open || 0);
       setPendingCount(data.pending || 0);
       setClosedCount(data.closed || 0);
+      setOpenGroupsCount(data.openGroups || 0);
     } catch (err) {
       console.error("Erro ao buscar contadores:", err);
     }
@@ -452,6 +455,22 @@ const TicketsManager = () => {
               </StyledBadge>
             }
             sx={{ minWidth: 100, width: "auto" }}
+          />
+          <Tab
+            value={"groups"}
+            icon={
+              <StyledBadge
+                badgeContent={openGroupsCount}
+                overlap="circular"
+                max={999}
+                color="secondary"
+              >
+                <Tooltip title={t("tickets.tabs.groups.title")} placement="top" arrow>
+                  <Group />
+                </Tooltip>
+              </StyledBadge>
+            }
+            sx={{ minWidth: 100, width: "auto" }}
           /> 
           {canTabsSettings("tabsPending") && (         
             <Tab
@@ -620,6 +639,7 @@ const TicketsManager = () => {
             selectedQueueIds={selectedQueueIds}
             updateCount={(val) => setOpenCount(val)}
             style={applyPanelStyle("open")}
+            isGroup={false}
           />
           <TicketsList
             status="pending"
@@ -637,6 +657,18 @@ const TicketsManager = () => {
           />
         </TicketWrapperStyled>
       </TabPanelStyled>
+      <TabPanelStyled value={tab} name="groups">
+        <TicketWrapperStyled>
+          <TicketsList
+            status="open"
+            showAll={showAllTickets}
+            selectedQueueIds={selectedQueueIds}
+            updateCount={(val) => setOpenGroupsCount(val)}
+            style={applyPanelStyle("groups")}
+            isGroup={true}
+          />
+        </TicketWrapperStyled>
+      </TabPanelStyled>
       <TabPanelStyled value={tab} name="pending">
         <TicketsList
           status="open"
@@ -644,6 +676,7 @@ const TicketsManager = () => {
           selectedQueueIds={selectedQueueIds}
           updateCount={(val) => setOpenCount(val)}
           style={applyPanelStyle("open")}
+          isGroup={false}
         />
         <TicketsList
           status="pending"

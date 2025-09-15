@@ -1209,6 +1209,7 @@ const messages = {
         },
         tabs: {
           open: { title: "Em Atendimento" },
+          groups: { title: "Grupos" },
           pending: { title: "Aguardando" },
           closed: { title: "Finalizados" },
           search: { title: "Busca" },

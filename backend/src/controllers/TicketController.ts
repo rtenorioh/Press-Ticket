@@ -45,6 +45,7 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
     const queueIdsStringified = req.query.queueIds as string;
     const withUnreadMessages = req.query.withUnreadMessages as string;
     const all = req.query.all as string;
+    const isGroup = req.query.isGroup as string;
 
     let userId = "0";
     let isAdmin = false;
@@ -101,7 +102,8 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
         userId: apiUserId,
         queueIds,
         withUnreadMessages,
-        all
+        all,
+        isGroup
       });
 
       return res.status(200).json({ tickets, count, hasMore });

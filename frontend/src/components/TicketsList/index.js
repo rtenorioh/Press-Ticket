@@ -159,6 +159,7 @@ const TicketsList = (props) => {
 		updateCount,
 		style,
 		tags,
+		isGroup,
 	} = props;
 	const { t } = useTranslation();
 	const [pageNumber, setPageNumber] = useState(1);
@@ -184,6 +185,7 @@ const TicketsList = (props) => {
 		showAll,
 		tags: JSON.stringify(tags),
 		queueIds: JSON.stringify(selectedQueueIds),
+		isGroup,
 	});
 
 	useEffect(() => {
@@ -200,7 +202,18 @@ const TicketsList = (props) => {
 
 	useEffect(() => {
 		const queueIds = queues?.map((q) => q.id);
-		const filteredTickets = tickets.filter((t) => queueIds.indexOf(t.queueId) > -1);
+		let filteredTickets = tickets.filter((t) => queueIds.indexOf(t.queueId) > -1);
+
+		// Filtrar por tipo de conversa (grupo ou individual)
+		if (isGroup !== undefined) {
+			if (isGroup === true) {
+				// Mostrar apenas tickets de grupos
+				filteredTickets = filteredTickets.filter((t) => t.contact?.isGroup === true);
+			} else {
+				// Mostrar apenas tickets individuais (não grupos)
+				filteredTickets = filteredTickets.filter((t) => !t.contact?.isGroup);
+			}
+		}
 
 		const getSettingValue = key => {
 			const { value } = settings.find(s => s.key === key);
@@ -214,7 +227,16 @@ const TicketsList = (props) => {
 				dispatch({ type: "LOAD_TICKETS", payload: filteredTickets });
 
 			} else {
-				dispatch({ type: "LOAD_TICKETS", payload: tickets });
+				// Aplicar filtro de grupo também nos tickets gerais
+				let allTickets = tickets;
+				if (isGroup !== undefined) {
+					if (isGroup === true) {
+						allTickets = allTickets.filter((t) => t.contact?.isGroup === true);
+					} else {
+						allTickets = allTickets.filter((t) => !t.contact?.isGroup);
+					}
+				}
+				dispatch({ type: "LOAD_TICKETS", payload: allTickets });
 			}
 		} else {
 
@@ -222,11 +244,20 @@ const TicketsList = (props) => {
 				dispatch({ type: "LOAD_TICKETS", payload: filteredTickets });
 
 			} else {
-				dispatch({ type: "LOAD_TICKETS", payload: tickets });
+				// Aplicar filtro de grupo também nos tickets gerais
+				let allTickets = tickets;
+				if (isGroup !== undefined) {
+					if (isGroup === true) {
+						allTickets = allTickets.filter((t) => t.contact?.isGroup === true);
+					} else {
+						allTickets = allTickets.filter((t) => !t.contact?.isGroup);
+					}
+				}
+				dispatch({ type: "LOAD_TICKETS", payload: allTickets });
 			}
 		}
 		// eslint-disable-next-line
-	}, [tickets, status, searchParam, queues, profile]);
+	}, [tickets, status, searchParam, queues, profile, isGroup]);
 
 	useEffect(() => {
 		const socket = openSocket();

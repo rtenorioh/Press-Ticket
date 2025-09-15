@@ -12,6 +12,7 @@ interface TicketCounts {
   open: number;
   pending: number;
   closed: number;
+  openGroups: number;
 }
 
 const CountTicketsService = async ({
@@ -31,6 +32,15 @@ const CountTicketsService = async ({
       ...baseConditions,
       status: "open"
     };
+    
+    const openGroupsConditions: any = {
+      ...baseConditions,
+      status: "open",
+      "$contact.isGroup$": true
+    };
+    
+    // Modificar openConditions para excluir grupos
+    openConditions["$contact.isGroup$"] = { [Op.or]: [false, null] };
     
     const pendingConditions: any = {
       ...baseConditions,
@@ -81,19 +91,53 @@ const CountTicketsService = async ({
       closedConditions.queueId = { [Op.in]: queueIds };
     }
     
+    // Aplicar as mesmas condições de usuário/fila para grupos
+    if (!showAll && userId) {
+      if (allTicketsEnabled) {
+        openGroupsConditions[Op.or] = [
+          { userId },
+          { queueId: { [Op.in]: queueIds } },
+          { queueId: null }
+        ];
+      } else {
+        openGroupsConditions[Op.or] = [
+          { userId },
+          { queueId: { [Op.in]: queueIds } }
+        ];
+      }
+    } else if (queueIds && queueIds.length > 0) {
+      openGroupsConditions.queueId = { [Op.in]: queueIds };
+    }
+    
     // Contar tickets para cada status
-    const [openCount, pendingCount, closedCount] = await Promise.all([
-      Ticket.count({ where: openConditions }),
+    const [openCount, pendingCount, closedCount, openGroupsCount] = await Promise.all([
+      Ticket.count({ 
+        where: openConditions,
+        include: [{
+          model: require("../../models/Contact").default,
+          as: "contact",
+          attributes: []
+        }]
+      }),
       Ticket.count({ where: pendingConditions }),
-      Ticket.count({ where: closedConditions })
+      Ticket.count({ where: closedConditions }),
+      Ticket.count({ 
+        where: openGroupsConditions,
+        include: [{
+          model: require("../../models/Contact").default,
+          as: "contact",
+          attributes: []
+        }]
+      })
     ]);
     
-    console.log(`[BACK_COUNT_RESULT][${timestamp}] Contagem: open=${openCount}, pending=${pendingCount}, closed=${closedCount}`);
+    console.log(`[BACK_COUNT_RESULT][${timestamp}] Contagem: open=${openCount}, pending=${pendingCount}, closed=${closedCount}, openGroups=${openGroupsCount}`);
     
     return {
       open: openCount,
       pending: pendingCount,
-      closed: closedCount
+      closed: closedCount,
+      openGroups: openGroupsCount
     };
   } catch (error) {
     console.error(`[BACK_COUNT_ERROR] Erro ao contar tickets:`, error);
