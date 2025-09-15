@@ -24,6 +24,7 @@ import { Close, Delete, Description, PictureAsPdf, InsertDriveFile, Image, Send,
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import openSocket from '../../services/socket-io';
+import api from "../../services/api";
 
 const PreviewContainer = styled(Box)(({ theme }) => ({
   display: 'flex',
@@ -111,7 +112,186 @@ const UploadModal = ({ open, onClose, files, onSend, loading }) => {
   const [compressionProgress, setCompressionProgress] = useState(0);
   const [compressionStatus, setCompressionStatus] = useState('');
   const [isCompressing, setIsCompressing] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState({});
+  const [uploadStatus, setUploadStatus] = useState({});
+  const [isUploading, setIsUploading] = useState(false);
   const captionInputRef = useRef(null);
+
+  // Limites de tamanho por tipo de arquivo (em MB) - Conforme especificações WhatsApp
+  const FILE_LIMITS = {
+    image: 100, // Imagens como mídia: 100MB (com opção HD)
+    video: 100, // Vídeos como mídia: 100MB (com opção HD)
+    audio: 100, // Áudios como mídia: 100MB
+    document: 2048, // Documentos: 2GB (2048MB)
+    default: 100 // Padrão: 100MB
+  };
+
+  const getFileType = (file) => {
+    const mimeType = file.type.split('/')[0];
+    if (mimeType === 'image') return 'image';
+    if (mimeType === 'video') return 'video';
+    if (mimeType === 'audio') return 'audio';
+    return 'document';
+  };
+
+  const getFileSizeLimit = (file) => {
+    const fileType = getFileType(file);
+    return FILE_LIMITS[fileType] || FILE_LIMITS.default;
+  };
+
+  const formatFileSize = (bytes) => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  };
+
+  const validateFile = (file) => {
+    const fileSizeMB = file.size / (1024 * 1024);
+    const limit = getFileSizeLimit(file);
+    const fileType = getFileType(file);
+    
+    return {
+      isValid: fileSizeMB <= limit,
+      size: fileSizeMB,
+      limit: limit,
+      type: fileType,
+      message: fileSizeMB > limit 
+        ? `Arquivo muito grande. Máximo ${limit}MB para ${fileType === 'document' ? 'documentos' : fileType === 'video' ? 'vídeos' : fileType === 'audio' ? 'áudios' : 'imagens'}`
+        : 'OK'
+    };
+  };
+
+  const shouldCompressVideo = (file) => {
+    const fileSizeMB = file.size / (1024 * 1024);
+    // Comprimir vídeos apenas se excederem muito o limite (ex: > 200MB)
+    return getFileType(file) === 'video' && fileSizeMB > 200;
+  };
+
+  const sendAsDocument = (file) => {
+    const fileSizeMB = file.size / (1024 * 1024);
+    const fileType = getFileType(file);
+    
+    // Arquivos que não são mídia sempre como documento
+    if (fileType === 'document') {
+      return true;
+    }
+    
+    // Para mídias, dar opção de enviar como documento se for muito grande
+    // mas não forçar, pois WhatsApp suporta até 100MB como mídia
+    return false;
+  };
+
+  const handleSend = async () => {
+    if (localFiles.length === 0) return;
+    
+    setIsUploading(true);
+    const results = [];
+    
+    // Resetar status de upload
+    const initialProgress = {};
+    const initialStatus = {};
+    localFiles.forEach((file, index) => {
+      initialProgress[index] = 0;
+      initialStatus[index] = 'pending';
+    });
+    setUploadProgress(initialProgress);
+    setUploadStatus(initialStatus);
+
+    // Enviar cada arquivo individualmente
+    for (let i = 0; i < localFiles.length; i++) {
+      const file = localFiles[i];
+      const validation = validateFile(file);
+      
+      try {
+        // Atualizar status para "enviando"
+        setUploadStatus(prev => ({ ...prev, [i]: 'uploading' }));
+        setUploadProgress(prev => ({ ...prev, [i]: 10 }));
+
+        if (!validation.isValid) {
+          throw new Error(validation.message);
+        }
+
+        // Preparar FormData para o arquivo individual
+        const formData = new FormData();
+        formData.append("medias", file);
+        
+        // Usar caption apenas para o primeiro arquivo ou se for o único
+        const fileCaption = (i === 0 || localFiles.length === 1) ? caption.trim() : '';
+        if (fileCaption) {
+          formData.append("body", fileCaption);
+        } else {
+          formData.append("body", file.name);
+        }
+        formData.append("fromMe", true);
+
+        // Adicionar metadata sobre o tipo de envio
+        if (sendAsDocument(file)) {
+          formData.append("sendAsDocument", "true");
+        }
+        if (shouldCompressVideo(file)) {
+          formData.append("compressVideo", "true");
+        }
+
+        setUploadProgress(prev => ({ ...prev, [i]: 50 }));
+
+        // Enviar arquivo
+        const response = await api.post(`/messages/${ticketId}`, formData, {
+          onUploadProgress: (progressEvent) => {
+            const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+            setUploadProgress(prev => ({ ...prev, [i]: Math.max(50, progress) }));
+          }
+        });
+
+        // Sucesso
+        setUploadProgress(prev => ({ ...prev, [i]: 100 }));
+        setUploadStatus(prev => ({ ...prev, [i]: 'success' }));
+        results.push({ file: file.name, status: 'success', response });
+
+      } catch (error) {
+        console.error(`Erro ao enviar arquivo ${file.name}:`, error);
+        setUploadStatus(prev => ({ ...prev, [i]: 'error' }));
+        setUploadProgress(prev => ({ ...prev, [i]: 0 }));
+        results.push({ 
+          file: file.name, 
+          status: 'error', 
+          error: error.response?.data?.message || error.message || 'Erro desconhecido'
+        });
+      }
+
+      // Pequena pausa entre envios para não sobrecarregar
+      if (i < localFiles.length - 1) {
+        await new Promise(resolve => setTimeout(resolve, 500));
+      }
+    }
+
+    // Mostrar resultados
+    const successCount = results.filter(r => r.status === 'success').length;
+    const errorCount = results.filter(r => r.status === 'error').length;
+    
+    if (successCount > 0) {
+      console.log(`${successCount} arquivo(s) enviado(s) com sucesso`);
+    }
+    if (errorCount > 0) {
+      console.error(`${errorCount} arquivo(s) falharam no envio`);
+      results.filter(r => r.status === 'error').forEach(r => {
+        console.error(`${r.file}: ${r.error}`);
+      });
+    }
+
+    setIsUploading(false);
+    
+    // Fechar modal após todos os envios (sucesso ou erro)
+    setTimeout(() => {
+      setCaption('');
+      setSelectedFileIndex(0);
+      setLocalFiles([]);
+      setUploadProgress({});
+      setUploadStatus({});
+      onClose();
+    }, 2000);
+  };
 
   React.useEffect(() => {
     if (files && files.length > 0) {
@@ -188,13 +368,6 @@ const UploadModal = ({ open, onClose, files, onSend, loading }) => {
     if (selectedFileIndex >= newFiles.length) {
       setSelectedFileIndex(newFiles.length - 1);
     }
-  };
-
-  const handleSend = () => {
-    onSend(localFiles, caption.trim());
-    setCaption('');
-    setSelectedFileIndex(0);
-    setLocalFiles([]);
   };
 
   const fileUrls = React.useMemo(() => {
@@ -378,6 +551,77 @@ const UploadModal = ({ open, onClose, files, onSend, loading }) => {
               </Box>
             )}
 
+            {/* Progresso de upload individual */}
+            {isUploading && (
+              <Box sx={{ mb: 2 }}>
+                <Typography variant="body2" color="primary" sx={{ mb: 1 }}>
+                  Enviando arquivos...
+                </Typography>
+                {localFiles.map((file, index) => (
+                  <Box key={index} sx={{ mb: 1 }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
+                      <Typography variant="caption" noWrap sx={{ maxWidth: '70%' }}>
+                        {file.name}
+                      </Typography>
+                      <Typography variant="caption" color={
+                        uploadStatus[index] === 'success' ? 'success.main' :
+                        uploadStatus[index] === 'error' ? 'error.main' :
+                        uploadStatus[index] === 'uploading' ? 'primary.main' : 'text.secondary'
+                      }>
+                        {uploadStatus[index] === 'success' && '✓ Enviado'}
+                        {uploadStatus[index] === 'error' && '✗ Erro'}
+                        {uploadStatus[index] === 'uploading' && `${uploadProgress[index] || 0}%`}
+                        {uploadStatus[index] === 'pending' && 'Aguardando...'}
+                      </Typography>
+                    </Box>
+                    <LinearProgress 
+                      variant="determinate" 
+                      value={uploadProgress[index] || 0}
+                      sx={{
+                        height: 4,
+                        borderRadius: 2,
+                        backgroundColor: (theme) => theme.palette.grey[200],
+                        '& .MuiLinearProgress-bar': {
+                          borderRadius: 2,
+                          backgroundColor: (theme) => 
+                            uploadStatus[index] === 'success' ? theme.palette.success.main :
+                            uploadStatus[index] === 'error' ? theme.palette.error.main :
+                            theme.palette.primary.main,
+                        }
+                      }}
+                    />
+                  </Box>
+                ))}
+              </Box>
+            )}
+
+            {/* Validação de arquivos */}
+            {localFiles.length > 0 && !isUploading && (
+              <Box sx={{ mb: 2 }}>
+                {localFiles.map((file, index) => {
+                  const validation = validateFile(file);
+                  if (!validation.isValid) {
+                    return (
+                      <Box key={index} sx={{ 
+                        p: 1, 
+                        mb: 1, 
+                        backgroundColor: 'error.light', 
+                        borderRadius: 1,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 1
+                      }}>
+                        <Typography variant="caption" color="error.contrastText">
+                          ⚠️ {file.name}: {validation.message}
+                        </Typography>
+                      </Box>
+                    );
+                  }
+                  return null;
+                })}
+              </Box>
+            )}
+
             <TextField
               fullWidth
               label={t('uploadModal.caption')}
@@ -388,7 +632,7 @@ const UploadModal = ({ open, onClose, files, onSend, loading }) => {
               inputRef={captionInputRef}
               multiline
               rows={2}
-              disabled={isCompressing}
+              disabled={isCompressing || isUploading}
               onKeyDown={(e) => {
                 if (e.ctrlKey && e.key === 'Enter') {
                   e.preventDefault();
@@ -434,7 +678,7 @@ const UploadModal = ({ open, onClose, files, onSend, loading }) => {
           onClick={onClose}
           variant="outlined"
           color="inherit"
-          disabled={loading || isCompressing}
+          disabled={loading || isCompressing || isUploading}
           sx={{ 
             borderRadius: 20,
             px: 3,
@@ -448,8 +692,8 @@ const UploadModal = ({ open, onClose, files, onSend, loading }) => {
           onClick={handleSend}
           variant="contained"
           color="primary"
-          disabled={loading || isCompressing}
-          startIcon={loading || isCompressing ? <CircularProgress size={20} /> : <Send />}
+          disabled={loading || isCompressing || isUploading}
+          startIcon={loading || isCompressing || isUploading ? <CircularProgress size={20} /> : <Send />}
           sx={{ 
             borderRadius: 20,
             px: 3,
@@ -457,7 +701,7 @@ const UploadModal = ({ open, onClose, files, onSend, loading }) => {
             fontWeight: 500
           }}
         >
-          {isCompressing ? 'Comprimindo...' : t('uploadModal.send')}
+          {isCompressing || isUploading ? 'Enviando...' : t('uploadModal.send')}
         </Button>
       </DialogActions>
     </Dialog>

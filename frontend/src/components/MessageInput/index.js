@@ -44,6 +44,7 @@ import { AuthContext } from "../../context/Auth/AuthContext";
 import { EditMessageContext } from "../../context/EditingMessage/EditingMessageContext";
 import { ReplyMessageContext } from "../../context/ReplyingMessage/ReplyingMessageContext";
 import UploadModal from "../UploadModal";
+import AttachmentMenu from "../AttachmentMenu";
 import toastError from "../../errors/toastError";
 import { useLocalStorage } from "../../hooks/useLocalStorage";
 import api from "../../services/api";
@@ -281,6 +282,7 @@ const MessageInput = ({ ticketStatus }) => {
   const inputRef = useRef();
   const [onDragEnter, setOnDragEnter] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
+  const [attachmentMenuAnchor, setAttachmentMenuAnchor] = useState(null);
   const { setReplyingMessage, replyingMessage } = useContext(ReplyMessageContext);
   const { setEditingMessage, editingMessage } = useContext(EditMessageContext);
   const { user = {} } = useContext(AuthContext);
@@ -857,6 +859,75 @@ const MessageInput = ({ ticketStatus }) => {
     );
   };
 
+  const handleAttachmentMenuClick = (event) => {
+    setAttachmentMenuAnchor(event.currentTarget);
+  };
+
+  const handleAttachmentMenuClose = () => {
+    setAttachmentMenuAnchor(null);
+  };
+
+  const handleDocumentSelect = (files) => {
+    setMedias(files);
+    setShowUploadModal(true);
+  };
+
+  const handlePhotoVideoSelect = (files) => {
+    setMedias(files);
+    setShowUploadModal(true);
+  };
+
+  const handleCameraSelect = (files) => {
+    setMedias(files);
+    setShowUploadModal(true);
+  };
+
+  const handleAudioSelect = (files) => {
+    setMedias(files);
+    setShowUploadModal(true);
+  };
+
+  const handleContactSelect = (contacts) => {
+    if (contacts && contacts.length > 0) {
+      // Criar dados dos contatos para envio
+      const contactsData = contacts.map(contact => ({
+        id: contact.id,
+        name: contact.name,
+        number: contact.number,
+        profilePicUrl: contact.profilePicUrl
+      }));
+
+      // Enviar contatos via API
+      handleSendContacts(contactsData);
+    }
+  };
+
+  const handleSendContacts = async (contacts) => {
+    if (contacts.length === 0) return;
+
+    setLoading(true);
+    try {
+      const { data } = await api.post(`/messages/${ticketId}/contacts`, {
+        contacts: contacts,
+        userId: user?.id
+      });
+
+      if (data) {
+        // Scroll automático ao enviar contatos
+        setTimeout(() => {
+          const messagesContainer = document.querySelector('.messages-list-scrollable');
+          if (messagesContainer) {
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+          }
+        }, 100);
+      }
+    } catch (err) {
+      toastError(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
       <MainWrapper
         ref={mainWrapperRef}
@@ -906,28 +977,32 @@ const MessageInput = ({ ticketStatus }) => {
               </EmojiBoxStyled>
             ) : null}
 
-            <InputStyled
-              multiple
-              type="file"
-              id="upload-button"
+            <Tooltip title={t("messagesInput.buttons.attach")} arrow placement="top">
+              <span>
+                <IconButton
+                  aria-label="attachment-menu"
+                  component="span"
+                  disabled={loading || recording || ticketStatus !== "open"}
+                  onClick={handleAttachmentMenuClick}
+                  size="medium"
+                >
+                  <AttachFile />
+                </IconButton>
+              </span>
+            </Tooltip>
+
+            <AttachmentMenu
+              anchorEl={attachmentMenuAnchor}
+              open={Boolean(attachmentMenuAnchor)}
+              onClose={handleAttachmentMenuClose}
+              onDocumentSelect={handleDocumentSelect}
+              onPhotoVideoSelect={handlePhotoVideoSelect}
+              onCameraSelect={handleCameraSelect}
+              onAudioSelect={handleAudioSelect}
+              onContactSelect={handleContactSelect}
               disabled={loading || recording || ticketStatus !== "open"}
-              onChange={handleChangeMedias}
             />
 
-            <label htmlFor="upload-button">
-              <Tooltip title={t("messagesInput.buttons.attach")} arrow placement="top">
-                <span>
-                  <IconButton
-                    aria-label="upload"
-                    component="span"
-                    disabled={loading || recording || ticketStatus !== "open"}
-                    size="medium"
-                  >
-                    <AttachFile />
-                  </IconButton>
-                </span>
-              </Tooltip>
-            </label>
             {canSignMessage() && (
             <FormControlLabel
               sx={{ marginRight: 7 }}

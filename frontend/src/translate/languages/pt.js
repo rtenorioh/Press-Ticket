@@ -680,6 +680,18 @@ const messages = {
         },  
         clearReply: "Limpar resposta"
       },
+      attachmentMenu: {
+        document: "Documento",
+        documentDesc: "PDF, DOC, TXT e outros",
+        photoVideo: "Fotos e vídeos",
+        photoVideoDesc: "Imagens e vídeos da galeria",
+        camera: "Câmera (beta)",
+        cameraDesc: "Tirar foto ou gravar vídeo",
+        audio: "Áudio",
+        audioDesc: "Arquivos de áudio MP3, WAV e outros",
+        contact: "Contato (beta)",
+        contactDesc: "Compartilhar contato"
+      },
       messageVariablesPicker: {
         label: "Variavéis disponíveis",
         vars: {
@@ -1778,4 +1790,3 @@ const messages = {
 };
 
 export { messages };
-

@@ -10,6 +10,7 @@ import DeleteWhatsAppMessage from "../services/WbotServices/DeleteWhatsAppMessag
 import EditWhatsAppMessage from "../services/WbotServices/EditWhatsAppMessage";
 import SendWhatsAppMedia from "../services/WbotServices/SendWhatsAppMedia";
 import SendWhatsAppMessage from "../services/WbotServices/SendWhatsAppMessage";
+import SendWhatsAppContacts from "../services/WbotServices/SendWhatsAppContacts";
 
 type IndexQuery = {
   pageNumber: string;
@@ -112,6 +113,37 @@ export const markAsRead = async (req: Request, res: Response): Promise<Response>
   } catch (error) {
     console.error("Erro ao marcar mensagens como lidas:", error);
     return res.status(500).json({ error: "Erro ao marcar mensagens como lidas" });
+  }
+};
+
+export const sendContacts = async (req: Request, res: Response): Promise<Response> => {
+  const { ticketId } = req.params;
+  const { contacts } = req.body;
+
+  console.log("MessageController.sendContacts - Dados recebidos:", {
+    ticketId,
+    contactsCount: contacts?.length || 0,
+    contacts: contacts?.map((c: any) => ({ id: c.id, name: c.name, number: c.number })) || []
+  });
+
+  if (!contacts || !Array.isArray(contacts) || contacts.length === 0) {
+    return res.status(400).json({ error: "Contatos são obrigatórios" });
+  }
+
+  const ticket = await ShowTicketService(ticketId);
+
+  if (ticket.status === "open") {
+    await SetTicketMessagesAsRead(ticket);
+  }
+
+  try {
+    const sentMessage = await SendWhatsAppContacts({ contacts, ticket });
+    const messageId = sentMessage?.id?.id;
+
+    return res.json({ id: messageId });
+  } catch (error) {
+    console.error("Erro ao enviar contatos:", error);
+    return res.status(500).json({ error: "Erro ao enviar contatos" });
   }
 };
 

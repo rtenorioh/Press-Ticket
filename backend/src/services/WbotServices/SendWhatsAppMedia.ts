@@ -95,7 +95,7 @@ const SendWhatsAppMedia = async ({
       maxSizeForMedia = 100; // 100MB para vídeos como mídia
       maxSizeForDocument = 2048; // 2GB para documentos
     } else if (isAudio) {
-      maxSizeForMedia = 16; // 16MB para áudios
+      maxSizeForMedia = 100; // 100MB para áudios
       maxSizeForDocument = 2048; // 2GB para documentos
     } else if (isImage) {
       maxSizeForMedia = 100; // 100MB para imagens
@@ -106,7 +106,7 @@ const SendWhatsAppMedia = async ({
     }
     
     // Comprimir vídeos grandes
-    if (isVideo && fileSizeInMB > 64) {
+    if (isVideo && fileSizeInMB > 200) {
       console.log(`Vídeo muito grande (${fileSizeInMB.toFixed(2)}MB), comprimindo...`);
       
       const compressedPath = path.join(
@@ -145,7 +145,15 @@ const SendWhatsAppMedia = async ({
 
     console.log(`Enviando arquivo: ${media.filename} (${finalSizeInMB.toFixed(2)}MB)`);
     
-    const mimeType = mime.lookup(finalMediaPath) || media.mimetype;
+    // Melhor tratamento do MIME type para vídeos WebM
+    let mimeType = mime.lookup(finalMediaPath) || media.mimetype;
+    
+    // Garantir MIME type correto para WebM
+    if (media.filename.toLowerCase().endsWith('.webm') && !mimeType.includes('webm')) {
+      mimeType = 'video/webm';
+    }
+    
+    console.log(`MIME type detectado: ${mimeType}`);
     
     // Determinar método de envio baseado no tamanho e tipo
     let sentMessage;
@@ -157,24 +165,33 @@ const SendWhatsAppMedia = async ({
       console.log(`Arquivo excede limite de mídia (${maxSizeForMedia}MB), enviando como documento`);
     }
     
-    // Para arquivos muito pequenos, sempre enviar como mídia
-    if (finalSizeInMB < 1) {
+    // Remover lógica específica para vídeos da câmera - tratar como qualquer vídeo
+    // if (isVideo && media.filename.includes('video_')) {
+    //   sendAsDocument = false;
+    //   console.log(`Vídeo da câmera detectado (${finalSizeInMB.toFixed(2)}MB), tentando como mídia para ter player`);
+    // }
+    
+    // Para arquivos muito pequenos que não são vídeos, sempre enviar como mídia
+    if (finalSizeInMB < 1 && !isVideo) {
       sendAsDocument = false;
     }
     
     try {
       const fileData = fs.readFileSync(finalMediaPath, { encoding: 'base64' });
       
-      // Limite do puppeteer para base64 (aproximadamente 50MB em base64)
-      const maxBase64Size = 67000000; // ~50MB
+      // Limite do puppeteer para base64 (aproximadamente 100MB em base64)
+      const maxBase64Size = 140000000; // ~100MB em base64 (para arquivos até 100MB)
       if (fileData.length > maxBase64Size) {
-        throw new AppError(`Arquivo muito grande para processamento (${(fileData.length / 1000000).toFixed(1)}MB em base64). Tente comprimir o arquivo.`);
+        console.log(`Arquivo muito grande para base64: ${(fileData.length / 1000000).toFixed(1)}MB`);
+        throw new AppError(`Arquivo muito grande para processamento (${(fileData.length / 1000000).toFixed(1)}MB em base64). Tente comprimir o arquivo ou enviar um arquivo menor.`);
       }
       
+      console.log(`Criando MessageMedia - Tipo: ${mimeType}, Tamanho base64: ${(fileData.length / 1000000).toFixed(1)}MB`);
       const newMedia = new MessageMedia(mimeType, fileData, media.filename);
       
       if (sendAsDocument) {
         // Enviar como documento
+        console.log(`Enviando como documento - Tipo: ${mimeType}`);
         sentMessage = await wbot.sendMessage(
           `${ticket.contact.number}@${ticket.isGroup ? "g" : "c"}.us`,
           newMedia,
@@ -183,8 +200,9 @@ const SendWhatsAppMedia = async ({
             sendMediaAsDocument: true
           }
         );
+        console.log('Documento enviado com sucesso');
       } else {
-        // Enviar como mídia normal
+        // Enviar como mídia normal com fallback para documento
         const options: any = {
           caption: hasBody
         };
@@ -194,11 +212,27 @@ const SendWhatsAppMedia = async ({
           options.sendAudioAsVoice = true;
         }
         
-        sentMessage = await wbot.sendMessage(
-          `${ticket.contact.number}@${ticket.isGroup ? "g" : "c"}.us`,
-          newMedia,
-          options
-        );
+        try {
+          console.log(`Tentando enviar mídia - Tipo: ${mimeType}, Como documento: ${sendAsDocument}`);
+          sentMessage = await wbot.sendMessage(
+            `${ticket.contact.number}@${ticket.isGroup ? "g" : "c"}.us`,
+            newMedia,
+            options
+          );
+          console.log('Mídia enviada com sucesso');
+        } catch (mediaError) {
+          console.log('Falha ao enviar como mídia, tentando como documento:', mediaError.message);
+          // Fallback automático para documento
+          sentMessage = await wbot.sendMessage(
+            `${ticket.contact.number}@${ticket.isGroup ? "g" : "c"}.us`,
+            newMedia,
+            {
+              caption: hasBody,
+              sendMediaAsDocument: true
+            }
+          );
+          console.log('Arquivo enviado como documento (fallback automático)');
+        }
       }
       
     } catch (error) {
