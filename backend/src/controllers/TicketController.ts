@@ -154,10 +154,13 @@ export const show = async (req: Request, res: Response): Promise<Response> => {
 
   const contact = await ShowTicketService(ticketId);
 
-  try {
-    await MarkMessagesAsReadService({ ticketId });
-  } catch (error) {
-    console.error("Erro ao marcar mensagens como lidas:", error);
+  // Só marca mensagens como lidas se o ticket estiver aceito (status "open")
+  if (contact.status === "open") {
+    try {
+      await MarkMessagesAsReadService({ ticketId });
+    } catch (error) {
+      console.error("Erro ao marcar mensagens como lidas:", error);
+    }
   }
 
   return res.status(200).json(contact);

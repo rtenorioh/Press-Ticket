@@ -108,8 +108,19 @@ export const markAsRead = async (req: Request, res: Response): Promise<Response>
   const { ticketId } = req.params;
 
   try {
-    await MarkMessagesAsReadService({ ticketId });
-    return res.status(200).json({ message: "Mensagens marcadas como lidas com sucesso" });
+    // Verificar o status do ticket antes de marcar como lida
+    const ticket = await ShowTicketService(ticketId);
+    
+    // Só marca mensagens como lidas se o ticket estiver aceito (status "open")
+    if (ticket.status === "open") {
+      await MarkMessagesAsReadService({ ticketId });
+      return res.status(200).json({ message: "Mensagens marcadas como lidas com sucesso" });
+    } else {
+      return res.status(400).json({ 
+        error: "Não é possível marcar mensagens como lidas. Ticket deve estar aceito (status 'open')",
+        currentStatus: ticket.status
+      });
+    }
   } catch (error) {
     console.error("Erro ao marcar mensagens como lidas:", error);
     return res.status(500).json({ error: "Erro ao marcar mensagens como lidas" });
