@@ -4,6 +4,7 @@ import { ThemeProvider } from "@mui/material/styles";
 import React, { useEffect, useState } from "react";
 import "react-toastify/dist/ReactToastify.css";
 import { SocketProvider, useSocket } from './context/SocketContext';
+import { ForwardingMessageProvider } from './context/ForwardingMessage';
 import toastError from "./errors/toastError";
 import Routes from "./routes";
 import api from "./services/api";
@@ -81,7 +82,9 @@ const AppContent = () => {
   return (
     <ThemeProvider theme={currentTheme}>
       <CssBaseline />
-      <Routes toggleTheme={toggleTheme} onThemeConfigUpdate={onThemeConfigUpdate} currentTheme={theme} />
+      <ForwardingMessageProvider>
+        <Routes toggleTheme={toggleTheme} onThemeConfigUpdate={onThemeConfigUpdate} currentTheme={theme} />
+      </ForwardingMessageProvider>
     </ThemeProvider>
   );
 };

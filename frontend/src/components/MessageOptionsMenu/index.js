@@ -5,6 +5,7 @@ import React, { useContext, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { EditMessageContext } from "../../context/EditingMessage/EditingMessageContext";
 import { ReplyMessageContext } from "../../context/ReplyingMessage/ReplyingMessageContext";
+import { useForwardingMessage } from "../../context/ForwardingMessage";
 import toastError from "../../errors/toastError";
 import toastSuccess from "../../errors/toastSuccess";
 import api from "../../services/api";
@@ -15,6 +16,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import ReplyIcon from "@mui/icons-material/Reply";
 import HistoryIcon from "@mui/icons-material/History";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import ForwardIcon from "@mui/icons-material/Forward";
 
 const StyledMenu = styled(Menu)(({ theme }) => ({
   '& .MuiPaper-root': {
@@ -52,6 +54,7 @@ const StyledMenu = styled(Menu)(({ theme }) => ({
 const MessageOptionsMenu = ({ message, menuOpen, handleClose, anchorEl }) => {
   const { setReplyingMessage } = useContext(ReplyMessageContext);
   const { setEditingMessage } = useContext(EditMessageContext);
+  const { enterForwardingMode } = useForwardingMessage();
   const [confirmationOpen, setConfirmationOpen] = useState(false);
   const [messageHistoryOpen, setMessageHistoryOpen] = useState(false);
   const { t } = useTranslation();
@@ -106,6 +109,11 @@ const MessageOptionsMenu = ({ message, menuOpen, handleClose, anchorEl }) => {
       handleClose();
     }
   }
+
+  const handleForwardMessage = () => {
+    enterForwardingMode();
+    handleClose();
+  }
   
   // Verifica se a mensagem tem texto para copiar
   const hasTextToCopy = () => {
@@ -153,6 +161,13 @@ const MessageOptionsMenu = ({ message, menuOpen, handleClose, anchorEl }) => {
             <ReplyIcon fontSize="small" />
           </ListItemIcon>
           <ListItemText primary={t("messageOptionsMenu.reply")} />
+        </MenuItem>
+
+        <MenuItem key="forward" onClick={handleForwardMessage}>
+          <ListItemIcon>
+            <ForwardIcon fontSize="small" />
+          </ListItemIcon>
+          <ListItemText primary={t("messageOptionsMenu.forward")} />
         </MenuItem>
         
         {hasTextToCopy() && (

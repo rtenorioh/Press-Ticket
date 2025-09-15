@@ -6,7 +6,8 @@ import {
   IconButton,
   styled,
   Tooltip,
-  Fab
+  Fab,
+  Checkbox
 } from "@mui/material";
 import {
   blue,
@@ -40,6 +41,9 @@ import MessageOptionsMenu from "../MessageOptionsMenu";
 import ModalImageCors from "../ModalImageCors";
 import MultiVcardPreview from "../MultiVcardPreview";
 import VcardPreview from "../VcardPreview";
+import ForwardingBar from "../ForwardingBar";
+import ForwardMessageModal from "../ForwardMessageModal";
+import { useForwardingMessage } from "../../context/ForwardingMessage";
 import { useTheme } from "@mui/material/styles";
 
 const MessagesListWrapper = styled("div")(({ theme }) => ({
@@ -140,7 +144,7 @@ const MessageRight = styled("div")(({ theme }) => ({
       right: 0,
     },
     whiteSpace: "pre-wrap",
-    backgroundColor: theme.palette.mode === 'dark' ? theme.palette.primary.dark + '30' : theme.palette.success.light + '60',
+    backgroundColor: theme.palette.mode === 'dark' ? theme.palette.primary.dark : theme.palette.success.light,
     color: theme.palette.text.primary,
     alignSelf: "flex-end",
     borderTopLeftRadius: 8,
@@ -312,8 +316,8 @@ const ScrollToBottomButton = styled(IconButton)(({ theme }) => ({
 const style = document.createElement('style');
 style.textContent = `
   @keyframes highlightMessage {
-    0% { background-color: rgba(0, 128, 0, 0.2); }
-    100% { background-color: transparent; }
+    0% { background-color: transparent; }
+    100% { background-color: rgba(0, 128, 0, 0.2); }
   }
   
   .highlight-new-message {
@@ -443,11 +447,44 @@ const MessagesList = ({ ticketId, isGroup, onClick }) => {
   const messageOptionsMenuOpen = Boolean(anchorEl);
   const currentTicketId = useRef(ticketId);
   const theme = useTheme();
+  
+  // Forwarding functionality
+  const {
+    isForwardingMode,
+    selectedMessages,
+    toggleMessageSelection,
+    exitForwardingMode,
+    clearSelectedMessages
+  } = useForwardingMessage();
+  const [forwardModalOpen, setForwardModalOpen] = useState(false);
   const [shouldAutoScroll, setShouldAutoScroll] = useState(false);
   const [isViewingOldMessages, setIsViewingOldMessages] = useState(false);
   const lastScrollUpTime = useRef(0);
   const defaultImage = '/default-profile.png';
   const lastSocketEventTime = useRef(Date.now());
+
+  // Forwarding handlers
+  const handleExitForwardingMode = () => {
+    exitForwardingMode();
+    clearSelectedMessages();
+  };
+
+  const handleOpenForwardModal = () => {
+    if (selectedMessages.length > 0) {
+      setForwardModalOpen(true);
+    }
+  };
+
+  const handleCloseForwardModal = () => {
+    setForwardModalOpen(false);
+    handleExitForwardingMode();
+  };
+
+  const handleMessageClick = (message) => {
+    if (isForwardingMode) {
+      toggleMessageSelection(message);
+    }
+  };
 
   useEffect(() => {
     dispatch({ type: "RESET" });
@@ -1279,21 +1316,75 @@ const MessagesList = ({ ticketId, isGroup, onClick }) => {
           );
         }
         if (!message.fromMe) {
+          const isSelected = selectedMessages.some(msg => msg.id === message.id);
           return (
             <React.Fragment key={message.id}>
               {renderDailyTimestamps(message, index)}
               {renderMessageDivider(message, index)}
               {renderNumberTicket(message, index)}
-              <MessageLeft id={message.id}>
-                <IconButtonStyled
-                  variant="contained"
-                  size="small"
-                  id="messageActionsButton"
-                  disabled={message.isDeleted}
-                  onClick={(e) => handleOpenMessageOptionsMenu(e, message)}
+              <Box 
+                sx={{ 
+                  display: 'flex', 
+                  alignItems: 'flex-start',
+                  gap: isForwardingMode ? 1 : 0,
+                  marginBottom: 1
+                }}
+              >
+                {isForwardingMode && (
+                  <Box
+                    onClick={() => handleMessageClick(message)}
+                    sx={{
+                      width: 20,
+                      height: 20,
+                      borderRadius: '50%',
+                      // backgroundColor: isSelected ? '#00a884' : 'transparent',
+                      border: isSelected ? 'none' : '2px solid #8696a0',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      cursor: 'pointer',
+                      marginTop: 1,
+                      flexShrink: 0,
+                      '&:hover': {
+                        backgroundColor: isSelected ? '#00a884' : 'rgba(134, 150, 160, 0.1)',
+                      }
+                    }}
+                  >
+                    {isSelected && (
+                      <svg width="12" height="9" viewBox="0 0 12 9" fill="none">
+                        <path
+                          d="M4.5 6.5L1.5 3.5L0.5 4.5L4.5 8.5L11.5 1.5L10.5 0.5L4.5 6.5Z"
+                          fill="white"
+                          strokeWidth="1"
+                        />
+                      </svg>
+                    )}
+                  </Box>
+                )}
+                <MessageLeft 
+                  id={message.id}
+                  onClick={!isForwardingMode ? undefined : () => handleMessageClick(message)}
+                  sx={{ 
+                    cursor: isForwardingMode ? 'pointer' : 'default',
+                    // backgroundColor: 'inherit',
+                    border: isSelected ? '2px solid #00a884' : 'none',
+                    flex: 1
+                  }}
                 >
-                  <ExpandMore />
-                </IconButtonStyled>
+                {!isForwardingMode && (
+                  <IconButtonStyled
+                    variant="contained"
+                    size="small"
+                    id="messageActionsButton"
+                    disabled={message.isDeleted}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleOpenMessageOptionsMenu(e, message);
+                    }}
+                  >
+                    <ExpandMore />
+                  </IconButtonStyled>
+                )}
                 {isGroup && (
                   <ContactImageContainer
                     onClick={() => onClick(message.contact)}
@@ -1333,43 +1424,70 @@ const MessagesList = ({ ticketId, isGroup, onClick }) => {
                   </MessageTimestamp>
                 </MessageItem>
               </MessageLeft>
+              </Box>
             </React.Fragment>
           );
-        } else {
-          return (
-            <React.Fragment key={message.id}>
-              {renderDailyTimestamps(message, index)}
-              {renderMessageDivider(message, index)}
-              {renderNumberTicket(message, index)}
-              <MessageRight id={message.id}>
-                <IconButtonStyled
-                  variant="contained"
-                  size="small"
-                  id="messageActionsButton"
-                  disabled={message.isDeleted}
-                  onClick={(e) => handleOpenMessageOptionsMenu(e, message)}
-                >
-                  <ExpandMore />
-                </IconButtonStyled>
+        }
+        
+        // Messages sent by me (fromMe = true)
+        const isSelected = selectedMessages.some(msg => msg.id === message.id);
+        return (
+          <React.Fragment key={message.id}>
+            {renderDailyTimestamps(message, index)}
+            {renderMessageDivider(message, index)}
+            {renderNumberTicket(message, index)}
+            <Box 
+              sx={{ 
+                display: 'flex', 
+                alignItems: 'flex-start',
+                gap: isForwardingMode ? 1 : 0,
+                marginBottom: 1,
+                justifyContent: 'flex-end'
+              }}
+            >
+              <MessageRight 
+                id={message.id}
+                onClick={!isForwardingMode ? undefined : () => handleMessageClick(message)}
+                sx={{ 
+                  cursor: isForwardingMode ? 'pointer' : 'default',
+                  // backgroundColor: 'inherit',
+                  border: isSelected ? '2px solid #00a884' : 'none',
+                  flex: 1
+                }}
+              >
+                {!isForwardingMode && (
+                  <IconButtonStyled
+                    variant="contained"
+                    size="small"
+                    id="messageActionsButton"
+                    disabled={message.isDeleted}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleOpenMessageOptionsMenu(e, message);
+                    }}
+                  >
+                    <ExpandMore />
+                  </IconButtonStyled>
+                )}
+                {message.isDeleted && (
+                  <div>
+                    <span style={{ color: red[200] }}>
+                      <Block
+                        sx={{
+                          fontSize: 18,
+                          verticalAlign: "middle",
+                          marginRight: 4,
+                          color: red[200]
+                        }}
+                      />
+                      <WhatsMarked>{t("messagesList.message.deleted")}</WhatsMarked>
+                    </span>
+                  </div>
+                )}
                 {(message.mediaUrl || message.mediaType === "location" || message.mediaType === "vcard"
                   || message.mediaType === "multi_vcard"
                 ) && checkMessageMedia(message)}
                 <MessageItem message={message}>
-                  {message.isDeleted && (
-                    <div>
-                      <span style={{ color: red[200] }}>
-                        <Block
-                          sx={{
-                            fontSize: 18,
-                            verticalAlign: "middle",
-                            marginRight: 4,
-                            color: red[200]
-                          }}
-                        />
-                        <WhatsMarked>{t("messagesList.message.deleted")}</WhatsMarked>
-                      </span>
-                    </div>
-                  )}
                   {message.quotedMsg && <div style={{ marginBottom: '8px' }}>{renderQuotedMessage(message)}</div>}
                   {message.mediaType !== "multi_vcard" && message.mediaType !== "location" && message.mediaType !== "vcard" && <WhatsMarked sx={{ fontSize: 'inherit', lineHeight: 'inherit', display: 'flex', width: '100%' }}>{message.body}</WhatsMarked>}
                   <MessageTimestamp>
@@ -1379,9 +1497,40 @@ const MessagesList = ({ ticketId, isGroup, onClick }) => {
                   </MessageTimestamp>
                 </MessageItem>
               </MessageRight>
-            </React.Fragment>
-          );
-        }
+              {isForwardingMode && (
+                <Box
+                  onClick={() => handleMessageClick(message)}
+                  sx={{
+                    width: 20,
+                    height: 20,
+                    borderRadius: '50%',
+                    // backgroundColor: isSelected ? '#00a884' : 'transparent',
+                    border: isSelected ? 'none' : '2px solid #8696a0',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: 'pointer',
+                    marginTop: 1,
+                    flexShrink: 0,
+                    '&:hover': {
+                      backgroundColor: isSelected ? '#00a884' : 'rgba(134, 150, 160, 0.1)',
+                    }
+                  }}
+                >
+                  {isSelected && (
+                    <svg width="12" height="9" viewBox="0 0 12 9" fill="none">
+                      <path
+                        d="M4.5 6.5L1.5 3.5L0.5 4.5L4.5 8.5L11.5 1.5L10.5 0.5L4.5 6.5Z"
+                        fill="white"
+                        strokeWidth="1"
+                      />
+                    </svg>
+                  )}
+                </Box>
+              )}
+            </Box>
+          </React.Fragment>
+        );
       });
       return viewMessagesList;
     } else {
@@ -1424,6 +1573,21 @@ const MessagesList = ({ ticketId, isGroup, onClick }) => {
           <CircularProgressStyled />
         </div>
       )}
+      
+      {/* Forwarding Bar */}
+      <ForwardingBar
+        isVisible={isForwardingMode}
+        selectedCount={selectedMessages.length}
+        onClose={handleExitForwardingMode}
+        onForward={handleOpenForwardModal}
+      />
+      
+      {/* Forward Modal */}
+      <ForwardMessageModal
+        open={forwardModalOpen}
+        onClose={handleCloseForwardModal}
+        selectedMessages={selectedMessages}
+      />
     </MessagesListWrapper>
   );
 };

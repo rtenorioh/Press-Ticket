@@ -158,6 +158,89 @@ export const sendContacts = async (req: Request, res: Response): Promise<Respons
   }
 };
 
+export const forwardMessages = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  const { ticketId } = req.params;
+  const { messages, contactId } = req.body;
+
+  if (!messages || !Array.isArray(messages) || messages.length === 0) {
+    return res.status(400).json({ error: "Messages array is required" });
+  }
+
+  try {
+    let ticket;
+    
+    if (contactId) {
+      // Se contactId foi fornecido, buscar ou criar ticket para esse contato
+      const FindOrCreateTicketService = require("../services/TicketServices/FindOrCreateTicketService").default;
+      const ShowContactService = require("../services/ContactServices/ShowContactService").default;
+      
+      const contact = await ShowContactService(contactId);
+      const GetDefaultWhatsApp = require("../helpers/GetDefaultWhatsApp").default;
+      const whatsapp = await GetDefaultWhatsApp();
+      
+      ticket = await FindOrCreateTicketService(contact, whatsapp.id, 0);
+    } else {
+      // Usar ticket fornecido
+      ticket = await ShowTicketService(ticketId);
+    }
+
+    if (ticket.status === "open") {
+      await SetTicketMessagesAsRead(ticket);
+    }
+
+    // Encaminhar cada mensagem
+    for (const messageData of messages) {
+      let body = messageData.body || "";
+      
+      // Adicionar indicador de encaminhamento
+      if (body) {
+        body = `↪ Encaminhada\n${body}`;
+      } else if (messageData.mediaType) {
+        body = "↪ Encaminhada";
+      }
+
+      // Enviar mensagem encaminhada
+      if (messageData.mediaType && messageData.mediaUrl) {
+        // Mensagem com mídia - criar objeto media simulado
+        const mediaObject = {
+          fieldname: 'medias',
+          originalname: 'forwarded_media',
+          encoding: '7bit',
+          mimetype: messageData.mediaType,
+          buffer: Buffer.from(''),
+          size: 0,
+          filename: 'forwarded_media',
+          path: messageData.mediaUrl
+        } as Express.Multer.File;
+
+        await SendWhatsAppMedia({ 
+          media: mediaObject, 
+          ticket, 
+          body: body 
+        });
+      } else {
+        // Mensagem de texto
+        await SendWhatsAppMessage({
+          body: body,
+          ticket,
+          quotedMsg: messageData.quotedMsg
+        });
+      }
+    }
+
+    return res.status(200).json({ 
+      message: "Messages forwarded successfully",
+      ticketId: ticket.id
+    });
+  } catch (error) {
+    console.error("Erro ao encaminhar mensagens:", error);
+    return res.status(500).json({ error: "Erro ao encaminhar mensagens" });
+  }
+};
+
 export const count = async (req: Request, res: Response): Promise<Response> => {
   const { userId, all, startDate, endDate } = req.query;
 
