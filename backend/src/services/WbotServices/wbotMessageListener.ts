@@ -492,30 +492,71 @@ const verifyMessage = async (
     }
   }
 
-  if (msg.fromMe === true) {
-    await ticket.update({
-      fromMe: msg.fromMe,
-      lastMessage:
-        msg.type === "location"
-          ? "🢅 🗺 Localization - Ver no Google Maps"
-          : `🢅 ${msg.body}`
-    });
-  } else {
-    await ticket.update({
-      lastMessage:
-        msg.type === "location"
-          ? "🢇 🗺 Localization - Ver no Google Maps"
-          : `🢇 ${msg.body}`
-    });
-  }
-
   try {
+    // Primeiro criar a mensagem no banco
     await CreateMessageService({ messageData });
+    
+    // Depois atualizar o lastMessage do ticket
+    if (msg.fromMe === true) {
+      await ticket.update({
+        fromMe: msg.fromMe,
+        lastMessage:
+          msg.type === "location"
+            ? "🢅 🗺 Localization - Ver no Google Maps"
+            : `🢅 ${msg.body}`
+      });
+    } else {
+      await ticket.update({
+        lastMessage:
+          msg.type === "location"
+            ? "🢇 🗺 Localization - Ver no Google Maps"
+            : `🢇 ${msg.body}`
+      });
+    }
+    
+    // Recarregar o ticket com lastMessage atualizado e emitir evento adicional
+    await ticket.reload();
+    const { getIO } = require("../../libs/socket");
+    const io = getIO();
+    const timestamp = new Date().toISOString();
+    
+    console.log(`[WBOT_MESSAGE_LISTENER][${timestamp}] Emitindo evento appMessage com lastMessage atualizado:`, {
+      ticketId: ticket.id,
+      lastMessage: ticket.lastMessage,
+      messageBody: msg.body?.substring(0, 30)
+    });
+    
+    io.to(ticket.id.toString())
+      .to(ticket.status)
+      .to("notification")
+      .emit("appMessage", {
+        action: "update",
+        ticket: ticket,
+        message: { id: messageData.id, body: msg.body }
+      });
   } catch (error) {
     console.error("Erro ao salvar mensagem no banco de dados:", error);
     setTimeout(async () => {
       try {
         await CreateMessageService({ messageData });
+        
+        // Atualizar lastMessage na segunda tentativa também
+        if (msg.fromMe === true) {
+          await ticket.update({
+            fromMe: msg.fromMe,
+            lastMessage:
+              msg.type === "location"
+                ? "🢅 🗺 Localization - Ver no Google Maps"
+                : `🢅 ${msg.body}`
+          });
+        } else {
+          await ticket.update({
+            lastMessage:
+              msg.type === "location"
+                ? "🢇 🗺 Localization - Ver no Google Maps"
+                : `🢇 ${msg.body}`
+          });
+        }
       } catch (retryError) {
         console.error("Erro ao salvar mensagem na segunda tentativa:", retryError);
       }

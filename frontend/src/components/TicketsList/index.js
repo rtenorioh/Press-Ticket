@@ -101,12 +101,33 @@ const reducer = (state, action) => {
 
 	if (action.type === "UPDATE_TICKET_UNREAD_MESSAGES") {
 		const ticket = action.payload;
+		const timestamp = new Date().toISOString();
+		console.log(`[REDUCER_UPDATE_UNREAD][${timestamp}] Processando ticket ${ticket.id}:`, {
+			lastMessage: ticket.lastMessage,
+			unreadMessages: ticket.unreadMessages
+		});
 
 		const ticketIndex = state.findIndex((t) => t.id === ticket.id);
 		if (ticketIndex !== -1) {
-			state[ticketIndex] = ticket;
-			state.unshift(state.splice(ticketIndex, 1)[0]);
+			const oldTicket = state[ticketIndex];
+			const updatedTicket = {
+				...oldTicket,
+				...ticket,
+				lastMessage: ticket.lastMessage || oldTicket.lastMessage,
+				unreadMessages: ticket.unreadMessages !== undefined ? ticket.unreadMessages : oldTicket.unreadMessages
+			};
+			
+			state[ticketIndex] = updatedTicket;
+			
+			// Mover para o topo apenas se houver nova mensagem diferente
+			if (ticket.lastMessage && ticket.lastMessage !== oldTicket.lastMessage) {
+				console.log(`[REDUCER_MOVE_TOP][${timestamp}] Movendo ticket ${ticket.id} para o topo`);
+				state.unshift(state.splice(ticketIndex, 1)[0]);
+			} else {
+				console.log(`[REDUCER_NO_MOVE][${timestamp}] Ticket ${ticket.id} não movido - mesma mensagem`);
+			}
 		} else {
+			console.log(`[REDUCER_ADD_NEW][${timestamp}] Adicionando novo ticket ${ticket.id}`);
 			state.unshift(ticket);
 		}
 

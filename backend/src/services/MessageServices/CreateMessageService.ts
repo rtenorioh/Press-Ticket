@@ -79,6 +79,16 @@ const CreateMessageService = async ({
     }
 
     const io = getIO();
+    const timestamp = new Date().toISOString();
+    
+    // Emitir evento inicial com a mensagem
+    console.log(`[CREATE_MESSAGE_SERVICE][${timestamp}] Emitindo evento appMessage inicial:`, {
+      messageId: message.id,
+      ticketId: message.ticketId,
+      ticketStatus: message.ticket.status,
+      body: message.body?.substring(0, 50)
+    });
+    
     io.to(message.ticketId.toString())
       .to(message.ticket.status)
       .to("notification")

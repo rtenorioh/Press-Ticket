@@ -68,7 +68,7 @@
     "/v1/messages/send-media": {
       "post": {
         "summary": "Envio de Mensagens com Mídia",
-        "description": "Envio de Mensagens com Mídia (imagens, documentos, áudio) via API\n\nPermissões requeridas: `create:messages`",
+        "description": "Envio de Mensagens com Mídia (imagens, documentos, áudio) via API\n\nLimites por tipo:\n- Vídeos/Fotos como mídia: 100MB\n- Áudios: 100MB\n- Documentos: até 2GB\n- Compressão automática para vídeos > 200MB\n\nPermissões requeridas: `create:messages`",
         "tags": [
           "Messages"
         ],
@@ -134,6 +134,102 @@
         "responses": {
           "200": {
             "description": "Mensagem com mídia enviada com sucesso"
+          },
+          "401": {
+            "description": "Token inválido ou não fornecido"
+          },
+          "403": {
+            "description": "Token não tem permissão 'create:messages'"
+          },
+          "500": {
+            "description": "Erro interno!"
+          }
+        }
+      }
+    },
+    "/v1/messages/{ticketId}/contacts": {
+      "post": {
+        "summary": "Enviar Contatos",
+        "description": "Envio de contatos via vCard/multi_vCard para um ticket específico\n\nPermissões requeridas: `create:messages`",
+        "tags": [
+          "Messages"
+        ],
+        "security": [
+          {
+            "apiToken": [
+              "create:messages"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "ticketId",
+            "in": "path",
+            "description": "ID do ticket para enviar os contatos",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "contacts": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer",
+                          "description": "ID do contato"
+                        },
+                        "name": {
+                          "type": "string",
+                          "description": "Nome do contato"
+                        },
+                        "number": {
+                          "type": "string",
+                          "description": "Número do contato"
+                        }
+                      },
+                      "required": ["id", "name", "number"]
+                    },
+                    "description": "Lista de contatos para enviar"
+                  }
+                },
+                "required": ["contacts"]
+              },
+              "examples": {
+                "contacts": {
+                  "value": {
+                    "contacts": [
+                      {
+                        "id": 1,
+                        "name": "João Silva",
+                        "number": "5511999999999"
+                      },
+                      {
+                        "id": 2,
+                        "name": "Maria Santos",
+                        "number": "5511888888888"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Contatos enviados com sucesso"
+          },
+          "400": {
+            "description": "Dados inválidos ou ticket não encontrado"
           },
           "401": {
             "description": "Token inválido ou não fornecido"
@@ -1339,6 +1435,16 @@
               "type": "string",
               "enum": ["true", "false"]
             }
+          },
+          {
+            "name": "isGroup",
+            "in": "query",
+            "description": "Filtrar por tipo de ticket (true=grupos, false=individuais, null=todos)",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["true", "false", "null"]
+            }
           }
         ],
         "responses": {
@@ -2274,6 +2380,93 @@
           },
           "404": {
             "description": "WhatsApp não encontrado"
+          }
+        }
+      }
+    },
+    "/v1/whatsappsession/{whatsappId}/pairing": {
+      "post": {
+        "summary": "Conectar via Pairing Code",
+        "description": "Conectar WhatsApp usando código de pareamento em vez de QR Code\n\nPermissões requeridas: `create:whatsappsession`",
+        "tags": [
+          "WhatsAppSession"
+        ],
+        "security": [
+          {
+            "apiToken": [
+              "create:whatsappsession"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "whatsappId",
+            "in": "path",
+            "description": "ID da conexão WhatsApp",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "phoneNumber": {
+                    "type": "string",
+                    "description": "Número no formato CODIGO_PAIS + NUMERO (ex: 5511999999999)"
+                  }
+                },
+                "required": ["phoneNumber"]
+              },
+              "examples": {
+                "pairing": {
+                  "value": {
+                    "phoneNumber": "5511999999999"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Pairing code gerado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "pairingCode": {
+                      "type": "string",
+                      "description": "Código de pareamento para inserir no WhatsApp"
+                    },
+                    "phoneNumber": {
+                      "type": "string",
+                      "description": "Número usado para gerar o código"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Número de telefone inválido"
+          },
+          "401": {
+            "description": "Token inválido ou não fornecido"
+          },
+          "403": {
+            "description": "Token não tem permissão 'create:whatsappsession'"
+          },
+          "404": {
+            "description": "Conexão WhatsApp não encontrada"
+          },
+          "500": {
+            "description": "Erro interno!"
           }
         }
       }

@@ -467,14 +467,38 @@ const ApiKey = () => {
                                     color="primary"
                                     onClick={() => {
                                         const allPermissions = [
+                                            // Contatos
                                             'create:contacts', 'read:contacts', 'update:contacts', 'delete:contacts',
+                                            // Mensagens
                                             'create:messages', 'read:messages',
+                                            // Setores
                                             'create:queue', 'read:queue', 'update:queue', 'delete:queue',
+                                            // Tags
                                             'create:tags', 'read:tags', 'update:tags', 'delete:tags',
+                                            // Tickets
                                             'create:tickets', 'read:tickets', 'update:tickets', 'delete:tickets',
+                                            // WhatsApp
                                             'create:whatsapp', 'read:whatsapp', 'update:whatsapp', 'delete:whatsapp',
+                                            // Sessões de WhatsApp
                                             'create:whatsappsession', 'update:whatsappsession', 'delete:whatsappsession',
-                                            'read:activity-logs'
+                                            // Logs de Atividade
+                                            'read:activity-logs',
+                                            // Backups
+                                            'create:backups', 'read:backups', 'update:backups', 'delete:backups',
+                                            // Logs de Erro
+                                            'create:error-logs', 'read:error-logs', 'delete:error-logs',
+                                            // Monitoramento de Rede
+                                            'read:network-status',
+                                            // Monitoramento de Setor
+                                            'read:queue-monitor',
+                                            // Atualização do Sistema
+                                            'read:system-update', 'write:system-update',
+                                            // Versão e Biblioteca WhatsApp
+                                            'read:version', 'write:whatsapp-lib',
+                                            // Sistema e Recursos
+                                            'write:system', 'read:system-resources',
+                                            // Vídeos
+                                            'read:videos', 'write:videos'
                                         ];
                                         
                                         if (newToken.permissions.length === allPermissions.length) {
@@ -486,7 +510,7 @@ const ApiKey = () => {
                                     sx={{ borderRadius: 20, textTransform: 'none' }}
                                 >
                                     {newToken.permissions.length === 0 || 
-                                     newToken.permissions.length < 20 ? 
+                                     newToken.permissions.length < 29 ? 
                                         t("apiKey.modal.buttons.selectAll") : 
                                         t("apiKey.modal.buttons.unselectAll")}
                                 </Button>

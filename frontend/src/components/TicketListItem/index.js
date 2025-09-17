@@ -258,6 +258,60 @@ const TicketListItem = ({ ticket, filteredTags }) => {
 		}
 	}, [ticket, currentTicket]);
 
+	// Socket listener para atualização em tempo real da última mensagem
+	useEffect(() => {
+		const socket = openSocket();
+		if (!socket) return;
+
+		const handleAppMessage = (data) => {
+			const timestamp = new Date().toISOString();
+			console.log(`[TICKET_ITEM_APP_MSG][${timestamp}] Evento appMessage recebido:`, {
+				action: data.action,
+				messageId: data.message?.id,
+				messageBody: data.message?.body?.substring(0, 30),
+				ticketId: data.ticket?.id,
+				ticketLastMessage: data.ticket?.lastMessage,
+				currentTicketId: ticket.id,
+				shouldUpdate: data.ticket?.id === ticket.id
+			});
+
+			if (data.action === "create" || data.action === "update") {
+				if (data.ticket && data.ticket.id === ticket.id) {
+					console.log(`[TICKET_ITEM_UPDATE][${timestamp}] Atualizando currentTicket ${ticket.id}:`, {
+						oldLastMessage: currentTicket.lastMessage,
+						newLastMessage: data.ticket.lastMessage,
+						oldUnreadMessages: currentTicket.unreadMessages,
+						newUnreadMessages: data.ticket.unreadMessages
+					});
+
+					setCurrentTicket(prevTicket => {
+						const updated = {
+							...prevTicket,
+							...data.ticket,
+							lastMessage: data.ticket.lastMessage || prevTicket.lastMessage,
+							unreadMessages: data.ticket.unreadMessages !== undefined ? data.ticket.unreadMessages : prevTicket.unreadMessages
+						};
+						
+						console.log(`[TICKET_ITEM_UPDATED][${timestamp}] Estado atualizado:`, {
+							ticketId: updated.id,
+							lastMessage: updated.lastMessage,
+							unreadMessages: updated.unreadMessages
+						});
+						
+						return updated;
+					});
+				} else {
+					console.log(`[TICKET_ITEM_SKIP][${timestamp}] Evento ignorado - ticket diferente: ${data.ticket?.id} != ${ticket.id}`);
+				}
+			}
+		};
+
+		socket.on("appMessage", handleAppMessage);
+		return () => {
+			socket.off("appMessage", handleAppMessage);
+		};
+	}, [ticket.id]);
+
 	useEffect(() => {
 		isMounted.current = true;
 
