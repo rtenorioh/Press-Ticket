@@ -117,13 +117,12 @@ const UploadModal = ({ open, onClose, files, onSend, loading }) => {
   const [isUploading, setIsUploading] = useState(false);
   const captionInputRef = useRef(null);
 
-  // Limites de tamanho por tipo de arquivo (em MB) - Conforme especificações WhatsApp
   const FILE_LIMITS = {
-    image: 100, // Imagens como mídia: 100MB (com opção HD)
-    video: 100, // Vídeos como mídia: 100MB (com opção HD)
-    audio: 100, // Áudios como mídia: 100MB
-    document: 2048, // Documentos: 2GB (2048MB)
-    default: 100 // Padrão: 100MB
+    image: 100,
+    video: 100,
+    audio: 100,
+    document: 2048,
+    default: 100
   };
 
   const getFileType = (file) => {
@@ -165,7 +164,6 @@ const UploadModal = ({ open, onClose, files, onSend, loading }) => {
 
   const shouldCompressVideo = (file) => {
     const fileSizeMB = file.size / (1024 * 1024);
-    // Comprimir vídeos apenas se excederem muito o limite (ex: > 200MB)
     return getFileType(file) === 'video' && fileSizeMB > 200;
   };
 
@@ -173,13 +171,10 @@ const UploadModal = ({ open, onClose, files, onSend, loading }) => {
     const fileSizeMB = file.size / (1024 * 1024);
     const fileType = getFileType(file);
     
-    // Arquivos que não são mídia sempre como documento
     if (fileType === 'document') {
       return true;
     }
     
-    // Para mídias, dar opção de enviar como documento se for muito grande
-    // mas não forçar, pois WhatsApp suporta até 100MB como mídia
     return false;
   };
 
@@ -189,7 +184,6 @@ const UploadModal = ({ open, onClose, files, onSend, loading }) => {
     setIsUploading(true);
     const results = [];
     
-    // Resetar status de upload
     const initialProgress = {};
     const initialStatus = {};
     localFiles.forEach((file, index) => {
@@ -199,13 +193,11 @@ const UploadModal = ({ open, onClose, files, onSend, loading }) => {
     setUploadProgress(initialProgress);
     setUploadStatus(initialStatus);
 
-    // Enviar cada arquivo individualmente
     for (let i = 0; i < localFiles.length; i++) {
       const file = localFiles[i];
       const validation = validateFile(file);
       
       try {
-        // Atualizar status para "enviando"
         setUploadStatus(prev => ({ ...prev, [i]: 'uploading' }));
         setUploadProgress(prev => ({ ...prev, [i]: 10 }));
 
@@ -213,11 +205,9 @@ const UploadModal = ({ open, onClose, files, onSend, loading }) => {
           throw new Error(validation.message);
         }
 
-        // Preparar FormData para o arquivo individual
         const formData = new FormData();
         formData.append("medias", file);
         
-        // Usar caption apenas para o primeiro arquivo ou se for o único
         const fileCaption = (i === 0 || localFiles.length === 1) ? caption.trim() : '';
         if (fileCaption) {
           formData.append("body", fileCaption);
@@ -226,7 +216,6 @@ const UploadModal = ({ open, onClose, files, onSend, loading }) => {
         }
         formData.append("fromMe", true);
 
-        // Adicionar metadata sobre o tipo de envio
         if (sendAsDocument(file)) {
           formData.append("sendAsDocument", "true");
         }
@@ -236,7 +225,6 @@ const UploadModal = ({ open, onClose, files, onSend, loading }) => {
 
         setUploadProgress(prev => ({ ...prev, [i]: 50 }));
 
-        // Enviar arquivo
         const response = await api.post(`/messages/${ticketId}`, formData, {
           onUploadProgress: (progressEvent) => {
             const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
@@ -244,7 +232,6 @@ const UploadModal = ({ open, onClose, files, onSend, loading }) => {
           }
         });
 
-        // Sucesso
         setUploadProgress(prev => ({ ...prev, [i]: 100 }));
         setUploadStatus(prev => ({ ...prev, [i]: 'success' }));
         results.push({ file: file.name, status: 'success', response });
@@ -260,19 +247,14 @@ const UploadModal = ({ open, onClose, files, onSend, loading }) => {
         });
       }
 
-      // Pequena pausa entre envios para não sobrecarregar
       if (i < localFiles.length - 1) {
         await new Promise(resolve => setTimeout(resolve, 500));
       }
     }
 
-    // Mostrar resultados
     const successCount = results.filter(r => r.status === 'success').length;
     const errorCount = results.filter(r => r.status === 'error').length;
     
-    if (successCount > 0) {
-      console.log(`${successCount} arquivo(s) enviado(s) com sucesso`);
-    }
     if (errorCount > 0) {
       console.error(`${errorCount} arquivo(s) falharam no envio`);
       results.filter(r => r.status === 'error').forEach(r => {
@@ -282,7 +264,6 @@ const UploadModal = ({ open, onClose, files, onSend, loading }) => {
 
     setIsUploading(false);
     
-    // Fechar modal após todos os envios (sucesso ou erro)
     setTimeout(() => {
       setCaption('');
       setSelectedFileIndex(0);
@@ -306,19 +287,40 @@ const UploadModal = ({ open, onClose, files, onSend, loading }) => {
   }, [files, localFiles]);
 
   React.useEffect(() => {
-    if (open && captionInputRef.current) {
-      captionInputRef.current.focus();
-    }
-  }, [open, selectedFileIndex]);
+    if (open && localFiles.length > 0) {
+      const focusInput = () => {
+        if (captionInputRef.current) {
+          const input = captionInputRef.current;
+          const inputElement = input.querySelector('textarea') || input.querySelector('input') || input;
+          if (inputElement && inputElement.focus) {
+            inputElement.focus();
+            if (inputElement.value) {
+              inputElement.setSelectionRange(inputElement.value.length, inputElement.value.length);
+            }
+          }
+        }
+      };
 
-  // Socket listener para progresso de compressão
+      focusInput();
+      
+      const timer1 = setTimeout(focusInput, 50);
+      const timer2 = setTimeout(focusInput, 150);
+      const timer3 = setTimeout(focusInput, 300);
+
+      return () => {
+        clearTimeout(timer1);
+        clearTimeout(timer2);
+        clearTimeout(timer3);
+      };
+    }
+  }, [open, localFiles.length, selectedFileIndex]);
+
   useEffect(() => {
     if (!ticketId || !open) return;
 
     const socket = openSocket();
     
     const handleCompressionProgress = (data) => {
-      console.log('Evento recebido no frontend:', data);
       if (data.ticketId === parseInt(ticketId)) {
         setCompressionProgress(data.progress);
         setCompressionStatus(data.status);
@@ -343,12 +345,8 @@ const UploadModal = ({ open, onClose, files, onSend, loading }) => {
       }
     };
 
-    // Escutar evento genérico também
     socket.on(`video-compression-progress-${ticketId}`, handleCompressionProgress);
     
-    // Debug: verificar se socket está conectado
-    console.log('Socket conectado:', socket.connected);
-    console.log('Escutando evento:', `video-compression-progress-${ticketId}`);
 
     return () => {
       socket.off(`video-compression-progress-${ticketId}`, handleCompressionProgress);
@@ -429,6 +427,17 @@ const UploadModal = ({ open, onClose, files, onSend, loading }) => {
       onClose={onClose} 
       maxWidth="sm" 
       fullWidth
+      onTransitionEnd={() => {
+        if (open && captionInputRef.current) {
+          setTimeout(() => {
+            const input = captionInputRef.current;
+            const inputElement = input.querySelector('textarea') || input.querySelector('input') || input;
+            if (inputElement && inputElement.focus) {
+              inputElement.focus();
+            }
+          }, 50);
+        }
+      }}
       PaperProps={{
         sx: {
           borderRadius: 2,
@@ -633,6 +642,7 @@ const UploadModal = ({ open, onClose, files, onSend, loading }) => {
               multiline
               rows={2}
               disabled={isCompressing || isUploading}
+              autoFocus={true}
               onKeyDown={(e) => {
                 if (e.ctrlKey && e.key === 'Enter') {
                   e.preventDefault();
