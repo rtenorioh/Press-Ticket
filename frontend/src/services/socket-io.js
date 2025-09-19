@@ -52,14 +52,14 @@ const connectToSocket = () => {
         console.log(`[FRONT_SOCKET_INIT][${timestamp}] Iniciando conexão com socket.io em ${getBackendUrl()}`);
         
         const socket = openSocket(getBackendUrl(), {
-            transports: ["websocket"],
+            transports: ["polling", "websocket"],
             query: {
                 token: parsedToken
             },
             reconnection: true,
-            reconnectionDelay: 3000,
-            reconnectionAttempts: 10,
-            forceNew: true,  // Força uma nova conexão
+            reconnectionDelay: 1000,
+            reconnectionAttempts: Infinity,
+            forceNew: false,
             timeout: 10000
         });
 

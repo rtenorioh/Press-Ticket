@@ -258,32 +258,13 @@ const TicketListItem = ({ ticket, filteredTags }) => {
 		}
 	}, [ticket, currentTicket]);
 
-	// Socket listener para atualização em tempo real da última mensagem
 	useEffect(() => {
 		const socket = openSocket();
 		if (!socket) return;
 
 		const handleAppMessage = (data) => {
-			const timestamp = new Date().toISOString();
-			console.log(`[TICKET_ITEM_APP_MSG][${timestamp}] Evento appMessage recebido:`, {
-				action: data.action,
-				messageId: data.message?.id,
-				messageBody: data.message?.body?.substring(0, 30),
-				ticketId: data.ticket?.id,
-				ticketLastMessage: data.ticket?.lastMessage,
-				currentTicketId: ticket.id,
-				shouldUpdate: data.ticket?.id === ticket.id
-			});
-
 			if (data.action === "create" || data.action === "update") {
 				if (data.ticket && data.ticket.id === ticket.id) {
-					console.log(`[TICKET_ITEM_UPDATE][${timestamp}] Atualizando currentTicket ${ticket.id}:`, {
-						oldLastMessage: currentTicket.lastMessage,
-						newLastMessage: data.ticket.lastMessage,
-						oldUnreadMessages: currentTicket.unreadMessages,
-						newUnreadMessages: data.ticket.unreadMessages
-					});
-
 					setCurrentTicket(prevTicket => {
 						const updated = {
 							...prevTicket,
@@ -292,16 +273,8 @@ const TicketListItem = ({ ticket, filteredTags }) => {
 							unreadMessages: data.ticket.unreadMessages !== undefined ? data.ticket.unreadMessages : prevTicket.unreadMessages
 						};
 						
-						console.log(`[TICKET_ITEM_UPDATED][${timestamp}] Estado atualizado:`, {
-							ticketId: updated.id,
-							lastMessage: updated.lastMessage,
-							unreadMessages: updated.unreadMessages
-						});
-						
 						return updated;
 					});
-				} else {
-					console.log(`[TICKET_ITEM_SKIP][${timestamp}] Evento ignorado - ticket diferente: ${data.ticket?.id} != ${ticket.id}`);
 				}
 			}
 		};
@@ -442,28 +415,26 @@ const TicketListItem = ({ ticket, filteredTags }) => {
 				userId: user?.id,
 			});
 			
-			setTimeout(() => {
-				const socket = openSocket();
-				if (socket) {
-			
-					socket.emit("ticket", {
-						action: "update",
-						ticketId: id,
-						ticket: {
-							...ticket,
-							status: "open",
-							userId: user?.id,
-							queueId: ticket?.queueId
-						}
-					});
+			const socket = openSocket();
+			if (socket) {
+		
+				socket.emit("ticket", {
+					action: "update",
+					ticketId: id,
+					ticket: {
+						...ticket,
+						status: "open",
+						userId: user?.id,
+						queueId: ticket?.queueId
+					}
+				});
 
-					socket.emit("joinTickets", "open");
-					socket.emit("joinTickets", "closed");
-					
-					socket.emit("getTickets", { status: "open", userId: user?.id, showAll: false });
-					socket.emit("getTickets", { status: "closed", userId: user?.id, showAll: false });
-				}
-			}, 500);
+				socket.emit("joinTickets", "open");
+				socket.emit("joinTickets", "closed");
+				
+				socket.emit("getTickets", { status: "open", userId: user?.id, showAll: false });
+				socket.emit("getTickets", { status: "closed", userId: user?.id, showAll: false });
+			}
 			
 			localStorage.setItem("pressticket:changeTab", "open");
 			
@@ -480,10 +451,6 @@ const TicketListItem = ({ ticket, filteredTags }) => {
 	const handleViewTicket = async (id) => {
 		setLoading(true);
 		try {
-			// Não fazer PUT - apenas navegar para espiar o ticket
-			// Manter status e usuário inalterados
-			
-			// Manter tab pending ativa
 			localStorage.setItem("pressticket:changeTab", "pending");
 			
 			navigate(`/tickets/${id}`);
@@ -503,29 +470,27 @@ const TicketListItem = ({ ticket, filteredTags }) => {
 				status: "pending",
 			});
 			
-			setTimeout(() => {
-				const socket = openSocket();
-				if (socket) {
-					socket.emit("ticket", {
-						action: "update",
-						ticketId: id,
-						ticket: {
-							...ticket,
-							status: "pending",
-							userId: null,
-							queueId: ticket?.queueId
-						}
-					});
+			const socket = openSocket();
+			if (socket) {
+				socket.emit("ticket", {
+					action: "update",
+					ticketId: id,
+					ticket: {
+						...ticket,
+						status: "pending",
+						userId: null,
+						queueId: ticket?.queueId
+					}
+				});
 
-					socket.emit("joinTickets", "pending");
-					socket.emit("joinTickets", "open");
-					
-					socket.emit("getTickets", { status: "pending", userId: user?.id, showAll: false });
-					socket.emit("getTickets", { status: "open", userId: user?.id, showAll: false });
-				}
-			}, 500);
-			
+				socket.emit("joinTickets", "pending");
+				socket.emit("joinTickets", "open");
+				
+				socket.emit("getTickets", { status: "pending", userId: user?.id, showAll: false });
+				socket.emit("getTickets", { status: "open", userId: user?.id, showAll: false });
+			}			
 
+			localStorage.setItem("pressticket:changeTab", "pending");
 			localStorage.setItem("pressticket:changeTab", "open");
 			
 			navigate(`/tickets`);
@@ -579,9 +544,8 @@ const TicketListItem = ({ ticket, filteredTags }) => {
 				}
 			}, 500);
 			
-			// Manter a tab atual ativa após fechar ticket
-			const currentTab = localStorage.getItem("pressticket:changeTab") || "open";
-			localStorage.setItem("pressticket:changeTab", currentTab);
+			localStorage.setItem("pressticket:changeTab", "closed");
+			localStorage.setItem("pressticket:changeTab", "open");
 			
 			navigate("/tickets");
 		} catch (err) {
