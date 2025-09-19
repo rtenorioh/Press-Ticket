@@ -70,7 +70,7 @@ const NotificationsPopOver = () => {
 	}, [play]);
 
 	useEffect(() => {
-		setNotifications(tickets);
+		setNotifications((tickets || []).filter(t => t.status !== "closed"));
 	}, [tickets]);
 
 	const requestNotificationPermission = () => {
@@ -140,13 +140,18 @@ const NotificationsPopOver = () => {
 				(data.ticket.userId === user?.id || !data.ticket.userId) &&
 				(UserQueues !== -1 || !data.ticket.queueId)
 			) {
+				// Não manter tickets fechados nas notificações
+				if (data.ticket.status === "closed") {
+					setNotifications((prevState) => prevState.filter((t) => t.id !== data.ticket.id));
+					return;
+				}
 				setNotifications((prevState) => {
 					const ticketIndex = prevState.findIndex((t) => t.id === data.ticket.id);
 					if (ticketIndex !== -1) {
 						prevState[ticketIndex] = data.ticket;
-						return [...prevState];
+						return [...prevState.filter(t => t.status !== "closed")];
 					}
-					return [data.ticket, ...prevState];
+					return [data.ticket, ...prevState].filter(t => t.status !== "closed");
 				});
 
 				// Para tickets com status 'pending', sempre notificar, exceto se o ticket já estiver aberto
