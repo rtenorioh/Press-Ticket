@@ -143,10 +143,12 @@ const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
 			}
 		};
 
-		fetchContact();
+		if (open) {
+			fetchContact();
+		}
 
 		return () => abortController.abort();
-	}, [contactId, initialValues]);
+	}, [open, contactId, initialValues]);
 
 	const handleClose = () => {
 		onClose();
