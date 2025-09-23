@@ -196,7 +196,6 @@ const TicketsManager = () => {
   const [selectedQueueIds, setSelectedQueueIds] = useState(userQueueIds || []);
   const [filterMenuAnchorEl, setFilterMenuAnchorEl] = useState(null);
 
-  // Função para buscar contadores do backend
   const fetchTicketCounts = async () => {
     try {
       const { data } = await api.get("/tickets/count", {
@@ -226,7 +225,6 @@ const TicketsManager = () => {
     const checkTabChange = () => {
       const changeTabRequest = localStorage.getItem("pressticket:changeTab");
       if (changeTabRequest) {
-        console.log("Mudando para a aba:", changeTabRequest);
         setTab(changeTabRequest);
         localStorage.removeItem("pressticket:changeTab");
       }
@@ -237,18 +235,15 @@ const TicketsManager = () => {
     return () => clearInterval(intervalId);
   }, []);
 
-  // Detectar mudança de aba quando o componente é montado ou quando a aba muda
   useEffect(() => {
     const checkTabChange = () => {
       const changeTabRequest = localStorage.getItem("pressticket:changeTab");
       if (changeTabRequest && changeTabRequest !== tab) {
-        console.log("Detectada mudança de aba pendente:", changeTabRequest);
         setTab(changeTabRequest);
         localStorage.removeItem("pressticket:changeTab");
       }
     };
     
-    // Verificar imediatamente quando a aba atual muda
     checkTabChange();
   }, [tab]);
 
@@ -266,12 +261,8 @@ const TicketsManager = () => {
     fetchSettings();
   }, []);
 
-  // Buscar contadores iniciais e configurar WebSocket para atualizações em tempo real
   useEffect(() => {
-    // Buscar contadores iniciais
     fetchTicketCounts();
-
-    // Configurar WebSocket para atualizações em tempo real
     const socket = openSocket();
     if (!socket) {
       console.error("Não foi possível conectar ao socket para contadores");
@@ -279,28 +270,19 @@ const TicketsManager = () => {
     }
 
     const handleTicketUpdate = (data) => {
-      console.log("[CONTADOR_TEMPO_REAL] Evento de ticket recebido:", data);
-      
-      // Atualizar contadores quando houver mudanças nos tickets
       if (data.action === "update" || data.action === "create" || data.action === "delete") {
         fetchTicketCounts();
       }
     };
 
-    const handleAppMessage = (data) => {
-      console.log("[CONTADOR_TEMPO_REAL] Evento de mensagem recebido:", data);
-      
-      // Atualizar contadores quando houver novas mensagens
+    const handleAppMessage = (data) => {      
       if (data.action === "create") {
         fetchTicketCounts();
       }
     };
 
-    // Registrar listeners
     socket.on("ticket", handleTicketUpdate);
     socket.on("appMessage", handleAppMessage);
-
-    // Se inscrever para receber eventos de todos os status
     socket.emit("joinTickets", "open");
     socket.emit("joinTickets", "pending");
     socket.emit("joinTickets", "closed");
@@ -311,13 +293,10 @@ const TicketsManager = () => {
     };
   }, [selectedQueueIds, showAllTickets]);
 
-  // Atualizar contadores quando filtros mudarem
   useEffect(() => {
     fetchTicketCounts();
   }, [selectedQueueIds, showAllTickets]);
   
-
-
   const handleSearch = (e) => {
     const searchedTerm = e.target.value.toLowerCase();
 

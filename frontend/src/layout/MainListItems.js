@@ -281,13 +281,6 @@ const MainListItems = (props) => {
                 </SubheaderStyled>
               <DividerStyled />
               <ListItemLink
-                to="/users"
-                primary={t("mainDrawer.listItems.users")}
-                icon={<PeopleAltOutlined />}
-                active={location.pathname === '/users'}
-                drawerClose={drawerClose}
-              />
-              <ListItemLink
                 to="/queues"
                 primary={t("mainDrawer.listItems.queues")}
                 icon={<AccountTreeOutlined />}
@@ -303,6 +296,13 @@ const MainListItems = (props) => {
                   </StyledBadge>
                 }
                 active={location.pathname === '/connections'}
+                drawerClose={drawerClose}
+              />
+              <ListItemLink
+                to="/users"
+                primary={t("mainDrawer.listItems.users")}
+                icon={<PeopleAltOutlined />}
+                active={location.pathname === '/users'}
                 drawerClose={drawerClose}
               />
               <ListItemLink

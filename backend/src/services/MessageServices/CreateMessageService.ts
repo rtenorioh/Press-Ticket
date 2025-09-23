@@ -80,23 +80,56 @@ const CreateMessageService = async ({
 
     const io = getIO();
     const timestamp = new Date().toISOString();
-    
-    // Emitir evento inicial com a mensagem
-    console.log(`[CREATE_MESSAGE_SERVICE][${timestamp}] Emitindo evento appMessage inicial:`, {
+
+    // Garantir que o ticket embutido esteja 100% atualizado (inclui lastMessage atualizado por listeners)
+    try {
+      if (message.ticket && typeof message.ticket.reload === "function") {
+        await message.ticket.reload({
+          include: [
+            "contact",
+            "queue",
+            {
+              model: Whatsapp,
+              as: "whatsapp",
+              attributes: ["name", "color"]
+            }
+          ]
+        });
+      }
+    } catch (reloadError) {
+      console.error("Erro ao recarregar ticket antes de emitir appMessage:", reloadError);
+    }
+
+    // Preparar lastMessage consistente para o frontend
+    const currentBody = message.body || "";
+    const arrow = message.fromMe ? "🢅 " : "🢇 ";
+    const composedLastMessage = `${arrow}${currentBody}`.trim();
+
+    // Se o ticket não tem lastMessage ou está diferente, forçar no payload emitido
+    const ticketPayload: any = message.ticket ? message.ticket.toJSON ? message.ticket.toJSON() : { ...message.ticket } : {};
+    if (!ticketPayload.lastMessage || ticketPayload.lastMessage === "" || ticketPayload.lastMessage.replace("🢇", "").replace("🢅", "").trim() !== currentBody.trim()) {
+      ticketPayload.lastMessage = composedLastMessage;
+    }
+    // Atualizar updatedAt para refletir mudança
+    ticketPayload.updatedAt = new Date();
+
+    // Emitir evento com ticket atualizado
+    console.log(`[CREATE_MESSAGE_SERVICE][${timestamp}] Emitindo evento appMessage (create):`, {
       messageId: message.id,
       ticketId: message.ticketId,
-      ticketStatus: message.ticket.status,
+      ticketStatus: ticketPayload?.status,
+      lastMessage: ticketPayload?.lastMessage,
       body: message.body?.substring(0, 50)
     });
-    
+
     io.to(message.ticketId.toString())
-      .to(message.ticket.status)
+      .to(ticketPayload.status)
       .to("notification")
       .emit("appMessage", {
         action: "create",
         message,
-        ticket: message.ticket,
-        contact: message.ticket.contact
+        ticket: ticketPayload,
+        contact: ticketPayload.contact
       });
 
     return message;

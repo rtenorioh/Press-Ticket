@@ -56,15 +56,31 @@ const reducer = (state, action) => {
 	if (action.type === "LOAD_TICKETS") {
 		const newTickets = action.payload;
 
-		newTickets.forEach((ticket) => {
-			const ticketIndex = state.findIndex((t) => t.id === ticket.id);
+		newTickets.forEach((incoming) => {
+			const ticketIndex = state.findIndex((t) => t.id === incoming.id);
 			if (ticketIndex !== -1) {
-				state[ticketIndex] = ticket;
-				if (ticket.unreadMessages > 0) {
+				const existing = state[ticketIndex];
+				const existingDate = existing.updatedAt ? new Date(existing.updatedAt) : null;
+				const incomingDate = incoming.updatedAt ? new Date(incoming.updatedAt) : null;
+				const useIncoming = !existingDate || !incomingDate || incomingDate >= existingDate;
+				const merged = {
+					...existing,
+					...(useIncoming ? incoming : {}),
+				};
+				// Preservar lastMessage quando o recebido vier vazio ou atrasado
+				if (!useIncoming || !incoming.lastMessage) {
+					merged.lastMessage = existing.lastMessage;
+				}
+				// UnreadMessages deve refletir o backend quando vier definido
+				if (incoming.unreadMessages !== undefined) {
+					merged.unreadMessages = incoming.unreadMessages;
+				}
+				state[ticketIndex] = merged;
+				if (merged.unreadMessages > 0) {
 					state.unshift(state.splice(ticketIndex, 1)[0]);
 				}
 			} else {
-				state.push(ticket);
+				state.push(incoming);
 			}
 		});
 
@@ -83,17 +99,23 @@ const reducer = (state, action) => {
 	}
 
 	if (action.type === "UPDATE_TICKET") {
-		const ticket = action.payload;
+		const incoming = action.payload;
 
-		const ticketIndex = state.findIndex((t) => t.id === ticket.id);
+		const ticketIndex = state.findIndex((t) => t.id === incoming.id);
 		if (ticketIndex !== -1) {
-			state[ticketIndex] = ticket;
+			const existing = state[ticketIndex];
+			const merged = {
+				...existing,
+				...incoming,
+				lastMessage: incoming.lastMessage || existing.lastMessage,
+			};
+			state[ticketIndex] = merged;
 			// Se o ticket tem mensagens não lidas, mover para o topo
-			if (ticket.unreadMessages > 0) {
+			if (merged.unreadMessages > 0) {
 				state.unshift(state.splice(ticketIndex, 1)[0]);
 			}
 		} else {
-			state.unshift(ticket);
+			state.unshift(incoming);
 		}
 
 		return [...state];
@@ -541,7 +563,7 @@ const TicketsList = (props) => {
 				}
 				
 				if (data.ticket) {
-					console.log(`[FRONT_APP_MSG_TICKET][${timestamp}] Detalhes do ticket associado:`, {
+					console.log(`[FRONT_APP_MSG_TICKET][${timestamp}] Ticket:`, {
 						id: data.ticket.id,
 						status: data.ticket.status,
 						unreadMessages: data.ticket.unreadMessages,
@@ -549,39 +571,26 @@ const TicketsList = (props) => {
 						queueId: data.ticket.queueId,
 						lastMessage: data.ticket.lastMessage
 					});
-					
-					// Verificar se o ticket deve ser exibido na lista atual
-					const shouldUpdate = shouldUpdateTicket(data.ticket);
-					console.log(`[FRONT_APP_MSG_DECISION][${timestamp}] Ticket ${data.ticket.id} deve ser atualizado? ${shouldUpdate ? 'Sim' : 'Não'}`);
 				}
 				
-				if (data.action === "create") {
-					console.log(`[FRONT_APP_MSG_CREATE][${timestamp}] Nova mensagem recebida para ticket: ${data.ticket?.id}`);
-					
-					if (data.ticket && shouldUpdateTicket(data.ticket)) {
-						console.log(`[FRONT_APP_MSG_SHOULD_UPDATE][${timestamp}] Ticket ${data.ticket.id} deve ser atualizado na lista`);
-						
-						// Sempre atualizar o ticket, independente se já existe ou não
-						// Isso garante sincronização em tempo real como nas notificações
-						try {
-							dispatch({
-								type: "UPDATE_TICKET_UNREAD_MESSAGES",
-								payload: data.ticket,
-							});
-							console.log(`[FRONT_APP_MSG_DISPATCH][${timestamp}] Dispatch UPDATE_TICKET_UNREAD_MESSAGES realizado com sucesso`);
-						} catch (error) {
-							console.error(`[FRONT_APP_MSG_ERRO][${timestamp}] Erro ao atualizar mensagens não lidas:`, error);
-						}
-					} else {
-						console.log(`[FRONT_APP_MSG_NO_UPDATE][${timestamp}] Ticket ${data.ticket?.id} não deve ser atualizado nesta lista`);
+				if ((data.action === "create" || data.action === "update") && data.ticket && shouldUpdateTicket(data.ticket)) {
+					try {
+						dispatch({
+							type: "UPDATE_TICKET_UNREAD_MESSAGES",
+							payload: data.ticket,
+						});
+						console.log(`[FRONT_APP_MSG_UPDATE_TICKET][${timestamp}] Ticket ${data.ticket.id} atualizado via '${data.action}'`);
+					} catch (error) {
+						console.error(`[FRONT_APP_MSG_UPDATE_ERROR][${timestamp}] Erro ao atualizar ticket:`, error);
 					}
 				}
-				
+
 				if (data.action === "update") {
 					console.log(`[FRONT_APP_MSG_ACK_UPDATE][${timestamp}] Atualização de ACK recebida: MessageId=${data.message?.id}, ACK=${data.message?.ack}`);
 				}
 			});
 
+			// Atualizações de contato
 			socket.on("contact", (data) => {
 				if (data.action === "update") {
 					dispatch({
@@ -591,21 +600,20 @@ const TicketsList = (props) => {
 				}
 			});
 			
+			// Lista consolidada de tickets vinda do backend
 			socket.on("ticketList", (data) => {
 				if (data && Array.isArray(data.tickets)) {
 					console.log("Recebendo lista de tickets atualizada", data.tickets.length);
-					
 					const filteredTickets = status 
 						? data.tickets.filter(ticket => ticket.status === status)
 						: data.tickets;
-					
 					if (filteredTickets.length > 0) {
 						console.log(`Carregando ${filteredTickets.length} tickets com status ${status}`);
 						dispatch({ type: "LOAD_TICKETS", payload: filteredTickets });
 					}
 				}
 			});
-			};
+		};
 
 		registerSocketEvents();
 

@@ -1,8 +1,8 @@
-import fs from "fs";
-import path from "path";
 import ffmpeg from "fluent-ffmpeg";
-import { MessageMedia, Message as WbotMessage } from "whatsapp-web.js";
+import fs from "fs";
 import mime from "mime-types";
+import path from "path";
+import { MessageMedia, Message as WbotMessage } from "whatsapp-web.js";
 import AppError from "../../errors/AppError";
 import GetTicketWbot from "../../helpers/GetTicketWbot";
 import Ticket from "../../models/Ticket";
@@ -209,7 +209,7 @@ const SendWhatsAppMedia = async ({
         
         // Para áudios, usar sendAudioAsVoice
         if (isAudio) {
-          options.sendAudioAsVoice = true;
+          options.sendAudioAsVoice = false;
         }
         
         try {

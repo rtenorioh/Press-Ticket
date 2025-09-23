@@ -5,9 +5,6 @@ import {
   Divider,
   IconButton,
   styled,
-  Tooltip,
-  Fab,
-  Checkbox
 } from "@mui/material";
 import {
   blue,
@@ -249,27 +246,6 @@ const MessageTimestamp = styled("span")(({ theme }) => ({
   minWidth: "40px",
 }));
 
-const DailyTimestamp = styled("span")(({ theme }) => ({
-  alignItems: "center",
-  textAlign: "center",
-  alignSelf: "center",
-  width: "110px",
-  backgroundColor: theme.palette.mode === 'dark' ? theme.palette.primary.dark + '20' : theme.palette.primary.light + '20',
-  margin: "10px auto",
-  borderRadius: theme.shape.borderRadius,
-  boxShadow: theme.shadows[1],
-  fontSize: "13px",
-  display: "flex",
-  justifyContent: "center",
-}));
-
-const DailyTimestampText = styled("div")(({ theme }) => ({
-  color: theme.palette.text.secondary,
-  padding: 8,
-  alignSelf: "center",
-  marginLeft: "0px",
-}));
-
 const DownloadMedia = styled("div")(({ theme }) => ({
   display: "flex",
   alignItems: "center",
@@ -379,9 +355,7 @@ const reducer = (state, action) => {
     const messageIndex = state.findIndex((m) => m.id === messageToUpdate.id);
     
     if (messageIndex !== -1) {
-      const oldMessage = state[messageIndex];
-      console.log(`[FRONT_REDUCER_FOUND][${timestamp}] Mensagem encontrada no índice ${messageIndex}. ACK anterior=${oldMessage.ack}, Novo ACK=${messageToUpdate.ack}`);
-      
+      const oldMessage = state[messageIndex];   
       
       const ackChanged = oldMessage.ack !== messageToUpdate.ack;
       const bodyChanged = oldMessage.body !== messageToUpdate.body;
@@ -395,8 +369,6 @@ const reducer = (state, action) => {
           ...messageToUpdate,
           _forceUpdate: Date.now()
         };
-        
-        console.log(`[FRONT_REDUCER_NOVO_ESTADO][${timestamp}] Novo estado criado com _forceUpdate=${newState[messageIndex]._forceUpdate}`);
         
         if (bodyChanged || editedChanged) {
           setTimeout(() => {
@@ -416,9 +388,7 @@ const reducer = (state, action) => {
         newState[messageIndex] = { ...oldMessage, ...messageToUpdate };
         return newState;
       }
-    } else {
-      console.warn(`[FRONT_REDUCER_NOT_FOUND][${timestamp}] Mensagem com ID ${messageToUpdate.id} não encontrada no estado`);
-    }
+    } 
 
     if (messageToUpdate.isDeleted === true) {
       toast.info(<ToastDisplay
@@ -447,8 +417,6 @@ const MessagesList = ({ ticketId, isGroup, onClick }) => {
   const messageOptionsMenuOpen = Boolean(anchorEl);
   const currentTicketId = useRef(ticketId);
   const theme = useTheme();
-  
-  // Forwarding functionality
   const {
     isForwardingMode,
     selectedMessages,
@@ -463,7 +431,6 @@ const MessagesList = ({ ticketId, isGroup, onClick }) => {
   const defaultImage = '/default-profile.png';
   const lastSocketEventTime = useRef(Date.now());
 
-  // Forwarding handlers
   const handleExitForwardingMode = () => {
     exitForwardingMode();
     clearSelectedMessages();
@@ -532,7 +499,6 @@ const MessagesList = ({ ticketId, isGroup, onClick }) => {
   }, [pageNumber, ticketId]);
 
   const scrollToBottom = useCallback((force = false) => {
-    const scrollUpTimeElapsed = Date.now() - lastScrollUpTime.current > 5000;
     
     if (force) {
       const messagesContainer = document.getElementById('messagesList');
@@ -557,15 +523,6 @@ const MessagesList = ({ ticketId, isGroup, onClick }) => {
   useEffect(() => {
     const processMessage = (data) => {
       const timestamp = new Date().toISOString();
-      console.log(`[FRONT_MSG_RECEBIDA][${timestamp}] Mensagem recebida via socket: Ação=${data.action}, ID=${data.message?.id}`);
-      console.log(`[FRONT_MSG_DETALHES][${timestamp}] Detalhes da mensagem:`, {
-        action: data.action,
-        messageId: data.message?.id,
-        body: data.message?.body?.substring(0, 50),
-        fromMe: data.message?.fromMe,
-        ack: data.message?.ack,
-        timestamp: data.message?.createdAt || data.message?.timestamp
-      });
       
       lastSocketEventTime.current = Date.now();
       
@@ -585,60 +542,35 @@ const MessagesList = ({ ticketId, isGroup, onClick }) => {
             try {
               dispatch({ type: "ADD_MESSAGE", payload: data.message });
               
-              if (!data.message.fromMe) {
-                console.log(`[FRONT_MSG_MARK_READ][${timestamp}] Marcando mensagens do ticket ${ticketId} como lidas após receber nova mensagem`);
-                
-                try {
-                  api.post(`/messages/${ticketId}/read`)
-                    .then(() => {
-                      console.log(`[FRONT_MSG_MARK_READ_SUCCESS][${timestamp}] Mensagens marcadas como lidas com sucesso`);
-                    })
-                    .catch((readError) => {
-                      console.error(`[FRONT_MSG_MARK_READ_ERROR][${timestamp}] Erro ao marcar mensagens como lidas:`, readError);
-                    });
-                } catch (apiError) {
-                  console.error(`[FRONT_MSG_MARK_READ_ERROR][${timestamp}] Erro ao chamar API para marcar mensagens como lidas:`, apiError);
-                }
-              }
-              
               setTimeout(() => {
                 try {
                   scrollToBottom(true);
-                  console.log(`[FRONT_MSG_SCROLL][${timestamp}] Scroll para o final realizado`);
                   
                   const messageElement = document.getElementById(data.message.id);
                   if (messageElement) {
                     messageElement.classList.add("highlight-new-message");
-                    console.log(`[FRONT_MSG_HIGHLIGHT][${timestamp}] Highlight adicionado à mensagem ${data.message.id}`);
+                    
                     setTimeout(() => {
                       messageElement.classList.remove("highlight-new-message");
                     }, 2000);
-                  } else {
-                    console.log(`[FRONT_MSG_ERRO][${timestamp}] Elemento da mensagem ${data.message.id} não encontrado no DOM`);
                   }
                 } catch (scrollError) {
-                  console.error(`[FRONT_MSG_ERRO_SCROLL][${timestamp}] Erro ao fazer scroll:`, scrollError);
+                  console.error(scrollError);
                 }
               }, 0);
             } catch (dispatchError) {
-              console.error(`[FRONT_MSG_ERRO_DISPATCH][${timestamp}] Erro ao fazer dispatch:`, dispatchError);
+              console.error(dispatchError);
             }
-          } else {
-            console.log(`[FRONT_MSG_DUPLICADA][${timestamp}] Mensagem ${data.message.id} já existe na lista, ignorando`);
           }
         }
 
         if (data.action === "update") {
-          console.log(`[FRONT_ACK_ATUALIZACAO][${timestamp}] Atualizando mensagem: ${data.message.id}, ACK=${data.message.ack}`);
           try {
             dispatch({ type: "UPDATE_MESSAGE", payload: data.message });
-            console.log(`[FRONT_ACK_DISPATCH][${timestamp}] Dispatch UPDATE_MESSAGE realizado com sucesso`);
           } catch (updateError) {
-            console.error(`[FRONT_ACK_ERRO][${timestamp}] Erro ao atualizar mensagem:`, updateError);
+            console.error(updateError);
           }
         }
-      } else {
-        console.log(`[FRONT_MSG_IGNORADA][${timestamp}] Mensagem ignorada, não pertence ao ticket atual. MessageTicketId=${messageTicketId}, TicketId=${ticketId}`);
       }
     };
     
@@ -650,11 +582,7 @@ const MessagesList = ({ ticketId, isGroup, onClick }) => {
       return;
     }
 
-    // Remover listeners antigos para evitar duplicação
-    socket.off("appMessage");
-    
-    // Registrar o novo listener com tratamento de erro
-    socket.on("appMessage", (data) => {
+    const handleAppMessage = (data) => {
       try {
         console.log(`[FRONT_SOCKET_EVENTO][${timestamp}] Evento appMessage recebido:`, {
           action: data.action,
@@ -666,7 +594,11 @@ const MessagesList = ({ ticketId, isGroup, onClick }) => {
       } catch (error) {
         console.error(`[FRONT_SOCKET_ERRO_PROCESSAMENTO][${timestamp}] Erro ao processar evento appMessage:`, error);
       }
-    });
+    };
+
+    // Remover apenas este handler (se existir) e registrar novamente
+    socket.off("appMessage", handleAppMessage);
+    socket.on("appMessage", handleAppMessage);
     
     // Verificar estado da conexão e entrar na sala do ticket
     if (socket.connected) {
@@ -787,7 +719,8 @@ const MessagesList = ({ ticketId, isGroup, onClick }) => {
 
     return () => {
       console.log("Desconectando socket do chatbox:", ticketId);
-      socket.off("appMessage");
+      // Remover somente o handler deste componente
+      socket.off("appMessage", handleAppMessage);
       socket.off("connect");
       document.removeEventListener('newMessage', handleNewMessage);
       document.removeEventListener('updateMessage', handleUpdateMessage);
