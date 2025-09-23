@@ -14,7 +14,6 @@ import ShowTicketService from "../services/TicketServices/ShowTicketService";
 import UpdateTicketService from "../services/TicketServices/UpdateTicketService";
 import SendWhatsAppMessage from "../services/WbotServices/SendWhatsAppMessage";
 import ShowWhatsAppService from "../services/WhatsappService/ShowWhatsAppService";
-import MarkMessagesAsReadService from "../services/MessageServices/MarkMessagesAsReadService";
 import { createActivityLog, ActivityActions, EntityTypes } from "../services/ActivityLogService";
 import CountTicketsService from "../services/TicketServices/CountTicketsService";
 
@@ -153,15 +152,6 @@ export const show = async (req: Request, res: Response): Promise<Response> => {
   const { ticketId } = req.params;
 
   const contact = await ShowTicketService(ticketId);
-
-  // Só marca mensagens como lidas se o ticket estiver aceito (status "open")
-  if (contact.status === "open") {
-    try {
-      await MarkMessagesAsReadService({ ticketId });
-    } catch (error) {
-      console.error("Erro ao marcar mensagens como lidas:", error);
-    }
-  }
 
   return res.status(200).json(contact);
 };

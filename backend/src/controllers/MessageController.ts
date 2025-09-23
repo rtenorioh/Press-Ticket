@@ -32,10 +32,6 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
     ticketId
   });
 
-  if (ticket.status === "open") {
-    await SetTicketMessagesAsRead(ticket);
-  }
-
   return res.json({ count, messages, ticket, hasMore });
 };
 
