@@ -2,6 +2,7 @@ import AppError from "../../errors/AppError";
 import GetWbotMessage from "../../helpers/GetWbotMessage";
 import Message from "../../models/Message";
 import Ticket from "../../models/Ticket";
+import OldMessage from "../../models/OldMessage";
 
 const EditWhatsAppMessage = async (
   messageId: string,
@@ -38,7 +39,17 @@ const EditWhatsAppMessage = async (
     throw new AppError("ERR_EDITING_WAPP_MSG");
   }
 
-  await message.update({ 
+  // Salvar o corpo antigo no histórico antes de atualizar
+  const oldBody = message.body;
+
+  if (typeof oldBody === "string" && oldBody !== newBody) {
+    await OldMessage.upsert({
+      messageId: message.id,
+      body: oldBody
+    });
+  }
+
+  await message.update({
     body: newBody,
     isEdited: true,
     updatedAt: new Date()
@@ -59,6 +70,10 @@ const EditWhatsAppMessage = async (
         model: Ticket,
         as: "ticket",
         include: ["contact"]
+      },
+      {
+        model: OldMessage,
+        as: "oldMessages"
       }
     ]
   });

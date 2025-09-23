@@ -1539,7 +1539,14 @@ const handleMsgEdit = async (
     await OldMessage.upsert(messageData);
     await editedMsg.update({ body: newBody, isEdited: true });
 
-    await editedMsg.reload();
+    await editedMsg.reload({
+      include: [
+        {
+          model: OldMessage,
+          as: "oldMessages"
+        }
+      ]
+    });
 
     io.to(editedMsg.ticketId.toString()).emit("appMessage", {
       action: "update",
