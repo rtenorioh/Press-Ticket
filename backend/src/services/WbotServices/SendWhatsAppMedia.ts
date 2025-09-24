@@ -66,6 +66,27 @@ const compressVideo = (inputPath: string, outputPath: string, ticketId: number, 
   });
 };
 
+// Função para transcodificar áudio para voz (OGG/Opus) compatível com WhatsApp
+const transcodeAudioToOpus = (inputPath: string, outputPath: string): Promise<void> => {
+  return new Promise((resolve, reject) => {
+    ffmpeg(inputPath)
+      .noVideo()
+      .audioCodec("libopus")
+      .audioBitrate("32k") // 16-32 kbps funciona bem; 32k mantém qualidade
+      .audioChannels(1)
+      .audioFrequency(16000)
+      .format("ogg")
+      .outputOptions([
+        "-application", "voip",
+        "-frame_duration", "20",
+        "-map_metadata", "-1"
+      ])
+      .on("end", () => resolve())
+      .on("error", (err) => reject(err))
+      .save(outputPath);
+  });
+};
+
 const SendWhatsAppMedia = async ({
   media,
   ticket,
@@ -105,6 +126,22 @@ const SendWhatsAppMedia = async ({
       maxSizeForDocument = 2048; // 2GB para documentos
     }
     
+    // Quando for áudio, tentar transcodificar para OGG/Opus (voz) para compatibilidade
+    if (isAudio) {
+      try {
+        const oggOutput = path.join(
+          path.dirname(media.path),
+          `voice_${Date.now()}_${media.filename.replace(/\.[^/.]+$/, "")}.ogg`
+        );
+        await transcodeAudioToOpus(media.path, oggOutput);
+        finalMediaPath = oggOutput;
+        shouldDeleteCompressed = true;
+        console.log("Áudio transcodificado para OGG/Opus (voz)");
+      } catch (audioErr) {
+        console.warn("Falha ao transcodificar áudio para Opus. Tentando enviar arquivo original:", audioErr?.message || audioErr);
+      }
+    }
+
     // Comprimir vídeos grandes
     if (isVideo && fileSizeInMB > 200) {
       console.log(`Vídeo muito grande (${fileSizeInMB.toFixed(2)}MB), comprimindo...`);
@@ -145,12 +182,16 @@ const SendWhatsAppMedia = async ({
 
     console.log(`Enviando arquivo: ${media.filename} (${finalSizeInMB.toFixed(2)}MB)`);
     
-    // Melhor tratamento do MIME type para vídeos WebM
+    // Melhor tratamento do MIME type para vídeos WebM e áudios OGG/Opus
     let mimeType = mime.lookup(finalMediaPath) || media.mimetype;
     
     // Garantir MIME type correto para WebM
     if (media.filename.toLowerCase().endsWith('.webm') && !mimeType.includes('webm')) {
       mimeType = 'video/webm';
+    }
+    // Garantir MIME type correto para OGG/Opus de voz
+    if ((finalMediaPath.toLowerCase().endsWith('.ogg') || finalMediaPath.toLowerCase().endsWith('.opus')) && !mimeType.includes('ogg') && !mimeType.includes('opus')) {
+      mimeType = 'audio/ogg';
     }
     
     console.log(`MIME type detectado: ${mimeType}`);
@@ -209,7 +250,7 @@ const SendWhatsAppMedia = async ({
         
         // Para áudios, usar sendAudioAsVoice
         if (isAudio) {
-          options.sendAudioAsVoice = false;
+          options.sendAudioAsVoice = true;
         }
         
         try {

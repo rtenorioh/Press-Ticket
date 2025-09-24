@@ -159,10 +159,6 @@ const InputBaseStyled = styled(InputBase)(({ theme }) => ({
   },
 }));
 
-const InputStyled = styled('input')(({ theme }) => ({
-  display: "none",
-}));
-
 const EmojiBoxStyled = styled(Box)(({ theme}) => ({
   position: "absolute",
   bottom: 63,
@@ -293,6 +289,13 @@ const MessageInput = ({ ticketStatus }) => {
   const { t } = useTranslation();
   const theme = useTheme();
   const mainWrapperRef = useRef(null);
+  const waveformCanvasRef = useRef(null);
+  const audioCtxRef = useRef(null);
+  const analyserRef = useRef(null);
+  const sourceRef = useRef(null);
+  const animationRef = useRef(null);
+  const streamRef = useRef(null);
+  const levelRef = useRef(0);
 
   useEffect(() => {
     const handleClickAway = (event) => {
@@ -308,6 +311,12 @@ const MessageInput = ({ ticketStatus }) => {
   useEffect(() => {
     inputRef.current.focus();
   }, [replyingMessage, editingMessage]);
+
+  useEffect(() => {
+    return () => {
+      try { stopAudioVisualizer(); } catch (_) {}
+    };
+  }, []);
 
   useEffect(() => {
     const fetchSettings = async () => {
@@ -639,7 +648,6 @@ const MessageInput = ({ ticketStatus }) => {
       if (editingMessage !== null) {
         response = await api.post(`/messages/edit/${editingMessage.id}`, message);
         
-        // Emitir evento local para atualizar a mensagem editada imediatamente
         if (response) {
           const updatedMessage = {
             ...editingMessage,
@@ -649,7 +657,6 @@ const MessageInput = ({ ticketStatus }) => {
             _forceUpdate: Date.now()
           };
           
-          // Disparar evento personalizado para atualização imediata
           setTimeout(() => {
             const event = new CustomEvent('updateMessage', { 
               detail: { 
@@ -660,7 +667,6 @@ const MessageInput = ({ ticketStatus }) => {
             document.dispatchEvent(event);
           }, 0);
           
-          // Emitir evento via socket para sincronização com outros clientes
           const socket = openSocket();
           if (socket) {
             socket.emit("appMessage", {
@@ -677,9 +683,7 @@ const MessageInput = ({ ticketStatus }) => {
           response = await api.post(`/messages/${ticketId}`, message);
         }
         
-        // Emitir evento local para atualizar a lista de mensagens imediatamente
         if (response && response.data) {
-          // Criar uma cópia local da mensagem para exibição imediata
           const messageData = {
             ...message,
             id: response.data.id || new Date().getTime().toString(),
@@ -690,8 +694,6 @@ const MessageInput = ({ ticketStatus }) => {
             read: 1
           };
           
-          // Disparar evento personalizado para o MessagesList com prioridade alta
-          // Isso garante que a mensagem seja exibida imediatamente
           setTimeout(() => {
             const event = new CustomEvent('newMessage', { 
               detail: { 
@@ -701,14 +703,12 @@ const MessageInput = ({ ticketStatus }) => {
             });
             document.dispatchEvent(event);
             
-            // Implementação do scroll automático ao enviar mensagem
             const messagesContainer = document.querySelector('.messages-list-scrollable');
             if (messagesContainer) {
               messagesContainer.scrollTop = messagesContainer.scrollHeight;
             }
           }, 0);
           
-          // Emitir evento via socket para sincronização com outros clientes
           const socket = openSocket();
           if (socket) {
             socket.emit("appMessage", {
@@ -738,13 +738,155 @@ const MessageInput = ({ ticketStatus }) => {
   const handleStartRecording = async () => {
     setLoading(true);
     try {
-      await navigator.mediaDevices.getUserMedia({ audio: true });
-      await Mp3Recorder.start();
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      streamRef.current = stream;
+      try {
+        await Mp3Recorder.start(stream);
+      } catch (e) {
+        await Mp3Recorder.start();
+      }
       setRecording(true);
       setLoading(false);
+      requestAnimationFrame(() => {
+        if (!waveformCanvasRef.current) {
+          setTimeout(() => startAudioVisualizer(stream), 50);
+        } else {
+          startAudioVisualizer(stream);
+        }
+      });
     } catch (err) {
       toastError(err);
       setLoading(false);
+    }
+  };
+
+  const startAudioVisualizer = (stream) => {
+    try {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      const audioCtx = new AudioCtx();
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume().catch(() => {});
+      }
+      const analyser = audioCtx.createAnalyser();
+      analyser.fftSize = 2048;
+      analyser.smoothingTimeConstant = 0.85;
+      const source = audioCtx.createMediaStreamSource(stream);
+      source.connect(analyser);
+
+      audioCtxRef.current = audioCtx;
+      analyserRef.current = analyser;
+      sourceRef.current = source;
+
+      const canvas = waveformCanvasRef.current;
+      if (!canvas) {
+        console.warn('[wave] canvas não disponível');
+        return;
+      }
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        console.warn('[wave] contexto 2d indisponível');
+        return;
+      }
+
+      const dpr = window.devicePixelRatio || 1;
+      const rect = canvas.getBoundingClientRect();
+      let cssWidth = Math.floor(rect.width) || 200;
+      let cssHeight = Math.floor(rect.height) || 24;
+      if (cssWidth === 0) {
+        setTimeout(() => startAudioVisualizer(stream), 100);
+        return;
+      }
+      canvas.width = Math.floor(cssWidth * dpr);
+      canvas.height = Math.floor(cssHeight * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+      let lastDebug = 0;
+      console.log('[wave] visualizador iniciado');
+      const draw = (ts) => {
+        const bufferLength = analyser.frequencyBinCount;
+        const dataArray = new Uint8Array(bufferLength);
+        analyser.getByteTimeDomainData(dataArray);
+
+        const r = canvas.getBoundingClientRect();
+        if (Math.floor(r.width) !== cssWidth || Math.floor(r.height) !== cssHeight) {
+          cssWidth = Math.floor(r.width) || 200;
+          cssHeight = Math.floor(r.height) || 24;
+          canvas.width = Math.floor(cssWidth * dpr);
+          canvas.height = Math.floor(cssHeight * dpr);
+          ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        }
+        const width = cssWidth;
+        const height = cssHeight;
+        ctx.clearRect(0, 0, width, height);
+        ctx.globalAlpha = 1;
+
+        let maxAbs = 0;
+        for (let i = 0; i < bufferLength; i += 4) {
+          const v = Math.abs((dataArray[i] - 128) / 128);
+          if (v > maxAbs) maxAbs = v;
+        }
+        const prevLevel = levelRef.current || 0;
+        const smoothed = prevLevel * 0.9 + maxAbs * 0.1;
+        levelRef.current = smoothed;
+
+        const speakThreshold = 0.025;
+
+        if (smoothed < speakThreshold) {
+          ctx.strokeStyle = theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.35)' : 'rgba(0,0,0,0.35)';
+          ctx.lineWidth = 2;
+          ctx.setLineDash([6, 6]);
+          ctx.beginPath();
+          ctx.moveTo(0, height / 2);
+          ctx.lineTo(width, height / 2);
+          ctx.stroke();
+          ctx.setLineDash([]);
+        } else {
+          const barCount = Math.min(60, Math.floor(width / 6));
+          const step = Math.max(1, Math.floor(bufferLength / barCount));
+          for (let i = 0; i < barCount; i++) {
+            const v = (dataArray[i * step] - 128) / 128;
+            let amp = Math.max(4, Math.abs(v) * height * 0.7);
+            amp = Math.max(amp, smoothed * height * 0.6);
+            const barWidth = 3;
+            const x = i * 6 + 1.5;
+            const y = (height - amp) / 2;
+            ctx.fillStyle = theme.palette.mode === 'dark' ? '#9e9e9e' : '#6b6f75';
+            ctx.globalAlpha = 0.95;
+            ctx.fillRect(x, y, barWidth, amp);
+          }
+        }
+        if (!lastDebug || ts - lastDebug > 1000) {
+          lastDebug = ts;
+        }
+        animationRef.current = requestAnimationFrame(draw);
+      };
+      animationRef.current = requestAnimationFrame(draw);
+    } catch (e) {
+      console.warn('Falha ao iniciar visualizador de áudio:', e);
+    }
+  };
+
+  const stopAudioVisualizer = () => {
+    if (animationRef.current) {
+      cancelAnimationFrame(animationRef.current);
+      animationRef.current = null;
+    }
+    if (audioCtxRef.current) {
+      try { audioCtxRef.current.close(); } catch (_) {}
+      audioCtxRef.current = null;
+    }
+    if (streamRef.current) {
+      try {
+        streamRef.current.getTracks().forEach(t => t.stop());
+      } catch (_) {}
+      streamRef.current = null;
+    }
+    const canvas = waveformCanvasRef.current;
+    if (canvas) {
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
     }
   };
 
@@ -776,6 +918,7 @@ const MessageInput = ({ ticketStatus }) => {
       if (blob.size < 10000) {
         setLoading(false);
         setRecording(false);
+        stopAudioVisualizer();
         return;
       }
 
@@ -795,6 +938,7 @@ const MessageInput = ({ ticketStatus }) => {
 
     setRecording(false);
     setLoading(false);
+    stopAudioVisualizer();
   };
 
   const handleCancelAudio = async () => {
@@ -804,6 +948,7 @@ const MessageInput = ({ ticketStatus }) => {
     } catch (err) {
       toastError(err);
     }
+    stopAudioVisualizer();
   };
 
   const handleOpenMenuClick = (event) => {
@@ -889,7 +1034,6 @@ const MessageInput = ({ ticketStatus }) => {
 
   const handleContactSelect = (contacts) => {
     if (contacts && contacts.length > 0) {
-      // Criar dados dos contatos para envio
       const contactsData = contacts.map(contact => ({
         id: contact.id,
         name: contact.name,
@@ -897,7 +1041,6 @@ const MessageInput = ({ ticketStatus }) => {
         profilePicUrl: contact.profilePicUrl
       }));
 
-      // Enviar contatos via API
       handleSendContacts(contactsData);
     }
   };
@@ -913,7 +1056,6 @@ const MessageInput = ({ ticketStatus }) => {
       });
 
       if (data) {
-        // Scroll automático ao enviar contatos
         setTimeout(() => {
           const messagesContainer = document.querySelector('.messages-list-scrollable');
           if (messagesContainer) {
@@ -1277,6 +1419,22 @@ const MessageInput = ({ ticketStatus }) => {
               >
                 <HighlightOff sx={{ color: theme.palette.error.main }} />
               </IconButton>
+              <Box sx={{
+                width: 220,
+                height: 36,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)',
+                borderRadius: '18px',
+                padding: '4px 8px',
+                border: `1px solid ${theme.palette.divider}`
+              }}>
+                <canvas
+                  ref={waveformCanvasRef}
+                  style={{ width: 200, height: 24, display: 'block' }}
+                />
+              </Box>
               {loading ? (
                 <div>
                   <CircularProgress sx={{ color: theme.palette.success.main, opacity: "70%" }} />
@@ -1310,7 +1468,6 @@ const MessageInput = ({ ticketStatus }) => {
             </Tooltip>
           )}
         </NewMessageBox>
-        {/* Modal de Upload */}
         <UploadModal 
           open={showUploadModal}
           onClose={() => {
