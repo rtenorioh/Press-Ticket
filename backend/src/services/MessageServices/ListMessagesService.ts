@@ -4,6 +4,7 @@ import Message from "../../models/Message";
 import OldMessage from "../../models/OldMessage";
 import Ticket from "../../models/Ticket";
 import ShowTicketService from "../TicketServices/ShowTicketService";
+import MessageReaction from "../../models/MessageReaction";
 
 interface Request {
   ticketId: string;
@@ -27,7 +28,6 @@ const ListMessagesService = async ({
     throw new AppError("ERR_NO_TICKET_FOUND", 404);
   }
 
-  // await setMessagesAsRead(ticket);
   const limit = 20;
   const offset = limit * (+pageNumber - 1);
 
@@ -63,6 +63,40 @@ const ListMessagesService = async ({
   });
 
   const hasMore = count > offset + messages.length;
+
+  try {
+    const ids = messages.map(m => m.id);
+    if (ids.length > 0) {
+      const allReacts = await MessageReaction.findAll({
+        where: { messageId: ids }
+      });
+
+      const countsMap: Record<string, Record<string, number>> = {};
+      const sendersMap: Record<string, Record<string, string[]>> = {};
+
+      for (const r of allReacts) {
+        const mid = (r as any).messageId as string;
+        const emoji = (r as any).emoji as string;
+        const senderId = (r as any).senderId as string;
+        if (!countsMap[mid]) countsMap[mid] = {};
+        if (!sendersMap[mid]) sendersMap[mid] = {};
+        if (!countsMap[mid][emoji]) countsMap[mid][emoji] = 0;
+        if (!sendersMap[mid][emoji]) sendersMap[mid][emoji] = [];
+        countsMap[mid][emoji] += 1;
+        sendersMap[mid][emoji].push(senderId);
+      }
+
+      for (const m of messages) {
+        const mid = m.id;
+        const counts = countsMap[mid] || {};
+        const senders = sendersMap[mid] || {};
+        (m as any).setDataValue("reactions", counts);
+        (m as any).setDataValue("reactionSenders", senders);
+      }
+    }
+  } catch (err) {
+    // console.warn("Skipping reactions aggregation:", err);
+  }
 
   return {
     messages: messages.reverse(),

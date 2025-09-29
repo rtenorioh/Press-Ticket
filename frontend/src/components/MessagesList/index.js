@@ -42,6 +42,7 @@ import ForwardingBar from "../ForwardingBar";
 import ForwardMessageModal from "../ForwardMessageModal";
 import { useForwardingMessage } from "../../context/ForwardingMessage";
 import { useTheme } from "@mui/material/styles";
+import MessageReactionsModal from "../MessageReactionsModal";
 
 const MessagesListWrapper = styled("div")(({ theme }) => ({
   overflow: "hidden",
@@ -402,6 +403,24 @@ const reducer = (state, action) => {
   if (action.type === "RESET") {
     return [];
   }
+
+  if (action.type === "UPDATE_MESSAGE_REACTIONS") {
+    const { messageId, emoji, actionType } = action.payload;
+    const idx = state.findIndex(m => m.id === messageId);
+    if (idx === -1) return state;
+    const msg = state[idx];
+    const current = { ...(msg.reactions || {}) };
+    const currCount = current[emoji] || 0;
+    if (actionType === "update") {
+      current[emoji] = currCount + 1;
+    } else if (actionType === "remove") {
+      current[emoji] = Math.max(0, currCount - 1);
+      if (current[emoji] === 0) delete current[emoji];
+    }
+    const newState = [...state];
+    newState[idx] = { ...msg, reactions: current };
+    return newState;
+  }
 };
 
 const MessagesList = ({ ticketId, isGroup, onClick }) => {
@@ -417,6 +436,8 @@ const MessagesList = ({ ticketId, isGroup, onClick }) => {
   const messageOptionsMenuOpen = Boolean(anchorEl);
   const currentTicketId = useRef(ticketId);
   const theme = useTheme();
+  const [reactionsModalOpen, setReactionsModalOpen] = useState(false);
+  const [reactionsMessageId, setReactionsMessageId] = useState(null);
   const {
     isForwardingMode,
     selectedMessages,
@@ -596,26 +617,25 @@ const MessagesList = ({ ticketId, isGroup, onClick }) => {
       }
     };
 
-    // Remover apenas este handler (se existir) e registrar novamente
     socket.off("appMessage", handleAppMessage);
     socket.on("appMessage", handleAppMessage);
+
+    const handleMessageReaction = (data) => {
+      try {
+        const { messageId, emoji, action: actionType } = data || {};
+        if (!messageId) return;
+        dispatch({ type: "UPDATE_MESSAGE_REACTIONS", payload: { messageId, emoji, actionType } });
+      } catch (e) { console.error(e); }
+    };
+    socket.off("messageReaction", handleMessageReaction);
+    socket.on("messageReaction", handleMessageReaction);
     
-    // Verificar estado da conexão e entrar na sala do ticket
     if (socket.connected) {
-      console.log(`[FRONT_SOCKET_CONECTADO][${timestamp}] Socket já conectado, entrando no chatbox: ${ticketId}`);
       socket.emit("joinChatBox", ticketId);
-      
-      // Solicitar estado atual das mensagens do ticket
-      console.log(`[FRONT_SOCKET_SYNC_REQUEST][${timestamp}] Solicitando sincronização de mensagens para o ticket: ${ticketId}`);
       socket.emit("syncMessages", { ticketId });
     } else {
-      console.log(`[FRONT_SOCKET_DESCONECTADO][${timestamp}] Socket desconectado, aguardando conexão...`);
       socket.on("connect", () => {
-        console.log(`[FRONT_SOCKET_RECONECTADO][${timestamp}] Socket conectado, entrando no chatbox: ${ticketId}`);
         socket.emit("joinChatBox", ticketId);
-        
-        // Solicitar estado atual das mensagens do ticket após reconexão
-        console.log(`[FRONT_SOCKET_RESYNC_REQUEST][${timestamp}] Solicitando sincronização de mensagens após reconexão para o ticket: ${ticketId}`);
         socket.emit("syncMessages", { ticketId });
       });
     }
@@ -642,7 +662,6 @@ const MessagesList = ({ ticketId, isGroup, onClick }) => {
       const { message, ticketId: messageTicketId } = event.detail;
       
       if (parseInt(messageTicketId) === parseInt(ticketId)) {
-        console.log("Mensagem editada via evento personalizado:", message);
         dispatch({ type: "UPDATE_MESSAGE", payload: message });
       }
     };
@@ -650,29 +669,23 @@ const MessagesList = ({ ticketId, isGroup, onClick }) => {
     document.addEventListener('newMessage', handleNewMessage);
     document.addEventListener('updateMessage', handleUpdateMessage);
 
-    // Controle para evitar requisições simultâneas
     let isPollingActive = true;
     
     const refreshInterval = setInterval(() => {
       const timestamp = new Date().toISOString();
-      
-      // Verificar se houve atualização recente via socket (menos de 5 segundos)
       const timeSinceLastSocketUpdate = Date.now() - lastSocketEventTime.current;
       
       if (timeSinceLastSocketUpdate < 5000) {
-        console.log(`[FRONT_POLLING_SKIP][${timestamp}] Pulando verificação periódica, atualização via socket recente (${Math.floor(timeSinceLastSocketUpdate/1000)}s atrás)`);
         return;
       }
       
       if (!isPollingActive) {
-        console.log(`[FRONT_POLLING_BUSY][${timestamp}] Pulando verificação periódica, consulta anterior em andamento`);
         return;
       }
       
       const fetchLatestMessages = async () => {
         try {
           isPollingActive = false;
-          console.log(`[FRONT_POLLING_START][${timestamp}] Iniciando verificação periódica para o ticket ${ticketId}`);
           
           const { data } = await api.get(`/messages/${ticketId}`, {
             params: { pageNumber: 1 }
@@ -686,18 +699,15 @@ const MessagesList = ({ ticketId, isGroup, onClick }) => {
               const existingMessageIndex = messagesList.findIndex(m => m.id === message.id);
               
               if (existingMessageIndex === -1) {
-                console.log(`[FRONT_POLLING_NOVA][${timestamp}] Adicionando nova mensagem da verificação periódica: ${message.id}`);
                 dispatch({ type: "ADD_MESSAGE", payload: message });
                 hasNewMessages = true;
               } else if (messagesList[existingMessageIndex].ack !== message.ack) {
-                console.log(`[FRONT_POLLING_ACK][${timestamp}] Atualizando ACK via polling: ID=${message.id}, ACK anterior=${messagesList[existingMessageIndex].ack}, Novo ACK=${message.ack}`);
                 dispatch({ type: "UPDATE_MESSAGE", payload: message });
                 updatedMessages++;
               }
             });
             
             if (hasNewMessages) {
-              console.log(`[FRONT_POLLING_SCROLL][${timestamp}] Novas mensagens encontradas, fazendo scroll`);
               setTimeout(() => {
                 scrollToBottom(true);
               }, 0);
@@ -715,12 +725,11 @@ const MessagesList = ({ ticketId, isGroup, onClick }) => {
       };
       
       fetchLatestMessages();
-    }, 5000); // Aumentado para 5 segundos para reduzir a carga no servidor
+    }, 5000);
 
     return () => {
-      console.log("Desconectando socket do chatbox:", ticketId);
-      // Remover somente o handler deste componente
       socket.off("appMessage", handleAppMessage);
+      socket.off("messageReaction", handleMessageReaction);
       socket.off("connect");
       document.removeEventListener('newMessage', handleNewMessage);
       document.removeEventListener('updateMessage', handleUpdateMessage);
@@ -728,6 +737,29 @@ const MessagesList = ({ ticketId, isGroup, onClick }) => {
       socket.emit("leaveChatBox", ticketId);
     };
   }, [ticketId, messagesList, scrollToBottom]);
+
+  const renderReactions = (message) => {
+    const reactions = message.reactions || {};
+    const entries = Object.entries(reactions).filter(([, count]) => count > 0);
+    if (entries.length === 0) return null;
+    return (
+      <span
+        onClick={() => { setReactionsMessageId(message.id); setReactionsModalOpen(true); }}
+        title={t("messageReactions.open", { defaultValue: "Ver reações" })}
+        style={{ display: 'inline-flex', gap: 6, alignItems: 'center', marginRight: 6, cursor: 'pointer' }}
+      >
+        {entries.map(([emoji, count]) => (
+          <span key={`${message.id}-${emoji}`} style={{
+            display: 'inline-flex', alignItems: 'center', gap: 4,
+            background: 'rgba(0,0,0,0.06)', borderRadius: 12, padding: '1px 6px', fontSize: 11
+          }}>
+            <span style={{ fontSize: 13 }}>{emoji}</span>
+            <span>{count}</span>
+          </span>
+        ))}
+      </span>
+    );
+  };
 
   const loadMore = () => {
     setPageNumber((prevPageNumber) => prevPageNumber + 1);
@@ -957,9 +989,6 @@ const MessagesList = ({ ticketId, isGroup, onClick }) => {
   };
 
   const renderMessageAck = (message) => {
-    const timestamp = new Date().toISOString();
-    
-    // Seguindo exatamente a documentação da biblioteca whatsapp-web.js:
     // ACK_ERROR: -1
     // ACK_PENDING: 0
     // ACK_SERVER: 1
@@ -1241,6 +1270,7 @@ const MessagesList = ({ ticketId, isGroup, onClick }) => {
                 <b>{t("messagesList.message.type")}</b>: <i>{message.mediaType}</i> <br />
                 {t("messagesList.message.notCompatibleWithSystem")} <br />
                 {t("messagesList.message.viewOnMobile")} <br />
+                {renderReactions(message)}
                 <MessageTimestamp>
                   {format(parseISO(message.createdAt), "HH:mm")}
                 </MessageTimestamp>
@@ -1351,6 +1381,7 @@ const MessagesList = ({ ticketId, isGroup, onClick }) => {
                   {message.quotedMsg && <div style={{ marginBottom: '8px' }}>{renderQuotedMessage(message)}</div>}
 
                   {message.mediaType !== "multi_vcard" && message.mediaType !== "location" && message.mediaType !== "vcard" && <WhatsMarked sx={{ fontSize: 'inherit', lineHeight: 'inherit', display: 'flex', width: '100%' }}>{message.body}</WhatsMarked>}
+                  {renderReactions(message)}
                   <MessageTimestamp>
                     {message.isEdited && <span>{t("messagesList.message.edited")} </span>}
                     {format(parseISO(message.createdAt), "HH:mm")}
@@ -1361,8 +1392,6 @@ const MessagesList = ({ ticketId, isGroup, onClick }) => {
             </React.Fragment>
           );
         }
-        
-        // Messages sent by me (fromMe = true)
         const isSelected = selectedMessages.some(msg => msg.id === message.id);
         return (
           <React.Fragment key={message.id}>
@@ -1423,6 +1452,7 @@ const MessagesList = ({ ticketId, isGroup, onClick }) => {
                 <MessageItem message={message}>
                   {message.quotedMsg && <div style={{ marginBottom: '8px' }}>{renderQuotedMessage(message)}</div>}
                   {message.mediaType !== "multi_vcard" && message.mediaType !== "location" && message.mediaType !== "vcard" && <WhatsMarked sx={{ fontSize: 'inherit', lineHeight: 'inherit', display: 'flex', width: '100%' }}>{message.body}</WhatsMarked>}
+                  {renderReactions(message)}
                   <MessageTimestamp>
                     {message.isEdited && <span>{t("messagesList.message.edited")} </span>}
                     {format(parseISO(message.createdAt), "HH:mm")}
@@ -1489,7 +1519,6 @@ const MessagesList = ({ ticketId, isGroup, onClick }) => {
       </MessagesListStyled>
       <ScrollToBottomButton
         onClick={() => {
-          // Implementação direta do scroll para o final da lista
           const messagesContainer = document.querySelector('.messages-list-scrollable');
           if (messagesContainer) {
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
@@ -1507,7 +1536,6 @@ const MessagesList = ({ ticketId, isGroup, onClick }) => {
         </div>
       )}
       
-      {/* Forwarding Bar */}
       <ForwardingBar
         isVisible={isForwardingMode}
         selectedCount={selectedMessages.length}
@@ -1515,13 +1543,20 @@ const MessagesList = ({ ticketId, isGroup, onClick }) => {
         onForward={handleOpenForwardModal}
       />
       
-      {/* Forward Modal */}
       <ForwardMessageModal
         open={forwardModalOpen}
         onClose={handleCloseForwardModal}
         selectedMessages={selectedMessages}
       />
+
+      <MessageReactionsModal
+        open={reactionsModalOpen}
+        onClose={() => setReactionsModalOpen(false)}
+        messageId={reactionsMessageId}
+        t={t}
+      />
     </MessagesListWrapper>
+
   );
 };
 

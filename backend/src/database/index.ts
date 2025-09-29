@@ -23,6 +23,7 @@ import VideoUser from "../models/VideoUser";
 import Whatsapp from "../models/Whatsapp";
 import WhatsappNotification from "../models/WhatsappNotification";
 import WhatsappQueue from "../models/WhatsappQueue";
+import MessageReaction from "../models/MessageReaction";
 
 // eslint-disable-next-line
 const dbConfig = require("../config/database");
@@ -53,7 +54,8 @@ const models = [
   ErrorLog,
   ActivityLog,
   Video,
-  VideoUser
+  VideoUser,
+  MessageReaction
 ];
 
 sequelize.addModels(models);

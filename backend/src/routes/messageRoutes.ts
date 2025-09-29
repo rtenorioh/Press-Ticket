@@ -17,5 +17,7 @@ messageRoutes.post("/messages/:ticketId/forward", isAuth, MessageController.forw
 messageRoutes.post("/messages/edit/:messageId", isAuth, MessageController.edit);
 messageRoutes.delete("/messages/:messageId", isAuth, MessageController.remove);
 messageRoutes.post("/messages/:ticketId/read", isAuth, MessageController.markAsRead);
+messageRoutes.post("/messages/:messageId/reactions", isAuth, MessageController.reactMessage);
+messageRoutes.get("/messages/:messageId/reactions", isAuth, MessageController.getReactions);
 
 export default messageRoutes;

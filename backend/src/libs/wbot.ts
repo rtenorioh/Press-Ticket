@@ -270,27 +270,40 @@ export const initWbot = async (whatsapp: Whatsapp): Promise<Session> => {
         resolve(wbot);
       });
 
-      wbot.on("message", async msg => {
-        const msgChatGPT: string = msg.body;
+      wbot.on("message_reaction", async (reaction: any) => {
+        try {
+          const parentId = reaction?.msgId?.id || reaction?.msgId?._serialized || reaction?.msgId || reaction?.id?.id || reaction?.id?._serialized;
+          if (!parentId) return;
 
-        if (msgChatGPT.includes("/gpt ")) {
-          const index = msgChatGPT.indexOf(" ");
-          const question = msgChatGPT.substring(index + 1);
-          getDavinciResponse(question).then((response: string) => {
-            wbot.sendMessage(msg.from, response);
-          });
-        }
+          const MessageModel = (await import("../models/Message")).default;
+          const msg = await MessageModel.findByPk(parentId);
+          if (!msg) return;
 
-        if (msgChatGPT.includes("/gptM ")) {
-          const index = msgChatGPT.indexOf(" ");
-          const imgDescription = msgChatGPT.substring(index + 1);
-          const imgUrl = await getDalleResponse(imgDescription);
-          if (imgUrl) {
-            const media = await MessageMedia.fromUrl(imgUrl);
-            wbot.sendMessage(msg.from, media, { caption: imgDescription });
-          } else {
-            wbot.sendMessage(msg.from, "❌ Não foi possível gerar a imagem.");
+          const io = getIO();
+          const sender = reaction?.senderId || reaction?.author || reaction?.participant || reaction?.from || reaction?.id?.participant || "";
+          const emoji = reaction?.reaction || "";
+          const action = emoji ? "update" : "remove";
+
+          try {
+            const MessageReaction = (await import("../models/MessageReaction")).default;
+            if (action === "update" && emoji) {
+              await MessageReaction.destroy({ where: { messageId: parentId, senderId: sender } });
+              await MessageReaction.create({ messageId: parentId, senderId: sender, emoji });
+            } else {
+              await MessageReaction.destroy({ where: { messageId: parentId, senderId: sender } });
+            }
+          } catch (dbErr) {
+            logger.warn("Persist reaction skipped (table might be missing)");
           }
+
+          io.to(msg.ticketId.toString()).emit("messageReaction", {
+            action,
+            messageId: parentId,
+            emoji,
+            senderId: sender
+          });
+        } catch (err) {
+          logger.warn("Erro ao processar evento message_reaction:", err);
         }
       });
     } catch (err: any) {
