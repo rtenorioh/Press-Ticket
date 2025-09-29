@@ -15,7 +15,6 @@ interface Request {
   body?: string;
 }
 
-// Função para comprimir vídeo com progresso
 const compressVideo = (inputPath: string, outputPath: string, ticketId: number, socketIo?: any): Promise<void> => {
   return new Promise((resolve, reject) => {
     const command = ffmpeg(inputPath)
@@ -66,7 +65,6 @@ const compressVideo = (inputPath: string, outputPath: string, ticketId: number, 
   });
 };
 
-// Função para transcodificar áudio para voz (OGG/Opus) compatível com WhatsApp
 const transcodeAudioToOpus = (inputPath: string, outputPath: string): Promise<void> => {
   return new Promise((resolve, reject) => {
     ffmpeg(inputPath)
@@ -98,19 +96,16 @@ const SendWhatsAppMedia = async ({
   try {
     const wbot = await GetTicketWbot(ticket);
     
-    // Importar socket.io para emitir eventos de progresso
     const { getIO } = require("../../libs/socket");
     const hasBody = body
       ? formatBody(body as string, ticket)
       : undefined;
 
-    // Identificar tipo de mídia
     const isVideo = media.mimetype.startsWith('video/');
     const isAudio = media.mimetype.startsWith('audio/');
     const isImage = media.mimetype.startsWith('image/');
     const fileSizeInMB = media.size / (1024 * 1024);
     
-    // Definir limites por tipo de mídia
     let maxSizeForMedia, maxSizeForDocument;
     if (isVideo) {
       maxSizeForMedia = 100; // 100MB para vídeos como mídia
@@ -126,7 +121,6 @@ const SendWhatsAppMedia = async ({
       maxSizeForDocument = 2048; // 2GB para documentos
     }
     
-    // Quando for áudio, tentar transcodificar para OGG/Opus (voz) para compatibilidade
     if (isAudio) {
       try {
         const oggOutput = path.join(
@@ -136,16 +130,12 @@ const SendWhatsAppMedia = async ({
         await transcodeAudioToOpus(media.path, oggOutput);
         finalMediaPath = oggOutput;
         shouldDeleteCompressed = true;
-        console.log("Áudio transcodificado para OGG/Opus (voz)");
       } catch (audioErr) {
         console.warn("Falha ao transcodificar áudio para Opus. Tentando enviar arquivo original:", audioErr?.message || audioErr);
       }
     }
 
-    // Comprimir vídeos grandes
-    if (isVideo && fileSizeInMB > 200) {
-      console.log(`Vídeo muito grande (${fileSizeInMB.toFixed(2)}MB), comprimindo...`);
-      
+    if (isVideo && fileSizeInMB > 200) {      
       const compressedPath = path.join(
         path.dirname(media.path),
         `compressed_${Date.now()}_${media.filename.replace(/\.[^/.]+$/, ".mp4")}`
@@ -153,9 +143,7 @@ const SendWhatsAppMedia = async ({
       
       try {
         const io = getIO();
-        
-        // Emitir evento de início da compressão
-        console.log(`Emitindo evento de início para ticket ${ticket.id}`);
+    
         io.emit(`video-compression-progress-${ticket.id}`, {
           ticketId: ticket.id,
           progress: 0,
@@ -165,42 +153,29 @@ const SendWhatsAppMedia = async ({
         await compressVideo(media.path, compressedPath, ticket.id, io);
         finalMediaPath = compressedPath;
         shouldDeleteCompressed = true;
-        console.log('Vídeo comprimido com sucesso');
       } catch (compressionError) {
         console.error('Erro na compressão, enviando arquivo original:', compressionError);
       }
     }
 
-    // Verificar tamanho final do arquivo
     const finalStats = fs.statSync(finalMediaPath);
     const finalSizeInMB = finalStats.size / (1024 * 1024);
     
-    // Verificar se excede limite máximo absoluto
     if (finalSizeInMB > maxSizeForDocument) {
       throw new AppError(`Arquivo muito grande (${finalSizeInMB.toFixed(2)}MB). Tamanho máximo: ${maxSizeForDocument}MB`);
     }
-
-    console.log(`Enviando arquivo: ${media.filename} (${finalSizeInMB.toFixed(2)}MB)`);
-    
-    // Melhor tratamento do MIME type para vídeos WebM e áudios OGG/Opus
     let mimeType = mime.lookup(finalMediaPath) || media.mimetype;
     
-    // Garantir MIME type correto para WebM
     if (media.filename.toLowerCase().endsWith('.webm') && !mimeType.includes('webm')) {
       mimeType = 'video/webm';
     }
-    // Garantir MIME type correto para OGG/Opus de voz
+    
     if ((finalMediaPath.toLowerCase().endsWith('.ogg') || finalMediaPath.toLowerCase().endsWith('.opus')) && !mimeType.includes('ogg') && !mimeType.includes('opus')) {
       mimeType = 'audio/ogg';
     }
-    
-    console.log(`MIME type detectado: ${mimeType}`);
-    
-    // Determinar método de envio baseado no tamanho e tipo
     let sentMessage;
     let sendAsDocument = false;
     
-    // Decidir se deve enviar como documento
     if (finalSizeInMB > maxSizeForMedia) {
       sendAsDocument = true;
       console.log(`Arquivo excede limite de mídia (${maxSizeForMedia}MB), enviando como documento`);
@@ -212,7 +187,6 @@ const SendWhatsAppMedia = async ({
     //   console.log(`Vídeo da câmera detectado (${finalSizeInMB.toFixed(2)}MB), tentando como mídia para ter player`);
     // }
     
-    // Para arquivos muito pequenos que não são vídeos, sempre enviar como mídia
     if (finalSizeInMB < 1 && !isVideo) {
       sendAsDocument = false;
     }
@@ -220,19 +194,21 @@ const SendWhatsAppMedia = async ({
     try {
       const fileData = fs.readFileSync(finalMediaPath, { encoding: 'base64' });
       
-      // Limite do puppeteer para base64 (aproximadamente 100MB em base64)
       const maxBase64Size = 140000000; // ~100MB em base64 (para arquivos até 100MB)
       if (fileData.length > maxBase64Size) {
         console.log(`Arquivo muito grande para base64: ${(fileData.length / 1000000).toFixed(1)}MB`);
         throw new AppError(`Arquivo muito grande para processamento (${(fileData.length / 1000000).toFixed(1)}MB em base64). Tente comprimir o arquivo ou enviar um arquivo menor.`);
       }
-      
-      console.log(`Criando MessageMedia - Tipo: ${mimeType}, Tamanho base64: ${(fileData.length / 1000000).toFixed(1)}MB`);
+    
       const newMedia = new MessageMedia(mimeType, fileData, media.filename);
       
       if (sendAsDocument) {
-        // Enviar como documento
-        console.log(`Enviando como documento - Tipo: ${mimeType}`);
+        try {
+          const chatId = `${ticket.contact.number}@${ticket.isGroup ? "g" : "c"}.us`;
+          const chat = await wbot.getChatById(chatId);
+          await chat.sendStateTyping();
+          await new Promise(resolve => setTimeout(resolve, 400));
+        } catch (e) {}
         sentMessage = await wbot.sendMessage(
           `${ticket.contact.number}@${ticket.isGroup ? "g" : "c"}.us`,
           newMedia,
@@ -241,29 +217,35 @@ const SendWhatsAppMedia = async ({
             sendMediaAsDocument: true
           }
         );
-        console.log('Documento enviado com sucesso');
       } else {
-        // Enviar como mídia normal com fallback para documento
         const options: any = {
           caption: hasBody
         };
         
-        // Para áudios, usar sendAudioAsVoice
         if (isAudio) {
           options.sendAudioAsVoice = true;
         }
         
         try {
-          console.log(`Tentando enviar mídia - Tipo: ${mimeType}, Como documento: ${sendAsDocument}`);
+          try {
+            const chatId = `${ticket.contact.number}@${ticket.isGroup ? "g" : "c"}.us`;
+            const chat = await wbot.getChatById(chatId);
+            await chat.sendStateTyping();
+            await new Promise(resolve => setTimeout(resolve, 400));
+          } catch (e) {}
           sentMessage = await wbot.sendMessage(
             `${ticket.contact.number}@${ticket.isGroup ? "g" : "c"}.us`,
             newMedia,
             options
           );
-          console.log('Mídia enviada com sucesso');
+
         } catch (mediaError) {
-          console.log('Falha ao enviar como mídia, tentando como documento:', mediaError.message);
-          // Fallback automático para documento
+          try {
+            const chatId = `${ticket.contact.number}@${ticket.isGroup ? "g" : "c"}.us`;
+            const chat = await wbot.getChatById(chatId);
+            await chat.sendStateTyping();
+            await new Promise(resolve => setTimeout(resolve, 400));
+          } catch (e) {}
           sentMessage = await wbot.sendMessage(
             `${ticket.contact.number}@${ticket.isGroup ? "g" : "c"}.us`,
             newMedia,
@@ -307,7 +289,6 @@ const SendWhatsAppMedia = async ({
       console.error("Erro ao salvar mensagem de mídia no banco de dados:", err);
     }
 
-    // Limpar arquivos
     fs.unlinkSync(media.path);
     if (shouldDeleteCompressed && fs.existsSync(finalMediaPath)) {
       fs.unlinkSync(finalMediaPath);
@@ -317,7 +298,6 @@ const SendWhatsAppMedia = async ({
   } catch (err) {
     console.error("Erro ao enviar mídia:", err);
     
-    // Limpar arquivos em caso de erro
     if (fs.existsSync(media.path)) {
       fs.unlinkSync(media.path);
     }

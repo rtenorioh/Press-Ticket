@@ -45,6 +45,14 @@ const SendWhatsAppMessage = async ({
 
     if (originalMessage) {
       try {
+        try {
+          const chatId = `${ticket.contact.number}@g.us`;
+          const chat = await wbot.getChatById(chatId);
+          await chat.sendStateTyping();
+          await new Promise(resolve => setTimeout(resolve, 400));
+        } catch (e) {
+          // silencioso: não bloquear envio caso falhe o typing
+        }
         const sentMessage = await originalMessage.reply(formatBody(body, ticket));
 
         await ticket.update({ lastMessage: body });
@@ -53,6 +61,12 @@ const SendWhatsAppMessage = async ({
         console.error(`Erro ao usar reply nativo: ${replyError}`);
 
         try {
+          try {
+            const chatId = `${ticket.contact.number}@g.us`;
+            const chat = await wbot.getChatById(chatId);
+            await chat.sendStateTyping();
+            await new Promise(resolve => setTimeout(resolve, 400));
+          } catch (e) {}
           const sentMessage = await wbot.sendMessage(
             `${ticket.contact.number}@g.us`,
             formatBody(body, ticket),
@@ -67,6 +81,12 @@ const SendWhatsAppMessage = async ({
       }
     }
 
+    try {
+      const chatId = `${ticket.contact.number}@g.us`;
+      const chat = await wbot.getChatById(chatId);
+      await chat.sendStateTyping();
+      await new Promise(resolve => setTimeout(resolve, 400));
+    } catch (e) {}
     const sentMessage = await wbot.sendMessage(
       `${ticket.contact.number}@g.us`,
       formatBody(body, ticket),
@@ -79,6 +99,12 @@ const SendWhatsAppMessage = async ({
   
   if (ticket.isGroup) {
     try {
+      try {
+        const chatId = `${ticket.contact.number}@g.us`;
+        const chat = await wbot.getChatById(chatId);
+        await chat.sendStateTyping();
+        await new Promise(resolve => setTimeout(resolve, 400));
+      } catch (e) {}
       const sentMessage = await wbot.sendMessage(
         `${ticket.contact.number}@g.us`,
         formatBody(body, ticket),
@@ -138,6 +164,12 @@ const SendWhatsAppMessage = async ({
   }
 
   try {
+    try {
+      const chatId = `${ticket.contact.number}@c.us`;
+      const chat = await wbot.getChatById(chatId);
+      await chat.sendStateTyping();
+      await new Promise(resolve => setTimeout(resolve, 400));
+    } catch (e) {}
     const sentMessage = await wbot.sendMessage(
       `${ticket.contact.number}@c.us`,
       formatBody(body, ticket),
