@@ -193,19 +193,20 @@ const SendWhatsAppMedia = async ({
     
     try {
       const fileData = fs.readFileSync(finalMediaPath, { encoding: 'base64' });
-      
       const maxBase64Size = 140000000; // ~100MB em base64 (para arquivos até 100MB)
       if (fileData.length > maxBase64Size) {
         console.log(`Arquivo muito grande para base64: ${(fileData.length / 1000000).toFixed(1)}MB`);
         throw new AppError(`Arquivo muito grande para processamento (${(fileData.length / 1000000).toFixed(1)}MB em base64). Tente comprimir o arquivo ou enviar um arquivo menor.`);
       }
-    
       const newMedia = new MessageMedia(mimeType, fileData, media.filename);
-      
       if (sendAsDocument) {
+        // Enviar como documento
+        console.log(`Enviando como documento - Tipo: ${mimeType}`);
+        // indicador de digitando antes do envio
         try {
           const chatId = `${ticket.contact.number}@${ticket.isGroup ? "g" : "c"}.us`;
           const chat = await wbot.getChatById(chatId);
+          // Para documento manter como 'digitando' (não é gravação ao vivo)
           await chat.sendStateTyping();
           await new Promise(resolve => setTimeout(resolve, 400));
         } catch (e) {}
@@ -217,7 +218,9 @@ const SendWhatsAppMedia = async ({
             sendMediaAsDocument: true
           }
         );
+        console.log('Documento enviado com sucesso');
       } else {
+        // Enviar como mídia normal com fallback para documento
         const options: any = {
           caption: hasBody
         };
@@ -225,21 +228,35 @@ const SendWhatsAppMedia = async ({
         if (isAudio) {
           options.sendAudioAsVoice = true;
         }
-        
         try {
+          // indicador de estado antes do envio (gravando para áudio, digitando para demais)
           try {
             const chatId = `${ticket.contact.number}@${ticket.isGroup ? "g" : "c"}.us`;
             const chat = await wbot.getChatById(chatId);
-            await chat.sendStateTyping();
+            if (isAudio) {
+              await chat.sendStateRecording();
+            } else {
+              await chat.sendStateTyping();
+            }
             await new Promise(resolve => setTimeout(resolve, 400));
           } catch (e) {}
+          console.log(`Tentando enviar mídia - Tipo: ${mimeType}, Como documento: ${sendAsDocument}`);
           sentMessage = await wbot.sendMessage(
             `${ticket.contact.number}@${ticket.isGroup ? "g" : "c"}.us`,
             newMedia,
             options
           );
-
+          // tentar limpar o estado após envio
+          try {
+            const chatId = `${ticket.contact.number}@${ticket.isGroup ? "g" : "c"}.us`;
+            const chat = await wbot.getChatById(chatId);
+            await chat.clearState();
+          } catch (e) {}
+          
         } catch (mediaError) {
+          console.log('Falha ao enviar como mídia, tentando como documento:', mediaError.message);
+          // Fallback automático para documento
+          // indicador de digitando antes do fallback
           try {
             const chatId = `${ticket.contact.number}@${ticket.isGroup ? "g" : "c"}.us`;
             const chat = await wbot.getChatById(chatId);
@@ -254,13 +271,17 @@ const SendWhatsAppMedia = async ({
               sendMediaAsDocument: true
             }
           );
-          console.log('Arquivo enviado como documento (fallback automático)');
+          // tentar limpar o estado após envio
+          try {
+            const chatId = `${ticket.contact.number}@${ticket.isGroup ? "g" : "c"}.us`;
+            const chat = await wbot.getChatById(chatId);
+            await chat.clearState();
+          } catch (e) {}
         }
       }
       
     } catch (error) {
       console.error('Erro no envio:', error);
-      
       if (error.message && error.message.includes('base64')) {
         throw new AppError("Arquivo muito grande para processamento. Tente um arquivo menor.");
       }
