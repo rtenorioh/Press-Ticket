@@ -56,16 +56,12 @@ const CreateTicketService = async ({
     throw new AppError("ERR_CREATING_TICKET");
   }
 
-  // Emitir atualização dos contadores de tickets para todos os usuários
   const timestamp = new Date().toISOString();
-  console.log(`[BACK_CREATE_TICKET][${timestamp}] Atualizando contadores após criação de ticket: ${ticket.id}`);
   
   try {
-    // Emitir atualização dos contadores para todos os usuários
     await EmitTicketCounterService();
   } catch (err) {
     console.error(`[BACK_CREATE_TICKET_ERROR][${timestamp}] Erro ao emitir contadores:`, err);
-    // Não interrompe o fluxo em caso de erro na emissão dos contadores
   }
 
   return ticket;

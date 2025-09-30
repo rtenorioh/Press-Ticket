@@ -605,12 +605,6 @@ const MessagesList = ({ ticketId, isGroup, onClick }) => {
 
     const handleAppMessage = (data) => {
       try {
-        console.log(`[FRONT_SOCKET_EVENTO][${timestamp}] Evento appMessage recebido:`, {
-          action: data.action,
-          messageId: data.message?.id,
-          ticketId: data.ticket?.id || data.message?.ticketId,
-          ack: data.message?.ack
-        });
         processMessage(data);
       } catch (error) {
         console.error(`[FRONT_SOCKET_ERRO_PROCESSAMENTO][${timestamp}] Erro ao processar evento appMessage:`, error);
@@ -712,10 +706,7 @@ const MessagesList = ({ ticketId, isGroup, onClick }) => {
                 scrollToBottom(true);
               }, 0);
             }
-            
-            if (updatedMessages > 0) {
-              console.log(`[FRONT_POLLING_UPDATED][${timestamp}] ${updatedMessages} mensagens tiveram ACK atualizado via polling`);
-            }
+          
           }
         } catch (err) {
           console.error(`[FRONT_POLLING_ERRO][${timestamp}] Erro ao buscar mensagens recentes:`, err);

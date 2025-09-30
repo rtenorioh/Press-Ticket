@@ -344,7 +344,6 @@ export const closeTickets = async (
     });
 
     if (!tickets || !tickets.length) {
-      console.log(`Nenhum ticket encontrado para fechar com o filtro:`, whereCondition);
       return res.status(404).json({ 
         error: "ERR_NO_TICKET_FOUND",
         message: `Nenhum ticket ${status ? `com status ${status}` : ''} encontrado para fechar` 
@@ -380,7 +379,6 @@ export const count = async (req: AuthenticatedRequest, res: Response): Promise<R
     let userId: number | null = null;
     let isAdmin = false;
     
-    // Verificar se é uma requisição de API ou se o usuário é admin
     const isApiRequest = req.path.startsWith('/v1/');
     if (isApiRequest || 'apiToken' in req) {
       isAdmin = true;
@@ -389,7 +387,6 @@ export const count = async (req: AuthenticatedRequest, res: Response): Promise<R
       isAdmin = req.user.profile === "admin" || req.user.profile === "masteradmin";
     }
     
-    // Converter queueIds de string para array se necessário
     let queueIdsArray: number[] = [];
     if (queueIds) {
       if (typeof queueIds === 'string') {
@@ -399,20 +396,15 @@ export const count = async (req: AuthenticatedRequest, res: Response): Promise<R
       }
     }
     
-    // Determinar se deve mostrar todos os tickets
     const showAllTickets = showAll === "true" || isAdmin;
     
     const timestamp = new Date().toISOString();
-    console.log(`[BACK_COUNT_REQUEST][${timestamp}] Requisição de contagem: showAll=${showAllTickets}, userId=${userId}, isAdmin=${isAdmin}`);
     
-    // Chamar o serviço de contagem
     const counts = await CountTicketsService({
       queueIds: queueIdsArray,
       showAll: showAllTickets,
       userId
     });
-    
-    console.log(`[BACK_COUNT_RESPONSE][${timestamp}] Resposta de contagem:`, counts);
     
     return res.status(200).json(counts);
   } catch (err: any) {

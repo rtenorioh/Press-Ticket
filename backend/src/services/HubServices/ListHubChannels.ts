@@ -14,7 +14,6 @@ const ListChannels = async () => {
     const client = new Client(notificameHubToken);
 
     const response = await client.listChannels();
-    console.log("Channels:", response);
     return response;
   } catch (error) {
     throw new Error("Error");

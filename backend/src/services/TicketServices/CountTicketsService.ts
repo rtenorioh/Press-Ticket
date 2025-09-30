@@ -131,8 +131,6 @@ const CountTicketsService = async ({
       })
     ]);
     
-    console.log(`[BACK_COUNT_RESULT][${timestamp}] Contagem: open=${openCount}, pending=${pendingCount}, closed=${closedCount}, openGroups=${openGroupsCount}`);
-    
     return {
       open: openCount,
       pending: pendingCount,

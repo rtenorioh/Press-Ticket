@@ -110,13 +110,10 @@ const Ticket = () => {
           setTicket(data);
           setLoading(false);
           
-          // Marcar mensagens como lidas ao abrir o ticket
           const timestamp = new Date().toISOString();
-          console.log(`[FRONT_MARK_READ][${timestamp}] Marcando mensagens do ticket ${ticketId} como lidas`);
           
           try {
             await api.post(`/messages/${ticketId}/read`);
-            console.log(`[FRONT_MARK_READ_SUCCESS][${timestamp}] Mensagens do ticket ${ticketId} marcadas como lidas com sucesso`);
           } catch (readError) {
             console.error(`[FRONT_MARK_READ_ERROR][${timestamp}] Erro ao marcar mensagens como lidas:`, readError);
           }
@@ -134,31 +131,15 @@ const Ticket = () => {
     const socket = openSocket();
 
     socket.on("connect", () => {
-      const timestamp = new Date().toISOString();
-      console.log(`[FRONT_TICKET_CONNECT][${timestamp}] Socket conectado, entrando no chatbox do ticket: ${ticketId}`);
       socket.emit("joinChatBox", ticketId);
     });
 
     socket.on("ticket", (data) => {
       const timestamp = new Date().toISOString();
-      console.log(`[FRONT_TICKET_EVENTO][${timestamp}] Evento de ticket recebido: Ação=${data.action}, TicketId=${data.ticket?.id || data.ticketId}`);
-      
-      if (data.ticket) {
-        console.log(`[FRONT_TICKET_DETALHES][${timestamp}] Detalhes do ticket:`, {
-          id: data.ticket.id,
-          status: data.ticket.status,
-          queueId: data.ticket.queueId,
-          userId: data.ticket.userId,
-          unreadMessages: data.ticket.unreadMessages,
-          lastMessage: data.ticket.lastMessage?.substring(0, 30)
-        });
-      }
       
       if (data.action === "update") {
-        console.log(`[FRONT_TICKET_UPDATE][${timestamp}] Atualizando dados do ticket ${data.ticket.id} no componente Ticket`);
         try {
           setTicket(data.ticket);
-          console.log(`[FRONT_TICKET_STATE][${timestamp}] Estado do ticket atualizado com sucesso`);
         } catch (error) {
           console.error(`[FRONT_TICKET_ERRO][${timestamp}] Erro ao atualizar estado do ticket:`, error);
         }
@@ -171,14 +152,11 @@ const Ticket = () => {
 
     socket.on("contact", (data) => {
       const timestamp = new Date().toISOString();
-      console.log(`[FRONT_CONTACT_EVENTO][${timestamp}] Evento de contato recebido: Ação=${data.action}, ContactId=${data.contact?.id}`);
       
       if (data.action === "update") {
-        console.log(`[FRONT_CONTACT_UPDATE][${timestamp}] Atualizando dados do contato ${data.contact?.id} no componente Ticket`);
         try {
           setContact((prevState) => {
             if (prevState.id === data.contact?.id) {
-              console.log(`[FRONT_CONTACT_STATE][${timestamp}] Estado do contato atualizado com sucesso`);
               return { ...prevState, ...data.contact };
             }
             return prevState;

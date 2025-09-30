@@ -100,20 +100,16 @@ const CreateMessageService = async ({
       console.error("Erro ao recarregar ticket antes de emitir appMessage:", reloadError);
     }
 
-    // Preparar lastMessage consistente para o frontend
     const currentBody = message.body || "";
     const arrow = message.fromMe ? "🢅 " : "🢇 ";
     const composedLastMessage = `${arrow}${currentBody}`.trim();
 
-    // Se o ticket não tem lastMessage ou está diferente, forçar no payload emitido
     const ticketPayload: any = message.ticket ? message.ticket.toJSON ? message.ticket.toJSON() : { ...message.ticket } : {};
     if (!ticketPayload.lastMessage || ticketPayload.lastMessage === "" || ticketPayload.lastMessage.replace("🢇", "").replace("🢅", "").trim() !== currentBody.trim()) {
       ticketPayload.lastMessage = composedLastMessage;
     }
-    // Atualizar updatedAt para refletir mudança
     ticketPayload.updatedAt = new Date();
 
-    // Emitir evento com ticket atualizado
     console.log(`[CREATE_MESSAGE_SERVICE][${timestamp}] Emitindo evento appMessage (create):`, {
       messageId: message.id,
       ticketId: message.ticketId,

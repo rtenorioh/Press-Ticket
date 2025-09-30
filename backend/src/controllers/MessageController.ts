@@ -257,12 +257,6 @@ export const sendContacts = async (req: Request, res: Response): Promise<Respons
   const { ticketId } = req.params;
   const { contacts } = req.body;
 
-  console.log("MessageController.sendContacts - Dados recebidos:", {
-    ticketId,
-    contactsCount: contacts?.length || 0,
-    contacts: contacts?.map((c: any) => ({ id: c.id, name: c.name, number: c.number })) || []
-  });
-
   if (!contacts || !Array.isArray(contacts) || contacts.length === 0) {
     return res.status(400).json({ error: "Contatos são obrigatórios" });
   }

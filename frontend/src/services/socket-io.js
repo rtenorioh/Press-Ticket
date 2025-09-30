@@ -49,7 +49,7 @@ const connectToSocket = () => {
 
         // Cria uma nova conexão de socket
         const timestamp = new Date().toISOString();
-        console.log(`[FRONT_SOCKET_INIT][${timestamp}] Iniciando conexão com socket.io em ${getBackendUrl()}`);
+        
         
         const socket = openSocket(getBackendUrl(), {
             transports: ["polling", "websocket"],
@@ -121,9 +121,7 @@ const connectToSocket = () => {
         
         socket.on("disconnect", (reason) => {
             const timestamp = new Date().toISOString();
-            console.log(`[FRONT_SOCKET_DISCONNECT][${timestamp}] Socket desconectado. Motivo: ${reason}`);
-            
-            // Verifica se a desconexão foi por erro de transporte
+        
             if (reason === 'transport error' || reason === 'transport close') {
                 console.warn(`[FRONT_SOCKET_TRANSPORT_ERROR][${timestamp}] Erro de transporte detectado. Tentando reconectar...`);
             }
@@ -166,34 +164,27 @@ const startHealthCheck = (socket) => {
         clearInterval(healthCheckInterval);
     }
     
-    // Configura evento de pong para atualizar timestamp
     socket.on("pong", () => {
         lastPongTime = Date.now();
         isSocketHealthy = true;
-        console.log(`[FRONT_SOCKET_HEALTH][${new Date().toISOString()}] Pong recebido, conexão saudável`);
     });
     
-    // Inicia verificação periódica
     healthCheckInterval = setInterval(() => {
-        // Envia ping para o servidor
         socket.emit("ping");
         
-        // Verifica se o último pong foi recebido há mais de 15 segundos
         const now = Date.now();
         if (now - lastPongTime > 15000) {
             isSocketHealthy = false;
             console.warn(`[FRONT_SOCKET_HEALTH][${new Date().toISOString()}] Conexão socket possivelmente inativa. Último pong: ${new Date(lastPongTime).toISOString()}`);
             
-            // Tenta reconectar se o socket não estiver conectado
             if (socket && !socket.connected) {
                 console.warn(`[FRONT_SOCKET_HEALTH][${new Date().toISOString()}] Tentando reconectar socket inativo...`);
                 socket.connect();
             }
         }
-    }, 10000); // Verifica a cada 10 segundos
+    }, 10000);
 };
 
-// Função para forçar uma reconexão do socket
 const reconnectSocket = () => {
     if (socketInstance) {
         socketInstance.disconnect();

@@ -514,17 +514,9 @@ const verifyMessage = async (
       });
     }
     
-    // Recarregar o ticket com lastMessage atualizado e emitir evento adicional
     await ticket.reload();
     const { getIO } = require("../../libs/socket");
     const io = getIO();
-    const timestamp = new Date().toISOString();
-    
-    console.log(`[WBOT_MESSAGE_LISTENER][${timestamp}] Emitindo evento appMessage com lastMessage atualizado:`, {
-      ticketId: ticket.id,
-      lastMessage: ticket.lastMessage,
-      messageBody: msg.body?.substring(0, 30)
-    });
     
     io.to(ticket.id.toString())
       .to(ticket.status)
@@ -540,7 +532,6 @@ const verifyMessage = async (
       try {
         await CreateMessageService({ messageData });
         
-        // Atualizar lastMessage na segunda tentativa também
         if (msg.fromMe === true) {
           await ticket.update({
             fromMe: msg.fromMe,
@@ -1368,10 +1359,8 @@ const handleMessage = async (
     Sentry.captureException(err);
     logger.error(`[MSG_ERRO] Erro ao processar mensagem do WhatsApp. ID=${msg?.id?.id || 'unknown'}, Erro: ${err}`);
     
-    // Log detalhado do erro para facilitar depuração
     logger.error(`[MSG_ERRO_DETALHES] Stack trace: ${err.stack || 'Sem stack trace'}`);
     
-    // Registrar informações adicionais sobre a mensagem que causou o erro
     try {
       logger.error(`[MSG_ERRO_CONTEXTO] Contexto da mensagem com erro: ${JSON.stringify({
         id: msg?.id?.id || 'unknown',
@@ -1400,9 +1389,7 @@ const handleMsgAck = async (msg: WbotMessage, ack: MessageAck) => {
 
   try {
     logger.info(`[ACK_EVENTO] Recebido evento de ACK: ID=${msg.id.id}, ACK=${ack}, Timestamp=${timestamp}`);
-    console.info(`[ACK_EVENTO] Recebido evento de ACK: ID=${msg.id.id}, ACK=${ack}, Timestamp=${timestamp}`);
     
-    // Log detalhado do objeto da mensagem para debug
     logger.info(`[ACK_DETALHES] Detalhes da mensagem: ${JSON.stringify({
       id: msg.id,
       fromMe: msg.fromMe,
@@ -1432,23 +1419,16 @@ const handleMsgAck = async (msg: WbotMessage, ack: MessageAck) => {
       return;
     }
 
-    // Log dos detalhes da mensagem encontrada no banco
-    logger.info(`[ACK_DB] Mensagem encontrada no banco: ID=${messageToUpdate.id}, TicketId=${messageToUpdate.ticketId}, Atual ACK=${messageToUpdate.ack}, Read=${messageToUpdate.read}`);
-    
     const currentAck = messageToUpdate.ack || 0;
     let ackToUpdate = ack || 0;
     
-    // Log para depuração da relação entre read e ack
     if (messageToUpdate.read === true && ackToUpdate < 3 && messageToUpdate.fromMe) {
       logger.info(`[ACK_DEBUG] Mensagem marcada como lida (read=true), mas ACK=${ackToUpdate}. Mantendo ACK original conforme documentação.`);
     }
     
-    // Verificar se o ACK precisa ser atualizado - apenas se o novo valor for maior que o atual
     if (ackToUpdate > currentAck) {
       logger.info(`[ACK_ATUALIZACAO] Atualizando ACK da mensagem ${msg.id.id}: ${currentAck} -> ${ackToUpdate}`);
-      console.log(`[ACK_ATUALIZACAO] Atualizando ACK da mensagem ${msg.id.id}: ${currentAck} -> ${ackToUpdate}`);
       
-      // Registrar timestamp antes da atualização
       const beforeUpdate = new Date().getTime();
       await messageToUpdate.update({ ack: ackToUpdate });
       const afterUpdate = new Date().getTime();

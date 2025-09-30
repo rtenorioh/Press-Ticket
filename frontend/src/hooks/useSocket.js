@@ -13,14 +13,10 @@ export const useSocket = () => {
                 globalSocket = openSocket();
                 if (globalSocket) {
                     globalSocket.on('connect', () => {
-                        const timestamp = new Date().toISOString();
-                        console.log(`[FRONT_SOCKET_CONNECT][${timestamp}] Socket conectado com sucesso. ID: ${globalSocket.id}`);
                         setConnected(true);
                     });
 
                     globalSocket.on('disconnect', (reason) => {
-                        const timestamp = new Date().toISOString();
-                        console.log(`[FRONT_SOCKET_DISCONNECT][${timestamp}] Socket desconectado. Motivo: ${reason}`);
                         setConnected(false);
                     });
 
@@ -35,7 +31,7 @@ export const useSocket = () => {
                             setTimeout(() => {
                                 globalSocket = null;
                                 socketRef.current = null;
-                                console.log(`[FRONT_SOCKET_RESET][${timestamp}] Socket resetado após erro de recursos.`);
+
                             }, 5000);
                         }
                     });

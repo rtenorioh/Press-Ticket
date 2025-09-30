@@ -28,14 +28,11 @@ const update = async (req: Request, res: Response): Promise<Response> => {
 
 const remove = async (req: Request, res: Response): Promise<Response> => {
   try {
-    console.log("Recebendo solicitação de desconexão...");
     const { whatsappId } = req.params;
     const whatsapp = await ShowWhatsAppService(whatsappId);
 
-    console.log("Obtendo instância do WhatsApp...");
     try {
       const wbot = getWbot(whatsapp.id);
-      console.log("Executando logout...");
       if (wbot && typeof wbot.logout === "function") {
         await wbot.logout();
       }
@@ -43,10 +40,8 @@ const remove = async (req: Request, res: Response): Promise<Response> => {
       console.log("Sessão não encontrada ou já desconectada, continuando...");
     }
 
-    // Remover sessão da memória
     removeWbot(whatsapp.id);
 
-    // Atualizar status para DISCONNECTED para evitar reconexão automática
     await UpdateWhatsAppService({
       whatsappId,
       whatsappData: { 
@@ -57,7 +52,6 @@ const remove = async (req: Request, res: Response): Promise<Response> => {
       }
     });
 
-    console.log("Logout concluído. Respondendo ao cliente...");
     return res.status(200).json({ message: "Session disconnected." });
   } catch (error) {
     console.error("Erro ao desconectar:", error);

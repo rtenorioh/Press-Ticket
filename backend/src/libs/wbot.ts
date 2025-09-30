@@ -94,7 +94,6 @@ const syncUnreadMessages = async (wbot: Session) => {
   try {
     await new Promise((resolve) => setTimeout(resolve, 5000));
     const chats = await wbot.getChats();
-    console.log(`Total de chats carregados: ${chats.length}`);
 
     /* eslint-disable no-restricted-syntax */
     /* eslint-disable no-await-in-loop */
@@ -200,14 +199,9 @@ export const initWbot = async (whatsapp: Whatsapp): Promise<Session> => {
         });
       });
 
-      wbot.on('code', (code) => {
-        console.log('Pairing code:', code);
-      });
-
       wbot.on("authenticated", async session => {
         logger.info(`Session: ${sessionName} AUTHENTICATED`);
         
-        // Salvar a sessão no banco de dados
         await whatsapp.update({
           session: JSON.stringify(session),
           status: "AUTHENTICATED"
@@ -373,16 +367,12 @@ export const shutdownWbot = async (whatsappId: string): Promise<void> => {
   );
 
   try {
-    console.log(`Desligando sessão para WhatsApp ID: ${whatsappIDNumber}`);
     await sessions[sessionIndex].destroy();
-    console.log(`Sessão com ID ${whatsappIDNumber} desligada com sucesso.`);
-
-    console.log(`Removendo arquivos da sessão: ${sessionPath}`);
+    
     await fs.rm(sessionPath, { recursive: true, force: true });
-    console.log(`Arquivos da sessão removidos com sucesso: ${sessionPath}`);
 
     sessions.splice(sessionIndex, 1);
-    console.log(
+    console.info(
       `Sessão com ID ${whatsappIDNumber} removida da lista de sessões.`
     );
     const retry = whatsapp.retries;
@@ -393,8 +383,6 @@ export const shutdownWbot = async (whatsappId: string): Promise<void> => {
       retries: retry + 1,
       number: ""
     });
-
-    // Removido StartWhatsAppSession para evitar reconexão automática após shutdown
     
   } catch (error) {
     console.error(

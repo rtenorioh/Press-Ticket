@@ -310,92 +310,60 @@ const TicketsList = (props) => {
 		}
 
 		const shouldUpdateTicket = (ticket) => {
-			// Adicionar logs para depuração
-			console.log(`[FRONT_TICKET_FILTER][${new Date().toISOString()}] Verificando ticket:`, {
-				id: ticket.id,
-				status: ticket.status,
-				userId: ticket.userId,
-				queueId: ticket.queueId,
-				currentStatus: status,
-				showAll: showAll,
-				currentUser: user?.id,
-				userProfile: user?.profile
-			});
-		
-			// Verificar se o status do ticket corresponde ao status da aba atual
 			const matchesCurrentStatus = status === ticket.status;
 			
-			// Se o status não corresponde à aba atual, não exibir
 			if (!matchesCurrentStatus) {
-				console.log(`[FRONT_TICKET_STATUS][${new Date().toISOString()}] Ticket ${ticket.id} com status diferente da aba atual: Não exibir`);
 				return false;
 			}
+
+			// NOVO: respeitar filtro de grupo vs individual
+			if (isGroup !== undefined) {
+				const isTicketGroup = !!ticket.contact?.isGroup;
+				if (isGroup !== isTicketGroup) {
+					return false;
+				}
+			}
 		
-			// Verificar se o usuário é admin ou masteradmin
 			const isAdmin = user?.profile === "admin" || user?.profile === "masteradmin";
 			
-			// Se for admin/masteradmin e showAll estiver ativo, mostrar todos os tickets DA ABA ATUAL
 			if (isAdmin && showAll && matchesCurrentStatus) {
-				console.log(`[FRONT_TICKET_ADMIN][${new Date().toISOString()}] Admin/Master com 'Todos' ativo: exibir ticket ${ticket.id}`);
 				return true;
 			}
 		
-			// Tickets pendentes (aguardando) com status "pending"
 			if (ticket.status === "pending") {
-				// Se o ticket tem setor atribuído, verificar se o usuário pertence ao setor
 				if (ticket.queueId) {
 					const belongsToQueue = selectedQueueIds.indexOf(ticket.queueId) > -1;
 					const shouldShow = belongsToQueue;
-					console.log(`[FRONT_TICKET_PENDING_QUEUE][${new Date().toISOString()}] Ticket pendente ${ticket.id} com setor: ${shouldShow ? 'Exibir' : 'Não exibir'}`);
 					return shouldShow;
 				}
 				
-				// Se não tem setor atribuído, mostrar para todos
-				console.log(`[FRONT_TICKET_PENDING][${new Date().toISOString()}] Ticket pendente ${ticket.id} sem setor: Exibir`);
 				return true;
 			}
 			
-			// Para tickets com status "open" (Atendimento):
 			if (ticket.status === "open") {
-				// Verificar se o ticket tem usuário atribuído
 				if (ticket.userId) {
-					// Se o ticket foi aceito pelo usuário atual, sempre exibir
 					const belongsToUser = ticket.userId === user?.id;
-					console.log(`[FRONT_TICKET_USER_OPEN][${new Date().toISOString()}] Ticket em atendimento ${ticket.id} atribuído ao usuário: ${belongsToUser ? 'Exibir' : 'Não exibir'}`);
 					return belongsToUser;
 				}
 				
-				// Se tem apenas setor (queue) atribuído, mostrar para todos usuários desse setor
 				if (ticket.queueId) {
 					const belongsToQueue = selectedQueueIds.indexOf(ticket.queueId) > -1;
-					console.log(`[FRONT_TICKET_QUEUE_OPEN][${new Date().toISOString()}] Ticket em atendimento ${ticket.id} com setor atribuído: ${belongsToQueue ? 'Exibir' : 'Não exibir'}`);
 					return belongsToQueue;
 				}
 				
-				// Se não tem nem usuário nem setor atribuído, mostrar para todos
-				console.log(`[FRONT_TICKET_DEFAULT_OPEN][${new Date().toISOString()}] Ticket em atendimento ${ticket.id} sem usuário/setor: Exibir`);
 				return true;
 			}
 			
-			// Para outros status (closed, etc):
-			
-			// Verificar se o ticket tem usuário atribuído
 			if (ticket.userId) {
-				// Regra 2: Se tem usuário atribuído, mostrar apenas para esse usuário
 				const belongsToUser = ticket.userId === user?.id;
-				console.log(`[FRONT_TICKET_USER][${new Date().toISOString()}] Ticket ${ticket.id} tem usuário atribuído: ${belongsToUser ? 'Exibir' : 'Não exibir'}`);
 				return belongsToUser;
 			}
 			
-			// Regra 1: Se tem apenas setor (queue) atribuído, mostrar para todos usuários desse setor
 			if (ticket.queueId) {
 				const belongsToQueue = selectedQueueIds.indexOf(ticket.queueId) > -1;
-				console.log(`[FRONT_TICKET_QUEUE][${new Date().toISOString()}] Ticket ${ticket.id} tem apenas setor atribuído: ${belongsToQueue ? 'Exibir' : 'Não exibir'}`);
 				return belongsToQueue;
 			}
 			
-			// Se não tem nem usuário nem setor atribuído, mostrar para todos
-			console.log(`[FRONT_TICKET_DEFAULT][${new Date().toISOString()}] Ticket ${ticket.id} sem usuário/setor: Exibir`);
 			return true;
 		};
 
@@ -406,20 +374,13 @@ const TicketsList = (props) => {
 			socket.on("connect", () => {
 				console.log("Socket conectado no TicketsList");
 				
-				// Sempre se inscrever no canal "pending" para receber notificações de novas mensagens
-				// independentemente da aba atual
-				console.log("Inscrevendo-se no canal 'pending' para receber notificações de novas mensagens");
 				socket.emit("joinTickets", "pending");
 				
-				// Se inscrever no canal correspondente à aba atual
 				if (status && status !== "pending") {
-					console.log(`Inscrevendo-se no canal '${status}' (aba atual)`);
 					socket.emit("joinTickets", status);
 				}
 				
-				// Solicitar tickets para a aba atual
 				if (status && user?.id) {
-					console.log(`Solicitando tickets com status '${status}'`);
 					socket.emit("getTickets", { status, userId: user.id, showAll });
 				} else {
 					socket.emit("joinNotification");
@@ -429,20 +390,37 @@ const TicketsList = (props) => {
 			socket.on("reconnect", () => {
 				console.log("Socket reconectado no TicketsList");
 				
-				// Sempre se inscrever no canal "pending" para receber notificações de novas mensagens
-				// independentemente da aba atual
-				console.log("Inscrevendo-se no canal 'pending' para receber notificações de novas mensagens");
 				socket.emit("joinTickets", "pending");
 				
-				// Se inscrever no canal correspondente à aba atual
 				if (status && status !== "pending") {
-					console.log(`Inscrevendo-se no canal '${status}' (aba atual)`);
 					socket.emit("joinTickets", status);
 				}
 				
-				// Solicitar tickets para a aba atual
 				if (status && user?.id) {
-					console.log(`Solicitando tickets com status '${status}'`);
+					socket.emit("getTickets", { status, userId: user.id, showAll });
+				} else {
+					socket.emit("joinNotification");
+				}
+			});
+
+			socket.on("reconnect", () => {
+				
+				socket.emit("joinTickets", "pending");
+				
+				if (status && status !== "pending") {
+					socket.emit("joinTickets", status);
+				}
+				
+				if (status && user?.id) {
+					socket.emit("getTickets", { status, userId: user.id, showAll });
+				} else {
+					socket.emit("joinNotification");
+				}
+			});
+			
+			socket.on("ticket", (data) => {
+				const timestamp = new Date().toISOString();
+				if (status && user?.id) {
 					socket.emit("getTickets", { status, userId: user.id, showAll });
 				} else {
 					socket.emit("joinNotification");
@@ -451,84 +429,56 @@ const TicketsList = (props) => {
 
 			socket.on("ticket", (data) => {
 				const timestamp = new Date().toISOString();
-				console.log(`[FRONT_TICKET_EVENTO][${timestamp}] Evento de ticket recebido: Ação=${data.action}, TicketId=${data.ticketId || data.ticket?.id}`);
-				
-				if (data.ticket) {
-					console.log(`[FRONT_TICKET_DETALHES][${timestamp}] Detalhes do ticket:`, {
-						id: data.ticket.id,
-						status: data.ticket.status,
-						queueId: data.ticket.queueId,
-						userId: data.ticket.userId,
-						unreadMessages: data.ticket.unreadMessages
-					});
-				}
 				
 				if (data.action === "updateUnread") {
-					console.log(`[FRONT_TICKET_UNREAD][${timestamp}] Resetando contador de não lidas para o ticket ${data.ticketId}`);
 					try {
 						dispatch({
 							type: "RESET_UNREAD",
 							payload: data.ticketId,
 						});
-						console.log(`[FRONT_TICKET_DISPATCH][${timestamp}] Dispatch RESET_UNREAD realizado com sucesso`);
+						
 					} catch (error) {
 						console.error(`[FRONT_TICKET_ERRO][${timestamp}] Erro ao resetar contador de não lidas:`, error);
 					}
 				}
 
 				if (data.action === "update") {
-					console.log(`[FRONT_TICKET_UPDATE][${timestamp}] Processando atualização do ticket: ${data.ticket.id}`);
 					
-					// Verificar se o ticket deve ser removido da lista atual
 					if (status && data.ticket.status !== status) {
-						console.log(`[FRONT_TICKET_STATUS_CHANGE][${timestamp}] Status do ticket mudou (${data.ticket.status} != ${status}). Removendo ticket ${data.ticket.id} da lista atual`);
 						try {
 							dispatch({ type: "DELETE_TICKET", payload: data.ticket.id });
-							console.log(`[FRONT_TICKET_DISPATCH][${timestamp}] Dispatch DELETE_TICKET realizado com sucesso`);
+
 						} catch (error) {
 							console.error(`[FRONT_TICKET_ERRO][${timestamp}] Erro ao deletar ticket:`, error);
 						}
-						return; // Importante: sair da função após remover o ticket
+						return;
 					}
 					
-					// Se o ticket deve ser adicionado/atualizado na lista atual
+					
 					if (shouldUpdateTicket(data.ticket)) {
-						console.log(`[FRONT_TICKET_UPDATE_SAME_STATUS][${timestamp}] Atualizando ticket ${data.ticket.id} na lista atual`);
+				
 						try {
 							dispatch({
 								type: "UPDATE_TICKET",
 								payload: data.ticket,
 							});
-							console.log(`[FRONT_TICKET_DISPATCH][${timestamp}] Dispatch UPDATE_TICKET realizado com sucesso`);
 						} catch (error) {
 							console.error(`[FRONT_TICKET_ERRO][${timestamp}] Erro ao atualizar ticket:`, error);
 						}
 					}
-					// Se o ticket não pertence mais às filas do usuário, remover
-					else if (notBelongsToUserQueues(data.ticket)) {
-						console.log(`[FRONT_TICKET_QUEUE_CHANGE][${timestamp}] Ticket ${data.ticket.id} não pertence mais às filas do usuário. Removendo da lista`);
-						try {
-							dispatch({ type: "DELETE_TICKET", payload: data.ticket.id });
-							console.log(`[FRONT_TICKET_DISPATCH][${timestamp}] Dispatch DELETE_TICKET realizado com sucesso`);
-						} catch (error) {
-							console.error(`[FRONT_TICKET_ERRO][${timestamp}] Erro ao deletar ticket:`, error);
-						}
-					}
-				}
-
-				if (data.action === "create") {
-					console.log(`[FRONT_TICKET_CREATE][${timestamp}] Novo ticket criado: ${data.ticket.id}`);
-					
-					if (data.ticket && shouldUpdateTicket(data.ticket)) {
-						// Se o ticket deve aparecer na lista atual, adicionar
+					else if (
+					// Remover se não pertence às filas do usuário
+					notBelongsToUserQueues(data.ticket) ||
+					// Remover se não atende ao filtro de grupos vs individuais
+					(isGroup !== undefined && (!!data.ticket.contact?.isGroup) !== isGroup)
+				) {
 						if (data.ticket.status === status || (data.ticket.status === "pending" && status !== "closed")) {
-							console.log(`[FRONT_TICKET_CREATE_ADD][${timestamp}] Adicionando novo ticket ${data.ticket.id} à lista`);
+							
 							try {
 								dispatch({
 									type: "ADD_TICKET",
 									payload: data.ticket,
 								});
-								console.log(`[FRONT_TICKET_DISPATCH][${timestamp}] Dispatch ADD_TICKET realizado com sucesso`);
 							} catch (error) {
 								console.error(`[FRONT_TICKET_ERRO][${timestamp}] Erro ao adicionar novo ticket:`, error);
 							}
@@ -538,10 +488,8 @@ const TicketsList = (props) => {
 
 
 				if (data.action === "delete") {
-					console.log(`[FRONT_TICKET_DELETE][${timestamp}] Recebido comando para deletar ticket ${data.ticketId}`);
 					try {
 						dispatch({ type: "DELETE_TICKET", payload: data.ticketId });
-						console.log(`[FRONT_TICKET_DISPATCH][${timestamp}] Dispatch DELETE_TICKET realizado com sucesso`);
 					} catch (error) {
 						console.error(`[FRONT_TICKET_ERRO][${timestamp}] Erro ao deletar ticket:`, error);
 					}
@@ -550,7 +498,6 @@ const TicketsList = (props) => {
 
 			socket.on("appMessage", (data) => {
 				const timestamp = new Date().toISOString();
-				console.log(`[FRONT_APP_MSG_EVENTO][${timestamp}] Evento appMessage recebido: Ação=${data.action}, MessageId=${data.message?.id}`);
 				
 				if (data.message) {
 					console.log(`[FRONT_APP_MSG_DETALHES][${timestamp}] Detalhes da mensagem:`, {
@@ -579,18 +526,13 @@ const TicketsList = (props) => {
 							type: "UPDATE_TICKET_UNREAD_MESSAGES",
 							payload: data.ticket,
 						});
-						console.log(`[FRONT_APP_MSG_UPDATE_TICKET][${timestamp}] Ticket ${data.ticket.id} atualizado via '${data.action}'`);
 					} catch (error) {
 						console.error(`[FRONT_APP_MSG_UPDATE_ERROR][${timestamp}] Erro ao atualizar ticket:`, error);
 					}
 				}
 
-				if (data.action === "update") {
-					console.log(`[FRONT_APP_MSG_ACK_UPDATE][${timestamp}] Atualização de ACK recebida: MessageId=${data.message?.id}, ACK=${data.message?.ack}`);
-				}
 			});
 
-			// Atualizações de contato
 			socket.on("contact", (data) => {
 				if (data.action === "update") {
 					dispatch({
@@ -600,15 +542,24 @@ const TicketsList = (props) => {
 				}
 			});
 			
-			// Lista consolidada de tickets vinda do backend
 			socket.on("ticketList", (data) => {
 				if (data && Array.isArray(data.tickets)) {
-					console.log("Recebendo lista de tickets atualizada", data.tickets.length);
-					const filteredTickets = status 
-						? data.tickets.filter(ticket => ticket.status === status)
+					// 1) Filtra por status (se informado)
+					let filteredTickets = status
+						? data.tickets.filter((ticket) => ticket.status === status)
 						: data.tickets;
+
+					// 2) Aplica também o filtro de grupos vs individuais, se definido via prop isGroup
+					if (isGroup !== undefined) {
+						if (isGroup === true) {
+							filteredTickets = filteredTickets.filter((t) => t.contact?.isGroup === true);
+						} else {
+							filteredTickets = filteredTickets.filter((t) => !t.contact?.isGroup);
+						}
+					}
+
 					if (filteredTickets.length > 0) {
-						console.log(`Carregando ${filteredTickets.length} tickets com status ${status}`);
+						console.log(`Carregando ${filteredTickets.length} tickets com status ${status}${isGroup !== undefined ? ` e isGroup=${isGroup}` : ""}`);
 						dispatch({ type: "LOAD_TICKETS", payload: filteredTickets });
 					}
 				}
@@ -618,14 +569,14 @@ const TicketsList = (props) => {
 		registerSocketEvents();
 
 		if (!socket.connected) {
-			console.log("Socket não está conectado, tentando reconectar...");
-			socket.connect();
+			socket.connect(() => {
+				console.log("Socket conectado no TicketsList");
+			});
 		}
 
 		return () => {
 			console.log("Limpando eventos do socket no TicketsList");
 			socket.off("connect");
-			socket.off("reconnect");
 			socket.off("ticket");
 			socket.off("appMessage");
 			socket.off("contact");

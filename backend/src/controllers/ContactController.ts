@@ -445,8 +445,6 @@ export const exportContacts = async (
       tags: tagIds
     });
 
-    console.log(`Exportando ${contacts.length} contatos`);
-
     if (contacts.length === 0) {
       return res.status(404).json({ error: "ERR_NO_CONTACT_FOUND" });
     }
