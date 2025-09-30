@@ -22,6 +22,9 @@ import {
   DeleteOutline,
   Edit,
   ImportContacts,
+  Block as BlockIcon,
+  LockOpen as LockOpenIcon,
+  Lock as LockIcon,
   Search,
   WhatsApp
 } from "@mui/icons-material";
@@ -128,6 +131,8 @@ const Contacts = () => {
   const [newTicketModalOpen, setNewTicketModalOpen] = useState(false);
   const [contactTicket, setContactTicket] = useState({});
   const [filteredTags, setFilteredTags] = useState([]);
+  const [blockLoadingId, setBlockLoadingId] = useState(null);
+  const [blockedStatus, setBlockedStatus] = useState({}); // { [contactId]: boolean }
 
   useEffect(() => {
     dispatch({ type: "RESET" });
@@ -221,18 +226,14 @@ const Contacts = () => {
     const ticketCreatedAt = ticketData.ticket?.createdAt ? new Date(ticketData.ticket.createdAt).toLocaleDateString('pt-BR') : "Data desconhecida";
 
     try {
-      
       if (openTicketsSetting === "enabled" || ticketData.hasOpenTicket) {
         if (ticketData.ticket?.user?.id === user?.id) {
           toast.info(
             <WhatsMarked>
               {t("contacts.toasts.redirectTicket")}
             </WhatsMarked>,
-            {
-              toastId: "redirecting-to-ticket",
-            }
+            { toastId: "redirecting-to-ticket" }
           );
-        
           setLoading(false);
           setTimeout(() => {
             navigate(`/tickets/${ticketData.ticket.id}`);
@@ -251,6 +252,7 @@ const Contacts = () => {
         }
       }
 
+      // Criar novo ticket se não houver bloqueios acima
       const { data } = await api.post("/tickets", {
         contactId,
         userId: user?.id,
@@ -269,6 +271,17 @@ const Contacts = () => {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchBlockedStatus = async (contact) => {
+    if (!contact?.id) return;
+    if (blockedStatus[contact.id] !== undefined) return;
+    try {
+      const { data } = await api.get(`/contacts/${contact.id}/block-status`);
+      setBlockedStatus(prev => ({ ...prev, [contact.id]: Boolean(data?.isBlocked) }));
+    } catch (err) {
+      // silencioso para melhor UX
     }
   };
 
@@ -300,6 +313,27 @@ const Contacts = () => {
     setDeletingAllContact(null);
     setSearchParam("");
     setPageNumber();
+  };
+
+  const handleToggleBlock = async (contact) => {
+    try {
+      setBlockLoadingId(contact.id);
+      const { data: status } = await api.get(`/contacts/${contact.id}/block-status`);
+      const currentlyBlocked = Boolean(status?.isBlocked);
+      if (currentlyBlocked) {
+        await api.post(`/contacts/${contact.id}/unblock`);
+        toast.success(t("contacts.toasts.unblocked") || "Contato desbloqueado no WhatsApp");
+        setBlockedStatus(prev => ({ ...prev, [contact.id]: false }));
+      } else {
+        await api.post(`/contacts/${contact.id}/block`);
+        toast.success(t("contacts.toasts.blocked") || "Contato bloqueado no WhatsApp");
+        setBlockedStatus(prev => ({ ...prev, [contact.id]: true }));
+      }
+    } catch (err) {
+      toastError(err);
+    } finally {
+      setBlockLoadingId(null);
+    }
   };
 
   const handleimportContact = async () => {
@@ -574,6 +608,30 @@ const Contacts = () => {
                         {contact.number && (
                           <IconButton size="small" onClick={() => hadleEditContact(contact.id)}>
                             <Edit color="info" />
+                          </IconButton>
+                        )}
+                        {contact.number && (
+                          <IconButton
+                            size="small"
+                            disabled={blockLoadingId === contact.id}
+                            onClick={() => handleToggleBlock(contact)}
+                            onMouseEnter={() => fetchBlockedStatus(contact)}
+                          >
+                            {blockLoadingId === contact.id ? (
+                              <BlockIcon color="disabled" />
+                            ) : blockedStatus[contact.id] ? (
+                              <Tooltip title={t("contacts.buttons.unblock") || "Desbloquear"}>
+                                <span>
+                                  <LockIcon color="error" />
+                                </span>
+                              </Tooltip>
+                            ) : (
+                              <Tooltip title={t("contacts.buttons.block") || "Bloquear"}>
+                                <span>
+                                  <LockOpenIcon color="success" />
+                                </span>
+                              </Tooltip>
+                            )}
                           </IconButton>
                         )}
                         <Can

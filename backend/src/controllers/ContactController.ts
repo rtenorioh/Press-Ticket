@@ -17,11 +17,119 @@ import CheckContactNumber from "../services/WbotServices/CheckNumber";
 import GetProfilePicUrl from "../services/WbotServices/GetProfilePicUrl";
 import SyncTagsService from "../services/TagServices/SyncTagsService";
 import { createActivityLog, ActivityActions, EntityTypes } from "../services/ActivityLogService";
+import Whatsapp from "../models/Whatsapp";
+import { getWbot } from "../libs/wbot";
 
 type IndexQuery = {
   searchParam: string;
   pageNumber: string;
   tags?: string;
+};
+
+export const getBlockStatus = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  const { contactId } = req.params;
+  const { whatsappId } = req.query as { whatsappId?: string };
+
+  const contact = await ShowContactService(contactId);
+
+  let sessionId: number | null = whatsappId ? parseInt(whatsappId as string, 10) : null;
+  if (!sessionId || Number.isNaN(sessionId)) {
+    const connected = await Whatsapp.findOne({ where: { status: "CONNECTED" } });
+    sessionId = connected?.id || null;
+  }
+  if (!sessionId) {
+    return res.status(400).json({ error: "Nenhuma sessão WhatsApp conectada" });
+  }
+
+  const wbot = getWbot(sessionId);
+  const numberId = await wbot.getNumberId(contact.number);
+  if (!numberId) {
+    return res.status(404).json({ error: "Número não registrado no WhatsApp" });
+  }
+
+  const wContact = await wbot.getContactById(numberId._serialized);
+  return res.status(200).json({ isBlocked: Boolean((wContact as any).isBlocked) });
+};
+
+export const blockContact = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  const { contactId } = req.params;
+  const { whatsappId } = req.body as { whatsappId?: number };
+
+  const contact = await ShowContactService(contactId);
+
+  let sessionId: number | null = whatsappId && Number.isInteger(whatsappId) ? Number(whatsappId) : null;
+  if (!sessionId) {
+    const connected = await Whatsapp.findOne({ where: { status: "CONNECTED" } });
+    sessionId = connected?.id || null;
+  }
+  if (!sessionId) {
+    return res.status(400).json({ error: "Nenhuma sessão WhatsApp conectada" });
+  }
+
+  const wbot = getWbot(sessionId);
+  const numberId = await wbot.getNumberId(contact.number);
+  if (!numberId) {
+    return res.status(404).json({ error: "Número não registrado no WhatsApp" });
+  }
+  const wContact = await wbot.getContactById(numberId._serialized);
+  const result = await (wContact as any).block();
+
+  const logUserId = req.user?.id || 1;
+  await createActivityLog({
+    userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
+    action: ActivityActions.UPDATE,
+    description: `Contato ${contact.name} (${contact.number}) bloqueado no WhatsApp (sessão ${sessionId})`,
+    entityType: EntityTypes.CONTACT,
+    entityId: contact.id,
+    additionalData: { whatsappId: sessionId }
+  });
+
+  return res.status(200).json({ success: Boolean(result) });
+};
+
+export const unblockContact = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  const { contactId } = req.params;
+  const { whatsappId } = req.body as { whatsappId?: number };
+
+  const contact = await ShowContactService(contactId);
+
+  let sessionId: number | null = whatsappId && Number.isInteger(whatsappId) ? Number(whatsappId) : null;
+  if (!sessionId) {
+    const connected = await Whatsapp.findOne({ where: { status: "CONNECTED" } });
+    sessionId = connected?.id || null;
+  }
+  if (!sessionId) {
+    return res.status(400).json({ error: "Nenhuma sessão WhatsApp conectada" });
+  }
+
+  const wbot = getWbot(sessionId);
+  const numberId = await wbot.getNumberId(contact.number);
+  if (!numberId) {
+    return res.status(404).json({ error: "Número não registrado no WhatsApp" });
+  }
+  const wContact = await wbot.getContactById(numberId._serialized);
+  const result = await (wContact as any).unblock();
+
+  const logUserId = req.user?.id || 1;
+  await createActivityLog({
+    userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
+    action: ActivityActions.UPDATE,
+    description: `Contato ${contact.name} (${contact.number}) desbloqueado no WhatsApp (sessão ${sessionId})`,
+    entityType: EntityTypes.CONTACT,
+    entityId: contact.id,
+    additionalData: { whatsappId: sessionId }
+  });
+
+  return res.status(200).json({ success: Boolean(result) });
 };
 
 type IndexGetContactQuery = {

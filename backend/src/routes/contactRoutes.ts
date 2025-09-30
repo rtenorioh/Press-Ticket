@@ -8,9 +8,12 @@ const contactRoutes = express.Router();
 
 contactRoutes.get("/contacts", isAuth, ContactController.index);
 contactRoutes.get("/contacts/export", isAuth, ContactController.exportContacts);
+contactRoutes.get("/contacts/:contactId/block-status", isAuth, ContactController.getBlockStatus);
 contactRoutes.get("/contacts/:contactId", isAuth, ContactController.show);
 contactRoutes.post("/contacts", isAuth, ContactController.store);
 contactRoutes.post("/contact", isAuth, ContactController.getContact);
+contactRoutes.post("/contacts/:contactId/block", isAuth, ContactController.blockContact);
+contactRoutes.post("/contacts/:contactId/unblock", isAuth, ContactController.unblockContact);
 contactRoutes.put("/contacts/:contactId", isAuth, ContactController.update);
 contactRoutes.delete("/contacts/:contactId", isAuth, ContactController.remove);
 contactRoutes.delete("/contacts", isAuth, ContactController.removeAll);

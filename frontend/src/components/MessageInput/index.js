@@ -36,7 +36,8 @@ import React, {
   useContext,
   useEffect,
   useRef,
-  useState
+  useState,
+  useCallback
 } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
@@ -285,6 +286,8 @@ const MessageInput = ({ ticketStatus }) => {
   const [settings, setSettings] = useState([]);
   const [signMessage, setSignMessage] = useLocalStorage("signOption", true);
   const [channelType, setChannelType] = useState(null);
+  const [contactId, setContactId] = useState(null);
+  const [isContactBlocked, setIsContactBlocked] = useState(false);
   const [showUploadModal, setShowUploadModal] = useState(false);
   const { t } = useTranslation();
   const theme = useTheme();
@@ -341,17 +344,56 @@ const MessageInput = ({ ticketStatus }) => {
   }, [editingMessage]);
 
   useEffect(() => {
-    const fetchChannelType = async () => {
+    const fetchTicketAndStatus = async () => {
       try {
         const { data } = await api.get(`/tickets/${ticketId}`);
         setChannelType(data.whatsapp?.type);
+        const cId = data.contact?.id;
+        setContactId(cId || null);
+        if (cId) {
+          try {
+            const { data: status } = await api.get(`/contacts/${cId}/block-status`);
+            setIsContactBlocked(Boolean(status?.isBlocked));
+          } catch (_) {
+            setIsContactBlocked(false);
+          }
+        } else {
+          setIsContactBlocked(false);
+        }
       } catch (err) {
         toastError(err);
       }
     };
 
-    fetchChannelType();
+    fetchTicketAndStatus();
   }, [ticketId]);
+
+  const refreshBlockedStatus = useCallback(async () => {
+    if (!contactId) return;
+    try {
+      const { data } = await api.get(`/contacts/${contactId}/block-status`);
+      setIsContactBlocked(Boolean(data?.isBlocked));
+    } catch (_) {}
+  }, [contactId]);
+
+  // Revalida o status de bloqueio quando a aba volta ao foco e periodicamente
+  useEffect(() => {
+    let intervalId;
+
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') {
+        refreshBlockedStatus();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibility);
+    intervalId = setInterval(refreshBlockedStatus, 10000);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibility);
+      if (intervalId) clearInterval(intervalId);
+    };
+  }, [contactId, refreshBlockedStatus]);
 
   useEffect(() => {
     inputRef.current.focus();
@@ -1240,19 +1282,24 @@ const MessageInput = ({ ticketStatus }) => {
               </MenuItem>
             </Menu>
           </Hidden>
-          <InputWrapper>
+          <InputWrapper onMouseEnter={() => {
+            // Re-checa sob demanda ao passar o mouse
+            refreshBlockedStatus();
+          }}>
             <InputBaseStyled
               inputRef={inputRef}
               placeholder={
-                ticketStatus === "open"
-                  ? t("messagesInput.placeholderOpen")
-                  : t("messagesInput.placeholderClosed")
+                isContactBlocked
+                  ? t("messagesInput.placeholderBlocked")
+                  : ticketStatus === "open"
+                    ? t("messagesInput.placeholderOpen")
+                    : t("messagesInput.placeholderClosed")
               }
               multiline
               maxRows={5}
               value={capitalizeFirstLetter(inputMessage)}
               onChange={handleChangeInput}
-              disabled={recording || loading || ticketStatus !== "open"}
+              disabled={recording || loading || ticketStatus !== "open" || isContactBlocked}
               onPaste={(e) => {
                 ticketStatus === "open" && handleInputPaste(e);
               }}

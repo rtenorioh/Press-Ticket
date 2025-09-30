@@ -241,7 +241,9 @@ const messages = {
           deletedAll: "Todos contatos excluídos com sucesso!",
           redirectTicket: "Você já possui um ticket aberto para este contato. Redirecionando...",
           exportSuccess: "Contatos exportados com sucesso!",
-          noContactsToExport: "Não há contatos para exportar."
+          noContactsToExport: "Não há contatos para exportar.",
+          blocked: "Contato bloqueado no WhatsApp",
+          unblocked: "Contato desbloqueado no WhatsApp"
         },
         errors: {
           ticketAlreadyOpen: "Já existe um ticket aberto para este contato, atribuído ao Atendente: *{{userName}}* no Canal: *{{userChannel}}* criado em: *{{ticketCreatedAt}}*.",
@@ -260,7 +262,9 @@ const messages = {
           import: "Importar Contatos",
           add: "Adicionar Contato",
           export: "Exportar Contatos",
-          delete: "Excluir Todos Contatos"
+          delete: "Excluir Todos Contatos",
+          block: "Bloquear",
+          unblock: "Desbloquear"
         },
         table: {
           name: "Nome",
@@ -682,6 +686,7 @@ const messages = {
       messagesInput: {
         placeholderOpen: "Digite uma mensagem",
         placeholderClosed: "Esse ticket está fechado!",
+        placeholderBlocked: "O contato está bloqueado. Desbloqueie para enviar mensagens.",
         signMessage: "Assinar",
         btnSend: "Enviar",
         btnUploadFile: "Enviar mídia",
