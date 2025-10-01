@@ -464,46 +464,53 @@ const TicketListItem = ({ ticket, filteredTags }) => {
 	};
 
 	const handleMoveTicket = async (id) => {
-		setLoading(true);
-		try {
-			await api.put(`/tickets/${id}`, {
-				status: "pending",
-			});
-			
-			const socket = openSocket();
-			if (socket) {
-				socket.emit("ticket", {
-					action: "update",
-					ticketId: id,
-					ticket: {
-						...ticket,
-						status: "pending",
-						userId: null,
-						queueId: ticket?.queueId
-					}
-				});
+    setLoading(true);
+    try {
+      // Atualiza no backend primeiro
+      await api.put(`/tickets/${id}`, {
+        status: "pending",
+      });
 
-				socket.emit("joinTickets", "pending");
-				socket.emit("joinTickets", "open");
-				
-				socket.emit("getTickets", { status: "pending", userId: user?.id, showAll: false });
-				socket.emit("getTickets", { status: "open", userId: user?.id, showAll: false });
-			}			
+      const socket = openSocket();
+      if (socket) {
+        // 1) Remover imediatamente da aba atual
+        socket.emit("ticket", {
+          action: "delete",
+          ticketId: id
+        });
 
-			localStorage.setItem("pressticket:changeTab", "pending");
-			localStorage.setItem("pressticket:changeTab", "open");
-			
-			navigate(`/tickets`);
-		} catch (err) {
-			toastError(err);
-		} finally {
-			if (isMounted.current) {
-				setLoading(false);
-			}
-		}
-	};
+        // 2) Após curto atraso, informar update para a aba pending
+        setTimeout(() => {
+          socket.emit("ticket", {
+            action: "update",
+            ticketId: id,
+            ticket: {
+              ...ticket,
+              status: "pending",
+              userId: null,
+              queueId: ticket?.queueId
+            }
+          });
 
-	const handleClosedTicket = async (id, status) => { 
+          socket.emit("joinTickets", "pending");
+          socket.emit("joinTickets", "open");
+          socket.emit("getTickets", { status: "pending", userId: user?.id, showAll: false });
+          socket.emit("getTickets", { status: "open", userId: user?.id, showAll: false });
+        }, 200);
+      }
+
+      localStorage.setItem("pressticket:changeTab", "pending");
+      navigate(`/tickets`);
+    } catch (err) {
+      toastError(err);
+    } finally {
+      if (isMounted.current) {
+        setLoading(false);
+      }
+    }
+};
+
+const handleClosedTicket = async (id, status) => { 
 		setLoading(true);
 		try {
 			

@@ -420,65 +420,47 @@ const TicketsList = (props) => {
 			
 			socket.on("ticket", (data) => {
 				const timestamp = new Date().toISOString();
-				if (status && user?.id) {
-					socket.emit("getTickets", { status, userId: user.id, showAll });
-				} else {
-					socket.emit("joinNotification");
-				}
-			});
-
-			socket.on("ticket", (data) => {
-				const timestamp = new Date().toISOString();
 				
-				if (data.action === "updateUnread") {
-					try {
-						dispatch({
-							type: "RESET_UNREAD",
-							payload: data.ticketId,
-						});
-						
-					} catch (error) {
-						console.error(`[FRONT_TICKET_ERRO][${timestamp}] Erro ao resetar contador de não lidas:`, error);
-					}
-				}
-
+				// Atualização de ticket
 				if (data.action === "update") {
-					
+					// Se mudou de status em relação à aba atual, remover imediatamente
 					if (status && data.ticket.status !== status) {
 						try {
 							dispatch({ type: "DELETE_TICKET", payload: data.ticket.id });
-
 						} catch (error) {
-							console.error(`[FRONT_TICKET_ERRO][${timestamp}] Erro ao deletar ticket:`, error);
+							console.error(`[FRONT_TICKET_ERRO][${timestamp}] Erro ao deletar ticket (status mudou):`, error);
 						}
 						return;
 					}
-					
-					
-					if (shouldUpdateTicket(data.ticket)) {
-				
+
+					if (data.ticket && shouldUpdateTicket(data.ticket)) {
+						if (data.ticket.status === status || (data.ticket.status === "pending" && status !== "closed")) {
+							try {
+								dispatch({ type: "UPDATE_TICKET", payload: data.ticket });
+							} catch (error) {
+								console.error(`[FRONT_TICKET_ERRO][${timestamp}] Erro ao atualizar ticket:`, error);
+							}
+						}
+					} else if (
+						// Remover se não pertence às filas do usuário
+						notBelongsToUserQueues(data.ticket) ||
+						// Remover se não atende ao filtro de grupos vs individuais
+						(isGroup !== undefined && (!!data.ticket.contact?.isGroup) !== isGroup)
+					) {
 						try {
-							dispatch({
-								type: "UPDATE_TICKET",
-								payload: data.ticket,
-							});
+							dispatch({ type: "DELETE_TICKET", payload: data.ticket.id });
 						} catch (error) {
-							console.error(`[FRONT_TICKET_ERRO][${timestamp}] Erro ao atualizar ticket:`, error);
+							console.error(`[FRONT_TICKET_ERRO][${timestamp}] Erro ao deletar ticket:`, error);
 						}
 					}
-					else if (
-					// Remover se não pertence às filas do usuário
-					notBelongsToUserQueues(data.ticket) ||
-					// Remover se não atende ao filtro de grupos vs individuais
-					(isGroup !== undefined && (!!data.ticket.contact?.isGroup) !== isGroup)
-				) {
+				}
+
+				// Criação de ticket
+				if (data.action === "create") {
+					if (data.ticket && shouldUpdateTicket(data.ticket)) {
 						if (data.ticket.status === status || (data.ticket.status === "pending" && status !== "closed")) {
-							
 							try {
-								dispatch({
-									type: "ADD_TICKET",
-									payload: data.ticket,
-								});
+								dispatch({ type: "ADD_TICKET", payload: data.ticket });
 							} catch (error) {
 								console.error(`[FRONT_TICKET_ERRO][${timestamp}] Erro ao adicionar novo ticket:`, error);
 							}
@@ -486,7 +468,7 @@ const TicketsList = (props) => {
 					}
 				}
 
-
+				// Exclusão de ticket
 				if (data.action === "delete") {
 					try {
 						dispatch({ type: "DELETE_TICKET", payload: data.ticketId });
@@ -496,6 +478,7 @@ const TicketsList = (props) => {
 				}
 			});
 
+			// Mensagens de app: atualiza lastMessage/unread em tempo real
 			socket.on("appMessage", (data) => {
 				const timestamp = new Date().toISOString();
 				
@@ -530,7 +513,6 @@ const TicketsList = (props) => {
 						console.error(`[FRONT_APP_MSG_UPDATE_ERROR][${timestamp}] Erro ao atualizar ticket:`, error);
 					}
 				}
-
 			});
 
 			socket.on("contact", (data) => {
@@ -541,7 +523,7 @@ const TicketsList = (props) => {
 					});
 				}
 			});
-			
+			// Lista de tickets completa fornecida via socket
 			socket.on("ticketList", (data) => {
 				if (data && Array.isArray(data.tickets)) {
 					// 1) Filtra por status (se informado)
@@ -569,9 +551,7 @@ const TicketsList = (props) => {
 		registerSocketEvents();
 
 		if (!socket.connected) {
-			socket.connect(() => {
-				console.log("Socket conectado no TicketsList");
-			});
+			socket.connect();
 		}
 
 		return () => {
