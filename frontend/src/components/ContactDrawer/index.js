@@ -19,6 +19,7 @@ import CopyToClipboard from "../CopyToClipboard";
 import WhatsMarked from "react-whatsmarked";
 import { TagsContainer } from "../TagsContainer";
 import ModalImageContatc from "./ModalImage";
+import GroupActionsPanel from "./GroupActionsPanel";
 
 const drawerWidth = 320;
 
@@ -91,7 +92,24 @@ const ContactDrawer = ({ open, handleDrawerClose, contact, loading, isGroup, mes
   const { user } = useContext(AuthContext);
   const [modalOpen, setModalOpen] = useState(false);
   const { t } = useTranslation();
-  const displayContact = isGroup && messageContact ? messageContact : contact;
+  // Tratar 3 condições:
+  // 1) contato individual -> usar contact
+  // 2) contato que está em um grupo (participante) -> quando isGroup=true e NÃO é o contato do grupo, usar messageContact
+  // 3) contato que é um grupo -> quando contact.isGroup=true, priorizar contact (dados do grupo)
+  const displayContact = (() => {
+    if (isGroup) {
+      if (contact?.isGroup) return contact; // contato é o grupo
+      if (messageContact) return messageContact; // participante do grupo
+      return contact; // fallback
+    }
+    return contact;
+  })();
+
+  const displayName = displayContact?.name || contact?.name || "";
+  const isGroupContact = Boolean(contact?.isGroup || displayContact?.isGroup || isGroup);
+  const groupJid = isGroupContact && contact?.number
+    ? (contact.number.includes("@g.us") ? contact.number : `${contact.number}@g.us`)
+    : null;
 
   return (
     <StyledDrawer
@@ -120,15 +138,19 @@ const ContactDrawer = ({ open, handleDrawerClose, contact, loading, isGroup, mes
       ) : (
         <DrawerContent>
           <ContactHeader square variant="outlined">
-            <ModalImageContatc imageUrl={displayContact.profilePicUrl} />
+            <ModalImageContatc imageUrl={displayContact?.profilePicUrl} />
             <Typography>
-              {displayContact.name}
-              <CopyToClipboard content={displayContact.name} color="secondary" />
+              {displayName || "—"}
+              {displayName && (
+                <CopyToClipboard content={displayName} color="secondary" />
+              )}
             </Typography>
-            <Typography>
-              <Link href={`tel:${user?.isTricked === "enabled" ? displayContact?.number : displayContact?.number.slice(0, -4) + "****"}`}>{user?.isTricked === "enabled" ? displayContact?.number : displayContact?.number.slice(0, -4) + "****"}</Link>
-              <CopyToClipboard content={user?.isTricked === "enabled" ? displayContact?.number : displayContact?.number.slice(0, -4) + "****"} color="secondary" />
-            </Typography>
+            {!isGroupContact && displayContact?.number && (
+              <Typography>
+                <Link href={`tel:${user?.isTricked === "enabled" ? displayContact.number : (displayContact.number || "").slice(0, -4) + "****"}`}>{user?.isTricked === "enabled" ? displayContact.number : (displayContact.number || "").slice(0, -4) + "****"}</Link>
+                <CopyToClipboard content={user?.isTricked === "enabled" ? displayContact.number : (displayContact.number || "").slice(0, -4) + "****"} color="secondary" />
+              </Typography>
+            )}
             {displayContact.address && (
               <Typography>
                 {displayContact.address}
@@ -159,6 +181,10 @@ const ContactDrawer = ({ open, handleDrawerClose, contact, loading, isGroup, mes
                 {t("contactDrawer.buttons.edit")}
               </Button>
           </ContactHeader>
+          {isGroupContact && groupJid && (
+            // Para ações de grupo precisamos do JID do grupo (ex.: 12345-678@g.us)
+            <GroupActionsPanel groupId={groupJid} />
+          )}
           <TagsContainer contact={contact} sx={{ marginTop: 2 }} />
           <ContactDetails square variant="outlined">
             <ContactModal
@@ -170,7 +196,7 @@ const ContactDrawer = ({ open, handleDrawerClose, contact, loading, isGroup, mes
               {t("contactDrawer.extraInfo")}
             </Typography>
             <Divider sx={{ mb: 2 }} />
-            {displayContact?.extraInfo?.map(info => (
+            {(displayContact?.extraInfo || contact?.extraInfo || []).map(info => (
               <ContactExtraInfo
                 key={info.id}
                 square

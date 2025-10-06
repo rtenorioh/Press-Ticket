@@ -10,7 +10,10 @@ import formatBody from "../../helpers/Mustache";
 
 async function findMessageDirectlyFromWA(wbot: any, ticket: Ticket, quotedMsgId: string): Promise<any | null> {
   try {
-    const chat = await wbot.getChatById(`${ticket.contact.number}@g.us`);
+    const groupId = ticket.contact.number.includes("@")
+      ? ticket.contact.number
+      : `${ticket.contact.number}@g.us`;
+    const chat = await wbot.getChatById(groupId);
 
     const messages = await chat.fetchMessages({ limit: 500 });
 
@@ -39,6 +42,12 @@ const SendWhatsAppMessage = async ({
   quotedMsg
 }: Request): Promise<WbotMessage> => {
   const wbot = await GetTicketWbot(ticket);
+  const groupId = ticket.contact.number.includes("@")
+    ? ticket.contact.number
+    : `${ticket.contact.number}@g.us`;
+  const userId = ticket.contact.number.includes("@")
+    ? ticket.contact.number
+    : `${ticket.contact.number}@c.us`;
 
   if (quotedMsg && ticket.isGroup) {
     const originalMessage = await findMessageDirectlyFromWA(wbot, ticket, quotedMsg.id);
@@ -46,8 +55,7 @@ const SendWhatsAppMessage = async ({
     if (originalMessage) {
       try {
         try {
-          const chatId = `${ticket.contact.number}@g.us`;
-          const chat = await wbot.getChatById(chatId);
+          const chat = await wbot.getChatById(groupId);
           await chat.sendStateTyping();
           await new Promise(resolve => setTimeout(resolve, 400));
         } catch (e) {
@@ -62,16 +70,19 @@ const SendWhatsAppMessage = async ({
 
         try {
           try {
-            const chatId = `${ticket.contact.number}@g.us`;
-            const chat = await wbot.getChatById(chatId);
+            const chat = await wbot.getChatById(groupId);
             await chat.sendStateTyping();
             await new Promise(resolve => setTimeout(resolve, 400));
           } catch (e) {}
-          const sentMessage = await wbot.sendMessage(
-            `${ticket.contact.number}@g.us`,
-            formatBody(body, ticket),
-            { linkPreview: false, quotedMessageId: originalMessage.id._serialized }
-          );
+          const payload = formatBody(body, ticket);
+          let sentMessage: any;
+          try {
+            sentMessage = await wbot.sendMessage(groupId, payload, { linkPreview: false, quotedMessageId: originalMessage.id._serialized });
+          } catch (e1) {
+            // retry curto
+            await new Promise(r => setTimeout(r, 500));
+            sentMessage = await wbot.sendMessage(groupId, payload, { linkPreview: false, quotedMessageId: originalMessage.id._serialized });
+          }
 
           await ticket.update({ lastMessage: body });
           return sentMessage;
@@ -82,16 +93,18 @@ const SendWhatsAppMessage = async ({
     }
 
     try {
-      const chatId = `${ticket.contact.number}@g.us`;
-      const chat = await wbot.getChatById(chatId);
+      const chat = await wbot.getChatById(groupId);
       await chat.sendStateTyping();
       await new Promise(resolve => setTimeout(resolve, 400));
     } catch (e) {}
-    const sentMessage = await wbot.sendMessage(
-      `${ticket.contact.number}@g.us`,
-      formatBody(body, ticket),
-      { linkPreview: false }
-    );
+    const payload = formatBody(body, ticket);
+    let sentMessage: any;
+    try {
+      sentMessage = await wbot.sendMessage(groupId, payload, { linkPreview: false });
+    } catch (e1) {
+      await new Promise(r => setTimeout(r, 500));
+      sentMessage = await wbot.sendMessage(groupId, payload, { linkPreview: false });
+    }
 
     await ticket.update({ lastMessage: body });
     return sentMessage;
@@ -100,16 +113,18 @@ const SendWhatsAppMessage = async ({
   if (ticket.isGroup) {
     try {
       try {
-        const chatId = `${ticket.contact.number}@g.us`;
-        const chat = await wbot.getChatById(chatId);
+        const chat = await wbot.getChatById(groupId);
         await chat.sendStateTyping();
         await new Promise(resolve => setTimeout(resolve, 400));
       } catch (e) {}
-      const sentMessage = await wbot.sendMessage(
-        `${ticket.contact.number}@g.us`,
-        formatBody(body, ticket),
-        { linkPreview: false }
-      );
+      const payload = formatBody(body, ticket);
+      let sentMessage: any;
+      try {
+        sentMessage = await wbot.sendMessage(groupId, payload, { linkPreview: false });
+      } catch (e1) {
+        await new Promise(r => setTimeout(r, 500));
+        sentMessage = await wbot.sendMessage(groupId, payload, { linkPreview: false });
+      }
 
       await ticket.update({ lastMessage: body });
       
@@ -165,16 +180,18 @@ const SendWhatsAppMessage = async ({
 
   try {
     try {
-      const chatId = `${ticket.contact.number}@c.us`;
-      const chat = await wbot.getChatById(chatId);
+      const chat = await wbot.getChatById(userId);
       await chat.sendStateTyping();
       await new Promise(resolve => setTimeout(resolve, 400));
     } catch (e) {}
-    const sentMessage = await wbot.sendMessage(
-      `${ticket.contact.number}@c.us`,
-      formatBody(body, ticket),
-      sendOptions
-    );
+    const payload = formatBody(body, ticket);
+    let sentMessage: any;
+    try {
+      sentMessage = await wbot.sendMessage(userId, payload, sendOptions);
+    } catch (e1) {
+      await new Promise(r => setTimeout(r, 500));
+      sentMessage = await wbot.sendMessage(userId, payload, sendOptions);
+    }
 
     await ticket.update({ lastMessage: body });
     

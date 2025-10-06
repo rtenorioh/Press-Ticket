@@ -961,12 +961,51 @@ const handleMessage = async (
       }
 
       groupContact = await verifyContact(msgGroupContact);
+
+      // Enriquecer dados do contato de grupo: nome, JID completo e foto
+      try {
+        const fullJid = (chat as any)?.id?._serialized
+          || (msgGroupContact as any)?.id?._serialized
+          || `${msgGroupContact.id.user}@g.us`;
+        const groupName = (chat as any)?.name || (chat as any)?.subject || groupContact.name;
+        let profilePicUrl: string | undefined;
+        try {
+          profilePicUrl = await (wbot as any).getProfilePicUrl(fullJid);
+        } catch {}
+
+        await groupContact.update({
+          isGroup: true,
+          name: groupName || groupContact.name,
+          number: fullJid, // armazenar JID serializado para uso em APIs de grupo
+          profilePicUrl: profilePicUrl || groupContact.profilePicUrl
+        });
+
+        try {
+          const { getIO } = require("../../libs/socket");
+          const io = getIO();
+          io.emit("contact", { action: "update", contact: groupContact });
+        } catch {}
+      } catch (enrichErr) {
+        logger.warn(`Falha ao enriquecer contato de grupo: ${String(enrichErr)}`);
+      }
     }
     const whatsapp = await ShowWhatsAppService(wbot.id!);
 
     const unreadMessages = msg.fromMe ? 0 : chat.unreadCount;
 
     const contact = await verifyContact(msgContact);
+
+    // Atualizar lastContactAt quando o contato envia uma mensagem (não é do usuário)
+    if (!msg.fromMe) {
+      try {
+        await contact.update({
+          lastContactAt: new Date()
+        });
+        logger.info(`[WBOT_LISTENER] lastContactAt atualizado para contato ${contact.id}`);
+      } catch (error) {
+        logger.error(`[WBOT_LISTENER] Erro ao atualizar lastContactAt: ${error}`);
+      }
+    }
 
     let ticket = await FindOrCreateTicketService(
       contact,

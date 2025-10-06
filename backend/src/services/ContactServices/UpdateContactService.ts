@@ -13,6 +13,18 @@ interface ContactData {
   address?: string;
   name?: string;
   extraInfo?: ExtraInfo[];
+  birthdate?: Date | string;
+  gender?: string;
+  status?: string;
+  lastContactAt?: Date | string;
+  country?: string;
+  zip?: string;
+  addressNumber?: string;
+  addressComplement?: string;
+  neighborhood?: string;
+  city?: string;
+  state?: string;
+  cpf?: string;
 }
 
 interface Request {
@@ -24,7 +36,7 @@ const UpdateContactService = async ({
   contactData,
   contactId
 }: Request): Promise<Contact> => {
-  const { email, address, name, number, extraInfo } = contactData;
+  const { email, address, name, number, extraInfo, birthdate, gender, status, lastContactAt, country, zip, addressNumber, addressComplement, neighborhood, city, state, cpf } = contactData;
 
   const contact = await Contact.findOne({
     where: { id: contactId },
@@ -34,6 +46,18 @@ const UpdateContactService = async ({
       "number",
       "address",
       "email",
+      "birthdate",
+      "gender",
+      "status",
+      "lastContactAt",
+      "country",
+      "zip",
+      "addressNumber",
+      "addressComplement",
+      "neighborhood",
+      "city",
+      "state",
+      "cpf",
       "profilePicUrl",
       "messengerId",
       "instagramId",
@@ -69,7 +93,19 @@ const UpdateContactService = async ({
     name,
     number,
     address,
-    email
+    email,
+    birthdate: birthdate && birthdate !== "" ? new Date(birthdate) : null,
+    gender,
+    status,
+    lastContactAt: lastContactAt && lastContactAt !== "" ? new Date(lastContactAt) : null,
+    country,
+    zip,
+    addressNumber,
+    addressComplement,
+    neighborhood,
+    city,
+    state,
+    cpf
   });
 
   await contact.reload({

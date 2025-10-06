@@ -42,6 +42,64 @@ class Contact extends Model<Contact> {
   @Column
   email: string;
 
+  @AllowNull(true)
+  @Column
+  birthdate: Date;
+
+  @AllowNull(true)
+  @Default("")
+  @Column
+  gender: string;
+
+  @AllowNull(true)
+  @Default("")
+  @Column
+  status: string;
+
+  @AllowNull(true)
+  @Column
+  lastContactAt: Date;
+
+  @AllowNull(true)
+  @Default("")
+  @Column
+  country: string;
+
+  @AllowNull(true)
+  @Default("")
+  @Column
+  zip: string;
+
+  @AllowNull(true)
+  @Default("")
+  @Column
+  addressNumber: string;
+
+  @AllowNull(true)
+  @Default("")
+  @Column
+  addressComplement: string;
+
+  @AllowNull(true)
+  @Default("")
+  @Column
+  neighborhood: string;
+
+  @AllowNull(true)
+  @Default("")
+  @Column
+  city: string;
+
+  @AllowNull(true)
+  @Default("")
+  @Column
+  state: string;
+
+  @AllowNull(true)
+  @Default("")
+  @Column
+  cpf: string;
+
   @Column
   profilePicUrl: string;
 

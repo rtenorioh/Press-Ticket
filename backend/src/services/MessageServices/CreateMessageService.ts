@@ -78,6 +78,18 @@ const CreateMessageService = async ({
       throw new Error("ERR_CREATING_MESSAGE");
     }
 
+    // Atualizar lastContactAt quando o contato envia uma mensagem (não é do usuário)
+    if (!messageData.fromMe && message.ticket?.contact) {
+      try {
+        await message.ticket.contact.update({
+          lastContactAt: new Date()
+        });
+        console.log(`[CREATE_MESSAGE_SERVICE] lastContactAt atualizado para contato ${message.ticket.contact.id}`);
+      } catch (error) {
+        console.error("Erro ao atualizar lastContactAt:", error);
+      }
+    }
+
     const io = getIO();
     const timestamp = new Date().toISOString();
 

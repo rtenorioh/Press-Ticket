@@ -6,6 +6,7 @@ interface Request {
   searchParam?: string;
   pageNumber?: string;
   tags?: number[];
+  isGroup?: string; // 'true' | 'false' | undefined (string por vir da query)
 }
 
 interface Response {
@@ -17,7 +18,8 @@ interface Response {
 const ListContactsService = async ({
   searchParam = "",
   pageNumber = "1",
-  tags
+  tags,
+  isGroup
 }: Request): Promise<Response> => {
   const whereCondition: any = {
     [Op.or]: [
@@ -38,8 +40,30 @@ const ListContactsService = async ({
           `%${searchParam.toLowerCase().trim()}%`
         )
       }
-    ]
+    ],
+    [Op.and]: []
   };
+
+  // Filtro por grupo, quando informado
+  if (typeof isGroup !== "undefined" && isGroup !== null && isGroup !== "") {
+    if (isGroup === "true") {
+      // Grupo: flag verdadeira OU número terminando com @g.us
+      whereCondition[Op.and].push({
+        [Op.or]: [
+          { isGroup: true },
+          { number: { [Op.like]: `%@g.us` } }
+        ]
+      });
+    } else if (isGroup === "false") {
+      // Individual: flag falsa/nula E número não terminando com @g.us
+      whereCondition[Op.and].push({
+        [Op.and]: [
+          { [Op.or]: [{ isGroup: false }, { isGroup: null }] },
+          { number: { [Op.notLike]: `%@g.us` } }
+        ]
+      });
+    }
+  }
 
   const includeCondition: Includeable[] = [
     {

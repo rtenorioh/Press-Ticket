@@ -57,7 +57,6 @@ const getDavinciResponse = async (clientText: string): Promise<string> => {
     temperature: 1,
     max_tokens: 4000
   };
-
   try {
     const response = await openai.createCompletion(options);
     let botResponse = "";
@@ -91,27 +90,33 @@ const getDalleResponse = async (
 const sessions: Session[] = [];
 
 const syncUnreadMessages = async (wbot: Session) => {
-  try {
-    await new Promise((resolve) => setTimeout(resolve, 5000));
-    const chats = await wbot.getChats();
+  const maxRetries = 3;
+  for (let attempt = 1; attempt <= maxRetries; attempt += 1) {
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 1500 * attempt));
+      const chats = await wbot.getChats();
 
-    /* eslint-disable no-restricted-syntax */
-    /* eslint-disable no-await-in-loop */
-    for (const chat of chats) {
-      if (chat.unreadCount > 0) {
-        const unreadMessages = await chat.fetchMessages({
-          limit: chat.unreadCount
-        });
+      /* eslint-disable no-restricted-syntax */
+      /* eslint-disable no-await-in-loop */
+      for (const chat of chats) {
+        if (chat.unreadCount > 0) {
+          const unreadMessages = await chat.fetchMessages({
+            limit: chat.unreadCount
+          });
 
-        for (const msg of unreadMessages) {
-          await handleMessage(msg, wbot);
+          for (const msg of unreadMessages) {
+            await handleMessage(msg, wbot);
+          }
+
+          await chat.sendSeen();
         }
-
-        await chat.sendSeen();
+      }
+      return;
+    } catch (error) {
+      if (attempt === maxRetries) {
+        console.warn(`syncUnreadMessages: falha ao carregar chats após ${maxRetries} tentativas. Detalhe:`, error);
       }
     }
-  } catch (error) {
-    console.error("Erro ao carregar os chats:", error);
   }
 };
 
@@ -259,7 +264,7 @@ export const initWbot = async (whatsapp: Whatsapp): Promise<Session> => {
         }
 
         wbot.sendPresenceAvailable();
-        await syncUnreadMessages(wbot);
+        void syncUnreadMessages(wbot);
 
         resolve(wbot);
       });
@@ -383,12 +388,31 @@ export const shutdownWbot = async (whatsappId: string): Promise<void> => {
       retries: retry + 1,
       number: ""
     });
-    
+
   } catch (error) {
     console.error(
       `Erro ao desligar ou limpar a sessão com ID ${whatsappIDNumber}:`,
       error
     );
     throw new AppError("Failed to destroy WhatsApp session.");
+  }
+};
+
+export const getWbotByGroupId = async (groupId: string): Promise<Session | null> => {
+  try {
+    for (const s of [...sessions]) {
+      try {
+        const chat = await s.getChatById(groupId);
+        if (chat && (chat as any).isGroup) {
+          return s;
+        }
+      } catch (_) {
+        // sessão não possui o grupo
+      }
+    }
+    return null;
+  } catch (err) {
+    logger.warn(`getWbotByGroupId: erro ao procurar sessão para groupId ${groupId}: ${String(err)}`);
+    return null;
   }
 };

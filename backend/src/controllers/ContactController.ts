@@ -24,6 +24,7 @@ type IndexQuery = {
   searchParam: string;
   pageNumber: string;
   tags?: string;
+  isGroup?: string;
 };
 
 export const getBlockStatus = async (
@@ -34,6 +35,10 @@ export const getBlockStatus = async (
   const { whatsappId } = req.query as { whatsappId?: string };
 
   const contact = await ShowContactService(contactId);
+
+  if (contact.isGroup) {
+    return res.status(400).json({ error: "BLOCK_STATUS_NOT_SUPPORTED_FOR_GROUP" });
+  }
 
   let sessionId: number | null = whatsappId ? parseInt(whatsappId as string, 10) : null;
   if (!sessionId || Number.isNaN(sessionId)) {
@@ -62,6 +67,10 @@ export const blockContact = async (
   const { whatsappId } = req.body as { whatsappId?: number };
 
   const contact = await ShowContactService(contactId);
+
+  if (contact.isGroup) {
+    return res.status(400).json({ error: "BLOCK_ACTION_NOT_SUPPORTED_FOR_GROUP" });
+  }
 
   let sessionId: number | null = whatsappId && Number.isInteger(whatsappId) ? Number(whatsappId) : null;
   if (!sessionId) {
@@ -101,6 +110,10 @@ export const unblockContact = async (
   const { whatsappId } = req.body as { whatsappId?: number };
 
   const contact = await ShowContactService(contactId);
+
+  if (contact.isGroup) {
+    return res.status(400).json({ error: "BLOCK_ACTION_NOT_SUPPORTED_FOR_GROUP" });
+  }
 
   let sessionId: number | null = whatsappId && Number.isInteger(whatsappId) ? Number(whatsappId) : null;
   if (!sessionId) {
@@ -152,17 +165,30 @@ interface ContactData {
   instagramId?: string;
   telegramId?: string;
   extraInfo?: ExtraInfo[];
+  birthdate?: Date | string;
+  gender?: string;
+  status?: string;
+  lastContactAt?: Date | string;
+  country?: string;
+  zip?: string;
+  addressNumber?: string;
+  addressComplement?: string;
+  neighborhood?: string;
+  city?: string;
+  state?: string;
+  cpf?: string;
 }
 
 export const index = async (req: Request, res: Response): Promise<Response> => {
-  const { searchParam, pageNumber, tags } = req.query as IndexQuery;
+  const { searchParam, pageNumber, tags, isGroup } = req.query as IndexQuery;
 
   const tagIds = tags ? tags.split(",").map(tag => Number(tag)) : [];
 
   const { contacts, count, hasMore } = await ListContactsService({
     searchParam,
     pageNumber,
-    tags: tagIds
+    tags: tagIds,
+    isGroup
   });
 
   return res.json({ contacts, count, hasMore });
@@ -174,7 +200,6 @@ export const getContact = async (
 ): Promise<Response> => {
   const { name, number, address, email } = req.body as IndexGetContactQuery;
 
-  // Verificar se pelo menos um parâmetro de busca foi fornecido
   if (!name && !number && !address && !email) {
     return res.status(400).json({ error: "Pelo menos um parâmetro de busca deve ser fornecido" });
   }
@@ -240,6 +265,20 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
   let { address } = newContact;
   let { email } = newContact;
   let { extraInfo } = newContact;
+  const {
+    birthdate,
+    gender,
+    status,
+    lastContactAt,
+    country,
+    zip,
+    addressNumber,
+    addressComplement,
+    neighborhood,
+    city,
+    state,
+    cpf
+  } = newContact;
 
   const contact = await CreateContactService({
     name,
@@ -247,7 +286,19 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     address,
     email,
     extraInfo,
-    profilePicUrl
+    profilePicUrl,
+    birthdate,
+    gender,
+    status,
+    lastContactAt,
+    country,
+    zip,
+    addressNumber,
+    addressComplement,
+    neighborhood,
+    city,
+    state,
+    cpf
   });
 
   const logUserId = req.user?.id || 1;
