@@ -13,6 +13,8 @@ interface Request {
   media: Express.Multer.File;
   ticket: Ticket;
   body?: string;
+  mentions?: string[];
+  sendAsDocument?: boolean;
 }
 
 const compressVideo = (inputPath: string, outputPath: string, ticketId: number, socketIo?: any): Promise<void> => {
@@ -88,13 +90,47 @@ const transcodeAudioToOpus = (inputPath: string, outputPath: string): Promise<vo
 const SendWhatsAppMedia = async ({
   media,
   ticket,
-  body
+  body,
+  mentions,
+  sendAsDocument: forceSendAsDocument
 }: Request): Promise<WbotMessage> => {
   let finalMediaPath = media.path;
   let shouldDeleteCompressed = false;
 
+  console.log('[SendWhatsAppMedia] Iniciando envio:', {
+    filename: media.filename,
+    mimetype: media.mimetype,
+    hasBody: !!body,
+    hasMentions: !!mentions,
+    mentionsCount: mentions?.length || 0,
+    forceSendAsDocument: !!forceSendAsDocument
+  });
+
   try {
     const wbot = await GetTicketWbot(ticket);
+    
+    const getChatId = () => {
+      let id = ticket.contact.number;
+      if (!id.includes('@')) {
+        id = `${id}@${ticket.isGroup ? "g" : "c"}.us`;
+      }
+      return id;
+    };
+    
+    const chatId = getChatId();
+    
+    const state = await wbot.getState();
+    
+    if (state !== 'CONNECTED') {
+      throw new AppError('WhatsApp não está conectado. Por favor, reconecte o WhatsApp.');
+    }
+    
+    try {
+      const chat = await wbot.getChatById(chatId);
+    } catch (chatError) {
+      console.error('[SendWhatsAppMedia] Erro ao buscar chat:', chatError.message);
+      throw new AppError(`Não foi possível encontrar o chat: ${chatError.message}`);
+    }
     
     const { getIO } = require("../../libs/socket");
     const hasBody = body
@@ -176,51 +212,61 @@ const SendWhatsAppMedia = async ({
     let sentMessage;
     let sendAsDocument = false;
     
-    if (finalSizeInMB > maxSizeForMedia) {
+    if (forceSendAsDocument) {
       sendAsDocument = true;
-      console.log(`Arquivo excede limite de mídia (${maxSizeForMedia}MB), enviando como documento`);
-    }
-    
-    // Remover lógica específica para vídeos da câmera - tratar como qualquer vídeo
-    // if (isVideo && media.filename.includes('video_')) {
-    //   sendAsDocument = false;
-    //   console.log(`Vídeo da câmera detectado (${finalSizeInMB.toFixed(2)}MB), tentando como mídia para ter player`);
-    // }
-    
-    if (finalSizeInMB < 1 && !isVideo) {
+    } else if (media.mimetype.startsWith('text/')) {
+      sendAsDocument = true;
+    } else if (hasBody && hasBody.trim() !== '') {
+      sendAsDocument = true;
+    } else if (finalSizeInMB > maxSizeForMedia) {
+      sendAsDocument = true;
+    } else if (finalSizeInMB < 1 && !isVideo) {
       sendAsDocument = false;
     }
     
     try {
       const fileData = fs.readFileSync(finalMediaPath, { encoding: 'base64' });
       const maxBase64Size = 140000000; // ~100MB em base64 (para arquivos até 100MB)
+      
       if (fileData.length > maxBase64Size) {
         console.log(`Arquivo muito grande para base64: ${(fileData.length / 1000000).toFixed(1)}MB`);
         throw new AppError(`Arquivo muito grande para processamento (${(fileData.length / 1000000).toFixed(1)}MB em base64). Tente comprimir o arquivo ou enviar um arquivo menor.`);
       }
-      const newMedia = new MessageMedia(mimeType, fileData, media.filename);
+      const sanitizedFilename = media.filename
+        .replace(/[^\w\s.-]/g, '_')
+        .replace(/\s+/g, '_')
+        .substring(0, 100);
+      
+      const newMedia = new MessageMedia(mimeType, fileData, sanitizedFilename);
       if (sendAsDocument) {
-        // Enviar como documento
-        console.log(`Enviando como documento - Tipo: ${mimeType}`);
-        // indicador de digitando antes do envio
         try {
-          const chatId = `${ticket.contact.number}@${ticket.isGroup ? "g" : "c"}.us`;
           const chat = await wbot.getChatById(chatId);
-          // Para documento manter como 'digitando' (não é gravação ao vivo)
           await chat.sendStateTyping();
           await new Promise(resolve => setTimeout(resolve, 400));
         } catch (e) {}
-        sentMessage = await wbot.sendMessage(
-          `${ticket.contact.number}@${ticket.isGroup ? "g" : "c"}.us`,
-          newMedia,
-          {
-            caption: hasBody,
-            sendMediaAsDocument: true
-          }
-        );
-        console.log('Documento enviado com sucesso');
+        const docOptions: any = {
+          caption: hasBody,
+          sendMediaAsDocument: true
+        };
+        if (mentions && mentions.length > 0) {
+          docOptions.mentions = mentions;
+        }
+
+        try {
+          sentMessage = await wbot.sendMessage(
+            chatId,
+            newMedia,
+            docOptions
+          );
+          
+        } catch (docError) {
+          console.error('[SendWhatsAppMedia] Erro ao enviar documento:', {
+            error: docError.message,
+            stack: docError.stack
+          });
+          throw docError;
+        }
       } else {
-        // Enviar como mídia normal com fallback para documento
         const options: any = {
           caption: hasBody
         };
@@ -228,10 +274,12 @@ const SendWhatsAppMedia = async ({
         if (isAudio) {
           options.sendAudioAsVoice = true;
         }
+        
+        if (mentions && mentions.length > 0) {
+          options.mentions = mentions;
+        }
         try {
-          // indicador de estado antes do envio (gravando para áudio, digitando para demais)
           try {
-            const chatId = `${ticket.contact.number}@${ticket.isGroup ? "g" : "c"}.us`;
             const chat = await wbot.getChatById(chatId);
             if (isAudio) {
               await chat.sendStateRecording();
@@ -240,40 +288,37 @@ const SendWhatsAppMedia = async ({
             }
             await new Promise(resolve => setTimeout(resolve, 400));
           } catch (e) {}
-          console.log(`Tentando enviar mídia - Tipo: ${mimeType}, Como documento: ${sendAsDocument}`);
           sentMessage = await wbot.sendMessage(
-            `${ticket.contact.number}@${ticket.isGroup ? "g" : "c"}.us`,
+            chatId,
             newMedia,
             options
           );
-          // tentar limpar o estado após envio
+
           try {
-            const chatId = `${ticket.contact.number}@${ticket.isGroup ? "g" : "c"}.us`;
             const chat = await wbot.getChatById(chatId);
             await chat.clearState();
           } catch (e) {}
           
         } catch (mediaError) {
-          console.log('Falha ao enviar como mídia, tentando como documento:', mediaError.message);
-          // Fallback automático para documento
-          // indicador de digitando antes do fallback
           try {
-            const chatId = `${ticket.contact.number}@${ticket.isGroup ? "g" : "c"}.us`;
             const chat = await wbot.getChatById(chatId);
             await chat.sendStateTyping();
             await new Promise(resolve => setTimeout(resolve, 400));
           } catch (e) {}
+          const fallbackOptions: any = {
+            caption: hasBody,
+            sendMediaAsDocument: true
+          };
+          if (mentions && mentions.length > 0) {
+            fallbackOptions.mentions = mentions;
+          }
           sentMessage = await wbot.sendMessage(
-            `${ticket.contact.number}@${ticket.isGroup ? "g" : "c"}.us`,
+            chatId,
             newMedia,
-            {
-              caption: hasBody,
-              sendMediaAsDocument: true
-            }
+            fallbackOptions
           );
-          // tentar limpar o estado após envio
+      
           try {
-            const chatId = `${ticket.contact.number}@${ticket.isGroup ? "g" : "c"}.us`;
             const chat = await wbot.getChatById(chatId);
             await chat.clearState();
           } catch (e) {}

@@ -34,12 +34,14 @@ interface Request {
   body: string;
   ticket: Ticket;
   quotedMsg?: Message;
+  mentions?: string[];
 }
 
 const SendWhatsAppMessage = async ({
   body,
   ticket,
-  quotedMsg
+  quotedMsg,
+  mentions
 }: Request): Promise<WbotMessage> => {
   const wbot = await GetTicketWbot(ticket);
   const groupId = ticket.contact.number.includes("@")
@@ -61,7 +63,11 @@ const SendWhatsAppMessage = async ({
         } catch (e) {
           // silencioso: não bloquear envio caso falhe o typing
         }
-        const sentMessage = await originalMessage.reply(formatBody(body, ticket));
+        const replyOptions: any = {};
+        if (mentions && mentions.length > 0) {
+          replyOptions.mentions = mentions;
+        }
+        const sentMessage = await originalMessage.reply(formatBody(body, ticket), undefined, replyOptions);
 
         await ticket.update({ lastMessage: body });
         return sentMessage;
@@ -76,12 +82,15 @@ const SendWhatsAppMessage = async ({
           } catch (e) {}
           const payload = formatBody(body, ticket);
           let sentMessage: any;
+          const sendOpts: any = { linkPreview: false, quotedMessageId: originalMessage.id._serialized };
+          if (mentions && mentions.length > 0) {
+            sendOpts.mentions = mentions;
+          }
           try {
-            sentMessage = await wbot.sendMessage(groupId, payload, { linkPreview: false, quotedMessageId: originalMessage.id._serialized });
+            sentMessage = await wbot.sendMessage(groupId, payload, sendOpts);
           } catch (e1) {
-            // retry curto
             await new Promise(r => setTimeout(r, 500));
-            sentMessage = await wbot.sendMessage(groupId, payload, { linkPreview: false, quotedMessageId: originalMessage.id._serialized });
+            sentMessage = await wbot.sendMessage(groupId, payload, sendOpts);
           }
 
           await ticket.update({ lastMessage: body });
@@ -99,11 +108,15 @@ const SendWhatsAppMessage = async ({
     } catch (e) {}
     const payload = formatBody(body, ticket);
     let sentMessage: any;
+    const sendOpts: any = { linkPreview: false };
+    if (mentions && mentions.length > 0) {
+      sendOpts.mentions = mentions;
+    }
     try {
-      sentMessage = await wbot.sendMessage(groupId, payload, { linkPreview: false });
+      sentMessage = await wbot.sendMessage(groupId, payload, sendOpts);
     } catch (e1) {
       await new Promise(r => setTimeout(r, 500));
-      sentMessage = await wbot.sendMessage(groupId, payload, { linkPreview: false });
+      sentMessage = await wbot.sendMessage(groupId, payload, sendOpts);
     }
 
     await ticket.update({ lastMessage: body });
@@ -119,11 +132,15 @@ const SendWhatsAppMessage = async ({
       } catch (e) {}
       const payload = formatBody(body, ticket);
       let sentMessage: any;
+      const sendOpts: any = { linkPreview: false };
+      if (mentions && mentions.length > 0) {
+        sendOpts.mentions = mentions;
+      }
       try {
-        sentMessage = await wbot.sendMessage(groupId, payload, { linkPreview: false });
+        sentMessage = await wbot.sendMessage(groupId, payload, sendOpts);
       } catch (e1) {
         await new Promise(r => setTimeout(r, 500));
-        sentMessage = await wbot.sendMessage(groupId, payload, { linkPreview: false });
+        sentMessage = await wbot.sendMessage(groupId, payload, sendOpts);
       }
 
       await ticket.update({ lastMessage: body });

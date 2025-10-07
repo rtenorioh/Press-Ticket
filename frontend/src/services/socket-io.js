@@ -1,15 +1,12 @@
 import openSocket from "socket.io-client";
 import { getBackendUrl } from "../config";
 
-// Variável para controlar se o socket já foi inicializado
 let socketInstance = null;
 let healthCheckInterval = null;
 let lastPongTime = Date.now();
 let isSocketHealthy = true;
 
-// Função para obter o socket existente ou criar um novo
 const connectToSocket = () => {
-    // Se já existe uma instância válida do socket, retorna ela
     if (socketInstance && socketInstance.connected) {
         return socketInstance;
     }
@@ -42,14 +39,9 @@ const connectToSocket = () => {
             return null;
         }
 
-        // Desconecta o socket existente se houver
         if (socketInstance) {
             socketInstance.disconnect();
         }
-
-        // Cria uma nova conexão de socket
-        const timestamp = new Date().toISOString();
-        
         
         const socket = openSocket(getBackendUrl(), {
             transports: ["polling", "websocket"],
@@ -65,21 +57,13 @@ const connectToSocket = () => {
 
         socket.on("connect", () => {
             const timestamp = new Date().toISOString();
-            console.log(`[FRONT_SOCKET_CONNECT][${timestamp}] Socket conectado com sucesso. ID: ${socket.id}`);
             
-            // Emite evento para sincronizar tickets após conexão
             const user = JSON.parse(localStorage.getItem("user") || "{}");
             if (user && user.id) {
-                console.log(`[FRONT_SOCKET_SYNC][${timestamp}] Solicitando sincronização de tickets para o usuário ${user.id}`);
-                // Solicita atualização dos tickets do usuário
                 socket.emit("getTickets", { userId: user.id });
                 
-                // Notifica o servidor que o cliente está online
-                console.log(`[FRONT_SOCKET_STATUS][${timestamp}] Notificando status online para o usuário ${user.id}`);
                 socket.emit("userStatus", { userId: user.id, status: "online" });
                 
-                // Inscreve-se no canal de contadores de tickets
-                console.log(`[FRONT_SOCKET_COUNTER][${timestamp}] Inscrevendo no canal de contadores de tickets`);
                 socket.emit("subscribeTicketCounter");
             } else {
                 console.warn(`[FRONT_SOCKET_NO_USER][${timestamp}] Não foi possível sincronizar tickets: usuário não encontrado no localStorage`);
@@ -105,13 +89,11 @@ const connectToSocket = () => {
             const timestamp = new Date().toISOString();
             console.log(`[FRONT_SOCKET_RECONNECT][${timestamp}] Socket reconectado com sucesso após ${attemptNumber} tentativa(s). ID: ${socket.id}`);
             
-            // Emite evento para sincronizar tickets após reconexão
             const user = JSON.parse(localStorage.getItem("user") || "{}");
             if (user && user.id) {
                 console.log(`[FRONT_SOCKET_RESYNC][${timestamp}] Resincronizando tickets após reconexão para o usuário ${user.id}`);
                 socket.emit("getTickets", { userId: user.id });
                 
-                // Reinscreve-se no canal de contadores de tickets
                 console.log(`[FRONT_SOCKET_COUNTER_RECONNECT][${timestamp}] Reinscrevendo no canal de contadores de tickets`);
                 socket.emit("subscribeTicketCounter");
             } else {
@@ -126,7 +108,6 @@ const connectToSocket = () => {
                 console.warn(`[FRONT_SOCKET_TRANSPORT_ERROR][${timestamp}] Erro de transporte detectado. Tentando reconectar...`);
             }
             
-            // Verifica se o servidor fechou a conexão
             if (reason === 'io server disconnect') {
                 console.warn(`[FRONT_SOCKET_SERVER_DISCONNECT][${timestamp}] Servidor fechou a conexão. Tentando reconectar manualmente...`);
                 socket.connect();
@@ -138,17 +119,14 @@ const connectToSocket = () => {
             if (reason === "io server disconnect" || 
                 reason === "forced close" || 
                 reason === "ping timeout") {
-                // Tenta reconectar automaticamente
                 setTimeout(() => {
                     socket.connect();
                 }, 3000);
             }
         });
 
-        // Inicia verificação de saúde da conexão
         startHealthCheck(socket);
         
-        // Armazena a instância do socket
         socketInstance = socket;
         return socket;
     } catch (err) {
@@ -157,9 +135,7 @@ const connectToSocket = () => {
     }
 };
 
-// Função para iniciar verificação periódica de saúde da conexão socket
 const startHealthCheck = (socket) => {
-    // Limpa intervalo anterior se existir
     if (healthCheckInterval) {
         clearInterval(healthCheckInterval);
     }
@@ -175,10 +151,10 @@ const startHealthCheck = (socket) => {
         const now = Date.now();
         if (now - lastPongTime > 15000) {
             isSocketHealthy = false;
-            console.warn(`[FRONT_SOCKET_HEALTH][${new Date().toISOString()}] Conexão socket possivelmente inativa. Último pong: ${new Date(lastPongTime).toISOString()}`);
+            // console.warn(`[FRONT_SOCKET_HEALTH][${new Date().toISOString()}] Conexão socket possivelmente inativa. Último pong: ${new Date(lastPongTime).toISOString()}`);
             
             if (socket && !socket.connected) {
-                console.warn(`[FRONT_SOCKET_HEALTH][${new Date().toISOString()}] Tentando reconectar socket inativo...`);
+                // console.warn(`[FRONT_SOCKET_HEALTH][${new Date().toISOString()}] Tentando reconectar socket inativo...`);
                 socket.connect();
             }
         }
@@ -192,6 +168,5 @@ const reconnectSocket = () => {
     return connectToSocket();
 };
 
-// Exporta a função principal e a função de reconexão
 export default connectToSocket;
 export { reconnectSocket };

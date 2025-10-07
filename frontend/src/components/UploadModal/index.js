@@ -17,7 +17,8 @@ import {
   Avatar,
   CircularProgress,
   Tooltip,
-  LinearProgress
+  LinearProgress,
+  ClickAwayListener
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { Close, Delete, Description, PictureAsPdf, InsertDriveFile, Image, Send, CloudUpload } from '@mui/icons-material';
@@ -88,6 +89,81 @@ const FileItemAvatar = styled(Avatar)(({ theme }) => ({
   height: 40,
 }));
 
+const MentionsListWrapper = styled('ul')(({ theme }) => ({
+  margin: 0,
+  position: "absolute",
+  bottom: "100%",
+  background: theme.palette.background.paper,
+  padding: 0,
+  border: `1px solid ${theme.palette.divider}`,
+  borderRadius: 8,
+  left: 0,
+  width: "100%",
+  maxHeight: "200px",
+  overflowY: "auto",
+  boxShadow: theme.shadows[3],
+  zIndex: 1060,
+  marginBottom: 8,
+  "& li": {
+    listStyle: "none",
+    "& a": {
+      display: "flex",
+      alignItems: "center",
+      gap: "12px",
+      padding: "10px 12px",
+      fontSize: '0.9rem',
+      color: theme.palette.text.primary,
+      borderBottom: `1px solid ${theme.palette.divider}`,
+      transition: 'all 0.2s ease',
+      cursor: 'pointer',
+      "&:hover": {
+        background: theme.palette.action.hover,
+      },
+      "& .mention-avatar": {
+        width: 36,
+        height: 36,
+        borderRadius: '50%',
+        objectFit: 'cover',
+        backgroundColor: theme.palette.primary.main,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        color: '#fff',
+        fontWeight: 600,
+        fontSize: '0.9rem',
+      },
+      "& .mention-info": {
+        flex: 1,
+        overflow: 'hidden',
+        "& .mention-name": {
+          fontWeight: 500,
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap',
+        },
+        "& .mention-number": {
+          fontSize: '0.8rem',
+          color: theme.palette.text.secondary,
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap',
+        },
+      },
+    },
+    "&:last-child a": {
+      borderBottom: "none",
+    },
+  },
+  scrollbarWidth: "thin",
+  '&::-webkit-scrollbar': {
+    width: '6px',
+  },
+  '&::-webkit-scrollbar-thumb': {
+    backgroundColor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)',
+    borderRadius: '3px',
+  },
+}));
+
 const getFileIcon = (file) => {
   const fileType = file.type.split('/')[0];
   const fileExtension = file.name.split('.').pop().toLowerCase();
@@ -116,6 +192,12 @@ const UploadModal = ({ open, onClose, files, onSend, loading }) => {
   const [uploadStatus, setUploadStatus] = useState({});
   const [isUploading, setIsUploading] = useState(false);
   const captionInputRef = useRef(null);
+  const [showMentions, setShowMentions] = useState(false);
+  const [mentionsList, setMentionsList] = useState([]);
+  const [mentionSearch, setMentionSearch] = useState("");
+  const [mentionStartPos, setMentionStartPos] = useState(0);
+  const [selectedMentions, setSelectedMentions] = useState([]);
+  const [isGroup, setIsGroup] = useState(false);
 
   const FILE_LIMITS = {
     image: 100,
@@ -168,14 +250,72 @@ const UploadModal = ({ open, onClose, files, onSend, loading }) => {
   };
 
   const sendAsDocument = (file) => {
-    const fileSizeMB = file.size / (1024 * 1024);
     const fileType = getFileType(file);
+    const mimeType = file.type;
     
     if (fileType === 'document') {
       return true;
     }
     
+    if (mimeType.startsWith('text/')) {
+      return true;
+    }
+    
+    if (mimeType === 'application/pdf') {
+      return true;
+    }
+    
     return false;
+  };
+
+  const handleMentionClick = (participant) => {
+    const textBefore = caption.substring(0, mentionStartPos);
+    const inputElement = captionInputRef.current?.querySelector('textarea') || captionInputRef.current?.querySelector('input');
+    const cursorPos = inputElement?.selectionStart || caption.length;
+    const textAfter = caption.substring(cursorPos);
+    const newText = `${textBefore}@${participant.number} ${textAfter}`;
+    
+    setCaption(newText);
+    setShowMentions(false);
+    setMentionSearch("");
+    
+    const mentionId = `${participant.number}@c.us`;
+    if (!selectedMentions.includes(mentionId)) {
+      setSelectedMentions([...selectedMentions, mentionId]);
+    }
+    
+    setTimeout(() => {
+      if (inputElement) {
+        inputElement.focus();
+        const newCursorPos = mentionStartPos + participant.number.length + 2;
+        inputElement.setSelectionRange(newCursorPos, newCursorPos);
+      }
+    }, 0);
+  };
+
+  const handleCaptionChange = (e) => {
+    const value = e.target.value;
+    setCaption(value);
+    
+    if (isGroup && mentionsList.length > 0) {
+      const inputElement = e.target;
+      const cursorPos = inputElement.selectionStart;
+      const textBeforeCursor = value.substring(0, cursorPos);
+      const lastAtIndex = textBeforeCursor.lastIndexOf('@');
+      
+      if (lastAtIndex !== -1) {
+        const textAfterAt = textBeforeCursor.substring(lastAtIndex + 1);
+        if (!textAfterAt.includes(' ') && !textAfterAt.includes('\n')) {
+          setMentionSearch(textAfterAt.toLowerCase());
+          setMentionStartPos(lastAtIndex);
+          setShowMentions(true);
+        } else {
+          setShowMentions(false);
+        }
+      } else {
+        setShowMentions(false);
+      }
+    }
   };
 
   const handleSend = async () => {
@@ -215,6 +355,10 @@ const UploadModal = ({ open, onClose, files, onSend, loading }) => {
           formData.append("body", file.name);
         }
         formData.append("fromMe", true);
+        
+        if (selectedMentions.length > 0 && (i === 0 || localFiles.length === 1)) {
+          formData.append("mentions", JSON.stringify(selectedMentions));
+        }
 
         if (sendAsDocument(file)) {
           formData.append("sendAsDocument", "true");
@@ -270,9 +414,44 @@ const UploadModal = ({ open, onClose, files, onSend, loading }) => {
       setLocalFiles([]);
       setUploadProgress({});
       setUploadStatus({});
+      setSelectedMentions([]);
+      setShowMentions(false);
       onClose();
     }, 2000);
   };
+
+  useEffect(() => {
+    const fetchTicketInfo = async () => {
+      if (!ticketId) return;
+      
+      try {
+        const { data } = await api.get(`/tickets/${ticketId}`);
+        const isGroupChat = Boolean(data.contact?.isGroup);
+        setIsGroup(isGroupChat);
+        
+        if (isGroupChat) {
+          const gId = data.contact?.number || data.contact?.remoteJid;
+          if (gId) {
+            try {
+              const { data: groupData } = await api.get(`/groups/${encodeURIComponent(gId)}/participants`);
+              setMentionsList(groupData.participants || []);
+            } catch (err) {
+              console.error("Erro ao carregar participantes:", err);
+              setMentionsList([]);
+            }
+          }
+        } else {
+          setMentionsList([]);
+        }
+      } catch (err) {
+        console.error("Erro ao carregar informações do ticket:", err);
+      }
+    };
+    
+    if (open) {
+      fetchTicketInfo();
+    }
+  }, [ticketId, open]);
 
   React.useEffect(() => {
     if (files && files.length > 0) {
@@ -534,7 +713,6 @@ const UploadModal = ({ open, onClose, files, onSend, loading }) => {
               </FileListContainer>
             )}
             
-            {/* Barra de progresso de compressão */}
             {isCompressing && (
               <Box sx={{ mb: 2 }}>
                 <Typography variant="body2" color="primary" sx={{ mb: 1 }}>
@@ -560,7 +738,6 @@ const UploadModal = ({ open, onClose, files, onSend, loading }) => {
               </Box>
             )}
 
-            {/* Progresso de upload individual */}
             {isUploading && (
               <Box sx={{ mb: 2 }}>
                 <Typography variant="body2" color="primary" sx={{ mb: 1 }}>
@@ -604,7 +781,6 @@ const UploadModal = ({ open, onClose, files, onSend, loading }) => {
               </Box>
             )}
 
-            {/* Validação de arquivos */}
             {localFiles.length > 0 && !isUploading && (
               <Box sx={{ mb: 2 }}>
                 {localFiles.map((file, index) => {
@@ -631,49 +807,88 @@ const UploadModal = ({ open, onClose, files, onSend, loading }) => {
               </Box>
             )}
 
-            <TextField
-              fullWidth
-              label={t('uploadModal.caption')}
-              placeholder={t('uploadModal.captionPlaceholder')}
-              value={caption}
-              onChange={(e) => setCaption(e.target.value)}
-              variant="outlined"
-              inputRef={captionInputRef}
-              multiline
-              rows={2}
-              disabled={isCompressing || isUploading}
-              autoFocus={true}
-              onKeyDown={(e) => {
-                if (e.ctrlKey && e.key === 'Enter') {
-                  e.preventDefault();
-                  handleSend();
-                }
-              }}
-              InputProps={{
-                sx: {
-                  borderRadius: 2,
-                  '& .MuiOutlinedInput-notchedOutline': {
-                    borderColor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.23)' : 'rgba(0, 0, 0, 0.23)',
+            <Box sx={{ position: 'relative' }}>
+              {showMentions && isGroup && (
+                <ClickAwayListener onClickAway={() => setShowMentions(false)}>
+                  <MentionsListWrapper>
+                    {mentionsList
+                      .filter(p => {
+                        const searchLower = mentionSearch.toLowerCase();
+                        return (
+                          p.name.toLowerCase().includes(searchLower) ||
+                          p.number.includes(mentionSearch)
+                        );
+                      })
+                      .slice(0, 10)
+                      .map((participant, index) => {
+                        const initial = participant.name ? participant.name.charAt(0).toUpperCase() : '?';
+                        return (
+                          <li key={index}>
+                            <a onClick={() => handleMentionClick(participant)}>
+                              {participant.avatar ? (
+                                <img 
+                                  src={participant.avatar} 
+                                  alt={participant.name}
+                                  className="mention-avatar"
+                                />
+                              ) : (
+                                <div className="mention-avatar">{initial}</div>
+                              )}
+                              <div className="mention-info">
+                                <div className="mention-name">{participant.name}</div>
+                                <div className="mention-number">+{participant.number}</div>
+                              </div>
+                            </a>
+                          </li>
+                        );
+                      })}
+                  </MentionsListWrapper>
+                </ClickAwayListener>
+              )}
+              <TextField
+                fullWidth
+                label={t('uploadModal.caption')}
+                placeholder={t('uploadModal.captionPlaceholder')}
+                value={caption}
+                onChange={handleCaptionChange}
+                variant="outlined"
+                inputRef={captionInputRef}
+                multiline
+                rows={2}
+                disabled={isCompressing || isUploading}
+                autoFocus={true}
+                onKeyDown={(e) => {
+                  if (e.ctrlKey && e.key === 'Enter') {
+                    e.preventDefault();
+                    handleSend();
+                  }
+                }}
+                InputProps={{
+                  sx: {
+                    borderRadius: 2,
+                    '& .MuiOutlinedInput-notchedOutline': {
+                      borderColor: (theme) => theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.23)' : 'rgba(0, 0, 0, 0.23)',
+                    },
+                    '&:hover .MuiOutlinedInput-notchedOutline': {
+                      borderColor: (theme) => theme.palette.primary.main,
+                    },
+                    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                      borderColor: (theme) => theme.palette.primary.main,
+                      borderWidth: 2,
+                    },
+                  }
+                }}
+                sx={{
+                  mt: 1,
+                  '& .MuiInputLabel-root': {
+                    color: (theme) => theme.palette.text.secondary,
                   },
-                  '&:hover .MuiOutlinedInput-notchedOutline': {
-                    borderColor: (theme) => theme.palette.primary.main,
-                  },
-                  '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                    borderColor: (theme) => theme.palette.primary.main,
-                    borderWidth: 2,
-                  },
-                }
-              }}
-              sx={{
-                mt: 1,
-                '& .MuiInputLabel-root': {
-                  color: (theme) => theme.palette.text.secondary,
-                },
-                '& .MuiInputLabel-root.Mui-focused': {
-                  color: (theme) => theme.palette.primary.main,
-                }
-              }}
-            />
+                  '& .MuiInputLabel-root.Mui-focused': {
+                    color: (theme) => theme.palette.primary.main,
+                  }
+                }}
+              />
+            </Box>
           </>
         )}
       </DialogContent>

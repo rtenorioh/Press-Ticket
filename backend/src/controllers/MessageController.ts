@@ -151,6 +151,7 @@ type MessageData = {
   fromMe: boolean;
   read: boolean;
   quotedMsg?: Message;
+  mentions?: string[];
 };
 
 export const index = async (req: Request, res: Response): Promise<Response> => {
@@ -167,8 +168,27 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
 
 export const store = async (req: Request, res: Response): Promise<Response> => {
   const { ticketId } = req.params;
-  const { body, quotedMsg }: MessageData = req.body;
+  let { body, quotedMsg, mentions, sendAsDocument, compressVideo }: any = req.body;
   const medias = req.files as Express.Multer.File[];
+
+  // Parse mentions se vier como string (FormData)
+  if (mentions && typeof mentions === 'string') {
+    try {
+      mentions = JSON.parse(mentions);
+      console.log('[MessageController] Mentions parseadas de string:', mentions);
+    } catch (e) {
+      console.log('[MessageController] Erro ao parsear mentions:', e);
+      mentions = undefined;
+    }
+  }
+
+  if (mentions) {
+    console.log('[MessageController] Mentions recebidas:', mentions, 'Tipo:', typeof mentions);
+  }
+
+  // Parse sendAsDocument se vier como string
+  const shouldSendAsDocument = sendAsDocument === 'true' || sendAsDocument === true;
+  const shouldCompressVideo = compressVideo === 'true' || compressVideo === true;
 
   const ticket = await ShowTicketService(ticketId);
 
@@ -181,7 +201,13 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
   if (medias) {
     const mediaMessages = await Promise.all(
       medias.map(async (media: Express.Multer.File) => {
-        const sentMessage = await SendWhatsAppMedia({ media, ticket, body });
+        const sentMessage = await SendWhatsAppMedia({ 
+          media, 
+          ticket, 
+          body, 
+          mentions,
+          sendAsDocument: shouldSendAsDocument
+        });
         return sentMessage;
       })
     );
@@ -189,7 +215,7 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
       messageId = mediaMessages[0].id.id;
     }
   } else {
-    const sentMessage = await SendWhatsAppMessage({ body, ticket, quotedMsg });
+    const sentMessage = await SendWhatsAppMessage({ body, ticket, quotedMsg, mentions });
     if (sentMessage) {
       messageId = sentMessage.id.id;
     }

@@ -267,6 +267,80 @@ const MessageQuickAnswersWrapper = styled('ul')(({ theme }) => ({
   },
 }));
 
+const MentionsListWrapper = styled('ul')(({ theme }) => ({
+  margin: 0,
+  position: "absolute",
+  bottom: "60px",
+  background: theme.palette.background.paper,
+  padding: 0,
+  border: `1px solid ${theme.palette.divider}`,
+  borderRadius: 8,
+  left: 0,
+  width: "100%",
+  maxHeight: "300px",
+  overflowY: "auto",
+  boxShadow: theme.shadows[3],
+  zIndex: 1060,
+  "& li": {
+    listStyle: "none",
+    "& a": {
+      display: "flex",
+      alignItems: "center",
+      gap: "12px",
+      padding: "10px 12px",
+      fontSize: '0.9rem',
+      color: theme.palette.text.primary,
+      borderBottom: `1px solid ${theme.palette.divider}`,
+      transition: 'all 0.2s ease',
+      "&:hover": {
+        background: theme.palette.action.hover,
+        cursor: "pointer",
+      },
+      "& .mention-avatar": {
+        width: 36,
+        height: 36,
+        borderRadius: '50%',
+        objectFit: 'cover',
+        backgroundColor: theme.palette.primary.main,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        color: '#fff',
+        fontWeight: 600,
+        fontSize: '0.9rem',
+      },
+      "& .mention-info": {
+        flex: 1,
+        overflow: 'hidden',
+        "& .mention-name": {
+          fontWeight: 500,
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap',
+        },
+        "& .mention-number": {
+          fontSize: '0.8rem',
+          color: theme.palette.text.secondary,
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap',
+        },
+      },
+    },
+    "&:last-child a": {
+      borderBottom: "none",
+    },
+  },
+  scrollbarWidth: "thin",
+  '&::-webkit-scrollbar': {
+    width: '6px',
+  },
+  '&::-webkit-scrollbar-thumb': {
+    backgroundColor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)',
+    borderRadius: '3px',
+  },
+}));
+
 const MessageInput = ({ ticketStatus }) => {
   const { ticketId } = useParams();
   const [medias, setMedias] = useState([]);
@@ -276,6 +350,11 @@ const MessageInput = ({ ticketStatus }) => {
   const [recording, setRecording] = useState(false);
   const [quickAnswers, setQuickAnswer] = useState([]);
   const [typeBar, setTypeBar] = useState(false);
+  const [showMentions, setShowMentions] = useState(false);
+  const [mentionsList, setMentionsList] = useState([]);
+  const [mentionSearch, setMentionSearch] = useState("");
+  const [mentionStartPos, setMentionStartPos] = useState(0);
+  const [selectedMentions, setSelectedMentions] = useState([]);
   const inputRef = useRef();
   const [onDragEnter, setOnDragEnter] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
@@ -288,6 +367,8 @@ const MessageInput = ({ ticketStatus }) => {
   const [channelType, setChannelType] = useState(null);
   const [contactId, setContactId] = useState(null);
   const [isContactBlocked, setIsContactBlocked] = useState(false);
+  const [isGroup, setIsGroup] = useState(false);
+  const [groupId, setGroupId] = useState(null);
   const [showUploadModal, setShowUploadModal] = useState(false);
   const { t } = useTranslation();
   const theme = useTheme();
@@ -350,6 +431,25 @@ const MessageInput = ({ ticketStatus }) => {
         setChannelType(data.whatsapp?.type);
         const cId = data.contact?.id;
         setContactId(cId || null);
+        
+        const isGroupChat = Boolean(data.contact?.isGroup);
+        setIsGroup(isGroupChat);
+        if (isGroupChat) {
+          const gId = data.contact?.number || data.contact?.remoteJid;
+          setGroupId(gId);
+          if (gId) {
+            try {
+              const { data: groupData } = await api.get(`/groups/${encodeURIComponent(gId)}/participants`);
+              setMentionsList(groupData.participants || []);
+            } catch (err) {
+              console.error("Erro ao carregar participantes:", err);
+              setMentionsList([]);
+            }
+          }
+        } else {
+          setMentionsList([]);
+        }
+        
         if (cId) {
           try {
             const { data: status } = await api.get(`/contacts/${cId}/block-status`);
@@ -376,7 +476,6 @@ const MessageInput = ({ ticketStatus }) => {
     } catch (_) {}
   }, [contactId]);
 
-  // Revalida o status de bloqueio quando a aba volta ao foco e periodicamente
   useEffect(() => {
     let intervalId;
 
@@ -614,8 +713,28 @@ const MessageInput = ({ ticketStatus }) => {
   };
 
   const handleChangeInput = (e) => {
-    setInputMessage(e.target.value);
-    handleLoadQuickAnswer(e.target.value);
+    const value = e.target.value;
+    setInputMessage(value);
+    handleLoadQuickAnswer(value);
+    
+    if (isGroup && mentionsList.length > 0) {
+      const cursorPos = e.target.selectionStart;
+      const textBeforeCursor = value.substring(0, cursorPos);
+      const lastAtIndex = textBeforeCursor.lastIndexOf('@');
+      
+      if (lastAtIndex !== -1) {
+        const textAfterAt = textBeforeCursor.substring(lastAtIndex + 1);
+        if (!textAfterAt.includes(' ') && !textAfterAt.includes('\n')) {
+          setMentionSearch(textAfterAt.toLowerCase());
+          setMentionStartPos(lastAtIndex);
+          setShowMentions(true);
+        } else {
+          setShowMentions(false);
+        }
+      } else {
+        setShowMentions(false);
+      }
+    }
   };
 
   const handleQuickAnswersClick = (value) => {
@@ -673,9 +792,41 @@ const MessageInput = ({ ticketStatus }) => {
     setShowUploadModal(false);
   };
 
+  const handleMentionClick = (participant) => {
+    const textBefore = inputMessage.substring(0, mentionStartPos);
+    const textAfter = inputMessage.substring(inputRef.current.selectionStart);
+    const newText = `${textBefore}@${participant.number} ${textAfter}`;
+    
+    setInputMessage(newText);
+    setShowMentions(false);
+    setMentionSearch("");
+    
+    const mentionId = `${participant.number}@c.us`;
+    if (!selectedMentions.includes(mentionId)) {
+      setSelectedMentions([...selectedMentions, mentionId]);
+    }
+    
+    setTimeout(() => {
+      inputRef.current.focus();
+      const newCursorPos = mentionStartPos + participant.number.length + 2;
+      inputRef.current.setSelectionRange(newCursorPos, newCursorPos);
+    }, 0);
+  };
+
   const handleSendMessage = async () => {
     if (inputMessage.trim() === "") return;
     setLoading(true);
+    
+    const mentionsInText = [];
+    const mentionRegex = /@(\d+)/g;
+    let match;
+    while ((match = mentionRegex.exec(inputMessage)) !== null) {
+      const mentionId = `${match[1]}@c.us`;
+      if (!mentionsInText.includes(mentionId)) {
+        mentionsInText.push(mentionId);
+      }
+    }
+    
     const message = {
       read: 1,
       fromMe: true,
@@ -684,6 +835,9 @@ const MessageInput = ({ ticketStatus }) => {
         ? `*${user?.name}:*\n${inputMessage.trim()}`
         : inputMessage.trim(),
       quotedMsg: replyingMessage,
+      mentions: mentionsInText.length > 0 
+        ? mentionsInText 
+        : undefined,
     };
     try {
       let response;
@@ -769,6 +923,8 @@ const MessageInput = ({ ticketStatus }) => {
     setLoading(false);
     setReplyingMessage(null);
     setEditingMessage(null);
+    setSelectedMentions([]);
+    setShowMentions(false);
     
     setTimeout(() => {
       if (inputRef.current) {
@@ -1283,7 +1439,6 @@ const MessageInput = ({ ticketStatus }) => {
             </Menu>
           </Hidden>
           <InputWrapper onMouseEnter={() => {
-            // Re-checa sob demanda ao passar o mouse
             refreshBlockedStatus();
           }}>
             <InputBaseStyled
@@ -1412,7 +1567,43 @@ const MessageInput = ({ ticketStatus }) => {
                 <FormatQuote />
               </IconButton>
             </FormatMenu>
-            {typeBar ? (
+            {showMentions && isGroup ? (
+              <ClickAwayListener onClickAway={() => setShowMentions(false)}>
+                <MentionsListWrapper>
+                  {mentionsList
+                    .filter(p => {
+                      const searchLower = mentionSearch.toLowerCase();
+                      return (
+                        p.name.toLowerCase().includes(searchLower) ||
+                        p.number.includes(mentionSearch)
+                      );
+                    })
+                    .slice(0, 10)
+                    .map((participant, index) => {
+                      const initial = participant.name ? participant.name.charAt(0).toUpperCase() : '?';
+                      return (
+                        <li key={index}>
+                          <a onClick={() => handleMentionClick(participant)}>
+                            {participant.avatar ? (
+                              <img 
+                                src={participant.avatar} 
+                                alt={participant.name}
+                                className="mention-avatar"
+                              />
+                            ) : (
+                              <div className="mention-avatar">{initial}</div>
+                            )}
+                            <div className="mention-info">
+                              <div className="mention-name">{participant.name}</div>
+                              <div className="mention-number">+{participant.number}</div>
+                            </div>
+                          </a>
+                        </li>
+                      );
+                    })}
+                </MentionsListWrapper>
+              </ClickAwayListener>
+            ) : typeBar ? (
               <MessageQuickAnswersWrapper>
                 {quickAnswers.map((value, index) => {
                   return (
