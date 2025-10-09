@@ -361,13 +361,24 @@ const reducer = (state, action) => {
       const ackChanged = oldMessage.ack !== messageToUpdate.ack;
       const bodyChanged = oldMessage.body !== messageToUpdate.body;
       const editedChanged = oldMessage.isEdited !== messageToUpdate.isEdited;
+      const oldMessagesChanged = messageToUpdate.oldMessages && 
+        (!oldMessage.oldMessages || oldMessage.oldMessages.length !== messageToUpdate.oldMessages.length);
       
-      if (ackChanged || bodyChanged || editedChanged) {
+      if (ackChanged || bodyChanged || editedChanged || oldMessagesChanged) {
+        console.log('[UPDATE_MESSAGE] Atualizando mensagem:', {
+          id: messageToUpdate.id,
+          bodyChanged,
+          editedChanged,
+          oldMessagesChanged,
+          oldMessagesCount: messageToUpdate.oldMessages?.length || 0,
+          oldMessages: messageToUpdate.oldMessages?.map(om => ({ id: om.id, body: om.body?.substring(0, 20) }))
+        });
         
         const newState = [...state];
         newState[messageIndex] = { 
           ...oldMessage,
           ...messageToUpdate,
+          oldMessages: messageToUpdate.oldMessages || oldMessage.oldMessages || [],
           _forceUpdate: Date.now()
         };
         
@@ -386,7 +397,11 @@ const reducer = (state, action) => {
         return newState;
       } else {
         const newState = [...state];
-        newState[messageIndex] = { ...oldMessage, ...messageToUpdate };
+        newState[messageIndex] = { 
+          ...oldMessage, 
+          ...messageToUpdate,
+          oldMessages: messageToUpdate.oldMessages || oldMessage.oldMessages || []
+        };
         return newState;
       }
     } 
@@ -435,6 +450,20 @@ const MessagesList = ({ ticketId, isGroup, onClick }) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const messageOptionsMenuOpen = Boolean(anchorEl);
   const currentTicketId = useRef(ticketId);
+  
+  // Atualizar selectedMessage quando messagesList mudar
+  useEffect(() => {
+    if (selectedMessage?.id) {
+      const updatedMessage = messagesList.find(m => m.id === selectedMessage.id);
+      if (updatedMessage && updatedMessage !== selectedMessage) {
+        console.log('[MessagesList] Atualizando selectedMessage:', {
+          id: updatedMessage.id,
+          oldMessagesCount: updatedMessage.oldMessages?.length || 0
+        });
+        setSelectedMessage(updatedMessage);
+      }
+    }
+  }, [messagesList, selectedMessage]);
   const theme = useTheme();
   const [reactionsModalOpen, setReactionsModalOpen] = useState(false);
   const [reactionsMessageId, setReactionsMessageId] = useState(null);
@@ -587,6 +616,13 @@ const MessagesList = ({ ticketId, isGroup, onClick }) => {
 
         if (data.action === "update") {
           try {
+            console.log('[SOCKET_UPDATE] Mensagem recebida via socket:', {
+              id: data.message?.id,
+              body: data.message?.body?.substring(0, 30),
+              isEdited: data.message?.isEdited,
+              oldMessagesCount: data.message?.oldMessages?.length || 0,
+              oldMessages: data.message?.oldMessages?.map(om => ({ id: om.id, body: om.body?.substring(0, 20) }))
+            });
             dispatch({ type: "UPDATE_MESSAGE", payload: data.message });
           } catch (updateError) {
             console.error(updateError);

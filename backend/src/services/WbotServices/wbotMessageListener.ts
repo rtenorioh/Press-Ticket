@@ -1550,19 +1550,53 @@ const handleMsgEdit = async (
   const io = getIO();
 
   try {
-    const messageData = {
-      messageId: msg.id.id,
-      body: oldBody
-    };
+    console.log(`[handleMsgEdit] ========================================`);
+    console.log(`[handleMsgEdit] Evento message_edit recebido para mensagem ${msg.id.id}`);
+    console.log(`[handleMsgEdit] Corpo ATUAL no banco: "${editedMsg.body}"`);
+    console.log(`[handleMsgEdit] Corpo ANTIGO do evento: "${oldBody}"`);
+    console.log(`[handleMsgEdit] Corpo NOVO do evento: "${newBody}"`);
+    console.log(`[handleMsgEdit] ========================================`);
+    
+    // Verificar se o corpo realmente mudou (usar oldBody do evento)
+    if (oldBody && newBody && oldBody !== newBody) {
+      console.log(`[handleMsgEdit] Corpo mudou, verificando se precisa salvar histórico`);
+      
+      // Verificar se já existe um histórico com esse corpo para evitar duplicatas
+      const existingHistory = await OldMessage.findOne({
+        where: {
+          messageId: msg.id.id,
+          body: oldBody
+        }
+      });
 
-    await OldMessage.upsert(messageData);
-    await editedMsg.update({ body: newBody, isEdited: true });
+      if (!existingHistory) {
+        await OldMessage.create({
+          messageId: msg.id.id,
+          body: oldBody
+        });
+        console.log(`[handleMsgEdit] Histórico salvo: "${oldBody}"`);
+      } else {
+        console.log(`[handleMsgEdit] Histórico já existe (ID: ${existingHistory.id}), pulando duplicata`);
+      }
+    } else {
+      console.log(`[handleMsgEdit] Sem mudança no corpo ou valores inválidos`);
+    }
+
+    // Atualizar mensagem apenas se o corpo no banco for diferente do novo
+    if (editedMsg.body !== newBody) {
+      await editedMsg.update({ body: newBody, isEdited: true });
+      console.log(`[handleMsgEdit] Mensagem atualizada no banco: "${newBody}"`);
+    } else {
+      console.log(`[handleMsgEdit] Mensagem já está atualizada no banco`);
+    }
 
     await editedMsg.reload({
       include: [
         {
           model: OldMessage,
-          as: "oldMessages"
+          as: "oldMessages",
+          separate: true,
+          order: [["createdAt", "DESC"]]
         }
       ]
     });

@@ -66,6 +66,15 @@ const CloseButton = styled(Button)(({ theme }) => ({
 const MessageHistoryModal = ({ open, onClose, oldMessages }) => {
   const { t } = useTranslation();
 
+  React.useEffect(() => {
+    if (open) {
+      console.log('[MessageHistoryModal] Modal aberto com oldMessages:', {
+        count: oldMessages?.length || 0,
+        messages: oldMessages?.map(om => ({ id: om.id, body: om.body?.substring(0, 30), createdAt: om.createdAt }))
+      });
+    }
+  }, [open, oldMessages]);
+
   return (
     <StyledDialog
       open={open}

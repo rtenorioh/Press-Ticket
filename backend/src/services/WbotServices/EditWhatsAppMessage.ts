@@ -21,32 +21,67 @@ const EditWhatsAppMessage = async (
     throw new AppError("No message found with this ID.");
   }
 
-  // const hasBody = newBody
-  //   ? formatBody(newBody as string, message.ticket)
-  //   : undefined;
+  if (!newBody || newBody.trim() === "") {
+    throw new AppError("O novo texto da mensagem não pode estar vazio.");
+  }
 
-  // if (!hasBody) {
-  //   throw new AppError("No message found with this newBody.");
-  // }
   const { ticket } = message;
 
-  const messageToEdit = await GetWbotMessage(ticket, messageId);
+  // IMPORTANTE: Capturar o corpo antigo ANTES de qualquer edição
+  const oldBody = message.body;
+  console.log(`[EditWhatsAppMessage] ========================================`);
+  console.log(`[EditWhatsAppMessage] Iniciando edição da mensagem ${messageId}`);
+  console.log(`[EditWhatsAppMessage] Corpo ATUAL no banco: "${oldBody}"`);
+  console.log(`[EditWhatsAppMessage] Corpo NOVO solicitado: "${newBody}"`);
+  console.log(`[EditWhatsAppMessage] ========================================`);
+
+  let messageToEdit;
+  try {
+    messageToEdit = await GetWbotMessage(ticket, messageId);
+  } catch (getMessageError: any) {
+    console.error(`[EditWhatsAppMessage] Erro ao buscar mensagem no WhatsApp:`, getMessageError);
+    throw new AppError("ERR_FETCH_WAPP_MSG_TO_EDIT");
+  }
 
   try {
+    console.log(`[EditWhatsAppMessage] Tentando editar mensagem com novo texto: "${newBody.substring(0, 50)}..."`);
     const res = await messageToEdit.edit(newBody);
-    if (res === null) throw new Error("Can't edit");
-  } catch (err) {
+    
+    if (res === null) {
+      console.error(`[EditWhatsAppMessage] Edição retornou null - mensagem pode ser muito antiga ou não editável`);
+      throw new Error("Não foi possível editar a mensagem. Ela pode ser muito antiga (mais de 15 minutos) ou não ser editável.");
+    }
+    
+    console.log(`[EditWhatsAppMessage] Mensagem editada com sucesso no WhatsApp`);
+  } catch (err: any) {
+    console.error(`[EditWhatsAppMessage] Erro ao editar mensagem no WhatsApp:`, err.message);
     throw new AppError("ERR_EDITING_WAPP_MSG");
   }
 
-  // Salvar o corpo antigo no histórico antes de atualizar
-  const oldBody = message.body;
+  // Salvar o corpo antigo no histórico
 
   if (typeof oldBody === "string" && oldBody !== newBody) {
-    await OldMessage.upsert({
-      messageId: message.id,
-      body: oldBody
+    console.log(`[EditWhatsAppMessage] Salvando histórico: "${oldBody}" -> "${newBody}"`);
+    
+    // Verificar se já existe um histórico com esse corpo para evitar duplicatas
+    const existingHistory = await OldMessage.findOne({
+      where: {
+        messageId: message.id,
+        body: oldBody
+      }
     });
+
+    if (!existingHistory) {
+      const newHistory = await OldMessage.create({
+        messageId: message.id,
+        body: oldBody
+      });
+      console.log(`[EditWhatsAppMessage] Histórico salvo com ID: ${newHistory.id}, body: "${newHistory.body}"`);
+    } else {
+      console.log(`[EditWhatsAppMessage] Histórico já existe (ID: ${existingHistory.id}), pulando duplicata`);
+    }
+  } else {
+    console.log(`[EditWhatsAppMessage] Histórico não salvo - oldBody: "${oldBody}", newBody: "${newBody}", são iguais: ${oldBody === newBody}`);
   }
 
   await message.update({
@@ -73,10 +108,19 @@ const EditWhatsAppMessage = async (
       },
       {
         model: OldMessage,
-        as: "oldMessages"
+        as: "oldMessages",
+        separate: true,
+        order: [["createdAt", "DESC"]]
       }
     ]
   });
+
+  console.log(`[EditWhatsAppMessage] Mensagem recarregada com ${message.oldMessages?.length || 0} históricos`);
+  if (message.oldMessages && message.oldMessages.length > 0) {
+    console.log(`[EditWhatsAppMessage] Históricos encontrados:`, 
+      message.oldMessages.map((om: any) => ({ id: om.id, body: om.body?.substring(0, 30) }))
+    );
+  }
 
   return message;
 };

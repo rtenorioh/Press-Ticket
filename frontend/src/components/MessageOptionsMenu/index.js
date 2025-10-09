@@ -1,7 +1,7 @@
 import { Menu, MenuItem, ListItemIcon, ListItemText, Divider, Popper, Paper, Box, ClickAwayListener, IconButton } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import PropTypes from "prop-types";
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { EditMessageContext } from "../../context/EditingMessage/EditingMessageContext";
 import { ReplyMessageContext } from "../../context/ReplyingMessage/ReplyingMessageContext";
@@ -20,6 +20,7 @@ import EmojiPicker, { Theme as EmojiTheme } from 'emoji-picker-react';
 import HistoryIcon from "@mui/icons-material/History";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import ForwardIcon from "@mui/icons-material/Forward";
+import openSocket from "../../services/socket-io";
 
 const StyledMenu = styled(Menu)(({ theme }) => ({
   '& .MuiPaper-root': {
@@ -75,6 +76,39 @@ const MessageOptionsMenu = ({ message, menuOpen, handleClose, anchorEl }) => {
     } catch (e) {}
     return ["👍", "❤️", "😂", "😮", "😢", "🙏"]; // defaults
   });
+  
+  // Estado local para manter a mensagem atualizada
+  const [currentMessage, setCurrentMessage] = useState(message);
+  
+  // Atualizar currentMessage quando message prop mudar
+  useEffect(() => {
+    if (message) {
+      setCurrentMessage(message);
+    }
+  }, [message]);
+  
+  // Escutar atualizações da mensagem via socket
+  useEffect(() => {
+    if (!message?.id) return;
+    
+    const socket = openSocket();
+    
+    const handleAppMessage = (data) => {
+      if (data.action === "update" && data.message?.id === message.id) {
+        console.log('[MessageOptionsMenu] Mensagem atualizada via socket:', {
+          id: data.message.id,
+          oldMessagesCount: data.message.oldMessages?.length || 0
+        });
+        setCurrentMessage(data.message);
+      }
+    };
+    
+    socket.on("appMessage", handleAppMessage);
+    
+    return () => {
+      socket.off("appMessage", handleAppMessage);
+    };
+  }, [message?.id]);
 
   const canEditMessage = () => {
     const timeDiff = new Date() - new Date(message.updatedAt);
@@ -207,6 +241,11 @@ const MessageOptionsMenu = ({ message, menuOpen, handleClose, anchorEl }) => {
   };
 
   const handleOpenMessageHistoryModal = (e) => {
+    console.log('[MessageOptionsMenu] Abrindo modal de histórico:', {
+      messageId: currentMessage?.id,
+      oldMessagesCount: currentMessage?.oldMessages?.length || 0,
+      oldMessages: currentMessage?.oldMessages?.map(om => ({ id: om.id, body: om.body?.substring(0, 30) }))
+    });
     setMessageHistoryOpen(true);
     handleClose();
   }
@@ -247,7 +286,7 @@ const MessageOptionsMenu = ({ message, menuOpen, handleClose, anchorEl }) => {
       <MessageHistoryModal
         open={messageHistoryOpen}
         onClose={setMessageHistoryOpen}
-        oldMessages={message.oldMessages}
+        oldMessages={currentMessage?.oldMessages || []}
       >
       </MessageHistoryModal>
       <StyledMenu
@@ -311,7 +350,7 @@ const MessageOptionsMenu = ({ message, menuOpen, handleClose, anchorEl }) => {
           </MenuItem>
         )}
         
-        {message.oldMessages?.length > 0 && (
+        {currentMessage?.oldMessages?.length > 0 && (
           <MenuItem key="history" onClick={handleOpenMessageHistoryModal}>
             <ListItemIcon>
               <HistoryIcon fontSize="small" />

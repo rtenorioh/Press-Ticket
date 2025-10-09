@@ -44,7 +44,9 @@ const ListMessagesService = async ({
       },
       {
         model: OldMessage,
-        as: "oldMessages"
+        as: "oldMessages",
+        separate: true,
+        order: [["createdAt", "DESC"]]
       },
       {
         model: Ticket,
