@@ -216,8 +216,6 @@ const SendWhatsAppMedia = async ({
       sendAsDocument = true;
     } else if (media.mimetype.startsWith('text/')) {
       sendAsDocument = true;
-    } else if (hasBody && hasBody.trim() !== '') {
-      sendAsDocument = true;
     } else if (finalSizeInMB > maxSizeForMedia) {
       sendAsDocument = true;
     } else if (finalSizeInMB < 1 && !isVideo) {
