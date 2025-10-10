@@ -737,9 +737,111 @@ const MessageInput = ({ ticketStatus }) => {
     }
   };
 
-  const handleQuickAnswersClick = (value) => {
-    setInputMessage(value);
+  const handleQuickAnswersClick = async (value) => {
     setTypeBar(false);
+    setInputMessage("");
+    
+    if (value.includes('|q')) {
+      const parts = value.split(/\|+q/g).map(part => part.trim()).filter(part => part.length > 0);
+      
+      if (parts.length > 1) {
+        await handleSendMultipleMessages(parts, value);
+      } else {
+        setInputMessage(value.replace(/\|+q/g, '').trim());
+      }
+    } else {
+      setInputMessage(value);
+    }
+  };
+
+  const handleSendMultipleMessages = async (parts, originalMessage) => {
+    setLoading(true);
+    
+    for (let i = 0; i < parts.length; i++) {
+      const part = parts[i];
+      
+      const textBeforePart = originalMessage.substring(0, originalMessage.indexOf(part));
+      const pipeCount = (textBeforePart.match(/\|/g) || []).length;
+      
+      if (i > 0) {
+        const previousPart = parts[i - 1];
+        const textBetween = originalMessage.substring(
+          originalMessage.indexOf(previousPart) + previousPart.length,
+          originalMessage.indexOf(part)
+        );
+        const pipesCount = (textBetween.match(/\|/g) || []).length;
+        const delayTime = pipesCount * 4000;
+        
+        await new Promise(resolve => setTimeout(resolve, delayTime));
+      }
+      
+      const message = {
+        read: 1,
+        fromMe: true,
+        mediaUrl: "",
+        body: signMessage
+          ? `*${user?.name}:*\n${part}`
+          : part,
+        quotedMsg: replyingMessage,
+      };
+      
+      try {
+        let response;
+        if (channelType !== null) {
+          response = await api.post(`/hub-message/${ticketId}`, message);
+        } else {
+          response = await api.post(`/messages/${ticketId}`, message);
+        }
+        
+        if (response && response.data) {
+          const messageData = {
+            ...message,
+            id: response.data.id || new Date().getTime().toString(),
+            ticketId: parseInt(ticketId),
+            createdAt: new Date().toISOString(),
+            userId: user?.id,
+            fromMe: true,
+            read: 1
+          };
+          
+          setTimeout(() => {
+            const event = new CustomEvent('newMessage', { 
+              detail: { 
+                message: messageData,
+                ticketId: ticketId 
+              } 
+            });
+            document.dispatchEvent(event);
+            
+            const messagesContainer = document.querySelector('.messages-list-scrollable');
+            if (messagesContainer) {
+              messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }
+          }, 0);
+          
+          const socket = openSocket();
+          if (socket) {
+            socket.emit("appMessage", {
+              action: "create",
+              message: messageData,
+              ticket: { id: ticketId }
+            });
+          }
+        }
+      } catch (err) {
+        toastError(err, t);
+        break;
+      }
+    }
+    
+    setLoading(false);
+    setReplyingMessage(null);
+    
+    setTimeout(() => {
+      if (inputRef.current) {
+        inputRef.current.focus();
+      }
+    }, 100);
   };
 
   const handleAddEmoji = (emojiObject) => {

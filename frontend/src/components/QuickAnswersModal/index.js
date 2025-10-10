@@ -6,7 +6,10 @@ import {
   DialogTitle,
   Box,
   Typography,
+  Collapse,
 } from "@mui/material";
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { styled, useTheme } from "@mui/material/styles";
 import { Form, Formik } from "formik";
 import React, { useEffect, useRef, useState } from "react";
@@ -52,6 +55,26 @@ const FieldContainer = styled(Box)(({ theme }) => ({
   marginBottom: theme.spacing(1),
 }));
 
+const InfoBox = styled(Box)(({ theme }) => ({
+  backgroundColor: theme.palette.mode === 'dark' ? 'rgba(33, 150, 243, 0.1)' : '#e3f2fd',
+  border: `1px solid ${theme.palette.mode === 'dark' ? 'rgba(33, 150, 243, 0.3)' : '#90caf9'}`,
+  borderRadius: theme.spacing(1),
+  padding: theme.spacing(2),
+  marginBottom: theme.spacing(2),
+}));
+
+const ExampleBox = styled(Box)(({ theme }) => ({
+  backgroundColor: theme.palette.mode === 'dark' ? 'rgba(0, 0, 0, 0.2)' : '#f5f5f5',
+  border: `1px solid ${theme.palette.divider}`,
+  borderRadius: theme.spacing(0.5),
+  padding: theme.spacing(1.5),
+  marginTop: theme.spacing(1),
+  fontFamily: 'monospace',
+  fontSize: '0.875rem',
+  whiteSpace: 'pre-wrap',
+  color: theme.palette.text.primary,
+}));
+
 const QuickAnswerSchema = Yup.object().shape({
   shortcut: Yup.string()
     .min(2, "Too Short!")
@@ -80,6 +103,7 @@ const QuickAnswersModal = ({
   const messageInputRef = useRef();
   const [loading, setLoading] = useState(false);
   const [quickAnswer, setQuickAnswer] = useState(initialState);
+  const [showHelp, setShowHelp] = useState(false);
 
   useEffect(() => {
     return () => {
@@ -193,9 +217,60 @@ const QuickAnswersModal = ({
                 </FieldContainer>
                 
                 <FieldContainer>
-                  <Typography variant="body2" sx={{ mb: 0.5 }}>
-                    {t("quickAnswersModal.form.message")}
-                  </Typography>
+                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 0.5 }}>
+                    <Typography variant="body2">
+                      {t("quickAnswersModal.form.message")}
+                    </Typography>
+                    <Button
+                      size="small"
+                      startIcon={<InfoOutlinedIcon />}
+                      endIcon={<ExpandMoreIcon sx={{ transform: showHelp ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.3s' }} />}
+                      onClick={() => setShowHelp(!showHelp)}
+                      sx={{ 
+                        textTransform: 'none',
+                        fontSize: '0.75rem',
+                        color: theme.palette.primary.main
+                      }}
+                    >
+                      Como dividir mensagens
+                    </Button>
+                  </Box>
+                  
+                  <Collapse in={showHelp}>
+                    <InfoBox>
+                      <Typography variant="body2" sx={{ fontWeight: 600, mb: 1, color: theme.palette.primary.main }}>
+                        💡 Divisão Automática de Mensagens
+                      </Typography>
+                      <Typography variant="body2" sx={{ mb: 1.5, lineHeight: 1.6 }}>
+                        Use <strong>|q</strong> para dividir sua mensagem em partes que serão enviadas com delay automático.
+                      </Typography>
+                      
+                      <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
+                        ⏱️ Delay por quantidade de pipes:
+                      </Typography>
+                      <Typography variant="body2" component="div" sx={{ mb: 1.5, pl: 2 }}>
+                        • <strong>|q</strong> = 4 segundos<br/>
+                        • <strong>||q</strong> = 8 segundos<br/>
+                        • <strong>|||q</strong> = 12 segundos<br/>
+                        • <strong>||||q</strong> = 16 segundos
+                      </Typography>
+                      
+                      <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
+                        📝 Exemplo:
+                      </Typography>
+                      <ExampleBox>
+                        Olá, tudo bem? |q
+                        Seu pedido foi processado com sucesso! ||q
+                        O código de rastreamento é: ABC123 |||q
+                        Obrigado pela preferência!
+                      </ExampleBox>
+                      
+                      <Typography variant="caption" sx={{ display: 'block', mt: 1.5, fontStyle: 'italic', color: theme.palette.text.secondary }}>
+                        ✅ Resultado: 1ª mensagem enviada imediatamente, 2ª após 4s, 3ª após 8s e 4ª após 12s
+                      </Typography>
+                    </InfoBox>
+                  </Collapse>
+                  
                   <WithSkeleton fullWidth loading={loading}>
                     <FormikTextField
                       multiline
