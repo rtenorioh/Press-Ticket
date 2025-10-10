@@ -374,7 +374,8 @@ const TicketListItem = ({ ticket, filteredTags }) => {
 				}
 			}, 500);
 			
-			localStorage.setItem("pressticket:changeTab", "open");
+			const isGroup = ticket?.contact?.isGroup || currentTicket?.contact?.isGroup;
+			localStorage.setItem("pressticket:changeTab", isGroup ? "groups" : "open");
 			
 			navigate(`/tickets/${id}`);
 		} catch (err) {
@@ -436,7 +437,8 @@ const TicketListItem = ({ ticket, filteredTags }) => {
 				socket.emit("getTickets", { status: "closed", userId: user?.id, showAll: false });
 			}
 			
-			localStorage.setItem("pressticket:changeTab", "open");
+			const isGroup = ticket?.contact?.isGroup || currentTicket?.contact?.isGroup;
+			localStorage.setItem("pressticket:changeTab", isGroup ? "groups" : "open");
 			
 			navigate(`/tickets/${id}`);
 		} catch (err) {

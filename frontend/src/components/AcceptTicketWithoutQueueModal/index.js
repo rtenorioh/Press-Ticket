@@ -96,11 +96,17 @@ const AcceptTicketWithouSelectQueue = ({ modalOpen, onClose, ticketId }) => {
 			const openTicketsSetting = getSettingValue("openTickets");
 
 			if (openTicketsSetting === "disabled") {
+				const { data: ticketData } = await api.get(`/tickets/${ticketId}`);
+				
 				await api.put(`/tickets/${ticketId}`, {
 					status: "open",
 					userId: userId || null,
 					queueId,
 				});
+				
+				const isGroup = ticketData?.contact?.isGroup;
+				localStorage.setItem("pressticket:changeTab", isGroup ? "groups" : "open");
+				
 				setLoading(false);
 				navigate(`/tickets/${ticketId}`);
 				handleClose();
@@ -132,6 +138,9 @@ const AcceptTicketWithouSelectQueue = ({ modalOpen, onClose, ticketId }) => {
 				userId: userId || null,
 				queueId,
 			});
+
+			const isGroup = ticketData?.contact?.isGroup;
+			localStorage.setItem("pressticket:changeTab", isGroup ? "groups" : "open");
 
 			setLoading(false);
 			navigate(`/tickets/${ticketId}`);

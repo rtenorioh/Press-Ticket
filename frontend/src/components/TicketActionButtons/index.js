@@ -107,6 +107,8 @@ const TicketActionButtons = ({ ticket }) => {
 			});
 			setLoading(false);
 			if (status === "open") {
+				const isGroup = ticket?.contact?.isGroup;
+				localStorage.setItem("pressticket:changeTab", isGroup ? "groups" : "open");
 				navigate(`/tickets/${ticket.id}`);
 			} else {
 				navigate("/tickets");
@@ -130,16 +132,15 @@ const TicketActionButtons = ({ ticket }) => {
 	};
 
 	const handleAcceptTicket = async (e) => {
-		// Verificar se o ticket tem setor atribuído
 		if (ticket.queue === null || ticket.queue === undefined) {
-			// Se não tem setor, abrir modal para selecionar
 			handleOpenAcceptTicketWithouSelectQueue();
-			localStorage.setItem("pressticket:changeTab", "open");
+			const isGroup = ticket?.contact?.isGroup;
+			localStorage.setItem("pressticket:changeTab", isGroup ? "groups" : "open");
 			navigate(`/tickets/${ticket.id}`);
 		} else {
-			// Se já tem setor, aceitar diretamente
 			await handleUpdateTicketStatus(e, "open", user?.id);
-			localStorage.setItem("pressticket:changeTab", "open");
+			const isGroup = ticket?.contact?.isGroup;
+			localStorage.setItem("pressticket:changeTab", isGroup ? "groups" : "open");
 			navigate(`/tickets/${ticket.id}`);
 		}
 	};
