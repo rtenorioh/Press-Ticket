@@ -119,7 +119,7 @@ const MessageReactionsModal = ({ open, onClose, messageId, t }) => {
                     </Avatar>
                   </ListItemAvatar>
                   <ListItemText
-                    primary={s.isMe || s.fromMe || s.me || s.isSenderMe ? (t ? t("messageReactions.you", { defaultValue: "Você" }) : "Você") : (s?.id?._serialized || s?.id?.user || "Contato")}
+                    primary={s.isMe || s.fromMe || s.me || s.isSenderMe ? (t ? t("messageReactions.you", { defaultValue: "Você" }) : "Você") : (s?.contactName || s?.id?._serialized || s?.id?.user || "Contato")}
                     secondary={<span style={{ fontSize: 18 }}>{s._emoji}</span>}
                   />
                 </ListItem>

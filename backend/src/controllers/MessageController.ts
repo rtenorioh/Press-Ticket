@@ -5,21 +5,21 @@ import Message from "../models/Message";
 import CountMessagesService from "../services/MessageServices/CountMessagesService";
 import ListMessagesService from "../services/MessageServices/ListMessagesService";
 import MarkMessagesAsReadService from "../services/MessageServices/MarkMessagesAsReadService";
-import ShowTicketService from "../services/TicketServices/ShowTicketService";
 import DeleteWhatsAppMessage from "../services/WbotServices/DeleteWhatsAppMessage";
 import EditWhatsAppMessage from "../services/WbotServices/EditWhatsAppMessage";
 import SendWhatsAppMedia from "../services/WbotServices/SendWhatsAppMedia";
 import SendWhatsAppMessage from "../services/WbotServices/SendWhatsAppMessage";
 import SendWhatsAppContacts from "../services/WbotServices/SendWhatsAppContacts";
-import ReactToWhatsAppMessage from "../services/WbotServices/ReactToWhatsAppMessage";
+import ShowTicketService from "../services/TicketServices/ShowTicketService";
 import GetTicketWbot from "../helpers/GetTicketWbot";
 import SerializeWbotMsgId from "../helpers/SerializeWbotMsgId";
 import Contact from "../models/Contact";
+import MessageReaction from "../models/MessageReaction";
+import ReactToWhatsAppMessage from "../services/WbotServices/ReactToWhatsAppMessage";
 
 type IndexQuery = {
   pageNumber: string;
 };
-
 export const reactMessage = async (req: Request, res: Response): Promise<Response> => {
   const { messageId } = req.params;
   const { emoji, removeEmoji } = req.body as { emoji: string, removeEmoji?: string };
@@ -55,6 +55,99 @@ export const getReactions = async (req: Request, res: Response): Promise<Respons
       return res.status(404).json({ error: "Mensagem não encontrada" });
     }
 
+    const dbReactions = await MessageReaction.findAll({
+      where: { messageId: message.id }
+    });
+
+    if (dbReactions.length > 0) {
+      const ticket = await ShowTicketService(String(message.ticketId));
+      const wbot = await GetTicketWbot(ticket);
+      
+      // Obter o número do WhatsApp conectado
+      const myNumber = wbot.info?.wid?._serialized || null;
+      
+      const groupedReactions: any = {};
+      
+      for (const reaction of dbReactions) {
+        if (!groupedReactions[reaction.emoji]) {
+          groupedReactions[reaction.emoji] = {
+            id: reaction.emoji,
+            aggregateEmoji: reaction.emoji,
+            hasReactionByMe: false,
+            senders: []
+          };
+        }
+        
+        // Verificar se esta reação é minha
+        const isMyReaction = myNumber && reaction.senderId === myNumber;
+        if (isMyReaction) {
+          groupedReactions[reaction.emoji].hasReactionByMe = true;
+        }
+        
+        let contactName = isMyReaction ? 'Você' : 'Contato';
+        let profilePicUrl = null;
+        let phoneNumber = null;
+        
+        try {
+          if (reaction.senderId.includes('@lid')) {
+            try {
+              const contact = await (wbot as any).getContactById(reaction.senderId);
+              if (contact) {
+                phoneNumber = contact.number || contact.id?.user;
+                if (!isMyReaction) {
+                  contactName = contact.name || contact.pushname || contact.shortName || phoneNumber || 'Contato';
+                }
+                
+                try {
+                  profilePicUrl = await (wbot as any).getProfilePicUrl(reaction.senderId);
+                } catch (e) {
+                  console.error('[getReactions] Erro ao buscar foto do @lid:', e);
+                }
+              
+              }
+            } catch (e) {
+              console.error('[getReactions] Erro ao buscar informações do @lid:', e);
+            }
+          } else {
+            phoneNumber = reaction.senderId
+              .replace('@c.us', '')
+              .replace('@s.whatsapp.net', '')
+              .replace('@g.us', '');
+          }
+          
+          if (phoneNumber && !isMyReaction && contactName === 'Contato') {
+            const contact = await Contact.findOne({
+              where: { number: phoneNumber }
+            });
+            
+            if (contact) {
+              contactName = contact.name || contact.number;
+              if (!profilePicUrl) {
+                profilePicUrl = contact.profilePicUrl;
+              }
+            } else if (phoneNumber) {
+              contactName = phoneNumber;
+            }
+          }
+        } catch (e) {
+          console.error('[getReactions] Erro ao buscar contato:', e);
+        }
+        
+        groupedReactions[reaction.emoji].senders.push({
+          id: { _serialized: reaction.senderId, user: reaction.senderId },
+          contactName,
+          profilePicUrl,
+          profilePicThumbObj: profilePicUrl ? { img: profilePicUrl } : null,
+          timestamp: reaction.createdAt,
+          isMe: isMyReaction,
+          fromMe: isMyReaction,
+          isSenderMe: isMyReaction
+        });
+      }
+      
+      const reactions = Object.values(groupedReactions);
+      return res.status(200).json({ reactions });
+    }
     const ticket = await ShowTicketService(String(message.ticketId));
     const wbot = await GetTicketWbot(ticket);
 
@@ -64,10 +157,10 @@ export const getReactions = async (req: Request, res: Response): Promise<Respons
 
     let remoteJid: string | null = null;
     try {
-      if (!ticket.isGroup) {
-        const contact = await Contact.findByPk(ticket.contactId);
-        const num = contact?.number?.replace(/\D/g, "");
-        if (num) remoteJid = `${num}@c.us`;
+      const contact = await Contact.findByPk(ticket.contactId);
+      const num = contact?.number?.replace(/\D/g, "");
+      if (num) {
+        remoteJid = ticket.isGroup ? `${num}@g.us` : `${num}@c.us`;
       }
     } catch {}
 
@@ -83,7 +176,6 @@ export const getReactions = async (req: Request, res: Response): Promise<Respons
       } catch { return null; }
     })();
 
-    // Primeiro, tentar via API oficial do whatsapp-web.js (Node context)
     const tryGetReactionsNode = async (id?: string | null) => {
       if (!id) return null;
       try {
@@ -103,43 +195,153 @@ export const getReactions = async (req: Request, res: Response): Promise<Respons
       return res.status(200).json({ reactions: nodeReactions });
     }
 
-    const reactions = await wbot.pupPage.evaluate((innerId: string, sId: string | null, altId: string | null) => {
+    const reactions = await wbot.pupPage.evaluate((innerId: string, sId: string | null, altId: string | null, isGroup: boolean, remote: string | null) => {
+      const logs: string[] = [];
       try {
         const Store = (window as any).Store;
         const tryIds = [sId, altId, innerId].filter(Boolean) as string[];
-        const findForId = (id: string) => {
-          try {
-            const mod = Store?.Reactions;
-            if (!mod || typeof mod.find !== 'function') return Promise.resolve(null);
-            return Promise.resolve(mod.find(id)).then((r: any) => r).catch(() => null);
-          } catch { return Promise.resolve(null); }
-        };
-        const chain = async () => {
-          for (const id of tryIds) {
-            const r = await findForId(id);
-            if (r && r.reactions) {
-              const arr = r.reactions.serialize ? r.reactions.serialize() : (Array.isArray(r.reactions) ? r.reactions : []);
-              if (Array.isArray(arr) && arr.length > 0) return arr;
+        
+        const processReactions = (arr: any[]) => {
+          return arr.map((reaction: any) => {
+            const processed = { ...reaction };
+            if (processed.senders && Array.isArray(processed.senders)) {
+              processed.senders = processed.senders.map((sender: any) => {
+                const senderId = sender?.id?._serialized || sender?.id?.user || sender?.id;
+                let contactName = 'Contato';
+                
+                if (senderId) {
+                  try {
+                    const contact = Store?.Contact?.get?.(senderId);
+                    if (contact) {
+                      contactName = contact.name || contact.pushname || contact.verifiedName || senderId;
+                    }
+                  } catch (e) {}
+                }
+                
+                return {
+                  ...sender,
+                  contactName
+                };
+              });
             }
-            // tentativa alternativa: localizar a Msg e extrair reactions diretamente
-            try {
-              const msg = Store?.Msg?.get?.(id);
-              const col = msg?.reactions || msg?.reactionCollection || msg?.collection;
-              if (col) {
-                const arr2 = col.serialize ? col.serialize() : (col.getModelsArray ? col.getModelsArray() : (Array.isArray(col) ? col : []));
-                if (Array.isArray(arr2) && arr2.length > 0) return arr2;
-              }
-            } catch {}
-          }
-          return [];
+            return processed;
+          });
         };
-        return chain();
+        
+        const tryGetReactionsFromMsg = (id: string) => {
+          const msg = Store?.Msg?.get?.(id);
+          if (!msg) {
+            return null;
+          }
+          const col = msg?.reactions || msg?.reactionCollection;
+          if (!col) {
+            return null;
+          }
+          const arr = col.serialize ? col.serialize() : (col.getModelsArray ? col.getModelsArray() : (Array.isArray(col) ? col : []));
+          if (Array.isArray(arr) && arr.length > 0) {
+            return processReactions(arr);
+          }
+          return null;
+        };
+        
+        for (const id of tryIds) {
+          const result = tryGetReactionsFromMsg(id);
+          if (result) {
+            return { reactions: result, logs };
+          }
+        }
+        
+        if (remote && innerId) {
+          try {
+            const possibleIds = [
+              `true_${remote}_${innerId}`,
+              `false_${remote}_${innerId}`,
+              sId,
+              altId
+            ].filter(Boolean);
+            
+            for (const fullId of possibleIds) {
+              const msg = Store?.Msg?.get?.(fullId);
+              if (msg) {
+                const col = msg?.reactions || msg?.reactionCollection;
+                if (col) {
+                  const arr = col.serialize ? col.serialize() : (col.getModelsArray ? col.getModelsArray() : (Array.isArray(col) ? col : []));
+                  
+                  if (Array.isArray(arr) && arr.length > 0) {
+                    const processed = processReactions(arr);
+                    return { reactions: processed, logs };
+                  }
+                } else {
+                  logs.push(`Mensagem encontrada mas sem reações`);
+                }
+              }
+            }
+            
+            try {
+              const allMsgs = Store?.Msg?.models || [];
+              
+              const partialMatches = allMsgs.filter((m: any) => {
+                const sid = m?.id?._serialized || '';
+                const iid = m?.id?.id || '';
+                return sid.includes(innerId) || iid.includes(innerId);
+              });
+              
+              if (partialMatches.length > 0) {
+                
+                const firstMatch = partialMatches[0];
+                const col = firstMatch?.reactions || firstMatch?.reactionCollection;
+                if (col) {
+                  const arr = col.serialize ? col.serialize() : (col.getModelsArray ? col.getModelsArray() : (Array.isArray(col) ? col : []));
+                  
+                  if (Array.isArray(arr) && arr.length > 0) {
+                    const processed = processReactions(arr);
+                    return { reactions: processed, logs };
+                  }
+                }
+              }
+              
+              if (allMsgs.length === 0 && remote) {
+                const chat = Store?.Chat?.get?.(remote);
+                if (chat) {
+                  
+                  for (const tryId of possibleIds) {
+                    try {
+                      
+                      const msgInChat = chat.msgs?.get?.(tryId);
+                      if (msgInChat) {
+                        const col = msgInChat?.reactions || msgInChat?.reactionCollection;
+                        if (col) {
+                          const arr = col.serialize ? col.serialize() : (col.getModelsArray ? col.getModelsArray() : (Array.isArray(col) ? col : []));
+                          if (Array.isArray(arr) && arr.length > 0) {
+                            const processed = processReactions(arr);
+                            return { reactions: processed, logs };
+                          }
+                        }
+                      }
+                    } catch (e) {
+                      logs.push(`Erro ao buscar ${tryId} no chat: ${e}`);
+                    }
+                  }
+                }
+              }
+            } catch (e) {
+              logs.push(`Erro no debug de mensagens: ${e}`);
+            }
+          } catch (e) {
+            logs.push(`Erro ao buscar com ID completo: ${e}`);
+          }
+        }
+      
+        return { reactions: [], logs };
       } catch (e) {
-        return [];
+        logs.push(`Erro geral: ${e}`);
+        return { reactions: [], logs };
       }
-    }, messageId, serializedId, altSerializedId);
+    }, messageId, serializedId, altSerializedId, ticket.isGroup, remoteJid);
 
-    return res.status(200).json({ reactions });
+    const result = reactions as { reactions: any[], logs: string[] };
+
+    return res.status(200).json({ reactions: result.reactions });
   } catch (error: any) {
     console.error("Erro ao listar reações:", error);
     return res.status(500).json({ error: "Erro ao listar reações" });
@@ -171,22 +373,19 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
   let { body, quotedMsg, mentions, sendAsDocument, compressVideo }: any = req.body;
   const medias = req.files as Express.Multer.File[];
 
-  // Parse mentions se vier como string (FormData)
   if (mentions && typeof mentions === 'string') {
     try {
       mentions = JSON.parse(mentions);
-      console.log('[MessageController] Mentions parseadas de string:', mentions);
     } catch (e) {
-      console.log('[MessageController] Erro ao parsear mentions:', e);
+      console.error('[MessageController] Erro ao parsear mentions:', e);
       mentions = undefined;
     }
   }
 
   if (mentions) {
-    console.log('[MessageController] Mentions recebidas:', mentions, 'Tipo:', typeof mentions);
+    console.info('[MessageController] Mentions recebidas:', mentions, 'Tipo:', typeof mentions);
   }
 
-  // Parse sendAsDocument se vier como string
   const shouldSendAsDocument = sendAsDocument === 'true' || sendAsDocument === true;
   const shouldCompressVideo = compressVideo === 'true' || compressVideo === true;
 
@@ -260,10 +459,8 @@ export const markAsRead = async (req: Request, res: Response): Promise<Response>
   const { ticketId } = req.params;
 
   try {
-    // Verificar o status do ticket antes de marcar como lida
     const ticket = await ShowTicketService(ticketId);
     
-    // Só marca mensagens como lidas se o ticket estiver aceito (status "open")
     if (ticket.status === "open") {
       await MarkMessagesAsReadService({ ticketId });
       return res.status(200).json({ message: "Mensagens marcadas como lidas com sucesso" });
@@ -319,7 +516,6 @@ export const forwardMessages = async (
     let ticket;
     
     if (contactId) {
-      // Se contactId foi fornecido, buscar ou criar ticket para esse contato
       const FindOrCreateTicketService = require("../services/TicketServices/FindOrCreateTicketService").default;
       const ShowContactService = require("../services/ContactServices/ShowContactService").default;
       
@@ -329,7 +525,6 @@ export const forwardMessages = async (
       
       ticket = await FindOrCreateTicketService(contact, whatsapp.id, 0);
     } else {
-      // Usar ticket fornecido
       ticket = await ShowTicketService(ticketId);
     }
 
@@ -337,20 +532,16 @@ export const forwardMessages = async (
       await SetTicketMessagesAsRead(ticket);
     }
 
-    // Encaminhar cada mensagem
     for (const messageData of messages) {
       let body = messageData.body || "";
       
-      // Adicionar indicador de encaminhamento
       if (body) {
         body = `↪ Encaminhada\n${body}`;
       } else if (messageData.mediaType) {
         body = "↪ Encaminhada";
       }
 
-      // Enviar mensagem encaminhada
       if (messageData.mediaType && messageData.mediaUrl) {
-        // Mensagem com mídia - criar objeto media simulado
         const mediaObject = {
           fieldname: 'medias',
           originalname: 'forwarded_media',
@@ -368,7 +559,6 @@ export const forwardMessages = async (
           body: body 
         });
       } else {
-        // Mensagem de texto
         await SendWhatsAppMessage({
           body: body,
           ticket,

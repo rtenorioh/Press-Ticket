@@ -1,4 +1,4 @@
-import { Menu, MenuItem, ListItemIcon, ListItemText, Divider, Popper, Paper, Box, ClickAwayListener, IconButton } from "@mui/material";
+import { Menu, MenuItem, ListItemIcon, ListItemText, Divider, Popper, Paper, Box, ClickAwayListener, IconButton, MenuList } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import PropTypes from "prop-types";
 import React, { useContext, useState, useEffect } from "react";
@@ -22,39 +22,6 @@ import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import ForwardIcon from "@mui/icons-material/Forward";
 import openSocket from "../../services/socket-io";
 
-const StyledMenu = styled(Menu)(({ theme }) => ({
-  '& .MuiPaper-root': {
-    borderRadius: 8,
-    boxShadow: theme.shadows[3],
-    padding: theme.spacing(1, 0),
-    backgroundColor: theme.palette.background.paper,
-  },
-  '& .MuiMenuItem-root': {
-    padding: theme.spacing(1, 2),
-    '&:hover': {
-      backgroundColor: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.04)',
-    },
-    '& .MuiListItemIcon-root': {
-      color: theme.palette.primary.main,
-      minWidth: 36,
-    },
-  },
-  '& .delete-option': {
-    '&:hover': {
-      backgroundColor: 'rgba(211, 47, 47, 0.08)',
-      '& .MuiListItemIcon-root': {
-        color: theme.palette.error.main,
-      },
-      '& .MuiTypography-root': {
-        color: theme.palette.error.main,
-      }
-    },
-  },
-  '& .MuiDivider-root': {
-    margin: theme.spacing(1, 0),
-  }
-}));
-
 const MessageOptionsMenu = ({ message, menuOpen, handleClose, anchorEl }) => {
   const { setReplyingMessage } = useContext(ReplyMessageContext);
   const { setEditingMessage } = useContext(EditMessageContext);
@@ -76,18 +43,15 @@ const MessageOptionsMenu = ({ message, menuOpen, handleClose, anchorEl }) => {
     } catch (e) {}
     return ["👍", "❤️", "😂", "😮", "😢", "🙏"]; // defaults
   });
-  
-  // Estado local para manter a mensagem atualizada
   const [currentMessage, setCurrentMessage] = useState(message);
   
-  // Atualizar currentMessage quando message prop mudar
+
   useEffect(() => {
     if (message) {
       setCurrentMessage(message);
     }
   }, [message]);
   
-  // Escutar atualizações da mensagem via socket
   useEffect(() => {
     if (!message?.id) return;
     
@@ -95,10 +59,6 @@ const MessageOptionsMenu = ({ message, menuOpen, handleClose, anchorEl }) => {
     
     const handleAppMessage = (data) => {
       if (data.action === "update" && data.message?.id === message.id) {
-        console.log('[MessageOptionsMenu] Mensagem atualizada via socket:', {
-          id: data.message.id,
-          oldMessagesCount: data.message.oldMessages?.length || 0
-        });
         setCurrentMessage(data.message);
       }
     };
@@ -289,87 +249,108 @@ const MessageOptionsMenu = ({ message, menuOpen, handleClose, anchorEl }) => {
         oldMessages={currentMessage?.oldMessages || []}
       >
       </MessageHistoryModal>
-      <StyledMenu
-        anchorEl={anchorEl}
-        anchorOrigin={{
-          vertical: "bottom",
-          horizontal: "right",
-        }}
-        transformOrigin={{
-          vertical: "top",
-          horizontal: "right",
-        }}
+      <Popper
         open={menuOpen}
-        onClose={handleClose}
-        elevation={3}
-        PaperProps={{
-          sx: {
-            minWidth: 180,
-            overflow: 'visible',
-          }
-        }}
+        anchorEl={anchorEl}
+        placement="bottom-start"
+        style={{ zIndex: 1300 }}
+        modifiers={[
+          {
+            name: 'offset',
+            options: {
+              offset: [0, 4],
+            },
+          },
+        ]}
       >
-        <MenuItem key="react-open" onClick={openReactionMenu} disabled={reacting}>
-          <ListItemIcon>
-            <SentimentSatisfiedAltIcon fontSize="small" />
-          </ListItemIcon>
-          <ListItemText primary={t("messageOptionsMenu.react") || "Reagir"} />
-        </MenuItem>
-        <Divider />
-        <MenuItem key="reply" onClick={hanldeReplyMessage}>
-          <ListItemIcon>
-            <ReplyIcon fontSize="small" />
-          </ListItemIcon>
-          <ListItemText primary={t("messageOptionsMenu.reply")} />
-        </MenuItem>
+        <ClickAwayListener onClickAway={handleClose}>
+          <Paper
+            elevation={3}
+            sx={{
+              minWidth: 180,
+              borderRadius: 2,
+              overflow: 'visible',
+            }}
+          >
+            <MenuList>
+              <MenuItem key="react-open" onClick={openReactionMenu} disabled={reacting}>
+                <ListItemIcon>
+                  <SentimentSatisfiedAltIcon fontSize="small" />
+                </ListItemIcon>
+                <ListItemText primary={t("messageOptionsMenu.react") || "Reagir"} />
+              </MenuItem>
+              <Divider />
+              <MenuItem key="reply" onClick={hanldeReplyMessage}>
+                <ListItemIcon>
+                  <ReplyIcon fontSize="small" />
+                </ListItemIcon>
+                <ListItemText primary={t("messageOptionsMenu.reply")} />
+              </MenuItem>
 
-        <MenuItem key="forward" onClick={handleForwardMessage}>
-          <ListItemIcon>
-            <ForwardIcon fontSize="small" />
-          </ListItemIcon>
-          <ListItemText primary={t("messageOptionsMenu.forward")} />
-        </MenuItem>
-        
-        {hasTextToCopy() && (
-          <MenuItem key="copy" onClick={handleCopyMessage}>
-            <ListItemIcon>
-              <ContentCopyIcon fontSize="small" />
-            </ListItemIcon>
-            <ListItemText primary={t("messageOptionsMenu.copy")} />
-          </MenuItem>
-        )}
-        
-        {(message.fromMe || hasTextToCopy()) && <Divider />}
-        
-        {message.fromMe && canEditMessage() && (
-          <MenuItem key="edit" onClick={handleEditMessage}>
-            <ListItemIcon>
-              <EditIcon fontSize="small" />
-            </ListItemIcon>
-            <ListItemText primary={t("messageOptionsMenu.edit")} />
-          </MenuItem>
-        )}
-        
-        {currentMessage?.oldMessages?.length > 0 && (
-          <MenuItem key="history" onClick={handleOpenMessageHistoryModal}>
-            <ListItemIcon>
-              <HistoryIcon fontSize="small" />
-            </ListItemIcon>
-            <ListItemText primary={t("messageOptionsMenu.history")} />
-          </MenuItem>
-        )}
-        
-        {message.fromMe && <Divider />}
-        
-        {message.fromMe && (
-          <MenuItem key="delete" onClick={handleOpenConfirmationModal} className="delete-option">
-            <ListItemIcon>
-              <DeleteOutlineIcon fontSize="small" />
-            </ListItemIcon>
-            <ListItemText primary={t("messageOptionsMenu.delete")} />
-          </MenuItem>
-        )}
-      </StyledMenu>
+              <MenuItem key="forward" onClick={handleForwardMessage}>
+                <ListItemIcon>
+                  <ForwardIcon fontSize="small" />
+                </ListItemIcon>
+                <ListItemText primary={t("messageOptionsMenu.forward")} />
+              </MenuItem>
+              
+              {hasTextToCopy() && (
+                <MenuItem key="copy" onClick={handleCopyMessage}>
+                  <ListItemIcon>
+                    <ContentCopyIcon fontSize="small" />
+                  </ListItemIcon>
+                  <ListItemText primary={t("messageOptionsMenu.copy")} />
+                </MenuItem>
+              )}
+              
+              {(message.fromMe || hasTextToCopy()) && <Divider />}
+              
+              {message.fromMe && canEditMessage() && (
+                <MenuItem key="edit" onClick={handleEditMessage}>
+                  <ListItemIcon>
+                    <EditIcon fontSize="small" />
+                  </ListItemIcon>
+                  <ListItemText primary={t("messageOptionsMenu.edit")} />
+                </MenuItem>
+              )}
+              
+              {currentMessage?.oldMessages?.length > 0 && (
+                <MenuItem key="history" onClick={handleOpenMessageHistoryModal}>
+                  <ListItemIcon>
+                    <HistoryIcon fontSize="small" />
+                  </ListItemIcon>
+                  <ListItemText primary={t("messageOptionsMenu.history")} />
+                </MenuItem>
+              )}
+              
+              {message.fromMe && <Divider />}
+              
+              {message.fromMe && (
+                <MenuItem 
+                  key="delete" 
+                  onClick={handleOpenConfirmationModal}
+                  sx={{
+                    '&:hover': {
+                      backgroundColor: 'rgba(211, 47, 47, 0.08)',
+                      '& .MuiListItemIcon-root': {
+                        color: 'error.main',
+                      },
+                      '& .MuiTypography-root': {
+                        color: 'error.main',
+                      }
+                    },
+                  }}
+                >
+                  <ListItemIcon>
+                    <DeleteOutlineIcon fontSize="small" />
+                  </ListItemIcon>
+                  <ListItemText primary={t("messageOptionsMenu.delete")} />
+                </MenuItem>
+              )}
+            </MenuList>
+          </Paper>
+        </ClickAwayListener>
+      </Popper>
 
       <Popper
         open={reactionPopperOpen}

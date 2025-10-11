@@ -844,6 +844,8 @@ const MessagesList = ({ ticketId, isGroup, onClick }) => {
   };
 
   const handleOpenMessageOptionsMenu = (e, message) => {
+    e.preventDefault();
+    e.stopPropagation();
     setAnchorEl(e.currentTarget);
     setSelectedMessage(message);
   };

@@ -20,106 +20,135 @@ const ReactToWhatsAppMessage = async ({ messageId, emoji }: ReactParams): Promis
   }
   const wbot = await GetTicketWbot(ticket);
 
-  let remoteJid: string | null = null;
-  try {
-    if (ticket.isGroup) {
-      remoteJid = null;
-    } else {
-      const contact = await Contact.findByPk(ticket.contactId);
-      const num = contact?.number?.replace(/\D/g, "");
-      if (num) remoteJid = `${num}@c.us`;
+  // Garantir que temos o contact carregado
+  if (!ticket.contact) {
+    const contact = await Contact.findByPk(ticket.contactId);
+    if (contact) {
+      (ticket as any).contact = contact;
     }
-  } catch {}
+  }
+
+  let remoteJid: string | null = null;
+  const num = ticket.contact?.number?.replace(/\D/g, "");
+  if (num) {
+    remoteJid = ticket.isGroup ? `${num}@g.us` : `${num}@c.us`;
+  }
+
+  console.log('[ReactToWhatsAppMessage] Debug:', {
+    messageId,
+    ticketId: ticket.id,
+    isGroup: ticket.isGroup,
+    contactNumber: ticket.contact?.number,
+    remoteJid
+  });
 
   const serializedId = (() => {
-    try { return SerializeWbotMsgId(ticket as any, message as any); } catch { return null; }
+    try { 
+      const id = SerializeWbotMsgId(ticket as any, message as any);
+      console.log('[ReactToWhatsAppMessage] serializedId:', id);
+      return id;
+    } catch (err) {
+      console.log('[ReactToWhatsAppMessage] Erro ao gerar serializedId:', err);
+      return null;
+    }
   })();
   const altSerializedId = (() => {
     try {
       if (!remoteJid) return null;
       const from = message.fromMe ? 'true' : 'false';
-      return `${from}_${remoteJid}_${message.id}`;
-    } catch { return null; }
+      const id = `${from}_${remoteJid}_${message.id}`;
+      console.log('[ReactToWhatsAppMessage] altSerializedId:', id);
+      return id;
+    } catch (err) {
+      console.log('[ReactToWhatsAppMessage] Erro ao gerar altSerializedId:', err);
+      return null;
+    }
   })();
 
-  try {
-    if (serializedId) {
-      const bySerialized = await (wbot as any).getMessageById?.(serializedId);
-      if (bySerialized && typeof bySerialized.react === "function") {
-        await bySerialized.react(emoji);
-        return { ticketId: message.ticketId };
+  // Para grupos, pular direto para o fallback do Store
+  // porque getMessageById não funciona bem com mensagens de grupo
+  if (!ticket.isGroup) {
+    try {
+      if (serializedId) {
+        const bySerialized = await (wbot as any).getMessageById?.(serializedId);
+        if (bySerialized && typeof bySerialized.react === "function") {
+          await bySerialized.react(emoji);
+          return { ticketId: message.ticketId };
+        }
       }
-    }
-      
-    if (altSerializedId) {
-      const byAlt = await (wbot as any).getMessageById?.(altSerializedId);
-      if (byAlt && typeof byAlt.react === "function") {
-        await byAlt.react(emoji);
-        return { ticketId: message.ticketId };
+        
+      if (altSerializedId) {
+        const byAlt = await (wbot as any).getMessageById?.(altSerializedId);
+        if (byAlt && typeof byAlt.react === "function") {
+          await byAlt.react(emoji);
+          return { ticketId: message.ticketId };
+        }
       }
-    }
 
-    const msgInstance = await (wbot as any).getMessageById?.(messageId);
-    if (msgInstance && typeof msgInstance.react === "function") {
-      await msgInstance.react(emoji);
-      return { ticketId: message.ticketId };
+      const msgInstance = await (wbot as any).getMessageById?.(messageId);
+      if (msgInstance && typeof msgInstance.react === "function") {
+        await msgInstance.react(emoji);
+        return { ticketId: message.ticketId };
+      }
+    } catch (err) {
+      console.warn("[ReactToWhatsAppMessage] Falha ao usar getMessageById/react, tentando fallback Store:", err);
     }
-  } catch (err) {
-    console.warn("[ReactToWhatsAppMessage] Falha ao usar getMessageById/react, tentando fallback Store:", err);
+  } else {
+    console.log("[ReactToWhatsAppMessage] Grupo detectado, usando fallback Store diretamente");
   }
 
   if (!wbot.pupPage) {
+    console.log("[ReactToWhatsAppMessage] pupPage não disponível");
     throw new Error("WhatsApp page not ready");
   }
 
-  const success = await wbot.pupPage.evaluate((msgId: string, serialized: string | null, altSerialized: string | null, reaction: string, remote: string | null) => {
+  console.log("[ReactToWhatsAppMessage] Iniciando fallback Store com pupPage.evaluate");
+  
+  let result: any = null;
+  try {
+    result = await wbot.pupPage.evaluate((msgId: string, serialized: string | null, altSerialized: string | null, reaction: string, remote: string | null) => {
+    const logs: string[] = [];
     try {
       const Store = (window as any).Store;
-      const byAnyId = async (id: string) => {
+      logs.push(`Tentando IDs: ${JSON.stringify({ msgId, serialized, altSerialized, remote })}`);
+      
+      const byAnyId = (id: string) => {
+        logs.push(`Buscando por ID: ${id}`);
         let msg = Store?.Msg?.get?.(id);
-        if (msg) return msg;
+        if (msg) {
+          logs.push('Mensagem encontrada via Store.Msg.get');
+          return Promise.resolve(msg);
+        }
         const models = Store?.Msg?.models || [];
         msg = models.find((m: any) => {
           const sid = m?.id?._serialized;
           const iid = m?.id?.id;
           return sid === id || iid === id || (typeof sid === 'string' && sid.includes(id)) || (typeof id === 'string' && id.includes(iid));
         });
-        if (msg) return msg;
-        if (typeof id === 'string' && id.includes('_') && id.includes('@')) {
-          try {
-            const res = await Store?.Msg?.getMessagesById?.([id]);
-            const list = res?.messages || [];
-            msg = list.find((m: any) => {
-              const sid = m?.id?._serialized;
-              const iid = m?.id?.id;
-              return sid === id || iid === id || (typeof sid === 'string' && sid.includes(id)) || (typeof id === 'string' && id.includes(iid));
-            }) || list[0];
-            if (msg) return msg;
-          } catch {}
-        }
+        if (msg) return Promise.resolve(msg);
+        
+        // Tentar buscar no chat específico se temos o remoteJid
         if (remote) {
           try {
-            const chat = Store?.Chat?.get?.(remote) || (await Store?.Chat?.find?.(remote));
-            const tryFindInChat = () => {
+            const chat = Store?.Chat?.get?.(remote);
+            if (chat) {
               const arr = chat?.msgs?.getModelsArray?.() || [];
-              return arr.find((m: any) => {
+              msg = arr.find((m: any) => {
                 const sid = m?.id?._serialized;
                 const iid = m?.id?.id;
                 return sid === id || iid === id || (typeof sid === 'string' && sid.includes(id)) || (typeof id === 'string' && id.includes(iid));
               });
-            };
-
-            msg = tryFindInChat();
-            if (msg) return msg;
-            if (typeof chat?.loadEarlierMsgs === 'function') {
-              for (let i = 0; i < 3 && !msg; i++) {
-                try { await chat.loadEarlierMsgs(); } catch {}
-                msg = tryFindInChat();
+              if (msg) {
+                logs.push(`Mensagem encontrada no chat ${remote}`);
+                return Promise.resolve(msg);
               }
             }
-            if (msg) return msg;
-          } catch {}
+          } catch (e) {
+            logs.push(`Erro ao buscar no chat: ${e}`);
+          }
         }
+        
+        // Buscar em todos os chats como último recurso
         try {
           const allChats = Store?.Chat?.models || [];
           for (const c of allChats) {
@@ -129,33 +158,78 @@ const ReactToWhatsAppMessage = async ({ messageId, emoji }: ReactParams): Promis
               const iid = m?.id?.id;
               return sid === id || iid === id || (typeof sid === 'string' && sid.includes(id)) || (typeof id === 'string' && id.includes(iid));
             });
-            if (found) return found;
+            if (found) {
+              logs.push('Mensagem encontrada em busca global');
+              return Promise.resolve(found);
+            }
           }
-        } catch {}
-        return msg || null;
+        } catch (e) {
+          logs.push(`Erro na busca global: ${e}`);
+        }
+        
+        return Promise.resolve(null);
       };
 
       const tryIds = [serialized, altSerialized, msgId].filter(Boolean) as string[];
-      const tryChain = async (): Promise<any> => {
+      logs.push(`Lista de IDs para tentar: ${JSON.stringify(tryIds)}`);
+      
+      const tryChain = () => {
+        let promise = Promise.resolve(null);
         for (const id of tryIds) {
-          const m = await byAnyId(id);
-          if (m) return m;
+          promise = promise.then((found: any) => {
+            if (found) return found;
+            return byAnyId(id).then((m: any) => {
+              if (m) {
+                logs.push(`Mensagem encontrada com ID: ${id}`);
+                return m;
+              }
+              return null;
+            });
+          });
         }
-        return null;
+        return promise.then((result: any) => {
+          if (!result) {
+            logs.push('Nenhuma mensagem encontrada');
+          }
+          return result;
+        });
       };
 
-      return Promise.resolve(tryChain())
+      return tryChain()
         .then((msg: any) => {
-          if (!msg) return false;
-          return Store.sendReactionToMsg(msg, reaction).then(() => true).catch(() => false);
+          if (!msg) {
+            logs.push('Mensagem não encontrada, abortando');
+            return { success: false, logs };
+          }
+          logs.push(`Enviando reação: ${reaction}`);
+          return Store.sendReactionToMsg(msg, reaction)
+            .then(() => {
+              logs.push('Reação enviada com sucesso');
+              return { success: true, logs };
+            })
+            .catch((err: any) => {
+              logs.push(`Erro ao enviar reação: ${err?.message || err}`);
+              return { success: false, logs };
+            });
         })
-        .catch(() => false);
-    } catch (e) {
-      return false;
+        .catch((err: any) => {
+          logs.push(`Erro no tryChain: ${err?.message || err}`);
+          return { success: false, logs };
+        });
+    } catch (e: any) {
+      logs.push(`Erro geral: ${e?.message || e}`);
+      return { success: false, logs };
     }
   }, messageId, serializedId, altSerializedId, emoji, remoteJid);
+  } catch (evalError) {
+    console.error("[ReactToWhatsAppMessage] Erro no pupPage.evaluate:", evalError);
+    throw new Error("Failed to evaluate Store reaction");
+  }
 
-  if (!success) {
+  console.log("[ReactToWhatsAppMessage] Logs do Store:", result?.logs || []);
+  console.log("[ReactToWhatsAppMessage] Resultado do fallback Store:", result?.success);
+
+  if (!result?.success) {
     throw new Error("Failed to send reaction via WhatsApp Web");
   }
 
