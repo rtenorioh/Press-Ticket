@@ -16,6 +16,7 @@ import Code from "@mui/icons-material/Code";
 import ContactPhoneOutlined from "@mui/icons-material/ContactPhoneOutlined";
 import DashboardOutlined from "@mui/icons-material/DashboardOutlined";
 import LocalOffer from "@mui/icons-material/LocalOffer";
+import LabelOutlined from "@mui/icons-material/LabelOutlined";
 import MenuBook from "@mui/icons-material/MenuBook";
 import MemoryIcon from '@mui/icons-material/Memory';
 import CpuIcon from '@mui/icons-material/DeveloperBoard';
@@ -253,6 +254,13 @@ const MainListItems = (props) => {
         primary={t("mainDrawer.listItems.tags")}
         icon={<LocalOffer />}
         active={location.pathname === '/tags'}
+        drawerClose={drawerClose}
+      />
+      <ListItemLink
+        to="/ClientStatus"
+        primary={t("mainDrawer.listItems.clientStatus")}
+        icon={<LabelOutlined />}
+        active={location.pathname === '/ClientStatus'}
         drawerClose={drawerClose}
       />
       <ListItemLink

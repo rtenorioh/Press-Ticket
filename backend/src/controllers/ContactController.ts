@@ -25,6 +25,7 @@ type IndexQuery = {
   pageNumber: string;
   tags?: string;
   isGroup?: string;
+  status?: string;
 };
 
 export const getBlockStatus = async (
@@ -180,7 +181,7 @@ interface ContactData {
 }
 
 export const index = async (req: Request, res: Response): Promise<Response> => {
-  const { searchParam, pageNumber, tags, isGroup } = req.query as IndexQuery;
+  const { searchParam, pageNumber, tags, isGroup, status } = req.query as IndexQuery;
 
   const tagIds = tags ? tags.split(",").map(tag => Number(tag)) : [];
 
@@ -188,7 +189,8 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
     searchParam,
     pageNumber,
     tags: tagIds,
-    isGroup
+    isGroup,
+    status
   });
 
   return res.json({ contacts, count, hasMore });
@@ -486,29 +488,56 @@ export const exportContacts = async (
   req: Request,
   res: Response
 ): Promise<Response> => {
-  const { searchParam, tags } = req.query as IndexQuery;
+  const { searchParam, tags, isGroup, status } = req.query as IndexQuery;
 
   const tagIds = tags ? tags.split(",").map(tag => Number(tag)) : [];
 
   try {
     const { contacts } = await ExportContactsService({
       searchParam,
-      tags: tagIds
+      tags: tagIds,
+      isGroup,
+      status
     });
 
     if (contacts.length === 0) {
       return res.status(404).json({ error: "ERR_NO_CONTACT_FOUND" });
     }
 
-    const exportData = contacts.map(contact => ({
-      id: contact.id,
-      name: contact.name || "",
-      number: contact.number || "",
-      email: contact.email || "",
-      address: contact.address || "",
-      tags: contact.tags ? contact.tags.map(tag => tag.name).join(", ") : "",
-      createdAt: contact.createdAt ? new Date(contact.createdAt).toLocaleDateString('pt-BR') : ""
-    }));
+    const exportData = contacts.map(contact => {
+      let extraInfoFormatted = "";
+      if (contact.extraInfo && Array.isArray(contact.extraInfo) && contact.extraInfo.length > 0) {
+        extraInfoFormatted = contact.extraInfo
+          .map(field => `${field.name}: ${field.value}`)
+          .join(" | ");
+      }
+
+      return {
+        id: contact.id,
+        name: contact.name || "",
+        number: contact.number || "",
+        email: contact.email || "",
+        cpf: contact.cpf || "",
+        birthdate: contact.birthdate ? new Date(contact.birthdate).toLocaleDateString('pt-BR') : "",
+        gender: contact.gender || "",
+        status: contact.status || "",
+        address: contact.address || "",
+        addressNumber: contact.addressNumber || "",
+        addressComplement: contact.addressComplement || "",
+        neighborhood: contact.neighborhood || "",
+        city: contact.city || "",
+        state: contact.state || "",
+        zip: contact.zip || "",
+        country: contact.country || "",
+        isGroup: contact.isGroup ? "Sim" : "Não",
+        profilePicUrl: contact.profilePicUrl || "",
+        extraInfo: extraInfoFormatted,
+        tags: contact.tags ? contact.tags.map(tag => tag.name).join(", ") : "",
+        createdAt: contact.createdAt ? new Date(contact.createdAt).toLocaleDateString('pt-BR') : "",
+        updatedAt: contact.updatedAt ? new Date(contact.updatedAt).toLocaleDateString('pt-BR') : "",
+        lastContactAt: contact.lastContactAt ? new Date(contact.lastContactAt).toLocaleDateString('pt-BR') : ""
+      };
+    });
 
     return res.status(200).json(exportData);
   } catch (err) {

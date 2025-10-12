@@ -274,6 +274,59 @@ const messages = {
           channels: "Canais",
           actions: "Ações",
         },
+        filters: {
+          status: "Filtrar por Status",
+          allStatus: "Todos os Status"
+        },
+        exportModal: {
+          title: "Selecionar Campos para Exportação",
+          selectAll: "Selecionar Todos",
+          deselectAll: "Desmarcar Todos",
+          selectedCount: "{{count}} de {{total}} campos selecionados",
+          groups: {
+            basic: "Informações Básicas",
+            personal: "Dados Pessoais",
+            address: "Endereço",
+            custom: "Campos Customizados",
+            dates: "Datas"
+          },
+          fields: {
+            id: "ID",
+            name: "Nome",
+            number: "Número",
+            email: "Email",
+            cpf: "CPF",
+            birthdate: "Data Nascimento",
+            gender: "Gênero",
+            status: "Status",
+            address: "Endereço",
+            addressNumber: "Número",
+            addressComplement: "Complemento",
+            neighborhood: "Bairro",
+            city: "Cidade",
+            state: "Estado",
+            zip: "CEP",
+            country: "País",
+            isGroup: "É Grupo",
+            profilePicUrl: "Foto Perfil",
+            extraInfo: "Informações Extras",
+            tags: "Tags",
+            createdAt: "Data Criação",
+            updatedAt: "Data Atualização",
+            lastContactAt: "Último Contato"
+          },
+          buttons: {
+            cancel: "Cancelar",
+            export: "Exportar ({{count}} campos)"
+          }
+        },
+        exportProgress: {
+          title: "Exportando Contatos",
+          preparing: "Preparando exportação...",
+          fetching: "Buscando contatos...",
+          processing: "Processando dados...",
+          finishing: "Finalizando..."
+        },
       },
       contactDrawer: {
         header: "Dados do contato",
@@ -657,6 +710,7 @@ const messages = {
           dashboard: "Dashboard",
           quickAnswers: "Respostas Rápidas",
           tags: "Tags",
+          clientStatus: "Status de Clientes",
           connections: "Canais",
           queues: "Setores",
           users: "Atendentes",
@@ -1255,6 +1309,47 @@ const messages = {
           color: "Cor da Tag"
         },
         success: "Tag salva com sucesso!",
+      },
+      clientStatus: {
+        title: "Status de Clientes",
+        table: {
+          id: "ID",
+          name: "Status",
+          color: "Cor",
+          contacts: "Contatos",
+          actions: "Ação"
+        },
+        toasts: {
+          deleted: "Status excluído com sucesso!",
+          deletedAll: "Todos os Status excluídos com sucesso!",
+        },
+        buttons: {
+          add: "Adicionar",
+          deleteAll: "Deletar Todos",
+          viewContacts: "Ver contatos com este status"
+        },
+        confirmationModal: {
+          deleteTitle: "Deletar ",
+          deleteAllTitle: "Deletar Todos",
+          deleteMessage: "Tem certeza que deseja deletar este Status?",
+          deleteAllMessage: "Tem certeza que deseja deletar todos os Status?",
+        },
+      },
+      clientStatusModal: {
+        title: {
+          add: "Adicionar Status",
+          edit: "Editar Status",
+        },
+        buttons: {
+          okAdd: "Salvar",
+          okEdit: "Editar",
+          cancel: "Cancelar",
+        },
+        form: {
+          name: "Nome do Status",
+          color: "Cor do Status"
+        },
+        success: "Status salvo com sucesso!",
       },
       ticketsManager: {
         buttons: {

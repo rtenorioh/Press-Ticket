@@ -31,6 +31,7 @@ import SystemHealth from "../pages/SystemHealth";
 import SystemUpdate from "../pages/SystemUpdate";
 import Signup from "../pages/Signup/";
 import Tags from "../pages/Tags";
+import ClientStatus from "../pages/ClientStatus";
 import Tickets from "../pages/Tickets/";
 import Users from "../pages/Users";
 import Videos from "../pages/Videos";
@@ -69,6 +70,7 @@ const AppRoutes = ({ toggleTheme, onThemeConfigUpdate }) => {
             <Route path="apikey" element={<ApiKey />} />
             <Route path="Queues" element={<Queues />} />
             <Route path="Tags" element={<Tags />} />
+            <Route path="ClientStatus" element={<ClientStatus />} />
             <Route path="errorLogs" element={<ErrorLogs />} />
             <Route path="diskSpace" element={<DiskSpace />} />
             <Route path="memoryUsage" element={<MemoryUsage />} />

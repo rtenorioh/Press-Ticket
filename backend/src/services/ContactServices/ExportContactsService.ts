@@ -2,10 +2,13 @@ import { Op, Sequelize } from "sequelize";
 import Contact from "../../models/Contact";
 import Tag from "../../models/Tag";
 import ContactTag from "../../models/ContactTag";
+import ContactCustomField from "../../models/ContactCustomField";
 
 interface Request {
   searchParam?: string;
   tags?: number[];
+  isGroup?: string;
+  status?: string;
 }
 
 interface Response {
@@ -14,7 +17,9 @@ interface Response {
 
 const ExportContactsService = async ({
   searchParam = "",
-  tags
+  tags,
+  isGroup,
+  status
 }: Request): Promise<Response> => {
   const whereCondition: any = {};
   
@@ -40,12 +45,26 @@ const ExportContactsService = async ({
     ];
   }
 
+  if (isGroup !== undefined) {
+    whereCondition.isGroup = isGroup === "true";
+  }
+
+  if (status) {
+    whereCondition.status = status;
+  }
+
   const includeCondition = [
     {
       model: Tag,
       as: "tags",
       attributes: ["id", "name", "color"],
       through: { attributes: [] },
+      required: false
+    },
+    {
+      model: ContactCustomField,
+      as: "extraInfo",
+      attributes: ["id", "name", "value"],
       required: false
     }
   ];
@@ -86,7 +105,29 @@ const ExportContactsService = async ({
       order: [["name", "ASC"]],
       limit: batchSize,
       offset: offset,
-      attributes: ["id", "name", "number", "email", "address", "createdAt"]
+      attributes: [
+        "id", 
+        "name", 
+        "number", 
+        "email", 
+        "address",
+        "birthdate",
+        "gender",
+        "status",
+        "country",
+        "zip",
+        "addressNumber",
+        "addressComplement",
+        "neighborhood",
+        "city",
+        "state",
+        "cpf",
+        "profilePicUrl",
+        "isGroup",
+        "createdAt",
+        "updatedAt",
+        "lastContactAt"
+      ]
     });
 
     if (contactsBatch.length > 0) {

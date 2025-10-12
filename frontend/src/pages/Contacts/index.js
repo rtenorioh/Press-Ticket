@@ -18,7 +18,15 @@ import {
   Modal,
   Divider,
   Typography,
-  Fade
+  Fade,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  LinearProgress,
+  Dialog,
+  DialogContent,
+  DialogTitle
 } from "@mui/material";
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
@@ -42,7 +50,7 @@ import {
 } from "@mui/icons-material";
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
 import WhatsMarked from "react-whatsmarked";
 
@@ -50,6 +58,7 @@ import { Can } from "../../components/Can";
 import ConfirmationModal from "../../components/ConfirmationModal/";
 import ContactChannels from "../../components/ContactChannels";
 import ContactModal from "../../components/ContactModal";
+import ExportFieldsModal from "../../components/ExportFieldsModal";
 import MainContainer from "../../components/MainContainer";
 import MainHeader from "../../components/MainHeader";
 import MainHeaderButtonsWrapper from "../../components/MainHeaderButtonsWrapper";
@@ -154,6 +163,7 @@ const IdContainer = styled('div')({
 const Contacts = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useContext(AuthContext);
   const defaultImage = '/default-profile.png';
   const [loading, setLoading] = useState(false);
@@ -178,6 +188,18 @@ const Contacts = () => {
   const [dataTab, setDataTab] = useState(0);
   const [channelsModalOpen, setChannelsModalOpen] = useState(false);
   const [selectedChannels, setSelectedChannels] = useState([]);
+  const [statusFilter, setStatusFilter] = useState("");
+  const [clientStatusList, setClientStatusList] = useState([]);
+  const [exportModalOpen, setExportModalOpen] = useState(false);
+  const [exportProgress, setExportProgress] = useState(0);
+  const [exportProgressOpen, setExportProgressOpen] = useState(false);
+
+  useEffect(() => {
+    if (location.state?.statusFilter) {
+      setStatusFilter(location.state.statusFilter);
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+  }, [location.state, location.pathname, navigate]);
 
   const formatDate = (dt) => {
     try {
@@ -198,6 +220,18 @@ const Contacts = () => {
   }, []);
 
   useEffect(() => {
+    const fetchClientStatus = async () => {
+      try {
+        const { data } = await api.get("/client-status/");
+        setClientStatusList(data.clientStatus || []);
+      } catch (err) {
+        console.error("Erro ao carregar status de clientes:", err);
+      }
+    };
+    fetchClientStatus();
+  }, []);
+
+  useEffect(() => {
     try {
       localStorage.setItem(TYPE_FILTER_KEY, typeFilter);
     } catch {}
@@ -206,7 +240,7 @@ const Contacts = () => {
   useEffect(() => {
     dispatch({ type: "RESET" });
     setPageNumber(1);
-  }, [searchParam, typeFilter]);
+  }, [searchParam, typeFilter, statusFilter]);
 
   useEffect(() => {
     setLoading(true);
@@ -220,7 +254,8 @@ const Contacts = () => {
               searchParam,
               pageNumber,
               tags: filteredTags.map(tag => tag.id).join(","),
-              ...(isGroupParam ? { isGroup: isGroupParam } : {})
+              ...(isGroupParam ? { isGroup: isGroupParam } : {}),
+              ...(statusFilter ? { status: statusFilter } : {})
             }
           });
 
@@ -236,7 +271,7 @@ const Contacts = () => {
     }, 500);
 
     return () => clearTimeout(delayDebounceFn);
-  }, [searchParam, pageNumber, filteredTags, typeFilter]);
+  }, [searchParam, pageNumber, filteredTags, typeFilter, statusFilter]);
 
   useEffect(() => {
     const socket = openSocket();
@@ -258,6 +293,12 @@ const Contacts = () => {
 
   const handleTagFilter = (tags) => {
     setFilteredTags(tags);
+    dispatch({ type: "RESET" });
+    setPageNumber(1);
+  };
+
+  const handleStatusFilter = (event) => {
+    setStatusFilter(event.target.value);
     dispatch({ type: "RESET" });
     setPageNumber(1);
   };
@@ -465,9 +506,14 @@ const Contacts = () => {
     }
   };
 
-  const handleExportContacts = async () => {
+  const handleExportContacts = async (selectedFields) => {
     setLoading(true);
+    setExportProgress(0);
+    setExportProgressOpen(true);
+    
     try {
+      setExportProgress(10);
+      
       const params = {};
       if (searchParam) {
         params.searchParam = searchParam;
@@ -475,25 +521,102 @@ const Contacts = () => {
       if (filteredTags && filteredTags.length > 0) {
         params.tags = filteredTags.map(tag => tag.id).join(",");
       }
+      
+      const isGroupParam = typeFilter === 'group' ? 'true' : (typeFilter === 'individual' ? 'false' : undefined);
+      if (isGroupParam !== undefined) {
+        params.isGroup = isGroupParam;
+      }
+      
+      if (statusFilter) {
+        params.status = statusFilter;
+      }
 
+      setExportProgress(20);
+      
       const { data } = await api.get("/contacts/export", { params });
+      
+      setExportProgress(40);
       
       if (!data || data.length === 0) {
         toast.info(t("contacts.toasts.noContactsToExport"));
         setLoading(false);
+        setExportProgressOpen(false);
         return;
       }
 
-      const csvContent = [
-        'ID;Nome;Número;Email;Endereço;Tags;Data de Criação'
-      ].concat(
-        data.map(contact => 
-          [contact.id, contact.name, contact.number, contact.email, contact.address, contact.tags, contact.createdAt].join(';')
-        )
-      ).join('\n');
+      const escapeCSV = (value) => {
+        if (value === null || value === undefined) return '';
+        const stringValue = String(value);
+        if (stringValue.includes(';') || stringValue.includes('\n') || stringValue.includes('"')) {
+          return `"${stringValue.replace(/"/g, '""')}"`;
+        }
+        return stringValue;
+      };
+
+      const formatNumber = (value) => {
+        if (!value) return '';
+        return `'${value}`;
+      };
+
+      const fieldMapping = {
+        id: { label: 'ID', getValue: (c) => c.id },
+        name: { label: 'Nome', getValue: (c) => escapeCSV(c.name) },
+        number: { label: 'Número', getValue: (c) => formatNumber(c.number) },
+        email: { label: 'Email', getValue: (c) => escapeCSV(c.email) },
+        cpf: { label: 'CPF', getValue: (c) => formatNumber(c.cpf) },
+        birthdate: { label: 'Data Nascimento', getValue: (c) => c.birthdate },
+        gender: { label: 'Gênero', getValue: (c) => escapeCSV(c.gender) },
+        status: { label: 'Status', getValue: (c) => escapeCSV(c.status) },
+        address: { label: 'Endereço', getValue: (c) => escapeCSV(c.address) },
+        addressNumber: { label: 'Número', getValue: (c) => c.addressNumber },
+        addressComplement: { label: 'Complemento', getValue: (c) => escapeCSV(c.addressComplement) },
+        neighborhood: { label: 'Bairro', getValue: (c) => escapeCSV(c.neighborhood) },
+        city: { label: 'Cidade', getValue: (c) => escapeCSV(c.city) },
+        state: { label: 'Estado', getValue: (c) => escapeCSV(c.state) },
+        zip: { label: 'CEP', getValue: (c) => formatNumber(c.zip) },
+        country: { label: 'País', getValue: (c) => escapeCSV(c.country) },
+        isGroup: { label: 'É Grupo', getValue: (c) => c.isGroup },
+        profilePicUrl: { label: 'Foto Perfil', getValue: (c) => c.profilePicUrl },
+        extraInfo: { label: 'Informações Extras', getValue: (c) => escapeCSV(c.extraInfo) },
+        tags: { label: 'Tags', getValue: (c) => escapeCSV(c.tags) },
+        createdAt: { label: 'Data Criação', getValue: (c) => c.createdAt },
+        updatedAt: { label: 'Data Atualização', getValue: (c) => c.updatedAt },
+        lastContactAt: { label: 'Último Contato', getValue: (c) => c.lastContactAt }
+      };
+
+      const headers = selectedFields.map(fieldId => fieldMapping[fieldId]?.label || fieldId).join(';');
+
+      setExportProgress(50);
+
+      const rows = [];
+      const totalContacts = data.length;
+      const batchSize = 100;
       
-      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      for (let i = 0; i < totalContacts; i += batchSize) {
+        const batch = data.slice(i, i + batchSize);
+        const batchRows = batch.map(contact => 
+          selectedFields.map(fieldId => {
+            const field = fieldMapping[fieldId];
+            return field ? field.getValue(contact) : '';
+          }).join(';')
+        );
+        rows.push(...batchRows);
+        
+        const progress = 50 + Math.floor(((i + batchSize) / totalContacts) * 40);
+        setExportProgress(Math.min(progress, 90));
+        
+        await new Promise(resolve => setTimeout(resolve, 10));
+      }
+
+      setExportProgress(95);
+
+      const csvContent = [headers, ...rows].join('\n');
+      
+      const BOM = '\uFEFF';
+      const blob = new Blob([BOM + csvContent], { type: 'text/csv;charset=utf-8;' });
       const url = URL.createObjectURL(blob);
+      
+      setExportProgress(98);
       
       const element = document.createElement('a');
       element.href = url;
@@ -502,9 +625,15 @@ const Contacts = () => {
       element.click();
       document.body.removeChild(element);
       
-      toast.success(t("contacts.toasts.exportSuccess"));
+      setExportProgress(100);
+      
+      setTimeout(() => {
+        setExportProgressOpen(false);
+        toast.success(t("contacts.toasts.exportSuccess"));
+      }, 500);
     } catch (err) {
       console.error(err, t);
+      setExportProgressOpen(false);
       if (err.response && err.response.status === 404 && 
         err.response.data && err.response.data.error === "ERR_NO_CONTACT_FOUND") {
         toast.info(t("contacts.toasts.noContactsFound"));
@@ -633,7 +762,7 @@ const Contacts = () => {
                   variant="contained"
                   color="primary"
                   disabled={loading}
-                  onClick={handleExportContacts}
+                  onClick={() => setExportModalOpen(true)}
                 >
                   <Archive />
                 </ButtonStyled>
@@ -663,8 +792,25 @@ const Contacts = () => {
           </Box>
         </MainHeaderButtonsWrapper>
       </MainHeader>
-      <Box sx={{ padding: 1 }}>
-        <TagsFilter onFiltered={handleTagFilter} />
+      <Box sx={{ padding: 1, display: 'flex', gap: 2, alignItems: 'center' }}>
+        <Box sx={{ flex: 1 }}>
+          <TagsFilter onFiltered={handleTagFilter} />
+        </Box>
+        <FormControl size="small" sx={{ minWidth: 200 }}>
+          <InputLabel id="status-filter-label">{t("contacts.filters.status", { defaultValue: "Filtrar por Status" })}</InputLabel>
+          <Select
+            labelId="status-filter-label"
+            id="status-filter"
+            value={statusFilter}
+            label={t("contacts.filters.status", { defaultValue: "Filtrar por Status" })}
+            onChange={handleStatusFilter}
+          >
+            <MenuItem value="">{t("contacts.filters.allStatus", { defaultValue: "Todos os Status" })}</MenuItem>
+            {clientStatusList.map((status) => (
+              <MenuItem key={status.id} value={status.name}>{status.name}</MenuItem>
+            ))}
+          </Select>
+        </FormControl>
       </Box>
       <PaperStyled
         variant="outlined"
@@ -1019,6 +1165,50 @@ const Contacts = () => {
           </ModalPaper>
         </Fade>
       </Modal>
+
+      <ExportFieldsModal
+        open={exportModalOpen}
+        onClose={() => setExportModalOpen(false)}
+        onExport={handleExportContacts}
+        t={t}
+      />
+
+      <Dialog
+        open={exportProgressOpen}
+        maxWidth="sm"
+        fullWidth
+        disableEscapeKeyDown
+      >
+        <DialogTitle>
+          <Typography variant="h6" align="center">
+            {t("contacts.exportProgress.title", { defaultValue: "Exportando Contatos" })}
+          </Typography>
+        </DialogTitle>
+        <DialogContent>
+          <Box sx={{ width: '100%', mt: 2, mb: 2 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+              <Box sx={{ width: '100%', mr: 1 }}>
+                <LinearProgress 
+                  variant="determinate" 
+                  value={exportProgress} 
+                  sx={{ height: 10, borderRadius: 5 }}
+                />
+              </Box>
+              <Box sx={{ minWidth: 35 }}>
+                <Typography variant="body2" color="text.secondary">
+                  {`${Math.round(exportProgress)}%`}
+                </Typography>
+              </Box>
+            </Box>
+            <Typography variant="body2" color="text.secondary" align="center">
+              {exportProgress < 20 && t("contacts.exportProgress.preparing", { defaultValue: "Preparando exportação..." })}
+              {exportProgress >= 20 && exportProgress < 40 && t("contacts.exportProgress.fetching", { defaultValue: "Buscando contatos..." })}
+              {exportProgress >= 40 && exportProgress < 95 && t("contacts.exportProgress.processing", { defaultValue: "Processando dados..." })}
+              {exportProgress >= 95 && t("contacts.exportProgress.finishing", { defaultValue: "Finalizando..." })}
+            </Typography>
+          </Box>
+        </DialogContent>
+      </Dialog>
     </MainContainer>
   );
 };

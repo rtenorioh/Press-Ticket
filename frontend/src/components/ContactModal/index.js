@@ -142,6 +142,7 @@ const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
 	const { t } = useTranslation();
 	const theme = useTheme();
 	const [loadingCep, setLoadingCep] = useState(false);
+	const [clientStatusList, setClientStatusList] = useState([]);
 
 	const formatPhoneNumber = (number) => {
 		if (!number) return "-";
@@ -187,6 +188,18 @@ const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
 			setLoadingCep(false);
 		}
 	};
+
+	useEffect(() => {
+		const fetchClientStatus = async () => {
+			try {
+				const { data } = await api.get("/client-status/");
+				setClientStatusList(data.clientStatus || []);
+			} catch (err) {
+				console.error("Erro ao carregar status de clientes:", err);
+			}
+		};
+		fetchClientStatus();
+	}, []);
 
 	useEffect(() => {
 		const fetchCountries = async () => {
@@ -355,12 +368,9 @@ const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
 												<FieldLabel>{t("contacts.fields.status", { defaultValue: "Status" })}</FieldLabel>
 												<Field as={Select} name="status" fullWidth variant="outlined" displayEmpty>
 													<MenuItem value="">{t("common.select", { defaultValue: "Selecione" })}</MenuItem>
-													<MenuItem value="Ex-cliente">Ex-cliente</MenuItem>
-													<MenuItem value="Lead Frio">Lead Frio</MenuItem>
-													<MenuItem value="Lead morno">Lead morno</MenuItem>
-													<MenuItem value="Lead Quente">Lead Quente</MenuItem>
-													<MenuItem value="Potencial Cliente">Potencial Cliente</MenuItem>
-													<MenuItem value="Cliente Ativo">Cliente Ativo</MenuItem>
+													{clientStatusList.map((status) => (
+														<MenuItem key={status.id} value={status.name}>{status.name}</MenuItem>
+													))}
 												</Field>
 											</FieldContainer>
 										</FieldRow>
