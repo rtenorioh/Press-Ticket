@@ -199,6 +199,10 @@ const Contacts = () => {
       setStatusFilter(location.state.statusFilter);
       navigate(location.pathname, { replace: true, state: {} });
     }
+    if (location.state?.tagFilter) {
+      setFilteredTags([location.state.tagFilter]);
+      navigate(location.pathname, { replace: true, state: {} });
+    }
   }, [location.state, location.pathname, navigate]);
 
   const formatDate = (dt) => {
@@ -794,7 +798,7 @@ const Contacts = () => {
       </MainHeader>
       <Box sx={{ padding: 1, display: 'flex', gap: 2, alignItems: 'center' }}>
         <Box sx={{ flex: 1 }}>
-          <TagsFilter onFiltered={handleTagFilter} />
+          <TagsFilter onFiltered={handleTagFilter} initialTags={filteredTags} />
         </Box>
         <FormControl size="small" sx={{ minWidth: 200 }}>
           <InputLabel id="status-filter-label">{t("contacts.filters.status", { defaultValue: "Filtrar por Status" })}</InputLabel>

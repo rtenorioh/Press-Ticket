@@ -1286,6 +1286,7 @@ const messages = {
         buttons: {
           add: "Adicionar",
           deleteAll: "Deletar Todos",
+          viewContacts: "Ver contatos com esta tag"
         },
         confirmationModal: {
           deleteTitle: "Deletar ",

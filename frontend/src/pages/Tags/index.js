@@ -10,7 +10,8 @@ import {
   TableHead,
   TableRow,
   TextField,
-  Tooltip
+  Tooltip,
+  Chip
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import AddCircleOutline from "@mui/icons-material/AddCircleOutline";
@@ -18,8 +19,10 @@ import DeleteForever from "@mui/icons-material/DeleteForever";
 import DeleteOutline from "@mui/icons-material/DeleteOutline";
 import Edit from "@mui/icons-material/Edit";
 import Search from "@mui/icons-material/Search";
+import VisibilityIcon from "@mui/icons-material/Visibility";
 import React, { useCallback, useEffect, useReducer, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import ConfirmationModal from "../../components/ConfirmationModal";
 import MainContainer from "../../components/MainContainer";
@@ -106,6 +109,7 @@ const ButtonContainer = styled(Box)(({ theme }) => ({
 
 const Tags = () => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [pageNumber, setPageNumber] = useState(1);
   const [hasMore, setHasMore] = useState(false);
@@ -217,6 +221,10 @@ const Tags = () => {
     if (scrollHeight - (scrollTop + 100) < clientHeight) {
       loadMore();
     }
+  };
+
+  const handleViewContacts = (tag) => {
+    navigate('/contacts', { state: { tagFilter: tag } });
   };
 
   return (
@@ -347,7 +355,24 @@ const Tags = () => {
                       }}
                     />
                   </TableCell>
-                  <TableCell align="center">{tag.contacttag && tag.contacttag.length > 0 ? (<span>{tag.contacttag.length}</span>) : <span>0</span>}</TableCell>
+                  <TableCell align="center">
+                    <Tooltip title={t("tags.buttons.viewContacts", { defaultValue: "Ver contatos com esta tag" })}>
+                      <Chip
+                        label={tag.contacttag && tag.contacttag.length > 0 ? tag.contacttag.length : 0}
+                        onClick={() => handleViewContacts(tag)}
+                        icon={<VisibilityIcon />}
+                        color="primary"
+                        variant="outlined"
+                        sx={{ 
+                          cursor: 'pointer',
+                          '&:hover': {
+                            backgroundColor: 'primary.light',
+                            color: 'white'
+                          }
+                        }}
+                      />
+                    </Tooltip>
+                  </TableCell>
                   <TableCell align="center">
                     <IconButton
                       size="small"

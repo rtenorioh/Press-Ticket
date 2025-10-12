@@ -3,10 +3,10 @@ import { Autocomplete, Chip, Paper, TextField } from "@mui/material";
 import toastError from "../../errors/toastError";
 import api from "../../services/api";
 
-const TagsFilter = ({ onFiltered }) => {
+const TagsFilter = ({ onFiltered, initialTags = [] }) => {
 
     const [tags, setTags] = useState([]);
-    const [selecteds, setSelecteds] = useState([]);
+    const [selecteds, setSelecteds] = useState(initialTags);
 
     useEffect(() => {
         let isMounted = true;
@@ -30,6 +30,12 @@ const TagsFilter = ({ onFiltered }) => {
             isMounted = false;
         };
     }, []);
+
+    useEffect(() => {
+        if (initialTags && initialTags.length > 0) {
+            setSelecteds(initialTags);
+        }
+    }, [initialTags]);
 
     const onChange = async (value) => {
         setSelecteds(value);
