@@ -49,6 +49,7 @@ import SystemHealthIcon from '@mui/icons-material/HealthAndSafety';
 import SystemUpdateAltIcon from "@mui/icons-material/SystemUpdateAlt";
 import SystemUpdateIcon from "@mui/icons-material/SystemUpdate";
 import MonitorIcon from "@mui/icons-material/Monitor";
+import LabelOutlined from "@mui/icons-material/LabelOutlined";
 
 const PREFIX = 'Documentation';
 
@@ -184,6 +185,12 @@ const Documentation = () => {
           description: t("documentation.general.tags"),
           icon: <LocalOffer />,
           path: "/tags"
+        },
+        {
+          name: t("mainDrawer.listItems.clientStatus"),
+          description: t("documentation.general.clientStatus"),
+          icon: <LabelOutlined />,
+          path: "/ClientStatus"
         },
         {
           name: t("mainDrawer.listItems.videos"),
