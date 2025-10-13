@@ -373,7 +373,7 @@ Preencha com as informações abaixo, atualizando as informações de acordo com
 server {
   server_name front.pressticket.com.br;
   location / {
-    proxy_pass http://127.0.0.1:3333;
+    proxy_pass http://127.0.0.1:3000;
     proxy_http_version 1.1;
     proxy_set_header Upgrade $http_upgrade;
     proxy_set_header Connection 'upgrade';
@@ -398,7 +398,7 @@ Preencha com as informações abaixo atualizando as informações de acordo com 
 server {
   server_name back.pressticket.com.br;
   location / {
-    proxy_pass http://127.0.0.1:8080;
+    proxy_pass http://127.0.0.1:4000;
     proxy_http_version 1.1;
     proxy_set_header Upgrade $http_upgrade;
     proxy_set_header Connection 'upgrade';

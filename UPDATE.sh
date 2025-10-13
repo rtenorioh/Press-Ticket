@@ -127,27 +127,119 @@ SELECTED_TZ=${1:-America/Sao_Paulo}
 # Configuração do arquivo de log (ajustado para usar o fuso horário)
 LOG_FILE="$CURRENT_LOG_DIR/update_${VERSION}_$(TZ=$SELECTED_TZ date +"%d-%m-%Y_%H-%M-%S").log"
 
-# Verifica se o jq está instalado; se não, instala automaticamente
-if ! command -v jq &>/dev/null; then
-    echo "A ferramenta jq não está instalada. Instalando agora..."
-    if sudo apt-get install -y jq; then
-        echo "jq instalado com sucesso."
+{
+    echo " "
+    echo "VERIFICANDO VERSÃO ATUAL DO SISTEMA"
+    echo " "
+} | tee -a "$LOG_FILE"
+
+# Obtém a versão atual do sistema do arquivo backend/dist/config/version.js (compilado)
+VERSION_JS_PATH="$SCRIPT_DIR/backend/dist/config/version.js"
+
+if [ -f "$VERSION_JS_PATH" ]; then
+    echo "Arquivo encontrado: $VERSION_JS_PATH" | tee -a "$LOG_FILE"
+    # Extrai a versão do arquivo version.js compilado
+    # Procura por: exports.systemVersion = "v1.13.2";
+    SYSTEM_VERSION=$(grep -oP 'systemVersion\s*=\s*"\K[^"]+' "$VERSION_JS_PATH" 2>/dev/null | tail -n1)
+    if [ -z "$SYSTEM_VERSION" ]; then
+        SYSTEM_VERSION="Não encontrado"
+        echo "Erro: Não foi possível extrair a versão do arquivo." | tee -a "$LOG_FILE"
     else
-        echo "Erro: Não foi possível instalar jq. Verifique as permissões ou instale manualmente."
-        finalizar "Erro: Não foi possível instalar jq. Verifique as permissões ou instale manualmente." 1
+        echo "Versão atual detectada: $SYSTEM_VERSION" | tee -a "$LOG_FILE"
+    fi
+else
+    echo "Arquivo compilado não encontrado: $VERSION_JS_PATH" | tee -a "$LOG_FILE"
+    # Fallback: tenta pegar do arquivo TypeScript original se o compilado não existir
+    VERSION_TS_PATH="$SCRIPT_DIR/backend/src/config/version.ts"
+    if [ -f "$VERSION_TS_PATH" ]; then
+        echo "Usando arquivo fonte: $VERSION_TS_PATH" | tee -a "$LOG_FILE"
+        # Procura por: export const systemVersion = "v1.13.2";
+        SYSTEM_VERSION=$(grep -oP 'systemVersion\s*=\s*"\K[^"]+' "$VERSION_TS_PATH" 2>/dev/null | tail -n1)
+        if [ -z "$SYSTEM_VERSION" ]; then
+            SYSTEM_VERSION="Não encontrado"
+            echo "Erro: Não foi possível extrair a versão do arquivo." | tee -a "$LOG_FILE"
+        else
+            echo "Versão atual detectada: $SYSTEM_VERSION" | tee -a "$LOG_FILE"
+        fi
+    else
+        SYSTEM_VERSION="Arquivo version não encontrado"
+        echo "Erro: Nenhum arquivo de versão encontrado." | tee -a "$LOG_FILE"
     fi
 fi
 
-# Obtém a versão atual do sistema do arquivo frontend/package.json
-PACKAGE_JSON_PATH="$SCRIPT_DIR/frontend/package.json"
+echo " " | tee -a "$LOG_FILE"
+sleep 2
 
-if [ -f "$PACKAGE_JSON_PATH" ]; then
-    SYSTEM_VERSION=$(jq -r '.systemVersion' "$PACKAGE_JSON_PATH" 2>/dev/null)
-    if [ -z "$SYSTEM_VERSION" ] || [ "$SYSTEM_VERSION" == "null" ]; then
-        SYSTEM_VERSION="Não encontrado"
+# Função para comparar versões (retorna 0 se v1 < v2, 1 se v1 >= v2)
+version_compare() {
+    local v1=$1
+    local v2=$2
+    
+    # Remove o 'v' do início das versões
+    v1=${v1#v}
+    v2=${v2#v}
+    
+    # Compara as versões usando sort -V
+    if [ "$(printf '%s\n' "$v1" "$v2" | sort -V | head -n1)" = "$v1" ] && [ "$v1" != "$v2" ]; then
+        return 0  # v1 < v2
+    else
+        return 1  # v1 >= v2
     fi
-else
-    SYSTEM_VERSION="Arquivo package.json não encontrado"
+}
+
+# Verifica se precisa limpar diretórios antigos do WhatsApp Web.js
+if [ "$SYSTEM_VERSION" != "Não encontrado" ] && [ "$SYSTEM_VERSION" != "Arquivo version não encontrado" ]; then
+    if version_compare "$SYSTEM_VERSION" "1.14.0"; then
+        {
+            echo " "
+            echo "**************************************************************"
+            echo "*           LIMPEZA DE ARQUIVOS ANTIGOS NECESSÁRIA           *"
+            echo "**************************************************************"
+            echo " Versão atual detectada: $SYSTEM_VERSION"
+            echo " Versões inferiores a v1.14.0 requerem limpeza de cache"
+            echo "**************************************************************"
+            echo " "
+        } | tee -a "$LOG_FILE"
+        
+        echo "Removendo diretórios antigos do WhatsApp Web.js..." | tee -a "$LOG_FILE"
+        
+        # Remove .wwebjs_auth
+        if [ -d "$SCRIPT_DIR/backend/.wwebjs_auth" ]; then
+            echo "Removendo $SCRIPT_DIR/backend/.wwebjs_auth..." | tee -a "$LOG_FILE"
+            sudo rm -rf "$SCRIPT_DIR/backend/.wwebjs_auth"
+            if [ $? -eq 0 ]; then
+                echo "✓ Diretório .wwebjs_auth removido com sucesso." | tee -a "$LOG_FILE"
+            else
+                echo "✗ Erro ao remover .wwebjs_auth" | tee -a "$LOG_FILE"
+            fi
+        else
+            echo "Diretório .wwebjs_auth não encontrado (já foi removido ou não existe)." | tee -a "$LOG_FILE"
+        fi
+        
+        # Remove .wwebjs_cache
+        if [ -d "$SCRIPT_DIR/backend/.wwebjs_cache" ]; then
+            echo "Removendo $SCRIPT_DIR/backend/.wwebjs_cache..." | tee -a "$LOG_FILE"
+            sudo rm -rf "$SCRIPT_DIR/backend/.wwebjs_cache"
+            if [ $? -eq 0 ]; then
+                echo "✓ Diretório .wwebjs_cache removido com sucesso." | tee -a "$LOG_FILE"
+            else
+                echo "✗ Erro ao remover .wwebjs_cache" | tee -a "$LOG_FILE"
+            fi
+        else
+            echo "Diretório .wwebjs_cache não encontrado (já foi removido ou não existe)." | tee -a "$LOG_FILE"
+        fi
+        
+        {
+            echo " "
+            echo "✓ Limpeza concluída. Após a atualização, será necessário"
+            echo "  reconectar todas as sessões do WhatsApp."
+            echo " "
+        } | tee -a "$LOG_FILE"
+        
+        sleep 5
+    else
+        echo "Versão $SYSTEM_VERSION >= v1.14.0 - Limpeza de cache não necessária." | tee -a "$LOG_FILE"
+    fi
 fi
 
 {
@@ -309,6 +401,106 @@ fi
 
 sleep 2
 
+# Verificação e atualização do Google Chrome
+{
+    echo " "
+    echo "VERIFICANDO A VERSÃO DO GOOGLE CHROME"
+    echo " "
+} | tee -a "$LOG_FILE"
+
+sleep 2
+
+# Verifica se o Google Chrome está instalado
+if command -v google-chrome &>/dev/null; then
+    CURRENT_CHROME_VERSION=$(google-chrome --version 2>/dev/null | grep -oP '\d+\.\d+\.\d+\.\d+' | head -n1)
+    
+    if [ -n "$CURRENT_CHROME_VERSION" ]; then
+        echo "Google Chrome instalado. Versão atual: $CURRENT_CHROME_VERSION" | tee -a "$LOG_FILE"
+        
+        # Busca a versão mais recente disponível
+        echo "Verificando se há atualizações disponíveis..." | tee -a "$LOG_FILE"
+        
+        if [ -t 0 ]; then
+            echo -e "${BOLD}${GREEN}Deseja atualizar o Google Chrome para a versão mais recente? (s/n)${RESET}"
+            read -r UPDATE_CHROME
+        else
+            UPDATE_CHROME=$(bash -c 'read -p "Deseja atualizar o Google Chrome para a versão mais recente? (s/n): " REPLY; echo $REPLY' </dev/tty)
+        fi
+        
+        UPDATE_CHROME=${UPDATE_CHROME:-n} # Define 'n' como padrão se vazio
+        
+        if [[ "$UPDATE_CHROME" =~ ^[sS]$ ]]; then
+            echo "Atualizando Google Chrome..." | tee -a "$LOG_FILE"
+            
+            # Baixa e instala a versão mais recente
+            cd /tmp || exit
+            wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+            
+            if [ -f "google-chrome-stable_current_amd64.deb" ]; then
+                sudo dpkg -i google-chrome-stable_current_amd64.deb 2>&1 | tee -a "$LOG_FILE"
+                sudo apt-get install -f -y 2>&1 | tee -a "$LOG_FILE"
+                rm google-chrome-stable_current_amd64.deb
+                
+                # Verifica a nova versão instalada
+                NEW_CHROME_VERSION=$(google-chrome --version 2>/dev/null | grep -oP '\d+\.\d+\.\d+\.\d+' | head -n1)
+                if [ -n "$NEW_CHROME_VERSION" ]; then
+                    echo "Google Chrome atualizado com sucesso para a versão: $NEW_CHROME_VERSION" | tee -a "$LOG_FILE"
+                else
+                    echo "Erro ao verificar a nova versão do Chrome." | tee -a "$LOG_FILE"
+                fi
+            else
+                echo "Erro ao baixar o Google Chrome." | tee -a "$LOG_FILE"
+            fi
+            
+            cd "$SCRIPT_DIR" || exit
+        else
+            echo "Atualização do Google Chrome ignorada pelo usuário." | tee -a "$LOG_FILE"
+        fi
+    else
+        echo "Erro ao detectar a versão do Google Chrome." | tee -a "$LOG_FILE"
+    fi
+else
+    echo "Google Chrome não está instalado." | tee -a "$LOG_FILE"
+    
+    if [ -t 0 ]; then
+        echo -e "${BOLD}${GREEN}Deseja instalar o Google Chrome? (s/n)${RESET}"
+        read -r INSTALL_CHROME
+    else
+        INSTALL_CHROME=$(bash -c 'read -p "Deseja instalar o Google Chrome? (s/n): " REPLY; echo $REPLY' </dev/tty)
+    fi
+    
+    INSTALL_CHROME=${INSTALL_CHROME:-n} # Define 'n' como padrão se vazio
+    
+    if [[ "$INSTALL_CHROME" =~ ^[sS]$ ]]; then
+        echo "Instalando Google Chrome..." | tee -a "$LOG_FILE"
+        
+        cd /tmp || exit
+        wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+        
+        if [ -f "google-chrome-stable_current_amd64.deb" ]; then
+            sudo dpkg -i google-chrome-stable_current_amd64.deb 2>&1 | tee -a "$LOG_FILE"
+            sudo apt-get install -f -y 2>&1 | tee -a "$LOG_FILE"
+            rm google-chrome-stable_current_amd64.deb
+            
+            # Verifica se a instalação foi bem-sucedida
+            if command -v google-chrome &>/dev/null; then
+                INSTALLED_CHROME_VERSION=$(google-chrome --version 2>/dev/null | grep -oP '\d+\.\d+\.\d+\.\d+' | head -n1)
+                echo "Google Chrome instalado com sucesso. Versão: $INSTALLED_CHROME_VERSION" | tee -a "$LOG_FILE"
+            else
+                echo "Erro ao instalar o Google Chrome." | tee -a "$LOG_FILE"
+            fi
+        else
+            echo "Erro ao baixar o Google Chrome." | tee -a "$LOG_FILE"
+        fi
+        
+        cd "$SCRIPT_DIR" || exit
+    else
+        echo "Instalação do Google Chrome ignorada pelo usuário." | tee -a "$LOG_FILE"
+    fi
+fi
+
+sleep 2
+
 {
     echo " "
     echo "BAIXANDO AS ATUALIZAÇÕES"
@@ -401,6 +593,17 @@ if [ -f "$ENV_FILE" ]; then
         echo "A variável COMPANY_NAME=$NOME_EMPRESA foi adicionada ao arquivo .env com sucesso." | tee -a "$LOG_FILE"
     fi
 
+    # Verifica se a variável DEVICE_NAME existe no arquivo .env
+    if grep -q "^DEVICE_NAME=" "$ENV_FILE"; then
+        echo "A variável DEVICE_NAME já existe no arquivo .env. Nenhuma alteração necessária." | tee -a "$LOG_FILE"
+    else
+        # Obter o nome da empresa a partir do diretório atual
+        NOME_EMPRESA=$(basename "$(dirname "$ENV_FILE")")
+        echo "# Nome da Empresa" >> "$ENV_FILE"
+        echo "DEVICE_NAME=$NOME_EMPRESA" >> "$ENV_FILE"
+        echo "A variável DEVICE_NAME=$NOME_EMPRESA foi adicionada ao arquivo .env com sucesso." | tee -a "$LOG_FILE"
+    fi
+
     # Verifica se a variável WEBHOOK existe no arquivo .env
     if grep -q "^WEBHOOK=" "$ENV_FILE"; then
         echo "A variável WEBHOOK já existe no arquivo .env. Nenhuma alteração necessária." | tee -a "$LOG_FILE"
@@ -434,31 +637,6 @@ if [ -f "$ENV_FILE" ]; then
     # Mensagem informando que o usuário deve confirmar os IDs após a atualização
     echo -e "${YELLOW}Atenção: Após a atualização, confirme os IDs do PM2 para o frontend e backend e atualize-os no arquivo .env do backend.${RESET}" | tee -a "$LOG_FILE"
     sleep 10
-
-    # Verifica se a URL em swagger.json é igual à variável BACKEND_URL no .env
-    SWAGGER_FILE="$SCRIPT_DIR/backend/src/swagger.json"
-    if [ -f "$SWAGGER_FILE" ]; then
-        # Extrai a URL do servers no swagger.json
-        SWAGGER_URL=$(grep -o '"url": "[^"]*"' "$SWAGGER_FILE" | head -1 | cut -d '"' -f4)
-        
-        # Extrai a BACKEND_URL do .env
-        BACKEND_URL=$(grep "^BACKEND_URL=" "$ENV_FILE" | cut -d '=' -f2- | tr -d '[:space:]')
-        
-        if [ -n "$BACKEND_URL" ] && [ -n "$SWAGGER_URL" ]; then
-            if [ "$SWAGGER_URL" = "$BACKEND_URL" ]; then
-                echo "A URL em swagger.json ($SWAGGER_URL) é igual à BACKEND_URL no .env ($BACKEND_URL)." | tee -a "$LOG_FILE"
-            else
-                echo "A URL em swagger.json ($SWAGGER_URL) é diferente da BACKEND_URL no .env ($BACKEND_URL). Atualizando..." | tee -a "$LOG_FILE"
-                # Substitui a URL no swagger.json
-                sed -i "s|\"url\": \"$SWAGGER_URL\"|\"url\": \"$BACKEND_URL\"|" "$SWAGGER_FILE"
-                echo "URL em swagger.json atualizada para $BACKEND_URL com sucesso." | tee -a "$LOG_FILE"
-            fi
-        else
-            echo "Erro: Não foi possível extrair a URL do swagger.json ou a BACKEND_URL do .env." | tee -a "$LOG_FILE"
-        fi
-    else
-        echo "Erro: O arquivo swagger.json não foi encontrado em $SWAGGER_FILE." | tee -a "$LOG_FILE"
-    fi
 
 else
     echo "Erro: O arquivo .env não foi encontrado no diretório backend."

@@ -347,56 +347,77 @@ echo -e "${COLOR}Verificando se MySQL já está instalado...${RESET}" | tee -a "
 
 # Verificar se o MySQL está instalado
 if dpkg -l | grep -q mysql-server; then
-    echo -e "${RED}Erro: O MySQL já está instalado no sistema.${RESET}" | tee -a "$LOG_FILE"
-    echo -e "${YELLOW}Por questões de compatibilidade, a instalação será interrompida.${RESET}" | tee -a "$LOG_FILE"
-    finalizar "Erro: MySQL já instalado. Remova o MySQL antes de instalar o MariaDB." 1
+    echo -e "${YELLOW}MySQL detectado no sistema.${RESET}" | tee -a "$LOG_FILE"
+    echo -e "${GREEN}Utilizando MySQL existente ao invés de instalar MariaDB.${RESET}" | tee -a "$LOG_FILE"
+    
+    # Configurar comando MySQL
+    if sudo mysql -u root -e "SELECT 1;" &>/dev/null; then
+        MYSQL_CMD="sudo mysql -u root"
+        echo -e "${GREEN}Conexão com o MySQL realizada sem senha.${RESET}" | tee -a "$LOG_FILE"
+    else
+        MYSQL_CMD="sudo mysql -u root --password='$DB_PASS'"
+        echo -e "${YELLOW}O MySQL exige senha para conexão. Utilizando a senha fornecida.${RESET}" | tee -a "$LOG_FILE"
+    fi
+    
+    # Verificar a versão do MySQL
+    echo -e "${COLOR}Verificando a versão do MySQL...${RESET}" | tee -a "$LOG_FILE"
+    mysql --version | tee -a "$LOG_FILE"
+    
+    # Verificar o status do serviço MySQL
+    echo -e "${COLOR}Verificando o status do serviço MySQL...${RESET}" | tee -a "$LOG_FILE"
+    if systemctl is-active --quiet mysql; then
+        echo -e "${GREEN}O serviço MySQL está ativo.${RESET}" | tee -a "$LOG_FILE"
+    else
+        echo -e "${RED}Erro: O serviço MySQL não está ativo.${RESET}"
+        finalizar "${RED}Erro: O serviço MySQL não está ativo.${RESET}" 1
+    fi
 else
     echo -e "${GREEN}MySQL não encontrado. Prosseguindo com a instalação do MariaDB...${RESET}" | tee -a "$LOG_FILE"
-fi
-
-# Verificar se o MariaDB já está instalado
-echo -e "${COLOR}Verificando a instalação do MariaDB...${RESET}" | tee -a "$LOG_FILE"
-
-# Verifica se o MariaDB já está instalado
-if dpkg -l | grep -q mariadb-server; then
-    echo -e "${GREEN}MariaDB já está instalado. Pulando a instalação.${RESET}" | tee -a "$LOG_FILE"
-else
-    echo -e "${COLOR}MariaDB não encontrado. Instalando...${RESET}" | tee -a "$LOG_FILE"
-    sudo apt-get update && sudo apt-get install -y mariadb-server mariadb-client | tee -a "$LOG_FILE"
-
-    # Verifica se a instalação foi bem-sucedida
-    if [ $? -eq 0 ]; then
-        echo -e "${GREEN}MariaDB instalado com sucesso!${RESET}" | tee -a "$LOG_FILE"
+    
+    # Verificar se o MariaDB já está instalado
+    echo -e "${COLOR}Verificando a instalação do MariaDB...${RESET}" | tee -a "$LOG_FILE"
+    
+    # Verifica se o MariaDB já está instalado
+    if dpkg -l | grep -q mariadb-server; then
+        echo -e "${GREEN}MariaDB já está instalado. Pulando a instalação.${RESET}" | tee -a "$LOG_FILE"
     else
-        echo -e "${RED}Erro: A instalação do MariaDB falhou. Verifique o log para mais detalhes.${RESET}"
-        finalizar "Erro: A instalação do MariaDB falhou. Verifique o log para mais detalhes." 1
+        echo -e "${COLOR}MariaDB não encontrado. Instalando...${RESET}" | tee -a "$LOG_FILE"
+        sudo apt-get update && sudo apt-get install -y mariadb-server mariadb-client | tee -a "$LOG_FILE"
+
+        # Verifica se a instalação foi bem-sucedida
+        if [ $? -eq 0 ]; then
+            echo -e "${GREEN}MariaDB instalado com sucesso!${RESET}" | tee -a "$LOG_FILE"
+        else
+            echo -e "${RED}Erro: A instalação do MariaDB falhou. Verifique o log para mais detalhes.${RESET}"
+            finalizar "Erro: A instalação do MariaDB falhou. Verifique o log para mais detalhes." 1
+        fi
+    fi
+
+    # Verificar se MariaDB exige senha para acessar
+    if sudo mysql -u root -e "SELECT 1;" &>/dev/null; then
+        MYSQL_CMD="sudo mysql -u root"
+        echo -e "${GREEN}Conexão com o MariaDB realizada sem senha.${RESET}" | tee -a "$LOG_FILE"
+    else
+        MYSQL_CMD="sudo mysql -u root --password='$DB_PASS'"
+        echo -e "${YELLOW}O MariaDB exige senha para conexão. Utilizando a senha fornecida.${RESET}" | tee -a "$LOG_FILE"
+    fi
+
+    # Verificar a versão do MariaDB
+    echo -e "${COLOR}Verificando a versão do MariaDB...${RESET}" | tee -a "$LOG_FILE"
+    mariadb --version | tee -a "$LOG_FILE"
+
+    # Verificar o status do serviço MariaDB
+    echo -e "${COLOR}Verificando o status do serviço MariaDB...${RESET}" | tee -a "$LOG_FILE"
+    if systemctl is-active --quiet mariadb; then
+        echo -e "${GREEN}O serviço MariaDB está ativo.${RESET}" | tee -a "$LOG_FILE"
+    else
+        echo -e "${RED}Erro: O serviço MariaDB não está ativo.${RESET}"
+        finalizar "${RED}Erro: O serviço MariaDB não está ativo.${RESET}" 1
     fi
 fi
 
-# Verificar se MariaDB exige senha para acessar
-if sudo mysql -u root -e "SELECT 1;" &>/dev/null; then
-    MYSQL_CMD="sudo mysql -u root"
-    echo -e "${GREEN}Conexão com o MariaDB realizada sem senha.${RESET}" | tee -a "$LOG_FILE"
-else
-    MYSQL_CMD="sudo mysql -u root --password='$DB_PASS'"
-    echo -e "${YELLOW}O MariaDB exige senha para conexão. Utilizando a senha fornecida.${RESET}" | tee -a "$LOG_FILE"
-fi
-
-# Verificar a versão do MariaDB
-echo -e "${COLOR}Verificando a versão do MariaDB...${RESET}" | tee -a "$LOG_FILE"
-mariadb --version | tee -a "$LOG_FILE"
-
-# Verificar o status do serviço MariaDB
-echo -e "${COLOR}Verificando o status do serviço MariaDB...${RESET}" | tee -a "$LOG_FILE"
-if systemctl is-active --quiet mariadb; then
-    echo -e "${GREEN}O serviço MariaDB está ativo.${RESET}" | tee -a "$LOG_FILE"
-else
-    echo -e "${RED}Erro: O serviço MariaDB não está ativo.${RESET}"
-    finalizar "${RED}Erro: O serviço MariaDB não está ativo.${RESET}" 1
-fi
-
-# Criar banco de dados e configurar MariaDB
-echo -e "${COLOR}Criar banco de dados e configurar MariaDB...${RESET}" | tee -a "$LOG_FILE"
+# Criar banco de dados e configurar
+echo -e "${COLOR}Criar banco de dados e configurar...${RESET}" | tee -a "$LOG_FILE"
 
 # Verificar se o banco de dados já existe
 echo -e "${COLOR}Verificando se o banco de dados $NOME_EMPRESA já existe...${RESET}" | tee -a "$LOG_FILE"
@@ -675,6 +696,7 @@ NODE_ENV=production
 
 # Nome da Empresa
 COMPANY_NAME=$NOME_EMPRESA
+DEVICE_NAME=
 
 # URLs e Portas
 BACKEND_URL=https://$URL_BACKEND
@@ -770,35 +792,6 @@ if [ -z "$MASTERADMIN_EMAIL" ]; then
 fi
 
 echo -e "${GREEN}Email do MasterAdmin obtido com sucesso: $MASTERADMIN_EMAIL.${RESET}" | tee -a "$LOG_FILE"
-
-# Atualizando a URL do servidor no arquivo swagger.json
-echo -e "${COLOR}Atualizando a URL do servidor no arquivo swagger.json...${RESET}" | tee -a "$LOG_FILE"
-
-SWAGGER_FILE="$DEPLOY_HOME/$NOME_EMPRESA/backend/src/swagger.json"
-
-if [ -f "$SWAGGER_FILE" ]; then
-    # Fazer backup do arquivo swagger.json
-    SWAGGER_BACKUP="$SWAGGER_FILE.bak"
-    cp "$SWAGGER_FILE" "$SWAGGER_BACKUP"
-    
-    # Substituir a URL do servidor no arquivo swagger.json
-    if ! sed -i "s|\"url\": \"https://apiback.pressticket.com.br\"|\"url\": \"$BACKEND_URL\"|g" "$SWAGGER_FILE"; then
-        echo -e "${RED}Erro ao atualizar a URL do servidor no arquivo swagger.json.${RESET}" | tee -a "$LOG_FILE"
-        if mv "$SWAGGER_BACKUP" "$SWAGGER_FILE"; then
-            echo -e "${YELLOW}Arquivo swagger.json restaurado com sucesso.${RESET}" | tee -a "$LOG_FILE"
-        else
-            echo -e "${RED}Falha ao restaurar o arquivo swagger.json. Verifique manualmente.${RESET}" | tee -a "$LOG_FILE"
-        fi
-        echo -e "${YELLOW}Prosseguindo com a instalação, mas a URL do servidor não foi atualizada.${RESET}" | tee -a "$LOG_FILE"
-    else
-        echo -e "${GREEN}URL do servidor no arquivo swagger.json atualizada com sucesso para: $BACKEND_URL.${RESET}" | tee -a "$LOG_FILE"
-        # Remover o backup se a substituição foi bem-sucedida
-        rm -f "$SWAGGER_BACKUP"
-    fi
-else
-    echo -e "${RED}Arquivo swagger.json não encontrado em $SWAGGER_FILE.${RESET}" | tee -a "$LOG_FILE"
-    echo -e "${YELLOW}Prosseguindo com a instalação, mas a URL do servidor não foi atualizada.${RESET}" | tee -a "$LOG_FILE"
-fi
 
 # Instalando as dependências
 echo -e "${COLOR}Instalando dependências do backend...${RESET}" | tee -a "$LOG_FILE"

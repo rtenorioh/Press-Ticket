@@ -69,9 +69,9 @@ DEVICE_NAME=
 #URLs e Portas
 WEBHOOK=https://ninety-yaks-trade.loca.lt
 BACKEND_URL=http://localhost
-FRONTEND_URL=http://localhost:3333
-PORT=8080
-PROXY_PORT=8080
+FRONTEND_URL=http://localhost:3000
+PORT=4000
+PROXY_PORT=4000
 
 #Caminho do Chrome
 CHROME_BIN=C:\Program Files\Google\Chrome\Application\chrome.exe
@@ -170,13 +170,13 @@ Crie ou edite o arquivo `.env` no diretório `frontend` com as seguintes informa
 
 ```bash
 #URL BACKEND
-REACT_APP_BACKEND_URL=http://localhost:8080
+REACT_APP_BACKEND_URL=http://localhost:4000
 
 #Tempo de encerramento automático dos tickets em horas
 REACT_APP_HOURS_CLOSE_TICKETS_AUTO=
 
 #PORTA do frontend
-PORT=3333
+PORT=3000
 
 # Para permitir acesso apenas do MasterAdmin (sempre ON)
 REACT_APP_MASTERADMIN=ON
