@@ -305,7 +305,29 @@ const ApiKey = () => {
             
             // Vídeos
             'read:videos': t("apiKey.permissions.readVideos"),
-            'write:videos': t("apiKey.permissions.writeVideos")
+            'write:videos': t("apiKey.permissions.writeVideos"),
+            
+            // Usuários
+            'create:users': t("apiKey.permissions.createUsers"),
+            'read:users': t("apiKey.permissions.readUsers"),
+            'update:users': t("apiKey.permissions.updateUsers"),
+            'delete:users': t("apiKey.permissions.deleteUsers"),
+            
+            // Respostas Rápidas
+            'create:quickAnswers': t("apiKey.permissions.createQuickAnswers"),
+            'read:quickAnswers': t("apiKey.permissions.readQuickAnswers"),
+            'update:quickAnswers': t("apiKey.permissions.updateQuickAnswers"),
+            'delete:quickAnswers': t("apiKey.permissions.deleteQuickAnswers"),
+            
+            // Status de Clientes
+            'create:client-status': t("apiKey.permissions.createClientStatus"),
+            'read:client-status': t("apiKey.permissions.readClientStatus"),
+            'update:client-status': t("apiKey.permissions.updateClientStatus"),
+            'delete:client-status': t("apiKey.permissions.deleteClientStatus"),
+            
+            // Grupos do WhatsApp
+            'read:groups': t("apiKey.permissions.readGroups"),
+            'write:groups': t("apiKey.permissions.writeGroups")
         };
         return names[permission] || permission;
     };
@@ -498,7 +520,15 @@ const ApiKey = () => {
                                             // Sistema e Recursos
                                             'write:system', 'read:system-resources',
                                             // Vídeos
-                                            'read:videos', 'write:videos'
+                                            'read:videos', 'write:videos',
+                                            // Usuários
+                                            'create:users', 'read:users', 'update:users', 'delete:users',
+                                            // Respostas Rápidas
+                                            'create:quickAnswers', 'read:quickAnswers', 'update:quickAnswers', 'delete:quickAnswers',
+                                            // Status de Clientes
+                                            'create:client-status', 'read:client-status', 'update:client-status', 'delete:client-status',
+                                            // Grupos do WhatsApp
+                                            'read:groups', 'write:groups'
                                         ];
                                         
                                         if (newToken.permissions.length === allPermissions.length) {
@@ -510,7 +540,7 @@ const ApiKey = () => {
                                     sx={{ borderRadius: 20, textTransform: 'none' }}
                                 >
                                     {newToken.permissions.length === 0 || 
-                                     newToken.permissions.length < 29 ? 
+                                     newToken.permissions.length < 43 ? 
                                         t("apiKey.modal.buttons.selectAll") : 
                                         t("apiKey.modal.buttons.unselectAll")}
                                 </Button>
@@ -1043,6 +1073,142 @@ const ApiKey = () => {
                             <AccordionDetails sx={{ pt: 2 }}>
                                 <Grid container spacing={1}>
                                     {['read:videos', 'write:videos'].map((permission) => (
+                                        <Grid item xs={12} sm={6} key={permission}>
+                                            <FormControlLabel
+                                                control={
+                                                    <Checkbox
+                                                        checked={newToken.permissions.includes(permission)}
+                                                        onChange={() => handlePermissionChange(permission)}
+                                                        color="primary"
+                                                        size="small"
+                                                    />
+                                                }
+                                                label={<Typography variant="body2">{renderPermissionName(permission)}</Typography>}
+                                            />
+                                        </Grid>
+                                    ))}
+                                </Grid>
+                            </AccordionDetails>
+                        </Accordion>
+
+                        {/* Acordeão de Usuários */}
+                        <Accordion sx={{ mb: 1, boxShadow: '0 1px 3px rgba(0,0,0,0.1)', borderRadius: '4px !important', '&:before': { display: 'none' } }}>
+                            <AccordionSummary
+                                expandIcon={<ExpandMoreIcon />}
+                                sx={{ 
+                                    backgroundColor: theme.palette.background.default,
+                                    borderRadius: '4px',
+                                }}
+                            >
+                                <Typography variant="subtitle2" fontWeight={500}>
+                                    {t("apiKey.categories.users")}
+                                </Typography>
+                            </AccordionSummary>
+                            <AccordionDetails sx={{ pt: 2 }}>
+                                <Grid container spacing={1}>
+                                    {['create:users', 'read:users', 'update:users', 'delete:users'].map((permission) => (
+                                        <Grid item xs={12} sm={6} key={permission}>
+                                            <FormControlLabel
+                                                control={
+                                                    <Checkbox
+                                                        checked={newToken.permissions.includes(permission)}
+                                                        onChange={() => handlePermissionChange(permission)}
+                                                        color="primary"
+                                                        size="small"
+                                                    />
+                                                }
+                                                label={<Typography variant="body2">{renderPermissionName(permission)}</Typography>}
+                                            />
+                                        </Grid>
+                                    ))}
+                                </Grid>
+                            </AccordionDetails>
+                        </Accordion>
+
+                        {/* Acordeão de Respostas Rápidas */}
+                        <Accordion sx={{ mb: 1, boxShadow: '0 1px 3px rgba(0,0,0,0.1)', borderRadius: '4px !important', '&:before': { display: 'none' } }}>
+                            <AccordionSummary
+                                expandIcon={<ExpandMoreIcon />}
+                                sx={{ 
+                                    backgroundColor: theme.palette.background.default,
+                                    borderRadius: '4px',
+                                }}
+                            >
+                                <Typography variant="subtitle2" fontWeight={500}>
+                                    {t("apiKey.categories.quickAnswers")}
+                                </Typography>
+                            </AccordionSummary>
+                            <AccordionDetails sx={{ pt: 2 }}>
+                                <Grid container spacing={1}>
+                                    {['create:quickAnswers', 'read:quickAnswers', 'update:quickAnswers', 'delete:quickAnswers'].map((permission) => (
+                                        <Grid item xs={12} sm={6} key={permission}>
+                                            <FormControlLabel
+                                                control={
+                                                    <Checkbox
+                                                        checked={newToken.permissions.includes(permission)}
+                                                        onChange={() => handlePermissionChange(permission)}
+                                                        color="primary"
+                                                        size="small"
+                                                    />
+                                                }
+                                                label={<Typography variant="body2">{renderPermissionName(permission)}</Typography>}
+                                            />
+                                        </Grid>
+                                    ))}
+                                </Grid>
+                            </AccordionDetails>
+                        </Accordion>
+
+                        {/* Acordeão de Status de Clientes */}
+                        <Accordion sx={{ mb: 1, boxShadow: '0 1px 3px rgba(0,0,0,0.1)', borderRadius: '4px !important', '&:before': { display: 'none' } }}>
+                            <AccordionSummary
+                                expandIcon={<ExpandMoreIcon />}
+                                sx={{ 
+                                    backgroundColor: theme.palette.background.default,
+                                    borderRadius: '4px',
+                                }}
+                            >
+                                <Typography variant="subtitle2" fontWeight={500}>
+                                    {t("apiKey.categories.clientStatus")}
+                                </Typography>
+                            </AccordionSummary>
+                            <AccordionDetails sx={{ pt: 2 }}>
+                                <Grid container spacing={1}>
+                                    {['create:client-status', 'read:client-status', 'update:client-status', 'delete:client-status'].map((permission) => (
+                                        <Grid item xs={12} sm={6} key={permission}>
+                                            <FormControlLabel
+                                                control={
+                                                    <Checkbox
+                                                        checked={newToken.permissions.includes(permission)}
+                                                        onChange={() => handlePermissionChange(permission)}
+                                                        color="primary"
+                                                        size="small"
+                                                    />
+                                                }
+                                                label={<Typography variant="body2">{renderPermissionName(permission)}</Typography>}
+                                            />
+                                        </Grid>
+                                    ))}
+                                </Grid>
+                            </AccordionDetails>
+                        </Accordion>
+
+                        {/* Acordeão de Grupos do WhatsApp */}
+                        <Accordion sx={{ mb: 1, boxShadow: '0 1px 3px rgba(0,0,0,0.1)', borderRadius: '4px !important', '&:before': { display: 'none' } }}>
+                            <AccordionSummary
+                                expandIcon={<ExpandMoreIcon />}
+                                sx={{ 
+                                    backgroundColor: theme.palette.background.default,
+                                    borderRadius: '4px',
+                                }}
+                            >
+                                <Typography variant="subtitle2" fontWeight={500}>
+                                    {t("apiKey.categories.whatsappGroups")}
+                                </Typography>
+                            </AccordionSummary>
+                            <AccordionDetails sx={{ pt: 2 }}>
+                                <Grid container spacing={1}>
+                                    {['read:groups', 'write:groups'].map((permission) => (
                                         <Grid item xs={12} sm={6} key={permission}>
                                             <FormControlLabel
                                                 control={

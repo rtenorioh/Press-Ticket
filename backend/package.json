@@ -14,7 +14,8 @@
     "dev": "ts-node-dev --respawn --transpile-only --ignore node_modules src/server.ts",
     "pretest": "NODE_ENV=test sequelize db:migrate && NODE_ENV=test sequelize db:seed:all",
     "test": "NODE_ENV=test jest",
-    "posttest": "NODE_ENV=test sequelize db:migrate:undo:all"
+    "posttest": "NODE_ENV=test sequelize db:migrate:undo:all",
+    "swagger:template": "node scripts/generate-swagger-template.js"
   },
   "author": "",
   "license": "MIT",
@@ -82,6 +83,7 @@
     "@types/pino-pretty": "~4.7.1",
     "@types/sequelize": "^4.28.20",
     "@types/supertest": "^2.0.10",
+    "@types/swagger-jsdoc": "^6.0.4",
     "@types/swagger-ui-express": "^4.1.3",
     "@types/uuid": "^8.3.4",
     "@types/validator": "^13.1.0",

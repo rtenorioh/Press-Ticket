@@ -26,7 +26,11 @@ const messages = {
           systemUpdate: "Atualização do Sistema",
           versionWhatsapp: "Versão e Biblioteca WhatsApp",
           systemResources: "Sistema e Recursos",
-          videos: "Vídeos"
+          videos: "Vídeos",
+          users: "Usuários",
+          quickAnswers: "Respostas Rápidas",
+          clientStatus: "Status de Clientes",
+          whatsappGroups: "Grupos do WhatsApp"
         },
         permissions: {
           createContacts: "Criar Contatos",
@@ -71,7 +75,21 @@ const messages = {
           writeSystem: "Reiniciar Serviços do Sistema",
           readSystemResources: "Monitorar Recursos do Sistema",
           readVideos: "Visualizar Vídeos",
-          writeVideos: "Gerenciar Vídeos"
+          writeVideos: "Gerenciar Vídeos",
+          createUsers: "Criar Usuários",
+          readUsers: "Visualizar Usuários",
+          updateUsers: "Editar Usuários",
+          deleteUsers: "Deletar Usuários",
+          createQuickAnswers: "Criar Respostas Rápidas",
+          readQuickAnswers: "Visualizar Respostas Rápidas",
+          updateQuickAnswers: "Editar Respostas Rápidas",
+          deleteQuickAnswers: "Deletar Respostas Rápidas",
+          createClientStatus: "Criar Status de Clientes",
+          readClientStatus: "Visualizar Status de Clientes",
+          updateClientStatus: "Editar Status de Clientes",
+          deleteClientStatus: "Deletar Status de Clientes",
+          readGroups: "Visualizar Grupos do WhatsApp",
+          writeGroups: "Gerenciar Grupos do WhatsApp"
         },
         messages: {
           success: {

@@ -5,6 +5,7 @@ import express, { Request, Response, NextFunction } from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import * as Sentry from "@sentry/node";
+import swaggerUi from "swagger-ui-express";
 import { logger } from "./utils/logger";
 import updateLastActivity from "./middleware/updateLastActivity";
 import errorLogger from "./middleware/errorLogger";
@@ -14,6 +15,7 @@ import uploadConfig from "./config/upload";
 import AppError from "./errors/AppError";
 import openApiRoutes from "./routes/openApiRoutes";
 import routes from "./routes";
+import swaggerSpec from "./config/swagger";
 
 if (process.env.NODE_ENV === "production") {
   Sentry.init({ dsn: process.env.SENTRY_DSN });
@@ -39,6 +41,16 @@ const openApiCorsOptions = {
   origin: "*",
   allowedHeaders: ["Content-Type", "Authorization", "x-api-token"],
 };
+
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
+  customCss: '.swagger-ui .topbar { display: none }',
+  customSiteTitle: "Press Ticket® API Documentation"
+}));
+
+app.get("/api-docs.json", (req, res) => {
+  res.setHeader("Content-Type", "application/json");
+  res.send(swaggerSpec);
+});
 
 app.use("/v1", cors(openApiCorsOptions), openApiRoutes);
 

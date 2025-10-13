@@ -74,7 +74,29 @@ const DEFAULT_PERMISSIONS = [
     
     // Vídeos
     'read:videos',
-    'write:videos'
+    'write:videos',
+    
+    // Usuários
+    'create:users',
+    'read:users',
+    'update:users',
+    'delete:users',
+    
+    // Respostas Rápidas
+    'create:quickAnswers',
+    'read:quickAnswers',
+    'update:quickAnswers',
+    'delete:quickAnswers',
+    
+    // Status de Clientes
+    'create:client-status',
+    'read:client-status',
+    'update:client-status',
+    'delete:client-status',
+    
+    // Grupos do WhatsApp
+    'read:groups',
+    'write:groups'
 ];
 
 const ListPermissionsService = async (): Promise<string[]> => {
