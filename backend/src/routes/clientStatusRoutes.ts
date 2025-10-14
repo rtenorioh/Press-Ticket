@@ -5,6 +5,7 @@ import * as ClientStatusController from "../controllers/ClientStatusController";
 
 const clientStatusRoutes = express.Router();
 
+clientStatusRoutes.get("/client-status/statistics", isAuth, ClientStatusController.statistics);
 clientStatusRoutes.get("/client-status", isAuth, ClientStatusController.index);
 clientStatusRoutes.post("/client-status", isAuth, ClientStatusController.store);
 clientStatusRoutes.put("/client-status/:clientStatusId", isAuth, ClientStatusController.update);

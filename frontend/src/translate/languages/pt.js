@@ -544,6 +544,21 @@ const messages = {
         users: {
           title: "Usuários Online"
         },
+        clientStatus: {
+          pieChart: {
+            title: "Distribuição de Contatos por Status"
+          },
+          barChart: {
+            title: "Quantidade de Contatos por Status"
+          },
+          withoutStatus: "Sem Status",
+          totalContacts: "Total de Contatos",
+          withStatusLabel: "Com Status",
+          withoutStatusLabel: "Sem Status",
+          contactsCount: "Quantidade de Contatos",
+          loading: "Carregando estatísticas...",
+          noData: "Nenhum dado disponível"
+        },
       },
       diskSpace: {
         title: "Espaço em Disco",

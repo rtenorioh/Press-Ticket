@@ -168,3 +168,51 @@ export const removeAll = async (
 
   return res.send();
 };
+
+export const statistics = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  const ClientStatus = (await import("../models/ClientStatus")).default;
+  const Contact = (await import("../models/Contact")).default;
+  const { Sequelize, Op } = await import("sequelize");
+
+  const statusWithCounts = await ClientStatus.findAll({
+    attributes: {
+      include: [
+        [
+          Sequelize.literal(`(
+            SELECT COUNT(*)
+            FROM Contacts AS contact
+            WHERE contact.status = ClientStatus.name
+          )`),
+          "contactsCount"
+        ]
+      ]
+    },
+    order: [["name", "ASC"]]
+  });
+
+  const contactsWithoutStatus = await Contact.count({
+    where: {
+      status: {
+        [Op.or]: [null, ""]
+      }
+    }
+  });
+
+  const totalContacts = await Contact.count();
+
+  const statistics = {
+    statusData: statusWithCounts.map((status: any) => ({
+      id: status.id,
+      name: status.name,
+      color: status.color,
+      count: parseInt(status.getDataValue("contactsCount")) || 0
+    })),
+    withoutStatus: contactsWithoutStatus,
+    total: totalContacts
+  };
+
+  return res.status(200).json(statistics);
+};

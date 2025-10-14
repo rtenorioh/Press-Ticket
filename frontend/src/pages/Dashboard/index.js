@@ -26,6 +26,8 @@ import ChartPerQueue from "./ChatsPerQueue";
 import ContactsWithTicketsChart from "./ContactsWithTicketsChart";
 import NewContactsChart from "./NewContactsChart";
 import TagCloud from "./TagCloud";
+import ClientStatusPieChart from "./ClientStatusPieChart";
+import ClientStatusBarChart from "./ClientStatusBarChart";
 
 const StyledContainer = styled(Container)(({ theme }) => ({
 	paddingTop: theme.spacing(2),
@@ -47,18 +49,27 @@ const DashboardSection = styled('div')(({ theme }) => ({
 
 const FixedHeightPaperCard = styled(Paper)(({ theme }) => ({
   padding: theme.spacing(2.5, 2),
-  background: `linear-gradient(135deg, ${theme.palette.primary.light} 0%, ${theme.palette.background.paper} 100%)`,
+  background: theme.palette.mode === 'dark' 
+    ? theme.palette.background.paper
+    : `linear-gradient(135deg, ${theme.palette.primary.light}15 0%, ${theme.palette.background.paper} 100%)`,
   display: "flex",
   flexDirection: "column",
   alignItems: "center",
   justifyContent: "center",
   borderRadius: 18,
-  boxShadow: "0 4px 24px 0 rgba(80, 80, 160, 0.07)",
+  boxShadow: theme.palette.mode === 'dark'
+    ? "0 8px 32px 0 rgba(0, 0, 0, 0.5), 0 2px 8px 0 rgba(0, 0, 0, 0.3)"
+    : "0 8px 32px 0 rgba(80, 80, 160, 0.12), 0 2px 8px 0 rgba(80, 80, 160, 0.08)",
   minHeight: 130,
-  transition: 'transform 0.25s cubic-bezier(.4,2,.6,1), box-shadow 0.25s cubic-bezier(.4,2,.6,1)',
+  border: theme.palette.mode === 'dark' 
+    ? `2px solid ${theme.palette.divider}` 
+    : `1px solid ${theme.palette.grey[200]}`,
+  transition: 'all 0.3s ease',
   '&:hover': {
-    transform: 'scale(1.035)',
-    boxShadow: '0 8px 32px 0 rgba(80, 80, 160, 0.12)',
+    transform: 'translateY(-2px)',
+    boxShadow: theme.palette.mode === 'dark'
+      ? "0 12px 40px 0 rgba(0, 0, 0, 0.6), 0 4px 12px 0 rgba(0, 0, 0, 0.4)"
+      : "0 12px 40px 0 rgba(80, 80, 160, 0.16), 0 4px 12px 0 rgba(80, 80, 160, 0.12)",
   },
   [theme.breakpoints.down('sm')]: {
     minHeight: 100,
@@ -368,6 +379,17 @@ const Dashboard = () => {
 					</>
 				)}
 			/>
+
+			<DashboardSection>
+				<Grid container spacing={3}>
+					<Grid item xs={12} sm={6}>
+						<ClientStatusPieChart />
+					</Grid>
+					<Grid item xs={12} sm={6}>
+						<ClientStatusBarChart />
+					</Grid>
+				</Grid>
+			</DashboardSection>
 
 			<DashboardSection>
 				<Grid container spacing={3}>

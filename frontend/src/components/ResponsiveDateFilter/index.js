@@ -27,9 +27,22 @@ const DateFieldsContainer = styled(Box)(({ theme }) => ({
 
 const StyledTextField = styled(TextField)(({ theme }) => ({
   width: '100%',
-  background: `linear-gradient(135deg, ${theme.palette.primary.light} 0%, ${theme.palette.background.paper} 100%)`,
+  background: theme.palette.mode === 'dark' 
+    ? theme.palette.background.paper
+    : `linear-gradient(135deg, ${theme.palette.primary.light}15 0%, ${theme.palette.background.paper} 100%)`,
   borderRadius: 12,
-  boxShadow: '0 2px 8px 0 rgba(80, 80, 160, 0.07)',
+  boxShadow: theme.palette.mode === 'dark'
+    ? '0 4px 16px 0 rgba(0, 0, 0, 0.4)'
+    : '0 4px 16px 0 rgba(80, 80, 160, 0.1)',
+  border: theme.palette.mode === 'dark' 
+    ? `1px solid ${theme.palette.divider}` 
+    : 'none',
+  transition: 'all 0.3s ease',
+  '&:hover': {
+    boxShadow: theme.palette.mode === 'dark'
+      ? '0 6px 20px 0 rgba(0, 0, 0, 0.5)'
+      : '0 6px 20px 0 rgba(80, 80, 160, 0.14)',
+  },
   '& .MuiInputBase-root': {
     color: theme.palette.text.primary,
     background: 'transparent',
@@ -45,7 +58,12 @@ const StyledTextField = styled(TextField)(({ theme }) => ({
     }
   },
   '& .MuiOutlinedInput-notchedOutline': {
-    borderColor: theme.palette.primary.light,
+    borderColor: theme.palette.mode === 'dark' 
+      ? theme.palette.divider
+      : theme.palette.primary.light,
+  },
+  '& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline': {
+    borderColor: theme.palette.primary.main,
   },
 }));
 

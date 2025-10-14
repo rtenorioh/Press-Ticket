@@ -2,19 +2,34 @@ import { Chip, Paper, Box, Typography } from "@mui/material";
 import { styled, useTheme } from "@mui/material/styles";
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
 import api from "../../services/api";
 import Title from "./Title";
 
 const ChartPaper = styled(Paper)(({ theme }) => ({
     padding: theme.spacing(2, 1.5, 1.5, 1.5),
-    background: `linear-gradient(135deg, ${theme.palette.primary.light} 0%, ${theme.palette.background.paper} 100%)`,
+    background: theme.palette.mode === 'dark' 
+      ? theme.palette.background.paper
+      : `linear-gradient(135deg, ${theme.palette.primary.light}15 0%, ${theme.palette.background.paper} 100%)`,
     borderRadius: 18,
-    boxShadow: "0 4px 24px 0 rgba(80, 80, 160, 0.07)",
+    boxShadow: theme.palette.mode === 'dark'
+      ? "0 8px 32px 0 rgba(0, 0, 0, 0.5), 0 2px 8px 0 rgba(0, 0, 0, 0.3)"
+      : "0 8px 32px 0 rgba(80, 80, 160, 0.12), 0 2px 8px 0 rgba(80, 80, 160, 0.08)",
     marginBottom: theme.spacing(1),
     overflow: 'unset',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
+    border: theme.palette.mode === 'dark' 
+      ? `2px solid ${theme.palette.divider}` 
+      : `1px solid ${theme.palette.grey[200]}`,
+    transition: 'all 0.3s ease',
+    '&:hover': {
+      boxShadow: theme.palette.mode === 'dark'
+        ? "0 12px 40px 0 rgba(0, 0, 0, 0.6), 0 4px 12px 0 rgba(0, 0, 0, 0.4)"
+        : "0 12px 40px 0 rgba(80, 80, 160, 0.16), 0 4px 12px 0 rgba(80, 80, 160, 0.12)",
+      transform: 'translateY(-2px)',
+    },
     [theme.breakpoints.down('sm')]: {
         padding: theme.spacing(1.5, 1, 1, 1),
     },
@@ -52,6 +67,7 @@ const TagCounter = styled('span')(({ theme }) => ({
 const TagCloud = () => {
     const { t } = useTranslation();
     const theme = useTheme();
+    const navigate = useNavigate();
     const [tags, setTags] = useState([]);
 
     useEffect(() => {
@@ -65,6 +81,10 @@ const TagCloud = () => {
         };
         fetchTags();
     }, []);
+
+    const handleViewContacts = (tag) => {
+        navigate('/contacts', { state: { tagFilter: tag } });
+    };
 
     return (
         <ChartPaper>
@@ -82,6 +102,7 @@ const TagCloud = () => {
                                     <TagCounter> ({tag.usageCount})</TagCounter>
                                 </span>
                             }
+                            onClick={() => handleViewContacts(tag)}
                             sx={{
                                 backgroundColor: tag.color,
                                 color: theme.palette.getContrastText(tag.color || theme.palette.primary.dark),
