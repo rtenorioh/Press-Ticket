@@ -211,6 +211,13 @@ export const initIO = (httpServer: Server): void => {
         socketId: socket.id
       });
       socket.join("notification");
+      
+      // Log adicional para debug
+      const notificationRoom = io.sockets.adapter.rooms.get("notification");
+      logger.info("Status do canal de notificações", {
+        socketId: socket.id,
+        totalClientsInNotificationRoom: notificationRoom ? notificationRoom.size : 0
+      });
     });
 
     socket.on("joinTickets", (status: string) => {

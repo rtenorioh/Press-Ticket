@@ -39,9 +39,9 @@ const CreateMessageService = async ({
     
     const existingMessage = await Message.findByPk(messageData.id);
     if (existingMessage) {
-      console.log("Mensagem já existe no banco de dados, atualizando:", messageData.id);
+      console.info("Mensagem já existe no banco de dados, atualizando:", messageData.id);
     } else {
-      console.log("Criando nova mensagem no banco de dados:", messageData.id);
+      console.info("Criando nova mensagem no banco de dados:", messageData.id);
     }
     
     await Message.upsert(messageData);
@@ -77,23 +77,17 @@ const CreateMessageService = async ({
     if (!message) {
       throw new Error("ERR_CREATING_MESSAGE");
     }
-
-    // Atualizar lastContactAt quando o contato envia uma mensagem (não é do usuário)
     if (!messageData.fromMe && message.ticket?.contact) {
       try {
         await message.ticket.contact.update({
           lastContactAt: new Date()
         });
-        console.log(`[CREATE_MESSAGE_SERVICE] lastContactAt atualizado para contato ${message.ticket.contact.id}`);
       } catch (error) {
         console.error("Erro ao atualizar lastContactAt:", error);
       }
     }
 
     const io = getIO();
-    const timestamp = new Date().toISOString();
-
-    // Garantir que o ticket embutido esteja 100% atualizado (inclui lastMessage atualizado por listeners)
     try {
       if (message.ticket && typeof message.ticket.reload === "function") {
         await message.ticket.reload({
@@ -121,14 +115,6 @@ const CreateMessageService = async ({
       ticketPayload.lastMessage = composedLastMessage;
     }
     ticketPayload.updatedAt = new Date();
-
-    console.log(`[CREATE_MESSAGE_SERVICE][${timestamp}] Emitindo evento appMessage (create):`, {
-      messageId: message.id,
-      ticketId: message.ticketId,
-      ticketStatus: ticketPayload?.status,
-      lastMessage: ticketPayload?.lastMessage,
-      body: message.body?.substring(0, 50)
-    });
 
     io.to(message.ticketId.toString())
       .to(ticketPayload.status)
