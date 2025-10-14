@@ -309,7 +309,12 @@ const reducer = (state, action) => {
     const newMessages = [];
 
     messages.forEach((message) => {
-      const messageIndex = state.findIndex((m) => m.id === message.id);
+      if (!message || !message.id) {
+        console.warn('[LOAD_MESSAGES] Mensagem sem ID ignorada:', message);
+        return;
+      }
+      
+      const messageIndex = state.findIndex((m) => m && m.id && m.id === message.id);
       if (messageIndex !== -1) {
         state[messageIndex] = message;
       } else {
@@ -322,7 +327,13 @@ const reducer = (state, action) => {
 
   if (action.type === "ADD_MESSAGE") {
     const newMessage = action.payload;
-    const messageIndex = state.findIndex((m) => m.id === newMessage.id);
+    
+    if (!newMessage || !newMessage.id) {
+      console.warn('[ADD_MESSAGE] Mensagem sem ID ignorada:', newMessage);
+      return state;
+    }
+    
+    const messageIndex = state.findIndex((m) => m && m.id && m.id === newMessage.id);
 
     if (messageIndex !== -1) {
       state[messageIndex] = newMessage;
@@ -352,8 +363,12 @@ const reducer = (state, action) => {
     const timestamp = new Date().toISOString();
     const messageToUpdate = action.payload;
     
+    if (!messageToUpdate || !messageToUpdate.id) {
+      console.warn('[UPDATE_MESSAGE] Mensagem sem ID ignorada:', messageToUpdate);
+      return state;
+    }
 
-    const messageIndex = state.findIndex((m) => m.id === messageToUpdate.id);
+    const messageIndex = state.findIndex((m) => m && m.id && m.id === messageToUpdate.id);
     
     if (messageIndex !== -1) {
       const oldMessage = state[messageIndex];   
@@ -365,14 +380,6 @@ const reducer = (state, action) => {
         (!oldMessage.oldMessages || oldMessage.oldMessages.length !== messageToUpdate.oldMessages.length);
       
       if (ackChanged || bodyChanged || editedChanged || oldMessagesChanged) {
-        console.log('[UPDATE_MESSAGE] Atualizando mensagem:', {
-          id: messageToUpdate.id,
-          bodyChanged,
-          editedChanged,
-          oldMessagesChanged,
-          oldMessagesCount: messageToUpdate.oldMessages?.length || 0,
-          oldMessages: messageToUpdate.oldMessages?.map(om => ({ id: om.id, body: om.body?.substring(0, 20) }))
-        });
         
         const newState = [...state];
         newState[messageIndex] = { 
@@ -421,19 +428,33 @@ const reducer = (state, action) => {
 
   if (action.type === "UPDATE_MESSAGE_REACTIONS") {
     const { messageId, emoji, actionType } = action.payload;
-    const idx = state.findIndex(m => m.id === messageId);
-    if (idx === -1) return state;
+    
+    if (!messageId) {
+      console.warn('[UPDATE_MESSAGE_REACTIONS] messageId está undefined');
+      return state;
+    }
+    
+    const idx = state.findIndex(m => m && m.id && m.id === messageId);
+    
+    if (idx === -1) {
+      console.warn('[UPDATE_MESSAGE_REACTIONS] Mensagem não encontrada:', messageId);
+      return state;
+    }
+    
     const msg = state[idx];
     const current = { ...(msg.reactions || {}) };
     const currCount = current[emoji] || 0;
+    
     if (actionType === "update") {
       current[emoji] = currCount + 1;
     } else if (actionType === "remove") {
       current[emoji] = Math.max(0, currCount - 1);
       if (current[emoji] === 0) delete current[emoji];
     }
+    
     const newState = [...state];
     newState[idx] = { ...msg, reactions: current };
+    
     return newState;
   }
 };
@@ -451,15 +472,10 @@ const MessagesList = ({ ticketId, isGroup, onClick }) => {
   const messageOptionsMenuOpen = Boolean(anchorEl);
   const currentTicketId = useRef(ticketId);
   
-  // Atualizar selectedMessage quando messagesList mudar
   useEffect(() => {
     if (selectedMessage?.id) {
       const updatedMessage = messagesList.find(m => m.id === selectedMessage.id);
       if (updatedMessage && updatedMessage !== selectedMessage) {
-        console.log('[MessagesList] Atualizando selectedMessage:', {
-          id: updatedMessage.id,
-          oldMessagesCount: updatedMessage.oldMessages?.length || 0
-        });
         setSelectedMessage(updatedMessage);
       }
     }
@@ -572,7 +588,6 @@ const MessagesList = ({ ticketId, isGroup, onClick }) => {
 
   useEffect(() => {
     const processMessage = (data) => {
-      const timestamp = new Date().toISOString();
       
       lastSocketEventTime.current = Date.now();
       
@@ -616,13 +631,6 @@ const MessagesList = ({ ticketId, isGroup, onClick }) => {
 
         if (data.action === "update") {
           try {
-            console.log('[SOCKET_UPDATE] Mensagem recebida via socket:', {
-              id: data.message?.id,
-              body: data.message?.body?.substring(0, 30),
-              isEdited: data.message?.isEdited,
-              oldMessagesCount: data.message?.oldMessages?.length || 0,
-              oldMessages: data.message?.oldMessages?.map(om => ({ id: om.id, body: om.body?.substring(0, 20) }))
-            });
             dispatch({ type: "UPDATE_MESSAGE", payload: data.message });
           } catch (updateError) {
             console.error(updateError);
@@ -653,9 +661,16 @@ const MessagesList = ({ ticketId, isGroup, onClick }) => {
     const handleMessageReaction = (data) => {
       try {
         const { messageId, emoji, action: actionType } = data || {};
-        if (!messageId) return;
+        
+        if (!messageId) {
+          console.warn('[handleMessageReaction] messageId está undefined');
+          return;
+        }
+        
         dispatch({ type: "UPDATE_MESSAGE_REACTIONS", payload: { messageId, emoji, actionType } });
-      } catch (e) { console.error(e); }
+      } catch (e) { 
+        console.error('[handleMessageReaction] Erro ao processar reação:', e); 
+      }
     };
     socket.off("messageReaction", handleMessageReaction);
     socket.on("messageReaction", handleMessageReaction);
@@ -674,7 +689,6 @@ const MessagesList = ({ ticketId, isGroup, onClick }) => {
       const { message, ticketId: messageTicketId } = event.detail;
       
       if (parseInt(messageTicketId) === parseInt(ticketId)) {
-        console.log("Mensagem recebida via evento personalizado:", message);
         
         const messageExists = messagesList.some(m => m.id === message.id);
         
