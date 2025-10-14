@@ -2517,6 +2517,43 @@ openApiRouter.post("/client-status", isApiToken('create:client-status'), ClientS
 
 /**
  * @swagger
+ * /v1/client-status/statistics:
+ *   get:
+ *     summary: Obter Estatísticas de Status de Clientes
+ *     description: Retorna estatísticas completas sobre distribuição de contatos por status
+ *     tags: [Client Status]
+ *     security:
+ *       - apiToken: []
+ *     responses:
+ *       200:
+ *         description: Estatísticas retornadas com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 statusData:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: integer
+ *                       name:
+ *                         type: string
+ *                       color:
+ *                         type: string
+ *                       count:
+ *                         type: integer
+ *                 withoutStatus:
+ *                   type: integer
+ *                 total:
+ *                   type: integer
+ */
+openApiRouter.get("/client-status/statistics", isApiToken('read:client-status'), ClientStatusController.statistics);
+
+/**
+ * @swagger
  * /v1/client-status/{clientStatusId}:
  *   get:
  *     summary: Obter Status de Cliente
