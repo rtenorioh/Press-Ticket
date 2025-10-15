@@ -6,11 +6,14 @@ import List from '@mui/material/List';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import Toolbar from '@mui/material/Toolbar';
+import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 import { styled } from '@mui/material/styles';  
 import AccountCircle from '@mui/icons-material/AccountCircle';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import MenuIcon from '@mui/icons-material/Menu';
+import FullscreenIcon from '@mui/icons-material/Fullscreen';
+import FullscreenExitIcon from '@mui/icons-material/FullscreenExit';
 import React, { useContext, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useLocation } from "react-router-dom";
@@ -123,6 +126,7 @@ const LoggedInLayout = ({ children, toggleTheme, onThemeConfigUpdate }) => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const { user } = useContext(AuthContext);
   const themeStorage = localStorage.getItem("theme");
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const [companyData, setCompanyData] = useState({
     logo: defaultLogo,
     name: "Press Ticket®",
@@ -252,6 +256,29 @@ const LoggedInLayout = ({ children, toggleTheme, onThemeConfigUpdate }) => {
     setDrawerOpen(false);
   };
 
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch((err) => {
+        console.error(`Erro ao tentar entrar em tela cheia: ${err.message}`);
+      });
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      }
+    }
+  };
+
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    };
+  }, []);
+
   if (loading) {
     return <BackdropLoading />;
   }
@@ -324,6 +351,21 @@ const LoggedInLayout = ({ children, toggleTheme, onThemeConfigUpdate }) => {
           </Title>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <Tooltip title={isFullscreen ? t("mainDrawer.appBar.fullscreen.exit") : t("mainDrawer.appBar.fullscreen.enter")}>
+              <IconButton
+                onClick={toggleFullscreen}
+                color="inherit"
+                sx={{
+                  borderRadius: '50%',
+                  padding: 0.75,
+                  '&:hover': {
+                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                  }
+                }}
+              >
+                {isFullscreen ? <FullscreenExitIcon /> : <FullscreenIcon />}
+              </IconButton>
+            </Tooltip>
             <ThemeSelector toggleTheme={toggleTheme} />
             <LanguageSelector />
             {user?.id && <NotificationsPopOver />}

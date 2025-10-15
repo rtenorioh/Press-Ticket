@@ -773,6 +773,10 @@ const messages = {
             profile: "Perfil",
             logout: "Sair",
           },
+          fullscreen: {
+            enter: "Tela cheia",
+            exit: "Sair da tela cheia"
+          },
         },
       },
       messageOptionsMenu: {
