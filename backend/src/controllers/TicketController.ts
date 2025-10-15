@@ -398,7 +398,6 @@ export const count = async (req: AuthenticatedRequest, res: Response): Promise<R
     
     const showAllTickets = showAll === "true" || isAdmin;
     
-    const timestamp = new Date().toISOString();
     
     const counts = await CountTicketsService({
       queueIds: queueIdsArray,

@@ -3,8 +3,6 @@ import CountTicketsService from "./CountTicketsService";
 
 const EmitTicketCounterService = async (): Promise<any> => {
   try {
-    const timestamp = new Date().toISOString();
-    
     const counters = await CountTicketsService({});
     
     const io = getIO();

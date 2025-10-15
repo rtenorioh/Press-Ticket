@@ -169,30 +169,9 @@ const NewTicketModal = ({ modalOpen, onClose }) => {
 				whatsappId: selectedWhatsapp
 			});
 			
-			// Emitir evento WebSocket para atualizar as listas em tempo real
-			setTimeout(() => {
-				const socket = openSocket();
-				if (socket) {
-					socket.emit("ticket", {
-						action: "update",
-						ticketId: ticket.id,
-						ticket: {
-							...ticket,
-							status: "open",
-							userId: user?.id,
-							queueId: selectedQueue,
-							whatsappId: selectedWhatsapp
-						}
-					});
-
-					// Forçar atualização da lista de tickets da aba "open"
-					socket.emit("joinTickets", "open");
-					socket.emit("getTickets", { status: "open", userId: user?.id, showAll: false });
-				}
-			}, 500);
-			
-			// Definir para mudar para a aba de atendimento
-			localStorage.setItem("pressticket:changeTab", "open");
+			const isGroup = ticket?.contact?.isGroup;
+			const targetTab = isGroup ? "groups" : "open";
+			localStorage.setItem("pressticket:changeTab", targetTab);
 			
 			navigate(`/tickets/${ticket.id}`);
 		} catch (err) {

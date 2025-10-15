@@ -21,8 +21,6 @@ const CountTicketsService = async ({
   userId = null
 }: CountTicketsParams = {}): Promise<TicketCounts> => {
   try {
-    const timestamp = new Date().toISOString();
-    
     const allTickets = await ListSettingsServiceOne({ key: "allTicket" });
     const allTicketsEnabled = allTickets?.value === "enabled";
     
@@ -30,7 +28,8 @@ const CountTicketsService = async ({
     
     const openConditions: any = {
       ...baseConditions,
-      status: "open"
+      status: "open",
+      "$contact.isGroup$": { [Op.or]: [false, null] }
     };
     
     const openGroupsConditions: any = {
@@ -38,9 +37,6 @@ const CountTicketsService = async ({
       status: "open",
       "$contact.isGroup$": true
     };
-    
-    // Modificar openConditions para excluir grupos
-    openConditions["$contact.isGroup$"] = { [Op.or]: [false, null] };
     
     const pendingConditions: any = {
       ...baseConditions,
@@ -91,7 +87,6 @@ const CountTicketsService = async ({
       closedConditions.queueId = { [Op.in]: queueIds };
     }
     
-    // Aplicar as mesmas condições de usuário/fila para grupos
     if (!showAll && userId) {
       if (allTicketsEnabled) {
         openGroupsConditions[Op.or] = [
@@ -109,7 +104,6 @@ const CountTicketsService = async ({
       openGroupsConditions.queueId = { [Op.in]: queueIds };
     }
     
-    // Contar tickets para cada status
     const [openCount, pendingCount, closedCount, openGroupsCount] = await Promise.all([
       Ticket.count({ 
         where: openConditions,

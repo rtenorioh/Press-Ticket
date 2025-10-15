@@ -105,14 +105,21 @@ const TicketActionButtons = ({ ticket }) => {
 				status: status,
 				userId: userId || null
 			});
-			setLoading(false);
+			
+		
+			
 			if (status === "open") {
 				const isGroup = ticket?.contact?.isGroup;
-				localStorage.setItem("pressticket:changeTab", isGroup ? "groups" : "open");
+				const targetTab = isGroup ? "groups" : "open";
+				localStorage.setItem("pressticket:changeTab", targetTab);
 				navigate(`/tickets/${ticket.id}`);
-			} else {
+			} else if (status === "pending") {
+				navigate("/tickets");
+			} else if (status === "closed") {
 				navigate("/tickets");
 			}
+			
+			setLoading(false);
 		} catch (err) {
 			setLoading(false);
 			toastError(err);

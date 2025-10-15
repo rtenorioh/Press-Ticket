@@ -1,5 +1,6 @@
 import Ticket from "../../models/Ticket";
 import AppError from "../../errors/AppError";
+import EmitTicketCounterService from "./EmitTicketCounterService";
 
 const DeleteTicketService = async (id: string): Promise<Ticket> => {
   const ticket = await Ticket.findOne({
@@ -11,6 +12,14 @@ const DeleteTicketService = async (id: string): Promise<Ticket> => {
   }
 
   await ticket.destroy();
+
+  const timestamp = new Date().toISOString();
+  
+  try {
+    await EmitTicketCounterService();
+  } catch (err) {
+    console.error(`[BACK_DELETE_TICKET_ERROR][${timestamp}] Erro ao emitir contadores:`, err);
+  }
 
   return ticket;
 };

@@ -67,11 +67,9 @@ const reducer = (state, action) => {
 					...existing,
 					...(useIncoming ? incoming : {}),
 				};
-				// Preservar lastMessage quando o recebido vier vazio ou atrasado
 				if (!useIncoming || !incoming.lastMessage) {
 					merged.lastMessage = existing.lastMessage;
 				}
-				// UnreadMessages deve refletir o backend quando vier definido
 				if (incoming.unreadMessages !== undefined) {
 					merged.unreadMessages = incoming.unreadMessages;
 				}
@@ -110,7 +108,6 @@ const reducer = (state, action) => {
 				lastMessage: incoming.lastMessage || existing.lastMessage,
 			};
 			state[ticketIndex] = merged;
-			// Se o ticket tem mensagens não lidas, mover para o topo
 			if (merged.unreadMessages > 0) {
 				state.unshift(state.splice(ticketIndex, 1)[0]);
 			}
@@ -124,10 +121,6 @@ const reducer = (state, action) => {
 	if (action.type === "UPDATE_TICKET_UNREAD_MESSAGES") {
 		const ticket = action.payload;
 		const timestamp = new Date().toISOString();
-		console.log(`[REDUCER_UPDATE_UNREAD][${timestamp}] Processando ticket ${ticket.id}:`, {
-			lastMessage: ticket.lastMessage,
-			unreadMessages: ticket.unreadMessages
-		});
 
 		const ticketIndex = state.findIndex((t) => t.id === ticket.id);
 		if (ticketIndex !== -1) {
@@ -141,15 +134,12 @@ const reducer = (state, action) => {
 			
 			state[ticketIndex] = updatedTicket;
 			
-			// Mover para o topo apenas se houver nova mensagem diferente
 			if (ticket.lastMessage && ticket.lastMessage !== oldTicket.lastMessage) {
-				console.log(`[REDUCER_MOVE_TOP][${timestamp}] Movendo ticket ${ticket.id} para o topo`);
 				state.unshift(state.splice(ticketIndex, 1)[0]);
 			} else {
-				console.log(`[REDUCER_NO_MOVE][${timestamp}] Ticket ${ticket.id} não movido - mesma mensagem`);
+				console.info(`[REDUCER_NO_MOVE][${timestamp}] Ticket ${ticket.id} não movido - mesma mensagem`);
 			}
 		} else {
-			console.log(`[REDUCER_ADD_NEW][${timestamp}] Adicionando novo ticket ${ticket.id}`);
 			state.unshift(ticket);
 		}
 
@@ -178,10 +168,8 @@ const reducer = (state, action) => {
 	if (action.type === "ADD_TICKET") {
 		const ticket = action.payload;
 		
-		// Verificar se o ticket já existe
 		const ticketIndex = state.findIndex((t) => t.id === ticket.id);
 		if (ticketIndex === -1) {
-			// Adicionar novo ticket no topo da lista
 			state.unshift(ticket);
 		}
 
@@ -247,13 +235,10 @@ const TicketsList = (props) => {
 		const queueIds = queues?.map((q) => q.id);
 		let filteredTickets = tickets.filter((t) => queueIds.indexOf(t.queueId) > -1);
 
-		// Filtrar por tipo de conversa (grupo ou individual)
 		if (isGroup !== undefined) {
 			if (isGroup === true) {
-				// Mostrar apenas tickets de grupos
 				filteredTickets = filteredTickets.filter((t) => t.contact?.isGroup === true);
 			} else {
-				// Mostrar apenas tickets individuais (não grupos)
 				filteredTickets = filteredTickets.filter((t) => !t.contact?.isGroup);
 			}
 		}
@@ -270,7 +255,6 @@ const TicketsList = (props) => {
 				dispatch({ type: "LOAD_TICKETS", payload: filteredTickets });
 
 			} else {
-				// Aplicar filtro de grupo também nos tickets gerais
 				let allTickets = tickets;
 				if (isGroup !== undefined) {
 					if (isGroup === true) {
@@ -287,7 +271,6 @@ const TicketsList = (props) => {
 				dispatch({ type: "LOAD_TICKETS", payload: filteredTickets });
 
 			} else {
-				// Aplicar filtro de grupo também nos tickets gerais
 				let allTickets = tickets;
 				if (isGroup !== undefined) {
 					if (isGroup === true) {
@@ -316,64 +299,59 @@ const TicketsList = (props) => {
 				return false;
 			}
 
-			// NOVO: respeitar filtro de grupo vs individual
 			if (isGroup !== undefined) {
 				const isTicketGroup = !!ticket.contact?.isGroup;
 				if (isGroup !== isTicketGroup) {
 					return false;
 				}
 			}
-		
+
 			const isAdmin = user?.profile === "admin" || user?.profile === "masteradmin";
 			
-			if (isAdmin && showAll && matchesCurrentStatus) {
-				return true;
-			}
-		
-			if (ticket.status === "pending") {
-				if (ticket.queueId) {
-					const belongsToQueue = selectedQueueIds.indexOf(ticket.queueId) > -1;
-					const shouldShow = belongsToQueue;
-					return shouldShow;
-				}
-				
-				return true;
-			}
 			
-			if (ticket.status === "open") {
-				if (ticket.userId) {
+			if (status === "closed") {
+				if (!isAdmin || (isAdmin && !showAll)) {
 					const belongsToUser = ticket.userId === user?.id;
-					return belongsToUser;
+					const belongsToQueue = ticket.queueId && selectedQueueIds.indexOf(ticket.queueId) > -1;
+					const shouldShow = belongsToUser || belongsToQueue;
+					return shouldShow;
+				} else {
+					return true;
 				}
-				
-				if (ticket.queueId) {
-					const belongsToQueue = selectedQueueIds.indexOf(ticket.queueId) > -1;
-					return belongsToQueue;
+			} else if (status === "pending") {
+				if (!isAdmin) {
+					const belongsToUser = ticket.userId === user?.id;
+					const belongsToQueue = !ticket.queueId || selectedQueueIds.indexOf(ticket.queueId) > -1;
+					const shouldShow = belongsToUser || belongsToQueue;
+					return shouldShow;
+				} else {
+					if (showAll) {
+						return true;
+					} else {
+						const belongsToUser = ticket.userId === user?.id;
+						const belongsToQueue = !ticket.queueId || selectedQueueIds.indexOf(ticket.queueId) > -1;
+						const shouldShow = belongsToUser || belongsToQueue;
+						return shouldShow;
+					}
 				}
-				
-				return true;
+			} else if (status === "open") {
+				if (!isAdmin || (isAdmin && !showAll)) {
+					const belongsToUser = ticket.userId === user?.id;
+					const belongsToQueue = ticket.queueId && selectedQueueIds.indexOf(ticket.queueId) > -1;
+					const shouldShow = belongsToUser || belongsToQueue;
+					return shouldShow;
+				} else {
+					return true;
+				}
 			}
-			
-			if (ticket.userId) {
-				const belongsToUser = ticket.userId === user?.id;
-				return belongsToUser;
-			}
-			
-			if (ticket.queueId) {
-				const belongsToQueue = selectedQueueIds.indexOf(ticket.queueId) > -1;
-				return belongsToQueue;
-			}
-			
-			return true;
+			return false;
 		};
 
 		const notBelongsToUserQueues = (ticket) =>
 			ticket.queueId && selectedQueueIds.indexOf(ticket.queueId) === -1;
 
 		const registerSocketEvents = () => {
-			socket.on("connect", () => {
-				console.log("Socket conectado no TicketsList");
-				
+			socket.on("connect", () => {				
 				socket.emit("joinTickets", "pending");
 				
 				if (status && status !== "pending") {
@@ -388,8 +366,6 @@ const TicketsList = (props) => {
 			});
 			
 			socket.on("reconnect", () => {
-				console.log("Socket reconectado no TicketsList");
-				
 				socket.emit("joinTickets", "pending");
 				
 				if (status && status !== "pending") {
@@ -421,9 +397,19 @@ const TicketsList = (props) => {
 			socket.on("ticket", (data) => {
 				const timestamp = new Date().toISOString();
 				
-				// Atualização de ticket
 				if (data.action === "update") {
-					// Se mudou de status em relação à aba atual, remover imediatamente
+					if (isGroup !== undefined && data.ticket?.contact) {
+						const isTicketGroup = !!data.ticket.contact.isGroup;
+						if (isGroup !== isTicketGroup) {
+							try {
+								dispatch({ type: "DELETE_TICKET", payload: data.ticket.id });
+							} catch (error) {
+								console.error(`[FRONT_TICKET_ERRO][${timestamp}] Erro ao deletar ticket (filtro grupo):`, error);
+							}
+							return;
+						}
+					}
+
 					if (status && data.ticket.status !== status) {
 						try {
 							dispatch({ type: "DELETE_TICKET", payload: data.ticket.id });
@@ -441,12 +427,7 @@ const TicketsList = (props) => {
 								console.error(`[FRONT_TICKET_ERRO][${timestamp}] Erro ao atualizar ticket:`, error);
 							}
 						}
-					} else if (
-						// Remover se não pertence às filas do usuário
-						notBelongsToUserQueues(data.ticket) ||
-						// Remover se não atende ao filtro de grupos vs individuais
-						(isGroup !== undefined && (!!data.ticket.contact?.isGroup) !== isGroup)
-					) {
+					} else if (notBelongsToUserQueues(data.ticket)) {
 						try {
 							dispatch({ type: "DELETE_TICKET", payload: data.ticket.id });
 						} catch (error) {
@@ -455,8 +436,14 @@ const TicketsList = (props) => {
 					}
 				}
 
-				// Criação de ticket
 				if (data.action === "create") {
+					if (isGroup !== undefined && data.ticket?.contact) {
+						const isTicketGroup = !!data.ticket.contact.isGroup;
+						if (isGroup !== isTicketGroup) {
+							return;
+						}
+					}
+
 					if (data.ticket && shouldUpdateTicket(data.ticket)) {
 						if (data.ticket.status === status || (data.ticket.status === "pending" && status !== "closed")) {
 							try {
@@ -468,7 +455,6 @@ const TicketsList = (props) => {
 					}
 				}
 
-				// Exclusão de ticket
 				if (data.action === "delete") {
 					try {
 						dispatch({ type: "DELETE_TICKET", payload: data.ticketId });
@@ -478,39 +464,27 @@ const TicketsList = (props) => {
 				}
 			});
 
-			// Mensagens de app: atualiza lastMessage/unread em tempo real
 			socket.on("appMessage", (data) => {
 				const timestamp = new Date().toISOString();
 				
-				if (data.message) {
-					console.log(`[FRONT_APP_MSG_DETALHES][${timestamp}] Detalhes da mensagem:`, {
-						id: data.message.id,
-						ticketId: data.message.ticketId,
-						body: data.message.body?.substring(0, 30),
-						ack: data.message.ack,
-						fromMe: data.message.fromMe
-					});
-				}
 				
-				if (data.ticket) {
-					console.log(`[FRONT_APP_MSG_TICKET][${timestamp}] Ticket:`, {
-						id: data.ticket.id,
-						status: data.ticket.status,
-						unreadMessages: data.ticket.unreadMessages,
-						userId: data.ticket.userId,
-						queueId: data.ticket.queueId,
-						lastMessage: data.ticket.lastMessage
-					});
-				}
-				
-				if ((data.action === "create" || data.action === "update") && data.ticket && shouldUpdateTicket(data.ticket)) {
-					try {
-						dispatch({
-							type: "UPDATE_TICKET_UNREAD_MESSAGES",
-							payload: data.ticket,
-						});
-					} catch (error) {
-						console.error(`[FRONT_APP_MSG_UPDATE_ERROR][${timestamp}] Erro ao atualizar ticket:`, error);
+				if ((data.action === "create" || data.action === "update") && data.ticket) {
+					if (isGroup !== undefined && data.ticket.contact) {
+						const isTicketGroup = !!data.ticket.contact.isGroup;
+						if (isGroup !== isTicketGroup) {
+							return;
+						}
+					}
+
+					if (shouldUpdateTicket(data.ticket)) {
+						try {
+							dispatch({
+								type: "UPDATE_TICKET_UNREAD_MESSAGES",
+								payload: data.ticket,
+							});
+						} catch (error) {
+							console.error(`[FRONT_APP_MSG_UPDATE_ERROR][${timestamp}] Erro ao atualizar ticket:`, error);
+						}
 					}
 				}
 			});
@@ -523,15 +497,12 @@ const TicketsList = (props) => {
 					});
 				}
 			});
-			// Lista de tickets completa fornecida via socket
 			socket.on("ticketList", (data) => {
 				if (data && Array.isArray(data.tickets)) {
-					// 1) Filtra por status (se informado)
 					let filteredTickets = status
 						? data.tickets.filter((ticket) => ticket.status === status)
 						: data.tickets;
 
-					// 2) Aplica também o filtro de grupos vs individuais, se definido via prop isGroup
 					if (isGroup !== undefined) {
 						if (isGroup === true) {
 							filteredTickets = filteredTickets.filter((t) => t.contact?.isGroup === true);
@@ -541,7 +512,6 @@ const TicketsList = (props) => {
 					}
 
 					if (filteredTickets.length > 0) {
-						console.log(`Carregando ${filteredTickets.length} tickets com status ${status}${isGroup !== undefined ? ` e isGroup=${isGroup}` : ""}`);
 						dispatch({ type: "LOAD_TICKETS", payload: filteredTickets });
 					}
 				}
@@ -555,14 +525,13 @@ const TicketsList = (props) => {
 		}
 
 		return () => {
-			console.log("Limpando eventos do socket no TicketsList");
 			socket.off("connect");
 			socket.off("ticket");
 			socket.off("appMessage");
 			socket.off("contact");
 			socket.off("ticketList");
 		};
-	}, [status, showAll, user, selectedQueueIds]);
+	}, [status, showAll, user, selectedQueueIds, isGroup]);
 
 	useEffect(() => {
 		if (typeof updateCount === "function") {

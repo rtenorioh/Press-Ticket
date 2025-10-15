@@ -342,40 +342,16 @@ const TicketListItem = ({ ticket, filteredTags }) => {
 		return null;
 	}
 
-	const handleAcepptTicket = async id => {
+	const handleAcceptTicket = async (id) => {
 		setLoading(true);
-		try {
-		
+		try {			
 			await api.put(`/tickets/${id}`, {
 				status: "open",
 				userId: user?.id,
 			});
-			
-			setTimeout(() => {
-				const socket = openSocket();
-				if (socket) {
-				
-					socket.emit("ticket", {
-						action: "update",
-						ticketId: id,
-						ticket: {
-							...ticket,
-							status: "open",
-							userId: user?.id,
-							queueId: ticket?.queueId
-						}
-					});
-
-					socket.emit("joinTickets", "open");
-					socket.emit("joinTickets", "pending");
-					
-					socket.emit("getTickets", { status: "open", userId: user?.id, showAll: false });
-					socket.emit("getTickets", { status: "pending", userId: user?.id, showAll: false });
-				}
-			}, 500);
-			
 			const isGroup = ticket?.contact?.isGroup || currentTicket?.contact?.isGroup;
-			localStorage.setItem("pressticket:changeTab", isGroup ? "groups" : "open");
+			const targetTab = isGroup ? "groups" : "open";
+			localStorage.setItem("pressticket:changeTab", targetTab);
 			
 			navigate(`/tickets/${id}`);
 		} catch (err) {
@@ -411,34 +387,14 @@ const TicketListItem = ({ ticket, filteredTags }) => {
 	const handleReopenTicket = async (id) => {
 		setLoading(true);
 		try {
+			
 			await api.put(`/tickets/${id}`, {
 				status: "open",
 				userId: user?.id,
 			});
-			
-			const socket = openSocket();
-			if (socket) {
-		
-				socket.emit("ticket", {
-					action: "update",
-					ticketId: id,
-					ticket: {
-						...ticket,
-						status: "open",
-						userId: user?.id,
-						queueId: ticket?.queueId
-					}
-				});
-
-				socket.emit("joinTickets", "open");
-				socket.emit("joinTickets", "closed");
-				
-				socket.emit("getTickets", { status: "open", userId: user?.id, showAll: false });
-				socket.emit("getTickets", { status: "closed", userId: user?.id, showAll: false });
-			}
-			
 			const isGroup = ticket?.contact?.isGroup || currentTicket?.contact?.isGroup;
-			localStorage.setItem("pressticket:changeTab", isGroup ? "groups" : "open");
+			const targetTab = isGroup ? "groups" : "open";
+			localStorage.setItem("pressticket:changeTab", targetTab);
 			
 			navigate(`/tickets/${id}`);
 		} catch (err) {
@@ -466,53 +422,44 @@ const TicketListItem = ({ ticket, filteredTags }) => {
 	};
 
 	const handleMoveTicket = async (id) => {
-    setLoading(true);
-    try {
-      // Atualiza no backend primeiro
-      await api.put(`/tickets/${id}`, {
-        status: "pending",
-      });
+		setLoading(true);
+		try {
+			
+			await api.put(`/tickets/${id}`, {
+				status: "pending",
+				userId: null
+			});
+			
+			const socket = openSocket();
+			
+			socket.emit("ticket", {
+				action: "delete",
+				ticketId: id
+			});
+			
+			setTimeout(() => {
+				socket.emit("ticket", {
+					action: "update",
+					ticketId: id,
+					ticket: { 
+						...ticket, 
+						status: "pending", 
+						userId: null 
+					}
+				});
+			}, 200);
+			
+			navigate(`/tickets`);
+		} catch (err) {
+			toastError(err);
+		} finally {
+			if (isMounted.current) {
+				setLoading(false);
+			}
+		}
+	};
 
-      const socket = openSocket();
-      if (socket) {
-        // 1) Remover imediatamente da aba atual
-        socket.emit("ticket", {
-          action: "delete",
-          ticketId: id
-        });
-
-        // 2) Após curto atraso, informar update para a aba pending
-        setTimeout(() => {
-          socket.emit("ticket", {
-            action: "update",
-            ticketId: id,
-            ticket: {
-              ...ticket,
-              status: "pending",
-              userId: null,
-              queueId: ticket?.queueId
-            }
-          });
-
-          socket.emit("joinTickets", "pending");
-          socket.emit("joinTickets", "open");
-          socket.emit("getTickets", { status: "pending", userId: user?.id, showAll: false });
-          socket.emit("getTickets", { status: "open", userId: user?.id, showAll: false });
-        }, 200);
-      }
-
-      localStorage.setItem("pressticket:changeTab", "pending");
-      navigate(`/tickets`);
-    } catch (err) {
-      toastError(err);
-    } finally {
-      if (isMounted.current) {
-        setLoading(false);
-      }
-    }
-};
-
-const handleClosedTicket = async (id, status) => { 
+	const handleClosedTicket = async (id, status) => { 
 		setLoading(true);
 		try {
 			
@@ -522,39 +469,6 @@ const handleClosedTicket = async (id, status) => {
 				queueId: ticket?.queueId || null,
 			});
 			
-			const socket = openSocket();
-			if (socket) {
-				socket.emit("ticket", {
-					action: "delete",
-					ticketId: id
-				});
-				
-				socket.emit("ticket", {
-					action: "update",
-					ticketId: id,
-					ticket: {
-						...ticket,
-						status: "closed",
-						userId: user?.id,
-						queueId: ticket?.queueId || null
-					}
-				});
-			}
-			
-			setTimeout(() => {
-				if (socket) {
-					socket.emit("joinTickets", "closed");
-					socket.emit("joinTickets", "open");
-					socket.emit("joinTickets", "pending");
-					
-					socket.emit("getTickets", { status: "closed", userId: user?.id, showAll: false });
-					socket.emit("getTickets", { status: "open", userId: user?.id, showAll: false });
-					socket.emit("getTickets", { status: "pending", userId: user?.id, showAll: false });
-				}
-			}, 500);
-			
-			localStorage.setItem("pressticket:changeTab", "closed");
-			localStorage.setItem("pressticket:changeTab", "open");
 			
 			navigate("/tickets");
 		} catch (err) {
@@ -842,7 +756,7 @@ const handleClosedTicket = async (id, status) => {
 						<Tooltip title={t("ticketsList.items.accept")} placement="bottom" arrow>
 							<BottomButton
 								color="primary"
-								onClick={e => handleAcepptTicket(ticket.id)} >
+								onClick={e => handleAcceptTicket(ticket.id)} >
 								<Done />
 							</BottomButton>
 						</Tooltip>

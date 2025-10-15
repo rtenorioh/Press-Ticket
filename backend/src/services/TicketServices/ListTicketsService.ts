@@ -44,18 +44,11 @@ const ListTicketsService = async ({
   isGroup
 }: Request): Promise<Response> => {
   try {
+
   let whereCondition: any = {};
   
-  if (userId) {
-    whereCondition = {
-      [Op.or]: [{ userId }, { status: "pending" }],
-      queueId: { [Op.or]: [queueIds, null] }
-    };
-  } else {
-    whereCondition = {
-      queueId: { [Op.or]: [queueIds] }
-    };
-  }
+  const allTickets = await ListSettingsServiceOne({ key: "allTicket" });
+  const allTicketsEnabled = allTickets?.value === "enabled";
 
   let includeCondition: Includeable[] = [
     {
@@ -92,18 +85,8 @@ const ListTicketsService = async ({
     }
   ];
 
-  if (showAll === "true") {
-    whereCondition = { queueId: { [Op.or]: [queueIds, null] } };
-  }
-
-  const allTickets = await ListSettingsServiceOne({ key: "allTicket" });
-  const allTicketsEnabled = allTickets?.value === "enabled";
-
   if (status) {
-    whereCondition = {
-      ...whereCondition,
-      status
-    };
+    whereCondition.status = status;
   }
 
   if (searchParam) {
@@ -161,21 +144,66 @@ const ListTicketsService = async ({
     };
   }
 
-  if (!isAdmin && userId) {
-    if (allTicketsEnabled) {
+  if (status === "closed") {
+    if (!isAdmin || (isAdmin && showAll !== "true")) {
       whereCondition = {
         ...whereCondition,
         [Op.or]: [
-          { userId },
-          { queueId: { [Op.in]: queueIds } },
-          { queueId: null, status: "pending" }
+          { userId: userId },
+          { queueId: { [Op.in]: queueIds } }
         ]
       };
+    }
+  } else if (status === "pending") {
+    if (!isAdmin) {
+      if (allTicketsEnabled) {  
+        if (queueIds && queueIds.length > 0) {
+          whereCondition = {
+            ...whereCondition,
+            [Op.or]: [
+              { queueId: { [Op.in]: queueIds } },
+              { queueId: null }
+            ]
+          };
+        }
+      } else {
+        whereCondition = {
+          ...whereCondition,
+          [Op.or]: [
+            { userId: userId },
+            { queueId: { [Op.in]: queueIds } },
+            { queueId: null }
+          ]
+        };
+      }
     } else {
+      if (showAll === "true") {
+        if (queueIds && queueIds.length > 0) {
+          whereCondition = {
+            ...whereCondition,
+            [Op.or]: [
+              { queueId: { [Op.in]: queueIds } },
+              { queueId: null }
+            ]
+          };
+        }
+      } else {
+        whereCondition = {
+          ...whereCondition,
+          [Op.or]: [
+            { userId: userId },
+            { queueId: { [Op.in]: queueIds } },
+            { queueId: null }
+          ]
+        };
+      }
+    }
+  } else if (status === "open") {
+    if (!isAdmin || (isAdmin && showAll !== "true")) {
       whereCondition = {
         ...whereCondition,
         [Op.or]: [
-          { userId },
+          { userId: userId },
           { queueId: { [Op.in]: queueIds } }
         ]
       };
@@ -189,16 +217,13 @@ const ListTicketsService = async ({
     };
   }
 
-  // Filtrar por tipo de conversa (grupo ou individual)
   if (isGroup !== undefined) {
     if (isGroup === "true") {
-      // Mostrar apenas tickets de grupos
       whereCondition = {
         ...whereCondition,
         "$contact.isGroup$": true
       };
     } else if (isGroup === "false") {
-      // Mostrar apenas tickets individuais (não grupos)
       whereCondition = {
         ...whereCondition,
         [Op.or]: [

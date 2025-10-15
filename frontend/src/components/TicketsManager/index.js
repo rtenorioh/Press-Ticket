@@ -263,6 +263,7 @@ const TicketsManager = () => {
 
   useEffect(() => {
     fetchTicketCounts();
+    
     const socket = openSocket();
     if (!socket) {
       console.error("Não foi possível conectar ao socket para contadores");
@@ -270,12 +271,14 @@ const TicketsManager = () => {
     }
 
     const handleTicketUpdate = (data) => {
-      if (data.action === "update" || data.action === "create" || data.action === "delete") {
+      
+      if (data.action === "update" || data.action === "create" || data.action === "delete" || data.action === "updateCounter") {
         fetchTicketCounts();
       }
     };
 
-    const handleAppMessage = (data) => {      
+    const handleAppMessage = (data) => {    
+      
       if (data.action === "create") {
         fetchTicketCounts();
       }
@@ -292,10 +295,6 @@ const TicketsManager = () => {
       socket.off("appMessage", handleAppMessage);
     };
   }, [selectedQueueIds, showAllTickets]);
-
-  useEffect(() => {
-    fetchTicketCounts();
-  }, [selectedQueueIds, showAllTickets]);
   
   const handleSearch = (e) => {
     const searchedTerm = e.target.value.toLowerCase();
@@ -311,12 +310,6 @@ const TicketsManager = () => {
 
   const handleChangeTab = (e, newValue) => {
     setTab(newValue);
-  };
-
-  const applyPanelStyle = (status) => {
-    if (tab !== status) {
-      return { width: 0, height: 0 };
-    }
   };
 
   const handleCloseTickets = async (status) => {
@@ -611,74 +604,37 @@ const TicketsManager = () => {
         </Box>
       </TicketOptionsBoxStyled>
       <TabPanelStyled value={tab} name="open">
-        <TicketWrapperStyled>
-          <TicketsList
-            status="open"
-            showAll={showAllTickets}
-            selectedQueueIds={selectedQueueIds}
-            updateCount={(val) => setOpenCount(val)}
-            style={applyPanelStyle("open")}
-            isGroup={false}
-          />
-          <TicketsList
-            status="pending"
-            showAll={true}
-            selectedQueueIds={selectedQueueIds}
-            updateCount={(val) => setPendingCount(val)}
-            style={applyPanelStyle("pending")}
-          />
-          <TicketsList
-            status="closed"
-            showAll={showAllTickets}
-            selectedQueueIds={selectedQueueIds}
-            updateCount={(val) => setClosedCount(val)}
-            style={applyPanelStyle("closed")}
-          />
-        </TicketWrapperStyled>
-      </TabPanelStyled>
-      <TabPanelStyled value={tab} name="groups">
-        <TicketWrapperStyled>
-          <TicketsList
-            status="open"
-            showAll={showAllTickets}
-            selectedQueueIds={selectedQueueIds}
-            updateCount={(val) => setOpenGroupsCount(val)}
-            style={applyPanelStyle("groups")}
-            isGroup={true}
-          />
-        </TicketWrapperStyled>
-      </TabPanelStyled>
-      <TabPanelStyled value={tab} name="pending">
         <TicketsList
           status="open"
           showAll={showAllTickets}
           selectedQueueIds={selectedQueueIds}
           updateCount={(val) => setOpenCount(val)}
-          style={applyPanelStyle("open")}
           isGroup={false}
         />
+      </TabPanelStyled>
+      <TabPanelStyled value={tab} name="groups">
+        <TicketsList
+          status="open"
+          showAll={showAllTickets}
+          selectedQueueIds={selectedQueueIds}
+          updateCount={(val) => setOpenGroupsCount(val)}
+          isGroup={true}
+        />
+      </TabPanelStyled>
+      <TabPanelStyled value={tab} name="pending">
         <TicketsList
           status="pending"
           showAll={true}
           selectedQueueIds={selectedQueueIds}
           updateCount={(val) => setPendingCount(val)}
-          style={applyPanelStyle("pending")}
         />
       </TabPanelStyled>
       <TabPanelStyled value={tab} name="closed">
-      <TicketsList
+        <TicketsList
           status="closed"
           showAll={showAllTickets}
           selectedQueueIds={selectedQueueIds}
           updateCount={(val) => setClosedCount(val)}
-          style={applyPanelStyle("closed")}
-        />
-        <TicketsList
-          status="pending"
-          showAll={true}
-          selectedQueueIds={selectedQueueIds}
-          updateCount={(val) => setPendingCount(val)}
-          style={applyPanelStyle("pending")}
         />
       </TabPanelStyled>
       <TabPanelStyled value={tab} name="search">
