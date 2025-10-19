@@ -151,10 +151,8 @@ const startHealthCheck = (socket) => {
         const now = Date.now();
         if (now - lastPongTime > 15000) {
             isSocketHealthy = false;
-            // console.warn(`[FRONT_SOCKET_HEALTH][${new Date().toISOString()}] Conexão socket possivelmente inativa. Último pong: ${new Date(lastPongTime).toISOString()}`);
             
             if (socket && !socket.connected) {
-                // console.warn(`[FRONT_SOCKET_HEALTH][${new Date().toISOString()}] Tentando reconectar socket inativo...`);
                 socket.connect();
             }
         }

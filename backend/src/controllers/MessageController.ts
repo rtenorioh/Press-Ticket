@@ -63,7 +63,6 @@ export const getReactions = async (req: Request, res: Response): Promise<Respons
       const ticket = await ShowTicketService(String(message.ticketId));
       const wbot = await GetTicketWbot(ticket);
       
-      // Obter o número do WhatsApp conectado
       const myNumber = wbot.info?.wid?._serialized || null;
       
       const groupedReactions: any = {};
@@ -78,7 +77,6 @@ export const getReactions = async (req: Request, res: Response): Promise<Respons
           };
         }
         
-        // Verificar se esta reação é minha
         const isMyReaction = myNumber && reaction.senderId === myNumber;
         if (isMyReaction) {
           groupedReactions[reaction.emoji].hasReactionByMe = true;

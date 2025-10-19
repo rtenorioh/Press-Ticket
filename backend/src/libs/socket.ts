@@ -71,7 +71,6 @@ export const initIO = (httpServer: Server): void => {
       const decoded = verify(token, authConfig.secret) as TokenPayload;
       const { id: userId } = decoded;
 
-      // Validação adicional do token
       if (!userId) {
         logger.warn("Conexão rejeitada: Token sem userId", { socketId: socket.id });
         socket.disconnect();
@@ -212,7 +211,6 @@ export const initIO = (httpServer: Server): void => {
       });
       socket.join("notification");
       
-      // Log adicional para debug
       const notificationRoom = io.sockets.adapter.rooms.get("notification");
       logger.info("Status do canal de notificações", {
         socketId: socket.id,
@@ -235,7 +233,6 @@ export const initIO = (httpServer: Server): void => {
       socket.join("ticketCounter");
     });
 
-    // Novo evento para sincronizar tickets após reconexão
     socket.on("getTickets", async (data: GetTicketsData) => {
       try {
         logger.info("Solicitação de sincronização de tickets", {
@@ -247,7 +244,6 @@ export const initIO = (httpServer: Server): void => {
 
         const { id: userId } = verify(token as string, authConfig.secret) as TokenPayload;
         
-        // Verificar se o usuário solicitante é o mesmo do token
         if (userId !== data.userId && data.userId) {
           logger.warn("Tentativa de acesso a tickets de outro usuário", {
             tokenUserId: userId,
@@ -257,7 +253,6 @@ export const initIO = (httpServer: Server): void => {
           return;
         }
 
-        // Buscar o usuário para verificar o perfil
         const user = await User.findByPk(userId);
         if (!user) {
           logger.warn("Usuário não encontrado ao sincronizar tickets", {
@@ -267,20 +262,16 @@ export const initIO = (httpServer: Server): void => {
           return;
         }
 
-        // Construir a query para buscar os tickets
         const whereCondition: any = {};
         
-        // Filtrar por status se fornecido
         if (data.status) {
           whereCondition.status = data.status;
         }
 
-        // Se não for admin e não for showAll, mostrar apenas tickets do usuário
         if (user.profile !== "admin" && !data.showAll) {
           whereCondition.userId = userId;
         }
 
-        // Buscar os tickets com relacionamentos
         const tickets = await Ticket.findAll({
           where: whereCondition,
           include: [
@@ -306,7 +297,7 @@ export const initIO = (httpServer: Server): void => {
             }
           ],
           order: [["updatedAt", "DESC"]],
-          limit: 50 // Limitar para evitar sobrecarga
+          limit: 50 
         });
 
         logger.info("Tickets sincronizados com sucesso", {
@@ -315,7 +306,6 @@ export const initIO = (httpServer: Server): void => {
           socketId: socket.id
         });
 
-        // Emitir os tickets para o usuário
         socket.emit("ticketList", { tickets });
 
       } catch (err) {
@@ -327,7 +317,6 @@ export const initIO = (httpServer: Server): void => {
     });
   });
 
-  // Log socket.io errors
   io.on("connect_error", (err: Error) => {
     logger.error("Connection error:", err);
   });

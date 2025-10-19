@@ -48,7 +48,6 @@ const CreateMessageService = async (
   if (fileName) {
     data.mediaUrl = fileName;
     data.mediaType = mediaType === "photo" ? "image" : mediaType;
-    // data.body = data.mediaUrl;
   } else {
     data.mediaType = "chat";
   }

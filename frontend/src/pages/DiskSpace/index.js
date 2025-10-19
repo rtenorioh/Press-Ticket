@@ -177,14 +177,11 @@ const DiskSpace = () => {
   const [expandedFolders, setExpandedFolders] = useState(new Set());
   const [folderContents, setFolderContents] = useState(new Map());
   
-  // Adicionar estilo global para garantir que a página tenha rolagem
   React.useEffect(() => {
-    // Adicionar estilo para garantir que o corpo da página tenha altura mínima
     document.body.style.overflow = 'auto';
     document.body.style.height = '100%';
     
     return () => {
-      // Limpar estilos ao desmontar o componente
       document.body.style.overflow = '';
       document.body.style.height = '';
     };
@@ -281,7 +278,6 @@ const DiskSpace = () => {
     };
   };
 
-  // Função para carregar conteúdo de uma pasta
   const loadFolderContents = async (folderPath) => {
     try {
       const { data } = await api.get('/folder-contents', {
@@ -296,7 +292,6 @@ const DiskSpace = () => {
     }
   };
 
-  // Função para expandir/colapsar pasta
   const toggleFolder = async (folderPath, isFolder) => {
     if (!isFolder) return;
     
@@ -307,7 +302,6 @@ const DiskSpace = () => {
     } else {
       newExpanded.add(folderPath);
       
-      // Carregar conteúdo se ainda não foi carregado
       if (!folderContents.has(folderPath)) {
         await loadFolderContents(folderPath);
       }
@@ -322,7 +316,6 @@ const DiskSpace = () => {
         <Title>{t('diskSpace.title')}</Title>
       </MainHeader>
       
-      {/* Conteúdo com rolagem */}
       <Box 
         sx={{ 
           height: 'calc(100vh - 120px)', 
@@ -604,7 +597,6 @@ const DiskSpace = () => {
               </Paper>
             )}
             
-            {/* Listagem das maiores pastas em estilo árvore */}
             <Paper className={`${classes.card} ${classes.folderTable}`} sx={{ mt: 3 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, borderBottom: '1px solid', borderColor: 'divider', pb: 1 }}>
                 <FolderOpenIcon sx={{ fontSize: 28, color: 'primary.main', mr: 1 }} />
@@ -632,7 +624,6 @@ const DiskSpace = () => {
               
               {diskSpace.largestFolders && diskSpace.largestFolders.length > 0 ? (
                 <Box className={classes.folderTreeView}>
-                  {/* Cabeçalho da tabela */}
                   <Box sx={{ 
                     display: 'flex', 
                     justifyContent: 'space-between', 
@@ -648,7 +639,6 @@ const DiskSpace = () => {
                     <Typography variant="subtitle2" sx={{ width: '130px', textAlign: 'center' }}>Uso (%)</Typography>
                   </Box>
                   
-                  {/* Pasta raiz dev/ */}
                   <Box sx={{ mb: 2 }}>
                     <Paper 
                       elevation={2} 
@@ -679,9 +669,7 @@ const DiskSpace = () => {
                     </Paper>
                   </Box>
 
-                  {/* Árvore de arquivos e pastas com accordion */}
                   {(() => {
-                    // Função recursiva para renderizar item da árvore
                     const renderTreeItem = (item, depth = 0) => {
                       const percentage = Math.round((item.sizeBytes / diskSpace.folderSizeBytes) * 100);
                       const isFolder = item.type === 'folder';
@@ -809,7 +797,6 @@ const DiskSpace = () => {
                               </Box>
                             </Box>
                             
-                            {/* Conteúdo expandido */}
                             {isFolder && (
                               <Collapse in={isExpanded} timeout="auto" unmountOnExit>
                                 <Box sx={{ pl: 2, pb: 1 }}>
@@ -822,7 +809,6 @@ const DiskSpace = () => {
                       );
                     };
 
-                    // Renderizar a árvore completa
                     return diskSpace.largestFolders.map((item) => renderTreeItem(item, 0));
                   })()}
                 </Box>

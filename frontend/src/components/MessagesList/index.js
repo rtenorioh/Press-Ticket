@@ -1343,7 +1343,6 @@ const MessagesList = ({ ticketId, isGroup, onClick }) => {
                       width: 20,
                       height: 20,
                       borderRadius: '50%',
-                      // backgroundColor: isSelected ? '#00a884' : 'transparent',
                       border: isSelected ? 'none' : '2px solid #8696a0',
                       display: 'flex',
                       alignItems: 'center',
@@ -1372,7 +1371,6 @@ const MessagesList = ({ ticketId, isGroup, onClick }) => {
                   onClick={!isForwardingMode ? undefined : () => handleMessageClick(message)}
                   sx={{ 
                     cursor: isForwardingMode ? 'pointer' : 'default',
-                    // backgroundColor: 'inherit',
                     border: isSelected ? '2px solid #00a884' : 'none',
                     flex: 1
                   }}
@@ -1455,7 +1453,6 @@ const MessagesList = ({ ticketId, isGroup, onClick }) => {
                 onClick={!isForwardingMode ? undefined : () => handleMessageClick(message)}
                 sx={{ 
                   cursor: isForwardingMode ? 'pointer' : 'default',
-                  // backgroundColor: 'inherit',
                   border: isSelected ? '2px solid #00a884' : 'none',
                   flex: 1
                 }}
@@ -1510,7 +1507,6 @@ const MessagesList = ({ ticketId, isGroup, onClick }) => {
                     width: 20,
                     height: 20,
                     borderRadius: '50%',
-                    // backgroundColor: isSelected ? '#00a884' : 'transparent',
                     border: isSelected ? 'none' : '2px solid #8696a0',
                     display: 'flex',
                     alignItems: 'center',

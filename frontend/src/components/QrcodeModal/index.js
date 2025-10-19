@@ -24,7 +24,6 @@ const QrcodeModal = ({ open, onClose, whatsAppId }) => {
 	const [isConnecting, setIsConnecting] = useState(false);
 	const { t } = useTranslation();
 
-	// Reset do estado quando modal abre
 	useEffect(() => {
 		if (open) {
 			setQrCode("");
@@ -67,12 +66,10 @@ const QrcodeModal = ({ open, onClose, whatsAppId }) => {
 				setQrCode(data.session.qrcode);
 				setStatus(data.session.status);
 				
-				// Detecta quando está conectando
 				if (data.session.status === "OPENING" || data.session.status === "PAIRING") {
 					setIsConnecting(true);
 				}
 				
-				// Fecha o modal quando conectado com sucesso
 				if (data.session.status === "CONNECTED") {
 					setIsConnecting(false);
 					toast.success("WhatsApp conectado com sucesso!", {
@@ -80,25 +77,21 @@ const QrcodeModal = ({ open, onClose, whatsAppId }) => {
 						autoClose: 3000
 					});
 					
-					// Aguarda um pouco antes de fechar para mostrar o feedback
 					setTimeout(() => {
 						onClose();
 					}, 1500);
 				}
 				
-				// Fecha o modal quando QR code é limpo (outras situações)
 				if (data.session.qrcode === "" && data.session.status !== "CONNECTED") {
 					onClose();
 				}
 			}
 		});
 
-		// Adiciona listener para evento whatsapp também
 		socket.on("whatsapp", data => {
 			if (data.action === "update" && data.whatsapp && data.whatsapp.id === whatsAppId) {
 				setStatus(data.whatsapp.status);
 				
-				// Fecha o modal quando conectado com sucesso
 				if (data.whatsapp.status === "CONNECTED") {
 					setIsConnecting(false);
 					toast.success("WhatsApp conectado com sucesso!", {
@@ -113,7 +106,6 @@ const QrcodeModal = ({ open, onClose, whatsAppId }) => {
 			}
 		});
 
-		// Adiciona verificação periódica do status para garantir fechamento
 		const checkStatus = async () => {
 			try {
 				const { data } = await api.get(`/whatsapp/${whatsAppId}`);
@@ -129,7 +121,6 @@ const QrcodeModal = ({ open, onClose, whatsAppId }) => {
 					}, 1500);
 				}
 			} catch (err) {
-				// Ignora erros de verificação
 			}
 		};
 
@@ -208,7 +199,6 @@ const QrcodeModal = ({ open, onClose, whatsAppId }) => {
 			
 			<DialogContent sx={{ p: 2, overflow: 'hidden' }}>
 				<Box sx={{ textAlign: 'center' }}>
-					{/* Status */}
 					<Box sx={{ mb: 2 }}>
 						<Typography 
 							variant="body1" 
@@ -228,7 +218,6 @@ const QrcodeModal = ({ open, onClose, whatsAppId }) => {
 
 					<Divider sx={{ mb: 2 }} />
 
-					{/* QR Code ou Loading */}
 					<Box 
 						sx={{ 
 							display: 'flex', 
@@ -275,7 +264,6 @@ const QrcodeModal = ({ open, onClose, whatsAppId }) => {
 						)}
 					</Box>
 
-					{/* Instruções */}
 					{qrCode && status !== "CONNECTED" && (
 						<Box sx={{ mt: 2, p: 1.5, bgcolor: '#f0f7ff', borderRadius: 2 }}>
 							<Typography variant="body2" color="primary" sx={{ fontWeight: 500, mb: 0.5 }}>

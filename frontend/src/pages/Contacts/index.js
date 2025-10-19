@@ -396,7 +396,6 @@ const Contacts = () => {
       const { data } = await api.get(`/contacts/${contact.id}/block-status`);
       setBlockedStatus(prev => ({ ...prev, [contact.id]: Boolean(data?.isBlocked) }));
     } catch (err) {
-      // silencioso para melhor UX
     }
   };
 

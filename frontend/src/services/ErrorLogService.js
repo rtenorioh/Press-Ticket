@@ -1,16 +1,6 @@
 import api from "./api";
 
 const ErrorLogService = {
-  /**
-   * Envia um log de erro para o backend
-   * @param {Object} errorData - Dados do erro
-   * @param {string} errorData.message - Mensagem de erro
-   * @param {string} errorData.stack - Stack trace do erro
-   * @param {string} errorData.component - Componente onde ocorreu o erro
-   * @param {string} errorData.url - URL onde ocorreu o erro
-   * @param {string} errorData.severity - Severidade do erro (error, warning, info)
-   * @returns {Promise} - Promise com o resultado da requisição
-   */
   async logError(errorData) {
     try {
       if (!errorData || (!errorData.message && !errorData.stack)) {

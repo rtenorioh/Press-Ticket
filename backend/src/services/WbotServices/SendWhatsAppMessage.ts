@@ -61,7 +61,6 @@ const SendWhatsAppMessage = async ({
           await chat.sendStateTyping();
           await new Promise(resolve => setTimeout(resolve, 400));
         } catch (e) {
-          // silencioso: não bloquear envio caso falhe o typing
         }
         const replyOptions: any = {};
         if (mentions && mentions.length > 0) {

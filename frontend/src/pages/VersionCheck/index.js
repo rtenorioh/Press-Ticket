@@ -122,7 +122,6 @@ const VersionCheck = () => {
         const data = await getVersionInfo();
         setVersionInfo(data);
         
-        // Buscar release notes se há atualização disponível
         if (data.whatsappLibNeedsUpdate && data.whatsappLibLatestVersion) {
           fetchReleaseNotes(data.whatsappLibLatestVersion);
         }
@@ -427,7 +426,6 @@ const VersionCheck = () => {
                 </Grid>
               </CardWrapper>
 
-              {/* Card de Release Notes */}
               {versionInfo.whatsappLibNeedsUpdate && (
                 <CardWrapper container spacing={4}>
                   <Grid item xs={12}>

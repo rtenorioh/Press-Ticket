@@ -141,19 +141,15 @@ const getDatabaseInfo = async (): Promise<{
       ? (versionResult[0] as any).version || "Unknown"
       : "Unknown";
     
-    // Verificar o dialeto do banco de dados e usar a consulta apropriada
     let connectionsResult;
     let activeConnections = 0;
     
     try {
       if (sequelize.getDialect() === 'postgres') {
-        // Consulta para PostgreSQL
         [connectionsResult] = await sequelize.query("SELECT count(*) as count FROM pg_stat_activity;");
       } else if (sequelize.getDialect() === 'mysql' || sequelize.getDialect() === 'mariadb') {
-        // Consulta para MySQL/MariaDB
         [connectionsResult] = await sequelize.query("SELECT COUNT(*) as count FROM information_schema.processlist WHERE command != 'Sleep';");
       } else {
-        // Fallback para outros bancos
         [connectionsResult] = await sequelize.query("SELECT 1 as count;");
         logger.info(`Contagem de conexões não implementada para o dialeto: ${sequelize.getDialect()}`);
       }
@@ -423,9 +419,9 @@ export const getSystemHealth = async (): Promise<SystemHealth> => {
         loadAvg: os.loadavg()
       },
       memory: {
-        total: Math.round(totalMemory / 1024 / 1024 / 1024 * 100) / 100, // GB
-        free: Math.round(freeMemory / 1024 / 1024 / 1024 * 100) / 100, // GB
-        used: Math.round(usedMemory / 1024 / 1024 / 1024 * 100) / 100, // GB
+        total: Math.round(totalMemory / 1024 / 1024 / 1024 * 100) / 100, 
+        free: Math.round(freeMemory / 1024 / 1024 / 1024 * 100) / 100, 
+        used: Math.round(usedMemory / 1024 / 1024 / 1024 * 100) / 100, 
         percentUsed: percentMemoryUsed
       },
       disk: diskInfo,

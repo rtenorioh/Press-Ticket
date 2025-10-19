@@ -20,7 +20,6 @@ const ReactToWhatsAppMessage = async ({ messageId, emoji }: ReactParams): Promis
   }
   const wbot = await GetTicketWbot(ticket);
 
-  // Garantir que temos o contact carregado
   if (!ticket.contact) {
     const contact = await Contact.findByPk(ticket.contactId);
     if (contact) {
@@ -65,8 +64,6 @@ const ReactToWhatsAppMessage = async ({ messageId, emoji }: ReactParams): Promis
     }
   })();
 
-  // Para grupos, pular direto para o fallback do Store
-  // porque getMessageById não funciona bem com mensagens de grupo
   if (!ticket.isGroup) {
     try {
       if (serializedId) {
@@ -127,7 +124,6 @@ const ReactToWhatsAppMessage = async ({ messageId, emoji }: ReactParams): Promis
         });
         if (msg) return Promise.resolve(msg);
         
-        // Tentar buscar no chat específico se temos o remoteJid
         if (remote) {
           try {
             const chat = Store?.Chat?.get?.(remote);
@@ -148,7 +144,6 @@ const ReactToWhatsAppMessage = async ({ messageId, emoji }: ReactParams): Promis
           }
         }
         
-        // Buscar em todos os chats como último recurso
         try {
           const allChats = Store?.Chat?.models || [];
           for (const c of allChats) {

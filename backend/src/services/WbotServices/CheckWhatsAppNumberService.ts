@@ -13,7 +13,6 @@ const CheckWhatsAppNumberService = async (number: string): Promise<Response> => 
     const defaultWhatsapp = await GetDefaultWhatsApp();
     const wbot = getWbot(defaultWhatsapp.id);
 
-    // Verifica se o número está no formato correto
     if (!number.match(/^\d+$/)) {
       return {
         exists: false,
@@ -22,7 +21,6 @@ const CheckWhatsAppNumberService = async (number: string): Promise<Response> => 
       };
     }
 
-    // Verifica se o número está registrado no WhatsApp
     const isRegistered = await wbot.isRegisteredUser(`${number}@c.us`);
     
     return {

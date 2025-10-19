@@ -41,7 +41,7 @@ const MessageOptionsMenu = ({ message, menuOpen, handleClose, anchorEl }) => {
       const saved = localStorage.getItem('recentReactions');
       if (saved) return JSON.parse(saved);
     } catch (e) {}
-    return ["👍", "❤️", "😂", "😮", "😢", "🙏"]; // defaults
+    return ["👍", "❤️", "😂", "😮", "😢", "🙏"]; 
   });
   const [currentMessage, setCurrentMessage] = useState(message);
   
@@ -72,7 +72,7 @@ const MessageOptionsMenu = ({ message, menuOpen, handleClose, anchorEl }) => {
 
   const canEditMessage = () => {
     const timeDiff = new Date() - new Date(message.updatedAt);
-    return timeDiff <= 15 * 60 * 1000; // 15 minutos en milisegundos
+    return timeDiff <= 15 * 60 * 1000; 
   };
 
   const openReactionMenu = (e) => {

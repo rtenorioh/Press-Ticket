@@ -12,14 +12,14 @@ import Setting from "../../models/Setting";
 const execPromise = promisify(exec);
 
 interface CleanupOptions {
-  olderThan?: number; // dias
-  messageTypes?: string[]; // tipos de mensagem para limpar (texto, mídia, etc)
-  queueIds?: number[]; // IDs dos setores para limpar
-  status?: string; // status dos tickets para limpar (closed, open, pending)
-  cleanLogs?: boolean; // limpar logs do sistema
-  cleanTemp?: boolean; // limpar arquivos temporários
-  cleanMedia?: boolean; // limpar arquivos de mídia
-  cleanClosedTickets?: boolean; // limpar tickets fechados
+  olderThan?: number; 
+  messageTypes?: string[]; 
+  queueIds?: number[]; 
+  status?: string; 
+  cleanLogs?: boolean; 
+  cleanTemp?: boolean; 
+  cleanMedia?: boolean; 
+  cleanClosedTickets?: boolean; 
 }
 
 interface CleanupResult {
@@ -33,7 +33,6 @@ interface CleanupResult {
   errors: string[];
 }
 
-// Função para obter o tamanho de um diretório em bytes
 const getDirSize = async (dirPath: string): Promise<number> => {
   try {
     const { stdout } = await execPromise(`du -sb "${dirPath}" | cut -f1`);
@@ -44,7 +43,6 @@ const getDirSize = async (dirPath: string): Promise<number> => {
   }
 };
 
-// Função para formatar bytes em unidades legíveis
 const formatBytes = (bytes: number, decimals = 2): string => {
   if (bytes === 0) return "0 Bytes";
   
@@ -57,30 +55,23 @@ const formatBytes = (bytes: number, decimals = 2): string => {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
 };
 
-// Função para limpar arquivos temporários
 const cleanTempFiles = async (): Promise<{ count: number; size: number }> => {
   try {
-    // Diretório temporário do sistema
     const tempDir = path.join(process.cwd(), "public", "temp");
     
-    // Verificar se o diretório existe
     if (!fs.existsSync(tempDir)) {
       return { count: 0, size: 0 };
     }
     
-    // Obter tamanho antes da limpeza
     const sizeBefore = await getDirSize(tempDir);
     
-    // Listar arquivos no diretório temporário
     const files = fs.readdirSync(tempDir);
     
-    // Filtrar apenas arquivos (não diretórios)
     const filesToRemove = files.filter(file => {
       const filePath = path.join(tempDir, file);
       return fs.statSync(filePath).isFile();
     });
     
-    // Remover arquivos
     let removedCount = 0;
     for (const file of filesToRemove) {
       const filePath = path.join(tempDir, file);
@@ -88,7 +79,6 @@ const cleanTempFiles = async (): Promise<{ count: number; size: number }> => {
       removedCount++;
     }
     
-    // Obter tamanho após a limpeza
     const sizeAfter = await getDirSize(tempDir);
     const freedSize = sizeBefore - sizeAfter;
     
@@ -99,24 +89,18 @@ const cleanTempFiles = async (): Promise<{ count: number; size: number }> => {
   }
 };
 
-// Função para limpar arquivos de log
 const cleanLogFiles = async (): Promise<{ count: number; size: number }> => {
   try {
-    // Diretório de logs do sistema
     const logDir = path.join(process.cwd(), "logs");
     
-    // Verificar se o diretório existe
     if (!fs.existsSync(logDir)) {
       return { count: 0, size: 0 };
     }
     
-    // Obter tamanho antes da limpeza
     const sizeBefore = await getDirSize(logDir);
     
-    // Listar arquivos no diretório de logs
     const files = fs.readdirSync(logDir);
     
-    // Filtrar arquivos de log mais antigos que 7 dias
     const now = Date.now();
     const sevenDaysMs = 7 * 24 * 60 * 60 * 1000;
     
@@ -126,7 +110,6 @@ const cleanLogFiles = async (): Promise<{ count: number; size: number }> => {
       return stats.isFile() && (now - stats.mtimeMs > sevenDaysMs);
     });
     
-    // Remover arquivos
     let removedCount = 0;
     for (const file of filesToRemove) {
       const filePath = path.join(logDir, file);
@@ -134,7 +117,6 @@ const cleanLogFiles = async (): Promise<{ count: number; size: number }> => {
       removedCount++;
     }
     
-    // Obter tamanho após a limpeza
     const sizeAfter = await getDirSize(logDir);
     const freedSize = sizeBefore - sizeAfter;
     
@@ -145,24 +127,18 @@ const cleanLogFiles = async (): Promise<{ count: number; size: number }> => {
   }
 };
 
-// Função para limpar arquivos de mídia
 const cleanMediaFiles = async (olderThan = 30): Promise<{ count: number; size: number }> => {
   try {
-    // Diretório de mídia do sistema
     const mediaDir = path.join(process.cwd(), "public", "media");
     
-    // Verificar se o diretório existe
     if (!fs.existsSync(mediaDir)) {
       return { count: 0, size: 0 };
     }
     
-    // Obter tamanho antes da limpeza
     const sizeBefore = await getDirSize(mediaDir);
     
-    // Listar arquivos no diretório de mídia
     const files = fs.readdirSync(mediaDir);
     
-    // Filtrar arquivos de mídia mais antigos que o número de dias especificado
     const now = Date.now();
     const olderThanMs = olderThan * 24 * 60 * 60 * 1000;
     
@@ -172,7 +148,6 @@ const cleanMediaFiles = async (olderThan = 30): Promise<{ count: number; size: n
       return stats.isFile() && (now - stats.mtimeMs > olderThanMs);
     });
     
-    // Remover arquivos
     let removedCount = 0;
     for (const file of filesToRemove) {
       const filePath = path.join(mediaDir, file);
@@ -180,7 +155,6 @@ const cleanMediaFiles = async (olderThan = 30): Promise<{ count: number; size: n
       removedCount++;
     }
     
-    // Obter tamanho após a limpeza
     const sizeAfter = await getDirSize(mediaDir);
     const freedSize = sizeBefore - sizeAfter;
     
@@ -191,35 +165,29 @@ const cleanMediaFiles = async (olderThan = 30): Promise<{ count: number; size: n
   }
 };
 
-// Função para limpar mensagens e tickets antigos
 const cleanMessagesAndTickets = async (options: CleanupOptions): Promise<{ messages: number; tickets: number }> => {
   try {
     const { olderThan = 30, status = "closed", queueIds } = options;
     
-    // Calcular a data limite
     const limitDate = new Date();
     limitDate.setDate(limitDate.getDate() - olderThan);
     
-    // Condições para tickets
     const ticketWhere: any = {
       updatedAt: {
         [Op.lt]: limitDate
       }
     };
     
-    // Adicionar condição de status se especificado
     if (status !== "all") {
       ticketWhere.status = status;
     }
     
-    // Adicionar condição de setores se especificado
     if (queueIds && queueIds.length > 0) {
       ticketWhere.queueId = {
         [Op.in]: queueIds
       };
     }
     
-    // Buscar IDs dos tickets que serão removidos
     const ticketsToRemove = await Ticket.findAll({
       attributes: ["id"],
       where: ticketWhere
@@ -227,7 +195,6 @@ const cleanMessagesAndTickets = async (options: CleanupOptions): Promise<{ messa
     
     const ticketIds = ticketsToRemove.map(t => t.id);
     
-    // Remover mensagens dos tickets
     let removedMessages = 0;
     if (ticketIds.length > 0) {
       const result = await Message.destroy({
@@ -240,7 +207,6 @@ const cleanMessagesAndTickets = async (options: CleanupOptions): Promise<{ messa
       removedMessages = result;
     }
     
-    // Remover tickets
     const removedTickets = await Ticket.destroy({
       where: ticketWhere
     });
@@ -255,7 +221,6 @@ const cleanMessagesAndTickets = async (options: CleanupOptions): Promise<{ messa
   }
 };
 
-// Função principal para executar a limpeza do sistema
 export const cleanupSystem = async (options: CleanupOptions): Promise<CleanupResult> => {
   const errors: string[] = [];
   let messagesRemoved = 0;
@@ -266,28 +231,24 @@ export const cleanupSystem = async (options: CleanupOptions): Promise<CleanupRes
   let totalSizeFreed = 0;
   
   try {
-    // Limpar arquivos temporários
     if (options.cleanTemp) {
       const tempResult = await cleanTempFiles();
       tempFilesRemoved = tempResult.count;
       totalSizeFreed += tempResult.size;
     }
     
-    // Limpar arquivos de log
     if (options.cleanLogs) {
       const logsResult = await cleanLogFiles();
       logsRemoved = logsResult.count;
       totalSizeFreed += logsResult.size;
     }
     
-    // Limpar arquivos de mídia
     if (options.cleanMedia) {
       const mediaResult = await cleanMediaFiles(options.olderThan);
       mediaFilesRemoved = mediaResult.count;
       totalSizeFreed += mediaResult.size;
     }
     
-    // Limpar tickets fechados e suas mensagens
     if (options.cleanClosedTickets) {
       const dbResult = await cleanMessagesAndTickets(options);
       messagesRemoved = dbResult.messages;
@@ -321,7 +282,6 @@ export const cleanupSystem = async (options: CleanupOptions): Promise<CleanupRes
   }
 };
 
-// Função para obter configurações de limpeza automática
 export const getCleanupSettings = async (): Promise<{
   autoCleanup: boolean;
   scheduleTime: string;
@@ -373,7 +333,6 @@ export const getCleanupSettings = async (): Promise<{
   }
 };
 
-// Função para salvar configurações de limpeza automática
 export const saveCleanupSettings = async (settings: {
   autoCleanup: boolean;
   scheduleTime: string;

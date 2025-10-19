@@ -26,8 +26,6 @@ export const installUpdate = async (req: Request, res: Response): Promise<Respon
       return res.status(400).json({ error: "O sistema já está na versão mais recente." });
     }
     
-    // Inicia o processo de atualização em segundo plano
-    // para não bloquear a resposta HTTP
     downloadAndInstallUpdate(updateInfo).catch(error => {
       logger.error(`Erro durante o processo de atualização em segundo plano: ${error.message}`);
     });

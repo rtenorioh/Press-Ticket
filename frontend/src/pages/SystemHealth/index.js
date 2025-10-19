@@ -22,7 +22,6 @@ import ListItemText from "@mui/material/ListItemText";
 import { toast } from "react-toastify";
 import { useTranslation } from "react-i18next";
 
-// Ícones
 import MemoryIcon from "@mui/icons-material/Memory";
 import StorageIcon from "@mui/icons-material/Storage";
 import DnsIcon from "@mui/icons-material/Dns";
@@ -56,17 +55,6 @@ const Root = styled('div')(({ theme }) => ({
   padding: theme.spacing(2),
   height: "100%",
   overflow: "auto",
-}));
-
-const StyledPaper = styled(Paper)(({ theme }) => ({
-  padding: theme.spacing(2),
-  display: "flex",
-  overflow: "auto",
-  flexDirection: "column",
-}));
-
-const FixedHeightPaper = styled(Paper)(({ theme }) => ({
-  minHeight: 150,
 }));
 
 const StyledCardHeader = styled(CardHeader)(({ theme }) => ({
@@ -119,25 +107,6 @@ const ProgressValue = styled(Typography)(({ theme }) => ({
   minWidth: 50,
 }));
 
-const SectionTitle = styled(Typography)(({ theme }) => ({
-  marginTop: theme.spacing(2),
-  marginBottom: theme.spacing(1),
-  fontWeight: 500,
-  color: theme.palette.text.secondary,
-}));
-
-const InfoCard = styled(Card)(({ theme }) => ({
-  height: '100%',
-  display: 'flex',
-  flexDirection: 'column',
-  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
-  transition: 'transform 0.2s, box-shadow 0.2s',
-  '&:hover': {
-    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
-    transform: 'translateY(-2px)',
-  },
-}));
-
 const InfoItem = styled(Box)(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
@@ -165,10 +134,6 @@ const InfoValue = styled(Typography)(({ theme, color }) => ({
   marginLeft: theme.spacing(0.5),
 }));
 
-const AlertsList = styled(List)(({ theme }) => ({
-  padding: 0,
-}));
-
 const SectionDescription = styled(Typography)(({ theme }) => ({
   marginBottom: theme.spacing(2),
   color: theme.palette.text.secondary,
@@ -190,11 +155,6 @@ const ChipError = styled(Chip)(({ theme }) => ({
   color: theme.palette.error.contrastText,
 }));
 
-const StyledDivider = styled(Divider)(({ theme }) => ({
-  margin: `${theme.spacing(2)} 0`,
-}));
-
-// Já definidos acima
 
 const SystemHealth = () => {
   const { t } = useTranslation();
@@ -259,7 +219,6 @@ const SystemHealth = () => {
 
   useEffect(() => {
     fetchHealthData();
-    // Atualizar dados a cada 60 segundos
     const interval = setInterval(fetchHealthData, 60000);
     return () => clearInterval(interval);
   }, [fetchHealthData]);
@@ -269,7 +228,6 @@ const SystemHealth = () => {
     toast.success(t("systemHealth.refreshSuccess"));
   };
 
-  // Formatar tempo de atividade
   const formatUptime = (seconds) => {
     const days = Math.floor(seconds / 86400);
     const hours = Math.floor((seconds % 86400) / 3600);
@@ -283,7 +241,6 @@ const SystemHealth = () => {
     return result;
   };
 
-  // Renderizar status com chip colorido
   const renderStatus = (status) => {
     switch (status) {
       case "healthy":
@@ -318,9 +275,7 @@ const SystemHealth = () => {
     }
   };
 
-  // Renderizar barra de progresso com cor baseada no valor
   const renderProgressBar = (value, label, customColor) => {
-    // Se uma cor personalizada for fornecida, use-a, caso contrário, determine com base no valor
     let color = customColor || "primary";
     if (!customColor) {
       if (value > 90) {
@@ -347,7 +302,6 @@ const SystemHealth = () => {
     );
   };
 
-  // Renderizar ícone para alerta baseado no nível
   const renderAlertIcon = (level) => {
     switch (level) {
       case "critical":
@@ -381,7 +335,6 @@ const SystemHealth = () => {
           )}
         </RefreshButton>
 
-        {/* Conexões WhatsApp */}
         <StatusCard>
           <StyledCardHeader
             title={t("systemHealth.whatsappConnections")}
@@ -470,7 +423,6 @@ const SystemHealth = () => {
           </StyledCardContent>
         </StatusCard>
 
-        {/* Banco de Dados */}
         <StatusCard>
           <StyledCardHeader
             title={t("systemHealth.database")}
@@ -557,7 +509,6 @@ const SystemHealth = () => {
           </StyledCardContent>
         </StatusCard>
 
-        {/* Status Geral do Sistema */}
         <StatusCard>
           <StyledCardHeader
             title={t("systemHealth.overallStatus")}
@@ -631,10 +582,7 @@ const SystemHealth = () => {
           </StyledCardContent>
         </StatusCard>
 
-        {/* Alertas já foram exibidos acima, removendo duplicidade */}
-
         <Grid container spacing={3}>
-          {/* CPU */}
           <Grid item xs={12} md={6}>
             <StatusCard>
               <StyledCardHeader
@@ -721,7 +669,6 @@ const SystemHealth = () => {
             </StatusCard>
           </Grid>
 
-          {/* Memória */}
           <Grid item xs={12} md={6}>
             <StatusCard>
               <StyledCardHeader
@@ -805,7 +752,6 @@ const SystemHealth = () => {
             </StatusCard>
           </Grid>
 
-          {/* Disco */}
           <Grid item xs={12} md={6}>
             <StatusCard>
               <StyledCardHeader
@@ -895,7 +841,6 @@ const SystemHealth = () => {
             </StatusCard>
           </Grid>
 
-          {/* Banco de Dados */}
           <Grid item xs={12} md={6}>
             <Card>
               <CardHeader
@@ -940,7 +885,6 @@ const SystemHealth = () => {
             </Card>
           </Grid>
 
-          {/* WhatsApp */}
           <Grid item xs={12} md={6}>
             <Card sx={{ height: '100%', boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)' }}>
               <CardHeader
@@ -1016,9 +960,6 @@ const SystemHealth = () => {
             </Card>
           </Grid>
 
-          {/* Banco de Dados - Já melhorado na seção principal */}
-
-          {/* Aplicação */}
           <Grid item xs={12} md={6}>
             <Card sx={{ height: '100%', boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)' }}>
               <CardHeader

@@ -17,31 +17,31 @@ class ErrorLog extends Model<ErrorLog> {
   id: number;
 
   @Column
-  source: string; // 'backend' ou 'frontend'
+  source: string; 
 
   @Column
-  userId: number; // ID do usuário, se disponível
+  userId: number; 
 
   @Column
-  username: string; // Nome do usuário, se disponível
+  username: string; 
 
   @Column(DataType.TEXT)
-  message: string; // Mensagem de erro
+  message: string; 
 
   @Column(DataType.TEXT)
-  stack: string; // Stack trace do erro
+  stack: string; 
 
   @Column
-  url: string; // URL onde ocorreu o erro (para frontend)
+  url: string; 
 
   @Column
-  userAgent: string; // Informações do navegador (para frontend)
+  userAgent: string; 
 
   @Column
-  component: string; // Componente onde ocorreu o erro
+  component: string; 
 
   @Column
-  severity: string; // 'error', 'warning', 'info'
+  severity: string; 
 
   @CreatedAt
   @Column(DataType.DATE(6))

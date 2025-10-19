@@ -48,23 +48,19 @@ interface NetworkStatus {
   };
 }
 
-// Função para obter informações detalhadas das interfaces de rede
 const getNetworkInterfaces = async (): Promise<NetworkInterfaceInfo[]> => {
   try {
     const interfaces: NetworkInterfaceInfo[] = [];
     const netInterfaces = os.networkInterfaces();
     
-    // Obter estatísticas de rede do comando ifconfig ou ip
     const { stdout: netStats } = await execPromise("ip -s link");
     
     for (const [name, ifaceInfos] of Object.entries(netInterfaces)) {
-      // Ignorar interfaces de loopback e sem endereços IPv4
       if (!ifaceInfos || name.includes("lo")) continue;
       
       const ipv4Info = ifaceInfos.find(info => info.family === "IPv4");
       if (!ipv4Info) continue;
       
-      // Extrair estatísticas para esta interface
       const rxBytes = extractNetworkStat(netStats, name, "RX: bytes");
       const txBytes = extractNetworkStat(netStats, name, "TX: bytes");
       const rxPackets = extractNetworkStat(netStats, name, "RX: packets");
@@ -72,7 +68,6 @@ const getNetworkInterfaces = async (): Promise<NetworkInterfaceInfo[]> => {
       const errors = extractNetworkStat(netStats, name, "errors");
       const dropped = extractNetworkStat(netStats, name, "dropped");
       
-      // Obter velocidade da interface
       let speed = "Unknown";
       try {
         const { stdout: speedOutput } = await execPromise(`cat /sys/class/net/${name}/speed 2>/dev/null || echo "Unknown"`);
@@ -83,7 +78,6 @@ const getNetworkInterfaces = async (): Promise<NetworkInterfaceInfo[]> => {
         speed = "Unknown";
       }
       
-      // Obter status da interface
       let status = "Unknown";
       try {
         const { stdout: statusOutput } = await execPromise(`cat /sys/class/net/${name}/operstate 2>/dev/null || echo "unknown"`);
@@ -114,7 +108,6 @@ const getNetworkInterfaces = async (): Promise<NetworkInterfaceInfo[]> => {
   }
 };
 
-// Função auxiliar para extrair estatísticas de rede do output do comando ip -s link
 const extractNetworkStat = (output: string, interfaceName: string, statName: string): string => {
   try {
     const interfaceSection = output.split(`${interfaceName}:`)[1]?.split("\n\n")[0];
@@ -146,10 +139,8 @@ const extractNetworkStat = (output: string, interfaceName: string, statName: str
   }
 };
 
-// Função para verificar a conectividade com a internet
 const checkInternetConnectivity = async (): Promise<boolean> => {
   try {
-    // Tenta resolver um domínio confiável
     await execPromise("ping -c 1 -W 2 8.8.8.8");
     return true;
   } catch (error) {
@@ -157,7 +148,6 @@ const checkInternetConnectivity = async (): Promise<boolean> => {
   }
 };
 
-// Função para verificar a latência para diferentes hosts
 const checkLatency = async (): Promise<PingResult[]> => {
   const hosts = ["8.8.8.8", "1.1.1.1", "208.67.222.222"]; // Google, Cloudflare, OpenDNS
   const results: PingResult[] = [];
@@ -166,7 +156,6 @@ const checkLatency = async (): Promise<PingResult[]> => {
     try {
       const { stdout } = await execPromise(`ping -c 3 -W 2 ${host}`);
       
-      // Extrair informações do ping
       const alive = true;
       let time = 0;
       let min = 0;
@@ -174,13 +163,11 @@ const checkLatency = async (): Promise<PingResult[]> => {
       let max = 0;
       let stddev = 0;
       
-      // Extrair tempo do primeiro ping
       const timeMatch = stdout.match(/time=(\d+(\.\d+)?)/);
       if (timeMatch) {
         time = parseFloat(timeMatch[1]);
       }
       
-      // Extrair estatísticas
       const statsMatch = stdout.match(/min\/avg\/max\/mdev = (\d+(\.\d+)?)\/(\d+(\.\d+)?)\/(\d+(\.\d+)?)\/(\d+(\.\d+)?)/);
       if (statsMatch) {
         min = parseFloat(statsMatch[1]);
@@ -198,7 +185,6 @@ const checkLatency = async (): Promise<PingResult[]> => {
   return results;
 };
 
-// Função para verificar conexões ativas
 const getActiveConnections = async (): Promise<{
   total: number;
   established: number;
@@ -215,7 +201,6 @@ const getActiveConnections = async (): Promise<{
     let timeWait = 0;
     let closeWait = 0;
     
-    // Processar saída do comando ss
     const lines = stdout.trim().split("\n");
     for (const line of lines) {
       const [count, state] = line.trim().split(/\s+/);
@@ -235,7 +220,6 @@ const getActiveConnections = async (): Promise<{
   }
 };
 
-// Função para verificar o status do DNS
 const checkDnsStatus = async (): Promise<{ working: boolean; resolveTime?: number }> => {
   try {
     const startTime = Date.now();
@@ -248,10 +232,8 @@ const checkDnsStatus = async (): Promise<{ working: boolean; resolveTime?: numbe
   }
 };
 
-// Função principal para obter o status completo da rede
 export const getNetworkStatus = async (): Promise<NetworkStatus> => {
   try {
-    // Executar todas as verificações em paralelo
     const [interfaces, internetConnected, latencyResults, activeConnections, dnsStatus] = await Promise.all([
       getNetworkInterfaces(),
       checkInternetConnectivity(),
@@ -272,7 +254,6 @@ export const getNetworkStatus = async (): Promise<NetworkStatus> => {
   } catch (error) {
     logger.error("Erro ao obter status da rede:", error);
     
-    // Retornar estrutura vazia em caso de erro
     return {
       interfaces: [],
       connectionStatus: {

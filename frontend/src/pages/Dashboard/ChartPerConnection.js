@@ -128,7 +128,6 @@ const ChartPerConnection = ({ searchParam, pageNumber, status, showAll, queueIds
               ))}
             </Pie>
             <Tooltip content={<CustomTooltip />} cursor={true} />
-            {/* <Legend verticalAlign="middle" align="right" layout="vertical" /> */}
           </PieChart>
         </ResponsiveContainer>
       </ChartPaper>

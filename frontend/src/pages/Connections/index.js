@@ -201,7 +201,6 @@ const Connections = () => {
 			if (data.action === "update" && data.whatsapp) {
 				const { whatsapp } = data;
 				
-				// Força atualização da lista quando há mudanças importantes
 				if (whatsapp.status === "CONNECTED" || whatsapp.number) {
 					setTimeout(() => {
 						fetchWhatsApps();
@@ -230,14 +229,12 @@ const Connections = () => {
 
 		socket.on("whatsappSession", (data) => {
 			if (data.action === "update") {
-				// Força atualização quando há mudanças na sessão
 				setTimeout(() => {
 					fetchWhatsApps();
 				}, 500);
 			}
 		});
 
-		// Garantir que o socket permaneça conectado para receber atualizações em tempo real
 		socket.on("connect", () => {
 			console.log("Socket conectado para atualizações em tempo real");
 		});
@@ -372,7 +369,6 @@ const Connections = () => {
 				
 				toast.success('Sessão iniciada com sucesso!');
 				
-				// Força atualização da lista
 				fetchWhatsApps();
 			}, 3000);
 		} catch (err) {
@@ -408,7 +404,6 @@ const Connections = () => {
 				
 				toast.success('Novo QR code gerado com sucesso!');
 				
-				// Força atualização da lista
 				fetchWhatsApps();
 			}, 3000);
 		} catch (err) {
@@ -435,7 +430,6 @@ const Connections = () => {
 		setWhatsAppModalOpen(false);
 		setSelectedWhatsApp(null);
 		
-		// Força atualização direta da lista após fechar o modal
 		setTimeout(() => {
 			fetchWhatsApps();
 		}, 300);
@@ -496,7 +490,6 @@ const Connections = () => {
 			
 				ToastManager.success('Sessão desconectada com sucesso!', `disconnect-success-${whatsAppId}`);
 			
-				// Força atualização imediata da lista após desconexão
 				setTimeout(() => {
 					fetchWhatsApps();
 				}, 300);
@@ -521,7 +514,6 @@ const Connections = () => {
 				
 				ToastManager.success('Canal excluído com sucesso!', `delete-success-${whatsAppId}`);
 				
-				// Força atualização da lista após exclusão
 				setTimeout(() => {
 					fetchWhatsApps();
 				}, 300);

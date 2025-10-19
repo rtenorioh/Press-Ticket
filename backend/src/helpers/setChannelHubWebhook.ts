@@ -24,8 +24,6 @@ export const setChannelWebhook = async (
     }
   );
 
-  // client
-  // .updateSubscription("subscription-identifier", subscription)
   client
     .createSubscription(subscription)
     .then((response: any) => {

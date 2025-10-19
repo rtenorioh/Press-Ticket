@@ -207,7 +207,6 @@ const MainListItems = (props) => {
     
     checkVersion();
     
-    // Verificar a cada 24 horas
     const interval = setInterval(checkVersion, 24 * 60 * 60 * 1000);
     
     return () => clearInterval(interval);
@@ -221,6 +220,13 @@ const MainListItems = (props) => {
           {t("mainDrawer.listItems.general")}
         </SubheaderStyled>
       <DividerStyled />
+      <ListItemLink
+        to="/documentation"
+        primary={t("documentation.menuItem")}
+        icon={<HelpOutlineIcon />}
+        active={location.pathname === '/documentation'}
+        drawerClose={drawerClose}
+      />
       <ListItemLink
         to="/"
         primary="Dashboard"
@@ -261,13 +267,6 @@ const MainListItems = (props) => {
         primary={t("mainDrawer.listItems.clientStatus")}
         icon={<LabelOutlined />}
         active={location.pathname === '/ClientStatus'}
-        drawerClose={drawerClose}
-      />
-      <ListItemLink
-        to="/documentation"
-        primary={t("documentation.menuItem")}
-        icon={<HelpOutlineIcon />}
-        active={location.pathname === '/documentation'}
         drawerClose={drawerClose}
       />
       <ListItemLink

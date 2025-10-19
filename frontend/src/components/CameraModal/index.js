@@ -69,12 +69,11 @@ const CameraModal = ({ open, onClose, onCapture }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [isRecording, setIsRecording] = useState(false);
-  const [facingMode, setFacingMode] = useState('user'); // 'user' ou 'environment'
+  const [facingMode, setFacingMode] = useState('user'); 
   const [recordedChunks, setRecordedChunks] = useState([]);
 
   useEffect(() => {
     if (open) {
-      // Pequeno delay para garantir que o modal esteja renderizado
       setTimeout(() => {
         startCamera();
       }, 100);
@@ -92,7 +91,6 @@ const CameraModal = ({ open, onClose, onCapture }) => {
     setError(null);
 
     try {
-      // Tentar primeiro sem especificar facingMode para maior compatibilidade
       let constraints = {
         video: {
           width: { ideal: 1280, min: 640 },
@@ -101,7 +99,6 @@ const CameraModal = ({ open, onClose, onCapture }) => {
         audio: true
       };
 
-      // Se não for a primeira tentativa, tentar com facingMode
       if (facingMode) {
         constraints.video.facingMode = facingMode;
       }
@@ -116,13 +113,11 @@ const CameraModal = ({ open, onClose, onCapture }) => {
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
         
-        // Forçar reprodução imediata
         try {
           await videoRef.current.play();
           console.log('Vídeo iniciado com sucesso');
         } catch (playError) {
           console.error('Erro ao reproduzir vídeo:', playError);
-          // Tentar novamente após um pequeno delay
           setTimeout(async () => {
             try {
               await videoRef.current.play();
@@ -186,8 +181,6 @@ const CameraModal = ({ open, onClose, onCapture }) => {
   const startRecording = () => {
     if (!streamRef.current) return;
 
-    // Tentar diferentes formatos de vídeo para melhor compatibilidade
-    // Priorizar MP4 para melhor compatibilidade com WhatsApp
     const supportedMimeTypes = [
       'video/mp4;codecs=h264',
       'video/mp4',
@@ -211,7 +204,7 @@ const CameraModal = ({ open, onClose, onCapture }) => {
 
     const options = {
       mimeType: selectedMimeType,
-      videoBitsPerSecond: 1000000, // Reduzido para melhor compatibilidade
+      videoBitsPerSecond: 1000000, 
       audioBitsPerSecond: 128000
     };
 
@@ -228,18 +221,15 @@ const CameraModal = ({ open, onClose, onCapture }) => {
       mediaRecorderRef.current.onstop = () => {
         const blob = new Blob(chunks, { type: selectedMimeType });
         
-        // Sempre tentar converter para MP4 se possível, senão usar WebM
         let extension = 'mp4';
         let fileType = 'video/mp4';
         
-        // Se for WebM, manter como WebM mas com tipo correto
         if (selectedMimeType.includes('webm')) {
           extension = 'webm';
           fileType = 'video/webm';
         }
         
-        // Limitar tamanho do arquivo (máximo 20MB para evitar problemas de base64)
-        const maxSizeBytes = 20 * 1024 * 1024; // 20MB
+        const maxSizeBytes = 20 * 1024 * 1024; 
         if (blob.size > maxSizeBytes) {
           setError(`Vídeo muito grande (${(blob.size / 1024 / 1024).toFixed(1)}MB). Máximo permitido: 20MB. Tente gravar um vídeo mais curto.`);
           return;
@@ -257,7 +247,7 @@ const CameraModal = ({ open, onClose, onCapture }) => {
         onClose();
       };
 
-      mediaRecorderRef.current.start(1000); // Capturar dados a cada 1 segundo
+      mediaRecorderRef.current.start(1000); 
       setIsRecording(true);
       setRecordedChunks(chunks);
       
@@ -276,16 +266,13 @@ const CameraModal = ({ open, onClose, onCapture }) => {
   };
 
   const switchCamera = async () => {
-    // Parar stream atual antes de trocar
     if (streamRef.current) {
       streamRef.current.getTracks().forEach(track => track.stop());
     }
     
-    // Trocar modo da câmera
     const newFacingMode = facingMode === 'user' ? 'environment' : 'user';
     setFacingMode(newFacingMode);
     
-    // Reiniciar câmera com novo modo
     await startCameraWithMode(newFacingMode);
   };
 
@@ -309,7 +296,6 @@ const CameraModal = ({ open, onClose, onCapture }) => {
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
         
-        // Forçar reprodução do vídeo
         await videoRef.current.play();
       }
     } catch (err) {

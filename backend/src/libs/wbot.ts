@@ -295,7 +295,6 @@ export const initWbot = async (whatsapp: Whatsapp): Promise<Session> => {
             logger.warn("Persist reaction skipped (table might be missing)");
           }
 
-          // Atualizar lastMessage do ticket
           try {
             const TicketModel = (await import("../models/Ticket")).default;
             const ticket = await TicketModel.findByPk(msg.ticketId);
@@ -303,33 +302,28 @@ export const initWbot = async (whatsapp: Whatsapp): Promise<Session> => {
               const myNumber = wbot.info?.wid?._serialized || null;
               const isMyReaction = myNumber && sender === myNumber;
               
-              // Formatar lastMessage com base em quem reagiu
               const reactionText = isMyReaction 
                 ? `Você reagiu com ${emoji} a: "${msg.body || 'mídia'}"`
                 : `Reagiu com ${emoji} a: "${msg.body || 'mídia'}"`;
               
               await ticket.update({ lastMessage: reactionText });
               
-              // Emitir evento de atualização do ticket para todos os clientes
               const ticketData = {
                 id: ticket.id,
                 lastMessage: reactionText,
                 updatedAt: new Date()
               };
               
-              // Emitir para a sala específica do ticket
               io.to(ticket.id.toString()).emit("ticket", {
                 action: "update",
                 ticket: ticketData
               });
               
-              // Emitir também para as salas de status
               io.to(ticket.status).emit("ticket", {
                 action: "update",
                 ticket: ticketData
               });
               
-              // Broadcast global como fallback
               io.emit("appMessage", {
                 action: "update",
                 ticket: ticketData
@@ -451,7 +445,6 @@ export const getWbotByGroupId = async (groupId: string): Promise<Session | null>
           return s;
         }
       } catch (_) {
-        // sessão não possui o grupo
       }
     }
     return null;

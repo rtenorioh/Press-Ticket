@@ -31,7 +31,7 @@ const SelectContactsModal = ({ open, onClose, onConfirm, excludeIds = [], title 
   const [searchParam, setSearchParam] = useState("");
   const [pageNumber, setPageNumber] = useState(1);
   const [hasMore, setHasMore] = useState(false);
-  const [selected, setSelected] = useState({}); // {contactId: contact}
+  const [selected, setSelected] = useState({}); 
 
   const fetchContacts = async (reset = false) => {
     try {
@@ -42,7 +42,6 @@ const SelectContactsModal = ({ open, onClose, onConfirm, excludeIds = [], title 
       setContacts(prev => reset ? data.contacts : [...prev, ...data.contacts]);
       setHasMore(Boolean(data.hasMore));
     } catch (e) {
-      // silencioso
     } finally { setLoading(false); }
   };
 

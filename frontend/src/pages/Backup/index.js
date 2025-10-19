@@ -52,7 +52,6 @@ import MainHeaderButtonsWrapper from "../../components/MainHeaderButtonsWrapper"
 import Title from "../../components/Title";
 import api from "../../services/api";
 
-// Componentes estilizados para um layout mais moderno
 const BackupPaper = styled(Paper)(({ theme }) => ({
   flex: 1,
   padding: theme.spacing(3),

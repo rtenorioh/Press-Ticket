@@ -39,7 +39,6 @@ const GetContactService = async ({ name, number }: Request): Promise<Contact> =>
         if (contact == null)
             throw new AppError("CONTACT_NOT_FIND");
         else {
-            // Buscar o contato recém-criado com as tags
             const newContact = await Contact.findByPk(contact.id, {
                 include: [
                     "extraInfo",

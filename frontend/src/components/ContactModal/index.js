@@ -333,8 +333,8 @@ const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
 													value={
 														values.cpf 
 															? values.cpf.length <= 11
-																? values.cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4') // CPF
-																: values.cpf.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5') // CNPJ
+																? values.cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4') 
+																: values.cpf.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5') 
 															: ''
 													}
 													inputProps={{ maxLength: 18 }}

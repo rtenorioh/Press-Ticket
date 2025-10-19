@@ -10,7 +10,6 @@ import React, {
 
 const LS_NAME = "audioMessageRate";
 
-// Estilos usando o sistema de styled do MUI v5
 const AudioContainer = styled(Box)(({ theme }) => ({
   display: "flex",
   flexDirection: "column",

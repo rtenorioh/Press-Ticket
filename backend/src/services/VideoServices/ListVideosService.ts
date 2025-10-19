@@ -40,14 +40,10 @@ const ListVideosService = async ({
     order: [["createdAt", "DESC"]]
   });
 
-  // Se não for admin e não for requisição via API (userId definido),
-  // filtra os vídeos que o usuário tem permissão para ver
   if (!isAdmin && userId) {
     const filteredVideos = videos.filter(video => {
-      // Se não há usuários específicos, todos podem ver
       if (!video.users || video.users.length === 0) return true;
       
-      // Verifica se o usuário atual está na lista de usuários permitidos
       return video.users.some(u => u.id === userId);
     });
 

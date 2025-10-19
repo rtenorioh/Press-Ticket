@@ -136,7 +136,6 @@ const ChartPerQueue = ({ queueIds, withUnreadMessages }) => {
               ))}
             </Pie>
             <Tooltip content={<CustomTooltip />} cursor={true} />
-            {/* <Legend layout="vertical" align="right" verticalAlign="middle" /> */}
           </PieChart>
         </ResponsiveContainer>
       </ChartPaper>

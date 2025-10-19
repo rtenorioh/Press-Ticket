@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import isAuth from "../middleware/isAuth"; // apenas para referência de padrão
+import isAuth from "../middleware/isAuth"; 
 import AppError from "../errors/AppError";
 import { getWbotByGroupId } from "../libs/wbot";
 import { MessageMedia } from "whatsapp-web.js";
@@ -160,7 +160,6 @@ export const listParticipants = async (req: Request, res: Response) => {
       }
     }
   } catch (_) {
-    // mantém participants como [] em caso de erro
   }
 
   const result = await Promise.all(

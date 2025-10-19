@@ -14,9 +14,9 @@ interface QueueStats {
   waitingTickets: number;
   pendingTickets: number;
   activeTickets: number;
-  avgWaitTime: number; // em minutos
-  avgHandleTime: number; // em minutos
-  oldestTicketTime: number; // timestamp
+  avgWaitTime: number; 
+  avgHandleTime: number; 
+  oldestTicketTime: number; 
   oldestTicketId: number | null;
   messagesCount: {
     total: number;
@@ -38,8 +38,8 @@ interface QueueMonitorData {
     totalMessages: number;
     messagesLast24Hours: number;
     messagesLast7Days: number;
-    avgWaitTime: number; // em minutos
-    oldestTicketTime: number; // timestamp
+    avgWaitTime: number; 
+    oldestTicketTime: number; 
     oldestTicketQueueId: number | null;
     oldestTicketId: number | null;
   };
@@ -75,7 +75,7 @@ const calculateAvgWaitTime = async (queueId: number): Promise<number> => {
     const now = new Date();
     const totalWaitTime = tickets.reduce((sum, ticket) => {
       const createdAt = new Date(ticket.createdAt);
-      const waitTime = (now.getTime() - createdAt.getTime()) / (1000 * 60); // em minutos
+      const waitTime = (now.getTime() - createdAt.getTime()) / (1000 * 60); 
       return sum + waitTime;
     }, 0);
 
@@ -93,7 +93,7 @@ const calculateAvgHandleTime = async (queueId: number): Promise<number> => {
         queueId,
         status: "closed",
         createdAt: {
-          [Op.gte]: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) // últimos 7 dias
+          [Op.gte]: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) 
         }
       },
       attributes: ["id", "createdAt", "updatedAt"]
@@ -104,7 +104,7 @@ const calculateAvgHandleTime = async (queueId: number): Promise<number> => {
     const totalHandleTime = closedTickets.reduce((sum, ticket) => {
       const createdAt = new Date(ticket.createdAt);
       const closedAt = new Date(ticket.updatedAt);
-      const handleTime = (closedAt.getTime() - createdAt.getTime()) / (1000 * 60); // em minutos
+      const handleTime = (closedAt.getTime() - createdAt.getTime()) / (1000 * 60); 
       return sum + handleTime;
     }, 0);
 
@@ -264,7 +264,6 @@ const getWhatsappStats = async (): Promise<{
         ]
       });
 
-      // Calcular mensagens de hoje
       const today = new Date();
       today.setHours(0, 0, 0, 0);
       
@@ -285,7 +284,6 @@ const getWhatsappStats = async (): Promise<{
         ]
       });
 
-      // Calcular mensagens dos últimos 7 dias
       const last7Days = new Date();
       last7Days.setDate(last7Days.getDate() - 7);
       last7Days.setHours(0, 0, 0, 0);

@@ -16,13 +16,13 @@ class EmailService {
     this.transporter = nodemailer.createTransport({
       host: "smtp.gmail.com",
       port: 587,
-      secure: false, // true para porta 465, false para outras portas
+      secure: false, 
       auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS,
       },
       tls: {
-        rejectUnauthorized: false // Permite conexões sem certificado válido (use apenas em desenvolvimento)
+        rejectUnauthorized: false 
       },
       debug: process.env.NODE_ENV !== "production",
       logger: process.env.NODE_ENV !== "production"

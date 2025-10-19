@@ -344,7 +344,7 @@ const UserModal = ({ open, onClose, userId }) => {
 														shrink: true,
 													}}
 													inputProps={{
-														step: 600, // 5 min
+														step: 600, 
 													}}
 													name="startWork"
 													error={
@@ -373,7 +373,7 @@ const UserModal = ({ open, onClose, userId }) => {
 														shrink: true,
 													}}
 													inputProps={{
-														step: 600, // 5 min
+														step: 600, 
 													}}
 													name="endWork"
 													error={

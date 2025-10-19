@@ -231,20 +231,14 @@ const SystemUpdate = () => {
   const [updateDialogOpen, setUpdateDialogOpen] = useState(false);
   const [statusPolling, setStatusPolling] = useState(null);
 
-  // Função para comparar versões e atualizar o estado
   const compareVersions = useCallback((currentVersion, latestVersion) => {
-    // Evitar comparações desnecessárias
     if (!currentVersion || !latestVersion) return;
     
-    // Obter a versão atual limpa (sem prefixo 'v')
     const currentVersionClean = String(currentVersion).replace(/^v/i, "").trim();
-    // Obter a versão mais recente limpa (sem prefixo 'v')
     const latestVersionClean = String(latestVersion).replace(/^v/i, "").trim();
     
-    // Verificar se as versões são iguais
     const isEqual = currentVersionClean === latestVersionClean && currentVersionClean !== "";
     
-    // Atualizar o estado apenas se houver mudança
     setUpdateInfo(prevState => {
       if (prevState.versionsEqual === isEqual) return prevState;
       
@@ -260,7 +254,6 @@ const SystemUpdate = () => {
     try {
       const { data } = await api.get("/version");
       
-      // Atualizar a versão atual e outras informações do sistema
       setUpdateInfo(prevState => ({
         ...prevState,
         currentVersion: data.currentVersion,
@@ -284,7 +277,6 @@ const SystemUpdate = () => {
         releaseNotes: data.releaseNotes
       }));
       
-      // Não chamamos compareVersions aqui, o useEffect cuidará disso
       
       toast.success(t("systemUpdate.checkSuccess"));
     } catch (err) {
@@ -452,16 +444,13 @@ const SystemUpdate = () => {
     const latestVersion = updateInfo.latestVersion;
     
     if (currentVersion && latestVersion) {
-      // Verificar se já comparamos essas versões antes
       if (lastCompareRef.current.current === currentVersion && 
           lastCompareRef.current.latest === latestVersion) {
-        return; // Evitar comparações redundantes
+        return; 
       }
       
-      // Atualizar a referência
       lastCompareRef.current = { current: currentVersion, latest: latestVersion };
       
-      // Comparar versões
       compareVersions(currentVersion, latestVersion);
     }
   }, [updateInfo.currentVersion, updateInfo.latestVersion, compareVersions]);

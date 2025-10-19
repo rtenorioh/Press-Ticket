@@ -72,7 +72,7 @@ const transcodeAudioToOpus = (inputPath: string, outputPath: string): Promise<vo
     ffmpeg(inputPath)
       .noVideo()
       .audioCodec("libopus")
-      .audioBitrate("32k") // 16-32 kbps funciona bem; 32k mantém qualidade
+      .audioBitrate("32k") 
       .audioChannels(1)
       .audioFrequency(16000)
       .format("ogg")
@@ -144,17 +144,17 @@ const SendWhatsAppMedia = async ({
     
     let maxSizeForMedia, maxSizeForDocument;
     if (isVideo) {
-      maxSizeForMedia = 100; // 100MB para vídeos como mídia
-      maxSizeForDocument = 2048; // 2GB para documentos
+      maxSizeForMedia = 100; 
+      maxSizeForDocument = 2048; 
     } else if (isAudio) {
-      maxSizeForMedia = 100; // 100MB para áudios
-      maxSizeForDocument = 2048; // 2GB para documentos
+      maxSizeForMedia = 100; 
+      maxSizeForDocument = 2048; 
     } else if (isImage) {
-      maxSizeForMedia = 100; // 100MB para imagens
-      maxSizeForDocument = 2048; // 2GB para documentos
+      maxSizeForMedia = 100; 
+      maxSizeForDocument = 2048; 
     } else {
-      maxSizeForMedia = 100; // Padrão para outros tipos
-      maxSizeForDocument = 2048; // 2GB para documentos
+      maxSizeForMedia = 100; 
+      maxSizeForDocument = 2048; 
     }
     
     if (isAudio) {
@@ -224,7 +224,7 @@ const SendWhatsAppMedia = async ({
     
     try {
       const fileData = fs.readFileSync(finalMediaPath, { encoding: 'base64' });
-      const maxBase64Size = 140000000; // ~100MB em base64 (para arquivos até 100MB)
+      const maxBase64Size = 140000000; 
       
       if (fileData.length > maxBase64Size) {
         console.log(`Arquivo muito grande para base64: ${(fileData.length / 1000000).toFixed(1)}MB`);

@@ -6,7 +6,7 @@ interface Request {
   searchParam?: string;
   pageNumber?: string;
   tags?: number[];
-  isGroup?: string; // 'true' | 'false' | undefined (string por vir da query)
+  isGroup?: string; 
   status?: string;
 }
 

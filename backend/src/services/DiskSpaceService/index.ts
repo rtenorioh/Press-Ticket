@@ -24,7 +24,6 @@ interface DiskSpaceInfo {
   largestFolders: FolderSizeInfo[];
 }
 
-// Função para obter conteúdo de uma pasta específica
 export const getFolderContents = async (folderPath: string): Promise<FolderSizeInfo[]> => {
   const companyName = process.env.COMPANY_NAME || "";
   
@@ -34,7 +33,6 @@ export const getFolderContents = async (folderPath: string): Promise<FolderSizeI
 
   const basePath = path.resolve("/home/deploy", companyName);
   
-  // Verificar se o caminho está dentro da pasta permitida
   const fullPath = path.resolve(basePath, folderPath);
   if (!fullPath.startsWith(basePath)) {
     throw new Error("Acesso negado: caminho fora da pasta permitida");
@@ -47,7 +45,7 @@ export const getFolderContents = async (folderPath: string): Promise<FolderSizeI
         return;
       }
       
-      const lines = stdout.trim().split('\n').slice(1); // Remove primeira linha (total)
+      const lines = stdout.trim().split('\n').slice(1); 
       const items: FolderSizeInfo[] = [];
       let processedCount = 0;
       
@@ -69,7 +67,6 @@ export const getFolderContents = async (folderPath: string): Promise<FolderSizeI
         const permissions = parts[0];
         const fileName = parts.slice(8).join(' ');
         
-        // Pular arquivos ocultos e especiais
         if (fileName === '.' || fileName === '..' || 
             fileName.includes('node_modules') || 
             fileName.includes('.git') ||
@@ -87,7 +84,6 @@ export const getFolderContents = async (folderPath: string): Promise<FolderSizeI
         const isDirectory = permissions.startsWith('d');
         const relativeName = path.relative(basePath, itemFullPath);
         
-        // Obter tamanho do item
         const duCommand = isDirectory ? `du -sb "${itemFullPath}" 2>/dev/null` : `stat -c%s "${itemFullPath}" 2>/dev/null`;
         
         exec(duCommand, (error, stdout, stderr) => {
@@ -101,7 +97,6 @@ export const getFolderContents = async (folderPath: string): Promise<FolderSizeI
           
           const sizeBytes = parseInt(stdout.trim().split(/\s+/)[0]) || 0;
           
-          // Converter bytes para formato legível
           const formatSize = (bytes: number): string => {
             const sizes = ['B', 'K', 'M', 'G', 'T'];
             if (bytes === 0) return '0B';
@@ -137,13 +132,10 @@ export const getDiskSpaceInfo = async (): Promise<DiskSpaceInfo> => {
     throw new Error("COMPANY_NAME não definido no arquivo .env");
   }
 
-  // Caminho da pasta do sistema atual
   const folderPath = path.resolve("/home/deploy", companyName);
 
-  // Função para obter estrutura completa de pastas e arquivos
   const getLargestFolders = () => {
     return new Promise<FolderSizeInfo[]>((resolve, reject) => {
-      // Função recursiva para construir a árvore
       const buildTree = async (dirPath: string, maxDepth: number = 2, currentDepth: number = 0): Promise<FolderSizeInfo[]> => {
         if (currentDepth >= maxDepth) return [];
         
@@ -154,7 +146,7 @@ export const getDiskSpaceInfo = async (): Promise<DiskSpaceInfo> => {
               return;
             }
             
-            const lines = stdout.trim().split('\n').slice(1); // Remove primeira linha (total)
+            const lines = stdout.trim().split('\n').slice(1); 
             const items: FolderSizeInfo[] = [];
             let processedCount = 0;
             
@@ -176,7 +168,6 @@ export const getDiskSpaceInfo = async (): Promise<DiskSpaceInfo> => {
               const permissions = parts[0];
               const fileName = parts.slice(8).join(' ');
               
-              // Pular arquivos ocultos e especiais
               if (fileName === '.' || fileName === '..' || 
                   fileName.includes('node_modules') || 
                   fileName.includes('.git') ||
@@ -194,7 +185,6 @@ export const getDiskSpaceInfo = async (): Promise<DiskSpaceInfo> => {
               const isDirectory = permissions.startsWith('d');
               const relativeName = path.relative(path.resolve("/home/deploy", companyName), fullPath);
               
-              // Obter tamanho do item
               const duCommand = isDirectory ? `du -sb "${fullPath}" 2>/dev/null` : `stat -c%s "${fullPath}" 2>/dev/null`;
               
               exec(duCommand, async (error, stdout, stderr) => {
@@ -208,7 +198,6 @@ export const getDiskSpaceInfo = async (): Promise<DiskSpaceInfo> => {
                 
                 const sizeBytes = parseInt(stdout.trim().split(/\s+/)[0]) || 0;
                 
-                // Converter bytes para formato legível
                 const formatSize = (bytes: number): string => {
                   const sizes = ['B', 'K', 'M', 'G', 'T'];
                   if (bytes === 0) return '0B';
@@ -225,7 +214,6 @@ export const getDiskSpaceInfo = async (): Promise<DiskSpaceInfo> => {
                   children: []
                 };
                 
-                // Se for diretório e não atingiu profundidade máxima, buscar filhos
                 if (isDirectory && currentDepth < maxDepth - 1) {
                   try {
                     item.children = await buildTree(fullPath, maxDepth, currentDepth + 1);
@@ -246,10 +234,8 @@ export const getDiskSpaceInfo = async (): Promise<DiskSpaceInfo> => {
         });
       };
       
-      // Construir apenas o primeiro nível para carregamento inicial
       buildTree(folderPath, 1, 0)
         .then(tree => {
-          // Pegar apenas os 20 maiores itens do primeiro nível
           const topItems = tree.slice(0, 20);
           resolve(topItems);
         })
@@ -257,7 +243,6 @@ export const getDiskSpaceInfo = async (): Promise<DiskSpaceInfo> => {
     });
   };
   
-  // Obter tamanho da pasta do sistema
   const getFolderSize = () => {
     return new Promise<{ size: string, bytes: number }>((resolve, reject) => {
       exec(`du -sh ${folderPath}`, (error, stdout, stderr) => {
@@ -270,7 +255,6 @@ export const getDiskSpaceInfo = async (): Promise<DiskSpaceInfo> => {
         const output = stdout.trim();
         const size = output.split("\t")[0];
         
-        // Obter o tamanho em bytes para comparação
         exec(`du -sb ${folderPath}`, (error, stdout, stderr) => {
           if (error) {
             logger.error(`Erro ao obter tamanho da pasta em bytes: ${error.message}`);
@@ -287,7 +271,6 @@ export const getDiskSpaceInfo = async (): Promise<DiskSpaceInfo> => {
     });
   };
   
-  // Obter espaço livre no disco
   const getDiskFreeSpace = () => {
     return new Promise<{ free: string, total: string, freeBytes: number, totalBytes: number }>((resolve, reject) => {
       exec("df -h /", (error, stdout, stderr) => {
@@ -312,7 +295,6 @@ export const getDiskSpaceInfo = async (): Promise<DiskSpaceInfo> => {
         const total = parts[1];
         const free = parts[3];
         
-        // Obter valores em bytes para cálculos
         exec("df --output=size,avail / | tail -1", (error, stdout, stderr) => {
           if (error) {
             logger.error(`Erro ao obter espaço em bytes: ${error.message}`);
@@ -335,14 +317,12 @@ export const getDiskSpaceInfo = async (): Promise<DiskSpaceInfo> => {
     });
   };
   
-  // Executar as funções para obter as informações
   const [folderInfo, diskInfo, largestFolders] = await Promise.all([
     getFolderSize(),
     getDiskFreeSpace(),
     getLargestFolders()
   ]);
   
-  // Calcular a porcentagem de uso
   const usedPercentage = Math.round((folderInfo.bytes / diskInfo.totalBytes) * 100);
   
   return {

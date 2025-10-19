@@ -85,10 +85,8 @@ const ClientStatusBarChart = () => {
       try {
         const { data } = await api.get("/client-status/statistics");
         
-        // Preparar dados para o gráfico de barras
         const formattedData = [];
         
-        // Adicionar contatos com status
         data.statusData.forEach(status => {
           if (status.count > 0) {
             const percentage = data.total > 0 ? ((status.count / data.total) * 100).toFixed(1) : 0;
@@ -101,7 +99,6 @@ const ClientStatusBarChart = () => {
           }
         });
 
-        // Adicionar contatos sem status
         if (data.withoutStatus > 0) {
           const percentage = data.total > 0 ? ((data.withoutStatus / data.total) * 100).toFixed(1) : 0;
           formattedData.push({
@@ -112,7 +109,6 @@ const ClientStatusBarChart = () => {
           });
         }
 
-        // Ordenar por quantidade (maior para menor)
         formattedData.sort((a, b) => b.value - a.value);
 
         setChartData(formattedData);

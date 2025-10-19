@@ -157,7 +157,7 @@ const DatabaseStatus = () => {
   useEffect(() => {
     fetchDatabaseStatus();
     
-    const interval = setInterval(fetchDatabaseStatus, 5 * 60 * 1000); // Atualiza a cada 5 minutos
+    const interval = setInterval(fetchDatabaseStatus, 5 * 60 * 1000); 
     
     return () => clearInterval(interval);
   }, [t]);
@@ -225,7 +225,6 @@ const DatabaseStatus = () => {
         
         {dbInfo && (
           <>
-            {/* Informações gerais do banco de dados */}
             <Paper className={classes.card}>
               <Grid container spacing={2}>
                 <Grid item xs={12} md={6}>
@@ -345,7 +344,6 @@ const DatabaseStatus = () => {
               </Grid>
             </Paper>
 
-            {/* Tabelas */}
             <Typography variant="h6" className={classes.sectionTitle}>
               {t("Tabelas do Banco de Dados")}
             </Typography>
@@ -386,7 +384,6 @@ const DatabaseStatus = () => {
               </TableContainer>
             </Paper>
 
-            {/* Consultas Lentas */}
             <Typography variant="h6" className={classes.sectionTitle}>
               {t("Consultas Lentas (últimas 24h)")}
             </Typography>
@@ -429,7 +426,6 @@ const DatabaseStatus = () => {
               </TableContainer>
             </Paper>
 
-            {/* Processos Ativos */}
             <Typography variant="h6" className={classes.sectionTitle}>
               {t("Processos Ativos")}
             </Typography>

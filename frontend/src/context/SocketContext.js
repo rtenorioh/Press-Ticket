@@ -26,7 +26,6 @@ export const SocketProvider = ({ children }) => {
 
         return () => {
             if (newSocket) {
-                // Removemos apenas os listeners, não desconectamos
                 newSocket.off('connect');
                 newSocket.off('disconnect');
             }

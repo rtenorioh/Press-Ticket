@@ -28,7 +28,6 @@ interface ActivityLog {
   details?: string;
 }
 
-// Modelo para logs de atividade
 class ActivityLogModel {
   id: number;
   userId: number;
@@ -53,7 +52,6 @@ class ActivityLogModel {
   }
 }
 
-// Tipos de ações para logs
 export enum ActivityActions {
   LOGIN = "login",
   LOGOUT = "logout",
@@ -67,7 +65,6 @@ export enum ActivityActions {
   SYSTEM = "system"
 }
 
-// Tipos de entidades para logs
 export enum EntityTypes {
   USER = "user",
   TICKET = "ticket",
@@ -81,9 +78,6 @@ export enum EntityTypes {
   SYSTEM = "system"
 }
 
-/**
- * Registra uma atividade no log
- */
 export const logActivity = async (
   userId: number,
   action: ActivityActions,
@@ -94,12 +88,9 @@ export const logActivity = async (
   details?: string
 ): Promise<ActivityLogModel> => {
   try {
-    // Aqui seria implementada a lógica para salvar o log no banco de dados
-    // Como exemplo, vamos apenas criar um objeto e retorná-lo
-    // Em uma implementação real, isso seria salvo em uma tabela ActivityLogs
     
     const log = new ActivityLogModel({
-      id: Date.now(), // Simulando um ID único
+      id: Date.now(), 
       userId,
       action,
       description,
@@ -119,19 +110,13 @@ export const logActivity = async (
   }
 };
 
-/**
- * Lista logs de atividade com filtros
- */
 export const listActivityLogs = async (
   filters: ActivityLogFilters
 ): Promise<{ logs: ActivityLog[]; count: number }> => {
   try {
-    // Aqui seria implementada a lógica para buscar logs no banco de dados
-    // Como exemplo, vamos retornar dados simulados
     
     const { startDate, endDate, userId, action, limit = 10, offset = 0 } = filters;
     
-    // Simulando logs de atividade
     const mockLogs: ActivityLog[] = [
       {
         id: 1,
@@ -170,7 +155,6 @@ export const listActivityLogs = async (
       }
     ];
     
-    // Filtragem simulada
     let filteredLogs = [...mockLogs];
     
     if (startDate && endDate) {
@@ -191,7 +175,6 @@ export const listActivityLogs = async (
     
     const count = filteredLogs.length;
     
-    // Aplicar paginação
     filteredLogs = filteredLogs.slice(offset, offset + limit);
     
     return {
@@ -204,9 +187,6 @@ export const listActivityLogs = async (
   }
 };
 
-/**
- * Busca detalhes de uma entidade com base no tipo e ID
- */
 export const getEntityDetails = async (
   entityType: EntityTypes,
   entityId: number

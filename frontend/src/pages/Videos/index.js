@@ -103,7 +103,7 @@ const VideoCard = styled(Card)(({ theme }) => ({
 }));
 
 const VideoCardMedia = styled(CardMedia)(({ theme }) => ({
-  paddingTop: "56.25%", // 16:9
+  paddingTop: "56.25%", 
   position: "relative",
   "&::after": {
     content: '""',
@@ -158,7 +158,7 @@ const VideoPlayerDialog = styled(Dialog)(({ theme }) => ({
 
 const VideoPlayerContainer = styled(Box)(({ theme }) => ({
   position: "relative",
-  paddingTop: "56.25%", // 16:9 aspect ratio
+  paddingTop: "56.25%", 
   width: "100%",
   backgroundColor: "#000",
 }));
@@ -325,10 +325,8 @@ const Videos = () => {
   };
 
   const canUserSeeVideo = (video) => {
-    // Se não há usuários específicos, todos podem ver
     if (!video.users || video.users.length === 0) return true;
     
-    // Verifica se o usuário atual está na lista de usuários permitidos
     return video.users.some(u => u.id === user.id);
   };
 
@@ -742,7 +740,7 @@ return (
                   sx={{
                     width: "100%",
                     height: 0,
-                    paddingTop: "56.25%", // 16:9 aspect ratio
+                    paddingTop: "56.25%", 
                     position: "relative",
                     marginTop: 1,
                     marginBottom: 2,

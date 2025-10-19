@@ -17,7 +17,7 @@ export const checkAndUpdateNotificationTime = async ({ whatsappId }: Request): P
   });
 
   const now = new Date();
-  const thirtyMinutesAgo = new Date(now.getTime() - 30 * 60 * 1000); // 30 minutos atrás
+  const thirtyMinutesAgo = new Date(now.getTime() - 30 * 60 * 1000); 
 
   if (!notification) {
     notification = await WhatsappNotification.create({

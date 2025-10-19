@@ -286,7 +286,6 @@ const VcardPreview = ({ contact, numbers }) => {
                 setNumberSelectionModalOpen(true);
                 setLoading(false);
             } else {
-                // Verificar se o contato já existe ou criar um novo
                 const number = selectedContact.number.replace(/\D/g, "");
                 const { data: existingContacts } = await api.get("/contacts", {
                     params: { searchParam: number }
@@ -294,7 +293,6 @@ const VcardPreview = ({ contact, numbers }) => {
                 
                 let contactId = null;
                 
-                // Se o contato já existe, usar o ID existente
                 if (existingContacts && existingContacts.contacts && existingContacts.contacts.length > 0) {
                     const existingContact = existingContacts.contacts.find(c => 
                         c.number && c.number.replace(/\D/g, "") === number
@@ -302,20 +300,17 @@ const VcardPreview = ({ contact, numbers }) => {
                     
                     if (existingContact) {
                         contactId = existingContact.id;
-                        // Atualizar o contato local com o ID do banco
                         setContact(prev => ({ ...prev, id: existingContact.id }));
                         setContactTicket({ ...selectedContact, id: existingContact.id });
                     }
                 }
                 
-                // Se não encontrou o contato, criar um novo
                 if (!contactId) {
                     const { data: newContact } = await api.post("/contacts", {
                         name: selectedContact.name,
                         number: selectedContact.number
                     });
                     contactId = newContact.id;
-                    // Atualizar o contato local com o ID do novo contato
                     setContact(prev => ({ ...prev, id: newContact.id }));
                     setContactTicket({ ...selectedContact, id: newContact.id });
                 }
@@ -340,14 +335,12 @@ const VcardPreview = ({ contact, numbers }) => {
                               typeof number === 'object' && number.number ? number.number.replace(/\D/g, "") :
                               typeof number === 'string' ? number.replace(/\D/g, "") : "";
             
-            // Verificar se o contato já existe ou criar um novo
             const { data: existingContacts } = await api.get("/contacts", {
                 params: { searchParam: cleanNumber }
             });
             
             let contactId = null;
             
-            // Se o contato já existe, usar o ID existente
             if (existingContacts && existingContacts.contacts && existingContacts.contacts.length > 0) {
                 const existingContact = existingContacts.contacts.find(c => 
                     c.number && c.number.replace(/\D/g, "") === cleanNumber
@@ -355,7 +348,6 @@ const VcardPreview = ({ contact, numbers }) => {
                 
                 if (existingContact) {
                     contactId = existingContact.id;
-                    // Criar contato com o número selecionado e o ID do banco
                     const contactWithSelectedNumber = {
                         ...selectedContact,
                         number: cleanNumber,
@@ -365,14 +357,12 @@ const VcardPreview = ({ contact, numbers }) => {
                 }
             }
             
-            // Se não encontrou o contato, criar um novo
             if (!contactId) {
                 const { data: newContact } = await api.post("/contacts", {
                     name: selectedContact.name,
                     number: cleanNumber
                 });
                 contactId = newContact.id;
-                // Criar contato com o número selecionado e o ID do novo contato
                 const contactWithSelectedNumber = {
                     ...selectedContact,
                     number: cleanNumber,

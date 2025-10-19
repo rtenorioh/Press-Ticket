@@ -288,7 +288,7 @@ const QueueModal = ({ open, onClose, queueId }) => {
 												shrink: true,
 											}}
 											inputProps={{
-												step: 300, // 5 minutes
+												step: 300, 
 											}}
 											fullWidth
 											name="startWork"
@@ -310,7 +310,7 @@ const QueueModal = ({ open, onClose, queueId }) => {
 												shrink: true,
 											}}
 											inputProps={{
-												step: 300, // 5 minutes
+												step: 300, 
 											}}
 											fullWidth
 											name="endWork"
@@ -338,7 +338,7 @@ const QueueModal = ({ open, onClose, queueId }) => {
 													shrink: true,
 												}}
 												inputProps={{
-													step: 300, // 5 minutes
+													step: 300, 
 												}}
 												fullWidth
 												name="startBreak"
@@ -360,7 +360,7 @@ const QueueModal = ({ open, onClose, queueId }) => {
 													shrink: true,
 												}}
 												inputProps={{
-													step: 300, // 5 minutes
+													step: 300, 
 												}}
 												fullWidth
 												name="endBreak"

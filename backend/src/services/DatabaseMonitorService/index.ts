@@ -6,10 +6,8 @@ import { QueryTypes } from "sequelize";
 
 const execAsync = promisify(exec);
 
-// Importando a configuração do banco de dados
 const dbConfig = require("../../config/database");
 
-// Criando uma instância do Sequelize para consultas diretas
 const sequelize = new Sequelize(
   dbConfig.database,
   dbConfig.username,
@@ -90,11 +88,9 @@ const formatBytes = (bytes: number): string => {
 
 export const getDatabaseInfo = async (): Promise<DatabaseInfo> => {
   try {
-    // Verificar conexão com o banco de dados
     await sequelize.authenticate();
     logger.info("Conexão com o banco de dados estabelecida com sucesso.");
 
-    // Informações gerais do banco de dados
     const dbInfo: DatabaseInfo = {
       name: dbConfig.database,
       host: dbConfig.host,
@@ -120,7 +116,6 @@ export const getDatabaseInfo = async (): Promise<DatabaseInfo> => {
     };
 
     try {
-      // Obter tamanho do banco de dados e tabelas
       const dbSizeResults: any = await sequelize.query(`
         SELECT 
           table_schema as 'database',
@@ -140,7 +135,6 @@ export const getDatabaseInfo = async (): Promise<DatabaseInfo> => {
         dbInfo.size.total = formatBytes(dbInfo.size.totalBytes);
       }
 
-      // Obter tamanho de cada tabela
       const tableSizes: any[] = await sequelize.query(`
         SELECT 
           table_name as 'name',
@@ -168,7 +162,6 @@ export const getDatabaseInfo = async (): Promise<DatabaseInfo> => {
       dbInfo.tables = tableInfos;
       dbInfo.size.byTable = tableInfos;
 
-      // Obter consultas lentas
       let slowQueries: SlowQueryInfo[] = [];
       try {
         const queryResult = await sequelize.query(`
@@ -190,7 +183,6 @@ export const getDatabaseInfo = async (): Promise<DatabaseInfo> => {
           type: QueryTypes.SELECT
         });
         
-        // Converter o resultado para o tipo SlowQueryInfo[]
         slowQueries = (queryResult as any[]).map(row => ({
           id: Number(row.id || 0),
           start_time: String(row.start_time || ''),
@@ -208,7 +200,6 @@ export const getDatabaseInfo = async (): Promise<DatabaseInfo> => {
 
       dbInfo.performance.slowQueries = slowQueries;
 
-      // Obter estatísticas de status do servidor
       const statusVariables: any[] = await sequelize.query(`
         SHOW GLOBAL STATUS WHERE Variable_name IN (
           'Uptime', 
@@ -226,7 +217,6 @@ export const getDatabaseInfo = async (): Promise<DatabaseInfo> => {
         return acc;
       }, {});
 
-      // Formatar o tempo de atividade
       const uptimeSeconds = parseInt(statusMap.Uptime || "0", 10);
       const days = Math.floor(uptimeSeconds / 86400);
       const hours = Math.floor((uptimeSeconds % 86400) / 3600);
@@ -240,7 +230,6 @@ export const getDatabaseInfo = async (): Promise<DatabaseInfo> => {
       dbInfo.performance.totalQueries = parseInt(statusMap.Questions || "0", 10);
       dbInfo.performance.slowQueryCount = parseInt(statusMap.Slow_queries || "0", 10);
 
-      // Obter processos ativos
       const processlist: ProcessInfo[] = await sequelize.query(`
         SELECT 
           id, 
@@ -263,7 +252,6 @@ export const getDatabaseInfo = async (): Promise<DatabaseInfo> => {
 
     } catch (error) {
       logger.error(`Erro ao obter informações detalhadas do banco de dados: ${error}`);
-      // Continuar com informações parciais
     }
 
     return dbInfo;

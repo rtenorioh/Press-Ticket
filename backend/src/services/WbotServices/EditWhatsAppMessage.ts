@@ -27,7 +27,6 @@ const EditWhatsAppMessage = async (
 
   const { ticket } = message;
 
-  // IMPORTANTE: Capturar o corpo antigo ANTES de qualquer edição
   const oldBody = message.body;
   console.log(`[EditWhatsAppMessage] ========================================`);
   console.log(`[EditWhatsAppMessage] Iniciando edição da mensagem ${messageId}`);
@@ -58,12 +57,10 @@ const EditWhatsAppMessage = async (
     throw new AppError("ERR_EDITING_WAPP_MSG");
   }
 
-  // Salvar o corpo antigo no histórico
 
   if (typeof oldBody === "string" && oldBody !== newBody) {
     console.log(`[EditWhatsAppMessage] Salvando histórico: "${oldBody}" -> "${newBody}"`);
     
-    // Verificar se já existe um histórico com esse corpo para evitar duplicatas
     const existingHistory = await OldMessage.findOne({
       where: {
         messageId: message.id,

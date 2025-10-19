@@ -65,7 +65,6 @@ export const useSocket = () => {
         socketRef.current = globalSocket;
 
         return () => {
-            // Não desconecta o socket global no cleanup
             socketRef.current = null;
         };
     }, []);
@@ -77,7 +76,6 @@ export const useSocket = () => {
     return {
         socket: getSocket(),
         connected,
-        // Função utilitária para emitir eventos com tratamento de erro
         emit: (event, data) => {
             try {
                 const socket = getSocket();
@@ -91,7 +89,6 @@ export const useSocket = () => {
                 return false;
             }
         },
-        // Função utilitária para ouvir eventos com tratamento de erro
         on: (event, callback) => {
             try {
                 const socket = getSocket();
@@ -105,7 +102,6 @@ export const useSocket = () => {
                 return false;
             }
         },
-        // Função utilitária para remover listeners com tratamento de erro
         off: (event, callback) => {
             try {
                 const socket = getSocket();

@@ -210,7 +210,6 @@ const AttachmentMenu = ({
         </MenuItemStyled>
       </StyledMenu>
 
-      {/* Input oculto para documentos */}
       <input
         ref={documentInputRef}
         type="file"
@@ -220,7 +219,6 @@ const AttachmentMenu = ({
         onChange={handleDocumentChange}
       />
 
-      {/* Input oculto para fotos e vídeos */}
       <input
         ref={photoVideoInputRef}
         type="file"
@@ -230,7 +228,6 @@ const AttachmentMenu = ({
         onChange={handlePhotoVideoChange}
       />
 
-      {/* Input oculto para áudios */}
       <input
         ref={audioInputRef}
         type="file"
@@ -240,15 +237,12 @@ const AttachmentMenu = ({
         onChange={handleAudioChange}
       />
 
-
-        {/* Modal da câmera */}
         <CameraModal
           open={showCameraModal}
           onClose={() => setShowCameraModal(false)}
           onCapture={handleCameraCapture}
         />
 
-        {/* Modal de seleção de contatos */}
         <ContactSelectionModal
           open={showContactModal}
           onClose={() => setShowContactModal(false)}

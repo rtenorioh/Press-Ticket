@@ -32,8 +32,6 @@ const ListMessagesService = async ({
   const offset = limit * (+pageNumber - 1);
 
   const { count, rows: messages } = await Message.findAndCountAll({
-    // where: { ticketId },
-    // where: {contactid : ticket.contactId},
     limit,
     include: [
       "contact",
@@ -97,7 +95,6 @@ const ListMessagesService = async ({
       }
     }
   } catch (err) {
-    // console.warn("Skipping reactions aggregation:", err);
   }
 
   return {

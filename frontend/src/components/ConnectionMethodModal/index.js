@@ -20,13 +20,12 @@ const ConnectionMethodModal = ({ open, onClose, onSelectMethod, whatsAppId }) =>
 	const [phoneError, setPhoneError] = useState("");
 
 	const handlePhoneChange = (event) => {
-		const value = event.target.value.replace(/\D/g, ""); // Remove caracteres não numéricos
+		const value = event.target.value.replace(/\D/g, ""); 
 		setPhoneNumber(value);
 		setPhoneError("");
 	};
 
 	const validatePhoneNumber = (phone) => {
-		// Validação básica para número brasileiro (11 dígitos com DDD)
 		if (!phone) {
 			return "Número de telefone é obrigatório";
 		}
@@ -36,7 +35,6 @@ const ConnectionMethodModal = ({ open, onClose, onSelectMethod, whatsAppId }) =>
 		if (phone.length > 15) {
 			return "Número muito longo";
 		}
-		// Verifica se começa com código do país (opcional)
 		if (phone.length === 11 && !phone.startsWith("55")) {
 			return "Para números brasileiros, use o formato: 5511999999999";
 		}
@@ -50,7 +48,6 @@ const ConnectionMethodModal = ({ open, onClose, onSelectMethod, whatsAppId }) =>
 			return;
 		}
 
-		// Formatar número para incluir código do país se necessário
 		let formattedNumber = phoneNumber;
 		if (phoneNumber.length === 11 && !phoneNumber.startsWith("55")) {
 			formattedNumber = "55" + phoneNumber;
@@ -73,11 +70,9 @@ const ConnectionMethodModal = ({ open, onClose, onSelectMethod, whatsAppId }) =>
 
 	const formatPhoneDisplay = (phone) => {
 		if (phone.length === 11) {
-			// Formato: (11) 99999-9999
 			return `(${phone.slice(0, 2)}) ${phone.slice(2, 7)}-${phone.slice(7)}`;
 		}
 		if (phone.length === 13 && phone.startsWith("55")) {
-			// Formato: +55 (11) 99999-9999
 			return `+55 (${phone.slice(2, 4)}) ${phone.slice(4, 9)}-${phone.slice(9)}`;
 		}
 		return phone;
@@ -106,7 +101,6 @@ const ConnectionMethodModal = ({ open, onClose, onSelectMethod, whatsAppId }) =>
 			</DialogTitle>
 
 			<DialogContent sx={{ px: 3, py: 2 }}>
-				{/* Opção QR Code */}
 				<Box sx={{ mb: 3 }}>
 					<Button
 						variant="outlined"
@@ -144,7 +138,6 @@ const ConnectionMethodModal = ({ open, onClose, onSelectMethod, whatsAppId }) =>
 					</Typography>
 				</Divider>
 
-				{/* Opção Pairing Code */}
 				<Box>
 					<Typography variant="subtitle1" fontWeight={600} sx={{ mb: 2 }}>
 						<Phone sx={{ mr: 1, verticalAlign: "middle" }} />

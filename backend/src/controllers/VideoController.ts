@@ -1,7 +1,6 @@
 import { Request, Response } from "express";
 import { getIO } from "../libs/socket";
 
-// Estendendo a interface Request para incluir o user
 declare module "express" {
   interface Request {
     user: {
@@ -20,11 +19,9 @@ import ShowVideoService from "../services/VideoServices/ShowVideoService";
 export const index = async (req: Request, res: Response): Promise<Response> => {
   const { searchParam } = req.query;
   
-  // Verificar se é uma requisição via API token ou usuário normal
-  let userId = "1"; // ID padrão para API token
-  let isAdmin = true; // API token tem acesso de admin por padrão
+  let userId = "1"; 
+  let isAdmin = true; 
   
-  // Se req.user existir, usar as informações do usuário
   if (req.user) {
     userId = req.user.id;
     isAdmin = req.user.profile === "admin";

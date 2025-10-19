@@ -65,7 +65,7 @@ const useStyles = makeStyles(theme => ({
   tooltip: {
     backgroundColor: "#f5f5f9",
     color: "rgba(0, 0, 0, 0.87)",
-    fontSize: "0.875rem", // Equivalente a 14px
+    fontSize: "0.875rem", 
     border: "1px solid #dadde9",
     maxWidth: 450
   },
@@ -76,8 +76,8 @@ const useStyles = makeStyles(theme => ({
     marginBottom: 2
   },
   cardHeader: {
-    backgroundColor: "#3f51b5", // Equivalente a theme.palette.primary.main
-    color: "#fff" // Equivalente a theme.palette.primary.contrastText
+    backgroundColor: "#3f51b5", 
+    color: "#fff" 
   },
   statusIcon: {
     fontSize: 48,
@@ -92,31 +92,31 @@ const useStyles = makeStyles(theme => ({
     fontWeight: "bold"
   },
   statusOnline: {
-    color: "#4caf50" // Equivalente a green[500]
+    color: "#4caf50" 
   },
   statusOffline: {
-    color: "#f44336" // Equivalente a red[500]
+    color: "#f44336" 
   },
   statusWarning: {
-    color: "#fbc02d" // Equivalente a yellow[700]
+    color: "#fbc02d" 
   },
   latencyGood: {
-    backgroundColor: "#4caf50", // Equivalente a green[500]
+    backgroundColor: "#4caf50", 
     color: "#fff"
   },
   latencyMedium: {
-    backgroundColor: "#fbc02d", // Equivalente a yellow[700]
+    backgroundColor: "#fbc02d", 
     color: "#000"
   },
   latencyBad: {
-    backgroundColor: "#f44336", // Equivalente a red[500]
+    backgroundColor: "#f44336", 
     color: "#fff"
   },
   interfaceCard: {
     marginBottom: 1
   },
   interfaceHeader: {
-    backgroundColor: "#1976d2", // Equivalente a blue[700]
+    backgroundColor: "#1976d2", 
     color: "#fff",
     padding: 1
   },
@@ -124,11 +124,11 @@ const useStyles = makeStyles(theme => ({
     padding: 1
   },
   interfaceStatusUp: {
-    color: "#4caf50", // Equivalente a green[500]
+    color: "#4caf50", 
     fontWeight: "bold"
   },
   interfaceStatusDown: {
-    color: "#f44336", // Equivalente a red[500]
+    color: "#f44336", 
     fontWeight: "bold"
   },
   statsGrid: {
@@ -136,26 +136,25 @@ const useStyles = makeStyles(theme => ({
   },
   statsItem: {
     padding: 1,
-    border: "1px solid rgba(0, 0, 0, 0.12)", // Equivalente a theme.palette.divider
+    border: "1px solid rgba(0, 0, 0, 0.12)", 
     borderRadius: 4,
     textAlign: "center"
   },
   statsLabel: {
     fontSize: "0.75rem",
-    color: "rgba(0, 0, 0, 0.6)" // Equivalente a theme.palette.text.secondary
+    color: "rgba(0, 0, 0, 0.6)" 
   },
   statsValue: {
     fontWeight: "bold"
   },
   lastUpdated: {
     marginTop: 2,
-    color: "rgba(0, 0, 0, 0.6)", // Equivalente a theme.palette.text.secondary
+    color: "rgba(0, 0, 0, 0.6)", 
     fontSize: "0.875rem",
     fontStyle: "italic"
   }
 }));
 
-// Função para formatar bytes em unidades legíveis
 const formatBytes = (bytes, decimals = 2) => {
   if (bytes === 0) return "0 Bytes";
   
@@ -168,7 +167,6 @@ const formatBytes = (bytes, decimals = 2) => {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
 };
 
-// Função para classificar a latência
 const getLatencyClass = (latency) => {
   if (latency < 50) return "latencyGood";
   if (latency < 150) return "latencyMedium";

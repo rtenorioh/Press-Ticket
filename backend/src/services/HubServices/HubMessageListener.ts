@@ -206,15 +206,8 @@ const HubMessageListener = async (
         ]
       });
 
-      // return ticket;
     }
 
-    // const ticket = await CreateOrUpdateTicketService({
-    //   contactId: contact.id,
-    //   channel,
-    //   contents,
-    //   whatsapp
-    // });
 
     if (contents[0]?.type === "text") {
       await CreateMessageService({

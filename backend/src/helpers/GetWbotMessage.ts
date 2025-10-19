@@ -9,13 +9,11 @@ export const GetWbotMessage = async (
 ): Promise<WbotMessage> => {
   const wbot = await GetTicketWbot(ticket);
 
-  // Validar número do contato
   if (!ticket.contact.number) {
     console.error("Número do contato não encontrado no ticket:", ticket.id);
     throw new AppError("ERR_INVALID_CONTACT_NUMBER");
   }
 
-  // Construir chatId com validação - verificar se já tem @c.us ou @g.us
   let chatId = ticket.contact.number;
   if (!chatId.includes("@")) {
     chatId = `${chatId}@${ticket.isGroup ? "g" : "c"}.us`;
@@ -33,7 +31,6 @@ export const GetWbotMessage = async (
   } catch (getChatError: any) {
     console.error(`[GetWbotMessage] Erro ao buscar chat ${chatId}:`, getChatError.message);
     
-    // Tentar buscar a mensagem diretamente pelo ID como fallback
     try {
       console.log(`[GetWbotMessage] Tentando buscar mensagem diretamente pelo ID: ${messageId}`);
       const directMessage = await wbot.getMessageById(messageId);

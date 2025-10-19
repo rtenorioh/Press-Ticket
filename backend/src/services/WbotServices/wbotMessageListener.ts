@@ -493,10 +493,8 @@ const verifyMessage = async (
   }
 
   try {
-    // Primeiro criar a mensagem no banco
     await CreateMessageService({ messageData });
     
-    // Depois atualizar o lastMessage do ticket
     if (msg.fromMe === true) {
       await ticket.update({
         fromMe: msg.fromMe,
@@ -566,7 +564,7 @@ const resetGreetingCounts = () => {
 
 const startGreetingCountResetTimer = () => {
   clearTimeout(resetGreetingCountTimeout);
-  resetGreetingCountTimeout = setTimeout(resetGreetingCounts, 1800000); // 30 minutos
+  resetGreetingCountTimeout = setTimeout(resetGreetingCounts, 1800000); 
 };
 
 const verifyQueue = async (
@@ -832,7 +830,6 @@ const handleMessage = async (
   try {
     logger.info(`[MSG_RECEBIDA] Nova mensagem recebida: ID=${msg.id?.id || 'unknown'}, Timestamp=${new Date().toISOString()}`);
     
-    // Log detalhado do objeto da mensagem para debug
     logger.info(`[MSG_DETALHES] Detalhes básicos: ${JSON.stringify({
       id: msg.id,
       fromMe: msg.fromMe,
@@ -858,7 +855,6 @@ const handleMessage = async (
   });
 
   if (Integrationdb?.value) {
-    // Buscar o ticket antes de enviar para o n8n
     const contact = await verifyContact(msg.fromMe ? await wbot.getContactById(msg.to) : await msg.getContact());
     
     const chat = await msg.getChat();
@@ -896,8 +892,6 @@ const handleMessage = async (
       await request(options); 
     } catch (error) {
       console.error("Erro ao enviar dados para o n8n:", error);
-      // Usar throw new Error pode interromper o fluxo de processamento da mensagem
-      // É melhor apenas logar o erro
     }
   }
 
@@ -925,12 +919,8 @@ const handleMessage = async (
     let queueId;
 
     if (msg.fromMe) {
-      // messages sent automatically by wbot have a special character in front of it
-      // if so, this message was already been stored in database;
       if (/\u200e/.test(msg.body[0])) return;
 
-      // media messages sent from me from cell phone, first comes with "hasMedia = false" and type = "image/ptt/etc"
-      // in this case, return and let this message be handled by "media_uploaded" event, when it will have "hasMedia = true"
 
       if (
         !msg.hasMedia &&
@@ -962,7 +952,6 @@ const handleMessage = async (
 
       groupContact = await verifyContact(msgGroupContact);
 
-      // Enriquecer dados do contato de grupo: nome, JID completo e foto
       try {
         const fullJid = (chat as any)?.id?._serialized
           || (msgGroupContact as any)?.id?._serialized
@@ -976,7 +965,7 @@ const handleMessage = async (
         await groupContact.update({
           isGroup: true,
           name: groupName || groupContact.name,
-          number: fullJid, // armazenar JID serializado para uso em APIs de grupo
+          number: fullJid, 
           profilePicUrl: profilePicUrl || groupContact.profilePicUrl
         });
 
@@ -995,7 +984,6 @@ const handleMessage = async (
 
     const contact = await verifyContact(msgContact);
 
-    // Atualizar lastContactAt quando o contato envia uma mensagem (não é do usuário)
     if (!msg.fromMe) {
       try {
         await contact.update({
@@ -1474,7 +1462,6 @@ const handleMsgAck = async (msg: WbotMessage, ack: MessageAck) => {
       
       logger.info(`[ACK_PERFORMANCE] Tempo para atualizar ACK no banco: ${afterUpdate - beforeUpdate}ms`);
 
-      // Registrar timestamp antes do envio via socket
       const beforeEmit = new Date().getTime();
       io.to(messageToUpdate.ticketId.toString()).emit("appMessage", {
         action: "update",
@@ -1488,13 +1475,10 @@ const handleMsgAck = async (msg: WbotMessage, ack: MessageAck) => {
       console.log(`[ACK_IGNORADO] ACK ignorado: valor atual (${currentAck}) >= novo valor (${ackToUpdate})`);
     }
     
-    // Verificar se há outras mensagens do mesmo ticket que precisam ser sincronizadas
-    // Apenas quando o ACK for 2 ou maior (recebido no dispositivo ou lido)
     if (ackToUpdate >= 2) {
       try {
         logger.info(`[ACK_BATCH_CHECK] Verificando outras mensagens do ticket ${messageToUpdate.ticketId} para sincronização`);
         
-        // Buscar outras mensagens anteriores do mesmo ticket e atualizar o ACK
         const messagesToUpdate = await Message.findAll({
           where: {
             ticketId: messageToUpdate.ticketId,
@@ -1507,11 +1491,9 @@ const handleMsgAck = async (msg: WbotMessage, ack: MessageAck) => {
         if (messagesToUpdate.length > 0) {
           logger.info(`[ACK_BATCH_UPDATE] Encontradas ${messagesToUpdate.length} mensagens para atualização em lote`);
           
-          // Atualizar mensagens em lote
           for (const msg of messagesToUpdate) {
             await msg.update({ ack: ackToUpdate >= 3 ? 3 : 2 });
             
-            // Emitir evento para cada mensagem atualizada
             io.to(msg.ticketId.toString()).emit("appMessage", {
               action: "update",
               message: msg
@@ -1557,11 +1539,9 @@ const handleMsgEdit = async (
     console.log(`[handleMsgEdit] Corpo NOVO do evento: "${newBody}"`);
     console.log(`[handleMsgEdit] ========================================`);
     
-    // Verificar se o corpo realmente mudou (usar oldBody do evento)
     if (oldBody && newBody && oldBody !== newBody) {
       console.log(`[handleMsgEdit] Corpo mudou, verificando se precisa salvar histórico`);
       
-      // Verificar se já existe um histórico com esse corpo para evitar duplicatas
       const existingHistory = await OldMessage.findOne({
         where: {
           messageId: msg.id.id,
@@ -1582,7 +1562,6 @@ const handleMsgEdit = async (
       console.log(`[handleMsgEdit] Sem mudança no corpo ou valores inválidos`);
     }
 
-    // Atualizar mensagem apenas se o corpo no banco for diferente do novo
     if (editedMsg.body !== newBody) {
       await editedMsg.update({ body: newBody, isEdited: true });
       console.log(`[handleMsgEdit] Mensagem atualizada no banco: "${newBody}"`);
@@ -1674,11 +1653,11 @@ const wbotMessageListener = async (wbot: Session): Promise<void> => {
   if (wbot.id) {
     setInterval(() => {
       updatePendingMessages(wbot.id!);
-    }, 30 * 60 * 1000); // 30 minutos
+    }, 30 * 60 * 1000); 
     
     setTimeout(() => {
       updatePendingMessages(wbot.id!);
-    }, 5 * 60 * 1000); // 5 minutos após iniciar
+    }, 5 * 60 * 1000); 
   }
 };
 

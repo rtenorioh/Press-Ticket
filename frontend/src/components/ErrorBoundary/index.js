@@ -14,7 +14,6 @@ class ErrorBoundary extends React.Component {
     componentDidCatch(error, errorInfo) {
         console.error("Uncaught error:", error, errorInfo);
         
-        // Registrar o erro no serviço de logs
         try {
             ErrorLogService.logError({
                 message: error.message || "Erro não identificado",
@@ -25,7 +24,6 @@ class ErrorBoundary extends React.Component {
                 console.error("Falha ao registrar erro:", err);
             });
         } catch (logError) {
-            // Garantir que erros no serviço de logs não afetem a funcionalidade do ErrorBoundary
             console.error("Erro ao tentar registrar erro:", logError);
         }
     }

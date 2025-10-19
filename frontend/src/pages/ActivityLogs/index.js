@@ -70,7 +70,7 @@ const useStyles = makeStyles(theme => ({
   tooltip: {
     backgroundColor: "#f5f5f9",
     color: "rgba(0, 0, 0, 0.87)",
-    fontSize: "0.875rem", // Equivalente a 14px
+    fontSize: "0.875rem", 
     border: "1px solid #dadde9",
     maxWidth: 450
   },
@@ -107,7 +107,7 @@ const useStyles = makeStyles(theme => ({
     position: "absolute",
     right: 1,
     top: 1,
-    color: "#9e9e9e" // Equivalente a grey[500]
+    color: "#9e9e9e" 
   },
   detailsContainer: {
     padding: 2
@@ -118,7 +118,7 @@ const useStyles = makeStyles(theme => ({
   },
   detailsItem: {
     padding: 1,
-    borderBottom: "1px solid rgba(0, 0, 0, 0.12)" // Equivalente a theme.palette.divider
+    borderBottom: "1px solid rgba(0, 0, 0, 0.12)" 
   },
   detailsLabel: {
     fontWeight: "bold",
@@ -282,7 +282,6 @@ const ActivityLogs = () => {
         </Typography>
         
         {Object.entries(entityDetails).map(([key, value]) => {
-          // Ignorar campos complexos ou vazios
           if (typeof value === "object" || value === null) return null;
           
           return (

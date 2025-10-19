@@ -547,7 +547,6 @@ const ApiKey = () => {
                             </Box>
                         </Box>
                         
-                        {/* Acordeão de Contatos */}
                         <Accordion sx={{ mb: 1, boxShadow: '0 1px 3px rgba(0,0,0,0.1)', borderRadius: '4px !important', '&:before': { display: 'none' } }}>
                             <AccordionSummary
                                 expandIcon={<ExpandMoreIcon />}
@@ -581,7 +580,6 @@ const ApiKey = () => {
                             </AccordionDetails>
                         </Accordion>
                         
-                        {/* Acordeão de Mensagens */}
                         <Accordion sx={{ mb: 1, boxShadow: '0 1px 3px rgba(0,0,0,0.1)', borderRadius: '4px !important', '&:before': { display: 'none' } }}>
                             <AccordionSummary
                                 expandIcon={<ExpandMoreIcon />}
@@ -615,7 +613,6 @@ const ApiKey = () => {
                             </AccordionDetails>
                         </Accordion>
                         
-                        {/* Acordeão de Setores */}
                         <Accordion sx={{ mb: 1, boxShadow: '0 1px 3px rgba(0,0,0,0.1)', borderRadius: '4px !important', '&:before': { display: 'none' } }}>
                             <AccordionSummary
                                 expandIcon={<ExpandMoreIcon />}
@@ -649,7 +646,6 @@ const ApiKey = () => {
                             </AccordionDetails>
                         </Accordion>
                         
-                        {/* Acordeão de Tags */}
                         <Accordion sx={{ mb: 1, boxShadow: '0 1px 3px rgba(0,0,0,0.1)', borderRadius: '4px !important', '&:before': { display: 'none' } }}>
                             <AccordionSummary
                                 expandIcon={<ExpandMoreIcon />}
@@ -683,7 +679,6 @@ const ApiKey = () => {
                             </AccordionDetails>
                         </Accordion>
                         
-                        {/* Acordeão de Tickets */}
                         <Accordion sx={{ mb: 1, boxShadow: '0 1px 3px rgba(0,0,0,0.1)', borderRadius: '4px !important', '&:before': { display: 'none' } }}>
                             <AccordionSummary
                                 expandIcon={<ExpandMoreIcon />}
@@ -717,7 +712,6 @@ const ApiKey = () => {
                             </AccordionDetails>
                         </Accordion>
                         
-                        {/* Acordeão de WhatsApp */}
                         <Accordion sx={{ mb: 1, boxShadow: '0 1px 3px rgba(0,0,0,0.1)', borderRadius: '4px !important', '&:before': { display: 'none' } }}>
                             <AccordionSummary
                                 expandIcon={<ExpandMoreIcon />}
@@ -751,7 +745,6 @@ const ApiKey = () => {
                             </AccordionDetails>
                         </Accordion>
                         
-                        {/* Acordeão de Sessões de WhatsApp */}
                         <Accordion sx={{ mb: 1, boxShadow: '0 1px 3px rgba(0,0,0,0.1)', borderRadius: '4px !important', '&:before': { display: 'none' } }}>
                             <AccordionSummary
                                 expandIcon={<ExpandMoreIcon />}
@@ -785,7 +778,6 @@ const ApiKey = () => {
                             </AccordionDetails>
                         </Accordion>
 
-                        {/* Acordeão de Logs de Atividade */}
                         <Accordion sx={{ mb: 1, boxShadow: '0 1px 3px rgba(0,0,0,0.1)', borderRadius: '4px !important', '&:before': { display: 'none' } }}>
                             <AccordionSummary
                                 expandIcon={<ExpandMoreIcon />}
@@ -819,7 +811,6 @@ const ApiKey = () => {
                             </AccordionDetails>
                         </Accordion>
 
-                        {/* Acordeão de Backups */}
                         <Accordion sx={{ mb: 1, boxShadow: '0 1px 3px rgba(0,0,0,0.1)', borderRadius: '4px !important', '&:before': { display: 'none' } }}>
                             <AccordionSummary
                                 expandIcon={<ExpandMoreIcon />}
@@ -853,7 +844,6 @@ const ApiKey = () => {
                             </AccordionDetails>
                         </Accordion>
 
-                        {/* Acordeão de Logs de Erro */}
                         <Accordion sx={{ mb: 1, boxShadow: '0 1px 3px rgba(0,0,0,0.1)', borderRadius: '4px !important', '&:before': { display: 'none' } }}>
                             <AccordionSummary
                                 expandIcon={<ExpandMoreIcon />}
@@ -887,7 +877,6 @@ const ApiKey = () => {
                             </AccordionDetails>
                         </Accordion>
 
-                        {/* Acordeão de Monitoramento de Rede */}
                         <Accordion sx={{ mb: 1, boxShadow: '0 1px 3px rgba(0,0,0,0.1)', borderRadius: '4px !important', '&:before': { display: 'none' } }}>
                             <AccordionSummary
                                 expandIcon={<ExpandMoreIcon />}
@@ -921,7 +910,6 @@ const ApiKey = () => {
                             </AccordionDetails>
                         </Accordion>
 
-                        {/* Acordeão de Monitoramento de Filas */}
                         <Accordion sx={{ mb: 1, boxShadow: '0 1px 3px rgba(0,0,0,0.1)', borderRadius: '4px !important', '&:before': { display: 'none' } }}>
                             <AccordionSummary
                                 expandIcon={<ExpandMoreIcon />}
@@ -954,8 +942,6 @@ const ApiKey = () => {
                                 </Grid>
                             </AccordionDetails>
                         </Accordion>
-
-                        {/* Acordeão de Atualização do Sistema */}
                         <Accordion sx={{ mb: 1, boxShadow: '0 1px 3px rgba(0,0,0,0.1)', borderRadius: '4px !important', '&:before': { display: 'none' } }}>
                             <AccordionSummary
                                 expandIcon={<ExpandMoreIcon />}
@@ -989,7 +975,6 @@ const ApiKey = () => {
                             </AccordionDetails>
                         </Accordion>
 
-                        {/* Acordeão de Versão e Biblioteca WhatsApp */}
                         <Accordion sx={{ mb: 1, boxShadow: '0 1px 3px rgba(0,0,0,0.1)', borderRadius: '4px !important', '&:before': { display: 'none' } }}>
                             <AccordionSummary
                                 expandIcon={<ExpandMoreIcon />}
@@ -1023,7 +1008,6 @@ const ApiKey = () => {
                             </AccordionDetails>
                         </Accordion>
 
-                        {/* Acordeão de Sistema e Recursos */}
                         <Accordion sx={{ mb: 1, boxShadow: '0 1px 3px rgba(0,0,0,0.1)', borderRadius: '4px !important', '&:before': { display: 'none' } }}>
                             <AccordionSummary
                                 expandIcon={<ExpandMoreIcon />}
@@ -1057,7 +1041,6 @@ const ApiKey = () => {
                             </AccordionDetails>
                         </Accordion>
 
-                        {/* Acordeão de Vídeos */}
                         <Accordion sx={{ mb: 1, boxShadow: '0 1px 3px rgba(0,0,0,0.1)', borderRadius: '4px !important', '&:before': { display: 'none' } }}>
                             <AccordionSummary
                                 expandIcon={<ExpandMoreIcon />}
@@ -1091,7 +1074,6 @@ const ApiKey = () => {
                             </AccordionDetails>
                         </Accordion>
 
-                        {/* Acordeão de Usuários */}
                         <Accordion sx={{ mb: 1, boxShadow: '0 1px 3px rgba(0,0,0,0.1)', borderRadius: '4px !important', '&:before': { display: 'none' } }}>
                             <AccordionSummary
                                 expandIcon={<ExpandMoreIcon />}
@@ -1125,7 +1107,6 @@ const ApiKey = () => {
                             </AccordionDetails>
                         </Accordion>
 
-                        {/* Acordeão de Respostas Rápidas */}
                         <Accordion sx={{ mb: 1, boxShadow: '0 1px 3px rgba(0,0,0,0.1)', borderRadius: '4px !important', '&:before': { display: 'none' } }}>
                             <AccordionSummary
                                 expandIcon={<ExpandMoreIcon />}
@@ -1159,7 +1140,6 @@ const ApiKey = () => {
                             </AccordionDetails>
                         </Accordion>
 
-                        {/* Acordeão de Status de Clientes */}
                         <Accordion sx={{ mb: 1, boxShadow: '0 1px 3px rgba(0,0,0,0.1)', borderRadius: '4px !important', '&:before': { display: 'none' } }}>
                             <AccordionSummary
                                 expandIcon={<ExpandMoreIcon />}
@@ -1193,7 +1173,6 @@ const ApiKey = () => {
                             </AccordionDetails>
                         </Accordion>
 
-                        {/* Acordeão de Grupos do WhatsApp */}
                         <Accordion sx={{ mb: 1, boxShadow: '0 1px 3px rgba(0,0,0,0.1)', borderRadius: '4px !important', '&:before': { display: 'none' } }}>
                             <AccordionSummary
                                 expandIcon={<ExpandMoreIcon />}

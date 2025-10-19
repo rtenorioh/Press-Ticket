@@ -8,7 +8,7 @@ const api = axios.create({
 let isRefreshing = false;
 let failedQueue = [];
 let lastRefreshTime = 0;
-const REFRESH_THRESHOLD = 25 * 60 * 1000; // 25 minutos em milissegundos
+const REFRESH_THRESHOLD = 25 * 60 * 1000; 
 
 const processQueue = (error, token = null) => {
   failedQueue.forEach(prom => {

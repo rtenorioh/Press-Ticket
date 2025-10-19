@@ -92,15 +92,11 @@ const ContactDrawer = ({ open, handleDrawerClose, contact, loading, isGroup, mes
   const { user } = useContext(AuthContext);
   const [modalOpen, setModalOpen] = useState(false);
   const { t } = useTranslation();
-  // Tratar 3 condições:
-  // 1) contato individual -> usar contact
-  // 2) contato que está em um grupo (participante) -> quando isGroup=true e NÃO é o contato do grupo, usar messageContact
-  // 3) contato que é um grupo -> quando contact.isGroup=true, priorizar contact (dados do grupo)
   const displayContact = (() => {
     if (isGroup) {
-      if (contact?.isGroup) return contact; // contato é o grupo
-      if (messageContact) return messageContact; // participante do grupo
-      return contact; // fallback
+      if (contact?.isGroup) return contact; 
+      if (messageContact) return messageContact; 
+      return contact; 
     }
     return contact;
   })();
@@ -182,7 +178,6 @@ const ContactDrawer = ({ open, handleDrawerClose, contact, loading, isGroup, mes
               </Button>
           </ContactHeader>
           {isGroupContact && groupJid && (
-            // Para ações de grupo precisamos do JID do grupo (ex.: 12345-678@g.us)
             <GroupActionsPanel groupId={groupJid} />
           )}
           <TagsContainer contact={contact} sx={{ marginTop: 2 }} />

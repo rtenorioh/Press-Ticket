@@ -17,13 +17,11 @@ const EmitTicketCounterService = {
         counters
       });
       
-      // Emitir evento para todos os clientes inscritos no canal ticketCounter
       io.to("ticketCounter").emit("ticket", {
         action: "updateCounter",
         counters
       });
       
-      // Emitir também para os canais específicos de status para garantir que todos recebam
       io.to("open").emit("ticket", {
         action: "updateCounter",
         counters

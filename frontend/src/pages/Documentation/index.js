@@ -12,17 +12,12 @@ import {
   CardHeader, 
   Divider,
   Box,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
   Link
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { Link as RouterLink } from "react-router-dom";
 import { Can } from "../../components/Can";
 
-// Importando os ícones necessários
 import DashboardOutlined from "@mui/icons-material/DashboardOutlined";
 import WhatsApp from "@mui/icons-material/WhatsApp";
 import ContactPhoneOutlined from "@mui/icons-material/ContactPhoneOutlined";
@@ -45,10 +40,8 @@ import BackupIcon from "@mui/icons-material/Backup";
 import HistoryIcon from "@mui/icons-material/History";
 import NetworkCheckIcon from "@mui/icons-material/NetworkCheck";
 import QueueMonitorIcon from '@mui/icons-material/Assessment';
-import SystemHealthIcon from '@mui/icons-material/HealthAndSafety';
 import SystemUpdateAltIcon from "@mui/icons-material/SystemUpdateAlt";
 import SystemUpdateIcon from "@mui/icons-material/SystemUpdate";
-import MonitorIcon from "@mui/icons-material/Monitor";
 import LabelOutlined from "@mui/icons-material/LabelOutlined";
 
 const PREFIX = 'Documentation';

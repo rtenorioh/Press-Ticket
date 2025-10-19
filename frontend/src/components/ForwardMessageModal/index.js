@@ -77,10 +77,8 @@ const ForwardMessageModal = ({ open, onClose, selectedMessages }) => {
 
     setSending(true);
     try {
-      // Para cada contato selecionado, encaminhar mensagens usando o novo endpoint
       const promises = selectedContacts.map(async (contact) => {
         try {
-          // Usar o endpoint de forward que busca ou cria ticket automaticamente
           return api.post(`/messages/0/forward`, {
             contactId: contact.id,
             messages: selectedMessages.map(msg => ({
