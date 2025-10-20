@@ -494,7 +494,7 @@ const Contacts = () => {
         setBlockedStatus(prev => ({ ...prev, [contact.id]: true }));
       }
     } catch (err) {
-      toastError(err);
+      toastError(err, t);
     } finally {
       setBlockLoadingId(null);
     }

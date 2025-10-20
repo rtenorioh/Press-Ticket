@@ -42,12 +42,6 @@ class Whatsapp extends Model<Whatsapp> {
   number: string;
 
   @Column
-  battery: string;
-
-  @Column
-  plugged: boolean;
-
-  @Column
   retries: number;
 
   @Column(DataType.TEXT)
