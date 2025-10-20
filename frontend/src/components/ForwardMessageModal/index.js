@@ -79,7 +79,9 @@ const ForwardMessageModal = ({ open, onClose, selectedMessages }) => {
     try {
       const promises = selectedContacts.map(async (contact) => {
         try {
-          return api.post(`/messages/0/forward`, {
+          const ticketId = contact.ticketId || 0;
+          
+          return api.post(`/messages/${ticketId}/forward`, {
             contactId: contact.id,
             messages: selectedMessages.map(msg => ({
               id: msg.id,
@@ -98,9 +100,10 @@ const ForwardMessageModal = ({ open, onClose, selectedMessages }) => {
       await Promise.all(promises);
       toastSuccess(t("forwardMessages.forwardedSuccess"));
       onClose();
+      setSelectedContacts([]);
     } catch (err) {
       console.error("Erro ao encaminhar mensagens:", err);
-      toastError(err);
+      toastError(err, t);
     } finally {
       setSending(false);
     }

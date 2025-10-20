@@ -12,9 +12,18 @@ const GetDefaultWhatsApp = async (
     }
   }
 
-  const defaultWhatsapp = await Whatsapp.findOne({
+  let defaultWhatsapp = await Whatsapp.findOne({
     where: { isDefault: true, type: "wwebjs" }
   });
+
+  if (!defaultWhatsapp) {
+    defaultWhatsapp = await Whatsapp.findOne({
+      where: { 
+        status: "CONNECTED",
+        type: "wwebjs"
+      }
+    });
+  }
 
   if (!defaultWhatsapp) {
     throw new AppError("ERR_NO_DEF_WAPP_FOUND");

@@ -571,7 +571,16 @@ export const forwardMessages = async (
     });
   } catch (error) {
     console.error("Erro ao encaminhar mensagens:", error);
-    return res.status(500).json({ error: "Erro ao encaminhar mensagens" });
+    
+    if (error.message === "ERR_NO_DEF_WAPP_FOUND") {
+      return res.status(400).json({ 
+        error: "Nenhuma conexão WhatsApp ativa encontrada. Por favor, conecte um WhatsApp antes de encaminhar mensagens." 
+      });
+    }
+    
+    return res.status(500).json({ 
+      error: error.message || "Erro ao encaminhar mensagens" 
+    });
   }
 };
 
