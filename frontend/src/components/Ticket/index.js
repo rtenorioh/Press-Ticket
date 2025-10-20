@@ -2,7 +2,6 @@ import { Paper } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { toast } from "react-toastify";
 import { EditMessageProvider } from "../../context/EditingMessage/EditingMessageContext";
 import { ReplyMessageProvider } from "../../context/ReplyingMessage/ReplyingMessageContext";
 import toastError from "../../errors/toastError";
@@ -14,6 +13,7 @@ import MessagesList from "../MessagesList";
 import TicketActionButtons from "../TicketActionButtons";
 import TicketHeader from "../TicketHeader";
 import TicketInfo from "../TicketInfo";
+import { useTranslation } from "react-i18next";
 
 const drawerWidth = 320;
 
@@ -91,9 +91,9 @@ const MainWrapper = styled(Paper)(({ theme, open }) => ({
 }));
 
 const Ticket = () => {
+  const { t } = useTranslation();
   const { ticketId } = useParams();
   const navigate = useNavigate();
-
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [contact, setContact] = useState({});
@@ -119,7 +119,7 @@ const Ticket = () => {
           }
         } catch (err) {
           setLoading(false);
-          toastError(err);
+          toastError(err, t);
         }
       };
       fetchTicket();

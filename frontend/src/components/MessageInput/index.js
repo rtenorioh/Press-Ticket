@@ -54,6 +54,7 @@ import RecordingTimer from "./RecordingTimer";
 import FormatBoldIcon from "@mui/icons-material/FormatBold";
 import FormatItalicIcon from "@mui/icons-material/FormatItalic";
 import StrikethroughSIcon from "@mui/icons-material/StrikethroughS";
+
 const Mp3Recorder = new MicRecorder({ bitRate: 128 });
 
 const MainWrapper = styled(Paper)(({ theme }) => ({
@@ -450,7 +451,7 @@ const MessageInput = ({ ticketStatus }) => {
           setMentionsList([]);
         }
         
-        if (cId) {
+        if (cId && !isGroupChat) {
           try {
             const { data: status } = await api.get(`/contacts/${cId}/block-status`);
             setIsContactBlocked(Boolean(status?.isBlocked));
@@ -461,7 +462,7 @@ const MessageInput = ({ ticketStatus }) => {
           setIsContactBlocked(false);
         }
       } catch (err) {
-        toastError(err);
+        toastError(err, t);
       }
     };
 
@@ -469,12 +470,12 @@ const MessageInput = ({ ticketStatus }) => {
   }, [ticketId]);
 
   const refreshBlockedStatus = useCallback(async () => {
-    if (!contactId) return;
+    if (!contactId || isGroup) return;
     try {
       const { data } = await api.get(`/contacts/${contactId}/block-status`);
       setIsContactBlocked(Boolean(data?.isBlocked));
     } catch (_) {}
-  }, [contactId]);
+  }, [contactId, isGroup]);
 
   useEffect(() => {
     let intervalId;
@@ -787,10 +788,10 @@ const MessageInput = ({ ticketStatus }) => {
       
       try {
         let response;
-        if (channelType !== null) {
-          response = await api.post(`/hub-message/${ticketId}`, message);
-        } else {
+        if (channelType === "wwebjs") {
           response = await api.post(`/messages/${ticketId}`, message);
+        } else {
+          response = await api.post(`/hub-message/${ticketId}`, message);
         }
         
         if (response && response.data) {
@@ -881,10 +882,10 @@ const MessageInput = ({ ticketStatus }) => {
     formData.append("fromMe", true);
 
     try {
-      if (channelType !== null) {
-        await api.post(`/hub-message/${ticketId}`, formData);
-      } else {
+      if (channelType === "wwebjs") {
         await api.post(`/messages/${ticketId}`, formData);
+      } else {
+        await api.post(`/hub-message/${ticketId}`, formData);
       }
     } catch (err) {
       toastError(err, t);
@@ -975,10 +976,11 @@ const MessageInput = ({ ticketStatus }) => {
           }
         }
       } else {
-        if (channelType !== null) {
-          response = await api.post(`/hub-message/${ticketId}`, message);
-        } else {
+        console.log("channelType", channelType);
+        if (channelType === "wwebjs") {
           response = await api.post(`/messages/${ticketId}`, message);
+        } else {
+          response = await api.post(`/hub-message/${ticketId}`, message);
         }
         
         if (response && response.data) {
@@ -1227,10 +1229,10 @@ const MessageInput = ({ ticketStatus }) => {
       formData.append("medias", blob, filename);
       formData.append("body", filename);
       formData.append("fromMe", true);
-      if (channelType !== null) {
-        await api.post(`/hub-message/${ticketId}`, formData);
-      } else {
+      if (channelType === "wwebjs") {
         await api.post(`/messages/${ticketId}`, formData);
+      } else {
+        await api.post(`/hub-message/${ticketId}`, formData);
       }
     } catch (err) {
       toastError(err, t);

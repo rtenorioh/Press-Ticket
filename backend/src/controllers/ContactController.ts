@@ -43,7 +43,7 @@ export const getBlockStatus = async (
 
   let sessionId: number | null = whatsappId ? parseInt(whatsappId as string, 10) : null;
   if (!sessionId || Number.isNaN(sessionId)) {
-    const connected = await Whatsapp.findOne({ where: { status: "CONNECTED" } });
+    const connected = await Whatsapp.findOne({ where: { status: "CONNECTED", type: "wwebjs" } });
     sessionId = connected?.id || null;
   }
   if (!sessionId) {
@@ -75,7 +75,7 @@ export const blockContact = async (
 
   let sessionId: number | null = whatsappId && Number.isInteger(whatsappId) ? Number(whatsappId) : null;
   if (!sessionId) {
-    const connected = await Whatsapp.findOne({ where: { status: "CONNECTED" } });
+    const connected = await Whatsapp.findOne({ where: { status: "CONNECTED", type: "wwebjs" } });
     sessionId = connected?.id || null;
   }
   if (!sessionId) {
@@ -118,7 +118,7 @@ export const unblockContact = async (
 
   let sessionId: number | null = whatsappId && Number.isInteger(whatsappId) ? Number(whatsappId) : null;
   if (!sessionId) {
-    const connected = await Whatsapp.findOne({ where: { status: "CONNECTED" } });
+    const connected = await Whatsapp.findOne({ where: { status: "CONNECTED", type: "wwebjs" } });
     sessionId = connected?.id || null;
   }
   if (!sessionId) {

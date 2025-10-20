@@ -391,6 +391,7 @@ const Contacts = () => {
 
   const fetchBlockedStatus = async (contact) => {
     if (!contact?.id) return;
+    if (contact?.isGroup) return;
     if (blockedStatus[contact.id] !== undefined) return;
     try {
       const { data } = await api.get(`/contacts/${contact.id}/block-status`);
@@ -480,6 +481,10 @@ const Contacts = () => {
   };
 
   const handleToggleBlock = async (contact) => {
+    if (contact?.isGroup) {
+      toast.error(t("contacts.toasts.groupNotSupported") || "Bloqueio não suportado para grupos");
+      return;
+    }
     try {
       setBlockLoadingId(contact.id);
       const { data: status } = await api.get(`/contacts/${contact.id}/block-status`);

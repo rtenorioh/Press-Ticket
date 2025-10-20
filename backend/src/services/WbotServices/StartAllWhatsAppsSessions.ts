@@ -6,10 +6,10 @@ export const StartAllWhatsAppsSessions = async (): Promise<void> => {
   const whatsapps = await ListWhatsAppsService();
   if (whatsapps.length > 0) {
     whatsapps.forEach(whatsapp => {
-      if (whatsapp.type !== null) {
-        setChannelWebhook(whatsapp, whatsapp.id.toString());
-      } else {
+      if (whatsapp.type === "wwebjs") {
         StartWhatsAppSession(whatsapp);
+      } else {
+        setChannelWebhook(whatsapp, whatsapp.id.toString());
       }
     });
   }

@@ -10,7 +10,12 @@ const GetDefaultWhatsAppByUser = async (
     return null;
   }
 
-  const defaultWhatsapp = user.whatsapps[0];
+  const wwebjsWhatsapps = user.whatsapps.filter(w => w.type === "wwebjs");
+  if (wwebjsWhatsapps.length === 0) {
+    return null;
+  }
+
+  const defaultWhatsapp = wwebjsWhatsapps[0];
 
   logger.info(
     `Found WhatsApp linked to user '${user.name}' is '${defaultWhatsapp.name}'.`

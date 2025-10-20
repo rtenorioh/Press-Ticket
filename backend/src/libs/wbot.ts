@@ -57,6 +57,7 @@ const getDavinciResponse = async (clientText: string): Promise<string> => {
     temperature: 1,
     max_tokens: 4000
   };
+
   try {
     const response = await openai.createCompletion(options);
     let botResponse = "";
@@ -117,6 +118,14 @@ const syncUnreadMessages = async (wbot: Session) => {
         console.warn(`syncUnreadMessages: falha ao carregar chats após ${maxRetries} tentativas. Detalhe:`, error);
       }
     }
+  }
+};
+
+export const listActiveWbotIds = (): number[] => {
+  try {
+    return sessions.map(s => s.id as number).filter(id => typeof id === 'number');
+  } catch {
+    return [];
   }
 };
 
@@ -189,7 +198,12 @@ export const initWbot = async (whatsapp: Whatsapp): Promise<Session> => {
       wbot.on("qr", async qr => {
         logger.info("Session:", sessionName);
         qrCode.generate(qr, { small: true });
-        await whatsapp.update({ qrcode: qr, status: "qrcode", retries: 0 });
+        await whatsapp.update({ 
+          qrcode: qr, 
+          status: "qrcode", 
+          retries: 0, 
+          type: "wwebjs" 
+        });
 
         const sessionIndex = sessions.findIndex(s => s.id === whatsapp.id);
         if (sessionIndex === -1) {
@@ -209,7 +223,8 @@ export const initWbot = async (whatsapp: Whatsapp): Promise<Session> => {
         
         await whatsapp.update({
           session: JSON.stringify(session),
-          status: "AUTHENTICATED"
+          status: "AUTHENTICATED",
+          type: "wwebjs"
         });
         
         io.emit("whatsappSession", {
@@ -249,7 +264,8 @@ export const initWbot = async (whatsapp: Whatsapp): Promise<Session> => {
           status: "CONNECTED",
           qrcode: "",
           retries: 0,
-          number: wbot.info.wid._serialized.split("@")[0]
+          number: wbot.info.wid._serialized.split("@")[0],
+          type: "wwebjs"
         });
 
         io.emit("whatsappSession", {

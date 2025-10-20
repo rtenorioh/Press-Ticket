@@ -13,7 +13,7 @@ const GetDefaultWhatsApp = async (
   }
 
   const defaultWhatsapp = await Whatsapp.findOne({
-    where: { isDefault: true }
+    where: { isDefault: true, type: "wwebjs" }
   });
 
   if (!defaultWhatsapp) {

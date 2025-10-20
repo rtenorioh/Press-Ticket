@@ -2,10 +2,13 @@ import ffmpeg from "fluent-ffmpeg";
 import fs from "fs";
 import mime from "mime-types";
 import path from "path";
+import { promisify } from "util";
 import { MessageMedia, Message as WbotMessage } from "whatsapp-web.js";
 import AppError from "../../errors/AppError";
 import GetTicketWbot from "../../helpers/GetTicketWbot";
 import Ticket from "../../models/Ticket";
+
+const writeFileAsync = promisify(fs.writeFile);
 
 import formatBody from "../../helpers/Mustache";
 
@@ -334,6 +337,28 @@ const SendWhatsAppMedia = async ({
 
     await ticket.update({ lastMessage: body || media.filename });
     
+    let savedFilename = media.filename;
+    try {
+      const downloadedMedia = await sentMessage.downloadMedia();
+      
+      if (downloadedMedia && downloadedMedia.data) {
+        if (!downloadedMedia.filename) {
+          const ext = downloadedMedia.mimetype.split("/")[1].split(";")[0];
+          const shortTime = new Date().getTime().toString().slice(-6);
+          downloadedMedia.filename = `sent_${shortTime}.${ext}`;
+        } else {
+          const shortTime = new Date().getTime().toString().slice(-6);
+          downloadedMedia.filename = `${shortTime}_${downloadedMedia.filename}`;
+        }
+        
+        const publicPath = path.join(__dirname, "..", "..", "..", "public", downloadedMedia.filename);
+        await writeFileAsync(publicPath, downloadedMedia.data, "base64");
+        savedFilename = downloadedMedia.filename;
+      }
+    } catch (downloadErr) {
+      console.warn("[SendWhatsAppMedia] Não foi possível baixar/salvar a mídia enviada:", downloadErr?.message);
+    }
+    
     const messageData = {
       id: sentMessage.id.id,
       ticketId: ticket.id,
@@ -341,6 +366,7 @@ const SendWhatsAppMedia = async ({
       body: body || media.filename,
       fromMe: true,
       mediaType: media.mimetype.split("/")[0],
+      mediaUrl: savedFilename,
       read: true,
       userId: ticket.userId
     };

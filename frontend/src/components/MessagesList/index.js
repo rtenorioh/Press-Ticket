@@ -554,7 +554,7 @@ const MessagesList = ({ ticketId, isGroup, onClick }) => {
 
         } catch (err) {
           setLoading(false);
-          toastError(err);
+          toastError(err, t);
         }
       };
       fetchMessages();

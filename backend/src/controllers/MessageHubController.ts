@@ -46,6 +46,12 @@ export const send = async (req: Request, res: Response): Promise<Response> => {
     return res.status(404).json({ message: "Ticket not found" });
   }
 
+  if (ticket.whatsapp?.type === "wwebjs") {
+    return res.status(400).json({ 
+      error: "Este ticket é do tipo wwebjs. Use o endpoint /messages/:ticketId"
+    });
+  }
+
   try {
     if (medias) {
       await Promise.all(
