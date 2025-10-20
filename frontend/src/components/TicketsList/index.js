@@ -526,12 +526,13 @@ const TicketsList = (props) => {
 
 		return () => {
 			socket.off("connect");
+			socket.off("reconnect");
 			socket.off("ticket");
 			socket.off("appMessage");
 			socket.off("contact");
 			socket.off("ticketList");
 		};
-	}, [status, showAll, user, selectedQueueIds, isGroup]);
+	}, []);
 
 	useEffect(() => {
 		if (typeof updateCount === "function") {

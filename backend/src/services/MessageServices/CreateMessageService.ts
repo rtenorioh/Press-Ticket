@@ -3,6 +3,7 @@ import Message from "../../models/Message";
 import OldMessage from "../../models/OldMessage";
 import Ticket from "../../models/Ticket";
 import Whatsapp from "../../models/Whatsapp";
+import FormatLastMessage from "../../helpers/FormatLastMessage";
 
 interface MessageData {
   id: string;
@@ -13,6 +14,9 @@ interface MessageData {
   read?: boolean;
   mediaType?: string;
   mediaUrl?: string;
+  mimetype?: string;
+  messageType?: string;
+  filename?: string;
 }
 interface Request {
   messageData: MessageData;
@@ -106,16 +110,19 @@ const CreateMessageService = async ({
       console.error("Erro ao recarregar ticket antes de emitir appMessage:", reloadError);
     }
 
-    const currentBody = message.body || "";
-    const arrow = message.fromMe ? "🢅 " : "🢇 ";
-    const composedLastMessage = `${arrow}${currentBody}`.trim();
+    const composedLastMessage = FormatLastMessage({
+      body: message.body || "",
+      mediaType: messageData.mediaType,
+      mimetype: messageData.mimetype,
+      messageType: messageData.messageType,
+      fromMe: message.fromMe,
+      filename: messageData.filename
+    });
 
     const ticketPayload: any = message.ticket ? message.ticket.toJSON ? message.ticket.toJSON() : { ...message.ticket } : {};
-    if (!ticketPayload.lastMessage || ticketPayload.lastMessage === "" || ticketPayload.lastMessage.replace("🢇", "").replace("🢅", "").trim() !== currentBody.trim()) {
-      ticketPayload.lastMessage = composedLastMessage;
-    }
+    ticketPayload.lastMessage = composedLastMessage;
     ticketPayload.updatedAt = new Date();
-
+      
     io.to(message.ticketId.toString())
       .to(ticketPayload.status)
       .to("notification")

@@ -70,6 +70,25 @@ const connectToSocket = () => {
             }
         });
 
+        socket.onAny((eventName, ...args) => {
+            const timestamp = new Date().toISOString();
+            
+            if (eventName === "appMessage") {
+                console.log(`[FRONT_SOCKET_EVENT][${timestamp}] ========== appMessage RECEBIDO ==========`);
+                console.log(`[FRONT_SOCKET_EVENT][${timestamp}] Payload completo:`, JSON.stringify(args, null, 2));
+                
+                if (args[0]) {
+                    console.log(`[FRONT_SOCKET_EVENT][${timestamp}] Action:`, args[0].action);
+                    console.log(`[FRONT_SOCKET_EVENT][${timestamp}] Ticket ID:`, args[0].ticket?.id);
+                    console.log(`[FRONT_SOCKET_EVENT][${timestamp}] LastMessage:`, args[0].ticket?.lastMessage);
+                    console.log(`[FRONT_SOCKET_EVENT][${timestamp}] UnreadMessages:`, args[0].ticket?.unreadMessages);
+                }
+                console.log(`[FRONT_SOCKET_EVENT][${timestamp}] =============================================`);
+            } else if (eventName !== "ping" && eventName !== "pong") {
+                console.log(`[FRONT_SOCKET_EVENT][${timestamp}] Evento: ${eventName}`, args);
+            }
+        });
+
         socket.on("connect_error", (error) => {
             const timestamp = new Date().toISOString();
             console.error(`[FRONT_SOCKET_CONNECT_ERROR][${timestamp}] Erro na conexão do socket:`, error.message);
@@ -87,14 +106,10 @@ const connectToSocket = () => {
 
         socket.on("reconnect", (attemptNumber) => {
             const timestamp = new Date().toISOString();
-            console.log(`[FRONT_SOCKET_RECONNECT][${timestamp}] Socket reconectado com sucesso após ${attemptNumber} tentativa(s). ID: ${socket.id}`);
             
             const user = JSON.parse(localStorage.getItem("user") || "{}");
             if (user && user.id) {
-                console.log(`[FRONT_SOCKET_RESYNC][${timestamp}] Resincronizando tickets após reconexão para o usuário ${user.id}`);
                 socket.emit("getTickets", { userId: user.id });
-                
-                console.log(`[FRONT_SOCKET_COUNTER_RECONNECT][${timestamp}] Reinscrevendo no canal de contadores de tickets`);
                 socket.emit("subscribeTicketCounter");
             } else {
                 console.warn(`[FRONT_SOCKET_RESYNC_FAILED][${timestamp}] Não foi possível resincronizar tickets após reconexão: usuário não encontrado`);
@@ -115,7 +130,7 @@ const connectToSocket = () => {
         });
 
         socket.on("disconnect", (reason) => {
-            console.log("Socket desconectado:", reason);
+            console.warn("Socket desconectado:", reason);
             if (reason === "io server disconnect" || 
                 reason === "forced close" || 
                 reason === "ping timeout") {

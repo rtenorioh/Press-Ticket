@@ -45,7 +45,7 @@
     "mustache": "^4.2.0",
     "mysql2": "^2.2.5",
     "nodemailer": "^6.9.16",
-    "notificamehubsdk": "^0.0.19",
+    "notificamehubsdk": "^0.0.21",
     "openai": "^3.2.1",
     "pg": "^8.4.1",
     "pino": "^8.11.0",

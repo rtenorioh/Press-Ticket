@@ -142,6 +142,9 @@ const NotificationsPopOver = () => {
 		});
 
 		socket.on("appMessage", (data) => {
+			if (!data.ticket) {
+				return;
+			}
 			
 			const UserQueues = user?.queues?.findIndex(	
 				(users) => users.id === data.ticket.queueId

@@ -188,76 +188,30 @@ const verifyMediaMessage = async (
     logger.error(err);
   }
 
-  let $tipoArquivo: string;
-
-  switch (media.mimetype.split("/")[0]) {
-    case "audio":
-      $tipoArquivo = "🔉 Mensagem de audio";
-      break;
-
-    case "image":
-      $tipoArquivo = "🖼️ Arquivo de imagem";
-      break;
-
-    case "video":
-      $tipoArquivo = "🎬 Arquivo de vídeo";
-      break;
-
-    case "document":
-      $tipoArquivo = "📘 Documento";
-      break;
-
-    case "application":
-      $tipoArquivo = "📎 Arquivo";
-      break;
-
-    case "ciphertext":
-      $tipoArquivo = "⚠️ Notificação";
-      break;
-
-    case "e2e_notification":
-      $tipoArquivo = "⛔ Notificação";
-      break;
-
-    case "revoked":
-      $tipoArquivo = "❌ Apagado";
-      break;
-
-    default:
-      $tipoArquivo = "🤷‍♂️ Tipo Desconhecido";
-      break;
-  }
-
-  let $strBody: string;
-
-  if (msg.fromMe === true) {
-    $strBody = msg.body;
-  } else {
-    $strBody = msg.body;
-  }
-
   const messageData = {
     id: msg.id.id,
     ticketId: ticket.id,
     contactId: msg.fromMe ? undefined : contact.id,
-    body: $strBody || media.filename,
+    body: msg.body || media.filename,
     fromMe: msg.fromMe,
     read: msg.fromMe,
     mediaUrl: media.filename,
     mediaType: media.mimetype.split("/")[0],
+    mimetype: media.mimetype,
+    filename: media.filename,
     quotedMsgId: quotedMsg?.id,
     userId: ticket.userId
   };
-
-  if (msg.fromMe === true) {
-    await ticket.update({
-      lastMessage: `🢅 ${$tipoArquivo}` || `🢅 ${$tipoArquivo}`
-    });
-  } else {
-    await ticket.update({
-      lastMessage: `🢇 ${$tipoArquivo}` || `🢇 ${$tipoArquivo}`
-    });
+  
+  const existingMessage = await Message.findByPk(messageData.id);
+  if (existingMessage) {
+    const messageAge = Date.now() - new Date(existingMessage.createdAt).getTime();
+    if (messageAge < 5000) {
+      console.log(`[WBOT_LISTENER] Mensagem com mídia ${messageData.id} já existe e foi criada há ${messageAge}ms, ignorando duplicação`);
+      return existingMessage;
+    }
   }
+  
   try {
     const newMessage = await CreateMessageService({ messageData });
     return newMessage;
@@ -362,6 +316,7 @@ const verifyMessage = async (
     body: msg.body,
     fromMe: msg.fromMe,
     mediaType: msg.type,
+    messageType: msg.type,
     read: msg.fromMe,
     quotedMsgId: quotedMsg?.id,
     userId: ticket.userId
@@ -492,60 +447,22 @@ const verifyMessage = async (
     }
   }
 
+  const existingMessage = await Message.findByPk(messageData.id);
+  if (existingMessage) {
+    const messageAge = Date.now() - new Date(existingMessage.createdAt).getTime();
+    if (messageAge < 5000) {
+      console.log(`[WBOT_LISTENER] Mensagem ${messageData.id} já existe e foi criada há ${messageAge}ms, ignorando duplicação`);
+      return;
+    }
+  }
+
   try {
     await CreateMessageService({ messageData });
-    
-    if (msg.fromMe === true) {
-      await ticket.update({
-        fromMe: msg.fromMe,
-        lastMessage:
-          msg.type === "location"
-            ? "🢅 🗺 Localization - Ver no Google Maps"
-            : `🢅 ${msg.body}`
-      });
-    } else {
-      await ticket.update({
-        lastMessage:
-          msg.type === "location"
-            ? "🢇 🗺 Localization - Ver no Google Maps"
-            : `🢇 ${msg.body}`
-      });
-    }
-    
-    await ticket.reload();
-    const { getIO } = require("../../libs/socket");
-    const io = getIO();
-    
-    io.to(ticket.id.toString())
-      .to(ticket.status)
-      .to("notification")
-      .emit("appMessage", {
-        action: "update",
-        ticket: ticket,
-        message: { id: messageData.id, body: msg.body }
-      });
   } catch (error) {
     console.error("Erro ao salvar mensagem no banco de dados:", error);
     setTimeout(async () => {
       try {
         await CreateMessageService({ messageData });
-        
-        if (msg.fromMe === true) {
-          await ticket.update({
-            fromMe: msg.fromMe,
-            lastMessage:
-              msg.type === "location"
-                ? "🢅 🗺 Localization - Ver no Google Maps"
-                : `🢅 ${msg.body}`
-          });
-        } else {
-          await ticket.update({
-            lastMessage:
-              msg.type === "location"
-                ? "🢇 🗺 Localization - Ver no Google Maps"
-                : `🢇 ${msg.body}`
-          });
-        }
       } catch (retryError) {
         console.error("Erro ao salvar mensagem na segunda tentativa:", retryError);
       }
@@ -1532,15 +1449,8 @@ const handleMsgEdit = async (
   const io = getIO();
 
   try {
-    console.log(`[handleMsgEdit] ========================================`);
-    console.log(`[handleMsgEdit] Evento message_edit recebido para mensagem ${msg.id.id}`);
-    console.log(`[handleMsgEdit] Corpo ATUAL no banco: "${editedMsg.body}"`);
-    console.log(`[handleMsgEdit] Corpo ANTIGO do evento: "${oldBody}"`);
-    console.log(`[handleMsgEdit] Corpo NOVO do evento: "${newBody}"`);
-    console.log(`[handleMsgEdit] ========================================`);
     
     if (oldBody && newBody && oldBody !== newBody) {
-      console.log(`[handleMsgEdit] Corpo mudou, verificando se precisa salvar histórico`);
       
       const existingHistory = await OldMessage.findOne({
         where: {
