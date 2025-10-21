@@ -20,6 +20,7 @@ type IndexQuery = {
 interface QuickAnswerData {
   shortcut: string;
   message: string;
+  mediaPath?: string;
 }
 
 export const index = async (req: Request, res: Response): Promise<Response> => {
@@ -35,6 +36,7 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
 
 export const store = async (req: Request, res: Response): Promise<Response> => {
   const newQuickAnswer: QuickAnswerData = req.body;
+  const media = req.file as Express.Multer.File;
 
   const QuickAnswerSchema = Yup.object().shape({
     shortcut: Yup.string().required(),
@@ -45,6 +47,10 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     await QuickAnswerSchema.validate(newQuickAnswer);
   } catch (err) {
     throw new AppError(err.message);
+  }
+
+  if (media) {
+    newQuickAnswer.mediaPath = media.filename;
   }
 
   const quickAnswer = await CreateQuickAnswerService({
@@ -87,6 +93,7 @@ export const update = async (
   res: Response
 ): Promise<Response> => {
   const quickAnswerData: QuickAnswerData = req.body;
+  const media = req.file as Express.Multer.File;
 
   const schema = Yup.object().shape({
     shortcut: Yup.string(),
@@ -97,6 +104,10 @@ export const update = async (
     await schema.validate(quickAnswerData);
   } catch (err) {
     throw new AppError(err.message);
+  }
+
+  if (media) {
+    quickAnswerData.mediaPath = media.filename;
   }
 
   const { quickAnswerId } = req.params;

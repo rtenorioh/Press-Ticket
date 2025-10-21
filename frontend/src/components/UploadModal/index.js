@@ -179,10 +179,10 @@ const getFileIcon = (file) => {
   }
 };
 
-const UploadModal = ({ open, onClose, files, onSend, loading }) => {
+const UploadModal = ({ open, onClose, files, onSend, loading, initialCaption }) => {
   const { t } = useTranslation();
   const { ticketId } = useParams();
-  const [caption, setCaption] = useState('');
+  const [caption, setCaption] = useState(initialCaption || '');
   const [selectedFileIndex, setSelectedFileIndex] = useState(0);
   const [localFiles, setLocalFiles] = useState([]);
   const [compressionProgress, setCompressionProgress] = useState(0);
@@ -419,6 +419,12 @@ const UploadModal = ({ open, onClose, files, onSend, loading }) => {
       onClose();
     }, 2000);
   };
+
+  useEffect(() => {
+    if (initialCaption) {
+      setCaption(initialCaption);
+    }
+  }, [initialCaption]);
 
   useEffect(() => {
     const fetchTicketInfo = async () => {

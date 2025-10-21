@@ -7,9 +7,17 @@ import {
   Box,
   Typography,
   Collapse,
+  IconButton,
+  Avatar,
 } from "@mui/material";
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import AttachFileIcon from '@mui/icons-material/AttachFile';
+import DeleteIcon from '@mui/icons-material/Delete';
+import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
+import ImageIcon from '@mui/icons-material/Image';
+import VideoLibraryIcon from '@mui/icons-material/VideoLibrary';
+import AudiotrackIcon from '@mui/icons-material/Audiotrack';
 import { styled, useTheme } from "@mui/material/styles";
 import { Form, Formik } from "formik";
 import React, { useEffect, useRef, useState } from "react";
@@ -96,6 +104,7 @@ const QuickAnswersModal = ({
   const initialState = {
     shortcut: "",
     message: "",
+    mediaPath: "",
   };
   const { t } = useTranslation();
   const theme = useTheme();
@@ -104,6 +113,9 @@ const QuickAnswersModal = ({
   const [loading, setLoading] = useState(false);
   const [quickAnswer, setQuickAnswer] = useState(initialState);
   const [showHelp, setShowHelp] = useState(false);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [filePreview, setFilePreview] = useState(null);
+  const fileInputRef = useRef(null);
 
   useEffect(() => {
     return () => {
@@ -117,7 +129,18 @@ const QuickAnswersModal = ({
         setLoading(true);
         try {
           const { data } = await api.get(`/quickAnswers/${quickAnswerId}`);
-          if (isMounted.current) setQuickAnswer(data);
+          if (isMounted.current) {
+            setQuickAnswer(data);
+            
+            if (data.mediaPath) {
+              setFilePreview({
+                url: `${process.env.REACT_APP_BACKEND_URL}/public/${data.mediaPath}`,
+                name: data.mediaPath,
+                type: 'application/octet-stream',
+                size: 0
+              });
+            }
+          }
         } catch (err) {
           toastError(err);
         } finally {
@@ -138,16 +161,34 @@ const QuickAnswersModal = ({
   const handleClose = () => {
     onClose();
     setQuickAnswer(initialState);
+    setSelectedFile(null);
+    setFilePreview(null);
     setLoading(false);
   };
 
   const handleSaveQuickAnswer = async values => {
     try {
+      const formData = new FormData();
+      formData.append("shortcut", values.shortcut);
+      formData.append("message", values.message);
+      
+      if (selectedFile) {
+        formData.append("media", selectedFile);
+      }
+
       if (quickAnswerId) {
-        await api.put(`/quickAnswers/${quickAnswerId}`, values);
+        const response = await api.put(`/quickAnswers/${quickAnswerId}`, formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
         onClose();
       } else {
-        const { data } = await api.post("/quickAnswers", values);
+        const { data } = await api.post("/quickAnswers", formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
         if (onSave) {
           onSave(data);
         }
@@ -155,7 +196,7 @@ const QuickAnswersModal = ({
       }
       toast.success(t("quickAnswersModal.success"));
     } catch (err) {
-      toastError(err);
+      toastError(err, t);
     }
   };
 
@@ -171,6 +212,47 @@ const QuickAnswersModal = ({
       el.setSelectionRange(newCursorPos, newCursorPos);
       el.focus();
     }, 100);
+  };
+
+  const handleFileChange = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      setSelectedFile(file);
+      
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFilePreview({
+          url: reader.result,
+          name: file.name,
+          type: file.type,
+          size: file.size
+        });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleRemoveFile = () => {
+    setSelectedFile(null);
+    setFilePreview(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  const getFileIcon = (type) => {
+    if (type.startsWith('image/')) return <ImageIcon />;
+    if (type.startsWith('video/')) return <VideoLibraryIcon />;
+    if (type.startsWith('audio/')) return <AudiotrackIcon />;
+    return <InsertDriveFileIcon />;
+  };
+
+  const formatFileSize = (bytes) => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
   };
 
   return (
@@ -287,7 +369,73 @@ const QuickAnswersModal = ({
                       placeholder={t("quickAnswersModal.form.message")}
                     />
                   </WithSkeleton>
-                </FieldContainer>                
+                </FieldContainer>
+
+                <FieldContainer>
+                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
+                    <Typography variant="body2">
+                      Anexar Arquivo (Opcional)
+                    </Typography>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.txt,.zip,.rar"
+                      onChange={handleFileChange}
+                      style={{ display: 'none' }}
+                    />
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      startIcon={<AttachFileIcon />}
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={isSubmitting}
+                      sx={{ textTransform: 'none' }}
+                    >
+                      Selecionar Arquivo
+                    </Button>
+                  </Box>
+
+                  {filePreview && (
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 2,
+                        p: 2,
+                        border: `1px solid ${theme.palette.divider}`,
+                        borderRadius: 1,
+                        backgroundColor: theme.palette.mode === 'dark' ? 'rgba(0, 0, 0, 0.2)' : '#f5f5f5',
+                      }}
+                    >
+                      <Avatar
+                        sx={{
+                          backgroundColor: theme.palette.primary.main,
+                          width: 40,
+                          height: 40,
+                        }}
+                      >
+                        {getFileIcon(filePreview.type)}
+                      </Avatar>
+                      <Box sx={{ flex: 1, minWidth: 0 }}>
+                        <Typography variant="body2" noWrap>
+                          {filePreview.name}
+                        </Typography>
+                        <Typography variant="caption" color="textSecondary">
+                          {formatFileSize(filePreview.size)}
+                        </Typography>
+                      </Box>
+                      <IconButton
+                        size="small"
+                        onClick={handleRemoveFile}
+                        disabled={isSubmitting}
+                        color="error"
+                      >
+                        <DeleteIcon />
+                      </IconButton>
+                    </Box>
+                  )}
+                </FieldContainer>
+                
                 <WithSkeleton loading={loading}>
                   <MessageVariablesPicker
                     disabled={isSubmitting}

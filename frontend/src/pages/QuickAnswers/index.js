@@ -16,6 +16,7 @@ import DeleteForever from '@mui/icons-material/DeleteForever';
 import DeleteOutline from '@mui/icons-material/DeleteOutline';
 import Edit from '@mui/icons-material/Edit';
 import Search from '@mui/icons-material/Search';
+import AttachFileIcon from '@mui/icons-material/AttachFile';
 import React, { useContext, useEffect, useReducer, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
@@ -350,6 +351,9 @@ const QuickAnswers = () => {
               <TableCell align="center">
                 {t("quickAnswers.table.message")}
               </TableCell>
+              <TableCell align="center" sx={{ width: 80 }}>
+                Anexo
+              </TableCell>
               {canEditQuickAnswers() && (
                 <TableCell align="center">
                   {t("quickAnswers.table.actions")}
@@ -363,6 +367,13 @@ const QuickAnswers = () => {
                 <TableRow key={quickAnswer.id}>
                   <TableCell align="center">{quickAnswer.shortcut}</TableCell>
                   <TableCell align="center">{quickAnswer.message}</TableCell>
+                  <TableCell align="center">
+                    {quickAnswer.mediaPath && (
+                      <Tooltip title="Possui anexo">
+                        <AttachFileIcon color="primary" fontSize="small" />
+                      </Tooltip>
+                    )}
+                  </TableCell>
                   <TableCell align="center">
                     <IconButton
                       size="small"

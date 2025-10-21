@@ -371,6 +371,7 @@ const MessageInput = ({ ticketStatus }) => {
   const [isGroup, setIsGroup] = useState(false);
   const [groupId, setGroupId] = useState(null);
   const [showUploadModal, setShowUploadModal] = useState(false);
+  const [initialCaption, setInitialCaption] = useState("");
   const { t } = useTranslation();
   const theme = useTheme();
   const mainWrapperRef = useRef(null);
@@ -738,20 +739,41 @@ const MessageInput = ({ ticketStatus }) => {
     }
   };
 
-  const handleQuickAnswersClick = async (value) => {
+  const handleQuickAnswersClick = async (quickAnswer) => {
     setTypeBar(false);
     setInputMessage("");
     
-    if (value.includes('|q')) {
-      const parts = value.split(/\|+q/g).map(part => part.trim()).filter(part => part.length > 0);
-      
-      if (parts.length > 1) {
-        await handleSendMultipleMessages(parts, value);
-      } else {
-        setInputMessage(value.replace(/\|+q/g, '').trim());
+    const message = quickAnswer.message;
+    const mediaPath = quickAnswer.mediaPath;
+    
+    if (mediaPath) {
+      try {
+        const mediaUrl = `${process.env.REACT_APP_BACKEND_URL}/public/${mediaPath}`;
+        
+        const response = await fetch(mediaUrl);
+        const blob = await response.blob();
+        
+        const fileName = mediaPath.split('/').pop();
+        const file = new File([blob], fileName, { type: blob.type });
+        
+        setInitialCaption(message);
+        setMedias([file]);
+        setShowUploadModal(true);
+      } catch (err) {
+        toastError(err);
       }
     } else {
-      setInputMessage(value);
+      if (message.includes('|q')) {
+        const parts = message.split(/\|+q/g).map(part => part.trim()).filter(part => part.length > 0);
+        
+        if (parts.length > 1) {
+          await handleSendMultipleMessages(parts, message);
+        } else {
+          setInputMessage(message.replace(/\|+q/g, '').trim());
+        }
+      } else {
+        setInputMessage(message);
+      }
     }
   };
 
@@ -1715,8 +1737,8 @@ const MessageInput = ({ ticketStatus }) => {
                       key={index}
                     >
                       {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
-                      <a onClick={() => handleQuickAnswersClick(value.message)}>
-                        {`${value.shortcut} - ${value.message}`}
+                      <a onClick={() => handleQuickAnswersClick(value)}>
+                        {`${value.shortcut} - ${value.message}${value.mediaPath ? ' 📎' : ''}`}
                       </a>
                     </li>
                   );
@@ -1815,10 +1837,12 @@ const MessageInput = ({ ticketStatus }) => {
           onClose={() => {
             setShowUploadModal(false);
             setMedias([]);
+            setInitialCaption("");
           }}
           files={medias}
           onSend={handleUploadMedia}
           loading={loading}
+          initialCaption={initialCaption}
         />
       </MainWrapper>
     );
