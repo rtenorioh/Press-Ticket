@@ -18,7 +18,7 @@ const documentationMessages = {
       title: "Administração",
       users: "Na área de Usuários você cadastra e gerencia todos os operadores do sistema. Defina perfis de acesso (administrador e atendente) e permissões específicas para cada usuário.",
       queues: "Em Setores você configura os diferentes setores ou departamentos da sua empresa. Organize a distribuição de atendimentos e defina regras de encaminhamento para cada setor.",
-      connections: "A seção de Canais permite gerenciar todos os seus canais. Conecte novos números, desconecte sessões inativas e monitore o status de cada conexão em tempo real.",
+      channels: "A seção de Canais permite gerenciar todos os seus canais. Conecte novos números, desconecte sessões inativas e monitore o status de cada conexão em tempo real.",
       queueMonitor: "O Monitor de Setores oferece visualização em tempo real do desempenho de cada setor. Acompanhe estatísticas de tickets, tempo médio de espera, volume de atendimentos e distribuição de carga entre atendentes para otimizar seu fluxo de trabalho.",
       settings: "Em Configurações você personaliza diversos aspectos do sistema. Ajuste a aparência e outras opções para adaptar o Sistema às necessidades da sua empresa."
     },

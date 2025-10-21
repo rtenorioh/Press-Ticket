@@ -412,7 +412,7 @@ const SystemHealth = () => {
                 severity="warning" 
                 sx={{ mt: 2 }}
                 action={
-                  <Button color="inherit" size="small" href="/connections">
+                  <Button color="inherit" size="small" href="/channels">
                     Verificar
                   </Button>
                 }
@@ -948,7 +948,7 @@ const SystemHealth = () => {
                     severity="warning" 
                     sx={{ mt: 2 }}
                     action={
-                      <Button color="inherit" size="small" href="/connections">
+                      <Button color="inherit" size="small" href="/channels">
                         Verificar
                       </Button>
                     }

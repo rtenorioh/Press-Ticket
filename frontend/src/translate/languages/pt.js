@@ -173,7 +173,7 @@ const messages = {
           cancel: "Cancelar",
         },
       },
-      connections: {
+      channels: {
         title: "Canais",
         toasts: {
           deleted: "Canal excluído com sucesso!",
@@ -744,7 +744,7 @@ const messages = {
           quickAnswers: "Respostas Rápidas",
           tags: "Tags",
           clientStatus: "Status de Clientes",
-          connections: "Canais",
+          channels: "Canais",
           queues: "Setores",
           users: "Atendentes",
           settings: "Configurações",

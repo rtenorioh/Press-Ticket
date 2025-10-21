@@ -1,7 +1,11 @@
 import {
 	Box,
 	Button,
+	Card,
+	CardContent,
+	CardActions,
 	CircularProgress,
+	Grid,
 	IconButton,
 	Paper,
 	Table,
@@ -9,6 +13,8 @@ import {
 	TableCell,
 	TableHead,
 	TableRow,
+	ToggleButton,
+	ToggleButtonGroup,
 	Tooltip,
 	tooltipClasses,
 	Typography,
@@ -23,6 +29,7 @@ import {
 	Edit,
 	Email,
 	Facebook,
+	GridView,
 	Instagram,
 	PlayCircleOutline,
 	Replay,
@@ -31,6 +38,7 @@ import {
 	SignalCellularConnectedNoInternet2Bar,
 	Sms,
 	SyncOutlined,
+	TableRows,
 	Telegram,
 	WhatsApp
 } from "@mui/icons-material";
@@ -105,6 +113,58 @@ const ActionFeedback = styled('div')({
 	gap: '4px'
 });
 
+const ChannelCard = styled(Card)(({ theme }) => ({
+	height: '100%',
+	display: 'flex',
+	flexDirection: 'column',
+	transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+	borderRadius: theme.spacing(2),
+	boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15), 0 2px 4px rgba(0, 0, 0, 0.1)',
+	border: `1px solid ${theme.palette.divider}`,
+	'&:hover': {
+		boxShadow: '0 8px 24px rgba(0, 0, 0, 0.2), 0 4px 8px rgba(0, 0, 0, 0.15)',
+		transform: 'translateY(-6px)',
+	},
+}));
+
+const ChannelCardHeader = styled(Box)(({ theme }) => ({
+	display: 'flex',
+	alignItems: 'center',
+	justifyContent: 'space-between',
+	padding: theme.spacing(2),
+	borderBottom: `1px solid ${theme.palette.divider}`,
+}));
+
+const ChannelInfo = styled(Box)({
+	display: 'flex',
+	alignItems: 'center',
+	gap: '12px',
+});
+
+const ChannelDetails = styled(Box)(({ theme }) => ({
+	display: 'flex',
+	flexDirection: 'column',
+	gap: theme.spacing(1.5),
+	padding: theme.spacing(2),
+}));
+
+const DetailRow = styled(Box)({
+	display: 'flex',
+	justifyContent: 'space-between',
+	alignItems: 'center',
+});
+
+const DetailLabel = styled(Typography)(({ theme }) => ({
+	fontWeight: 600,
+	color: theme.palette.text.secondary,
+	fontSize: '0.875rem',
+}));
+
+const DetailValue = styled(Typography)(({ theme }) => ({
+	color: theme.palette.text.primary,
+	fontSize: '0.875rem',
+}));
+
 const CustomToolTip = ({ title, content, children }) => {
 	return (
 		<CustomTooltipStyled
@@ -127,7 +187,7 @@ const CustomToolTip = ({ title, content, children }) => {
 	);
 };
 
-const Connections = () => {
+const Channels = () => {
 	const { t } = useTranslation();
 	const navigate = useNavigate();
 	const { user } = useContext(AuthContext);
@@ -150,6 +210,9 @@ const Connections = () => {
 	const [loadingActions, setLoadingActions] = useState({});
 	const [actionMessages, setActionMessages] = useState({});
 	const [lastNotificationTime, setLastNotificationTime] = useState({});
+	const [viewMode, setViewMode] = useState(() => {
+		return localStorage.getItem('channelsViewMode') || 'list';
+	});
 
 	const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -336,7 +399,7 @@ const Connections = () => {
 				return <Email sx={{ color: "#004f9f" }} />;
 			case "webchat":
 				return <Sms sx={{ color: "#EB6D58" }} />;
-			case null:
+			case "wwebjs":
 				return <WhatsApp sx={{ color: "#075e54" }} />;
 			default:
 				return null;
@@ -454,8 +517,8 @@ const Connections = () => {
 		if (action === "disconnect") {
 			setConfirmModalInfo({
 				action: action,
-				title: t("connections.confirmationModal.disconnectTitle"),
-				message: t("connections.confirmationModal.disconnectMessage"),
+				title: t("channels.confirmationModal.disconnectTitle"),
+				message: t("channels.confirmationModal.disconnectMessage"),
 				whatsAppId: whatsAppId,
 			});
 		}
@@ -463,8 +526,8 @@ const Connections = () => {
 		if (action === "delete") {
 			setConfirmModalInfo({
 				action: action,
-				title: t("connections.confirmationModal.deleteTitle"),
-				message: t("connections.confirmationModal.deleteMessage"),
+				title: t("channels.confirmationModal.deleteTitle"),
+				message: t("channels.confirmationModal.deleteMessage"),
 				whatsAppId: whatsAppId,
 			});
 		}
@@ -652,7 +715,7 @@ const Connections = () => {
 		return (
 			<>
 				{(whatsApp.status === "CONNECTED") && (
-					<Tooltip title={t("connections.buttons.shutdown")}>
+					<Tooltip title={t("channels.buttons.shutdown")}>
 						<IconButton
 							size="small"
 							color="secondary"
@@ -663,7 +726,7 @@ const Connections = () => {
 					</Tooltip>
 				)}
 				{whatsApp.status === "qrcode" && (
-					<Tooltip title={t("connections.buttons.qrcode")}>
+					<Tooltip title={t("channels.buttons.qrcode")}>
 						<IconButton
 							size="small"
 							color="primary"
@@ -675,7 +738,7 @@ const Connections = () => {
 				)}
 				{whatsApp.status === "DISCONNECTED" && (
 					<>
-						<Tooltip title={t("connections.buttons.start")}>
+						<Tooltip title={t("channels.buttons.start")}>
 							<IconButton
 								size="small"
 								color="primary"
@@ -684,7 +747,7 @@ const Connections = () => {
 								<PlayCircleOutline />
 							</IconButton>
 						</Tooltip>
-						<Tooltip title={t("connections.buttons.newQr")}>
+						<Tooltip title={t("channels.buttons.newQr")}>
 							<IconButton
 								size="small"
 								color="secondary"
@@ -698,8 +761,8 @@ const Connections = () => {
 				{(whatsApp.status === "CONNECTED" ||
 					whatsApp.status === "PAIRING" ||
 					whatsApp.status === "TIMEOUT") &&
-					whatsApp.type === null && (
-						<Tooltip title={t("connections.buttons.disconnect")}>
+					whatsApp.type === "wwebjs" && (
+						<Tooltip title={t("channels.buttons.disconnect")}>
 							<IconButton
 								size="small"
 								color="secondary"
@@ -715,7 +778,7 @@ const Connections = () => {
 					</IconButton>
 				)}
 				{(!whatsApp.type && whatsApp.status === "CONNECTED") && (
-					<Tooltip title={t("connections.buttons.restart")}>
+					<Tooltip title={t("channels.buttons.restart")}>
 						<IconButton
 							size="small"
 							color="primary"
@@ -734,8 +797,8 @@ const Connections = () => {
 			<CustomTableCell>
 				{whatsApp.status === "DISCONNECTED" && (
 					<CustomToolTip
-						title={t("connections.toolTips.disconnected.title")}
-						content={t("connections.toolTips.disconnected.content")}
+						title={t("channels.toolTips.disconnected.title")}
+						content={t("channels.toolTips.disconnected.content")}
 					>
 						<SignalCellularConnectedNoInternet0Bar color="secondary" />
 					</CustomToolTip>
@@ -745,21 +808,21 @@ const Connections = () => {
 				)}
 				{whatsApp.status === "qrcode" && (
 					<CustomToolTip
-						title={t("connections.toolTips.qrcode.title")}
-						content={t("connections.toolTips.qrcode.content")}
+						title={t("channels.toolTips.qrcode.title")}
+						content={t("channels.toolTips.qrcode.content")}
 					>
 						<CropFree />
 					</CustomToolTip>
 				)}
 				{whatsApp.status === "CONNECTED" && (
-					<CustomToolTip title={t("connections.toolTips.connected.title")}>
+					<CustomToolTip title={t("channels.toolTips.connected.title")}>
 						<SignalCellular4Bar sx={{ color: green[500] }} />
 					</CustomToolTip>
 				)}
 				{(whatsApp.status === "TIMEOUT" || whatsApp.status === "PAIRING") && (
 					<CustomToolTip
-						title={t("connections.toolTips.timeout.title")}
-						content={t("connections.toolTips.timeout.content")}
+						title={t("channels.toolTips.timeout.title")}
+						content={t("channels.toolTips.timeout.content")}
 					>
 						<SignalCellularConnectedNoInternet2Bar color="secondary" />
 					</CustomToolTip>
@@ -804,6 +867,110 @@ const Connections = () => {
 		return number;
 	};
 
+	const handleViewModeChange = (event, newMode) => {
+		if (newMode !== null) {
+			setViewMode(newMode);
+			localStorage.setItem('channelsViewMode', newMode);
+		}
+	};
+
+	const renderCardView = () => {
+		return (
+			<Grid container spacing={3}>
+				{whatsApps?.length > 0 &&
+					whatsApps.map(whatsApp => (
+						<Grid item xs={12} sm={6} md={4} lg={3} key={whatsApp.id}>
+							<ChannelCard>
+								<ChannelCardHeader>
+									<ChannelInfo>
+										{getChannelIcon(whatsApp.type)}
+										<Box>
+											<Typography variant="h6" fontWeight={600}>
+												{whatsApp.name}
+											</Typography>
+											<Typography variant="caption" color="text.secondary">
+												ID: {whatsApp.id}
+											</Typography>
+										</Box>
+									</ChannelInfo>
+									{whatsApp?.type === "wwebjs" && renderStatusToolTips(whatsApp)}
+								</ChannelCardHeader>
+
+								<CardContent sx={{ flexGrow: 1, p: 0 }}>
+									<ChannelDetails>
+										<DetailRow>
+											<DetailLabel>Cor:</DetailLabel>
+											<Box
+												sx={{
+													backgroundColor: whatsApp.color,
+													width: 60,
+													height: 24,
+													borderRadius: 2
+												}}
+											/>
+										</DetailRow>
+
+										<DetailRow>
+											<DetailLabel>Número:</DetailLabel>
+											<DetailValue>
+												{whatsApp.number ? (
+													user.isTricked === "enabled" 
+														? formatPhoneNumber(whatsApp.number) 
+														: formatPhoneNumber(whatsApp.number).slice(0, -4) + "****"
+												) : "-"}
+											</DetailValue>
+										</DetailRow>
+
+										<DetailRow>
+											<DetailLabel>Atualizado:</DetailLabel>
+											<DetailValue>
+												{format(parseISO(whatsApp.updatedAt), "dd/MM/yy HH:mm")}
+											</DetailValue>
+										</DetailRow>
+
+										{whatsApp.isDefault && (
+											<DetailRow>
+												<DetailLabel>Padrão:</DetailLabel>
+												<CheckCircle sx={{ color: green[500] }} />
+											</DetailRow>
+										)}
+									</ChannelDetails>
+								</CardContent>
+
+								<CardActions sx={{ p: 2, pt: 0, flexWrap: 'wrap', gap: 1, justifyContent: 'space-between' }}>
+									<Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+										{whatsApp?.type === "wwebjs" ? (
+											<ActionFeedback>
+												{renderActionButtons(whatsApp)}
+											</ActionFeedback>
+										) : null}
+									</Box>
+									<Box sx={{ display: 'flex', gap: 1 }}>
+										<Tooltip title={t("channels.buttons.edit")}>
+											<IconButton
+												size="small"
+												onClick={() => handleEditWhatsApp(whatsApp)}
+											>
+												<Edit color="info" />
+											</IconButton>
+										</Tooltip>
+										<Tooltip title={t("channels.buttons.delete")}>
+											<IconButton
+												size="small"
+												onClick={() => handleOpenConfirmationModal("delete", whatsApp.id)}
+											>
+												<DeleteOutline color="error" />
+											</IconButton>
+										</Tooltip>
+									</Box>
+								</CardActions>
+							</ChannelCard>
+						</Grid>
+					))}
+			</Grid>
+		);
+	};
+
 	return (
 		<MainContainer>
 			<ConfirmationModal
@@ -829,9 +996,27 @@ const Connections = () => {
 				onClose={handleCloseNotificameHubModal}
 			/>
 			<MainHeader>
-				<Title>{t("connections.title")} {whatsApps.length > 0 ? `(${whatsApps.length})` : ""}</Title>
+				<Title>{t("channels.title")} {whatsApps.length > 0 ? `(${whatsApps.length})` : ""}</Title>
 				<MainHeaderButtonsWrapper>
-					<Tooltip title={t("connections.buttons.restart")} arrow>
+					<ToggleButtonGroup
+						value={viewMode}
+						exclusive
+						onChange={handleViewModeChange}
+						size="small"
+						sx={{ mr: 2 }}
+					>
+						<ToggleButton value="list" aria-label="visualização em lista">
+							<Tooltip title="Visualização em Lista">
+								<TableRows />
+							</Tooltip>
+						</ToggleButton>
+						<ToggleButton value="grid" aria-label="visualização em grade">
+							<Tooltip title="Visualização em Grade">
+								<GridView />
+							</Tooltip>
+						</ToggleButton>
+					</ToggleButtonGroup>
+					<Tooltip title={t("channels.buttons.restart")} arrow>
 						<Button
 							variant="contained"
 							color="primary"
@@ -845,7 +1030,7 @@ const Connections = () => {
 							<SyncOutlined />
 						</Button>
 					</Tooltip>
-					<Tooltip title={t("connections.buttons.wwebjs")}>
+					<Tooltip title={t("channels.buttons.wwebjs")}>
 						<Button
 							variant="contained"
 							color="primary"
@@ -859,7 +1044,7 @@ const Connections = () => {
 							<WhatsApp />
 						</Button>
 					</Tooltip>
-					<Tooltip title={t("connections.buttons.hub")}>
+					<Tooltip title={t("channels.buttons.hub")}>
 						<Button
 							variant="contained"
 							color="secondary"
@@ -875,127 +1060,159 @@ const Connections = () => {
 				</MainHeaderButtonsWrapper>
 			</MainHeader>
 			<MainPaper variant="outlined">
-				<Table size="small">
-					<TableHead>
-						<TableRow>
-							<TableCell align="center">
-								{t("connections.table.id")}
-							</TableCell>
-							<TableCell align="center">
-								{t("connections.table.channel")}
-							</TableCell>
-							<TableCell align="center">
-								{t("connections.table.name")}
-							</TableCell>
-							<TableCell align="center">
-								{t("connections.table.color")}
-							</TableCell>
-							<TableCell align="center">
-								{t("connections.table.status")}
-							</TableCell>
-							<TableCell align="center">
-								{t("connections.table.number")}
-							</TableCell>
-							<TableCell align="center">
-								{t("connections.table.session")}
-							</TableCell>
-							<TableCell align="center">
-								{t("connections.table.lastUpdate")}
-							</TableCell>
-							<TableCell align="center">
-								{t("connections.table.default")}
-							</TableCell>
-							<TableCell align="center">
-								{t("connections.table.actions")}
-							</TableCell>
-						</TableRow>
-					</TableHead>
-					<TableBody>
-						{loading ? (
-							<TableRowSkeleton />
-						) : (
-							<>
-								{whatsApps?.length > 0 &&
-									whatsApps.map(whatsApp => (
-										<TableRow key={whatsApp.id}>
-											<TableCell align="center">
-												{whatsApp.id}
-											</TableCell>
-											<TableCell align="center">
-												{getChannelIcon(whatsApp.type)}
-											</TableCell>
-											<TableCell align="center">
-												{whatsApp.name}
-											</TableCell>
-											<TableCell align="center">
+				{loading ? (
+					viewMode === 'list' ? (
+						<Table size="small">
+							<TableHead>
+								<TableRow>
+									<TableCell align="center">{t("channels.table.id")}</TableCell>
+									<TableCell align="center">{t("channels.table.channel")}</TableCell>
+									<TableCell align="center">{t("channels.table.name")}</TableCell>
+									<TableCell align="center">{t("channels.table.color")}</TableCell>
+									<TableCell align="center">{t("channels.table.status")}</TableCell>
+									<TableCell align="center">{t("channels.table.number")}</TableCell>
+									<TableCell align="center">{t("channels.table.session")}</TableCell>
+									<TableCell align="center">{t("channels.table.lastUpdate")}</TableCell>
+									<TableCell align="center">{t("channels.table.default")}</TableCell>
+									<TableCell align="center">{t("channels.table.actions")}</TableCell>
+								</TableRow>
+							</TableHead>
+							<TableBody>
+								<TableRowSkeleton />
+							</TableBody>
+						</Table>
+					) : (
+						<Grid container spacing={3}>
+							{[1, 2, 3, 4].map((item) => (
+								<Grid item xs={12} sm={6} md={4} lg={3} key={item}>
+									<ChannelCard>
+										<CardContent>
+											<CircularProgress />
+										</CardContent>
+									</ChannelCard>
+								</Grid>
+							))}
+						</Grid>
+					)
+				) : viewMode === 'list' ? (
+					<Table size="small">
+						<TableHead>
+							<TableRow>
+								<TableCell align="center">
+									{t("channels.table.id")}
+								</TableCell>
+								<TableCell align="center">
+									{t("channels.table.channel")}
+								</TableCell>
+								<TableCell align="center">
+									{t("channels.table.name")}
+								</TableCell>
+								<TableCell align="center">
+									{t("channels.table.color")}
+								</TableCell>
+								<TableCell align="center">
+									{t("channels.table.status")}
+								</TableCell>
+								<TableCell align="center">
+									{t("channels.table.number")}
+								</TableCell>
+								<TableCell align="center">
+									{t("channels.table.session")}
+								</TableCell>
+								<TableCell align="center">
+									{t("channels.table.lastUpdate")}
+								</TableCell>
+								<TableCell align="center">
+									{t("channels.table.default")}
+								</TableCell>
+								<TableCell align="center">
+									{t("channels.table.actions")}
+								</TableCell>
+							</TableRow>
+						</TableHead>
+						<TableBody>
+							{whatsApps?.length > 0 &&
+								whatsApps.map(whatsApp => (
+									<TableRow key={whatsApp.id}>
+										<TableCell align="center">
+											{whatsApp.id}
+										</TableCell>
+										<TableCell align="center">
+											{getChannelIcon(whatsApp.type)}
+										</TableCell>
+										<TableCell align="center">
+											{whatsApp.name}
+										</TableCell>
+										<TableCell align="center">
+											<CustomTableCell>
+												<Box
+													sx={{
+														backgroundColor: whatsApp.color,
+														width: 40,
+														height: 20,
+														alignSelf: "center",
+														borderRadius: 10
+													}}
+												/>
+											</CustomTableCell>
+										</TableCell>
+										<TableCell align="center">
+											{whatsApp?.type === "wwebjs" ? renderStatusToolTips(whatsApp) : "-"}
+										</TableCell>
+										<TableCell align="center">
+											{whatsApp.number ? (
+												<>
+													{user.isTricked === "enabled" ? formatPhoneNumber(whatsApp.number) : formatPhoneNumber(whatsApp.number).slice(0, -4) + "****"}
+												</>
+											) : "-"}
+										</TableCell>
+										<TableCell align="center">
+											{whatsApp?.type === "wwebjs" ? (
+												<ActionFeedback>
+													{renderActionButtons(whatsApp)}
+												</ActionFeedback>
+											) : "-"}
+										</TableCell>
+										<TableCell align="center">
+											{format(parseISO(whatsApp.updatedAt), "dd/MM/yy HH:mm")}
+										</TableCell>
+										<TableCell align="center">
+											{whatsApp.isDefault && (
 												<CustomTableCell>
-													<Box
-														sx={{
-															backgroundColor: whatsApp.color,
-															width: 40,
-															height: 20,
-															alignSelf: "center",
-															borderRadius: 10
-														}}
-													/>
+													<CheckCircle sx={{ color: green[500] }} />
 												</CustomTableCell>
-											</TableCell>
-											<TableCell align="center">
-												{whatsApp?.type === null || whatsApp?.type === undefined ? renderStatusToolTips(whatsApp) : "-"}
-											</TableCell>
-											<TableCell align="center">
-												{whatsApp.number ? (
-													<>
-														{user.isTricked === "enabled" ? formatPhoneNumber(whatsApp.number) : formatPhoneNumber(whatsApp.number).slice(0, -4) + "****"}
-													</>
-												) : "-"}
-											</TableCell>
-											<TableCell align="center">
-												{whatsApp?.type === null || whatsApp?.type === undefined ? (
-													<ActionFeedback>
-														{renderActionButtons(whatsApp)}
-													</ActionFeedback>
-												) : "-"}
-											</TableCell>
-											<TableCell align="center">
-												{format(parseISO(whatsApp.updatedAt), "dd/MM/yy HH:mm")}
-											</TableCell>
-											<TableCell align="center">
-												{whatsApp.isDefault && (
-													<CustomTableCell>
-														<CheckCircle sx={{ color: green[500] }} />
-													</CustomTableCell>
-												)}
-											</TableCell>
-											<TableCell align="center">
-												<Tooltip title={t("connections.buttons.edit")}>
-													<IconButton
-														size="small"
-														onClick={() => handleEditWhatsApp(whatsApp)}
-													>
-														<Edit color="info" />
-													</IconButton>
-												</Tooltip>
-												<Tooltip title={t("connections.buttons.delete")}>
-													<IconButton
-														size="small"
-														onClick={e => {
-															handleOpenConfirmationModal("delete", whatsApp.id);
-														}}
-													>
-														<DeleteOutline color="error" />
-													</IconButton>
-												</Tooltip>
-											</TableCell>
-										</TableRow>
-									))}
-							</>
-						)}
-					</TableBody>
-				</Table>
+											)}
+										</TableCell>
+										<TableCell align="center">
+											<Tooltip title={t("channels.buttons.edit")}>
+												<IconButton
+													size="small"
+													onClick={() => handleEditWhatsApp(whatsApp)}
+												>
+													<Edit color="info" />
+												</IconButton>
+											</Tooltip>
+											<Tooltip title={t("channels.buttons.delete")}>
+												<IconButton
+													size="small"
+													onClick={e => {
+														handleOpenConfirmationModal("delete", whatsApp.id);
+													}}
+												>
+													<DeleteOutline color="error" />
+												</IconButton>
+											</Tooltip>
+										</TableCell>
+									</TableRow>
+								))}
+						</TableBody>
+					</Table>
+				) : (
+					renderCardView()
+				)}
 			</MainPaper>
 		</MainContainer>
 	);
 };
 
-export default Connections;
+export default Channels;

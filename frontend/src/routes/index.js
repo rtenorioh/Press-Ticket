@@ -8,7 +8,7 @@ import Api from "../pages/Api/";
 import ApiDocs from "../pages/ApiDocs/";
 import ApiKey from "../pages/ApiKey/";
 import Documentation from "../pages/Documentation/";
-import Connections from "../pages/Connections/";
+import Channels from "../pages/Channels/";
 import Contacts from "../pages/Contacts/";
 import CpuUsage from "../pages/CpuUsage/";
 import Dashboard from "../pages/Dashboard/";
@@ -60,7 +60,7 @@ const AppRoutes = ({ toggleTheme, onThemeConfigUpdate }) => {
             <Route index element={<Dashboard />} />
             <Route path="documentation" element={<Documentation />} />
             <Route path="tickets/:ticketId?" element={<Tickets />} />
-            <Route path="connections" element={<Connections />} />
+            <Route path="channels" element={<Channels />} />
             <Route path="contacts" element={<Contacts />} />
             <Route path="users" element={<Users />} />
             <Route path="quickAnswers" element={<QuickAnswers />} />

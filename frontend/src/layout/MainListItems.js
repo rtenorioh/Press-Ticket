@@ -295,14 +295,14 @@ const MainListItems = (props) => {
                 drawerClose={drawerClose}
               />
               <ListItemLink
-                to="/connections"
-                primary={t("mainDrawer.listItems.connections")}
+                to="/channels"
+                primary={t("mainDrawer.listItems.channels")}
                 icon={
                   <StyledBadge badgeContent={connectionWarning ? "!" : 0} color="error" overlap="rectangular">
                     <SyncAlt />
                   </StyledBadge>
                 }
-                active={location.pathname === '/connections'}
+                active={location.pathname === '/channels'}
                 drawerClose={drawerClose}
               />
               <ListItemLink

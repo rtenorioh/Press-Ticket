@@ -209,10 +209,10 @@ const Documentation = () => {
           path: "/queues"
         },
         {
-          name: t("mainDrawer.listItems.connections"),
-          description: t("documentation.administration.connections"),
+          name: t("mainDrawer.listItems.channels"),
+          description: t("documentation.administration.channels"),
           icon: <SyncAlt />,
-          path: "/connections"
+          path: "/channels"
         },
         {
           name: t("mainDrawer.listItems.queueMonitor"),
