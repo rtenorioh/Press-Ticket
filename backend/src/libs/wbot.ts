@@ -359,6 +359,209 @@ export const initWbot = async (whatsapp: Whatsapp): Promise<Session> => {
           logger.warn("Erro ao processar evento message_reaction:", err);
         }
       });
+
+      wbot.on("call", async (call: any) => {
+        try {          
+          const originalFrom = call.from;
+          let realPhoneNumber = call.from;
+          
+          if (call.from.includes('@lid')) {
+            try {
+              const contact = await wbot.getContactById(call.from);
+              const phoneNumber = contact.id.user || contact.number;
+              realPhoneNumber = `${phoneNumber}@c.us`;
+            } catch (err) {
+              logger.warn(`[CALL] Erro ao converter LID, usando original: ${err}`);
+              realPhoneNumber = call.from;
+            }
+          }
+          
+          const Setting = (await import("../models/Setting")).default;
+          
+          const autoRejectCallsSetting = await Setting.findOne({
+            where: { key: "autoRejectCalls" }
+          });
+          
+          const callSetting = await Setting.findOne({
+            where: { key: "call" }
+          });
+          
+          if (autoRejectCallsSetting && autoRejectCallsSetting.value === "enabled") {
+            try {
+              const pupPage = await wbot.pupPage;
+              
+              if (pupPage) {
+                const rejected = await pupPage.evaluate((callId: string) => {
+                  try {
+                    const results: string[] = [];
+                    
+                    results.push('Método 1: Tentando tecla ESC...');
+                    try {
+                      const escEvent = new KeyboardEvent('keydown', {
+                        key: 'Escape',
+                        code: 'Escape',
+                        keyCode: 27,
+                        which: 27,
+                        bubbles: true,
+                        cancelable: true
+                      });
+                      document.dispatchEvent(escEvent);
+                      results.push('✅ Tecla ESC enviada');
+                    } catch (err: any) {
+                      results.push(`❌ Tecla ESC falhou: ${err.message}`);
+                    }
+                    
+                    results.push('Método 2: Procurando botão vermelho...');
+                    try {
+                      const allButtons = Array.from(document.querySelectorAll('button, div[role="button"]'));
+                      const redButton = allButtons.find((btn: any) => {
+                        const style = window.getComputedStyle(btn);
+                        const bgColor = style.backgroundColor;
+                        return bgColor.includes('234, 67, 53') || 
+                               bgColor.includes('244, 67, 54') ||
+                               bgColor.includes('255, 0, 0') ||
+                               bgColor.includes('220, 53, 69');
+                      });
+                      
+                      if (redButton) {
+                        (redButton as HTMLElement).click();
+                        results.push('✅ Botão vermelho clicado');
+                        return { success: true, method: 'Red Button Click', results };
+                      } else {
+                        results.push(`❌ Botão vermelho não encontrado (${allButtons.length} botões verificados)`);
+                      }
+                    } catch (err: any) {
+                      results.push(`❌ Busca por botão vermelho falhou: ${err.message}`);
+                    }
+                    
+                    results.push('Método 3: Procurando ícone call-end...');
+                    try {
+                      const callEndIcon = document.querySelector('[data-icon="call-end"]');
+                      if (callEndIcon) {
+                        const button = callEndIcon.closest('button') || callEndIcon.closest('[role="button"]');
+                        if (button) {
+                          (button as HTMLElement).click();
+                          results.push('✅ Ícone call-end clicado');
+                          return { success: true, method: 'Call End Icon', results };
+                        }
+                      }
+                      results.push('❌ Ícone call-end não encontrado');
+                    } catch (err: any) {
+                      results.push(`❌ Busca por ícone call-end falhou: ${err.message}`);
+                    }
+                    
+                    results.push('Método 4: Tentando WWebJS.rejectCall...');
+                    try {
+                      const WWebJS = (window as any).WWebJS;
+                      if (WWebJS && typeof WWebJS.rejectCall === 'function') {
+                        WWebJS.rejectCall(callId);
+                        results.push('✅ WWebJS.rejectCall executado');
+                        return { success: true, method: 'WWebJS.rejectCall', results };
+                      } else {
+                        results.push('❌ WWebJS.rejectCall não disponível');
+                      }
+                    } catch (err: any) {
+                      results.push(`❌ WWebJS.rejectCall falhou: ${err.message}`);
+                    }
+                    
+                    return { success: false, error: 'Todos os métodos falharam', results };
+                  } catch (err: any) {
+                    return { success: false, error: err.message, stack: err.stack, results: [] };
+                  }
+                }, call.id);
+                
+                if (rejected.results && rejected.results.length > 0) {
+                  logger.info(`[CALL] Resultados das tentativas:\n${rejected.results.join('\n')}`);
+                }
+                
+                if (rejected.success) {
+                  logger.info(`[CALL] ✅ Chamada rejeitada via Puppeteer (método: ${rejected.method})`);
+                } else {
+                  logger.warn(`[CALL] ❌ Falha ao rejeitar via Puppeteer: ${rejected.error}`);
+                  if (rejected.stack) {
+                    logger.warn(`[CALL] Stack trace: ${rejected.stack}`);
+                  }
+                  
+                  logger.info(`[CALL] Tentando rejeitar via call.reject() - call.from: ${call.from}, call.id: ${call.id}`);
+                  try {
+                    const originalCallFrom = call.from;
+                    const originalPeerJid = call.peerJid;
+                    
+                    if (originalCallFrom.includes('@lid')) {
+                      call.from = realPhoneNumber;
+                      if (call.peerJid) {
+                        call.peerJid = realPhoneNumber;
+                      }
+                    }
+                    
+                    const rejectResult = await call.reject();
+                    
+                    call.from = originalCallFrom;
+                    if (originalPeerJid) {
+                      call.peerJid = originalPeerJid;
+                    }
+                  } catch (rejectError) {
+                    logger.error(`[CALL] Erro ao executar call.reject(): ${rejectError}`);
+                    logger.error(`[CALL] Stack: ${(rejectError as Error).stack}`);
+                  }
+                }
+              } else {
+                logger.warn(`[CALL] pupPage não disponível, usando método padrão`);
+                await call.reject();
+                logger.info(`[CALL] Chamada rejeitada via método padrão`);
+              }
+            } catch (rejectErr) {
+              logger.error(`[CALL] Erro ao rejeitar chamada: ${rejectErr}`);
+              logger.error(`[CALL] Stack trace: ${(rejectErr as Error).stack}`);
+            }
+            
+            const autoRejectMessageSetting = await Setting.findOne({
+              where: { key: "autoRejectCallsMessage" }
+            });
+            
+            if (autoRejectMessageSetting && autoRejectMessageSetting.value) {
+              try {
+                await wbot.sendMessage(realPhoneNumber, autoRejectMessageSetting.value);
+                logger.info(`[CALL] Mensagem automática enviada para ${realPhoneNumber}`);
+              } catch (msgErr) {
+                logger.warn(`[CALL] Erro ao enviar mensagem automática: ${msgErr}`);
+              }
+            }
+            
+            io.emit("callRejected", {
+              whatsappId: whatsapp.id,
+              from: call.from,
+              isVideo: call.isVideo,
+              timestamp: new Date(),
+              reason: "autoReject"
+            });
+          } else if (callSetting && callSetting.value === "enabled") {
+            logger.info(`[CALL] Chamada de ${realPhoneNumber} não será aceita (call setting enabled)`);
+            
+            try {
+              await wbot.sendMessage(
+                realPhoneNumber,
+                "*Mensagem Automática:*\nAs chamadas de voz e vídeo estão desabilitadas para esse WhatsApp, favor enviar uma mensagem de texto. Obrigado"
+              );
+              logger.info(`[CALL] Mensagem de não aceitação enviada para ${realPhoneNumber}`);
+            } catch (msgErr) {
+              logger.warn(`[CALL] Erro ao enviar mensagem de não aceitação: ${msgErr}`);
+            }
+            
+            io.emit("callRejected", {
+              whatsappId: whatsapp.id,
+              from: call.from,
+              isVideo: call.isVideo,
+              timestamp: new Date(),
+              reason: "notAccepted"
+            });
+          } else {
+            logger.info(`[CALL] Chamadas habilitadas - Chamada de ${call.from} permitida`);
+          }
+        } catch (err) {
+          logger.error(`[CALL] Erro ao processar chamada: ${err}`);
+        }
+      });
     } catch (err: any) {
       logger.error(err);
     }

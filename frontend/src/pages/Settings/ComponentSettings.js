@@ -8,7 +8,8 @@ import {
     Box,
     MenuItem,
     FormControl,
-    Card
+    Card,
+    TextField
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import React from "react";
@@ -96,7 +97,7 @@ const ComponentSettings = ({ settings, getSettingValue, handleChangeBooleanSetti
             title: t("settings.general.ticketManagement"),
             settings: booleanSettings.filter(s => [
                 'allTicket', 'CheckMsgIsGroup', 'closeTicketApi', 'ASC', 'created', 'openTickets', 
-                'queueLength', 'call'
+                'queueLength'
             ].includes(s.key))
         }
     ];
@@ -129,6 +130,69 @@ const ComponentSettings = ({ settings, getSettingValue, handleChangeBooleanSetti
                 </Grid>
             ))}
             
+            <Grid item xs={12}>
+                <SectionTitle variant="h6">{t("settings.general.callSettings")}</SectionTitle>
+                <SettingCard>
+                    {(getSettingValue("call") !== "enabled" || getSettingValue("autoRejectCalls") === "enabled") && (
+                        <SettingItem>
+                            <Tooltip title={t("settings.general.autoRejectCalls.note")} placement="top-start">
+                                <FormControlLabel
+                                    control={
+                                        <Checkbox
+                                            checked={settings && settings.length > 0 && getSettingValue("autoRejectCalls") === "enabled"}
+                                            onChange={handleChangeBooleanSetting}
+                                            name="autoRejectCalls"
+                                            color="primary"
+                                        />
+                                    }
+                                    label={t("settings.general.autoRejectCalls.name")}
+                                    sx={{ marginRight: 'auto' }}
+                                />
+                            </Tooltip>
+                        </SettingItem>
+                    )}
+                    {getSettingValue("autoRejectCalls") === "enabled" && (
+                        <SettingItem>
+                            <Box sx={{ width: '100%' }}>
+                                <Tooltip title={t("settings.general.autoRejectCallsMessage.note")} placement="top-start">
+                                    <Typography variant="body1" sx={{ mb: 1 }}>
+                                        {t("settings.general.autoRejectCallsMessage.name")}
+                                    </Typography>
+                                </Tooltip>
+                                <TextField
+                                    fullWidth
+                                    multiline
+                                    rows={3}
+                                    variant="outlined"
+                                    name="autoRejectCallsMessage"
+                                    value={settings && settings.length > 0 ? getSettingValue("autoRejectCallsMessage") : ""}
+                                    onChange={handleChangeSetting}
+                                    placeholder={t("settings.general.autoRejectCallsMessage.placeholder")}
+                                />
+                            </Box>
+                        </SettingItem>
+                    )}
+                    {(getSettingValue("autoRejectCalls") !== "enabled" || getSettingValue("call") === "enabled") && (
+                        <SettingItem>
+                            <Tooltip title={t("settings.general.call.note")} placement="top-start">
+                                <FormControlLabel
+                                    control={
+                                        <Checkbox
+                                            checked={settings && settings.length > 0 && getSettingValue("call") === "enabled"}
+                                            onChange={handleChangeBooleanSetting}
+                                            name="call"
+                                            color="primary"
+                                        />
+                                    }
+                                    label={t("settings.general.call.name")}
+                                    sx={{ marginRight: 'auto' }}
+                                />
+                            </Tooltip>
+                        </SettingItem>
+                    )}
+                </SettingCard>
+            </Grid>
+
             <Grid item xs={12}>
                 <SectionTitle variant="h6">{t("settings.general.timeSettings")}</SectionTitle>
                 <SettingCard>

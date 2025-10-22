@@ -1130,13 +1130,27 @@ const messages = {
             },
           },
           call: {
-            name: "Aceitar chamadas",
-            note: "Se desabilitado, o cliente receberá uma mensagem informando que não aceita chamadas de voz/vídeo",
+            name: "Não aceitar chamadas",
+            note: "Se habilitado, o cliente receberá uma mensagem informando que não aceita chamadas de voz/vídeo",
             options: {
               enabled: "Ativado",
               disabled: "Desativado",
             },
           },
+          autoRejectCalls: {
+            name: "Rejeitar Chamadas Automaticamente (beta)",
+            note: "Rejeita automaticamente todas as chamadas recebidas (voz e vídeo) e envia uma mensagem configurável",
+            options: {
+              enabled: "Ativado",
+              disabled: "Desativado",
+            },
+          },
+          autoRejectCallsMessage: {
+            name: "Mensagem de Rejeição de Chamadas",
+            note: "Mensagem enviada automaticamente após rejeitar uma chamada",
+            placeholder: "Digite a mensagem que será enviada quando uma chamada for rejeitada...",
+          },
+          callSettings: "Configurações de Chamadas",
           sideMenu: {
             name: "Menu Lateral Inicial",
             note: "Se habilitado, o menu lateral irá iniciar fechado",

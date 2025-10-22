@@ -850,9 +850,6 @@ const handleMessage = async (
 
       msgContact = await wbot.getContactById(msg.to);
     } else {
-      const listSettingsService = await ListSettingsServiceOne({ key: "call" });
-      var callSetting = listSettingsService?.value;
-
       msgContact = await msg.getContact();
     }
 
@@ -1283,14 +1280,6 @@ const handleMessage = async (
       }
     }
 
-    // eslint-disable-next-line block-scoped-var
-    if (msg.type === "call_log" && callSetting === "disabled") {
-      const sentMessage = await wbot.sendMessage(
-        `${contact.number}@c.us`,
-        "*Mensagem Automática:*\nAs chamadas de voz e vídeo estão desabilitas para esse WhatsApp, favor enviar uma mensagem de texto. Obrigado"
-      );
-      await verifyMessage(sentMessage, ticket, contact);
-    }
     const profilePicUrl = await msgContact.getProfilePicUrl();
     const contactData = {
       name: msgContact.name || msgContact.pushname || msgContact.id.user,
