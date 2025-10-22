@@ -219,6 +219,25 @@ export const initWbot = async (whatsapp: Whatsapp): Promise<Session> => {
         });
       });
 
+      wbot.on("loading_screen", (percent, message) => {
+        logger.info(`Session: ${sessionName} LOADING - ${percent}% - ${message}`);
+        
+        io.emit("whatsappSession", {
+          action: "update",
+          session: {
+            id: whatsapp.id,
+            name: whatsapp.name,
+            status: "OPENING",
+            loadingProgress: percent,
+            loadingMessage: message
+          }
+        });
+      });
+
+      wbot.on("remote_session_saved", () => {
+        logger.info(`Session: ${sessionName} REMOTE_SESSION_SAVED`);
+      });
+
       wbot.on("authenticated", async session => {
         logger.info(`Session: ${sessionName} AUTHENTICATED`);
         
@@ -362,6 +381,11 @@ export const initWbot = async (whatsapp: Whatsapp): Promise<Session> => {
         } catch (err) {
           logger.warn("Erro ao processar evento message_reaction:", err);
         }
+      });
+
+      wbot.on("change_state", (state) => {
+        logger.info(`Session: ${sessionName} STATE_CHANGED - ${state}`);
+        updateLastActivity(whatsapp.id);
       });
 
       wbot.on("call", async (call: any) => {

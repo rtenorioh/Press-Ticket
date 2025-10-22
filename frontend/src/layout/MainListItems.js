@@ -307,13 +307,6 @@ const MainListItems = (props) => {
                 drawerClose={drawerClose}
               />
               <ListItemLink
-                to="/health-check"
-                primary="Monitoramento"
-                icon={<MonitorHeartIcon />}
-                active={location.pathname === '/health-check'}
-                drawerClose={drawerClose}
-              />
-              <ListItemLink
                 to="/users"
                 primary={t("mainDrawer.listItems.users")}
                 icon={<PeopleAltOutlined />}
@@ -391,6 +384,13 @@ const MainListItems = (props) => {
                 primary={t("mainDrawer.listItems.databaseStatus")}
                 icon={<DatabaseIcon />}
                 active={location.pathname === '/databaseStatus'}
+                drawerClose={drawerClose}
+              />
+              <ListItemLink
+                to="/health-check"
+                primary="Monitoramento"
+                icon={<MonitorHeartIcon />}
+                active={location.pathname === '/health-check'}
                 drawerClose={drawerClose}
               />
               <ListItemLink

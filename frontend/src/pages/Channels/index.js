@@ -7,6 +7,7 @@ import {
 	CircularProgress,
 	Grid,
 	IconButton,
+	LinearProgress,
 	Paper,
 	Table,
 	TableBody,
@@ -210,6 +211,8 @@ const Channels = () => {
 	const [loadingActions, setLoadingActions] = useState({});
 	const [actionMessages, setActionMessages] = useState({});
 	const [lastNotificationTime, setLastNotificationTime] = useState({});
+	const [loadingProgress, setLoadingProgress] = useState({});
+	const [loadingMessages, setLoadingMessages] = useState({});
 	const [viewMode, setViewMode] = useState(() => {
 		return localStorage.getItem('channelsViewMode') || 'list';
 	});
@@ -292,6 +295,17 @@ const Channels = () => {
 
 		socket.on("whatsappSession", (data) => {
 			if (data.action === "update") {
+				if (data.session?.loadingProgress !== undefined) {
+					setLoadingProgress(prev => ({
+						...prev,
+						[data.session.id]: data.session.loadingProgress
+					}));
+					setLoadingMessages(prev => ({
+						...prev,
+						[data.session.id]: data.session.loadingMessage
+					}));
+				}
+				
 				setTimeout(() => {
 					fetchWhatsApps();
 				}, 500);
@@ -773,9 +787,26 @@ const Channels = () => {
 						</Tooltip>
 					)}
 				{whatsApp.status === "OPENING" && (
-					<IconButton size="small" disabled color="default">
-						<CircularProgress size={24} />
-					</IconButton>
+					<Box sx={{ width: '100%', minWidth: 200 }}>
+						<Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+							<CircularProgress size={20} />
+							<Typography variant="caption" color="primary">
+								{loadingMessages[whatsApp.id] || 'Carregando...'}
+							</Typography>
+						</Box>
+						{loadingProgress[whatsApp.id] !== undefined && (
+							<Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+								<LinearProgress 
+									variant="determinate" 
+									value={loadingProgress[whatsApp.id]} 
+									sx={{ flexGrow: 1, height: 6, borderRadius: 3 }}
+								/>
+								<Typography variant="caption" color="textSecondary" sx={{ minWidth: 35 }}>
+									{loadingProgress[whatsApp.id]}%
+								</Typography>
+							</Box>
+						)}
+					</Box>
 				)}
 				{(!whatsApp.type && whatsApp.status === "CONNECTED") && (
 					<Tooltip title={t("channels.buttons.restart")}>
