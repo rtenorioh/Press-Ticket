@@ -4,12 +4,13 @@ import path from "path";
 import qrCode from "qrcode-terminal";
 import { Client, LocalAuth, MessageMedia } from "whatsapp-web.js";
 import AppError from "../errors/AppError";
-import Integration from "../models/Integration";
-import Whatsapp from "../models/Whatsapp";
-import { StartWhatsAppSession } from "../services/WbotServices/StartWhatsAppSession";
-import { handleMessage } from "../services/WbotServices/wbotMessageListener";
-import { logger } from "../utils/logger";
 import { getIO } from "./socket";
+import { logger } from "../utils/logger";
+import { StartWhatsAppSession } from "../services/WbotServices/StartWhatsAppSession";
+import { initializeHealthTracking, updateLastActivity } from "../services/WbotServices/HealthCheckService";
+import Whatsapp from "../models/Whatsapp";
+import Integration from "../models/Integration";
+import { handleMessage } from "../services/WbotServices/wbotMessageListener";
 
 interface Session extends Client {
   id?: number;
@@ -259,6 +260,9 @@ export const initWbot = async (whatsapp: Whatsapp): Promise<Session> => {
 
       wbot.on("ready", async () => {
         logger.info(`Session: ${sessionName} READY`);
+
+        initializeHealthTracking(whatsapp.id);
+        updateLastActivity(whatsapp.id);
 
         await whatsapp.update({
           status: "CONNECTED",

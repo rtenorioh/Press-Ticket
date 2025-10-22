@@ -38,6 +38,7 @@ import NetworkCheckIcon from "@mui/icons-material/NetworkCheck";
 import QueueIcon from "@mui/icons-material/Queue";
 import QueueMonitorIcon from '@mui/icons-material/Assessment';
 import SystemHealthIcon from '@mui/icons-material/HealthAndSafety';
+import MonitorHeartIcon from '@mui/icons-material/MonitorHeart';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import { useTranslation } from "react-i18next";
 import { Can } from "../components/Can";
@@ -303,6 +304,13 @@ const MainListItems = (props) => {
                   </StyledBadge>
                 }
                 active={location.pathname === '/channels'}
+                drawerClose={drawerClose}
+              />
+              <ListItemLink
+                to="/health-check"
+                primary="Monitoramento"
+                icon={<MonitorHeartIcon />}
+                active={location.pathname === '/health-check'}
                 drawerClose={drawerClose}
               />
               <ListItemLink

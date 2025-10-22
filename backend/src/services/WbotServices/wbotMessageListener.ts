@@ -33,6 +33,7 @@ import ListSettingsServiceOne from "../SettingServices/ListSettingsServiceOne";
 import FindOrCreateTicketService from "../TicketServices/FindOrCreateTicketService";
 import UpdateTicketService from "../TicketServices/UpdateTicketService";
 import ShowWhatsAppService from "../WhatsappService/ShowWhatsAppService";
+import { incrementMessageCount, incrementErrorCount, updateLastActivity } from "./HealthCheckService";
 
 ffmpeg.setFfmpegPath("/usr/bin/ffmpeg");
 
@@ -745,6 +746,11 @@ const handleMessage = async (
   wbot: Session
 ): Promise<void> => {
   try {
+    if (wbot.id) {
+      incrementMessageCount(wbot.id);
+      updateLastActivity(wbot.id);
+    }
+    
     logger.info(`[MSG_RECEBIDA] Nova mensagem recebida: ID=${msg.id?.id || 'unknown'}, Timestamp=${new Date().toISOString()}`);
     
     logger.info(`[MSG_DETALHES] Detalhes básicos: ${JSON.stringify({
@@ -765,6 +771,9 @@ const handleMessage = async (
     logger.info(`[MSG_PROCESSANDO] Iniciando processamento da mensagem: ID=${msg.id?.id || 'unknown'}`);
   } catch (err) {
     logger.error(`[MSG_ERRO_LOG] Erro ao registrar logs iniciais: ${err}`);
+    if (wbot.id) {
+      incrementErrorCount(wbot.id);
+    }
   }
 
   const Integrationdb = await Integration.findOne({

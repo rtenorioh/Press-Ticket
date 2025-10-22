@@ -32,6 +32,7 @@ import whatsappRoutes from "./whatsappRoutes";
 import whatsappSessionRoutes from "./whatsappSessionRoutes";
 import whatsappNotificationRoutes from "./whatsappNotificationRoutes";
 import groupRoutes from "./groupRoutes";
+import healthCheckRoutes from "./healthCheckRoutes";
 
 const routes = Router();
 
@@ -67,5 +68,6 @@ routes.use(systemHealthRoutes);
 routes.use(systemUpdateRoutes);
 routes.use(videoRoutes);
 routes.use(groupRoutes);
+routes.use(healthCheckRoutes);
 
 export default routes;

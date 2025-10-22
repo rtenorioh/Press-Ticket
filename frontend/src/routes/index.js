@@ -35,6 +35,7 @@ import ClientStatus from "../pages/ClientStatus";
 import Tickets from "../pages/Tickets/";
 import Users from "../pages/Users";
 import Videos from "../pages/Videos";
+import HealthCheck from "../pages/HealthCheck";
 import PrivateRoute from "./PrivateRoute";
 import PublicRoute from "./PublicRoute";
 
@@ -84,6 +85,7 @@ const AppRoutes = ({ toggleTheme, onThemeConfigUpdate }) => {
             <Route path="system-update" element={<SystemUpdate />} />
             <Route path="versionCheck" element={<VersionCheck />} />
             <Route path="videos" element={<Videos />} />
+            <Route path="health-check" element={<HealthCheck />} />
           </Route>
         </Routes>
         <ToastContainer 
