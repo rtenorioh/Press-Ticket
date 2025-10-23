@@ -40,6 +40,7 @@ import QueueMonitorIcon from '@mui/icons-material/Assessment';
 import SystemHealthIcon from '@mui/icons-material/HealthAndSafety';
 import MonitorHeartIcon from '@mui/icons-material/MonitorHeart';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
+import GroupIcon from '@mui/icons-material/Group';
 import { useTranslation } from "react-i18next";
 import { Can } from "../components/Can";
 import { AuthContext } from "../context/Auth/AuthContext";
@@ -311,6 +312,13 @@ const MainListItems = (props) => {
                 primary={t("mainDrawer.listItems.users")}
                 icon={<PeopleAltOutlined />}
                 active={location.pathname === '/users'}
+                drawerClose={drawerClose}
+              />
+              <ListItemLink
+                to="/group-management"
+                primary="Grupos"
+                icon={<GroupIcon />}
+                active={location.pathname === '/group-management'}
                 drawerClose={drawerClose}
               />
               <ListItemLink

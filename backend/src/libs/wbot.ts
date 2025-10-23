@@ -597,6 +597,161 @@ export const initWbot = async (whatsapp: Whatsapp): Promise<Session> => {
           logger.error(`[CALL] Erro ao processar chamada: ${err}`);
         }
       });
+
+      wbot.on("group_join", async (notification: any) => {
+        try {
+          logger.info(`[GROUP_JOIN] Membro entrou no grupo: ${notification.chatId}`);
+          
+          const groupId = notification.chatId;
+          const participants = notification.recipientIds || [];
+          
+          const GroupEventService = (await import("../services/GroupEventService")).default;
+          
+          let groupName = "";
+          try {
+            const chat = await wbot.getChatById(groupId);
+            groupName = chat.name;
+          } catch (err) {
+            logger.warn(`[GROUP_JOIN] Não foi possível obter nome do grupo: ${err}`);
+          }
+          
+          await GroupEventService.createEvent({
+            whatsappId: whatsapp.id,
+            groupId,
+            groupName,
+            eventType: "join",
+            participants
+          });
+          
+          updateLastActivity(whatsapp.id);
+        } catch (err) {
+          logger.error(`[GROUP_JOIN] Erro ao processar entrada no grupo: ${err}`);
+        }
+      });
+
+      wbot.on("group_leave", async (notification: any) => {
+        try {
+          logger.info(`[GROUP_LEAVE] Membro saiu do grupo: ${notification.chatId}`);
+          
+          const groupId = notification.chatId;
+          const participants = notification.recipientIds || [];
+          
+          const GroupEventService = (await import("../services/GroupEventService")).default;
+          
+          let groupName = "";
+          try {
+            const chat = await wbot.getChatById(groupId);
+            groupName = chat.name;
+          } catch (err) {
+            logger.warn(`[GROUP_LEAVE] Não foi possível obter nome do grupo: ${err}`);
+          }
+          
+          await GroupEventService.createEvent({
+            whatsappId: whatsapp.id,
+            groupId,
+            groupName,
+            eventType: "leave",
+            participants
+          });
+          
+          updateLastActivity(whatsapp.id);
+        } catch (err) {
+          logger.error(`[GROUP_LEAVE] Erro ao processar saída do grupo: ${err}`);
+        }
+      });
+
+      wbot.on("group_update", async (notification: any) => {
+        try {
+          logger.info(`[GROUP_UPDATE] Grupo atualizado: ${notification.chatId}`);
+          
+          const groupId = notification.chatId;
+          
+          const GroupEventService = (await import("../services/GroupEventService")).default;
+          
+          let groupName = "";
+          try {
+            const chat = await wbot.getChatById(groupId);
+            groupName = chat.name;
+          } catch (err) {
+            logger.warn(`[GROUP_UPDATE] Não foi possível obter nome do grupo: ${err}`);
+          }
+          
+          await GroupEventService.createEvent({
+            whatsappId: whatsapp.id,
+            groupId,
+            groupName,
+            eventType: "update"
+          });
+          
+          updateLastActivity(whatsapp.id);
+        } catch (err) {
+          logger.error(`[GROUP_UPDATE] Erro ao processar atualização do grupo: ${err}`);
+        }
+      });
+
+      wbot.on("group_admin_changed", async (notification: any) => {
+        try {
+          logger.info(`[GROUP_ADMIN_CHANGED] Admin alterado no grupo: ${notification.chatId}`);
+          
+          const groupId = notification.chatId;
+          const participants = notification.recipientIds || [];
+          const type = notification.type;
+          
+          const GroupEventService = (await import("../services/GroupEventService")).default;
+          
+          let groupName = "";
+          try {
+            const chat = await wbot.getChatById(groupId);
+            groupName = chat.name;
+          } catch (err) {
+            logger.warn(`[GROUP_ADMIN_CHANGED] Não foi possível obter nome do grupo: ${err}`);
+          }
+          
+          await GroupEventService.createEvent({
+            whatsappId: whatsapp.id,
+            groupId,
+            groupName,
+            eventType: "admin_changed",
+            participants,
+            action: type
+          });
+          
+          updateLastActivity(whatsapp.id);
+        } catch (err) {
+          logger.error(`[GROUP_ADMIN_CHANGED] Erro ao processar mudança de admin: ${err}`);
+        }
+      });
+
+      wbot.on("group_membership_request", async (notification: any) => {
+        try {
+          logger.info(`[GROUP_MEMBERSHIP_REQUEST] Solicitação de entrada no grupo: ${notification.chatId}`);
+          
+          const groupId = notification.chatId;
+          const participant = notification.author;
+          
+          const GroupEventService = (await import("../services/GroupEventService")).default;
+          
+          let groupName = "";
+          try {
+            const chat = await wbot.getChatById(groupId);
+            groupName = chat.name;
+          } catch (err) {
+            logger.warn(`[GROUP_MEMBERSHIP_REQUEST] Não foi possível obter nome do grupo: ${err}`);
+          }
+          
+          await GroupEventService.createEvent({
+            whatsappId: whatsapp.id,
+            groupId,
+            groupName,
+            eventType: "membership_request",
+            participants: [participant]
+          });
+          
+          updateLastActivity(whatsapp.id);
+        } catch (err) {
+          logger.error(`[GROUP_MEMBERSHIP_REQUEST] Erro ao processar solicitação: ${err}`);
+        }
+      });
     } catch (err: any) {
       logger.error(err);
     }
