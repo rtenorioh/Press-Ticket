@@ -1,5 +1,32 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Paper, Typography, Button, Divider, Stack, Switch, Snackbar, Alert, Tooltip, Grid, Chip, List, ListItem, ListItemIcon, ListItemText, Avatar, TextField, IconButton, Badge, Pagination } from "@mui/material";
+import { 
+  Paper, 
+  Typography, 
+  Button, 
+  Divider, 
+  Stack, 
+  Switch, 
+  Snackbar, 
+  Alert, 
+  Tooltip, 
+  Chip, 
+  List, 
+  ListItem, 
+  ListItemIcon, 
+  ListItemText, 
+  Avatar, 
+  TextField, 
+  IconButton, 
+  Badge, 
+  Pagination,
+  Tabs,
+  Tab,
+  Box,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails
+} from "@mui/material";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { useTranslation } from "react-i18next";
 import GroupService from "../../services/group";
 import PersonAddAlt1Icon from "@mui/icons-material/PersonAddAlt1";
@@ -33,6 +60,8 @@ const GroupActionsPanel = ({ groupId }) => {
   const [page, setPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [addModalOpen, setAddModalOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState(0);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   const filtered = useMemo(() => {
     const term = search.trim().toLowerCase();
@@ -55,6 +84,34 @@ const GroupActionsPanel = ({ groupId }) => {
       setLoading(true);
       const data = await GroupService.listParticipants(groupId);
       setParticipants(data?.participants || []);
+      
+      const hasAnyAdmin = (data?.participants || []).some(p => p.isAdmin || p.isSuperAdmin);
+      
+      if (!hasAnyAdmin) {
+        setIsAdmin(true);
+      } else {
+        const myNumber = localStorage.getItem('myWhatsAppNumber');
+        let me = myNumber ? (data?.participants || []).find(p => p.number === myNumber) : null;
+        
+        if (!me && myNumber) {
+          me = (data?.participants || []).find(p => 
+            p.number?.includes(myNumber) || 
+            myNumber.includes(p.number) ||
+            p.id?.includes(myNumber)
+          );
+        }
+        
+        if (!me) {
+          const superAdmins = (data?.participants || []).filter(p => p.isSuperAdmin);
+          if (superAdmins.length === 1) {
+            setIsAdmin(true);
+            return;
+          }
+        }
+        
+        const adminStatus = me?.isAdmin || me?.isSuperAdmin || false;
+        setIsAdmin(adminStatus);
+      }
     } catch (e) {
       notify(t("groupActions.messages.requestsErr"), "error");
     } finally { setLoading(false); }
@@ -88,6 +145,7 @@ const GroupActionsPanel = ({ groupId }) => {
       setLoading(true);
       await GroupService.removeParticipants(groupId, participantIds);
       notify(t("groupActions.messages.removeOk"));
+      await loadParticipants();
     } catch (e) { notify(t("groupActions.messages.removeErr"), "error"); } finally { setLoading(false); }
   };
 
@@ -99,6 +157,7 @@ const GroupActionsPanel = ({ groupId }) => {
       setLoading(true);
       await GroupService.promoteParticipants(groupId, participantIds);
       notify(t("groupActions.messages.promoteOk"));
+      await loadParticipants();
     } catch (e) { notify(t("groupActions.messages.promoteErr"), "error"); } finally { setLoading(false); }
   };
 
@@ -110,6 +169,7 @@ const GroupActionsPanel = ({ groupId }) => {
       setLoading(true);
       await GroupService.demoteParticipants(groupId, participantIds);
       notify(t("groupActions.messages.demoteOk"));
+      await loadParticipants();
     } catch (e) { notify(t("groupActions.messages.demoteErr"), "error"); } finally { setLoading(false); }
   };
 
@@ -231,267 +291,491 @@ const GroupActionsPanel = ({ groupId }) => {
   };
 
   return (
-    <Paper variant="outlined" sx={{ p: 2, mt: 2 }}>
-      <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 1 }}>
-        <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>{t("groupActions.title")}</Typography>
-        <Stack direction="row" spacing={1} alignItems="center">
-          <Badge color="primary" badgeContent={participants.length} max={999}>
-            <Chip size="small" label={loading ? t("common.loading", { defaultValue: "Carregando" }) : t("common.ready", { defaultValue: "Pronto" })} color={loading ? "default" : "success"} variant="outlined" />
-          </Badge>
-          <Tooltip title={t("common.refresh", { defaultValue: "Atualizar" })}>
-            <span>
-              <IconButton size="small" onClick={loadParticipants} disabled={loading}>
-                <RefreshIcon fontSize="small" />
-              </IconButton>
-            </span>
-          </Tooltip>
-        </Stack>
-      </Stack>
-      <Divider sx={{ mb: 2 }} />
-
-      <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1 }}>
-        <Typography variant="overline" color="text.secondary">{participants.length} {participants.length === 1 ? "membro" : "membros"}</Typography>
-        <TextField size="small" placeholder={t("common.search", { defaultValue: "Buscar" })} value={search} onChange={e => setSearch(e.target.value)} InputProps={{ startAdornment: <SearchIcon fontSize="small" sx={{ mr: 1 }} /> }} />
-      </Stack>
-      <List dense sx={{ maxHeight: 220, overflowY: "auto", mb: 1.5 }}>
-        {paginated.map(p => (
-          <ListItem key={p.id}>
-            <ListItemIcon>
-              <Avatar src={p.avatar || undefined}>{(p.name || p.number || "?").substring(0,1)}</Avatar>
-            </ListItemIcon>
-            <ListItemText
-              primary={<Stack direction="row" spacing={1} alignItems="center"><span>{p.name || p.number}</span>{p.isSuperAdmin && <Chip size="small" label="Dono" color="success" />}{!p.isSuperAdmin && p.isAdmin && <Chip size="small" label="Admin" color="primary" variant="outlined" />}</Stack>}
-              secondary={p.about || p.number}
+    <Paper variant="outlined" sx={{ p: 0, mt: 2, overflow: 'visible', width: '100%', maxWidth: '100%' }}>
+      <Box sx={{ 
+        p: 1.5, 
+        backgroundColor: 'primary.main', 
+        color: 'primary.contrastText',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between'
+      }}>
+        <Stack direction="row" alignItems="center" spacing={0.5} sx={{ flex: 1, minWidth: 0 }}>
+          <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.875rem' }} noWrap>
+            Ações do Grupo
+          </Typography>
+          {isAdmin && (
+            <Chip 
+              size="small" 
+              label="Admin" 
+              sx={{ 
+                backgroundColor: 'rgba(255,255,255,0.2)',
+                color: 'inherit',
+                fontWeight: 600,
+                height: 20,
+                fontSize: '0.7rem',
+                '& .MuiChip-label': { px: 0.75 }
+              }} 
             />
-          </ListItem>
-        ))}
-      </List>
-      <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 2 }}>
-        <Stack direction="row" spacing={1} alignItems="center">
-          <Typography variant="caption">Itens por página:</Typography>
-          <TextField
-            select
-            size="small"
-            value={rowsPerPage}
-            onChange={e => setRowsPerPage(parseInt(e.target.value, 10))}
-            sx={{ width: 88 }}
-            SelectProps={{ native: true }}
-          >
-            {[10, 25, 50, 100].map(opt => (
-              <option key={opt} value={opt}>{opt}</option>
-            ))}
-          </TextField>
-          <Typography variant="caption">{start + 1}-{Math.min(end, filtered.length)} de {filtered.length}</Typography>
+          )}
         </Stack>
-        <Pagination
-          size="small"
-          color="primary"
-          page={currentPage}
-          count={totalPages}
-          onChange={(_, value) => setPage(value)}
-          siblingCount={0}
-          boundaryCount={1}
-        />
-      </Stack>
+        <Stack direction="row" spacing={0.5} alignItems="center">
+          <Badge color="secondary" badgeContent={participants.length} max={99}>
+            <Chip 
+              size="small" 
+              label={loading ? "..." : "OK"} 
+              sx={{ 
+                backgroundColor: loading ? 'rgba(255,255,255,0.1)' : 'rgba(76, 175, 80, 0.3)',
+                color: 'inherit',
+                height: 20,
+                fontSize: '0.7rem',
+                '& .MuiChip-label': { px: 0.75 }
+              }} 
+            />
+          </Badge>
+          <Tooltip title="Atualizar">
+            <IconButton 
+              size="small" 
+              onClick={loadParticipants} 
+              disabled={loading}
+              sx={{ color: 'inherit', p: 0.5 }}
+            >
+              <RefreshIcon sx={{ fontSize: '1.1rem' }} />
+            </IconButton>
+          </Tooltip>
+        </Stack>
+      </Box>
+      
+      <Tabs 
+        value={activeTab} 
+        onChange={(e, v) => setActiveTab(v)}
+        sx={{ 
+          borderBottom: 1, 
+          borderColor: 'divider', 
+          backgroundColor: 'background.paper',
+          minHeight: 40,
+          '& .MuiTab-root': {
+            minHeight: 40,
+            fontSize: '0.75rem',
+            padding: '6px 8px',
+            minWidth: 'auto'
+          }
+        }}
+        variant="fullWidth"
+      >
+        <Tab label="Membros" />
+        {isAdmin && <Tab label="Admin" />}
+        <Tab label="Info" />
+      </Tabs>
+      
+      <Box sx={{ p: 1.5, maxHeight: 450, overflowY: 'auto' }}>
+        {activeTab === 0 && (
+          <Box>
+            <TextField 
+              fullWidth
+              size="small" 
+              placeholder="Buscar membros..." 
+              value={search} 
+              onChange={e => setSearch(e.target.value)} 
+              InputProps={{ 
+                startAdornment: <SearchIcon fontSize="small" sx={{ mr: 0.5, color: 'action.active' }} /> 
+              }}
+              sx={{ mb: 1.5 }}
+            />
+            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
+              {participants.length} {participants.length === 1 ? "membro" : "membros"}
+            </Typography>
 
-      <Typography variant="overline" color="text.secondary">Membros</Typography>
-      <Grid container spacing={1} sx={{ mb: 1 }}>
-        <Grid item>
-          <Tooltip title={t("groupActions.buttons.add")} placement="top">
-            <span>
-              <Button size="small" variant="contained" startIcon={<PersonAddAlt1Icon />} onClick={handleAddParticipants} disabled={loading}>
-                {t("groupActions.buttons.add")}
-              </Button>
-            </span>
-          </Tooltip>
-        </Grid>
-        <Grid item>
-          <Tooltip title={t("groupActions.buttons.remove")} placement="top">
-            <span>
-              <Button size="small" variant="outlined" startIcon={<PersonRemoveIcon />} onClick={handleRemoveParticipants} disabled={loading}>
-                {t("groupActions.buttons.remove")}
-              </Button>
-            </span>
-          </Tooltip>
-        </Grid>
-      </Grid>
+            <List dense sx={{ maxHeight: 250, overflowY: "auto", mb: 1, backgroundColor: 'background.default', borderRadius: 1 }}>
+              {paginated.map(p => (
+                <ListItem 
+                  key={p.id}
+                  sx={{
+                    borderBottom: '1px solid',
+                    borderColor: 'divider',
+                    '&:last-child': { borderBottom: 0 }
+                  }}
+                >
+                  <ListItemIcon sx={{ minWidth: 40 }}>
+                    <Avatar src={p.avatar || undefined} sx={{ width: 32, height: 32, fontSize: '0.875rem' }}>
+                      {(p.name || p.number || "?").substring(0,1).toUpperCase()}
+                    </Avatar>
+                  </ListItemIcon>
+                  <ListItemText
+                    primary={
+                      <Stack direction="row" spacing={0.5} alignItems="center">
+                        <Typography variant="body2" sx={{ fontWeight: 500, fontSize: '0.813rem' }} noWrap>
+                          {(p.name || p.number).length > 20 ? (p.name || p.number).substring(0, 20) + '...' : (p.name || p.number)}
+                        </Typography>
+                        {p.isSuperAdmin && (
+                          <Chip size="small" label="Dono" color="success" sx={{ height: 18, fontSize: '0.65rem', '& .MuiChip-label': { px: 0.5 } }} />
+                        )}
+                        {!p.isSuperAdmin && p.isAdmin && (
+                          <Chip size="small" label="Admin" color="primary" variant="outlined" sx={{ height: 18, fontSize: '0.65rem', '& .MuiChip-label': { px: 0.5 } }} />
+                        )}
+                      </Stack>
+                    }
+                    secondary={
+                      <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.7rem' }} noWrap>
+                        {(p.about || p.number).length > 25 ? (p.about || p.number).substring(0, 25) + '...' : (p.about || p.number)}
+                      </Typography>
+                    }
+                  />
+                </ListItem>
+              ))}
+            </List>
 
-      <Typography variant="overline" color="text.secondary">Administração</Typography>
-      <Grid container spacing={1} sx={{ mb: 1 }}>
-        <Grid item>
-          <Tooltip title={t("groupActions.buttons.promote")} placement="top">
-            <span>
-              <Button size="small" variant="outlined" startIcon={<ArrowUpwardIcon />} onClick={handlePromote} disabled={loading}>
-                {t("groupActions.buttons.promote")}
-              </Button>
-            </span>
-          </Tooltip>
-        </Grid>
-        <Grid item>
-          <Tooltip title={t("groupActions.buttons.demote")} placement="top">
-            <span>
-              <Button size="small" variant="outlined" startIcon={<ArrowDownwardIcon />} onClick={handleDemote} disabled={loading}>
-                {t("groupActions.buttons.demote")}
-              </Button>
-            </span>
-          </Tooltip>
-        </Grid>
-      </Grid>
+            <Stack spacing={1} sx={{ mb: 1.5 }}>
+              <Stack direction="row" spacing={0.5} alignItems="center">
+                <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.7rem' }}>Pág:</Typography>
+                <TextField
+                  select
+                  size="small"
+                  value={rowsPerPage}
+                  onChange={e => setRowsPerPage(parseInt(e.target.value, 10))}
+                  sx={{ width: 55, '& .MuiInputBase-input': { py: 0.5, fontSize: '0.75rem' } }}
+                  SelectProps={{ native: true }}
+                >
+                  {[10, 25, 50].map(opt => (
+                    <option key={opt} value={opt}>{opt}</option>
+                  ))}
+                </TextField>
+                <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.7rem' }}>
+                  {start + 1}-{Math.min(end, filtered.length)} de {filtered.length}
+                </Typography>
+              </Stack>
+              <Pagination
+                size="small"
+                color="primary"
+                page={currentPage}
+                count={totalPages}
+                onChange={(_, value) => setPage(value)}
+                siblingCount={0}
+                boundaryCount={1}
+                sx={{ '& .MuiPaginationItem-root': { minWidth: 26, height: 26, fontSize: '0.75rem' } }}
+              />
+            </Stack>
 
-      <Typography variant="overline" color="text.secondary">Convite</Typography>
-      <Grid container spacing={1} sx={{ mb: 1 }}>
-        <Grid item>
-          <Tooltip title={t("groupActions.buttons.getInvite")} placement="top">
-            <span>
-              <Button size="small" variant="contained" color="secondary" startIcon={<LinkIcon />} onClick={handleGetInvite} disabled={loading}>
-                {t("groupActions.buttons.getInvite")}
+            <Divider sx={{ my: 1.5 }} />
+            
+            <Typography variant="caption" sx={{ mb: 1, fontWeight: 600, display: 'block', textTransform: 'uppercase', color: 'text.secondary' }}>Ações</Typography>
+            <Stack spacing={0.75}>
+              <Button 
+                fullWidth
+                size="small" 
+                variant="contained" 
+                startIcon={<LinkIcon fontSize="small" />} 
+                onClick={handleGetInvite} 
+                disabled={loading}
+                sx={{ fontSize: '0.75rem', py: 0.5 }}
+              >
+                Copiar Link
               </Button>
-            </span>
-          </Tooltip>
-        </Grid>
-        <Grid item>
-          <Tooltip title={t("groupActions.buttons.revokeInvite")} placement="top">
-            <span>
-              <Button size="small" variant="outlined" color="secondary" startIcon={<LinkOffIcon />} onClick={handleRevokeInvite} disabled={loading}>
-                {t("groupActions.buttons.revokeInvite")}
-              </Button>
-            </span>
-          </Tooltip>
-        </Grid>
-      </Grid>
+              
+              {isAdmin && (
+                <Button 
+                  fullWidth
+                  size="small" 
+                  variant="contained" 
+                  color="primary"
+                  startIcon={<PersonAddAlt1Icon fontSize="small" />} 
+                  onClick={handleAddParticipants} 
+                  disabled={loading}
+                  sx={{ fontSize: '0.75rem', py: 0.5 }}
+                >
+                  Adicionar
+                </Button>
+              )}
+            </Stack>
+          </Box>
+        )}
+        
+        {isAdmin && activeTab === 1 && (
+          <Box>
+            <Accordion defaultExpanded>
+              <AccordionSummary 
+                expandIcon={<ExpandMoreIcon fontSize="small" />}
+                sx={{ minHeight: 40, '& .MuiAccordionSummary-content': { my: 0.75 } }}
+              >
+                <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.813rem' }}>Gerenciar Membros</Typography>
+              </AccordionSummary>
+              <AccordionDetails sx={{ pt: 0 }}>
+                <Stack spacing={0.75}>
+                  <Button 
+                    fullWidth
+                    size="small" 
+                    variant="outlined" 
+                    startIcon={<PersonRemoveIcon />} 
+                    onClick={handleRemoveParticipants} 
+                    disabled={loading}
+                  >
+                    Remover Participantes
+                  </Button>
+                  <Button 
+                    fullWidth
+                    size="small" 
+                    variant="outlined" 
+                    startIcon={<ArrowUpwardIcon />} 
+                    onClick={handlePromote} 
+                    disabled={loading}
+                  >
+                    Promover a Admin
+                  </Button>
+                  <Button 
+                    fullWidth
+                    size="small" 
+                    variant="outlined" 
+                    startIcon={<ArrowDownwardIcon />} 
+                    onClick={handleDemote} 
+                    disabled={loading}
+                  >
+                    Rebaixar Admin
+                  </Button>
+                </Stack>
+              </AccordionDetails>
+            </Accordion>
+            
+            <Accordion sx={{ '&:before': { display: 'none' } }}>
+              <AccordionSummary 
+                expandIcon={<ExpandMoreIcon fontSize="small" />}
+                sx={{ minHeight: 40, '& .MuiAccordionSummary-content': { my: 0.75 } }}
+              >
+                <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.813rem' }}>Link de Convite</Typography>
+              </AccordionSummary>
+              <AccordionDetails sx={{ pt: 0 }}>
+                <Stack spacing={0.75}>
+                  <Button 
+                    fullWidth
+                    size="small" 
+                    variant="outlined" 
+                    color="secondary" 
+                    startIcon={<LinkOffIcon fontSize="small" />} 
+                    onClick={handleRevokeInvite} 
+                    disabled={loading}
+                    sx={{ fontSize: '0.75rem', py: 0.5 }}
+                  >
+                    Revogar Link
+                  </Button>
+                </Stack>
+              </AccordionDetails>
+            </Accordion>
+            
+            <Accordion sx={{ '&:before': { display: 'none' } }}>
+              <AccordionSummary 
+                expandIcon={<ExpandMoreIcon fontSize="small" />}
+                sx={{ minHeight: 40, '& .MuiAccordionSummary-content': { my: 0.75 } }}
+              >
+                <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.813rem' }}>Configurações</Typography>
+              </AccordionSummary>
+              <AccordionDetails sx={{ pt: 0 }}>
+                <List dense sx={{ p: 0 }}>
+                  <ListItem
+                    sx={{ px: 0, py: 0.5 }}
+                    secondaryAction={
+                      <Switch edge="end" onChange={handleToggleMemberAddMode} disabled={loading} size="small" />
+                    }
+                  >
+                    <ListItemIcon sx={{ minWidth: 36 }}>
+                      <AdminPanelSettingsIcon sx={{ fontSize: '1.1rem' }} />
+                    </ListItemIcon>
+                    <ListItemText 
+                      primary="Admins adicionam"
+                      primaryTypographyProps={{ variant: 'body2', fontSize: '0.75rem' }}
+                    />
+                  </ListItem>
 
-      <Typography variant="overline" color="text.secondary">Informações</Typography>
-      <Grid container spacing={1} sx={{ mb: 1 }}>
-        <Grid item>
-          <Tooltip title={t("groupActions.buttons.subject")} placement="top">
-            <span>
-              <Button size="small" variant="outlined" startIcon={<TitleIcon />} onClick={handleSetSubject} disabled={loading}>
-                {t("groupActions.buttons.subject")}
-              </Button>
-            </span>
-          </Tooltip>
-        </Grid>
-        <Grid item>
-          <Tooltip title={t("groupActions.buttons.description")} placement="top">
-            <span>
-              <Button size="small" variant="outlined" startIcon={<DescriptionIcon />} onClick={handleSetDescription} disabled={loading}>
-                {t("groupActions.buttons.description")}
-              </Button>
-            </span>
-          </Tooltip>
-        </Grid>
-      </Grid>
+                  <ListItem
+                    sx={{ px: 0, py: 0.5 }}
+                    secondaryAction={
+                      <Switch edge="end" onChange={handleToggleAnnouncement} disabled={loading} size="small" />
+                    }
+                  >
+                    <ListItemIcon sx={{ minWidth: 36 }}>
+                      <CampaignIcon sx={{ fontSize: '1.1rem' }} />
+                    </ListItemIcon>
+                    <ListItemText 
+                      primary="Admins enviam"
+                      primaryTypographyProps={{ variant: 'body2', fontSize: '0.75rem' }}
+                    />
+                  </ListItem>
 
-      <Typography variant="overline" color="text.secondary">Foto</Typography>
-      <Grid container spacing={1} sx={{ mb: 1 }}>
-        <Grid item>
-          <Tooltip title={t("groupActions.buttons.setPicture")} placement="top">
-            <span>
-              <Button size="small" variant="outlined" startIcon={<ImageIcon />} onClick={handleSetPicture} disabled={loading}>
-                {t("groupActions.buttons.setPicture")}
-              </Button>
-            </span>
-          </Tooltip>
-        </Grid>
-        <Grid item>
-          <Tooltip title={t("groupActions.buttons.deletePicture")} placement="top">
-            <span>
-              <Button size="small" variant="outlined" startIcon={<ImageNotSupportedIcon />} onClick={handleDeletePicture} disabled={loading}>
-                {t("groupActions.buttons.deletePicture")}
-              </Button>
-            </span>
-          </Tooltip>
-        </Grid>
-      </Grid>
-
-      <Divider sx={{ my: 1.5 }} />
-
-      <Typography variant="overline" color="text.secondary">Preferências</Typography>
-      <List dense>
-        <Tooltip title={t("groupActions.switches.memberAddMode")} placement="top-start">
-          <ListItem
-            secondaryAction={
-              <Switch edge="end" onChange={handleToggleMemberAddMode} disabled={loading} />
-            }
-          >
-            <ListItemIcon>
-              <AdminPanelSettingsIcon fontSize="small" />
-            </ListItemIcon>
-            <ListItemText primary={t("groupActions.switches.memberAddMode")} />
-          </ListItem>
-        </Tooltip>
-
-        <Tooltip title={t("groupActions.switches.announcement")} placement="top-start">
-          <ListItem
-            secondaryAction={
-              <Switch edge="end" onChange={handleToggleAnnouncement} disabled={loading} />
-            }
-          >
-            <ListItemIcon>
-              <CampaignIcon fontSize="small" />
-            </ListItemIcon>
-            <ListItemText primary={t("groupActions.switches.announcement")} />
-          </ListItem>
-        </Tooltip>
-
-        <Tooltip title={t("groupActions.switches.restrict")} placement="top-start">
-          <ListItem
-            secondaryAction={
-              <Switch edge="end" onChange={handleToggleRestrict} disabled={loading} />
-            }
-          >
-            <ListItemIcon>
-              <EditIcon fontSize="small" />
-            </ListItemIcon>
-            <ListItemText primary={t("groupActions.switches.restrict")} />
-          </ListItem>
-        </Tooltip>
-      </List>
-
-      <Divider sx={{ my: 1.5 }} />
-
-      <Typography variant="overline" color="text.secondary">Solicitações</Typography>
-      <Grid container spacing={1} sx={{ mb: 1 }}>
-        <Grid item>
-          <Tooltip title={t("groupActions.buttons.listRequests")} placement="top">
-            <span>
-              <Button size="small" variant="outlined" startIcon={<ListAltIcon />} onClick={handleListRequests} disabled={loading}>
-                {t("groupActions.buttons.listRequests")}
-              </Button>
-            </span>
-          </Tooltip>
-        </Grid>
-        <Grid item>
-          <Tooltip title={t("groupActions.buttons.approveRequests")} placement="top">
-            <span>
-              <Button size="small" variant="outlined" startIcon={<CheckCircleIcon />} onClick={handleApproveRequests} disabled={loading}>
-                {t("groupActions.buttons.approveRequests")}
-              </Button>
-            </span>
-          </Tooltip>
-        </Grid>
-        <Grid item>
-          <Tooltip title={t("groupActions.buttons.rejectRequests")} placement="top">
-            <span>
-              <Button size="small" variant="outlined" startIcon={<CancelIcon />} onClick={handleRejectRequests} disabled={loading}>
-                {t("groupActions.buttons.rejectRequests")}
-              </Button>
-            </span>
-          </Tooltip>
-        </Grid>
-      </Grid>
-
-      <Divider sx={{ my: 1.5 }} />
-      <Typography variant="overline" color="error.main">Zona de risco</Typography>
-      <Stack spacing={1} direction="row" sx={{ flexWrap: 'wrap', gap: 1 }}>
-        <Tooltip title={t("groupActions.buttons.leave")} placement="top">
-          <span>
-            <Button size="small" variant="outlined" color="error" startIcon={<LogoutIcon />} onClick={handleLeave} disabled={loading}>
-              {t("groupActions.buttons.leave")}
-            </Button>
-          </span>
-        </Tooltip>
-      </Stack>
+                  <ListItem
+                    sx={{ px: 0, py: 0.5 }}
+                    secondaryAction={
+                      <Switch edge="end" onChange={handleToggleRestrict} disabled={loading} size="small" />
+                    }
+                  >
+                    <ListItemIcon sx={{ minWidth: 36 }}>
+                      <EditIcon sx={{ fontSize: '1.1rem' }} />
+                    </ListItemIcon>
+                    <ListItemText 
+                      primary="Admins editam"
+                      primaryTypographyProps={{ variant: 'body2', fontSize: '0.75rem' }}
+                    />
+                  </ListItem>
+                </List>
+              </AccordionDetails>
+            </Accordion>
+            
+            <Accordion sx={{ '&:before': { display: 'none' } }}>
+              <AccordionSummary 
+                expandIcon={<ExpandMoreIcon fontSize="small" />}
+                sx={{ minHeight: 40, '& .MuiAccordionSummary-content': { my: 0.75 } }}
+              >
+                <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.813rem' }}>Solicitações</Typography>
+              </AccordionSummary>
+              <AccordionDetails sx={{ pt: 0 }}>
+                <Stack spacing={0.75}>
+                  <Button 
+                    fullWidth
+                    size="small" 
+                    variant="outlined" 
+                    startIcon={<ListAltIcon fontSize="small" />} 
+                    onClick={handleListRequests} 
+                    disabled={loading}
+                    sx={{ fontSize: '0.75rem', py: 0.5 }}
+                  >
+                    Listar
+                  </Button>
+                  <Button 
+                    fullWidth
+                    size="small" 
+                    variant="outlined" 
+                    color="success"
+                    startIcon={<CheckCircleIcon fontSize="small" />} 
+                    onClick={handleApproveRequests} 
+                    disabled={loading}
+                    sx={{ fontSize: '0.75rem', py: 0.5 }}
+                  >
+                    Aprovar
+                  </Button>
+                  <Button 
+                    fullWidth
+                    size="small" 
+                    variant="outlined" 
+                    color="error"
+                    startIcon={<CancelIcon fontSize="small" />} 
+                    onClick={handleRejectRequests} 
+                    disabled={loading}
+                    sx={{ fontSize: '0.75rem', py: 0.5 }}
+                  >
+                    Rejeitar
+                  </Button>
+                </Stack>
+              </AccordionDetails>
+            </Accordion>
+            
+            <Accordion sx={{ '&:before': { display: 'none' } }}>
+              <AccordionSummary 
+                expandIcon={<ExpandMoreIcon fontSize="small" />}
+                sx={{ minHeight: 40, '& .MuiAccordionSummary-content': { my: 0.75 } }}
+              >
+                <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.813rem', color: 'error.main' }}>Zona de Risco</Typography>
+              </AccordionSummary>
+              <AccordionDetails sx={{ pt: 0 }}>
+                <Button 
+                  fullWidth
+                  size="small" 
+                  variant="outlined" 
+                  color="error" 
+                  startIcon={<LogoutIcon fontSize="small" />} 
+                  onClick={handleLeave} 
+                  disabled={loading}
+                  sx={{ fontSize: '0.75rem', py: 0.5 }}
+                >
+                  Sair do Grupo
+                </Button>
+              </AccordionDetails>
+            </Accordion>
+          </Box>
+        )}
+        
+        {activeTab === (isAdmin ? 2 : 1) && (
+          <Box>
+            <Accordion defaultExpanded sx={{ '&:before': { display: 'none' } }}>
+              <AccordionSummary 
+                expandIcon={<ExpandMoreIcon fontSize="small" />}
+                sx={{ minHeight: 40, '& .MuiAccordionSummary-content': { my: 0.75 } }}
+              >
+                <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.813rem' }}>Informações</Typography>
+              </AccordionSummary>
+              <AccordionDetails sx={{ pt: 0 }}>
+                <Stack spacing={0.75}>
+                  {isAdmin && (
+                    <>
+                      <Button 
+                        fullWidth
+                        size="small" 
+                        variant="outlined" 
+                        startIcon={<TitleIcon fontSize="small" />} 
+                        onClick={handleSetSubject} 
+                        disabled={loading}
+                        sx={{ fontSize: '0.75rem', py: 0.5 }}
+                      >
+                        Alterar Nome
+                      </Button>
+                      <Button 
+                        fullWidth
+                        size="small" 
+                        variant="outlined" 
+                        startIcon={<DescriptionIcon fontSize="small" />} 
+                        onClick={handleSetDescription} 
+                        disabled={loading}
+                        sx={{ fontSize: '0.75rem', py: 0.5 }}
+                      >
+                        Alterar Descrição
+                      </Button>
+                    </>
+                  )}
+                  {!isAdmin && (
+                    <Typography variant="caption" color="text.secondary" sx={{ textAlign: 'center', py: 1.5, display: 'block' }}>
+                      Apenas admins podem editar
+                    </Typography>
+                  )}
+                </Stack>
+              </AccordionDetails>
+            </Accordion>
+            
+            {isAdmin && (
+              <Accordion sx={{ '&:before': { display: 'none' } }}>
+                <AccordionSummary 
+                  expandIcon={<ExpandMoreIcon fontSize="small" />}
+                  sx={{ minHeight: 40, '& .MuiAccordionSummary-content': { my: 0.75 } }}
+                >
+                  <Typography variant="body2" sx={{ fontWeight: 600, fontSize: '0.813rem' }}>Foto</Typography>
+                </AccordionSummary>
+                <AccordionDetails sx={{ pt: 0 }}>
+                  <Stack spacing={0.75}>
+                    <Button 
+                      fullWidth
+                      size="small" 
+                      variant="outlined" 
+                      startIcon={<ImageIcon fontSize="small" />} 
+                      onClick={handleSetPicture} 
+                      disabled={loading}
+                      sx={{ fontSize: '0.75rem', py: 0.5 }}
+                    >
+                      Alterar Foto
+                    </Button>
+                    <Button 
+                      fullWidth
+                      size="small" 
+                      variant="outlined" 
+                      color="error"
+                      startIcon={<ImageNotSupportedIcon fontSize="small" />} 
+                      onClick={handleDeletePicture} 
+                      disabled={loading}
+                      sx={{ fontSize: '0.75rem', py: 0.5 }}
+                    >
+                      Remover Foto
+                    </Button>
+                  </Stack>
+                </AccordionDetails>
+              </Accordion>
+            )}
+          </Box>
+        )}
+      </Box>
 
       <SelectContactsModal
         open={addModalOpen}
