@@ -1,6 +1,8 @@
 import { Request, Response } from "express";
 import GroupManagementService from "../services/WbotServices/GroupManagementService";
+import GroupEventsService from "../services/WbotServices/GroupEventsService";
 import AppError from "../errors/AppError";
+import { getWbot } from "../libs/wbot";
 
 export const createGroup = async (
   req: Request,
@@ -85,6 +87,24 @@ export const addParticipants = async (
     participants
   });
 
+  const wbot = getWbot(Number(whatsappId));
+  for (const participantId of participants) {
+    try {
+      const contact = await wbot.getContactById(participantId.includes('@') ? participantId : `${participantId}@c.us`);
+      await GroupEventsService.registerEvent({
+        whatsappId: Number(whatsappId),
+        groupId,
+        eventType: "PARTICIPANT_ADDED",
+        participantId: contact.id._serialized,
+        participantName: contact.name || contact.pushname || participantId,
+        performedBy: wbot.info.wid._serialized,
+        performedByName: "Você"
+      });
+    } catch (err) {
+      console.error(`Erro ao registrar evento de adição: ${err}`);
+    }
+  }
+
   return res.json({ 
     message: "Participantes adicionados com sucesso",
     result 
@@ -108,6 +128,24 @@ export const removeParticipants = async (
     participants
   });
 
+  const wbot = getWbot(Number(whatsappId));
+  for (const participantId of participants) {
+    try {
+      const contact = await wbot.getContactById(participantId.includes('@') ? participantId : `${participantId}@c.us`);
+      await GroupEventsService.registerEvent({
+        whatsappId: Number(whatsappId),
+        groupId,
+        eventType: "PARTICIPANT_REMOVED",
+        participantId: contact.id._serialized,
+        participantName: contact.name || contact.pushname || participantId,
+        performedBy: wbot.info.wid._serialized,
+        performedByName: "Você"
+      });
+    } catch (err) {
+      console.error(`Erro ao registrar evento de remoção: ${err}`);
+    }
+  }
+
   return res.json({ message: "Participantes removidos com sucesso" });
 };
 
@@ -128,6 +166,24 @@ export const promoteParticipants = async (
     participants
   });
 
+  const wbot = getWbot(Number(whatsappId));
+  for (const participantId of participants) {
+    try {
+      const contact = await wbot.getContactById(participantId.includes('@') ? participantId : `${participantId}@c.us`);
+      await GroupEventsService.registerEvent({
+        whatsappId: Number(whatsappId),
+        groupId,
+        eventType: "PARTICIPANT_PROMOTED",
+        participantId: contact.id._serialized,
+        participantName: contact.name || contact.pushname || participantId,
+        performedBy: wbot.info.wid._serialized,
+        performedByName: "Você"
+      });
+    } catch (err) {
+      console.error(`Erro ao registrar evento de promoção: ${err}`);
+    }
+  }
+
   return res.json({ message: "Participantes promovidos a admin com sucesso" });
 };
 
@@ -147,6 +203,24 @@ export const demoteParticipants = async (
     groupId,
     participants
   });
+
+  const wbot = getWbot(Number(whatsappId));
+  for (const participantId of participants) {
+    try {
+      const contact = await wbot.getContactById(participantId.includes('@') ? participantId : `${participantId}@c.us`);
+      await GroupEventsService.registerEvent({
+        whatsappId: Number(whatsappId),
+        groupId,
+        eventType: "PARTICIPANT_DEMOTED",
+        participantId: contact.id._serialized,
+        participantName: contact.name || contact.pushname || participantId,
+        performedBy: wbot.info.wid._serialized,
+        performedByName: "Você"
+      });
+    } catch (err) {
+      console.error(`Erro ao registrar evento de rebaixamento: ${err}`);
+    }
+  }
 
   return res.json({ message: "Participantes rebaixados com sucesso" });
 };

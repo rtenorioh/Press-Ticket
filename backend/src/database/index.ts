@@ -25,6 +25,7 @@ import WhatsappNotification from "../models/WhatsappNotification";
 import WhatsappQueue from "../models/WhatsappQueue";
 import MessageReaction from "../models/MessageReaction";
 import ClientStatus from "../models/ClientStatus";
+import GroupEvent from "../models/GroupEvent";
 
 // eslint-disable-next-line
 const dbConfig = require("../config/database");
@@ -57,7 +58,8 @@ const models = [
   Video,
   VideoUser,
   MessageReaction,
-  ClientStatus
+  ClientStatus,
+  GroupEvent
 ];
 
 sequelize.addModels(models);

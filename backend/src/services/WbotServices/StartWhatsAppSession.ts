@@ -4,6 +4,7 @@ import { wbotMessageListener } from "./wbotMessageListener";
 import { getIO } from "../../libs/socket";
 import wbotMonitor from "./wbotMonitor";
 import { logger } from "../../utils/logger";
+import GroupEventsService from "./GroupEventsService";
 
 export const StartWhatsAppSession = async (
   whatsapp: Whatsapp
@@ -20,6 +21,7 @@ export const StartWhatsAppSession = async (
     const wbot = await initWbot(whatsapp);
     wbotMessageListener(wbot);
     wbotMonitor(wbot, whatsapp);
+    GroupEventsService.setupGroupListeners(wbot, whatsapp.id);
   } catch (err) {
     logger.error(err);
   }

@@ -35,6 +35,7 @@ import Title from "../../components/Title";
 import CreateGroupModal from "../../components/CreateGroupModal";
 import ManageParticipantsModal from "../../components/ManageParticipantsModal";
 import GroupSettingsModal from "../../components/GroupSettingsModal";
+import GroupEventNotifications from "../../components/GroupEventNotifications";
 
 const MainPaper = styled(Paper)(({ theme }) => ({
   flex: 1,
@@ -196,6 +197,10 @@ const GroupManagement = () => {
               </option>
             ))}
           </TextField>
+          
+          {selectedWhatsappId && (
+            <GroupEventNotifications whatsappId={selectedWhatsappId} />
+          )}
           
           <Button
             variant="contained"

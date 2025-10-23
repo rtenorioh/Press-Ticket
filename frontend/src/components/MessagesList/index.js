@@ -127,6 +127,19 @@ const QuotedMsgStyled = styled("div")(({ theme }) => ({
   backgroundColor: theme.palette.action.hover,
 }));
 
+const SystemMessage = styled("div")(({ theme }) => ({
+  margin: "10px auto",
+  padding: "6px 12px",
+  maxWidth: "80%",
+  textAlign: "center",
+  backgroundColor: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.05)',
+  color: theme.palette.text.secondary,
+  borderRadius: "8px",
+  fontSize: "13px",
+  fontStyle: "italic",
+  wordBreak: "break-word",
+}));
+
 const MessageRight = styled("div")(({ theme }) => ({
   marginLeft: 20,
     marginTop: 2,
@@ -1255,6 +1268,16 @@ const MessagesList = ({ ticketId, isGroup, onClick }) => {
   const renderMessages = () => {
     if (messagesList.length > 0) {
       const viewMessagesList = messagesList.map((message, index) => {
+        if (message.mediaType === "event") {
+          return (
+            <React.Fragment key={message.id}>
+              {renderDailyTimestamps(message, index)}
+              <SystemMessage>
+                {message.body}
+              </SystemMessage>
+            </React.Fragment>
+          );
+        }
         if (message.mediaType === "call_log") {
           return (
             <React.Fragment key={message.id}>

@@ -29,14 +29,29 @@ class GroupEvent extends Model<GroupEvent> {
   @Column
   groupName: string;
 
-  @Column(DataType.ENUM("join", "leave", "update", "admin_changed", "membership_request"))
+  @Column
   eventType: string;
 
-  @Column(DataType.JSON)
-  participants: string[];
+  @Column
+  participantId: string;
 
   @Column
-  action: string;
+  participantName: string;
+
+  @Column(DataType.TEXT)
+  oldValue: string;
+
+  @Column(DataType.TEXT)
+  newValue: string;
+
+  @Column
+  performedBy: string;
+
+  @Column
+  performedByName: string;
+
+  @Column
+  timestamp: Date;
 
   @Column(DataType.JSON)
   metadata: any;
