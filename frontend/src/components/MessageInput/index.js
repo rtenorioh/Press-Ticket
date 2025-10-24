@@ -46,6 +46,7 @@ import { EditMessageContext } from "../../context/EditingMessage/EditingMessageC
 import { ReplyMessageContext } from "../../context/ReplyingMessage/ReplyingMessageContext";
 import UploadModal from "../UploadModal";
 import AttachmentMenu from "../AttachmentMenu";
+import PollCreator from "../PollCreator";
 import toastError from "../../errors/toastError";
 import { useLocalStorage } from "../../hooks/useLocalStorage";
 import api from "../../services/api";
@@ -372,6 +373,7 @@ const MessageInput = ({ ticketStatus }) => {
   const [groupId, setGroupId] = useState(null);
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [initialCaption, setInitialCaption] = useState("");
+  const [showPollCreator, setShowPollCreator] = useState(false);
   const { t } = useTranslation();
   const theme = useTheme();
   const mainWrapperRef = useRef(null);
@@ -1356,6 +1358,10 @@ const MessageInput = ({ ticketStatus }) => {
     setShowUploadModal(true);
   };
 
+  const handlePollClick = () => {
+    setShowPollCreator(true);
+  };
+
   const handleContactSelect = (contacts) => {
     if (contacts && contacts.length > 0) {
       const contactsData = contacts.map(contact => ({
@@ -1466,7 +1472,14 @@ const MessageInput = ({ ticketStatus }) => {
               onCameraSelect={handleCameraSelect}
               onAudioSelect={handleAudioSelect}
               onContactSelect={handleContactSelect}
+              onPollClick={handlePollClick}
               disabled={loading || recording || ticketStatus !== "open"}
+            />
+
+            <PollCreator
+              open={showPollCreator}
+              onClose={() => setShowPollCreator(false)}
+              ticketId={ticketId}
             />
 
             {canSignMessage() && (

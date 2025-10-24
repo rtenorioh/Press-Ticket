@@ -47,6 +47,10 @@ const FormatLastMessage = ({
         fileIcon = "📎 Arquivo";
         break;
 
+      case "poll_creation":
+        fileIcon = "📊 Enquete";
+        break;  
+
       case "ciphertext":
         fileIcon = "⚠️ Notificação";
         break;

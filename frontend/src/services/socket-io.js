@@ -43,6 +43,9 @@ const connectToSocket = () => {
             socketInstance.disconnect();
         }
         
+        console.log("[SOCKET] Conectando com token:", parsedToken.substring(0, 20) + "...");
+        console.log("[SOCKET] Backend URL:", getBackendUrl());
+        
         const socket = openSocket(getBackendUrl(), {
             transports: ["polling", "websocket"],
             query: {
@@ -57,14 +60,15 @@ const connectToSocket = () => {
 
         socket.on("connect", () => {
             const timestamp = new Date().toISOString();
+            console.log(`[SOCKET] ✅ CONECTADO! Socket ID: ${socket.id}`);
             
             const user = JSON.parse(localStorage.getItem("user") || "{}");
             if (user && user.id) {
+                console.log(`[SOCKET] Usuário: ${user.name} (ID: ${user.id})`);
                 socket.emit("getTickets", { userId: user.id });
-                
                 socket.emit("userStatus", { userId: user.id, status: "online" });
-                
                 socket.emit("subscribeTicketCounter");
+                socket.emit("joinNotification");
             } else {
                 console.warn(`[FRONT_SOCKET_NO_USER][${timestamp}] Não foi possível sincronizar tickets: usuário não encontrado no localStorage`);
             }
@@ -91,16 +95,17 @@ const connectToSocket = () => {
 
         socket.on("connect_error", (error) => {
             const timestamp = new Date().toISOString();
-            console.error(`[FRONT_SOCKET_CONNECT_ERROR][${timestamp}] Erro na conexão do socket:`, error.message);
-            console.error(`[FRONT_SOCKET_CONNECT_ERROR_STACK][${timestamp}] Stack de erro:`, error?.stack || 'Sem stack disponível');
+            console.error(`[SOCKET] ❌ ERRO DE CONEXÃO:`, error.message);
+            console.error(`[SOCKET] Tipo de erro:`, error.type);
+            console.error(`[SOCKET] Stack:`, error?.stack || 'Sem stack disponível');
             
             if (error.message.includes("jwt expired") || 
                 error.message.includes("invalid token") || 
                 error.message.includes("jwt malformed")) {
-                console.warn(`[FRONT_SOCKET_TOKEN_ERROR][${timestamp}] Problema com o token JWT detectado: ${error.message}. Desconectando socket e redirecionando.`);
+                console.warn(`[SOCKET] ⚠️ Token inválido ou expirado. Fazendo logout...`);
                 socket.disconnect();
                 localStorage.removeItem("token");
-                window.location.reload();
+                window.location.href = "/login";
             }
         });
 
@@ -118,14 +123,15 @@ const connectToSocket = () => {
         
         socket.on("disconnect", (reason) => {
             const timestamp = new Date().toISOString();
+            console.warn(`[SOCKET] ⚠️ DESCONECTADO! Motivo: ${reason}`);
         
             if (reason === 'transport error' || reason === 'transport close') {
-                console.warn(`[FRONT_SOCKET_TRANSPORT_ERROR][${timestamp}] Erro de transporte detectado. Tentando reconectar...`);
+                console.warn(`[SOCKET] Erro de transporte. Tentando reconectar...`);
             }
             
             if (reason === 'io server disconnect') {
-                console.warn(`[FRONT_SOCKET_SERVER_DISCONNECT][${timestamp}] Servidor fechou a conexão. Tentando reconectar manualmente...`);
-                socket.connect();
+                console.warn(`[SOCKET] Servidor fechou a conexão. Reconectando...`);
+                setTimeout(() => socket.connect(), 1000);
             }
         });
 

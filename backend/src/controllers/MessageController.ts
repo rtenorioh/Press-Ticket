@@ -10,6 +10,7 @@ import EditWhatsAppMessage from "../services/WbotServices/EditWhatsAppMessage";
 import SendWhatsAppMedia from "../services/WbotServices/SendWhatsAppMedia";
 import SendWhatsAppMessage from "../services/WbotServices/SendWhatsAppMessage";
 import SendWhatsAppContacts from "../services/WbotServices/SendWhatsAppContacts";
+import SendPollService from "../services/WbotServices/SendPollService";
 import ShowTicketService from "../services/TicketServices/ShowTicketService";
 import GetTicketWbot from "../helpers/GetTicketWbot";
 import SerializeWbotMsgId from "../helpers/SerializeWbotMsgId";
@@ -594,4 +595,27 @@ export const count = async (req: Request, res: Response): Promise<Response> => {
     endDate: endDate as string
   });
   return res.json(counter);
+};
+
+export const sendPoll = async (req: Request, res: Response): Promise<Response> => {
+  const { ticketId } = req.params;
+  const { pollName, options, allowMultipleAnswers } = req.body;
+
+  try {
+    if (!pollName || !options || !Array.isArray(options)) {
+      return res.status(400).json({ error: "Nome da enquete e opções são obrigatórios" });
+    }
+
+    const message = await SendPollService.execute({
+      ticketId: Number(ticketId),
+      pollName,
+      options,
+      allowMultipleAnswers: allowMultipleAnswers || false
+    });
+
+    return res.json(message);
+  } catch (error: any) {
+    console.error("Erro ao enviar enquete:", error);
+    return res.status(500).json({ error: error.message || "Erro ao enviar enquete" });
+  }
 };

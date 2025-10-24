@@ -17,7 +17,8 @@ import {
   Videocam,
   ContactPhone,
   AudioFile,
-  Close
+  Close,
+  Poll
 } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
 import CameraModal from '../CameraModal';
@@ -64,6 +65,7 @@ const AttachmentMenu = ({
   onCameraSelect, 
   onAudioSelect,
   onContactSelect,
+  onPollClick,
   disabled = false 
 }) => {
   const { t } = useTranslation();
@@ -102,6 +104,13 @@ const AttachmentMenu = ({
   const handleContactClick = () => {
     onClose();
     setShowContactModal(true);
+  };
+
+  const handlePollClick = () => {
+    onClose();
+    if (onPollClick) {
+      onPollClick();
+    }
   };
 
   const handleDocumentChange = (e) => {
@@ -206,6 +215,16 @@ const AttachmentMenu = ({
           <ListItemText 
             primary={t('attachmentMenu.contact')} 
             secondary={t('attachmentMenu.contactDesc')}
+          />
+        </MenuItemStyled>
+
+        <MenuItemStyled onClick={handlePollClick} disabled={disabled}>
+          <ListItemIcon>
+            <Poll />
+          </ListItemIcon>
+          <ListItemText 
+            primary="Enquete" 
+            secondary="Criar enquete"
           />
         </MenuItemStyled>
       </StyledMenu>

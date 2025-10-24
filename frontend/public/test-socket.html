@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste Socket.IO</title>
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 { color: #333; }
+        .status {
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .connected { background: #d4edda; color: #155724; }
+        .disconnected { background: #f8d7da; color: #721c24; }
+        .log {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+            margin-top: 20px;
+        }
+        .log-entry {
+            margin: 5px 0;
+            padding: 5px;
+            border-left: 3px solid #007bff;
+            padding-left: 10px;
+        }
+        .log-error { border-left-color: #dc3545; color: #dc3545; }
+        .log-success { border-left-color: #28a745; color: #28a745; }
+        .log-warning { border-left-color: #ffc107; color: #856404; }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #0056b3; }
+        input {
+            padding: 10px;
+            width: 300px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔌 Teste de Conexão Socket.IO</h1>
+        
+        <div id="status" class="status disconnected">
+            ❌ Desconectado
+        </div>
+
+        <div>
+            <h3>Token JWT:</h3>
+            <input type="text" id="tokenInput" placeholder="Cole o token aqui (do localStorage)">
+            <button onclick="connectSocket()">Conectar</button>
+            <button onclick="disconnect()">Desconectar</button>
+        </div>
+
+        <div>
+            <h3>Testes:</h3>
+            <button onclick="testPollVoteUpdate()">Simular pollVoteUpdate</button>
+            <button onclick="clearLogs()">Limpar Logs</button>
+        </div>
+
+        <div>
+            <h3>Logs:</h3>
+            <div id="logs" class="log"></div>
+        </div>
+    </div>
+
+    <script>
+        let socket = null;
+        const backendUrl = 'https://devapi.pressticket.com.br' ||'http://localhost:8080'; // Altere se necessário
+
+        function log(message, type = 'info') {
+            const logsDiv = document.getElementById('logs');
+            const entry = document.createElement('div');
+            entry.className = `log-entry log-${type}`;
+            const timestamp = new Date().toLocaleTimeString();
+            entry.textContent = `[${timestamp}] ${message}`;
+            logsDiv.appendChild(entry);
+            logsDiv.scrollTop = logsDiv.scrollHeight;
+            console.log(message);
+        }
+
+        function updateStatus(connected) {
+            const statusDiv = document.getElementById('status');
+            if (connected) {
+                statusDiv.className = 'status connected';
+                statusDiv.textContent = '✅ Conectado - Socket ID: ' + socket.id;
+            } else {
+                statusDiv.className = 'status disconnected';
+                statusDiv.textContent = '❌ Desconectado';
+            }
+        }
+
+        function connectSocket() {
+            const token = document.getElementById('tokenInput').value.trim();
+            
+            if (!token) {
+                // Tentar pegar do localStorage
+                const storedToken = localStorage.getItem('token');
+                if (storedToken) {
+                    try {
+                        const parsedToken = JSON.parse(storedToken);
+                        document.getElementById('tokenInput').value = parsedToken;
+                        log('Token carregado do localStorage', 'success');
+                        connectWithToken(parsedToken);
+                        return;
+                    } catch (e) {
+                        log('Erro ao parsear token do localStorage', 'error');
+                    }
+                }
+                log('Por favor, insira um token JWT', 'warning');
+                return;
+            }
+
+            connectWithToken(token);
+        }
+
+        function connectWithToken(token) {
+            if (socket) {
+                socket.disconnect();
+            }
+
+            log('Tentando conectar ao backend: ' + backendUrl, 'info');
+            log('Token: ' + token.substring(0, 20) + '...', 'info');
+
+            socket = io(backendUrl, {
+                transports: ['polling', 'websocket'],
+                query: { token },
+                reconnection: true,
+                reconnectionDelay: 1000,
+                reconnectionAttempts: 5
+            });
+
+            socket.on('connect', () => {
+                log('✅ CONECTADO COM SUCESSO!', 'success');
+                log('Socket ID: ' + socket.id, 'success');
+                updateStatus(true);
+
+                // Entrar nas salas
+                socket.emit('joinNotification');
+                log('Entrou na sala "notification"', 'success');
+            });
+
+            socket.on('connect_error', (error) => {
+                log('❌ ERRO DE CONEXÃO: ' + error.message, 'error');
+                log('Tipo: ' + error.type, 'error');
+                updateStatus(false);
+            });
+
+            socket.on('disconnect', (reason) => {
+                log('⚠️ DESCONECTADO: ' + reason, 'warning');
+                updateStatus(false);
+            });
+
+            socket.on('pollVoteUpdate', (data) => {
+                log('📊 POLL VOTE UPDATE RECEBIDO!', 'success');
+                log('Dados: ' + JSON.stringify(data, null, 2), 'success');
+            });
+
+            socket.onAny((eventName, ...args) => {
+                if (eventName !== 'ping' && eventName !== 'pong') {
+                    log('📨 Evento recebido: ' + eventName, 'info');
+                    log('Dados: ' + JSON.stringify(args, null, 2), 'info');
+                }
+            });
+        }
+
+        function disconnect() {
+            if (socket) {
+                socket.disconnect();
+                log('Desconectado manualmente', 'warning');
+                updateStatus(false);
+            }
+        }
+
+        function testPollVoteUpdate() {
+            if (!socket || !socket.connected) {
+                log('❌ Socket não está conectado!', 'error');
+                return;
+            }
+
+            const testData = {
+                pollMessageId: 'test-poll-123',
+                votes: [
+                    {
+                        voterId: '5522992463080@c.us',
+                        voterName: 'Teste',
+                        selectedOptions: [{ localId: 0, name: 'Opção 1' }],
+                        timestamp: new Date()
+                    }
+                ],
+                ticketId: 1
+            };
+
+            log('Enviando teste de pollVoteUpdate...', 'info');
+            socket.emit('pollVoteUpdate', testData);
+        }
+
+        function clearLogs() {
+            document.getElementById('logs').innerHTML = '';
+            log('Logs limpos', 'info');
+        }
+
+        // Tentar conectar automaticamente se houver token
+        window.addEventListener('load', () => {
+            const storedToken = localStorage.getItem('token');
+            if (storedToken) {
+                try {
+                    const parsedToken = JSON.parse(storedToken);
+                    document.getElementById('tokenInput').value = parsedToken;
+                    log('Token encontrado no localStorage', 'success');
+                    log('Clique em "Conectar" para testar', 'info');
+                } catch (e) {
+                    log('Token no localStorage está inválido', 'error');
+                }
+            } else {
+                log('Nenhum token encontrado no localStorage', 'warning');
+                log('Faça login no sistema e volte aqui', 'info');
+            }
+        });
+    </script>
+</body>
+</html>

@@ -395,6 +395,45 @@ export const initWbot = async (whatsapp: Whatsapp): Promise<Session> => {
         updateLastActivity(whatsapp.id);
       });
 
+      wbot.on("vote_update", async (vote: any) => {
+        try {
+          logger.info(`[POLL_VOTE] ========== NOVO VOTO RECEBIDO ==========`);
+          logger.info(`[POLL_VOTE] Voter: ${vote.voter}`);
+          logger.info(`[POLL_VOTE] Poll ID (parentMsgKey): ${vote.parentMsgKey?.id}`);
+          logger.info(`[POLL_VOTE] Poll ID (parentMessage): ${vote.parentMessage?.id?.id}`);
+          logger.info(`[POLL_VOTE] Selected Options: ${JSON.stringify(vote.selectedOptions)}`);
+          logger.info(`[POLL_VOTE] Timestamp: ${vote.interractedAtTs}`);
+          logger.info(`[POLL_VOTE] ==========================================`);
+
+          const PollVoteService = (await import("../services/PollVoteService")).default;
+          
+          let voterName = vote.voter;
+          try {
+            const contact = await wbot.getContactById(vote.voter);
+            voterName = contact.name || contact.pushname || vote.voter;
+            logger.info(`[POLL_VOTE] Nome do votante: ${voterName}`);
+          } catch (err) {
+            logger.warn(`[POLL_VOTE] Erro ao buscar nome do votante: ${err}`);
+          }
+
+          const pollMessageId = vote.parentMsgKey?.id || vote.parentMessage?.id?.id;
+          logger.info(`[POLL_VOTE] Salvando voto para poll: ${pollMessageId}`);
+
+          await PollVoteService.createOrUpdate({
+            pollMessageId,
+            voterId: vote.voter,
+            voterName,
+            selectedOptions: vote.selectedOptions,
+            timestamp: new Date(vote.interractedAtTs)
+          });
+
+          logger.info(`[POLL_VOTE] Voto salvo com sucesso!`);
+        } catch (error) {
+          logger.error(`[POLL_VOTE] Erro ao processar voto: ${error}`);
+          logger.error(`[POLL_VOTE] Stack: ${error.stack}`);
+        }
+      });
+
       wbot.on("call", async (call: any) => {
         try {          
           const originalFrom = call.from;

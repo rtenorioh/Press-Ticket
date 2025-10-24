@@ -310,13 +310,39 @@ const verifyMessage = async (
   if (msg.type === "location") msg = await prepareLocation(msg);
 
   const quotedMsg = await verifyQuotedMessage(msg);
+  
+  let pollBody = msg.body;
+  if (msg.type === "poll_creation" && (msg as any).pollName) {
+    const poll = msg as any;
+    const pollName = poll.pollName || "Enquete";
+    const pollOptions = poll.pollOptions || [];
+    
+    logger.info(`[POLL_RECEIVED] Estrutura completa da enquete: ${JSON.stringify({
+      pollName,
+      pollOptions,
+      totalOptions: pollOptions.length
+    })}`);
+    
+    pollBody = `📊 Enquete: ${pollName}\n\n`;
+    pollBody += `Selecione uma ou mais opções:\n\n`;
+    
+    pollOptions.forEach((option: any, index: number) => {
+      const optionName = option?.name || option?.localName || option;
+      if (optionName && typeof optionName === 'string' && optionName.trim() !== '') {
+        pollBody += `${index + 1}. ${optionName}\n`;
+      }
+    });
+    
+    logger.info(`[POLL_RECEIVED] Enquete recebida: ${pollName} com ${pollOptions.length} opções`);
+  }
+  
   const messageData = {
     id: msg.id.id,
     ticketId: ticket.id,
     contactId: msg.fromMe ? undefined : contact.id,
-    body: msg.body,
+    body: pollBody,
     fromMe: msg.fromMe,
-    mediaType: msg.type,
+    mediaType: msg.type === "poll_creation" ? "poll" : msg.type,
     messageType: msg.type,
     read: msg.fromMe,
     quotedMsgId: quotedMsg?.id,
@@ -732,7 +758,8 @@ const isValidMsg = (msg: WbotMessage): boolean => {
     msgType === "vcard" ||
     msgType === "multi_vcard" ||
     msgType === "sticker" ||
-    msgType === "location"
+    msgType === "location" ||
+    msgType === "poll_creation"
   ) {
     return true;
   }
@@ -762,6 +789,11 @@ const handleMessage = async (
       timestamp: msg.timestamp,
       hasMedia: msg.hasMedia
     })}`);
+
+    // if (msg.type === 'poll_creation' || (msg as any).pollName) {
+    //   logger.info(`[MSG_IGNORADA] Mensagem de enquete ignorada (processada pelo SendPollService): ID=${msg.id?.id || 'unknown'}`);
+    //   return;
+    // }
     
     if (!isValidMsg(msg)) {
       logger.info(`[MSG_IGNORADA] Mensagem ignorada por não ser válida: ID=${msg.id?.id || 'unknown'}`);

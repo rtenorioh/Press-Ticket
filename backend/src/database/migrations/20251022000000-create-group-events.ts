@@ -25,21 +25,35 @@ module.exports = {
         allowNull: true
       },
       eventType: {
-        type: DataTypes.ENUM(
-          "join",
-          "leave",
-          "update",
-          "admin_changed",
-          "membership_request"
-        ),
+        type: DataTypes.STRING,
         allowNull: false
       },
-      participants: {
-        type: DataTypes.JSON,
+      participantId: {
+        type: DataTypes.STRING,
         allowNull: true
       },
-      action: {
+      participantName: {
         type: DataTypes.STRING,
+        allowNull: true
+      },
+      oldValue: {
+        type: DataTypes.TEXT,
+        allowNull: true
+      },
+      newValue: {
+        type: DataTypes.TEXT,
+        allowNull: true
+      },
+      performedBy: {
+        type: DataTypes.STRING,
+        allowNull: true
+      },
+      performedByName: {
+        type: DataTypes.STRING,
+        allowNull: true
+      },
+      timestamp: {
+        type: DataTypes.DATE,
         allowNull: true
       },
       metadata: {

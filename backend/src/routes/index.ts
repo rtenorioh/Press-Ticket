@@ -36,6 +36,7 @@ import healthCheckRoutes from "./healthCheckRoutes";
 import cacheRoutes from "./cacheRoutes";
 import groupEventRoutes from "./groupEventRoutes";
 import groupManagementRoutes from "./groupManagementRoutes";
+import pollVoteRoutes from "./pollVoteRoutes";
 
 const routes = Router();
 
@@ -75,5 +76,6 @@ routes.use(healthCheckRoutes);
 routes.use(cacheRoutes);
 routes.use(groupEventRoutes);
 routes.use(groupManagementRoutes);
+routes.use(pollVoteRoutes);
 
 export default routes;

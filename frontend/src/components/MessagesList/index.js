@@ -43,6 +43,7 @@ import ForwardMessageModal from "../ForwardMessageModal";
 import { useForwardingMessage } from "../../context/ForwardingMessage";
 import { useTheme } from "@mui/material/styles";
 import MessageReactionsModal from "../MessageReactionsModal";
+import PollMessage from "../PollMessage";
 
 const MessagesListWrapper = styled("div")(({ theme }) => ({
   overflow: "hidden",
@@ -827,7 +828,6 @@ const MessagesList = ({ ticketId, isGroup, onClick }) => {
     "buttons_response",
     "notification_template",
     "groups_v4_invite",
-    "poll_creation",
     "event_creation"
   ];
 
@@ -1275,6 +1275,22 @@ const MessagesList = ({ ticketId, isGroup, onClick }) => {
               <SystemMessage>
                 {message.body}
               </SystemMessage>
+            </React.Fragment>
+          );
+        }
+        if (message.mediaType === "poll" || message.mediaType === "poll_creation") {
+          return (
+            <React.Fragment key={message.id}>
+              {renderDailyTimestamps(message, index)}
+              {renderMessageDivider(message, index)}
+              {renderNumberTicket(message, index)}
+              <div style={{ 
+                display: 'flex', 
+                justifyContent: message.fromMe ? 'flex-end' : 'flex-start',
+                padding: '8px 16px'
+              }}>
+                <PollMessage message={message} />
+              </div>
             </React.Fragment>
           );
         }
