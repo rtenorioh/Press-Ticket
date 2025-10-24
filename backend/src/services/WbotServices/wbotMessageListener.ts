@@ -189,6 +189,13 @@ const verifyMediaMessage = async (
     logger.error(err);
   }
 
+  let albumId = null;
+  const mediaType = media.mimetype.split("/")[0];
+  if (mediaType === "image" || mediaType === "video") {
+    const roundedTimestamp = Math.floor(msg.timestamp / 5) * 5;
+    albumId = `${msg.from}_${roundedTimestamp}`;
+  }
+
   const messageData = {
     id: msg.id.id,
     ticketId: ticket.id,
@@ -197,10 +204,11 @@ const verifyMediaMessage = async (
     fromMe: msg.fromMe,
     read: msg.fromMe,
     mediaUrl: media.filename,
-    mediaType: media.mimetype.split("/")[0],
+    mediaType: mediaType,
     mimetype: media.mimetype,
     filename: media.filename,
     quotedMsgId: quotedMsg?.id,
+    albumId: albumId,
     userId: ticket.userId
   };
   

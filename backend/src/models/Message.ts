@@ -50,6 +50,9 @@ class Message extends Model<Message> {
   mediaType: string;
 
   @Column
+  albumId: string;
+
+  @Column
   userId: number;
 
   @Default(false)

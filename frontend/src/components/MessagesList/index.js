@@ -44,6 +44,7 @@ import { useForwardingMessage } from "../../context/ForwardingMessage";
 import { useTheme } from "@mui/material/styles";
 import MessageReactionsModal from "../MessageReactionsModal";
 import PollMessage from "../PollMessage";
+import AlbumPreview from "../AlbumPreview";
 
 const MessagesListWrapper = styled("div")(({ theme }) => ({
   overflow: "hidden",
@@ -1267,7 +1268,222 @@ const MessagesList = ({ ticketId, isGroup, onClick }) => {
 
   const renderMessages = () => {
     if (messagesList.length > 0) {
+      // Agrupar mensagens por albumId
+      const albumGroups = {};
+      const processedAlbumIds = new Set();
+      
+      messagesList.forEach((message) => {
+        if (message.albumId && (message.mediaType === "image" || message.mediaType === "video")) {
+          if (!albumGroups[message.albumId]) {
+            albumGroups[message.albumId] = [];
+          }
+          albumGroups[message.albumId].push(message);
+        }
+      });
+
       const viewMessagesList = messagesList.map((message, index) => {
+        // Se a mensagem faz parte de um álbum e ainda não foi processada
+        if (message.albumId && albumGroups[message.albumId] && albumGroups[message.albumId].length > 1) {
+          if (processedAlbumIds.has(message.albumId)) {
+            // Já renderizamos este álbum, pular esta mensagem
+            return null;
+          }
+          
+          // Marcar este albumId como processado
+          processedAlbumIds.add(message.albumId);
+          
+          // Renderizar o álbum completo
+          const albumMessages = albumGroups[message.albumId];
+          const firstMessage = albumMessages[0];
+          
+          if (!firstMessage.fromMe) {
+            // Álbum recebido (esquerda)
+            const isSelected = selectedMessages.some(msg => albumMessages.some(am => am.id === msg.id));
+            return (
+              <React.Fragment key={`album-${message.albumId}`}>
+                {renderDailyTimestamps(firstMessage, index)}
+                {renderMessageDivider(firstMessage, index)}
+                {renderNumberTicket(firstMessage, index)}
+                <Box 
+                  sx={{ 
+                    display: 'flex', 
+                    alignItems: 'flex-start',
+                    gap: isForwardingMode ? 1 : 0,
+                    marginBottom: 1
+                  }}
+                >
+                  {isForwardingMode && (
+                    <Box
+                      onClick={() => albumMessages.forEach(msg => handleMessageClick(msg))}
+                      sx={{
+                        width: 20,
+                        height: 20,
+                        borderRadius: '50%',
+                        border: isSelected ? 'none' : '2px solid #8696a0',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        cursor: 'pointer',
+                        marginTop: 1,
+                        flexShrink: 0,
+                        '&:hover': {
+                          backgroundColor: isSelected ? '#00a884' : 'rgba(134, 150, 160, 0.1)',
+                        }
+                      }}
+                    >
+                      {isSelected && (
+                        <svg width="12" height="9" viewBox="0 0 12 9" fill="none">
+                          <path
+                            d="M4.5 6.5L1.5 3.5L0.5 4.5L4.5 8.5L11.5 1.5L10.5 0.5L4.5 6.5Z"
+                            fill="white"
+                            strokeWidth="1"
+                          />
+                        </svg>
+                      )}
+                    </Box>
+                  )}
+                  <MessageLeft 
+                    id={firstMessage.id}
+                    onClick={!isForwardingMode ? undefined : () => albumMessages.forEach(msg => handleMessageClick(msg))}
+                    sx={{ 
+                      cursor: isForwardingMode ? 'pointer' : 'default',
+                      border: isSelected ? '2px solid #00a884' : 'none',
+                      flex: 1
+                    }}
+                  >
+                    {!isForwardingMode && (
+                      <IconButtonStyled
+                        variant="contained"
+                        size="small"
+                        id="messageActionsButton"
+                        disabled={firstMessage.isDeleted}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleOpenMessageOptionsMenu(e, firstMessage);
+                        }}
+                      >
+                        <ExpandMore />
+                      </IconButtonStyled>
+                    )}
+                    {isGroup && (
+                      <ContactImageContainer
+                        onClick={() => onClick(firstMessage.contact)}
+                        sx={{ cursor: "pointer" }}
+                      >
+                        <ContactImage src={firstMessage.contact.profilePicUrl || defaultImage} alt={firstMessage.contact?.name} />
+                        <MessageContactNameStyled>
+                          {firstMessage.contact?.name}
+                        </MessageContactNameStyled>
+                      </ContactImageContainer>
+                    )}
+                    <AlbumPreview messages={albumMessages} />
+                    {firstMessage.body && firstMessage.body.trim() !== "" && (
+                      <MessageItem message={firstMessage}>
+                        <WhatsMarked sx={{ fontSize: 'inherit', lineHeight: 'inherit', display: 'flex', width: '100%' }}>
+                          {firstMessage.body}
+                        </WhatsMarked>
+                      </MessageItem>
+                    )}
+                    {renderReactions(firstMessage)}
+                    <MessageTimestamp>
+                      {format(parseISO(firstMessage.createdAt), "HH:mm")}
+                    </MessageTimestamp>
+                  </MessageLeft>
+                </Box>
+              </React.Fragment>
+            );
+          } else {
+            // Álbum enviado (direita)
+            const isSelected = selectedMessages.some(msg => albumMessages.some(am => am.id === msg.id));
+            return (
+              <React.Fragment key={`album-${message.albumId}`}>
+                {renderDailyTimestamps(firstMessage, index)}
+                {renderMessageDivider(firstMessage, index)}
+                {renderNumberTicket(firstMessage, index)}
+                <Box 
+                  sx={{ 
+                    display: 'flex', 
+                    alignItems: 'flex-start',
+                    gap: isForwardingMode ? 1 : 0,
+                    marginBottom: 1,
+                    justifyContent: 'flex-end'
+                  }}
+                >
+                  <MessageRight 
+                    id={firstMessage.id}
+                    onClick={!isForwardingMode ? undefined : () => albumMessages.forEach(msg => handleMessageClick(msg))}
+                    sx={{ 
+                      cursor: isForwardingMode ? 'pointer' : 'default',
+                      border: isSelected ? '2px solid #00a884' : 'none',
+                      flex: 1
+                    }}
+                  >
+                    {!isForwardingMode && (
+                      <IconButtonStyled
+                        variant="contained"
+                        size="small"
+                        id="messageActionsButton"
+                        disabled={firstMessage.isDeleted}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleOpenMessageOptionsMenu(e, firstMessage);
+                        }}
+                      >
+                        <ExpandMore />
+                      </IconButtonStyled>
+                    )}
+                    <AlbumPreview messages={albumMessages} />
+                    {firstMessage.body && firstMessage.body.trim() !== "" && (
+                      <MessageItem message={firstMessage}>
+                        <WhatsMarked sx={{ fontSize: 'inherit', lineHeight: 'inherit', display: 'flex', width: '100%' }}>
+                          {firstMessage.body}
+                        </WhatsMarked>
+                      </MessageItem>
+                    )}
+                    {renderReactions(firstMessage)}
+                    <MessageTimestamp>
+                      {renderMessageAck(firstMessage)}
+                      {format(parseISO(firstMessage.createdAt), "HH:mm")}
+                    </MessageTimestamp>
+                  </MessageRight>
+                  {isForwardingMode && (
+                    <Box
+                      onClick={() => albumMessages.forEach(msg => handleMessageClick(msg))}
+                      sx={{
+                        width: 20,
+                        height: 20,
+                        borderRadius: '50%',
+                        border: isSelected ? 'none' : '2px solid #8696a0',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        cursor: 'pointer',
+                        marginTop: 1,
+                        flexShrink: 0,
+                        backgroundColor: isSelected ? '#00a884' : 'transparent',
+                        '&:hover': {
+                          backgroundColor: isSelected ? '#00a884' : 'rgba(134, 150, 160, 0.1)',
+                        }
+                      }}
+                    >
+                      {isSelected && (
+                        <svg width="12" height="9" viewBox="0 0 12 9" fill="none">
+                          <path
+                            d="M4.5 6.5L1.5 3.5L0.5 4.5L4.5 8.5L11.5 1.5L10.5 0.5L4.5 6.5Z"
+                            fill="white"
+                            strokeWidth="1"
+                          />
+                        </svg>
+                      )}
+                    </Box>
+                  )}
+                </Box>
+              </React.Fragment>
+            );
+          }
+        }
+        
+        // Renderização normal para mensagens que não são álbuns
         if (message.mediaType === "event") {
           return (
             <React.Fragment key={message.id}>
@@ -1573,7 +1789,8 @@ const MessagesList = ({ ticketId, isGroup, onClick }) => {
           </React.Fragment>
         );
       });
-      return viewMessagesList;
+      // Filtrar mensagens null (álbuns já processados)
+      return viewMessagesList.filter(msg => msg !== null);
     } else {
       return <div>Say hello to your new contact!</div>;
     }
