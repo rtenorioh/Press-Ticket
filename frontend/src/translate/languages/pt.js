@@ -30,7 +30,8 @@ const messages = {
           users: "Usuários",
           quickAnswers: "Respostas Rápidas",
           clientStatus: "Status de Clientes",
-          whatsappGroups: "Grupos do WhatsApp"
+          whatsappGroups: "Grupos do WhatsApp",
+          presence: "Presença (Indicadores)"
         },
         permissions: {
           createContacts: "Criar Contatos",
@@ -89,7 +90,8 @@ const messages = {
           updateClientStatus: "Editar Status de Clientes",
           deleteClientStatus: "Deletar Status de Clientes",
           readGroups: "Visualizar Grupos do WhatsApp",
-          writeGroups: "Gerenciar Grupos do WhatsApp"
+          writeGroups: "Gerenciar Grupos do WhatsApp",
+          writePresence: "Enviar Indicadores de Digitação/Gravação"
         },
         messages: {
           success: {

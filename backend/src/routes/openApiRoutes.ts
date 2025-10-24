@@ -28,6 +28,7 @@ import * as UserController from "../controllers/UserController";
 import * as QuickAnswerController from "../controllers/QuickAnswerController";
 import * as GroupController from "../controllers/GroupController";
 import * as ClientStatusController from "../controllers/ClientStatusController";
+import * as MessageController from "../controllers/MessageController";
 import isApiToken from "../middleware/isApiToken";
 
 const upload = multer(uploadConfig);
@@ -2629,5 +2630,138 @@ openApiRouter.delete("/client-status/:clientStatusId", isApiToken('delete:client
  *         description: Todos os status excluídos
  */
 openApiRouter.delete("/client-status", isApiToken('delete:client-status'), ClientStatusController.removeAll);
+
+// Rotas de Presença (Indicadores de Digitação/Gravação)
+
+/**
+ * @swagger
+ * /v1/presence/typing/{ticketId}:
+ *   post:
+ *     summary: Enviar Indicador de Digitação
+ *     description: Simula indicador "digitando..." no WhatsApp
+ *     tags: [Presence]
+ *     security:
+ *       - apiToken: []
+ *     parameters:
+ *       - in: path
+ *         name: ticketId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID do ticket
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               duration:
+ *                 type: integer
+ *                 description: Duração em milissegundos (padrão 3000ms)
+ *                 example: 5000
+ *     responses:
+ *       200:
+ *         description: Indicador enviado com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *       401:
+ *         description: Token inválido
+ *       403:
+ *         description: Sem permissão write:presence
+ *       500:
+ *         description: Erro ao enviar indicador
+ */
+openApiRouter.post("/presence/typing/:ticketId", isApiToken('write:presence'), MessageController.sendTypingIndicator);
+
+/**
+ * @swagger
+ * /v1/presence/recording/{ticketId}:
+ *   post:
+ *     summary: Enviar Indicador de Gravação
+ *     description: Simula indicador "gravando áudio..." no WhatsApp
+ *     tags: [Presence]
+ *     security:
+ *       - apiToken: []
+ *     parameters:
+ *       - in: path
+ *         name: ticketId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID do ticket
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               duration:
+ *                 type: integer
+ *                 description: Duração em milissegundos (padrão 5000ms)
+ *                 example: 8000
+ *     responses:
+ *       200:
+ *         description: Indicador enviado com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *       401:
+ *         description: Token inválido
+ *       403:
+ *         description: Sem permissão write:presence
+ *       500:
+ *         description: Erro ao enviar indicador
+ */
+openApiRouter.post("/presence/recording/:ticketId", isApiToken('write:presence'), MessageController.sendRecordingIndicator);
+
+/**
+ * @swagger
+ * /v1/presence/available/{ticketId}:
+ *   post:
+ *     summary: Definir Presença como Disponível
+ *     description: Remove indicadores de digitação/gravação
+ *     tags: [Presence]
+ *     security:
+ *       - apiToken: []
+ *     parameters:
+ *       - in: path
+ *         name: ticketId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID do ticket
+ *     responses:
+ *       200:
+ *         description: Presença definida como disponível
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *       401:
+ *         description: Token inválido
+ *       403:
+ *         description: Sem permissão write:presence
+ *       500:
+ *         description: Erro ao definir presença
+ */
+openApiRouter.post("/presence/available/:ticketId", isApiToken('write:presence'), MessageController.setAvailablePresence);
 
 export default openApiRouter;

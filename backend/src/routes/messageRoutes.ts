@@ -21,4 +21,9 @@ messageRoutes.post("/messages/:ticketId/read", isAuth, MessageController.markAsR
 messageRoutes.post("/messages/:messageId/reactions", isAuth, MessageController.reactMessage);
 messageRoutes.get("/messages/:messageId/reactions", isAuth, MessageController.getReactions);
 
+// Rotas de controle de presença
+messageRoutes.post("/messages/:ticketId/presence/typing", isAuth, MessageController.sendTypingIndicator);
+messageRoutes.post("/messages/:ticketId/presence/recording", isAuth, MessageController.sendRecordingIndicator);
+messageRoutes.post("/messages/:ticketId/presence/available", isAuth, MessageController.setAvailablePresence);
+
 export default messageRoutes;

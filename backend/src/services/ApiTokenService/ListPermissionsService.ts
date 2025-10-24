@@ -96,7 +96,10 @@ const DEFAULT_PERMISSIONS = [
     
     // Grupos do WhatsApp
     'read:groups',
-    'write:groups'
+    'write:groups',
+    
+    // Presença (Indicadores de Digitação/Gravação)
+    'write:presence'
 ];
 
 const ListPermissionsService = async (): Promise<string[]> => {

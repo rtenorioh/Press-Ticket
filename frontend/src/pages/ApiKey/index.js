@@ -327,7 +327,10 @@ const ApiKey = () => {
             
             // Grupos do WhatsApp
             'read:groups': t("apiKey.permissions.readGroups"),
-            'write:groups': t("apiKey.permissions.writeGroups")
+            'write:groups': t("apiKey.permissions.writeGroups"),
+            
+            // Presença (Indicadores de Digitação/Gravação)
+            'write:presence': t("apiKey.permissions.writePresence")
         };
         return names[permission] || permission;
     };
@@ -528,7 +531,9 @@ const ApiKey = () => {
                                             // Status de Clientes
                                             'create:client-status', 'read:client-status', 'update:client-status', 'delete:client-status',
                                             // Grupos do WhatsApp
-                                            'read:groups', 'write:groups'
+                                            'read:groups', 'write:groups',
+                                            // Presença
+                                            'write:presence'
                                         ];
                                         
                                         if (newToken.permissions.length === allPermissions.length) {
@@ -540,7 +545,7 @@ const ApiKey = () => {
                                     sx={{ borderRadius: 20, textTransform: 'none' }}
                                 >
                                     {newToken.permissions.length === 0 || 
-                                     newToken.permissions.length < 43 ? 
+                                     newToken.permissions.length < 44 ? 
                                         t("apiKey.modal.buttons.selectAll") : 
                                         t("apiKey.modal.buttons.unselectAll")}
                                 </Button>
@@ -1188,6 +1193,39 @@ const ApiKey = () => {
                             <AccordionDetails sx={{ pt: 2 }}>
                                 <Grid container spacing={1}>
                                     {['read:groups', 'write:groups'].map((permission) => (
+                                        <Grid item xs={12} sm={6} key={permission}>
+                                            <FormControlLabel
+                                                control={
+                                                    <Checkbox
+                                                        checked={newToken.permissions.includes(permission)}
+                                                        onChange={() => handlePermissionChange(permission)}
+                                                        color="primary"
+                                                        size="small"
+                                                    />
+                                                }
+                                                label={<Typography variant="body2">{renderPermissionName(permission)}</Typography>}
+                                            />
+                                        </Grid>
+                                    ))}
+                                </Grid>
+                            </AccordionDetails>
+                        </Accordion>
+
+                        <Accordion sx={{ mb: 1, boxShadow: '0 1px 3px rgba(0,0,0,0.1)', borderRadius: '4px !important', '&:before': { display: 'none' } }}>
+                            <AccordionSummary
+                                expandIcon={<ExpandMoreIcon />}
+                                sx={{ 
+                                    backgroundColor: theme.palette.background.default,
+                                    borderRadius: '4px',
+                                }}
+                            >
+                                <Typography variant="subtitle2" fontWeight={500}>
+                                    {t("apiKey.categories.presence")}
+                                </Typography>
+                            </AccordionSummary>
+                            <AccordionDetails sx={{ pt: 2 }}>
+                                <Grid container spacing={1}>
+                                    {['write:presence'].map((permission) => (
                                         <Grid item xs={12} sm={6} key={permission}>
                                             <FormControlLabel
                                                 control={

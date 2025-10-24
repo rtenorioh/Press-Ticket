@@ -11,6 +11,7 @@ import SendWhatsAppMedia from "../services/WbotServices/SendWhatsAppMedia";
 import SendWhatsAppMessage from "../services/WbotServices/SendWhatsAppMessage";
 import SendWhatsAppContacts from "../services/WbotServices/SendWhatsAppContacts";
 import SendPollService from "../services/WbotServices/SendPollService";
+import PresenceService from "../services/WbotServices/PresenceService";
 import ShowTicketService from "../services/TicketServices/ShowTicketService";
 import GetTicketWbot from "../helpers/GetTicketWbot";
 import SerializeWbotMsgId from "../helpers/SerializeWbotMsgId";
@@ -617,5 +618,66 @@ export const sendPoll = async (req: Request, res: Response): Promise<Response> =
   } catch (error: any) {
     console.error("Erro ao enviar enquete:", error);
     return res.status(500).json({ error: error.message || "Erro ao enviar enquete" });
+  }
+};
+
+export const sendTypingIndicator = async (req: Request, res: Response): Promise<Response> => {
+  const { ticketId } = req.params;
+  const { duration } = req.body;
+
+  try {
+    const ticket = await ShowTicketService(Number(ticketId));
+    const chatId = `${ticket.contact.number}@c.us`;
+
+    await PresenceService.simulateTyping(
+      ticket.whatsappId,
+      chatId,
+      duration || 3000
+    );
+
+    return res.json({ success: true, message: "Indicador de digitação enviado" });
+  } catch (error: any) {
+    console.error("Erro ao enviar indicador de digitação:", error);
+    return res.status(500).json({ error: error.message || "Erro ao enviar indicador de digitação" });
+  }
+};
+
+export const sendRecordingIndicator = async (req: Request, res: Response): Promise<Response> => {
+  const { ticketId } = req.params;
+  const { duration } = req.body;
+
+  try {
+    const ticket = await ShowTicketService(Number(ticketId));
+    const chatId = `${ticket.contact.number}@c.us`;
+
+    await PresenceService.simulateRecording(
+      ticket.whatsappId,
+      chatId,
+      duration || 5000
+    );
+
+    return res.json({ success: true, message: "Indicador de gravação enviado" });
+  } catch (error: any) {
+    console.error("Erro ao enviar indicador de gravação:", error);
+    return res.status(500).json({ error: error.message || "Erro ao enviar indicador de gravação" });
+  }
+};
+
+export const setAvailablePresence = async (req: Request, res: Response): Promise<Response> => {
+  const { ticketId } = req.params;
+
+  try {
+    const ticket = await ShowTicketService(Number(ticketId));
+    const chatId = `${ticket.contact.number}@c.us`;
+
+    await PresenceService.setAvailable(
+      ticket.whatsappId,
+      chatId
+    );
+
+    return res.json({ success: true, message: "Presença definida como disponível" });
+  } catch (error: any) {
+    console.error("Erro ao definir presença:", error);
+    return res.status(500).json({ error: error.message || "Erro ao definir presença" });
   }
 };
