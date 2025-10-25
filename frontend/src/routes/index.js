@@ -10,6 +10,7 @@ import ApiKey from "../pages/ApiKey/";
 import Documentation from "../pages/Documentation/";
 import Channels from "../pages/Channels/";
 import Contacts from "../pages/Contacts/";
+import BlockedContacts from "../pages/BlockedContacts/";
 import CpuUsage from "../pages/CpuUsage/";
 import Dashboard from "../pages/Dashboard/";
 import VersionCheck from "../pages/VersionCheck/";
@@ -64,6 +65,7 @@ const AppRoutes = ({ toggleTheme, onThemeConfigUpdate }) => {
             <Route path="tickets/:ticketId?" element={<Tickets />} />
             <Route path="channels" element={<Channels />} />
             <Route path="contacts" element={<Contacts />} />
+            <Route path="blocked-contacts" element={<BlockedContacts />} />
             <Route path="users" element={<Users />} />
             <Route path="quickAnswers" element={<QuickAnswers />} />
             <Route path="Settings" element={<Settings toggleTheme={toggleTheme} onThemeConfigUpdate={onThemeConfigUpdate} />} />

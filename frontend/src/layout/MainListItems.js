@@ -7,13 +7,17 @@ import {
   ListItem,
   ListItemIcon,
   ListItemText,
-  ListSubheader
+  ListSubheader,
+  Collapse
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 
 import AccountTreeOutlined from "@mui/icons-material/AccountTreeOutlined";
 import Code from "@mui/icons-material/Code";
 import ContactPhoneOutlined from "@mui/icons-material/ContactPhoneOutlined";
+import BlockIcon from "@mui/icons-material/Block";
+import ExpandLess from "@mui/icons-material/ExpandLess";
+import ExpandMore from "@mui/icons-material/ExpandMore";
 import DashboardOutlined from "@mui/icons-material/DashboardOutlined";
 import LocalOffer from "@mui/icons-material/LocalOffer";
 import LabelOutlined from "@mui/icons-material/LabelOutlined";
@@ -116,7 +120,7 @@ const StyledBadge = styled(Badge)(({ theme }) => ({
 }));
 
 function ListItemLink(props) {
-  const { icon, primary, to, active, drawerClose } = props;
+  const { icon, primary, to, active, drawerClose, sx: customSx, ...rest } = props;
 
   const renderLink = React.useMemo(
     () =>
@@ -149,7 +153,9 @@ function ListItemLink(props) {
               color: (theme) => theme.palette.primary.main,
             },
           },
+          ...customSx,
         }}
+        {...rest}
       >
         {icon ? <IconStyled active={active ? 1 : 0}>{icon}</IconStyled> : null}
         <ListItemText 
@@ -161,6 +167,71 @@ function ListItemLink(props) {
   );
 }
 
+function ListItemLinkWithDropdown(props) {
+  const { icon, primary, to, active, drawerClose, open, onToggle, children } = props;
+  const navigate = (e) => {
+    // Navega para a página
+    window.location.href = to;
+  };
+
+  const handleClick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onToggle();
+  };
+
+  const ItemComponent = active ? ActiveItemStyled : ListItem;
+
+  return (
+    <>
+      <ListItemStyled>
+        <ItemComponent 
+          button 
+          onClick={navigate}
+          sx={{
+            py: 0.5,
+            minHeight: '44px',
+            borderRadius: 10,
+            mx: 1,
+            my: 0.5,
+            px: 1.5,
+            color: active ? 'primary.contrastText' : 'text.primary',
+            '&:hover': {
+              background: (theme) => theme.palette.action.hover,
+              color: (theme) => theme.palette.primary.main,
+              '& .MuiListItemIcon-root': {
+                color: (theme) => theme.palette.primary.main,
+              },
+            },
+          }}
+        >
+          {icon ? <IconStyled active={active ? 1 : 0}>{icon}</IconStyled> : null}
+          <ListItemText 
+            primary={primary}
+            primaryTypographyProps={{ fontSize: '1rem', fontWeight: active ? 700 : 500, letterSpacing: '0.01em' }}
+          />
+          <IconStyled 
+            active={0} 
+            onClick={handleClick}
+            sx={{ 
+              minWidth: 'auto',
+              cursor: 'pointer',
+              '&:hover': {
+                color: (theme) => theme.palette.primary.main,
+              }
+            }}
+          >
+            {open ? <ExpandLess /> : <ExpandMore />}
+          </IconStyled>
+        </ItemComponent>
+      </ListItemStyled>
+      <Collapse in={open} timeout="auto" unmountOnExit>
+        {children}
+      </Collapse>
+    </>
+  );
+}
+
 const MainListItems = (props) => {
   const { drawerClose } = props;
   const location = useLocation();
@@ -168,7 +239,15 @@ const MainListItems = (props) => {
   const { user } = useContext(AuthContext);
   const [connectionWarning, setConnectionWarning] = useState(false);
   const [versionWarning, setVersionWarning] = useState(false);
+  const [contactsOpen, setContactsOpen] = useState(false);
   const { t } = useTranslation();
+
+  // Abrir dropdown de Contatos se estiver na página de bloqueados
+  useEffect(() => {
+    if (location.pathname === '/blocked-contacts') {
+      setContactsOpen(true);
+    }
+  }, [location.pathname]);
 
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
@@ -243,13 +322,24 @@ const MainListItems = (props) => {
         active={location.pathname === '/tickets'}
         drawerClose={drawerClose}
       />
-      <ListItemLink
+      <ListItemLinkWithDropdown
         to="/contacts"
         primary={t("mainDrawer.listItems.contacts")}
         icon={<ContactPhoneOutlined />}
-        active={location.pathname === '/contacts'}
+        active={location.pathname === '/contacts' || location.pathname === '/blocked-contacts'}
         drawerClose={drawerClose}
-      />
+        open={contactsOpen}
+        onToggle={() => setContactsOpen(!contactsOpen)}
+      >
+        <ListItemLink
+          to="/blocked-contacts"
+          primary="Bloqueados"
+          icon={<BlockIcon />}
+          active={location.pathname === '/blocked-contacts'}
+          drawerClose={drawerClose}
+          sx={{ pl: 6 }}
+        />
+      </ListItemLinkWithDropdown>
       <ListItemLink
         to="/quickAnswers"
         primary={t("mainDrawer.listItems.quickAnswers")}

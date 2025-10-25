@@ -58,6 +58,7 @@ import { Can } from "../../components/Can";
 import ConfirmationModal from "../../components/ConfirmationModal/";
 import ContactChannels from "../../components/ContactChannels";
 import ContactModal from "../../components/ContactModal";
+import ContactAdvancedInfoModal from "../../components/ContactAdvancedInfoModal";
 import ExportFieldsModal from "../../components/ExportFieldsModal";
 import MainContainer from "../../components/MainContainer";
 import MainHeader from "../../components/MainHeader";
@@ -193,6 +194,8 @@ const Contacts = () => {
   const [exportModalOpen, setExportModalOpen] = useState(false);
   const [exportProgress, setExportProgress] = useState(0);
   const [exportProgressOpen, setExportProgressOpen] = useState(false);
+  const [advancedInfoModalOpen, setAdvancedInfoModalOpen] = useState(false);
+  const [selectedAdvancedContact, setSelectedAdvancedContact] = useState(null);
 
   useEffect(() => {
     if (location.state?.statusFilter) {
@@ -941,6 +944,19 @@ const Contacts = () => {
                           </IconButton>
                         )}
                         {contact.number && !contact.isGroup && (
+                          <Tooltip title="Informações Avançadas">
+                            <IconButton
+                              size="small"
+                              onClick={() => {
+                                setSelectedAdvancedContact(contact);
+                                setAdvancedInfoModalOpen(true);
+                              }}
+                            >
+                              <InfoOutlinedIcon color="primary" />
+                            </IconButton>
+                          </Tooltip>
+                        )}
+                        {contact.number && !contact.isGroup && (
                           <IconButton
                             size="small"
                             disabled={blockLoadingId === contact.id}
@@ -1217,6 +1233,16 @@ const Contacts = () => {
           </Box>
         </DialogContent>
       </Dialog>
+
+      <ContactAdvancedInfoModal
+        open={advancedInfoModalOpen}
+        onClose={() => {
+          setAdvancedInfoModalOpen(false);
+          setSelectedAdvancedContact(null);
+        }}
+        contactId={selectedAdvancedContact?.id}
+        whatsappId={null}
+      />
     </MainContainer>
   );
 };

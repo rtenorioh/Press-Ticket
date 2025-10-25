@@ -8,7 +8,10 @@ const contactRoutes = express.Router();
 
 contactRoutes.get("/contacts", isAuth, ContactController.index);
 contactRoutes.get("/contacts/export", isAuth, ContactController.exportContacts);
+contactRoutes.get("/contacts/blocked", isAuth, ContactController.listBlockedContacts);
 contactRoutes.get("/contacts/:contactId/block-status", isAuth, ContactController.getBlockStatus);
+contactRoutes.get("/contacts/:contactId/about", isAuth, ContactController.getAbout);
+contactRoutes.get("/contacts/:contactId/common-groups", isAuth, ContactController.getCommonGroups);
 contactRoutes.get("/contacts/:contactId", isAuth, ContactController.show);
 contactRoutes.post("/contacts", isAuth, ContactController.store);
 contactRoutes.post("/contact", isAuth, ContactController.getContact);

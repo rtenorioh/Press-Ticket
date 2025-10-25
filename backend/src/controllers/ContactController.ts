@@ -9,6 +9,9 @@ import ExportContactsService from "../services/ContactServices/ExportContactsSer
 import ListContactsService from "../services/ContactServices/ListContactsService";
 import ShowContactService from "../services/ContactServices/ShowContactService";
 import UpdateContactService from "../services/ContactServices/UpdateContactService";
+import GetAboutService from "../services/ContactServices/GetAboutService";
+import GetCommonGroupsService from "../services/ContactServices/GetCommonGroupsService";
+import ListBlockedContactsService from "../services/ContactServices/ListBlockedContactsService";
 
 import AppError from "../errors/AppError";
 import GetContactService from "../services/ContactServices/GetContactService";
@@ -543,5 +546,72 @@ export const exportContacts = async (
   } catch (err) {
     console.error(err);
     return res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+export const getAbout = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  try {
+    const { contactId } = req.params;
+    const { whatsappId } = req.query as { whatsappId?: string };
+
+    const about = await GetAboutService({
+      contactId,
+      whatsappId: whatsappId ? parseInt(whatsappId, 10) : undefined
+    });
+
+    return res.status(200).json(about);
+  } catch (err: any) {
+    if (err instanceof AppError) {
+      return res.status(err.statusCode).json({ error: err.message });
+    }
+    console.error("Erro ao obter about do contato:", err);
+    return res.status(500).json({ error: "ERR_INTERNAL_SERVER_ERROR" });
+  }
+};
+
+export const getCommonGroups = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  try {
+    const { contactId } = req.params;
+    const { whatsappId } = req.query as { whatsappId?: string };
+
+    const commonGroups = await GetCommonGroupsService({
+      contactId,
+      whatsappId: whatsappId ? parseInt(whatsappId, 10) : undefined
+    });
+
+    return res.status(200).json(commonGroups);
+  } catch (err: any) {
+    if (err instanceof AppError) {
+      return res.status(err.statusCode).json({ error: err.message });
+    }
+    console.error("Erro ao obter grupos em comum:", err);
+    return res.status(500).json({ error: "ERR_INTERNAL_SERVER_ERROR" });
+  }
+};
+
+export const listBlockedContacts = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  try {
+    const { whatsappId } = req.query as { whatsappId?: string };
+
+    const blockedContacts = await ListBlockedContactsService({
+      whatsappId: whatsappId ? parseInt(whatsappId, 10) : undefined
+    });
+
+    return res.status(200).json(blockedContacts);
+  } catch (err: any) {
+    if (err instanceof AppError) {
+      return res.status(err.statusCode).json({ error: err.message });
+    }
+    console.error("Erro ao listar contatos bloqueados:", err);
+    return res.status(500).json({ error: "ERR_INTERNAL_SERVER_ERROR" });
   }
 };
