@@ -1394,7 +1394,7 @@ const MessageInput = ({ ticketStatus }) => {
         }, 100);
       }
     } catch (err) {
-      toastError(err);
+      toastError(err, t);
     } finally {
       setLoading(false);
     }

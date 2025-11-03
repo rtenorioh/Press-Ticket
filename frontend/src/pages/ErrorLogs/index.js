@@ -33,6 +33,7 @@ import DownloadIcon from "@mui/icons-material/Download";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import FilterListIcon from "@mui/icons-material/FilterList";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { toast } from "react-toastify";
@@ -376,6 +377,34 @@ function ErrorLogs() {
   const handleCloseDetailDialog = () => {
     setDetailDialogOpen(false);
     setSelectedLog(null);
+  };
+
+  const handleCopyLogDetails = () => {
+    if (!selectedLog) return;
+
+    const logDetails = `
+Detalhes do Log    
+ID: ${selectedLog.id}
+Data: ${selectedLog.createdAt ? format(parseISO(selectedLog.createdAt), "dd/MM/yyyy HH:mm:ss", { locale: ptBR }) : "Data desconhecida"}
+Origem: ${selectedLog.source || "-"}
+Severidade: ${selectedLog.severity || "error"}
+Componente: ${selectedLog.component || "-"}
+Usuário: ${selectedLog.user || "-"}
+URL: ${selectedLog.url || "-"}
+User Agent: ${selectedLog.userAgent || "-"}
+Mensagem: ${selectedLog.message || "-"}
+Stack Trace:
+${selectedLog.stack || "-"}
+    `.trim();
+
+    navigator.clipboard.writeText(logDetails)
+      .then(() => {
+        toast.success("Informações do log copiadas para a área de transferência");
+      })
+      .catch((error) => {
+        console.error("Erro ao copiar:", error);
+        toast.error("Erro ao copiar informações do log");
+      });
   };
 
   const handleDownloadLogs = async () => {
@@ -755,7 +784,18 @@ function ErrorLogs() {
         maxWidth="md"
         fullWidth
       >
-        <DialogTitle>{t("errorLogs.detail.title", "Detalhes do Log")}</DialogTitle>
+        <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          {t("errorLogs.detail.title", "Detalhes do Log")}
+          <Tooltip title="Copiar todas as informações">
+            <IconButton
+              onClick={handleCopyLogDetails}
+              color="primary"
+              size="small"
+            >
+              <ContentCopyIcon />
+            </IconButton>
+          </Tooltip>
+        </DialogTitle>
         <DialogContent>
           {selectedLog ? (
             <Grid container spacing={2}>

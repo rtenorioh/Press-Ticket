@@ -219,6 +219,10 @@ const Backup = () => {
     try {
       await api.post(`/backups/${selectedBackup.filename}/restore`);
       toast.success(t("backup.restoreSuccess"));
+      
+      setTimeout(() => {
+        window.location.reload();
+      }, 4000);
     } catch (err) {
       toast.error(t("backup.restoreError"));
       console.error(err);

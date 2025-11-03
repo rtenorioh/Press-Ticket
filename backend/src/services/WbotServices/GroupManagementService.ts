@@ -343,15 +343,50 @@ class GroupManagementService {
       const wbot = getWbot(whatsappId);
       const chats = await wbot.getChats();
 
-      const groups = chats
-        .filter((chat: any) => chat.isGroup)
-        .map((chat: any) => ({
-          id: chat.id._serialized,
-          name: chat.name,
-          participantsCount: chat.participants?.length || 0,
-          unreadCount: chat.unreadCount,
-          timestamp: chat.timestamp
-        }));
+      const groups = [];
+      
+      for (const chat of chats) {
+        try {
+          if (chat.isGroup) {
+            const groupChat = chat as any;
+            
+            const groupData = {
+              id: groupChat.id?._serialized || groupChat.id,
+              name: groupChat.name || "Sem nome",
+              participantsCount: 0,
+              unreadCount: 0,
+              timestamp: null as number | null
+            };
+
+            try {
+              if (groupChat.participants) {
+                groupData.participantsCount = Array.isArray(groupChat.participants) 
+                  ? groupChat.participants.length 
+                  : 0;
+              }
+            } catch (e) {
+              logger.warn(`[GROUP_MANAGEMENT] Erro ao obter participantes do grupo ${groupData.id}`);
+            }
+
+            try {
+              groupData.unreadCount = groupChat.unreadCount || 0;
+            } catch (e) {
+              logger.warn(`[GROUP_MANAGEMENT] Erro ao obter unreadCount do grupo ${groupData.id}`);
+            }
+
+            try {
+              groupData.timestamp = groupChat.timestamp || null;
+            } catch (e) {
+              logger.warn(`[GROUP_MANAGEMENT] Erro ao obter timestamp do grupo ${groupData.id}`);
+            }
+
+            groups.push(groupData);
+          }
+        } catch (chatErr) {
+          logger.warn(`[GROUP_MANAGEMENT] Erro ao processar chat individual: ${chatErr}`);
+          continue;
+        }
+      }
 
       logger.info(`[GROUP_MANAGEMENT] Listados ${groups.length} grupos do canal ${whatsappId}`);
 

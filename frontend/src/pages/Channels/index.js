@@ -33,6 +33,7 @@ import {
 	GridView,
 	Instagram,
 	PlayCircleOutline,
+	QrCode2,
 	Replay,
 	SignalCellular4Bar,
 	SignalCellularConnectedNoInternet0Bar,
@@ -746,7 +747,7 @@ const Channels = () => {
 							color="primary"
 							onClick={() => handleOpenQrModal(whatsApp)}
 						>
-							<VisibilityIcon />
+							<QrCode2 />
 						</IconButton>
 					</Tooltip>
 				)}
@@ -955,7 +956,7 @@ const Channels = () => {
 										<DetailRow>
 											<DetailLabel>Atualizado:</DetailLabel>
 											<DetailValue>
-												{format(parseISO(whatsApp.updatedAt), "dd/MM/yy HH:mm")}
+												{whatsApp.updatedAt ? format(parseISO(whatsApp.updatedAt), "dd/MM/yy HH:mm") : "-"}
 											</DetailValue>
 										</DetailRow>
 
@@ -1205,7 +1206,7 @@ const Channels = () => {
 											) : "-"}
 										</TableCell>
 										<TableCell align="center">
-											{format(parseISO(whatsApp.updatedAt), "dd/MM/yy HH:mm")}
+											{whatsApp.updatedAt ? format(parseISO(whatsApp.updatedAt), "dd/MM/yy HH:mm") : "-"}
 										</TableCell>
 										<TableCell align="center">
 											{whatsApp.isDefault && (

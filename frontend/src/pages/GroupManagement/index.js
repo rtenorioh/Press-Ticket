@@ -171,13 +171,20 @@ const GroupManagement = () => {
   };
 
   const filteredGroups = groups.filter((group) =>
-    group.name.toLowerCase().includes(searchParam.toLowerCase())
+    group.name?.toLowerCase().includes(searchParam.toLowerCase())
   );
 
   return (
     <MainContainer>
       <MainHeader>
-        <Title>Gerenciamento de Grupos</Title>
+        <Title>
+          Gerenciamento de Grupos
+          {selectedWhatsappId && groups.length > 0 && (
+            <span style={{ marginLeft: '8px', fontSize: '0.9em', color: '#666' }}>
+              ({groups.length} {groups.length === 1 ? 'grupo' : 'grupos'})
+            </span>
+          )}
+        </Title>
         <MainHeaderButtonsWrapper>
           <TextField
             select
