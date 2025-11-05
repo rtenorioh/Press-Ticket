@@ -360,6 +360,14 @@ const SendWhatsAppMedia = async ({
       console.warn("[SendWhatsAppMedia] Não foi possível baixar/salvar a mídia enviada:", downloadErr?.message);
     }
     
+    let fileSize = null;
+    try {
+      const stats = fs.statSync(path.join(__dirname, "..", "..", "..", "public", savedFilename));
+      fileSize = stats.size;
+    } catch (err) {
+      console.warn("[SendWhatsAppMedia] Não foi possível obter tamanho do arquivo:", err?.message);
+    }
+
     const messageData = {
       id: sentMessage.id.id,
       ticketId: ticket.id,
@@ -369,7 +377,8 @@ const SendWhatsAppMedia = async ({
       mediaType: media.mimetype.split("/")[0],
       mediaUrl: savedFilename,
       read: true,
-      userId: ticket.userId
+      userId: ticket.userId,
+      fileSize: fileSize
     };
 
     const CreateMessageService = require("../MessageServices/CreateMessageService").default;

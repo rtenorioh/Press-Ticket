@@ -19,6 +19,9 @@ import {
   ExpandMore,
   GetApp,
   KeyboardArrowDown,
+  PictureAsPdf,
+  Description,
+  InsertDriveFile,
 } from "@mui/icons-material";
 
 import {
@@ -268,6 +271,91 @@ const DownloadMedia = styled("div")(({ theme }) => ({
   justifyContent: "center",
   backgroundColor: "inherit",
   padding: 10,
+}));
+
+const DocumentPreview = styled("div")(({ theme }) => ({
+  display: "flex",
+  flexDirection: "column",
+  backgroundColor: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.03)',
+  borderRadius: "8px",
+  overflow: "hidden",
+  maxWidth: "400px",
+  minWidth: "300px",
+}));
+
+const DocumentThumbnail = styled("div")(({ theme }) => ({
+  width: "100%",
+  height: "200px",
+  backgroundColor: theme.palette.mode === 'dark' ? 'rgba(0, 0, 0, 0.3)' : 'rgba(0, 0, 0, 0.1)',
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  position: "relative",
+  overflow: "hidden",
+  "& img": {
+    width: "100%",
+    height: "100%",
+    objectFit: "cover",
+  },
+  "& iframe": {
+    width: "calc(100% + 20px)",
+    height: "calc(100% + 20px)",
+    border: "none",
+    pointerEvents: "none",
+    marginRight: "-20px",
+    marginBottom: "-20px",
+  }
+}));
+
+const DocumentHeader = styled("div")(({ theme }) => ({
+  display: "flex",
+  alignItems: "center",
+  padding: "12px",
+  gap: "12px",
+  backgroundColor: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.05)',
+}));
+
+const DocumentIcon = styled("div")(({ theme }) => ({
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  width: "48px",
+  height: "48px",
+  borderRadius: "8px",
+  backgroundColor: theme.palette.mode === 'dark' ? '#d32f2f' : '#e53935',
+  color: "#fff",
+  flexShrink: 0,
+}));
+
+const DocumentInfo = styled("div")(({ theme }) => ({
+  display: "flex",
+  flexDirection: "column",
+  flex: 1,
+  minWidth: 0,
+}));
+
+const DocumentName = styled("div")(({ theme }) => ({
+  fontSize: "14px",
+  fontWeight: 500,
+  color: theme.palette.text.primary,
+  overflow: "hidden",
+  textOverflow: "ellipsis",
+  whiteSpace: "nowrap",
+  marginBottom: "4px",
+}));
+
+const DocumentDetails = styled("div")(({ theme }) => ({
+  fontSize: "12px",
+  color: theme.palette.text.secondary,
+  display: "flex",
+  gap: "4px",
+}));
+
+const DocumentDownloadButton = styled(IconButton)(({ theme }) => ({
+  color: theme.palette.mode === 'dark' ? '#4caf50' : '#2e7d32',
+  '&:hover': {
+    backgroundColor: theme.palette.mode === 'dark' ? 'rgba(76, 175, 80, 0.08)' : 'rgba(46, 125, 50, 0.08)',
+  },
 }));
 
 const MessageCenter = styled("div")(({ theme }) => ({
@@ -1026,23 +1114,86 @@ const MessagesList = ({ ticketId, isGroup, onClick }) => {
         />
       );
     } else {
+      const filename = message.body || "documento";
+      const docInfo = getDocumentInfo(filename, message.mediaType);
+      const DocumentIconComponent = docInfo.icon;
+      
+      const fileSize = message.fileSize || null;
+      const isPdf = docInfo.type === "PDF";
+      
       return (
-        <>
-          <DownloadMedia>
-            <Button
-              startIcon={<GetApp />}
-              color="primary"
-              variant="outlined"
-              target="_blank"
+        <DocumentPreview>
+          {/* Thumbnail/Preview do documento */}
+          {isPdf && message.mediaUrl && (
+            <DocumentThumbnail>
+              <iframe
+                src={`${message.mediaUrl}#toolbar=0&navpanes=0&scrollbar=0`}
+                title={filename}
+              />
+            </DocumentThumbnail>
+          )}
+          
+          <DocumentHeader>
+            <DocumentIcon>
+              <DocumentIconComponent sx={{ fontSize: 28 }} />
+            </DocumentIcon>
+            <DocumentInfo>
+              <DocumentName title={filename}>
+                {filename}
+              </DocumentName>
+              <DocumentDetails>
+                {docInfo.type && <span>{docInfo.type}</span>}
+                {fileSize && (
+                  <>
+                    <span>•</span>
+                    <span>{formatFileSize(fileSize)}</span>
+                  </>
+                )}
+              </DocumentDetails>
+            </DocumentInfo>
+            <DocumentDownloadButton
+              component="a"
               href={message.mediaUrl}
+              target="_blank"
+              download={filename}
+              size="small"
             >
-              {t("messagesList.message.download")}
-            </Button>
-          </DownloadMedia>
-          <Divider />
-        </>
+              <GetApp />
+            </DocumentDownloadButton>
+          </DocumentHeader>
+        </DocumentPreview>
       );
     }
+  };
+
+  const formatFileSize = (bytes) => {
+    if (!bytes || bytes === 0) return "Tamanho desconhecido";
+    if (bytes < 1024) return bytes + " B";
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
+    if (bytes < 1024 * 1024 * 1024) return (bytes / (1024 * 1024)).toFixed(1) + " MB";
+    return (bytes / (1024 * 1024 * 1024)).toFixed(1) + " GB";
+  };
+
+  const getDocumentInfo = (filename, mediaType) => {
+    if (!filename) return { icon: InsertDriveFile, type: "Documento", pages: null };
+    
+    const ext = filename.split('.').pop().toLowerCase();
+    
+    if (ext === 'pdf') {
+      return { icon: PictureAsPdf, type: "PDF", pages: null };
+    } else if (['doc', 'docx'].includes(ext)) {
+      return { icon: Description, type: "DOC", pages: null };
+    } else if (['xls', 'xlsx'].includes(ext)) {
+      return { icon: Description, type: "XLS", pages: null };
+    } else if (['ppt', 'pptx'].includes(ext)) {
+      return { icon: Description, type: "PPT", pages: null };
+    } else if (['txt'].includes(ext)) {
+      return { icon: Description, type: "TXT", pages: null };
+    } else if (['zip', 'rar', '7z'].includes(ext)) {
+      return { icon: InsertDriveFile, type: "ZIP", pages: null };
+    }
+    
+    return { icon: InsertDriveFile, type: ext.toUpperCase(), pages: null };
   };
 
   const renderMessageAck = (message) => {
@@ -1241,17 +1392,18 @@ const MessagesList = ({ ticketId, isGroup, onClick }) => {
             />
           )}
           {message.quotedMsg.mediaType === "application" && (
-            <DownloadMedia>
-              <Button
-                startIcon={<GetApp />}
-                color="primary"
-                variant="outlined"
-                target="_blank"
-                href={message.quotedMsg.mediaUrl}
-              >
-                {t("messagesList.message.download")}
-              </Button>
-            </DownloadMedia>
+            <DocumentPreview style={{ maxWidth: "250px", minWidth: "200px" }}>
+              <DocumentHeader style={{ padding: "8px" }}>
+                <DocumentIcon style={{ width: "32px", height: "32px" }}>
+                  <PictureAsPdf sx={{ fontSize: 20 }} />
+                </DocumentIcon>
+                <DocumentInfo>
+                  <DocumentName style={{ fontSize: "12px" }} title={message.quotedMsg.body || "documento"}>
+                    {message.quotedMsg.body || "documento"}
+                  </DocumentName>
+                </DocumentInfo>
+              </DocumentHeader>
+            </DocumentPreview>
           )}
           {message.quotedMsg.mediaType === "image" ? (
             <ModalImageCors imageUrl={message.quotedMsg.mediaUrl} />

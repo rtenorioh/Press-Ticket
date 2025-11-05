@@ -196,6 +196,8 @@ const verifyMediaMessage = async (
     albumId = `${msg.from}_${roundedTimestamp}`;
   }
 
+  const fileSize = media.data ? Buffer.from(media.data, 'base64').length : null;
+
   const messageData = {
     id: msg.id.id,
     ticketId: ticket.id,
@@ -209,7 +211,8 @@ const verifyMediaMessage = async (
     filename: media.filename,
     quotedMsgId: quotedMsg?.id,
     albumId: albumId,
-    userId: ticket.userId
+    userId: ticket.userId,
+    fileSize: fileSize
   };
   
   const existingMessage = await Message.findByPk(messageData.id);

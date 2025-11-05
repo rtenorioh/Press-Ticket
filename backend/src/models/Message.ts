@@ -53,6 +53,9 @@ class Message extends Model<Message> {
   albumId: string;
 
   @Column
+  fileSize: number;
+
+  @Column
   userId: number;
 
   @Default(false)
