@@ -336,6 +336,7 @@ const SendWhatsAppMedia = async ({
     }
 
     await ticket.update({ lastMessage: body || media.filename });
+    await ticket.reload();
     
     let savedFilename = media.filename;
     try {

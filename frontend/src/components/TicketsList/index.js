@@ -1,7 +1,7 @@
 import List from '@mui/material/List';
 import Paper from '@mui/material/Paper';
 import { styled } from '@mui/material/styles';
-import React, { useContext, useEffect, useReducer, useState } from "react";
+import React, { useContext, useEffect, useReducer, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { AuthContext } from "../../context/Auth/AuthContext";
 import toastError from "../../errors/toastError";
@@ -134,10 +134,11 @@ const reducer = (state, action) => {
 			
 			state[ticketIndex] = updatedTicket;
 			
-			if (ticket.lastMessage && ticket.lastMessage !== oldTicket.lastMessage) {
+			const oldMsg = typeof oldTicket.lastMessage === 'string' ? oldTicket.lastMessage : JSON.stringify(oldTicket.lastMessage);
+			const newMsg = typeof ticket.lastMessage === 'string' ? ticket.lastMessage : JSON.stringify(ticket.lastMessage);
+			
+			if (ticket.lastMessage && newMsg !== oldMsg) {
 				state.unshift(state.splice(ticketIndex, 1)[0]);
-			} else {
-				console.info(`[REDUCER_NO_MOVE][${timestamp}] Ticket ${ticket.id} não movido - mesma mensagem`);
 			}
 		} else {
 			state.unshift(ticket);
@@ -200,6 +201,20 @@ const TicketsList = (props) => {
 	const { profile, queues } = user || {};
 	const [settings, setSettings] = useState([]);
 	const [filteredTags, setFilteredTags] = useState([]);
+	
+	const statusRef = useRef(status);
+	const userRef = useRef(user);
+	const selectedQueueIdsRef = useRef(selectedQueueIds);
+	const isGroupRef = useRef(isGroup);
+	const showAllRef = useRef(showAll);
+	
+	useEffect(() => {
+		statusRef.current = status;
+		userRef.current = user;
+		selectedQueueIdsRef.current = selectedQueueIds;
+		isGroupRef.current = isGroup;
+		showAllRef.current = showAll;
+	}, [status, user, selectedQueueIds, isGroup, showAll]);
 
 	const handleTagFilter = (tags) => {
 		setFilteredTags(tags);
@@ -295,199 +310,151 @@ const TicketsList = (props) => {
 		}
 
 		const shouldUpdateTicket = (ticket) => {
-			const matchesCurrentStatus = status === ticket.status;
+			const currentStatus = statusRef.current;
+			const currentUser = userRef.current;
+			const currentQueueIds = selectedQueueIdsRef.current;
+			const currentIsGroup = isGroupRef.current;
+			const currentShowAll = showAllRef.current;
+			
+			const matchesCurrentStatus = currentStatus === ticket.status;
 			
 			if (!matchesCurrentStatus) {
 				return false;
 			}
 
-			if (isGroup !== undefined) {
+			if (currentIsGroup !== undefined) {
 				const isTicketGroup = !!ticket.contact?.isGroup;
-				if (isGroup !== isTicketGroup) {
+				if (currentIsGroup !== isTicketGroup) {
 					return false;
 				}
 			}
 
-			const isAdmin = user?.profile === "admin" || user?.profile === "masteradmin";
+			const isAdmin = currentUser?.profile === "admin" || currentUser?.profile === "masteradmin";
 			
-			
-			if (status === "closed") {
-				if (!isAdmin || (isAdmin && !showAll)) {
-					const belongsToUser = ticket.userId === user?.id;
-					const belongsToQueue = ticket.queueId && selectedQueueIds.indexOf(ticket.queueId) > -1;
-					const shouldShow = belongsToUser || belongsToQueue;
-					return shouldShow;
-				} else {
-					return true;
+			if (currentStatus === "closed") {
+				if (!isAdmin || (isAdmin && !currentShowAll)) {
+					const belongsToUser = ticket.userId === currentUser?.id;
+					const belongsToQueue = ticket.queueId && currentQueueIds.indexOf(ticket.queueId) > -1;
+					return belongsToUser || belongsToQueue;
 				}
-			} else if (status === "pending") {
+				return true;
+			} else if (currentStatus === "pending") {
 				if (!isAdmin) {
-					const belongsToUser = ticket.userId === user?.id;
-					const belongsToQueue = !ticket.queueId || selectedQueueIds.indexOf(ticket.queueId) > -1;
-					const shouldShow = belongsToUser || belongsToQueue;
-					return shouldShow;
-				} else {
-					if (showAll) {
-						return true;
-					} else {
-						const belongsToUser = ticket.userId === user?.id;
-						const belongsToQueue = !ticket.queueId || selectedQueueIds.indexOf(ticket.queueId) > -1;
-						const shouldShow = belongsToUser || belongsToQueue;
-						return shouldShow;
-					}
+					const belongsToUser = ticket.userId === currentUser?.id;
+					const belongsToQueue = !ticket.queueId || currentQueueIds.indexOf(ticket.queueId) > -1;
+					return belongsToUser || belongsToQueue;
 				}
-			} else if (status === "open") {
-				if (!isAdmin || (isAdmin && !showAll)) {
-					const belongsToUser = ticket.userId === user?.id;
-					const belongsToQueue = ticket.queueId && selectedQueueIds.indexOf(ticket.queueId) > -1;
-					const shouldShow = belongsToUser || belongsToQueue;
-					return shouldShow;
-				} else {
+				if (currentShowAll) {
 					return true;
 				}
+				const belongsToUser = ticket.userId === currentUser?.id;
+				const belongsToQueue = !ticket.queueId || currentQueueIds.indexOf(ticket.queueId) > -1;
+				return belongsToUser || belongsToQueue;
+			} else if (currentStatus === "open") {
+				if (!isAdmin || (isAdmin && !currentShowAll)) {
+					const belongsToUser = ticket.userId === currentUser?.id;
+					const belongsToQueue = ticket.queueId && currentQueueIds.indexOf(ticket.queueId) > -1;
+					return belongsToUser || belongsToQueue;
+				}
+				return true;
 			}
 			return false;
 		};
 
-		const notBelongsToUserQueues = (ticket) =>
-			ticket.queueId && selectedQueueIds.indexOf(ticket.queueId) === -1;
+		const notBelongsToUserQueues = (ticket) => {
+			const currentQueueIds = selectedQueueIdsRef.current;
+			return ticket.queueId && currentQueueIds.indexOf(ticket.queueId) === -1;
+		};
 
 		const registerSocketEvents = () => {
-			socket.on("connect", () => {				
+			const handleConnect = () => {
+				const currentStatus = statusRef.current;
+				const currentUser = userRef.current;
+				const currentShowAll = showAllRef.current;
+				
 				socket.emit("joinTickets", "pending");
 				
-				if (status && status !== "pending") {
-					socket.emit("joinTickets", status);
+				if (currentStatus && currentStatus !== "pending") {
+					socket.emit("joinTickets", currentStatus);
 				}
 				
-				if (status && user?.id) {
-					socket.emit("getTickets", { status, userId: user.id, showAll });
+				if (currentStatus && currentUser?.id) {
+					socket.emit("getTickets", { status: currentStatus, userId: currentUser.id, showAll: currentShowAll });
 				} else {
 					socket.emit("joinNotification");
 				}
-			});
+			};
 			
-			socket.on("reconnect", () => {
-				socket.emit("joinTickets", "pending");
-				
-				if (status && status !== "pending") {
-					socket.emit("joinTickets", status);
-				}
-				
-				if (status && user?.id) {
-					socket.emit("getTickets", { status, userId: user.id, showAll });
-				} else {
-					socket.emit("joinNotification");
-				}
-			});
-
-			socket.on("reconnect", () => {
-				
-				socket.emit("joinTickets", "pending");
-				
-				if (status && status !== "pending") {
-					socket.emit("joinTickets", status);
-				}
-				
-				if (status && user?.id) {
-					socket.emit("getTickets", { status, userId: user.id, showAll });
-				} else {
-					socket.emit("joinNotification");
-				}
-			});
+			socket.on("connect", handleConnect);
+			socket.on("reconnect", handleConnect);
 			
 			socket.on("ticket", (data) => {
-				const timestamp = new Date().toISOString();
-				
-				if (data.action === "update") {
-					if (isGroup !== undefined && data.ticket?.contact) {
-						const isTicketGroup = !!data.ticket.contact.isGroup;
-						if (isGroup !== isTicketGroup) {
-							try {
+				try {
+					if (data.action === "update") {
+						if (isGroup !== undefined && data.ticket?.contact) {
+							const isTicketGroup = !!data.ticket.contact.isGroup;
+							if (isGroup !== isTicketGroup) {
 								dispatch({ type: "DELETE_TICKET", payload: data.ticket.id });
-							} catch (error) {
-								console.error(`[FRONT_TICKET_ERRO][${timestamp}] Erro ao deletar ticket (filtro grupo):`, error);
+								return;
 							}
+						}
+
+						if (status && data.ticket.status !== status) {
+							dispatch({ type: "DELETE_TICKET", payload: data.ticket.id });
 							return;
 						}
-					}
 
-					if (status && data.ticket.status !== status) {
-						try {
-							dispatch({ type: "DELETE_TICKET", payload: data.ticket.id });
-						} catch (error) {
-							console.error(`[FRONT_TICKET_ERRO][${timestamp}] Erro ao deletar ticket (status mudou):`, error);
-						}
-						return;
-					}
-
-					if (data.ticket && shouldUpdateTicket(data.ticket)) {
-						if (data.ticket.status === status || (data.ticket.status === "pending" && status !== "closed")) {
-							try {
+						if (data.ticket && shouldUpdateTicket(data.ticket)) {
+							if (data.ticket.status === status || (data.ticket.status === "pending" && status !== "closed")) {
 								dispatch({ type: "UPDATE_TICKET", payload: data.ticket });
-							} catch (error) {
-								console.error(`[FRONT_TICKET_ERRO][${timestamp}] Erro ao atualizar ticket:`, error);
 							}
-						}
-					} else if (notBelongsToUserQueues(data.ticket)) {
-						try {
+						} else if (notBelongsToUserQueues(data.ticket)) {
 							dispatch({ type: "DELETE_TICKET", payload: data.ticket.id });
-						} catch (error) {
-							console.error(`[FRONT_TICKET_ERRO][${timestamp}] Erro ao deletar ticket:`, error);
-						}
-					}
-				}
-
-				if (data.action === "create") {
-					if (isGroup !== undefined && data.ticket?.contact) {
-						const isTicketGroup = !!data.ticket.contact.isGroup;
-						if (isGroup !== isTicketGroup) {
-							return;
 						}
 					}
 
-					if (data.ticket && shouldUpdateTicket(data.ticket)) {
-						if (data.ticket.status === status || (data.ticket.status === "pending" && status !== "closed")) {
-							try {
+					if (data.action === "create") {
+						if (isGroup !== undefined && data.ticket?.contact) {
+							const isTicketGroup = !!data.ticket.contact.isGroup;
+							if (isGroup !== isTicketGroup) {
+								return;
+							}
+						}
+
+						if (data.ticket && shouldUpdateTicket(data.ticket)) {
+							if (data.ticket.status === status || (data.ticket.status === "pending" && status !== "closed")) {
 								dispatch({ type: "ADD_TICKET", payload: data.ticket });
-							} catch (error) {
-								console.error(`[FRONT_TICKET_ERRO][${timestamp}] Erro ao adicionar novo ticket:`, error);
 							}
 						}
 					}
-				}
 
-				if (data.action === "delete") {
-					try {
+					if (data.action === "delete") {
 						dispatch({ type: "DELETE_TICKET", payload: data.ticketId });
-					} catch (error) {
-						console.error(`[FRONT_TICKET_ERRO][${timestamp}] Erro ao deletar ticket:`, error);
 					}
+				} catch (error) {
+					console.error("Erro ao processar evento ticket:", error);
 				}
 			});
 
 			socket.on("appMessage", (data) => {
-				const timestamp = new Date().toISOString();
-				
-				
-				if ((data.action === "create" || data.action === "update") && data.ticket) {
-					if (isGroup !== undefined && data.ticket.contact) {
-						const isTicketGroup = !!data.ticket.contact.isGroup;
-						if (isGroup !== isTicketGroup) {
-							return;
+				try {
+					if ((data.action === "create" || data.action === "update") && data.ticket) {
+						if (isGroup !== undefined && data.ticket.contact) {
+							const isTicketGroup = !!data.ticket.contact.isGroup;
+							if (isGroup !== isTicketGroup) {
+								return;
+							}
 						}
-					}
 
-					if (shouldUpdateTicket(data.ticket)) {
-						try {
+						if (shouldUpdateTicket(data.ticket)) {
 							dispatch({
 								type: "UPDATE_TICKET_UNREAD_MESSAGES",
 								payload: data.ticket,
 							});
-						} catch (error) {
-							console.error(`[FRONT_APP_MSG_UPDATE_ERROR][${timestamp}] Erro ao atualizar ticket:`, error);
 						}
 					}
+				} catch (error) {
+					console.error("Erro ao processar evento appMessage:", error);
 				}
 			});
 

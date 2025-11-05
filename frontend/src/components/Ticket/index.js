@@ -110,12 +110,12 @@ const Ticket = () => {
           setTicket(data);
           setLoading(false);
           
-          const timestamp = new Date().toISOString();
-          
-          try {
-            await api.post(`/messages/${ticketId}/read`);
-          } catch (readError) {
-            console.error(`[FRONT_MARK_READ_ERROR][${timestamp}] Erro ao marcar mensagens como lidas:`, readError);
+          if (data.status === "open") {
+            try {
+              await api.post(`/messages/${ticketId}/read`);
+            } catch (readError) {
+              console.error("Erro ao marcar mensagens como lidas:", readError);
+            }
           }
         } catch (err) {
           setLoading(false);

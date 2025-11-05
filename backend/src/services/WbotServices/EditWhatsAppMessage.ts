@@ -94,6 +94,7 @@ const EditWhatsAppMessage = async (
 
   if (mostRecentMessage && mostRecentMessage.id === messageId) {
     await ticket.update({ lastMessage: newBody });
+    await ticket.reload();
   }
 
   await message.reload({

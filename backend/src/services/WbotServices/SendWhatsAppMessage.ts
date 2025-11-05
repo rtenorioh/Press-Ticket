@@ -69,6 +69,7 @@ const SendWhatsAppMessage = async ({
         const sentMessage = await originalMessage.reply(formatBody(body, ticket), undefined, replyOptions);
 
         await ticket.update({ lastMessage: body });
+        await ticket.reload();
         return sentMessage;
       } catch (replyError) {
         console.error(`Erro ao usar reply nativo: ${replyError}`);
@@ -93,6 +94,7 @@ const SendWhatsAppMessage = async ({
           }
 
           await ticket.update({ lastMessage: body });
+          await ticket.reload();
           return sentMessage;
         } catch (idError) {
           console.error(`Erro ao usar ID serializado diretamente: ${idError}`);
@@ -119,6 +121,7 @@ const SendWhatsAppMessage = async ({
     }
 
     await ticket.update({ lastMessage: body });
+    await ticket.reload();
     return sentMessage;
   }
   
@@ -143,6 +146,7 @@ const SendWhatsAppMessage = async ({
       }
 
       await ticket.update({ lastMessage: body });
+      await ticket.reload();
       
       const messageData = {
         id: sentMessage.id.id,
@@ -210,6 +214,7 @@ const SendWhatsAppMessage = async ({
     }
 
     await ticket.update({ lastMessage: body });
+    await ticket.reload();
     
     const messageData = {
       id: sentMessage.id.id,

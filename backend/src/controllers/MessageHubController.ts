@@ -93,10 +93,13 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
   });
 
   const io = getIO();
-  io.to(ticket.status).emit("ticket", {
-    action: "update",
-    ticket
-  });
+  io.to(ticket.status)
+    .to("notification")
+    .to(ticket.id.toString())
+    .emit("ticket", {
+      action: "update",
+      ticket
+    });
 
   return res.status(200).json(ticket);
 };

@@ -253,10 +253,8 @@ const TicketListItem = ({ ticket, filteredTags }) => {
 	const defaultImage = '/default-profile.png';
 	
 	useEffect(() => {
-		if (JSON.stringify(ticket) !== JSON.stringify(currentTicket)) {
-			setCurrentTicket(ticket);
-		}
-	}, [ticket, currentTicket]);
+		setCurrentTicket(ticket);
+	}, [ticket.id, ticket.lastMessage, ticket.unreadMessages, ticket.status, ticket.userId]);
 
 	useEffect(() => {
 		const socket = openSocket();
@@ -424,31 +422,12 @@ const TicketListItem = ({ ticket, filteredTags }) => {
 	const handleMoveTicket = async (id) => {
 		setLoading(true);
 		try {
-			
 			await api.put(`/tickets/${id}`, {
 				status: "pending",
 				userId: null
 			});
 			
-			const socket = openSocket();
-			
-			socket.emit("ticket", {
-				action: "delete",
-				ticketId: id
-			});
-			
-			setTimeout(() => {
-				socket.emit("ticket", {
-					action: "update",
-					ticketId: id,
-					ticket: { 
-						...ticket, 
-						status: "pending", 
-						userId: null 
-					}
-				});
-			}, 200);
-			
+			localStorage.setItem("pressticket:changeTab", "open");
 			navigate(`/tickets`);
 		} catch (err) {
 			toastError(err);

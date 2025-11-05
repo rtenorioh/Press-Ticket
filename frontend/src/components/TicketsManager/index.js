@@ -277,17 +277,31 @@ const TicketsManager = () => {
       return;
     }
 
-    const handleTicketUpdate = (data) => {
-      
-      if (data.action === "update" || data.action === "create" || data.action === "delete" || data.action === "updateCounter") {
+    let debounceTimer = null;
+    
+    const debouncedFetchCounts = () => {
+      if (debounceTimer) {
+        clearTimeout(debounceTimer);
+      }
+      debounceTimer = setTimeout(() => {
         fetchTicketCounts();
+      }, 500);
+    };
+
+    const handleTicketUpdate = (data) => {
+      if (data.action === "updateCounter" && data.counters) {
+        setOpenCount(data.counters.open || 0);
+        setPendingCount(data.counters.pending || 0);
+        setClosedCount(data.counters.closed || 0);
+        setOpenGroupsCount(data.counters.openGroups || 0);
+      } else if (data.action === "update" || data.action === "create" || data.action === "delete") {
+        debouncedFetchCounts();
       }
     };
 
     const handleAppMessage = (data) => {    
-      
       if (data.action === "create") {
-        fetchTicketCounts();
+        debouncedFetchCounts();
       }
     };
 
@@ -298,6 +312,9 @@ const TicketsManager = () => {
     socket.emit("joinTickets", "closed");
 
     return () => {
+      if (debounceTimer) {
+        clearTimeout(debounceTimer);
+      }
       socket.off("ticket", handleTicketUpdate);
       socket.off("appMessage", handleAppMessage);
     };

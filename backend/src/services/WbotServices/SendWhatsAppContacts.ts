@@ -88,6 +88,7 @@ END:VCARD`;
       : `📞 ${contacts.length} contatos compartilhados`;
       
     await ticket.update({ lastMessage: lastMessageText });
+    await ticket.reload();
 
     if (!sentMessage) {
       throw new AppError("ERR_SENDING_WAPP_CONTACTS");

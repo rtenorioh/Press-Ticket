@@ -93,30 +93,58 @@ const sessions: Session[] = [];
 
 const syncUnreadMessages = async (wbot: Session) => {
   const maxRetries = 3;
+  
+  if (!wbot || !wbot.pupPage) {
+    console.warn('syncUnreadMessages: sessão não está pronta');
+    return;
+  }
+
   for (let attempt = 1; attempt <= maxRetries; attempt += 1) {
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1500 * attempt));
+      await new Promise((resolve) => setTimeout(resolve, 2000 * attempt));
+      
+      const state = await wbot.getState();
+      if (state !== 'CONNECTED') {
+        console.warn(`syncUnreadMessages: WhatsApp não está conectado. Estado: ${state}`);
+        return;
+      }
+
       const chats = await wbot.getChats();
+      
+      if (!chats || !Array.isArray(chats)) {
+        console.warn('syncUnreadMessages: chats inválidos');
+        continue;
+      }
 
       /* eslint-disable no-restricted-syntax */
       /* eslint-disable no-await-in-loop */
       for (const chat of chats) {
-        if (chat.unreadCount > 0) {
-          const unreadMessages = await chat.fetchMessages({
-            limit: chat.unreadCount
-          });
+        try {
+          if (chat.unreadCount > 0) {
+            const unreadMessages = await chat.fetchMessages({
+              limit: Math.min(chat.unreadCount, 50)
+            });
 
-          for (const msg of unreadMessages) {
-            await handleMessage(msg, wbot);
+            for (const msg of unreadMessages) {
+              try {
+                await handleMessage(msg, wbot);
+              } catch (msgError) {
+                console.error(`Erro ao processar mensagem não lida: ${msgError}`);
+              }
+            }
+
+            await chat.sendSeen();
           }
-
-          await chat.sendSeen();
+        } catch (chatError) {
+          console.error(`Erro ao processar chat ${chat.id._serialized}:`, chatError);
         }
       }
       return;
     } catch (error) {
       if (attempt === maxRetries) {
-        console.warn(`syncUnreadMessages: falha ao carregar chats após ${maxRetries} tentativas. Detalhe:`, error);
+        console.warn(`syncUnreadMessages: falha após ${maxRetries} tentativas:`, error.message || error);
+      } else {
+        console.log(`syncUnreadMessages: tentativa ${attempt} falhou, tentando novamente...`);
       }
     }
   }
