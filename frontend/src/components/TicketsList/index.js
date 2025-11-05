@@ -249,8 +249,22 @@ const TicketsList = (props) => {
 	}, []);
 
 	useEffect(() => {
-		const queueIds = queues?.map((q) => q.id);
-		let filteredTickets = tickets.filter((t) => queueIds.indexOf(t.queueId) > -1);
+		let filteredTickets = tickets;
+
+		if (selectedQueueIds && selectedQueueIds.length > 0) {
+			filteredTickets = filteredTickets.filter((t) => {
+				if (!t.queueId) return false;
+				return selectedQueueIds.indexOf(t.queueId) > -1;
+			});
+		} else {
+			const queueIds = queues?.map((q) => q.id) || [];
+			if (queueIds.length > 0) {
+				filteredTickets = filteredTickets.filter((t) => {
+					if (!t.queueId) return true;
+					return queueIds.indexOf(t.queueId) > -1;
+				});
+			}
+		}
 
 		if (isGroup !== undefined) {
 			if (isGroup === true) {
@@ -266,41 +280,13 @@ const TicketsList = (props) => {
 		};
 		const allticket = settings && settings.length > 0 && getSettingValue("allTicket") === "enabled";
 
-		if (allticket === true) {
-
-			if (profile === "") {
-				dispatch({ type: "LOAD_TICKETS", payload: filteredTickets });
-
-			} else {
-				let allTickets = tickets;
-				if (isGroup !== undefined) {
-					if (isGroup === true) {
-						allTickets = allTickets.filter((t) => t.contact?.isGroup === true);
-					} else {
-						allTickets = allTickets.filter((t) => !t.contact?.isGroup);
-					}
-				}
-				dispatch({ type: "LOAD_TICKETS", payload: allTickets });
-			}
+		if (profile === "user" && !allticket) {
+			dispatch({ type: "LOAD_TICKETS", payload: filteredTickets });
 		} else {
-
-			if (profile === "user") {
-				dispatch({ type: "LOAD_TICKETS", payload: filteredTickets });
-
-			} else {
-				let allTickets = tickets;
-				if (isGroup !== undefined) {
-					if (isGroup === true) {
-						allTickets = allTickets.filter((t) => t.contact?.isGroup === true);
-					} else {
-						allTickets = allTickets.filter((t) => !t.contact?.isGroup);
-					}
-				}
-				dispatch({ type: "LOAD_TICKETS", payload: allTickets });
-			}
+			dispatch({ type: "LOAD_TICKETS", payload: filteredTickets });
 		}
 		// eslint-disable-next-line
-	}, [tickets, status, searchParam, queues, profile, isGroup]);
+	}, [tickets, status, searchParam, queues, profile, isGroup, selectedQueueIds]);
 
 	useEffect(() => {
 		const socket = openSocket();
@@ -329,31 +315,41 @@ const TicketsList = (props) => {
 				}
 			}
 
+			if (currentQueueIds && currentQueueIds.length > 0) {
+				if (ticket.queueId) {
+					if (currentQueueIds.indexOf(ticket.queueId) === -1) {
+						return false;
+					}
+				} else {
+					return false;
+				}
+			}
+
 			const isAdmin = currentUser?.profile === "admin" || currentUser?.profile === "masteradmin";
 			
 			if (currentStatus === "closed") {
 				if (!isAdmin || (isAdmin && !currentShowAll)) {
 					const belongsToUser = ticket.userId === currentUser?.id;
-					const belongsToQueue = ticket.queueId && currentQueueIds.indexOf(ticket.queueId) > -1;
+					const belongsToQueue = ticket.queueId && currentUser?.queues?.some(q => q.id === ticket.queueId);
 					return belongsToUser || belongsToQueue;
 				}
 				return true;
 			} else if (currentStatus === "pending") {
 				if (!isAdmin) {
 					const belongsToUser = ticket.userId === currentUser?.id;
-					const belongsToQueue = !ticket.queueId || currentQueueIds.indexOf(ticket.queueId) > -1;
+					const belongsToQueue = !ticket.queueId || currentUser?.queues?.some(q => q.id === ticket.queueId);
 					return belongsToUser || belongsToQueue;
 				}
 				if (currentShowAll) {
 					return true;
 				}
 				const belongsToUser = ticket.userId === currentUser?.id;
-				const belongsToQueue = !ticket.queueId || currentQueueIds.indexOf(ticket.queueId) > -1;
+				const belongsToQueue = !ticket.queueId || currentUser?.queues?.some(q => q.id === ticket.queueId);
 				return belongsToUser || belongsToQueue;
 			} else if (currentStatus === "open") {
 				if (!isAdmin || (isAdmin && !currentShowAll)) {
 					const belongsToUser = ticket.userId === currentUser?.id;
-					const belongsToQueue = ticket.queueId && currentQueueIds.indexOf(ticket.queueId) > -1;
+					const belongsToQueue = ticket.queueId && currentUser?.queues?.some(q => q.id === ticket.queueId);
 					return belongsToUser || belongsToQueue;
 				}
 				return true;
