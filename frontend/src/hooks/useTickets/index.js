@@ -13,6 +13,7 @@ const useTickets = ({
     showAll,
     userId,
     queueIds,
+    channelIds,
     withUnreadMessages,
     all,
     isGroup
@@ -50,6 +51,7 @@ const useTickets = ({
                             showAll,
                             userId,
                             queueIds,
+                            channelIds,
                             withUnreadMessages,
                             all,
                             isGroup
@@ -168,6 +170,7 @@ const useTickets = ({
         showAll,
         userId,
         queueIds,
+        channelIds,
         withUnreadMessages,
         all,
         isGroup,

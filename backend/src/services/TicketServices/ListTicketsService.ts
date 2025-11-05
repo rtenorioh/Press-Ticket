@@ -19,6 +19,7 @@ interface Request {
   userId?: string;
   withUnreadMessages?: string;
   queueIds: number[];
+  channelIds?: number[];
   all?: string;
   isGroup?: string;
 }
@@ -40,6 +41,7 @@ const ListTicketsService = async ({
   userId,
   withUnreadMessages,
   queueIds = [],
+  channelIds = [],
   all,
   isGroup
 }: Request): Promise<Response> => {
@@ -232,6 +234,13 @@ const ListTicketsService = async ({
         ]
       };
     }
+  }
+
+  if (channelIds && channelIds.length > 0) {
+    whereCondition = {
+      ...whereCondition,
+      whatsappId: { [Op.in]: channelIds }
+    };
   }
 
   const defaultLimit = 20;

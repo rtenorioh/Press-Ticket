@@ -42,6 +42,7 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
     const searchParam = req.query.searchParam as string;
     const showAll = req.query.showAll as string;
     const queueIdsStringified = req.query.queueIds as string;
+    const channelIdsStringified = req.query.channelIds as string;
     const withUnreadMessages = req.query.withUnreadMessages as string;
     const all = req.query.all as string;
     const isGroup = req.query.isGroup as string;
@@ -64,6 +65,7 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
     }
 
     let queueIds: number[] = [];
+    let channelIds: number[] = [];
 
     if (queueIdsStringified) {
       try {
@@ -73,6 +75,17 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
       } catch (error) {
         console.error("Erro ao fazer JSON.parse:", error.message);
         return res.status(400).json({ error: "Formato JSON inválido para queueIds" });
+      }
+    }
+
+    if (channelIdsStringified) {
+      try {
+        channelIds = Array.isArray(channelIdsStringified)
+          ? channelIdsStringified.map(Number)
+          : JSON.parse(channelIdsStringified);
+      } catch (error) {
+        console.error("Erro ao fazer JSON.parse:", error.message);
+        return res.status(400).json({ error: "Formato JSON inválido para channelIds" });
       }
     }
 
@@ -100,6 +113,7 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
         isAdmin,
         userId: apiUserId,
         queueIds,
+        channelIds,
         withUnreadMessages,
         all,
         isGroup

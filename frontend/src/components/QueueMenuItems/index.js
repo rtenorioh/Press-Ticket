@@ -1,6 +1,6 @@
 import React from "react";
-import { ListItemText, MenuItem, Typography, Box, Divider, Button, useTheme } from "@mui/material";
-import { Check, FilterList } from "@mui/icons-material";
+import { ListItemText, MenuItem, Typography, Box, Divider, Button, useTheme, IconButton } from "@mui/material";
+import { Check, AccountTreeOutlined, ClearAll } from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
 
 const QueueMenuItems = ({
@@ -54,11 +54,11 @@ const QueueMenuItems = ({
             gap: '8px'
           }}
         >
-          <FilterList fontSize="small" />
+          <AccountTreeOutlined fontSize="small" />
           {t("ticketsQueueSelect.placeholder")}
         </Typography>
         
-        <Box sx={{ display: 'flex', gap: '8px' }}>
+        <Box sx={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
           <Button 
             size="small" 
             variant="text" 
@@ -66,23 +66,25 @@ const QueueMenuItems = ({
             sx={{ 
               minWidth: 'auto', 
               padding: '4px 8px',
-              fontSize: '0.75rem'
+              fontSize: '0.75rem',
+              textTransform: 'uppercase'
             }}
           >
             {t("all")}
           </Button>
-          <Button 
+          <IconButton 
             size="small" 
-            variant="text" 
             onClick={handleClearAll}
             sx={{ 
-              minWidth: 'auto', 
-              padding: '4px 8px',
-              fontSize: '0.75rem'
+              padding: '4px',
+              '&:hover': {
+                backgroundColor: theme.palette.action.hover
+              }
             }}
+            title="Limpar seleção"
           >
-            {t("none")}
-          </Button>
+            <ClearAll fontSize="small" />
+          </IconButton>
         </Box>
       </Box>
       

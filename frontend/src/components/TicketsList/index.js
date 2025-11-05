@@ -187,6 +187,7 @@ const TicketsList = (props) => {
 		searchParam,
 		showAll,
 		selectedQueueIds,
+		selectedChannelIds,
 		updateCount,
 		style,
 		tags,
@@ -207,7 +208,7 @@ const TicketsList = (props) => {
 	useEffect(() => {
 		dispatch({ type: "RESET" });
 		setPageNumber(1);
-	}, [status, searchParam, dispatch, showAll, selectedQueueIds, tags]);
+	}, [status, searchParam, dispatch, showAll, selectedQueueIds, selectedChannelIds, tags]);
 
 	const { tickets, hasMore, loading } = useTickets({
 		pageNumber,
@@ -216,6 +217,7 @@ const TicketsList = (props) => {
 		showAll,
 		tags: JSON.stringify(tags),
 		queueIds: JSON.stringify(selectedQueueIds),
+		channelIds: JSON.stringify(selectedChannelIds),
 		isGroup,
 	});
 

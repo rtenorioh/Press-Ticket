@@ -23,16 +23,20 @@ import {
   Add,
   Close,
   Refresh,
-  Group
+  Group,
+  AccountTreeOutlined,
+  SyncAlt
 } from "@mui/icons-material";
 import React, { useContext, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { AuthContext } from "../../context/Auth/AuthContext";
+import { WhatsAppsContext } from "../../context/WhatsApp/WhatsAppsContext";
 import { Can } from "../Can";
 import NewTicketModal from "../NewTicketModal";
 import TabPanel from "../TabPanel";
 import TicketsList from "../TicketsList";
 import QueueMenuItems from "../QueueMenuItems";
+import ChannelMenuItems from "../ChannelMenuItems";
 import toastError from "../../errors/toastError";
 import api from "../../services/api";
 import { toast } from "react-toastify";
@@ -187,6 +191,7 @@ const TicketsManager = () => {
   const [confirmationOpen, setConfirmationOpen] = useState(false);
   const [closeAction, setCloseAction] = useState(null);
   const { user } = useContext(AuthContext);
+  const { whatsApps } = useContext(WhatsAppsContext);
   const [openCount, setOpenCount] = useState(0);
   const [pendingCount, setPendingCount] = useState(0);
   const [closedCount, setClosedCount] = useState(0);
@@ -194,7 +199,9 @@ const TicketsManager = () => {
   const userQueueIds = user?.queues?.map((q) => q.id);
   const [settings, setSettings] = useState([]);
   const [selectedQueueIds, setSelectedQueueIds] = useState(userQueueIds || []);
+  const [selectedChannelIds, setSelectedChannelIds] = useState([]);
   const [filterMenuAnchorEl, setFilterMenuAnchorEl] = useState(null);
+  const [channelMenuAnchorEl, setChannelMenuAnchorEl] = useState(null);
 
   const fetchTicketCounts = async () => {
     try {
@@ -483,10 +490,16 @@ const TicketsManager = () => {
         </Tabs>  
       </TabsHeaderStyled>
       <TicketOptionsBoxStyled elevation={0}>
-        <Box sx={{ display: "flex", alignItems: "center" }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
           <Tooltip title={t("ticketsManager.buttons.closed")} placement="top" arrow>
             <ActionButton
               onClick={(event) => setAnchorEl(event.currentTarget)}
+              sx={{
+                boxShadow: theme.shadows[2],
+                '&:hover': {
+                  boxShadow: theme.shadows[4]
+                }
+              }}
             >
               <Close fontSize="small" />
             </ActionButton>
@@ -496,6 +509,12 @@ const TicketsManager = () => {
               onClick={() => {
                 setTab(tab => tab === "open" ? "pending" : "open");
                 setTimeout(() => setTab("open"), 100);
+              }}
+              sx={{
+                boxShadow: theme.shadows[2],
+                '&:hover': {
+                  boxShadow: theme.shadows[4]
+                }
               }}
             >
               <Refresh fontSize="small" />
@@ -548,15 +567,77 @@ const TicketsManager = () => {
                     color="primary"
                   />
                 }
+                sx={{ marginRight: 2 }}
               />
             )}
           />
-          <Box sx={{ display: "flex", alignItems: "center" }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <Tooltip title="Canais" placement="top" arrow>
+              <ActionButton
+                onClick={(event) => setChannelMenuAnchorEl(event.currentTarget)}
+                sx={{
+                  boxShadow: theme.shadows[2],
+                  '&:hover': {
+                    boxShadow: theme.shadows[4]
+                  }
+                }}
+              >
+                <SyncAlt fontSize="small" />
+              </ActionButton>
+            </Tooltip>
+            <Menu
+              anchorEl={channelMenuAnchorEl}
+              keepMounted
+              open={Boolean(channelMenuAnchorEl)}
+              onClose={() => setChannelMenuAnchorEl(null)}
+              PaperProps={{
+                elevation: 3,
+                sx: {
+                  borderRadius: theme.shape.borderRadius,
+                  minWidth: "280px",
+                  padding: "4px",
+                  backgroundColor: theme.palette.background.paper,
+                  boxShadow: theme.shadows[3],
+                  border: `1px solid ${theme.palette.divider}`,
+                  overflow: 'visible',
+                  '&:before': {
+                    content: '""',
+                    display: 'block',
+                    position: 'absolute',
+                    top: 0,
+                    right: 14,
+                    width: 10,
+                    height: 10,
+                    bgcolor: theme.palette.background.paper,
+                    transform: 'translateY(-50%) rotate(45deg)',
+                    zIndex: 0,
+                    borderLeft: `1px solid ${theme.palette.divider}`,
+                    borderTop: `1px solid ${theme.palette.divider}`
+                  }
+                },
+              }}
+              transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+              anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+            >
+              <ChannelMenuItems
+                selectedChannelIds={selectedChannelIds}
+                channels={whatsApps}
+                onChange={(values) => setSelectedChannelIds(values)}
+                onClose={() => setChannelMenuAnchorEl(null)}
+              />
+            </Menu>
+
             <Tooltip title={t("tickets.buttons.queues")} placement="top" arrow>
               <ActionButton
                 onClick={(event) => setFilterMenuAnchorEl(event.currentTarget)}
+                sx={{
+                  boxShadow: theme.shadows[2],
+                  '&:hover': {
+                    boxShadow: theme.shadows[4]
+                  }
+                }}
               >
-                <FilterList fontSize="small" />
+                <AccountTreeOutlined fontSize="small" />
               </ActionButton>
             </Tooltip>
             <Menu
@@ -608,6 +689,7 @@ const TicketsManager = () => {
           status="open"
           showAll={showAllTickets}
           selectedQueueIds={selectedQueueIds}
+          selectedChannelIds={selectedChannelIds}
           updateCount={(val) => setOpenCount(val)}
           isGroup={false}
         />
@@ -617,6 +699,7 @@ const TicketsManager = () => {
           status="open"
           showAll={showAllTickets}
           selectedQueueIds={selectedQueueIds}
+          selectedChannelIds={selectedChannelIds}
           updateCount={(val) => setOpenGroupsCount(val)}
           isGroup={true}
         />
@@ -626,6 +709,7 @@ const TicketsManager = () => {
           status="pending"
           showAll={true}
           selectedQueueIds={selectedQueueIds}
+          selectedChannelIds={selectedChannelIds}
           updateCount={(val) => setPendingCount(val)}
         />
       </TabPanelStyled>
@@ -634,6 +718,7 @@ const TicketsManager = () => {
           status="closed"
           showAll={showAllTickets}
           selectedQueueIds={selectedQueueIds}
+          selectedChannelIds={selectedChannelIds}
           updateCount={(val) => setClosedCount(val)}
         />
       </TabPanelStyled>
@@ -642,6 +727,7 @@ const TicketsManager = () => {
           searchParam={searchParam}
           showAll={true}
           selectedQueueIds={selectedQueueIds}
+          selectedChannelIds={selectedChannelIds}
         />
       </TabPanelStyled>
     </TicketWrapperStyled>
