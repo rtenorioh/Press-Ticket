@@ -41,7 +41,7 @@ const StyledDialog = styled(Dialog)(({ theme }) => ({
 
 const INITIAL_QUEUE_VALUE = "";
 
-const AcceptTicketWithouSelectQueue = ({ modalOpen, onClose, ticketId }) => {
+const AcceptTicketWithouSelectQueue = ({ modalOpen, onClose, ticketId, onSuccess }) => {
 	const navigate = useNavigate();
 	const [selectedQueue, setSelectedQueue] = useState(INITIAL_QUEUE_VALUE);
 	const [loading, setLoading] = useState(false);
@@ -108,6 +108,9 @@ const AcceptTicketWithouSelectQueue = ({ modalOpen, onClose, ticketId }) => {
 				localStorage.setItem("pressticket:changeTab", isGroup ? "groups" : "open");
 				
 				setLoading(false);
+				if (onSuccess) {
+					onSuccess();
+				}
 				navigate(`/tickets/${ticketId}`);
 				handleClose();
 				return;
@@ -143,13 +146,16 @@ const AcceptTicketWithouSelectQueue = ({ modalOpen, onClose, ticketId }) => {
 			localStorage.setItem("pressticket:changeTab", isGroup ? "groups" : "open");
 
 			setLoading(false);
+			if (onSuccess) {
+				onSuccess();
+			}
 			navigate(`/tickets/${ticketId}`);
 			handleClose();
 		} catch (err) {
 			setLoading(false);
 			toastError(err, t);
 		}
-	}, [ticketId, userId, navigate, handleClose, checkOpenTickets, t, settings]);
+	}, [ticketId, userId, navigate, handleClose, checkOpenTickets, t, settings, onSuccess]);
 
 	return (
 		<StyledDialog
@@ -247,6 +253,7 @@ AcceptTicketWithouSelectQueue.propTypes = {
 	modalOpen: PropTypes.bool.isRequired,
 	onClose: PropTypes.func.isRequired,
 	ticketId: PropTypes.number.isRequired,
+	onSuccess: PropTypes.func,
 };
 
 export default AcceptTicketWithouSelectQueue;

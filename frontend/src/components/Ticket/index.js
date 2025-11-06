@@ -125,7 +125,8 @@ const Ticket = () => {
       fetchTicket();
     }, 500);
     return () => clearTimeout(delayDebounceFn);
-  }, [ticketId, navigate]);
+  }, [ticketId, navigate, t]);
+
 
   useEffect(() => {
     const socket = openSocket();
@@ -139,7 +140,12 @@ const Ticket = () => {
       
       if (data.action === "update") {
         try {
-          setTicket(data.ticket);
+          if (data.ticket && data.ticket.id === parseInt(ticketId)) {
+            setTicket(prevTicket => ({
+              ...prevTicket,
+              ...data.ticket
+            }));
+          }
         } catch (error) {
           console.error(`[FRONT_TICKET_ERRO][${timestamp}] Erro ao atualizar estado do ticket:`, error);
         }
@@ -186,6 +192,24 @@ const Ticket = () => {
     setMessageContact(null);
   };
 
+  const handleTicketAccepted = async () => {
+    try {
+      const { data } = await api.get("/tickets/" + ticketId);
+      setContact(data.contact);
+      setTicket(data);
+      
+      if (data.status === "open") {
+        try {
+          await api.post(`/messages/${ticketId}/read`);
+        } catch (readError) {
+          console.error("Erro ao marcar mensagens como lidas:", readError);
+        }
+      }
+    } catch (err) {
+      toastError(err, t);
+    }
+  };
+
   return (
     <Root id="drawer-container">
       <MainWrapper
@@ -203,7 +227,10 @@ const Ticket = () => {
               />
             </TicketInfoContainer>
             <TicketActionButtonsContainer>
-              <TicketActionButtons ticket={ticket} />
+              <TicketActionButtons 
+                ticket={ticket} 
+                onTicketAccepted={handleTicketAccepted}
+              />
             </TicketActionButtonsContainer>
           </HeaderWrapper>
         </TicketHeader>

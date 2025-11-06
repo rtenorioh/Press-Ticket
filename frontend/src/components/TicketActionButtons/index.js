@@ -80,7 +80,7 @@ const LoadingIconButton = ({ loading, color, onClick, children, title }) => {
 	);
 };
 
-const TicketActionButtons = ({ ticket }) => {
+const TicketActionButtons = ({ ticket, onTicketAccepted }) => {
 	const { t } = useTranslation();
 	const navigate = useNavigate();
 	const [anchorEl, setAnchorEl] = useState(null);
@@ -141,14 +141,11 @@ const TicketActionButtons = ({ ticket }) => {
 	const handleAcceptTicket = async (e) => {
 		if (ticket.queue === null || ticket.queue === undefined) {
 			handleOpenAcceptTicketWithouSelectQueue();
-			const isGroup = ticket?.contact?.isGroup;
-			localStorage.setItem("pressticket:changeTab", isGroup ? "groups" : "open");
-			navigate(`/tickets/${ticket.id}`);
 		} else {
 			await handleUpdateTicketStatus(e, "open", user?.id);
-			const isGroup = ticket?.contact?.isGroup;
-			localStorage.setItem("pressticket:changeTab", isGroup ? "groups" : "open");
-			navigate(`/tickets/${ticket.id}`);
+			if (onTicketAccepted) {
+				await onTicketAccepted();
+			}
 		}
 	};
 
@@ -224,6 +221,7 @@ const TicketActionButtons = ({ ticket }) => {
 				modalOpen={acceptTicketWithouSelectQueueOpen}
 				onClose={(e) => setAcceptTicketWithouSelectQueueOpen(false)}
 				ticketId={ticket.id}
+				onSuccess={onTicketAccepted}
 			/>
 		</ActionButtonsContainer>
 	);

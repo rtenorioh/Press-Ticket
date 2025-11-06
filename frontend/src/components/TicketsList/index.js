@@ -120,7 +120,6 @@ const reducer = (state, action) => {
 
 	if (action.type === "UPDATE_TICKET_UNREAD_MESSAGES") {
 		const ticket = action.payload;
-		const timestamp = new Date().toISOString();
 
 		const ticketIndex = state.findIndex((t) => t.id === ticket.id);
 		if (ticketIndex !== -1) {
