@@ -37,6 +37,7 @@ import cacheRoutes from "./cacheRoutes";
 import groupEventRoutes from "./groupEventRoutes";
 import groupManagementRoutes from "./groupManagementRoutes";
 import pollVoteRoutes from "./pollVoteRoutes";
+import rateLimitRoutes from "./rateLimitRoutes";
 
 const routes = Router();
 
@@ -77,5 +78,6 @@ routes.use(cacheRoutes);
 routes.use(groupEventRoutes);
 routes.use(groupManagementRoutes);
 routes.use(pollVoteRoutes);
+routes.use(rateLimitRoutes);
 
 export default routes;
