@@ -333,7 +333,7 @@ const MainListItems = (props) => {
       >
         <ListItemLink
           to="/blocked-contacts"
-          primary="Bloqueados"
+          primary={t("mainDrawer.listItems.blockedContacts")}
           icon={<BlockIcon />}
           active={location.pathname === '/blocked-contacts'}
           drawerClose={drawerClose}
@@ -406,7 +406,7 @@ const MainListItems = (props) => {
               />
               <ListItemLink
                 to="/group-management"
-                primary="Grupos"
+                primary={t("mainDrawer.listItems.groups")}
                 icon={<GroupIcon />}
                 active={location.pathname === '/group-management'}
                 drawerClose={drawerClose}

@@ -742,6 +742,7 @@ const messages = {
           apikey: "Gerenciador da API",
           tickets: "Tickets",
           contacts: "Contatos",
+          blockedContacts: "Contatos Bloqueados",
           dashboard: "Dashboard",
           quickAnswers: "Respostas Rápidas",
           tags: "Tags",
@@ -749,6 +750,7 @@ const messages = {
           channels: "Canais",
           queues: "Setores",
           users: "Atendentes",
+          groups: "Grupos",
           settings: "Configurações",
           system: "Monitoramento do Sistema",
           errorLogs: "Log de Erros",
@@ -761,7 +763,7 @@ const messages = {
           activityLogs: "Logs de Atividade",
           networkStatus: "Status da Rede",
           queueMonitor: "Monitoramento de Setores",
-          systemHealth: "Saúde do Sistema",
+          systemHealth: "Monitoramento de Canais",
           systemUpdate: "Atualizações do Sistema",
           versionCheck: "Verificação de Versão",
           logout: "Sair",
@@ -809,6 +811,23 @@ const messages = {
         forwarded: "Encaminhada",
         forwardedSuccess: "Mensagens encaminhadas com sucesso!",
         forwardedError: "Erro ao encaminhar mensagens",
+      },
+      healthCheck: {
+        title: "Monitoramento de Canais",
+        tooltips: {
+          refresh: "Atualizar"
+        },
+        noChannels: "Nenhum canal encontrado",
+        number: "Número",
+        pushname: "Usuário",
+        platform: "Plataforma",
+        wwebVersion: "Versão",
+        uptime: "Uptime",
+        messages: "Mensagens",
+        latency: "Latência",
+        errors: "Erros",
+        lastActivity: "Última atividade",
+        connectionStatus: "Status da Conexão"
       },
       messageHistoryModal: {
         close: "Fechar",

@@ -16,6 +16,8 @@ const rules = {
 			"contacts-page:deleteContact",
 			"documentation-admin:view",
 			"documentation-api:view",
+			"documentation-system:view",
+			"documentation-maintenance:view",
 			"videos:create"
 		],
 	},
@@ -34,7 +36,8 @@ const rules = {
 			"settings:personalize",
 			"documentation-admin:view",
 			"documentation-api:view",
-			"documentation-system:view"
+			"documentation-system:view",
+			"documentation-maintenance:view"
 		],
 	}
 };

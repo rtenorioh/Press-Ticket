@@ -43,6 +43,9 @@ import QueueMonitorIcon from '@mui/icons-material/Assessment';
 import SystemUpdateAltIcon from "@mui/icons-material/SystemUpdateAlt";
 import SystemUpdateIcon from "@mui/icons-material/SystemUpdate";
 import LabelOutlined from "@mui/icons-material/LabelOutlined";
+import BlockIcon from "@mui/icons-material/Block";
+import GroupIcon from '@mui/icons-material/Group';
+import MonitorHeartIcon from '@mui/icons-material/MonitorHeart';
 
 const PREFIX = 'Documentation';
 
@@ -150,7 +153,7 @@ const Documentation = () => {
       title: t("documentation.general.title"),
       items: [
         {
-          name: "Dashboard",
+          name: t("mainDrawer.listItems.dashboard"),
           description: t("documentation.general.dashboard"),
           icon: <DashboardOutlined />,
           path: "/"
@@ -166,6 +169,12 @@ const Documentation = () => {
           description: t("documentation.general.contacts"),
           icon: <ContactPhoneOutlined />,
           path: "/contacts"
+        },
+        {
+          name: t("mainDrawer.listItems.blockedContacts"),
+          description: t("documentation.general.blockedContacts"),
+          icon: <BlockIcon />,
+          path: "/blocked-contacts"
         },
         {
           name: t("mainDrawer.listItems.quickAnswers"),
@@ -215,6 +224,12 @@ const Documentation = () => {
           path: "/channels"
         },
         {
+          name: t("mainDrawer.listItems.groups"),
+          description: t("documentation.administration.groups"),
+          icon: <GroupIcon />,
+          path: "/group-management"
+        },
+        {
           name: t("mainDrawer.listItems.queueMonitor"),
           description: t("documentation.administration.queueMonitor"),
           icon: <QueueMonitorIcon />,
@@ -252,8 +267,8 @@ const Documentation = () => {
       ]
     },
     {
-      title: "Monitoramento do Sistema",
-      items: [
+      title: t("documentation.system.title"),
+      items: [ 
         {
           name: t("mainDrawer.listItems.memoryUsage"),
           description: t("documentation.system.memoryUsage"),
@@ -277,6 +292,12 @@ const Documentation = () => {
           description: t("documentation.system.databaseStatus"),
           icon: <DatabaseIcon />,
           path: "/databaseStatus"
+        },
+        {
+          name: t("mainDrawer.listItems.systemHealth"),
+          description: t("documentation.system.systemHealth"),
+          icon: <MonitorHeartIcon />,
+          path: "/health-check"
         },
         {
           name: t("mainDrawer.listItems.networkStatus"),
@@ -434,75 +455,76 @@ const Documentation = () => {
                       <Typography variant="h5" className={classes.section}>
                         {category.title}
                       </Typography>
-                      {category.items.map((item, itemIndex) => {
-                        if (item.subItems) {
-                          return (
-                            <div key={`item-${categoryIndex}-${itemIndex}`}>
-                              <Typography variant="h6" className={classes.subsection}>
-                                <Box display="flex" alignItems="center" mt={2} mb={1}>
-                                  {React.cloneElement(item.icon, { style: { marginRight: 8 } })}
-                                  {item.name}
+                      <Grid container spacing={3}>
+                        {category.items.map((item, itemIndex) => (
+                          <Grid item xs={12} sm={6} md={4} key={`item-${categoryIndex}-${itemIndex}`}>
+                            <Card className={classes.card}>
+                              <CardHeader
+                                title={
+                                  <Box display="flex" alignItems="center">
+                                    {React.cloneElement(item.icon, { style: { marginRight: 8 } })}
+                                    <Typography variant="h6">{item.name}</Typography>
+                                  </Box>
+                                }
+                                className={classes.cardHeader}
+                              />
+                              <CardContent className={classes.cardContent}>
+                                <Typography variant="body2" color="textSecondary" component="p">
+                                  {item.description}
+                                </Typography>
+                                <Box mt={2}>
+                                  <Link component={RouterLink} to={item.path} className={classes.link}>
+                                    {t("documentation.visitPage")}
+                                  </Link>
                                 </Box>
-                              </Typography>
-                              <Grid container spacing={3}>
-                                {item.subItems.map((subItem, subItemIndex) => (
-                                  <Grid item xs={12} sm={6} md={4} key={`subitem-${categoryIndex}-${itemIndex}-${subItemIndex}`}>
-                                    <Card className={classes.card}>
-                                      <CardHeader
-                                        title={
-                                          <Box display="flex" alignItems="center">
-                                            {React.cloneElement(subItem.icon, { style: { marginRight: 8 } })}
-                                            <Typography variant="h6">{subItem.name}</Typography>
-                                          </Box>
-                                        }
-                                        className={classes.cardHeader}
-                                      />
-                                      <CardContent className={classes.cardContent}>
-                                        <Typography variant="body2" color="textSecondary" component="p">
-                                          {subItem.description}
-                                        </Typography>
-                                        <Box mt={2}>
-                                          <Link component={RouterLink} to={subItem.path} className={classes.link}>
-                                            {t("documentation.visitPage")}
-                                          </Link>
-                                        </Box>
-                                      </CardContent>
-                                    </Card>
-                                  </Grid>
-                                ))}
-                              </Grid>
-                            </div>
-                          );
-                        } else {
-                          return (
-                            <Grid container spacing={3} key={`item-${categoryIndex}-${itemIndex}`}>
-                              <Grid item xs={12} sm={6} md={4}>
-                                <Card className={classes.card}>
-                                  <CardHeader
-                                    title={
-                                      <Box display="flex" alignItems="center">
-                                        {React.cloneElement(item.icon, { style: { marginRight: 8 } })}
-                                        <Typography variant="h6">{item.name}</Typography>
-                                      </Box>
-                                    }
-                                    className={classes.cardHeader}
-                                  />
-                                  <CardContent className={classes.cardContent}>
-                                    <Typography variant="body2" color="textSecondary" component="p">
-                                      {item.description}
-                                    </Typography>
-                                    <Box mt={2}>
-                                      <Link component={RouterLink} to={item.path} className={classes.link}>
-                                        {t("documentation.visitPage")}
-                                      </Link>
-                                    </Box>
-                                  </CardContent>
-                                </Card>
-                              </Grid>
-                            </Grid>
-                          );
-                        }
-                      })}
+                              </CardContent>
+                            </Card>
+                          </Grid>
+                        ))}
+                      </Grid>
+                      <Divider className={classes.divider} />
+                    </div>
+                  )}
+                />
+              );  
+            } else if (category.title === t("documentation.maintenance.title")) {
+              return (
+                <Can
+                  key={`category-${categoryIndex}`}
+                  role={user.profile}
+                  perform="documentation-maintenance:view"
+                  yes={() => (
+                    <div>
+                      <Typography variant="h5" className={classes.section}>
+                        {category.title}
+                      </Typography>
+                      <Grid container spacing={3}>
+                        {category.items.map((item, itemIndex) => (
+                          <Grid item xs={12} sm={6} md={4} key={`item-${categoryIndex}-${itemIndex}`}>
+                            <Card className={classes.card}>
+                              <CardHeader
+                                title={
+                                  <Box display="flex" alignItems="center">
+                                    {React.cloneElement(item.icon, { style: { marginRight: 8 } })}
+                                    <Typography variant="h6">{item.name}</Typography>
+                                  </Box>
+                                }
+                                className={classes.cardHeader}
+                              />
+                              <CardContent className={classes.cardContent}>
+                                <Typography variant="body2" color="textSecondary" component="p">
+                                  {item.description}
+                                </Typography>
+                                <Box mt={2}>
+                                  <Link component={RouterLink} to={item.path} className={classes.link}>
+                                    {t("documentation.visitPage")}
+                                  </Link>
+                                </Box>
+                              </CardContent>
+                            </Card>
+                          </Grid>
+                        ))}
+                      </Grid>
                       <Divider className={classes.divider} />
                     </div>
                   )}

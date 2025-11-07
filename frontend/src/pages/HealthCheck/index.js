@@ -32,6 +32,7 @@ import Title from "../../components/Title";
 import api from "../../services/api";
 import toastError from "../../errors/toastError";
 import openSocket from "../../services/socket-io";
+import { useTranslation } from "react-i18next";
 
 const MainPaper = styled(Paper)(({ theme }) => ({
   flex: 1,
@@ -69,6 +70,7 @@ const StatBox = styled(Box)(({ theme }) => ({
 }));
 
 const HealthCheck = () => {
+  const { t } = useTranslation();
   const [healthData, setHealthData] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -146,9 +148,9 @@ const HealthCheck = () => {
   return (
     <MainContainer>
       <MainHeader>
-        <Title>Monitoramento de Saúde dos Canais</Title>
+        <Title>{t("healthCheck.title")}</Title>
         <Box sx={{ display: "flex", gap: 1 }}>
-          <Tooltip title="Atualizar">
+          <Tooltip title={t("healthCheck.tooltips.refresh")}>
             <IconButton onClick={fetchHealthData} disabled={loading}>
               <Refresh />
             </IconButton>
@@ -182,7 +184,7 @@ const HealthCheck = () => {
                     sx={{ fontSize: 80, color: "text.secondary", mb: 2 }}
                   />
                   <Typography variant="h6" color="textSecondary">
-                    Nenhum canal encontrado
+                    {t("healthCheck.noChannels")}
                   </Typography>
                 </Box>
               </Grid>
@@ -214,16 +216,16 @@ const HealthCheck = () => {
 
                       <Box sx={{ mb: 2 }}>
                         <Typography variant="body2" color="textSecondary">
-                          Número: {health.number}
+                          {t("healthCheck.number")}: {health.number}
                         </Typography>
                         <Typography variant="body2" color="textSecondary">
-                          Usuário: {health.pushname}
+                          {t("healthCheck.pushname")}: {health.pushname}
                         </Typography>
                         <Typography variant="body2" color="textSecondary">
-                          Plataforma: {health.platform}
+                          {t("healthCheck.platform")}: {health.platform}
                         </Typography>
                         <Typography variant="body2" color="textSecondary">
-                          Versão: {health.wwebVersion}
+                          {t("healthCheck.wwebVersion")}: {health.wwebVersion}
                         </Typography>
                       </Box>
 
@@ -233,7 +235,7 @@ const HealthCheck = () => {
                             <Schedule fontSize="small" color="primary" />
                             <Box>
                               <Typography variant="caption" color="textSecondary">
-                                Uptime
+                                {t("healthCheck.uptime")}
                               </Typography>
                               <Typography variant="body2" fontWeight="bold">
                                 {formatUptime(health.uptime)}
@@ -247,7 +249,7 @@ const HealthCheck = () => {
                             <Message fontSize="small" color="primary" />
                             <Box>
                               <Typography variant="caption" color="textSecondary">
-                                Mensagens
+                                {t("healthCheck.messages")}
                               </Typography>
                               <Typography variant="body2" fontWeight="bold">
                                 {health.messagesProcessed}
@@ -261,7 +263,7 @@ const HealthCheck = () => {
                             <Speed fontSize="small" color={getLatencyColor(health.latency)} />
                             <Box>
                               <Typography variant="caption" color="textSecondary">
-                                Latência
+                                {t("healthCheck.latency")}
                               </Typography>
                               <Typography variant="body2" fontWeight="bold">
                                 {health.latency >= 0 ? `${health.latency}ms` : "N/A"}
@@ -278,7 +280,7 @@ const HealthCheck = () => {
                             />
                             <Box>
                               <Typography variant="caption" color="textSecondary">
-                                Erros
+                                {t("healthCheck.errors")}
                               </Typography>
                               <Typography variant="body2" fontWeight="bold">
                                 {health.errors}
@@ -290,7 +292,7 @@ const HealthCheck = () => {
 
                       <Box sx={{ mt: 2 }}>
                         <Typography variant="caption" color="textSecondary">
-                          Última atividade:{" "}
+                          {t("healthCheck.lastActivity")}:{" "}
                           {format(new Date(health.lastActivity), "dd/MM/yyyy HH:mm:ss", {
                             locale: ptBR,
                           })}
@@ -300,7 +302,7 @@ const HealthCheck = () => {
                       {health.isConnected && (
                         <Box sx={{ mt: 2 }}>
                           <Typography variant="caption" color="textSecondary" gutterBottom>
-                            Status da Conexão
+                            {t("healthCheck.connectionStatus")}
                           </Typography>
                           <LinearProgress
                             variant="determinate"
