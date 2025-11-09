@@ -39,13 +39,36 @@ export const setIO = (io: SocketIO): void => {
 export const initIO = (httpServer: Server): void => {
   io = new SocketIO(httpServer, {
     cors: {
-      origin: process.env.FRONTEND_URL || "http://localhost:3000",
+      origin: (origin, callback) => {
+        // Permitir requisições sem origin
+        if (!origin) {
+          return callback(null, true);
+        }
+        
+        // Permitir origin configurada no .env (frontend)
+        if (process.env.FRONTEND_URL && origin === process.env.FRONTEND_URL) {
+          return callback(null, true);
+        }
+
+        // Permitir localhost em desenvolvimento
+        if (process.env.NODE_ENV !== 'production' && origin.includes('localhost')) {
+          return callback(null, true);
+        }
+
+        // Bloquear outras origens
+        logger.warn(`Socket.IO CORS bloqueou origem: ${origin}`);
+        callback(new Error('Not allowed by CORS'));
+      },
       methods: ["GET", "POST"],
-      allowedHeaders: ["Authorization"],
+      allowedHeaders: ["Authorization", "Content-Type"],
       credentials: true
     },
     transports: ['websocket', 'polling'],
-    path: '/socket.io'
+    path: '/socket.io',
+    pingTimeout: 60000,
+    pingInterval: 25000,
+    upgradeTimeout: 30000,
+    maxHttpBufferSize: 1e8 // 100 MB
   });
 
   logger.info("Servidor Socket.IO iniciado", {

@@ -8,7 +8,6 @@ import * as Sentry from "@sentry/node";
 import swaggerUi from "swagger-ui-express";
 import helmet from "helmet";
 import compression from "compression";
-import rateLimit from "express-rate-limit";
 import { logger } from "./utils/logger";
 import updateLastActivity from "./middleware/updateLastActivity";
 import errorLogger from "./middleware/errorLogger";
@@ -19,6 +18,7 @@ import AppError from "./errors/AppError";
 import openApiRoutes from "./routes/openApiRoutes";
 import routes from "./routes";
 import swaggerSpec from "./config/swagger";
+import { apiLimiter } from "./config/rateLimiter";
 
 if (process.env.NODE_ENV === "production") {
   Sentry.init({ dsn: process.env.SENTRY_DSN });
@@ -26,61 +26,56 @@ if (process.env.NODE_ENV === "production") {
 
 const app = express();
 
-// Configurar trust proxy para funcionar com Nginx/reverse proxy
-// Isso permite que o Express confie nos headers X-Forwarded-*
 app.set('trust proxy', true);
 
-// Segurança: Headers HTTP
-app.use(
-  helmet({
-    contentSecurityPolicy: false, // Desabilitado para compatibilidade com Socket.IO
-    crossOriginEmbedderPolicy: false
-  })
-);
+app.use((req, res, next) => {
+  if (req.path === '/api-docs' || req.path.startsWith('/api-docs/')) {
+    helmet({
+      contentSecurityPolicy: false,
+      crossOriginEmbedderPolicy: false,
+      crossOriginResourcePolicy: false,
+      frameguard: false
+    })(req, res, next);
+  } else {
+    helmet({
+      contentSecurityPolicy: false,
+      crossOriginEmbedderPolicy: false,
+      crossOriginResourcePolicy: false
+    })(req, res, next);
+  }
+});
 
-// Performance: Compressão de respostas
 app.use(compression());
 
-app.use(
-  cors({
-    credentials: true,
-    origin: process.env.FRONTEND_URL
-  })
-);
+const corsOptions = {
+  origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
+    if (!origin) {
+      return callback(null, true);
+    }
+    if (process.env.FRONTEND_URL && origin === process.env.FRONTEND_URL) {
+      return callback(null, true);
+    }
 
-// Rate Limiting: Proteção contra brute force e DDoS
-// Limites mais permissivos em desenvolvimento
-const isDevelopment = process.env.NODE_ENV !== 'production';
+    if (process.env.NODE_ENV !== 'production' && origin.includes('localhost')) {
+      return callback(null, true);
+    }
+    logger.warn(`CORS bloqueou origem não permitida: ${origin}`);
+    callback(new Error('Not allowed by CORS'));
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Range', 'Accept'],
+  exposedHeaders: ['Content-Range', 'Accept-Ranges', 'Content-Length'],
+  maxAge: 86400 // 24 horas de cache para preflight
+};
 
-const generalLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutos
-  max: isDevelopment ? 1000 : 100, // Dev: 1000, Prod: 100 requisições por IP
-  message: "Muitas requisições deste IP, tente novamente mais tarde.",
-  standardHeaders: true,
-  legacyHeaders: false,
-});
-
-const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutos
-  max: isDevelopment ? 50 : 5, // Dev: 50, Prod: 5 tentativas de login
-  message: "Muitas tentativas de login, tente novamente mais tarde.",
-  skipSuccessfulRequests: true,
-});
-
-const apiLimiter = rateLimit({
-  windowMs: 60 * 60 * 1000, // 1 hora
-  max: isDevelopment ? 10000 : 1000, // Dev: 10000, Prod: 1000 requisições
-  message: "Limite de requisições da API excedido.",
-});
+app.use(cors(corsOptions));
 
 app.use(cookieParser());
 app.use(express.json({ limit: '50mb' }));
 app.use(express.raw({ limit: '500mb' }));
 app.use(express.urlencoded({ limit: '500mb', extended: true }));
 app.use(Sentry.Handlers.requestHandler());
-
-// Aplicar rate limiting geral
-app.use(generalLimiter);
 
 const openApiCorsOptions = {
   credentials: true,
@@ -98,13 +93,23 @@ app.get("/api-docs.json", (req, res) => {
   res.send(swaggerSpec);
 });
 
-// Rate limiting específico para API pública
 app.use("/v1", cors(openApiCorsOptions), apiLimiter, openApiRoutes);
 
-// Rate limiting para rotas de autenticação
-app.use("/auth", authLimiter);
+const publicCorsOptions = {
+  origin: true,
+  credentials: false,
+  methods: ["GET", "HEAD", "OPTIONS"],
+  allowedHeaders: ["Range", "Content-Type", "Accept", "Origin"],
+  exposedHeaders: ["Content-Range", "Accept-Ranges", "Content-Length", "Content-Type"],
+  maxAge: 86400, // Cache de 24h para preflight
+  optionsSuccessStatus: 200
+};
 
-app.use("/public", express.static(uploadConfig.directory));
+app.use("/public", cors(publicCorsOptions), (req, res, next) => {
+  res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+  res.setHeader('Cross-Origin-Embedder-Policy', 'unsafe-none');
+  next();
+}, express.static(uploadConfig.directory));
 app.use(routes);
 app.use(updateLastActivity);
 

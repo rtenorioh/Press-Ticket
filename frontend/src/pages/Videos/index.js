@@ -34,7 +34,6 @@ import {
   Checkbox,
   ListItemText,
   CardActionArea,
-  useTheme,
   InputAdornment,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
@@ -58,20 +57,6 @@ import api from "../../services/api";
 import { Can } from "../../components/Can";
 import toastError from "../../errors/toastError";
 import ConfirmationModal from "../../components/ConfirmationModal";
-
-const SearchContainer = styled("div")(({ theme }) => ({
-  display: "flex",
-  alignItems: "center",
-  marginBottom: theme.spacing(2),
-  [theme.breakpoints.down("sm")]: {
-    flexDirection: "column",
-    alignItems: "flex-start",
-    "& > *": {
-      width: "100%",
-      marginBottom: theme.spacing(1),
-    },
-  },
-}));
 
 const ButtonContainer = styled("div")(({ theme }) => ({
   display: "flex",
@@ -186,7 +171,6 @@ const MenuProps = {
 const Videos = () => {
   const { t } = useTranslation();
   const { user } = useContext(AuthContext);
-  const theme = useTheme();
   const [loading, setLoading] = useState(false);
   const [videos, setVideos] = useState([]);
   const [searchParam, setSearchParam] = useState("");
@@ -341,7 +325,7 @@ const Videos = () => {
   const handleOpenPlayer = (video) => {
     const videoId = getYoutubeVideoId(video.url);
     if (videoId) {
-      setCurrentVideoUrl(`https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`);
+      setCurrentVideoUrl(`https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&rel=0&modestbranding=1&enablejsapi=1`);
       setCurrentVideoTitle(video.title);
       setPlayerOpen(true);
     } else {
@@ -810,8 +794,9 @@ return (
             <VideoIframe
               src={currentVideoUrl}
               title={currentVideoTitle}
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
               allowFullScreen
+              referrerPolicy="strict-origin-when-cross-origin"
             />
           )}
         </VideoPlayerContainer>
