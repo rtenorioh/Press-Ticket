@@ -779,6 +779,111 @@ npm run build | tee -a "$LOG_FILE"
 
 {
     echo " "
+    echo "VERIFICANDO SECURITY HEADERS NO NGINX"
+    echo " "
+} | tee -a "$LOG_FILE"
+
+sleep 2
+
+# Obtém o nome da empresa do diretório atual
+NOME_EMPRESA=$(basename "$SCRIPT_DIR")
+NGINX_FRONT_CONFIG="/etc/nginx/sites-available/${NOME_EMPRESA}-front"
+
+# Verifica se o arquivo de configuração do Nginx existe
+if [ -f "$NGINX_FRONT_CONFIG" ]; then
+    echo "Arquivo de configuração do Nginx encontrado: $NGINX_FRONT_CONFIG" | tee -a "$LOG_FILE"
+    
+    # Verifica se os security headers já existão
+    if grep -q "Permissions-Policy" "$NGINX_FRONT_CONFIG"; then
+        echo "Security headers já estão configurados no Nginx. Nenhuma ação necessária." | tee -a "$LOG_FILE"
+    else
+        echo "Security headers não encontrados. Adicionando ao Nginx..." | tee -a "$LOG_FILE"
+        
+        # Faz backup do arquivo original
+        sudo cp "$NGINX_FRONT_CONFIG" "${NGINX_FRONT_CONFIG}.backup-$(date +%Y%m%d-%H%M%S)"
+        echo "Backup criado: ${NGINX_FRONT_CONFIG}.backup-$(date +%Y%m%d-%H%M%S)" | tee -a "$LOG_FILE"
+        
+        # Obtém a URL do backend do .env
+        BACKEND_URL=$(grep "^BACKEND_URL=" "$SCRIPT_DIR/backend/.env" | cut -d '=' -f2- | tr -d '[:space:]' | sed 's|https://||' | sed 's|http://||')
+        
+        if [ -z "$BACKEND_URL" ]; then
+            echo "Aviso: Não foi possível obter BACKEND_URL do .env. Usando valor padrão." | tee -a "$LOG_FILE"
+            BACKEND_URL="api.exemplo.com.br"
+        fi
+        
+        # Cria arquivo temporário com os headers
+        TEMP_HEADERS=$(mktemp)
+        cat > "$TEMP_HEADERS" << 'EOF'
+    
+    # Security Headers
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-XSS-Protection "1; mode=block" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+    add_header Permissions-Policy "geolocation=(), microphone=(), camera=(), payment=(), usb=(), magnetometer=(), gyroscope=(), accelerometer=()" always;
+    add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.youtube.com https://www.youtube-nocookie.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https: blob:; media-src 'self' https: blob:; connect-src 'self' https://BACKEND_URL_PLACEHOLDER wss://BACKEND_URL_PLACEHOLDER; frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com; object-src 'none'; base-uri 'self'; form-action 'self';" always;
+EOF
+        
+        # Substitui o placeholder pela URL real do backend
+        sed -i "s|BACKEND_URL_PLACEHOLDER|$BACKEND_URL|g" "$TEMP_HEADERS"
+        
+        # Adiciona os headers após a linha server_name
+        sudo sed -i "/server_name/r $TEMP_HEADERS" "$NGINX_FRONT_CONFIG"
+        
+        # Remove arquivo temporário
+        rm "$TEMP_HEADERS"
+        
+        echo "Security headers adicionados com sucesso ao Nginx." | tee -a "$LOG_FILE"
+        
+        # Testa a configuração do Nginx
+        echo "Testando configuração do Nginx..." | tee -a "$LOG_FILE"
+        if sudo nginx -t 2>&1 | tee -a "$LOG_FILE"; then
+            echo "Configuração do Nginx válida. Recarregando..." | tee -a "$LOG_FILE"
+            sudo nginx -s reload | tee -a "$LOG_FILE"
+            echo "Nginx recarregado com sucesso." | tee -a "$LOG_FILE"
+        else
+            echo "Erro na configuração do Nginx. Restaurando backup..." | tee -a "$LOG_FILE"
+            sudo cp "${NGINX_FRONT_CONFIG}.backup-$(date +%Y%m%d-%H%M%S)" "$NGINX_FRONT_CONFIG"
+            sudo nginx -s reload
+            echo "Backup restaurado. Continuando atualização..." | tee -a "$LOG_FILE"
+        fi
+    fi
+    
+    # Verifica e desabilita headers duplicados no server.js do frontend
+    FRONTEND_SERVER_JS="$SCRIPT_DIR/frontend/server.js"
+    if [ -f "$FRONTEND_SERVER_JS" ]; then
+        if grep -q "frameguard: false" "$FRONTEND_SERVER_JS"; then
+            echo "Headers já desabilitados no server.js do frontend." | tee -a "$LOG_FILE"
+        else
+            echo "Desabilitando headers duplicados no server.js..." | tee -a "$LOG_FILE"
+            
+            # Faz backup
+            cp "$FRONTEND_SERVER_JS" "${FRONTEND_SERVER_JS}.backup-$(date +%Y%m%d-%H%M%S)"
+            
+            # Substitui a configuração do helmet
+            sed -i '/helmet({/,/})/c\
+\thelmet({\
+\t\tcontentSecurityPolicy: false,\
+\t\tcrossOriginEmbedderPolicy: false,\
+\t\tframeguard: false,\
+\t\txContentTypeOptions: false,\
+\t\txXssProtection: false,\
+\t\treferrerPolicy: false,\
+\t\tpermissionsPolicy: false,\
+\t})' "$FRONTEND_SERVER_JS"
+            
+            echo "Headers desabilitados no server.js com sucesso." | tee -a "$LOG_FILE"
+        fi
+    fi
+else
+    echo "Aviso: Arquivo de configuração do Nginx não encontrado: $NGINX_FRONT_CONFIG" | tee -a "$LOG_FILE"
+    echo "Security headers não foram adicionados automaticamente." | tee -a "$LOG_FILE"
+fi
+
+sleep 2
+
+{
+    echo " "
     echo "RESTART PM2"
     echo " "
 } | tee -a "$LOG_FILE"

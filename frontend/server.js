@@ -13,12 +13,60 @@ if (!process.env.PORT) {
 	);
 }
 
-app.use(
-	helmet({
-		contentSecurityPolicy: false, // Desativa CSP (útil para evitar problemas com bibliotecas de terceiros)
-		crossOriginEmbedderPolicy: false, // Desativa política de incorporação para permitir imagens e mídias de terceiros
-	})
-);
+// Configuração do Helmet baseada no ambiente
+const isProduction = process.env.NODE_ENV === 'production';
+
+if (isProduction) {
+	// Em produção: Nginx envia os headers, então desabilitamos no Helmet
+	app.use(
+		helmet({
+			contentSecurityPolicy: false, // Nginx já envia
+			crossOriginEmbedderPolicy: false,
+			frameguard: false, // Nginx já envia
+			xContentTypeOptions: false, // Nginx já envia
+			xXssProtection: false, // Nginx já envia
+			referrerPolicy: false, // Nginx já envia
+			permissionsPolicy: false, // Nginx já envia
+		})
+	);
+	console.log('🔒 Modo Produção: Security headers gerenciados pelo Nginx');
+} else {
+	// Em desenvolvimento: Helmet envia os headers (não tem Nginx)
+	app.use(
+		helmet({
+			contentSecurityPolicy: {
+				directives: {
+					defaultSrc: ["'self'"],
+					scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://www.youtube.com", "https://www.youtube-nocookie.com"],
+					styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+					fontSrc: ["'self'", "https://fonts.gstatic.com"],
+					imgSrc: ["'self'", "data:", "https:", "blob:"],
+					mediaSrc: ["'self'", "https:", "blob:"],
+					connectSrc: ["'self'", "http://localhost:*", "ws://localhost:*"],
+					frameSrc: ["'self'", "https://www.youtube.com", "https://www.youtube-nocookie.com"],
+					objectSrc: ["'none'"],
+					baseUri: ["'self'"],
+					formAction: ["'self'"],
+				},
+			},
+			crossOriginEmbedderPolicy: false,
+			referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
+			permissionsPolicy: {
+				features: {
+					geolocation: [],
+					microphone: [],
+					camera: [],
+					payment: [],
+					usb: [],
+					magnetometer: [],
+					gyroscope: [],
+					accelerometer: [],
+				},
+			},
+		})
+	);
+	console.log('🔧 Modo Desenvolvimento: Security headers gerenciados pelo Helmet');
+}
 
 const oneDay = 24 * 60 * 60 * 1000; // Cache de 1 dia em milissegundos
 app.use(express.static(path.join(__dirname, "build"), { maxAge: oneDay }));

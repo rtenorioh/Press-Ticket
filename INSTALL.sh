@@ -949,11 +949,20 @@ sudo apt-get install -y nginx | tee -a "$LOG_FILE" || finalizar "Erro ao instala
 echo -e "${GREEN}Nginx instalado com sucesso.${RESET}" | tee -a "$LOG_FILE"
 
 # Criando e configurando o arquivo do frontend no Nginx
-echo -e "${COLOR}Configurando o arquivo do frontend no Nginx...${RESET}" | tee -a "$LOG_FILE"
+echo -e "${COLOR}Configurando o arquivo do frontend no Nginx com Security Headers...${RESET}" | tee -a "$LOG_FILE"
 
 if ! sudo tee /etc/nginx/sites-available/$NOME_EMPRESA-front <<EOF
 server {
     server_name $URL_FRONTEND;
+    
+    # Security Headers
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-XSS-Protection "1; mode=block" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+    add_header Permissions-Policy "geolocation=(), microphone=(), camera=(), payment=(), usb=(), magnetometer=(), gyroscope=(), accelerometer=()" always;
+    add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.youtube.com https://www.youtube-nocookie.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https: blob:; media-src 'self' https: blob:; connect-src 'self' https://$URL_BACKEND wss://$URL_BACKEND; frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com; object-src 'none'; base-uri 'self'; form-action 'self';" always;
+    
     location / {
         proxy_pass http://127.0.0.1:$PORT_FRONTEND;
         proxy_http_version 1.1;
@@ -971,7 +980,7 @@ then
     finalizar "Erro ao criar o arquivo de configuração do frontend." 1
 fi
 
-echo -e "${GREEN}Arquivo de configuração do frontend criado com sucesso.${RESET}" | tee -a "$LOG_FILE"
+echo -e "${GREEN}Arquivo de configuração do frontend criado com sucesso com Security Headers.${RESET}" | tee -a "$LOG_FILE"
 
 # Criando e configurando o arquivo do backend no Nginx
 echo -e "${COLOR}Configurando o arquivo do backend no Nginx...${RESET}" | tee -a "$LOG_FILE"

@@ -369,9 +369,20 @@ sudo nano /etc/nginx/sites-available/Press-Ticket-frontend
 
 Preencha com as informações abaixo, atualizando as informações de acordo com o seu domínio:
 
+**IMPORTANTE**: A configuração abaixo já inclui os **Security Headers** para garantir nota A no [SecurityHeaders.com](https://securityheaders.com)
+
 ```
 server {
   server_name front.pressticket.com.br;
+  
+  # Security Headers
+  add_header X-Frame-Options "SAMEORIGIN" always;
+  add_header X-Content-Type-Options "nosniff" always;
+  add_header X-XSS-Protection "1; mode=block" always;
+  add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+  add_header Permissions-Policy "geolocation=(), microphone=(), camera=(), payment=(), usb=(), magnetometer=(), gyroscope=(), accelerometer=()" always;
+  add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.youtube.com https://www.youtube-nocookie.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https: blob:; media-src 'self' https: blob:; connect-src 'self' https://back.pressticket.com.br wss://back.pressticket.com.br; frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com; object-src 'none'; base-uri 'self'; form-action 'self';" always;
+  
   location / {
     proxy_pass http://127.0.0.1:3000;
     proxy_http_version 1.1;
@@ -385,6 +396,8 @@ server {
   }
 }
 ```
+
+**Nota**: Lembre-se de substituir `back.pressticket.com.br` no `Content-Security-Policy` pela URL real do seu backend!
 
 ### 9.3 Criando e editando o arquivo de configuração do backend
 
@@ -542,3 +555,63 @@ Senha:
 ```
 masteradmin
 ```
+
+---
+
+# Seção 13: Verificação de Security Headers
+
+Após a instalação completa e configuração do SSL, você pode verificar a segurança do seu sistema:
+
+### 13.1 Testar Security Headers
+
+Acesse o site [SecurityHeaders.com](https://securityheaders.com) e teste seu domínio frontend:
+
+```
+https://securityheaders.com/?q=https://front.pressticket.com.br
+```
+
+**Resultado esperado**: Nota **A** 🎉
+
+### 13.2 Verificar Headers via Terminal
+
+```bash
+curl -I https://front.pressticket.com.br/ | grep -i "x-frame\|content-security\|permissions"
+```
+
+Você deve ver os seguintes headers:
+- `X-Frame-Options: SAMEORIGIN`
+- `X-Content-Type-Options: nosniff`
+- `X-XSS-Protection: 1; mode=block`
+- `Referrer-Policy: strict-origin-when-cross-origin`
+- `Permissions-Policy: geolocation=()...`
+- `Content-Security-Policy: default-src 'self'...`
+
+### 13.3 Verificar Ausência de Duplicação
+
+```bash
+curl -I https://front.pressticket.com.br/ | grep -c "X-Frame-Options"
+```
+
+**Resultado esperado**: `1` (não deve retornar `2` ou mais)
+
+### 13.4 Sobre os Security Headers
+
+Os security headers configurados no Nginx do frontend garantem:
+
+- ✅ **X-Frame-Options**: Previne clickjacking
+- ✅ **X-Content-Type-Options**: Previne MIME sniffing
+- ✅ **X-XSS-Protection**: Proteção contra XSS (legacy)
+- ✅ **Referrer-Policy**: Controla informações do Referer
+- ✅ **Permissions-Policy**: Bloqueia recursos sensíveis (câmera, microfone, geolocalização)
+- ✅ **Content-Security-Policy**: Controla fontes de recursos e previne XSS
+
+**Nota sobre CSP**: O aviso sobre `unsafe-inline` e `unsafe-eval` é esperado e necessário para o React funcionar corretamente. Isso não compromete a nota A.
+
+### 13.5 Comportamento do server.js
+
+O `server.js` do frontend detecta automaticamente o ambiente:
+
+- **Produção** (`NODE_ENV=production`): Headers desabilitados no Helmet, pois o Nginx já os envia
+- **Desenvolvimento** (localhost): Headers habilitados no Helmet, pois não há Nginx
+
+Isso evita duplicação de headers em produção e garante segurança em desenvolvimento.

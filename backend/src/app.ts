@@ -34,15 +34,26 @@ app.use((req, res, next) => {
       contentSecurityPolicy: false,
       crossOriginEmbedderPolicy: false,
       crossOriginResourcePolicy: false,
-      frameguard: false
+      frameguard: false,
+      xContentTypeOptions: false,
+      permittedCrossDomainPolicies: { permittedPolicies: "none" }
     })(req, res, next);
   } else {
     helmet({
       contentSecurityPolicy: false,
       crossOriginEmbedderPolicy: false,
-      crossOriginResourcePolicy: false
+      crossOriginResourcePolicy: false,
+      xContentTypeOptions: false,
+      permittedCrossDomainPolicies: { permittedPolicies: "none" }
     })(req, res, next);
   }
+});
+
+app.use((req, res, next) => {
+  res.setHeader('Permissions-Policy', 
+    'geolocation=(), microphone=(), camera=(), payment=(), usb=(), magnetometer=(), gyroscope=(), accelerometer=()'
+  );
+  next();
 });
 
 app.use(compression());

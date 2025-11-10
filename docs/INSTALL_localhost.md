@@ -168,7 +168,12 @@ cd Press-Ticket/frontend
 
 Crie ou edite o arquivo `.env` no diretório `frontend` com as seguintes informações:
 
+**IMPORTANTE**: Em localhost, defina `NODE_ENV=development` para que o `server.js` ative automaticamente os **Security Headers** via Helmet (já que não há Nginx em desenvolvimento).
+
 ```bash
+#Ambiente (development para localhost)
+NODE_ENV=development
+
 #URL BACKEND
 REACT_APP_BACKEND_URL=http://localhost:4000
 
@@ -182,6 +187,12 @@ PORT=3000
 REACT_APP_MASTERADMIN=ON
 
 ```
+
+**Nota sobre Security Headers em Localhost**:
+- Com `NODE_ENV=development`, o `server.js` automaticamente habilita os security headers via Helmet
+- O Content-Security-Policy permite conexões com `localhost:*` (qualquer porta)
+- Isso garante segurança mesmo em ambiente de desenvolvimento
+- Em produção (VPS), o Nginx gerencia os headers e o `server.js` os desabilita automaticamente
 
 ---
 
@@ -242,3 +253,55 @@ Senha:
 ```
 masteradmin
 ```
+
+---
+
+## Verificação de Security Headers em Localhost
+
+### Como Funciona em Desenvolvimento
+
+Em ambiente de desenvolvimento (localhost), o `server.js` detecta automaticamente que `NODE_ENV=development` e habilita os security headers via Helmet.
+
+### Testar Headers em Localhost
+
+Após iniciar o frontend, você pode verificar os headers:
+
+```bash
+curl -I http://localhost:3000/ | grep -i "x-frame\|content-security\|permissions"
+```
+
+**Você deve ver**:
+- `X-Frame-Options: SAMEORIGIN`
+- `X-Content-Type-Options: nosniff`
+- `X-XSS-Protection: 1; mode=block`
+- `Referrer-Policy: strict-origin-when-cross-origin`
+- `Permissions-Policy: geolocation=()...`
+- `Content-Security-Policy: default-src 'self'...`
+
+### Diferenças entre Desenvolvimento e Produção
+
+| Aspecto | Localhost (Development) | VPS (Production) |
+|---------|------------------------|------------------|
+| **Headers gerenciados por** | Helmet (server.js) | Nginx |
+| **CSP connect-src** | `localhost:*` (qualquer porta) | URL específica do backend |
+| **Configuração** | Automática via NODE_ENV | Nginx + server.js |
+
+### Logs do server.js
+
+Ao iniciar o frontend em localhost, você verá:
+
+```
+🔧 Modo Desenvolvimento: Security headers gerenciados pelo Helmet
+Server is running on port 3000
+```
+
+Isso confirma que os headers estão sendo enviados pelo Helmet.
+
+### Benefícios em Desenvolvimento
+
+- ✅ **Headers automáticos**: Não precisa configurar Nginx local
+- ✅ **CSP flexível**: Permite conexões com qualquer porta do localhost
+- ✅ **Testes realistas**: Mesmo comportamento de segurança da produção
+- ✅ **Sem configuração extra**: Funciona out-of-the-box
+
+**Nota**: Quando você fizer deploy para produção (VPS), basta mudar `NODE_ENV=production` e o sistema automaticamente desabilita os headers no Helmet, deixando o Nginx gerenciar tudo!
