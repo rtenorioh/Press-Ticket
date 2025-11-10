@@ -255,14 +255,6 @@ const TicketsList = (props) => {
 				if (!t.queueId) return false;
 				return selectedQueueIds.indexOf(t.queueId) > -1;
 			});
-		} else {
-			const queueIds = queues?.map((q) => q.id) || [];
-			if (queueIds.length > 0) {
-				filteredTickets = filteredTickets.filter((t) => {
-					if (!t.queueId) return true;
-					return queueIds.indexOf(t.queueId) > -1;
-				});
-			}
 		}
 
 		if (isGroup !== undefined) {
@@ -358,6 +350,9 @@ const TicketsList = (props) => {
 
 		const notBelongsToUserQueues = (ticket) => {
 			const currentQueueIds = selectedQueueIdsRef.current;
+			if (!currentQueueIds || currentQueueIds.length === 0) {
+				return false;
+			}
 			return ticket.queueId && currentQueueIds.indexOf(ticket.queueId) === -1;
 		};
 

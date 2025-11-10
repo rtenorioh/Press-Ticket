@@ -198,7 +198,7 @@ const TicketsManager = () => {
   const [openGroupsCount, setOpenGroupsCount] = useState(0);
   const userQueueIds = user?.queues?.map((q) => q.id);
   const [settings, setSettings] = useState([]);
-  const [selectedQueueIds, setSelectedQueueIds] = useState(userQueueIds || []);
+  const [selectedQueueIds, setSelectedQueueIds] = useState([]);
   const [selectedChannelIds, setSelectedChannelIds] = useState([]);
   const [filterMenuAnchorEl, setFilterMenuAnchorEl] = useState(null);
   const [channelMenuAnchorEl, setChannelMenuAnchorEl] = useState(null);
