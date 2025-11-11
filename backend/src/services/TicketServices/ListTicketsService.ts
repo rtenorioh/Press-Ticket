@@ -150,15 +150,12 @@ const ListTicketsService = async ({
     if (!isAdmin || (isAdmin && showAll !== "true")) {
       whereCondition = {
         ...whereCondition,
-        [Op.or]: [
-          { userId: userId },
-          { queueId: { [Op.in]: queueIds } }
-        ]
+        userId: userId
       };
     }
   } else if (status === "pending") {
     if (!isAdmin) {
-      if (allTicketsEnabled) {  
+      if (allTicketsEnabled) {
         if (queueIds && queueIds.length > 0) {
           whereCondition = {
             ...whereCondition,
@@ -167,16 +164,34 @@ const ListTicketsService = async ({
               { queueId: null }
             ]
           };
+        } else {
+          whereCondition = {
+            ...whereCondition,
+            [Op.or]: [
+              { userId: userId },
+              { queueId: null }
+            ]
+          };
         }
       } else {
-        whereCondition = {
-          ...whereCondition,
-          [Op.or]: [
-            { userId: userId },
-            { queueId: { [Op.in]: queueIds } },
-            { queueId: null }
-          ]
-        };
+        if (queueIds && queueIds.length > 0) {
+          whereCondition = {
+            ...whereCondition,
+            [Op.or]: [
+              { userId: userId },
+              { queueId: { [Op.in]: queueIds } },
+              { queueId: null }
+            ]
+          };
+        } else {
+          whereCondition = {
+            ...whereCondition,
+            [Op.or]: [
+              { userId: userId },
+              { queueId: null }
+            ]
+          };
+        }
       }
     } else {
       if (showAll === "true") {
@@ -190,27 +205,54 @@ const ListTicketsService = async ({
           };
         }
       } else {
-        whereCondition = {
-          ...whereCondition,
-          [Op.or]: [
-            { userId: userId },
-            { queueId: { [Op.in]: queueIds } },
-            { queueId: null }
-          ]
-        };
+        if (queueIds && queueIds.length > 0) {
+          whereCondition = {
+            ...whereCondition,
+            [Op.or]: [
+              { userId: userId },
+              { queueId: { [Op.in]: queueIds } },
+              { queueId: null }
+            ]
+          };
+        } else {
+          whereCondition = {
+            ...whereCondition,
+            [Op.or]: [
+              { userId: userId },
+              { queueId: null }
+            ]
+          };
+        }
       }
     }
   } else if (status === "open") {
     if (!isAdmin || (isAdmin && showAll !== "true")) {
+      if (queueIds && queueIds.length > 0) {
+        whereCondition = {
+          ...whereCondition,
+          [Op.or]: [
+            { userId: userId },
+            {
+              [Op.and]: [
+                { queueId: { [Op.in]: queueIds } },
+                { userId: null }
+              ]
+            }
+          ]
+        };
+      } else {
+        whereCondition = {
+          ...whereCondition,
+          [Op.or]: [{ userId: userId }]
+        };
+      }
+    } else if (isAdmin && showAll === "true") {
       whereCondition = {
-        ...whereCondition,
-        [Op.or]: [
-          { userId: userId },
-          { queueId: { [Op.in]: queueIds } }
-        ]
+        ...whereCondition
       };
     }
   }
+
 
   if (withUnreadMessages === "true") {
     whereCondition = {
@@ -226,13 +268,33 @@ const ListTicketsService = async ({
         "$contact.isGroup$": true
       };
     } else if (isGroup === "false") {
-      whereCondition = {
-        ...whereCondition,
-        [Op.or]: [
-          { "$contact.isGroup$": false },
-          { "$contact.isGroup$": null }
-        ]
-      };
+      const hasExistingOr = whereCondition[Op.or] !== undefined;
+      
+      if (hasExistingOr) {
+        const existingOr = whereCondition[Op.or];
+        delete whereCondition[Op.or];
+        
+        whereCondition = {
+          ...whereCondition,
+          [Op.and]: [
+            { [Op.or]: existingOr },
+            {
+              [Op.or]: [
+                { "$contact.isGroup$": false },
+                { "$contact.isGroup$": null }
+              ]
+            }
+          ]
+        };
+      } else {
+        whereCondition = {
+          ...whereCondition,
+          [Op.or]: [
+            { "$contact.isGroup$": false },
+            { "$contact.isGroup$": null }
+          ]
+        };
+      }
     }
   }
 

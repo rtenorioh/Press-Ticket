@@ -276,7 +276,15 @@ export const initIO = (httpServer: Server): void => {
           return;
         }
 
-        const user = await User.findByPk(userId);
+        const user = await User.findByPk(userId, {
+          include: [
+            {
+              model: Queue,
+              as: "queues",
+              attributes: ["id", "name"]
+            }
+          ]
+        });
         if (!user) {
           logger.warn("Usuário não encontrado ao sincronizar tickets", {
             userId,
@@ -291,8 +299,59 @@ export const initIO = (httpServer: Server): void => {
           whereCondition.status = data.status;
         }
 
-        if (user.profile !== "admin" && !data.showAll) {
-          whereCondition.userId = userId;
+        const isAdmin = user.profile === "admin" || user.profile === "masteradmin";
+        const userQueueIds = user.queues?.map((q: any) => q.id) || [];
+
+        if (data.status === "open") {
+          if (!isAdmin || (isAdmin && !data.showAll)) {
+            if (userQueueIds.length > 0) {
+              whereCondition[Op.or] = [
+                { userId: userId },
+                {
+                  [Op.and]: [
+                    { queueId: { [Op.in]: userQueueIds } },
+                    { userId: null }
+                  ]
+                }
+              ];
+            } else {
+              whereCondition.userId = userId;
+            }
+          }
+        } else if (data.status === "closed") {
+          if (!isAdmin || (isAdmin && !data.showAll)) {
+            whereCondition.userId = userId;
+          }
+        } else if (data.status === "pending") {
+          if (!isAdmin) {
+            if (userQueueIds.length > 0) {
+              whereCondition[Op.or] = [
+                { userId: userId },
+                { queueId: { [Op.in]: userQueueIds } },
+                { queueId: null }
+              ];
+            } else {
+              whereCondition[Op.or] = [
+                { userId: userId },
+                { queueId: null }
+              ];
+            }
+          } else {
+            if (!data.showAll) {
+              if (userQueueIds.length > 0) {
+                whereCondition[Op.or] = [
+                  { userId: userId },
+                  { queueId: { [Op.in]: userQueueIds } },
+                  { queueId: null }
+                ];
+              } else {
+                whereCondition[Op.or] = [
+                  { userId: userId },
+                  { queueId: null }
+                ];
+              }
+            }
+          }
         }
 
         const tickets = await Ticket.findAll({

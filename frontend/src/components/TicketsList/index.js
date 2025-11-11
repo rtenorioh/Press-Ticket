@@ -224,13 +224,17 @@ const TicketsList = (props) => {
 		setPageNumber(1);
 	}, [status, searchParam, dispatch, showAll, selectedQueueIds, selectedChannelIds, tags]);
 
+	const queueIdsToSend = selectedQueueIds && selectedQueueIds.length > 0 
+		? selectedQueueIds 
+		: queues?.map(q => q.id) || [];
+
 	const { tickets, hasMore, loading } = useTickets({
 		pageNumber,
 		searchParam,
 		status,
 		showAll,
 		tags: JSON.stringify(tags),
-		queueIds: JSON.stringify(selectedQueueIds),
+		queueIds: JSON.stringify(queueIdsToSend),
 		channelIds: JSON.stringify(selectedChannelIds),
 		isGroup,
 	});
@@ -248,36 +252,10 @@ const TicketsList = (props) => {
 	}, []);
 
 	useEffect(() => {
-		let filteredTickets = tickets;
-
-		if (selectedQueueIds && selectedQueueIds.length > 0) {
-			filteredTickets = filteredTickets.filter((t) => {
-				if (!t.queueId) return false;
-				return selectedQueueIds.indexOf(t.queueId) > -1;
-			});
-		}
-
-		if (isGroup !== undefined) {
-			if (isGroup === true) {
-				filteredTickets = filteredTickets.filter((t) => t.contact?.isGroup === true);
-			} else {
-				filteredTickets = filteredTickets.filter((t) => !t.contact?.isGroup);
-			}
-		}
-
-		const getSettingValue = key => {
-			const { value } = settings.find(s => s.key === key);
-			return value;
-		};
-		const allticket = settings && settings.length > 0 && getSettingValue("allTicket") === "enabled";
-
-		if (profile === "user" && !allticket) {
-			dispatch({ type: "LOAD_TICKETS", payload: filteredTickets });
-		} else {
-			dispatch({ type: "LOAD_TICKETS", payload: filteredTickets });
-		}
+		
+		dispatch({ type: "LOAD_TICKETS", payload: tickets });
 		// eslint-disable-next-line
-	}, [tickets, status, searchParam, queues, profile, isGroup, selectedQueueIds]);
+	}, [tickets]);
 
 	useEffect(() => {
 		const socket = openSocket();
@@ -293,9 +271,7 @@ const TicketsList = (props) => {
 			const currentIsGroup = isGroupRef.current;
 			const currentShowAll = showAllRef.current;
 			
-			const matchesCurrentStatus = currentStatus === ticket.status;
-			
-			if (!matchesCurrentStatus) {
+			if (currentStatus !== ticket.status) {
 				return false;
 			}
 
@@ -306,54 +282,32 @@ const TicketsList = (props) => {
 				}
 			}
 
-			if (currentQueueIds && currentQueueIds.length > 0) {
-				if (ticket.queueId) {
-					if (currentQueueIds.indexOf(ticket.queueId) === -1) {
-						return false;
-					}
-				} else {
+			const queueIdsToCheck = currentQueueIds && currentQueueIds.length > 0 
+				? currentQueueIds 
+				: currentUser?.queues?.map(q => q.id) || [];
+
+			if (queueIdsToCheck.length > 0 && ticket.queueId) {
+				if (queueIdsToCheck.indexOf(ticket.queueId) === -1) {
 					return false;
 				}
 			}
 
-			const isAdmin = currentUser?.profile === "admin" || currentUser?.profile === "masteradmin";
-			
-			if (currentStatus === "closed") {
-				if (!isAdmin || (isAdmin && !currentShowAll)) {
-					const belongsToUser = ticket.userId === currentUser?.id;
-					const belongsToQueue = ticket.queueId && currentUser?.queues?.some(q => q.id === ticket.queueId);
-					return belongsToUser || belongsToQueue;
-				}
-				return true;
-			} else if (currentStatus === "pending") {
-				if (!isAdmin) {
-					const belongsToUser = ticket.userId === currentUser?.id;
-					const belongsToQueue = !ticket.queueId || currentUser?.queues?.some(q => q.id === ticket.queueId);
-					return belongsToUser || belongsToQueue;
-				}
-				if (currentShowAll) {
-					return true;
-				}
-				const belongsToUser = ticket.userId === currentUser?.id;
-				const belongsToQueue = !ticket.queueId || currentUser?.queues?.some(q => q.id === ticket.queueId);
-				return belongsToUser || belongsToQueue;
-			} else if (currentStatus === "open") {
-				if (!isAdmin || (isAdmin && !currentShowAll)) {
-					const belongsToUser = ticket.userId === currentUser?.id;
-					const belongsToQueue = ticket.queueId && currentUser?.queues?.some(q => q.id === ticket.queueId);
-					return belongsToUser || belongsToQueue;
-				}
-				return true;
-			}
-			return false;
+			return true;
 		};
 
 		const notBelongsToUserQueues = (ticket) => {
 			const currentQueueIds = selectedQueueIdsRef.current;
-			if (!currentQueueIds || currentQueueIds.length === 0) {
+			const currentUser = userRef.current;
+			
+			const queueIdsToCheck = currentQueueIds && currentQueueIds.length > 0 
+				? currentQueueIds 
+				: currentUser?.queues?.map(q => q.id) || [];
+			
+			if (queueIdsToCheck.length === 0) {
 				return false;
 			}
-			return ticket.queueId && currentQueueIds.indexOf(ticket.queueId) === -1;
+			
+			return ticket.queueId && queueIdsToCheck.indexOf(ticket.queueId) === -1;
 		};
 
 		const registerSocketEvents = () => {

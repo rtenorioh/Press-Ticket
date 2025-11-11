@@ -57,7 +57,7 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
 
     else if (req.user) {
       userId = req.user.id.toString();
-      isAdmin = req.user.profile === "admin";
+      isAdmin = req.user.profile === "admin" || req.user.profile === "masteradmin";
     } 
 
     else {
