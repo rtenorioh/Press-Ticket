@@ -57,8 +57,14 @@ const GetCommonGroupsService = async ({
     throw new AppError("ERR_NUMBER_NOT_REGISTERED", 404);
   }
 
-  const wContact = await wbot.getContactById(numberId._serialized);
-  const commonGroups = await (wContact as any).getCommonGroups();
+  let commonGroups = [];
+  try {
+    const wContact = await wbot.getContactById(numberId._serialized);
+    commonGroups = await (wContact as any).getCommonGroups();
+  } catch (error) {
+    console.warn(`[FALLBACK] Erro ao obter contato/grupos comuns do WhatsApp: ${error.message || error}`);
+    commonGroups = [];
+  }
   
   const groupsInfo: GroupInfo[] = [];
   

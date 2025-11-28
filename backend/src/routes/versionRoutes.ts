@@ -7,5 +7,6 @@ const versionRoutes = express.Router();
 
 versionRoutes.get("/version", isAuth, VersionController.getVersion);
 versionRoutes.post("/whatsapp-lib/update", isAuth, WhatsappLibController.updateWhatsappLibrary);
+versionRoutes.post("/whatsapp-lib/update-git", isAuth, WhatsappLibController.updateWhatsappLibraryFromGit);
 
 export default versionRoutes;

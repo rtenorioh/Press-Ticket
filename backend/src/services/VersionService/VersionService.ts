@@ -3,6 +3,14 @@ import axios from "axios";
 import fs from "fs";
 import path from "path";
 
+interface GitCommit {
+  sha: string;
+  message: string;
+  author: string;
+  date: string;
+  url: string;
+}
+
 interface VersionInfo {
   currentVersion: string;
   latestVersion: string | null;
@@ -11,6 +19,9 @@ interface VersionInfo {
   whatsappLibLatestVersion: string | null;
   whatsappLibNeedsUpdate: boolean;
   whatsappLibLatestReleaseDate: string | null;
+  whatsappLibGitCommits: GitCommit[];
+  whatsappLibHasGitUpdates: boolean;
+  whatsappLibGitCommitsCount: number;
 }
 
 const fetchLatestVersion = async (): Promise<string | null> => {
@@ -27,11 +38,11 @@ const fetchLatestVersion = async (): Promise<string | null> => {
 
 const getWhatsappLibVersion = (): string | null => {
   try {
-    const packageJsonPath = path.resolve(__dirname, "../../../package.json");
+    const packageJsonPath = path.resolve(__dirname, "../../../node_modules/whatsapp-web.js/package.json");
     const packageJsonContent = fs.readFileSync(packageJsonPath, "utf8");
     const packageJson = JSON.parse(packageJsonContent);
     
-    const version = packageJson.dependencies["whatsapp-web.js"]?.replace("^", "") || null;
+    const version = packageJson.version || null;
     return version;
   } catch (error) {
     console.error("Erro ao ler a versão da biblioteca whatsapp-web.js:", error);
@@ -72,6 +83,54 @@ const fetchWhatsappLibLatestVersion = async (): Promise<WhatsappLibVersionInfo> 
   }
 };
 
+const fetchWhatsappLibGitCommits = async (currentVersion: string | null): Promise<GitCommit[]> => {
+  try {
+    if (!currentVersion) {
+      return [];
+    }
+
+    const commitsResponse = await axios.get(
+      "https://api.github.com/repos/pedroslopez/whatsapp-web.js/commits",
+      {
+        params: {
+          sha: "main",
+          per_page: 50
+        }
+      }
+    );
+
+    const releasesResponse = await axios.get(
+      "https://api.github.com/repos/pedroslopez/whatsapp-web.js/releases"
+    );
+
+    const stableReleases = releasesResponse.data.filter((release: any) => !release.prerelease);
+    const currentRelease = stableReleases.find((release: any) => 
+      release.tag_name === `v${currentVersion}` || release.tag_name === currentVersion
+    );
+
+    if (!currentRelease) {
+      return [];
+    }
+
+    const releaseDate = new Date(currentRelease.published_at);
+    const commitsAfterRelease = commitsResponse.data.filter((commit: any) => {
+      const commitDate = new Date(commit.commit.author.date);
+      return commitDate > releaseDate;
+    });
+
+    return commitsAfterRelease.map((commit: any) => ({
+      sha: commit.sha.substring(0, 7),
+      message: commit.commit.message.split('\n')[0],
+      author: commit.commit.author.name,
+      date: commit.commit.author.date,
+      url: commit.html_url
+    }));
+  } catch (error) {
+    console.error("Erro ao buscar commits do Git:", error);
+    return [];
+  }
+};
+
 export const getVersionInfo = async (): Promise<VersionInfo> => {
   const latestVersion = await fetchLatestVersion();
   const whatsappLibVersion = getWhatsappLibVersion();
@@ -86,6 +145,10 @@ export const getVersionInfo = async (): Promise<VersionInfo> => {
     ? whatsappLibVersion.localeCompare(whatsappLibLatestVersion, undefined, { numeric: true, sensitivity: 'base' }) < 0
     : false;
 
+  const whatsappLibGitCommits = await fetchWhatsappLibGitCommits(whatsappLibVersion);
+  const whatsappLibGitCommitsCount = whatsappLibGitCommits.length;
+  const whatsappLibHasGitUpdates = whatsappLibGitCommitsCount > 0;
+
   return {
     currentVersion: systemVersion,
     latestVersion,
@@ -93,6 +156,9 @@ export const getVersionInfo = async (): Promise<VersionInfo> => {
     whatsappLibVersion,
     whatsappLibLatestVersion,
     whatsappLibNeedsUpdate,
-    whatsappLibLatestReleaseDate: whatsappLibInfo.releaseDate
+    whatsappLibLatestReleaseDate: whatsappLibInfo.releaseDate,
+    whatsappLibGitCommits,
+    whatsappLibHasGitUpdates,
+    whatsappLibGitCommitsCount
   };
 };

@@ -765,7 +765,7 @@ const messages = {
           queueMonitor: "Monitoramento de Setores",
           systemHealth: "Monitoramento de Canais",
           systemUpdate: "Atualizações do Sistema",
-          versionCheck: "Verificação de Versão",
+          versionCheck: "Verificação da Lib",
           logout: "Sair",
         },
         appBar: {

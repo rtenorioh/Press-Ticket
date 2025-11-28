@@ -10,6 +10,11 @@ export const updateWhatsappLib = async () => {
   return data;
 };
 
+export const updateWhatsappLibFromGit = async () => {
+  const { data } = await api.post("/whatsapp-lib/update-git");
+  return data;
+};
+
 export const getReleaseNotes = async (version) => {
   try {
     const response = await fetch(`https://api.github.com/repos/pedroslopez/whatsapp-web.js/releases/tags/v${version}`);

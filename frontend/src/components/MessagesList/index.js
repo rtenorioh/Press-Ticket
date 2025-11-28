@@ -286,24 +286,24 @@ const DocumentPreview = styled("div")(({ theme }) => ({
 const DocumentThumbnail = styled("div")(({ theme }) => ({
   width: "100%",
   height: "200px",
-  backgroundColor: theme.palette.mode === 'dark' ? 'rgba(0, 0, 0, 0.3)' : 'rgba(0, 0, 0, 0.1)',
+  backgroundColor: theme.palette.mode === 'dark' ? 'rgba(0, 0, 0, 0.3)' : '#ffffff',
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
   position: "relative",
   overflow: "hidden",
+  transition: "background-color 0.2s ease",
+  borderBottom: `1px solid ${theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'}`,
+  "&:hover": {
+    backgroundColor: theme.palette.mode === 'dark' ? 'rgba(0, 0, 0, 0.4)' : 'rgba(0, 0, 0, 0.02)',
+  },
   "& img": {
     width: "100%",
     height: "100%",
     objectFit: "cover",
   },
-  "& iframe": {
-    width: "calc(100% + 20px)",
-    height: "calc(100% + 20px)",
+  "& object": {
     border: "none",
-    pointerEvents: "none",
-    marginRight: "-20px",
-    marginBottom: "-20px",
   }
 }));
 
@@ -1125,11 +1125,35 @@ const MessagesList = ({ ticketId, isGroup, onClick }) => {
         <DocumentPreview>
           {/* Thumbnail/Preview do documento */}
           {isPdf && message.mediaUrl && (
-            <DocumentThumbnail>
-              <iframe
-                src={`${message.mediaUrl}#toolbar=0&navpanes=0&scrollbar=0`}
-                title={filename}
-              />
+            <DocumentThumbnail
+              onClick={() => window.open(message.mediaUrl, '_blank')}
+              sx={{ cursor: 'pointer' }}
+            >
+              <object
+                data={message.mediaUrl}
+                type="application/pdf"
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  pointerEvents: 'none',
+                }}
+              >
+                <Box
+                  sx={{
+                    width: '100%',
+                    height: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexDirection: 'column',
+                    gap: 1,
+                    backgroundColor: 'rgba(0, 0, 0, 0.05)',
+                  }}
+                >
+                  <PictureAsPdf sx={{ fontSize: 64, color: '#d32f2f' }} />
+                  <span style={{ fontSize: '12px', color: '#666' }}>Clique para visualizar</span>
+                </Box>
+              </object>
             </DocumentThumbnail>
           )}
           

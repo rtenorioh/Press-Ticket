@@ -49,15 +49,15 @@ const GetAboutService = async ({
     throw new AppError("ERR_NUMBER_NOT_REGISTERED", 404);
   }
 
-  const wContact = await wbot.getContactById(numberId._serialized);
-
   let about: string | null = null;
   
   try {
+    const wContact = await wbot.getContactById(numberId._serialized);
     if (typeof (wContact as any).getAbout === 'function') {
       about = await (wContact as any).getAbout();
     }
   } catch (error) {
+    console.warn(`[FALLBACK] Erro ao obter contato/about do WhatsApp: ${error.message || error}`);
     about = null;
   }
 

@@ -2,7 +2,7 @@ import React, { useEffect, useState, useContext } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
-import { getVersionInfo, updateWhatsappLib, getReleaseNotes } from "../../services/versionService";
+import { getVersionInfo, updateWhatsappLib, updateWhatsappLibFromGit, getReleaseNotes } from "../../services/versionService";
 import { 
   Container, 
   Paper, 
@@ -20,6 +20,8 @@ import { styled } from "@mui/material/styles";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import ErrorIcon from "@mui/icons-material/Error";
 import SystemUpdateIcon from "@mui/icons-material/SystemUpdate";
+import GitHubIcon from "@mui/icons-material/GitHub";
+import CloudDownloadIcon from "@mui/icons-material/CloudDownload";
 import { AuthContext } from "../../context/Auth/AuthContext";
 import MainContainer from "../../components/MainContainer";
 import MainHeader from "../../components/MainHeader";
@@ -105,12 +107,16 @@ const VersionCheck = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [updatingLib, setUpdatingLib] = useState(false);
+  const [updatingLibFromGit, setUpdatingLibFromGit] = useState(false);
   const [countdown, setCountdown] = useState(0);
   const [versionInfo, setVersionInfo] = useState({
     whatsappLibVersion: "",
     whatsappLibLatestVersion: "",
     whatsappLibNeedsUpdate: false,
-    whatsappLibLatestReleaseDate: null
+    whatsappLibLatestReleaseDate: null,
+    whatsappLibGitCommits: [],
+    whatsappLibHasGitUpdates: false,
+    whatsappLibGitCommitsCount: 0
   });
   const [releaseNotes, setReleaseNotes] = useState(null);
   const [loadingReleaseNotes, setLoadingReleaseNotes] = useState(false);
@@ -347,6 +353,89 @@ const VersionCheck = () => {
     }
   };
 
+  const handleUpdateWhatsappLibFromGit = async () => {
+    try {
+      setUpdatingLibFromGit(true);
+      toast.dismiss();
+      
+      const prepToastId = toast.info('Preparando para atualizar a biblioteca WhatsApp do GitHub...', {
+        autoClose: false,
+        position: "top-right",
+        closeButton: false
+      });
+      
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      toast.update(prepToastId, {
+        render: 'Instalando versão mais recente do GitHub (branch main)...',
+        type: 'info',
+        autoClose: false,
+        position: "top-right",
+        closeButton: false
+      });
+      
+      try {
+        const result = await updateWhatsappLibFromGit();
+        
+        toast.dismiss(prepToastId);
+        
+        if (result.success) {
+          toast.success(`Biblioteca WhatsApp atualizada do GitHub com sucesso para a versão v${result.newVersion || 'mais recente'}. O servidor está sendo reiniciado para aplicar as mudanças.`, {
+            autoClose: 5000,
+            position: "top-right",
+            toastId: 'update-git-success'
+          });
+          
+          setTimeout(() => {
+            setCountdown(30);
+          }, 1000);
+          
+          await new Promise(resolve => setTimeout(resolve, 2000));
+          
+          try {
+            const data = await getVersionInfo();
+            setVersionInfo(data);
+          } catch (versionError) {
+            console.error('Erro ao obter informações de versão após atualização:', versionError);
+          }
+        } else {
+          toast.error(`Erro ao atualizar biblioteca do GitHub: ${result.error || 'Erro desconhecido'}`, {
+            autoClose: false,
+            position: "top-right"
+          });
+        }
+      } catch (apiError) {
+        toast.dismiss(prepToastId);
+        
+        console.error('Erro na chamada da API:', apiError);
+        
+        if (apiError.message && apiError.message.includes('Network Error')) {
+          toast.info('O servidor está sendo reiniciado após a atualização da biblioteca...', {
+            autoClose: 5000,
+            position: "top-right"
+          });
+          
+          setTimeout(() => {
+            setCountdown(30);
+          }, 1000);
+        } else {
+          toast.error('Erro de conexão ao tentar atualizar a biblioteca do GitHub. A atualização pode ter sido iniciada, mas não foi possível confirmar. Por favor, atualize a página em alguns segundos para verificar o status.', {
+            autoClose: false,
+            position: "top-right"
+          });
+        }
+      }
+    } catch (err) {
+      console.error('Erro geral:', err);
+      toast.error('Ocorreu um erro inesperado. Por favor, tente novamente em alguns instantes.', {
+        autoClose: false,
+        position: "top-right"
+      });
+    } finally {
+      setUpdatingLibFromGit(false);
+    }
+  };
+
   return (
     <MainContainer>
       <MainHeader>
@@ -542,55 +631,196 @@ const VersionCheck = () => {
                 </CardWrapper>
               )}
 
-              {versionInfo.whatsappLibNeedsUpdate ? (
-                <MessageBox type="warning">
-                  <Box display="flex" alignItems="flex-start">
-                    <ErrorIcon color="warning" style={{ marginRight: 16, marginTop: 4 }} />
-                    <div>
-                      <Typography variant="h6" gutterBottom>
-                        {t("versionCheck.whatsappLibUpdateAvailable")}
-                      </Typography>
-                      <Typography variant="body1" paragraph>
-                        {t("versionCheck.whatsappLibUpdateMessage")}
-                      </Typography>
-                      
-                      <Box mt={2} mb={2}>
-                        <Button
-                          variant="contained"
-                          color="warning"
-                          onClick={handleUpdateWhatsappLib}
-                          disabled={updatingLib}
-                          startIcon={updatingLib ? <CircularProgress size={20} color="inherit" /> : <SystemUpdateIcon />}
-                          fullWidth
-                          size="medium"
-                          sx={{
-                            borderRadius: 2,
-                            py: 1,
-                            fontWeight: "bold",
-                            boxShadow: 2,
-                            '&:hover': {
-                              transform: 'translateY(-2px)',
-                              boxShadow: 3,
-                            },
-                            transition: 'all 0.3s ease'
-                          }}
-                        >
-                          {updatingLib ? "Atualizando..." : "Atualizar Biblioteca"}
-                        </Button>
-                      </Box>
-                      
-                      <Typography variant="body2" color="textSecondary">
-                        <Link 
-                          href="https://github.com/pedroslopez/whatsapp-web.js/releases" 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                        >
-                          {t("versionCheck.whatsappLibRepository")}
-                        </Link>
-                      </Typography>
-                    </div>
+              {(versionInfo.whatsappLibNeedsUpdate || versionInfo.whatsappLibHasGitUpdates) ? (
+                <Box sx={{ mt: 3 }}>
+                  <Typography variant="h6" gutterBottom sx={{ mb: 2, fontWeight: 'bold' }}>
+                    ⚠️ Atualizações Disponíveis
+                  </Typography>
+                  <Grid container spacing={3}>
+                    {/* Coluna NPM */}
+                    {versionInfo.whatsappLibNeedsUpdate && (
+                      <Grid item xs={12} md={versionInfo.whatsappLibHasGitUpdates ? 6 : 12}>
+                        <Card sx={{ height: '100%', borderLeft: 4, borderColor: 'warning.main' }}>
+                          <CardContent>
+                            <Box display="flex" alignItems="center" mb={2}>
+                              <CloudDownloadIcon sx={{ fontSize: 40, mr: 2, color: 'warning.main' }} />
+                              <div>
+                                <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+                                  📦 Versão Estável (NPM)
+                                </Typography>
+                                <Typography variant="body2" color="textSecondary">
+                                  v{versionInfo.whatsappLibLatestVersion}
+                                </Typography>
+                              </div>
+                            </Box>
+                            
+                            <Divider sx={{ my: 2 }} />
+                            
+                            {loadingReleaseNotes ? (
+                              <Box display="flex" alignItems="center" justifyContent="center" py={3}>
+                                <CircularProgress size={24} sx={{ mr: 2 }} />
+                                <Typography variant="body2" color="textSecondary">
+                                  Carregando informações da release...
+                                </Typography>
+                              </Box>
+                            ) : releaseNotes?.body ? (
+                              <Box sx={{ 
+                                maxHeight: 200, 
+                                overflowY: 'auto', 
+                                mb: 2,
+                                p: 2,
+                                backgroundColor: 'grey.50',
+                                borderRadius: 1,
+                                border: '1px solid',
+                                borderColor: 'grey.200'
+                              }}>
+                                <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap', fontSize: '0.85rem' }}>
+                                  {releaseNotes.body.substring(0, 300)}...
+                                </Typography>
+                              </Box>
+                            ) : (
+                              <Typography variant="body2" sx={{ mb: 2 }} color="textSecondary">
+                                Release oficial do NPM com testes completos.
+                              </Typography>
+                            )}
+                            
+                            <Button
+                              variant="contained"
+                              color="warning"
+                              onClick={handleUpdateWhatsappLib}
+                              disabled={updatingLib || updatingLibFromGit}
+                              startIcon={updatingLib ? <CircularProgress size={20} color="inherit" /> : <CloudDownloadIcon />}
+                              fullWidth
+                              size="large"
+                              sx={{
+                                borderRadius: 2,
+                                py: 1.5,
+                                fontWeight: "bold",
+                                boxShadow: 3,
+                                '&:hover': {
+                                  transform: 'translateY(-2px)',
+                                  boxShadow: 4,
+                                },
+                                transition: 'all 0.3s ease',
+                                mb: 1
+                              }}
+                            >
+                              {updatingLib ? "Atualizando do NPM..." : "Atualizar via NPM"}
+                            </Button>
+                            
+                            <Link 
+                              href={`https://github.com/pedroslopez/whatsapp-web.js/releases/tag/v${versionInfo.whatsappLibLatestVersion}`}
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              sx={{ display: 'block', textAlign: 'center', mt: 1 }}
+                            >
+                              <Typography variant="caption">
+                                Ver detalhes da release
+                              </Typography>
+                            </Link>
+                          </CardContent>
+                        </Card>
+                      </Grid>
+                    )}
+                    
+                    {/* Coluna Git */}
+                    {versionInfo.whatsappLibHasGitUpdates && (
+                      <Grid item xs={12} md={versionInfo.whatsappLibNeedsUpdate ? 6 : 12}>
+                        <Card sx={{ height: '100%', borderLeft: 4, borderColor: 'info.main' }}>
+                          <CardContent>
+                            <Box display="flex" alignItems="center" mb={2}>
+                              <GitHubIcon sx={{ fontSize: 40, mr: 2, color: 'info.main' }} />
+                              <div>
+                                <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+                                  🚀 Versão Desenvolvimento (Git)
+                                </Typography>
+                                <Typography variant="body2" color="textSecondary">
+                                  {versionInfo.whatsappLibGitCommitsCount} commit{versionInfo.whatsappLibGitCommitsCount > 1 ? 's' : ''} à frente
+                                </Typography>
+                              </div>
+                            </Box>
+                            
+                            <Divider sx={{ my: 2 }} />
+                            
+                            <Box sx={{ 
+                              maxHeight: 200, 
+                              overflowY: 'auto', 
+                              mb: 2,
+                              p: 2,
+                              backgroundColor: 'grey.50',
+                              borderRadius: 1,
+                              border: '1px solid',
+                              borderColor: 'grey.200'
+                            }}>
+                              {versionInfo.whatsappLibGitCommits.slice(0, 5).map((commit, index) => (
+                                <Box key={commit.sha} mb={1.5}>
+                                  <Typography variant="caption" sx={{ fontFamily: 'monospace', color: 'info.main', fontWeight: 'bold' }}>
+                                    {commit.sha}
+                                  </Typography>
+                                  <Typography variant="body2" sx={{ fontSize: '0.85rem', mt: 0.5 }}>
+                                    {commit.message}
+                                  </Typography>
+                                  <Typography variant="caption" color="textSecondary">
+                                    por {commit.author} • {new Date(commit.date).toLocaleDateString('pt-BR')}
+                                  </Typography>
+                                  {index < Math.min(4, versionInfo.whatsappLibGitCommits.length - 1) && (
+                                    <Divider sx={{ mt: 1 }} />
+                                  )}
+                                </Box>
+                              ))}
+                              {versionInfo.whatsappLibGitCommitsCount > 5 && (
+                                <Typography variant="caption" color="textSecondary" sx={{ display: 'block', mt: 1, textAlign: 'center' }}>
+                                  + {versionInfo.whatsappLibGitCommitsCount - 5} commit{versionInfo.whatsappLibGitCommitsCount - 5 > 1 ? 's' : ''} adicional{versionInfo.whatsappLibGitCommitsCount - 5 > 1 ? 'is' : ''}
+                                </Typography>
+                              )}
+                            </Box>
+                            
+                            <Button
+                              variant="contained"
+                              color="info"
+                              onClick={handleUpdateWhatsappLibFromGit}
+                              disabled={updatingLib || updatingLibFromGit}
+                              startIcon={updatingLibFromGit ? <CircularProgress size={20} color="inherit" /> : <GitHubIcon />}
+                              fullWidth
+                              size="large"
+                              sx={{
+                                borderRadius: 2,
+                                py: 1.5,
+                                fontWeight: "bold",
+                                boxShadow: 3,
+                                '&:hover': {
+                                  transform: 'translateY(-2px)',
+                                  boxShadow: 4,
+                                },
+                                transition: 'all 0.3s ease',
+                                mb: 1
+                              }}
+                            >
+                              {updatingLibFromGit ? "Instalando do Git..." : "Atualizar via Git"}
+                            </Button>
+                            
+                            <Link 
+                              href="https://github.com/pedroslopez/whatsapp-web.js/commits/main"
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              sx={{ display: 'block', textAlign: 'center', mt: 1 }}
+                            >
+                              <Typography variant="caption">
+                                Ver todos os commits
+                              </Typography>
+                            </Link>
+                          </CardContent>
+                        </Card>
+                      </Grid>
+                    )}
+                  </Grid>
+                  
+                  <Box sx={{ mt: 2, p: 2, backgroundColor: 'info.lighter', borderRadius: 1, border: '1px solid', borderColor: 'info.main' }}>
+                    <Typography variant="body2" color="textSecondary">
+                      ℹ️ <strong>Dica:</strong> Versões do NPM são estáveis e testadas. Versões do Git contêm as últimas correções e recursos, mas podem ser menos estáveis.
+                    </Typography>
                   </Box>
-                </MessageBox>
+                </Box>
               ) : (
                 <MessageBox type="success">
                   <Box display="flex" alignItems="flex-start">

@@ -238,7 +238,8 @@ const MainListItems = (props) => {
   const { whatsApps } = useContext(WhatsAppsContext);
   const { user } = useContext(AuthContext);
   const [connectionWarning, setConnectionWarning] = useState(false);
-  const [versionWarning, setVersionWarning] = useState(false);
+  const [systemWarning, setSystemWarning] = useState(false);
+  const [libWarning, setLibWarning] = useState(false);
   const [contactsOpen, setContactsOpen] = useState(false);
   const { t } = useTranslation();
 
@@ -275,14 +276,17 @@ const MainListItems = (props) => {
     const checkVersion = async () => {
       try {
         const { data } = await api.get("/version");
-        if (data && data.needsUpdate) {
-          setVersionWarning(true);
+        if (data) {
+          setSystemWarning(!!data.needsUpdate);
+          setLibWarning(!!data.whatsappLibNeedsUpdate);
         } else {
-          setVersionWarning(false);
+          setSystemWarning(false);
+          setLibWarning(false);
         }
       } catch (err) {
         console.error("Erro ao verificar versão:", err);
-        setVersionWarning(false);
+        setSystemWarning(false);
+        setLibWarning(false);
       }
     };
     
@@ -527,7 +531,11 @@ const MainListItems = (props) => {
               <ListItemLink
                 to="system-update"
                 primary={t("mainDrawer.listItems.systemUpdate")}
-                icon={<SystemUpdateAltIcon />}
+                icon={
+                  <StyledBadge badgeContent={systemWarning ? "!" : 0} color="error" overlap="rectangular">
+                    <SystemUpdateAltIcon />
+                  </StyledBadge>
+                }
                 active={location.pathname === '/system-update'}
                 drawerClose={drawerClose}
               />
@@ -535,7 +543,7 @@ const MainListItems = (props) => {
                 to="versionCheck"
                 primary={t("mainDrawer.listItems.versionCheck")}
                 icon={
-                  <StyledBadge badgeContent={versionWarning ? "!" : 0} color="error" overlap="rectangular">
+                  <StyledBadge badgeContent={libWarning ? "!" : 0} color="error" overlap="rectangular">
                     <SystemUpdateIcon />
                   </StyledBadge>
                 }

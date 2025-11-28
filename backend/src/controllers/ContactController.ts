@@ -59,8 +59,13 @@ export const getBlockStatus = async (
     return res.status(404).json({ error: "Número não registrado no WhatsApp" });
   }
 
-  const wContact = await wbot.getContactById(numberId._serialized);
-  return res.status(200).json({ isBlocked: Boolean((wContact as any).isBlocked) });
+  try {
+    const wContact = await wbot.getContactById(numberId._serialized);
+    return res.status(200).json({ isBlocked: Boolean((wContact as any).isBlocked) });
+  } catch (err) {
+    console.warn(`[FALLBACK] Erro ao obter contato do WhatsApp: ${err.message || err}`);
+    return res.status(200).json({ isBlocked: false });
+  }
 };
 
 export const blockContact = async (
@@ -90,8 +95,15 @@ export const blockContact = async (
   if (!numberId) {
     return res.status(404).json({ error: "Número não registrado no WhatsApp" });
   }
-  const wContact = await wbot.getContactById(numberId._serialized);
-  const result = await (wContact as any).block();
+  
+  let result;
+  try {
+    const wContact = await wbot.getContactById(numberId._serialized);
+    result = await (wContact as any).block();
+  } catch (err) {
+    console.warn(`[FALLBACK] Erro ao obter/bloquear contato: ${err.message || err}`);
+    return res.status(500).json({ error: "Erro ao bloquear contato no WhatsApp" });
+  }
 
   const logUserId = req.user?.id || 1;
   await createActivityLog({
@@ -133,8 +145,15 @@ export const unblockContact = async (
   if (!numberId) {
     return res.status(404).json({ error: "Número não registrado no WhatsApp" });
   }
-  const wContact = await wbot.getContactById(numberId._serialized);
-  const result = await (wContact as any).unblock();
+  
+  let result;
+  try {
+    const wContact = await wbot.getContactById(numberId._serialized);
+    result = await (wContact as any).unblock();
+  } catch (err) {
+    console.warn(`[FALLBACK] Erro ao obter/desbloquear contato: ${err.message || err}`);
+    return res.status(500).json({ error: "Erro ao desbloquear contato no WhatsApp" });
+  }
 
   const logUserId = req.user?.id || 1;
   await createActivityLog({

@@ -226,6 +226,20 @@ const verifyMediaMessage = async (
   
   try {
     const newMessage = await CreateMessageService({ messageData });
+    
+    const FormatLastMessage = require("../../helpers/FormatLastMessage").default;
+    const formattedLastMessage = FormatLastMessage({
+      body: messageData.body,
+      mediaType: messageData.mediaType,
+      mimetype: media.mimetype,
+      messageType: msg.type,
+      fromMe: msg.fromMe,
+      filename: media.filename
+    });
+    
+    await ticket.update({ lastMessage: formattedLastMessage });
+    await ticket.reload();
+    
     return newMessage;
   } catch (error) {
     console.error("Erro ao salvar mensagem com mídia no banco de dados:", error);
@@ -233,6 +247,20 @@ const verifyMediaMessage = async (
       setTimeout(async () => {
         try {
           const newMessage = await CreateMessageService({ messageData });
+          
+          const FormatLastMessage = require("../../helpers/FormatLastMessage").default;
+          const formattedLastMessage = FormatLastMessage({
+            body: messageData.body,
+            mediaType: messageData.mediaType,
+            mimetype: media.mimetype,
+            messageType: msg.type,
+            fromMe: msg.fromMe,
+            filename: media.filename
+          });
+          
+          await ticket.update({ lastMessage: formattedLastMessage });
+          await ticket.reload();
+          
           resolve(newMessage);
         } catch (retryError) {
           console.error("Erro ao salvar mensagem com mídia na segunda tentativa:", retryError);
@@ -496,11 +524,37 @@ const verifyMessage = async (
 
   try {
     await CreateMessageService({ messageData });
+    
+    const FormatLastMessage = require("../../helpers/FormatLastMessage").default;
+    const formattedLastMessage = FormatLastMessage({
+      body: messageData.body,
+      mediaType: messageData.mediaType,
+      mimetype: undefined,
+      messageType: messageData.messageType,
+      fromMe: msg.fromMe,
+      filename: undefined
+    });
+    
+    await ticket.update({ lastMessage: formattedLastMessage });
+    await ticket.reload();
   } catch (error) {
     console.error("Erro ao salvar mensagem no banco de dados:", error);
     setTimeout(async () => {
       try {
         await CreateMessageService({ messageData });
+        
+        const FormatLastMessage = require("../../helpers/FormatLastMessage").default;
+        const formattedLastMessage = FormatLastMessage({
+          body: messageData.body,
+          mediaType: messageData.mediaType,
+          mimetype: undefined,
+          messageType: messageData.messageType,
+          fromMe: msg.fromMe,
+          filename: undefined
+        });
+        
+        await ticket.update({ lastMessage: formattedLastMessage });
+        await ticket.reload();
       } catch (retryError) {
         console.error("Erro ao salvar mensagem na segunda tentativa:", retryError);
       }
@@ -779,6 +833,32 @@ const isValidMsg = (msg: WbotMessage): boolean => {
   return true;
 };
 
+const getSafeContact = async (
+  wbot: Session,
+  msg: WbotMessage,
+  useRemoteJid?: string
+): Promise<WbotContact> => {
+  try {
+    if (msg.fromMe) {
+      const jid = useRemoteJid || msg.to;
+      return await wbot.getContactById(jid);
+    }
+    return await msg.getContact();
+  } catch (err) {
+    logger.warn(`[FALLBACK] Usando contato alternativo devido a limitação da lib whatsapp-web.js: ${err.message || String(err)}`);
+    const jid = useRemoteJid || (msg.fromMe ? msg.to : msg.from);
+    const user = jid ? jid.split("@")[0] : "";
+    const isGroup = jid?.endsWith("@g.us") || false;
+    const fallbackContact: any = {
+      id: { user, _serialized: jid },
+      name: user,
+      pushname: user,
+      isGroup
+    };
+    return fallbackContact as WbotContact;
+  }
+};
+
 const handleMessage = async (
   msg: WbotMessage,
   wbot: Session
@@ -824,13 +904,16 @@ const handleMessage = async (
   });
 
   if (Integrationdb?.value) {
-    const contact = await verifyContact(msg.fromMe ? await wbot.getContactById(msg.to) : await msg.getContact());
+    const baseContact = await getSafeContact(wbot, msg);
+    const contact = await verifyContact(baseContact);
     
     const chat = await msg.getChat();
     let groupContact;
     
     if (chat.isGroup) {
-      const msgGroupContact = msg.fromMe ? await wbot.getContactById(msg.to) : await wbot.getContactById(msg.from);
+      const msgGroupContact = msg.fromMe
+        ? await getSafeContact(wbot, msg, msg.to)
+        : await getSafeContact(wbot, msg, msg.from);
       groupContact = await verifyContact(msgGroupContact);
     }
     
@@ -900,9 +983,9 @@ const handleMessage = async (
       )
         return;
 
-      msgContact = await wbot.getContactById(msg.to);
+      msgContact = await getSafeContact(wbot, msg, msg.to);
     } else {
-      msgContact = await msg.getContact();
+      msgContact = await getSafeContact(wbot, msg);
     }
 
     const chat = await msg.getChat();
@@ -911,9 +994,9 @@ const handleMessage = async (
       let msgGroupContact;
 
       if (msg.fromMe) {
-        msgGroupContact = await wbot.getContactById(msg.to);
+        msgGroupContact = await getSafeContact(wbot, msg, msg.to);
       } else {
-        msgGroupContact = await wbot.getContactById(msg.from);
+        msgGroupContact = await getSafeContact(wbot, msg, msg.from);
       }
 
       groupContact = await verifyContact(msgGroupContact);
@@ -1332,7 +1415,15 @@ const handleMessage = async (
       }
     }
 
-    const profilePicUrl = await msgContact.getProfilePicUrl();
+    let profilePicUrl;
+    try {
+      if (typeof msgContact.getProfilePicUrl === 'function') {
+        profilePicUrl = await msgContact.getProfilePicUrl();
+      }
+    } catch (picErr) {
+      logger.warn(`Não foi possível obter foto de perfil: ${String(picErr)}`);
+    }
+    
     const contactData = {
       name: msgContact.name || msgContact.pushname || msgContact.id.user,
       number: msgContact.id.user,
