@@ -537,7 +537,15 @@ const Documentation = () => {
                     {category.title}
                   </Typography>
                   <Grid container spacing={3}>
-                    {category.items.map((item, itemIndex) => (
+                    {category.items
+                      .filter(item => {
+                        // Filtrar Contatos Bloqueados para apenas admin
+                        if (item.path === "/blocked-contacts") {
+                          return user?.profile?.toUpperCase() === "ADMIN";
+                        }
+                        return true;
+                      })
+                      .map((item, itemIndex) => (
                       <Grid item xs={12} sm={6} md={4} key={`item-${categoryIndex}-${itemIndex}`}>
                         <Card className={classes.card}>
                           <CardHeader

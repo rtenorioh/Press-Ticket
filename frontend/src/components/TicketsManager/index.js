@@ -508,19 +508,21 @@ const TicketsManager = () => {
       </TabsHeaderStyled>
       <TicketOptionsBoxStyled elevation={0}>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-          <Tooltip title={t("ticketsManager.buttons.closed")} placement="top" arrow>
-            <ActionButton
-              onClick={(event) => setAnchorEl(event.currentTarget)}
-              sx={{
-                boxShadow: theme.shadows[2],
-                '&:hover': {
-                  boxShadow: theme.shadows[4]
-                }
-              }}
-            >
-              <Close fontSize="small" />
-            </ActionButton>
-          </Tooltip>
+          {user?.profile?.toUpperCase() === "ADMIN" && (
+            <Tooltip title={t("ticketsManager.buttons.closed")} placement="top" arrow>
+              <ActionButton
+                onClick={(event) => setAnchorEl(event.currentTarget)}
+                sx={{
+                  boxShadow: theme.shadows[2],
+                  '&:hover': {
+                    boxShadow: theme.shadows[4]
+                  }
+                }}
+              >
+                <Close fontSize="small" />
+              </ActionButton>
+            </Tooltip>
+          )}
           <Tooltip title={t("ticketsManager.buttons.refresh")} placement="top" arrow>
             <ActionButton
               onClick={() => {

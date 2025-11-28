@@ -39,6 +39,7 @@ import Videos from "../pages/Videos";
 import HealthCheck from "../pages/HealthCheck";
 import GroupManagement from "../pages/GroupManagement";
 import PrivateRoute from "./PrivateRoute";
+import AdminRoute from "./AdminRoute";
 import PublicRoute from "./PublicRoute";
 
 const AppRoutes = ({ toggleTheme, onThemeConfigUpdate }) => {
@@ -65,7 +66,7 @@ const AppRoutes = ({ toggleTheme, onThemeConfigUpdate }) => {
             <Route path="tickets/:ticketId?" element={<Tickets />} />
             <Route path="channels" element={<Channels />} />
             <Route path="contacts" element={<Contacts />} />
-            <Route path="blocked-contacts" element={<BlockedContacts />} />
+            <Route path="blocked-contacts" element={<AdminRoute element={<BlockedContacts />} />} />
             <Route path="users" element={<Users />} />
             <Route path="quickAnswers" element={<QuickAnswers />} />
             <Route path="Settings" element={<Settings toggleTheme={toggleTheme} onThemeConfigUpdate={onThemeConfigUpdate} />} />

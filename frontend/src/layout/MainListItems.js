@@ -243,12 +243,12 @@ const MainListItems = (props) => {
   const [contactsOpen, setContactsOpen] = useState(false);
   const { t } = useTranslation();
 
-  // Abrir dropdown de Contatos se estiver na página de bloqueados
+  // Abrir dropdown de Contatos se estiver na página de bloqueados (apenas para admin)
   useEffect(() => {
-    if (location.pathname === '/blocked-contacts') {
+    if (location.pathname === '/blocked-contacts' && user?.profile?.toUpperCase() === "ADMIN") {
       setContactsOpen(true);
     }
-  }, [location.pathname]);
+  }, [location.pathname, user]);
 
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
@@ -335,14 +335,16 @@ const MainListItems = (props) => {
         open={contactsOpen}
         onToggle={() => setContactsOpen(!contactsOpen)}
       >
-        <ListItemLink
-          to="/blocked-contacts"
-          primary={t("mainDrawer.listItems.blockedContacts")}
-          icon={<BlockIcon />}
-          active={location.pathname === '/blocked-contacts'}
-          drawerClose={drawerClose}
-          sx={{ pl: 6 }}
-        />
+        {user?.profile?.toUpperCase() === "ADMIN" && (
+          <ListItemLink
+            to="/blocked-contacts"
+            primary={t("mainDrawer.listItems.blockedContacts")}
+            icon={<BlockIcon />}
+            active={location.pathname === '/blocked-contacts'}
+            drawerClose={drawerClose}
+            sx={{ pl: 6 }}
+          />
+        )}
       </ListItemLinkWithDropdown>
       <ListItemLink
         to="/quickAnswers"
