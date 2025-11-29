@@ -18,6 +18,8 @@ import SerializeWbotMsgId from "../helpers/SerializeWbotMsgId";
 import Contact from "../models/Contact";
 import MessageReaction from "../models/MessageReaction";
 import ReactToWhatsAppMessage from "../services/WbotServices/ReactToWhatsAppMessage";
+import { createActivityLog, ActivityActions, EntityTypes } from "../services/ActivityLogService";
+import GetClientIp from "../helpers/GetClientIp";
 
 type IndexQuery = {
   pageNumber: string;
@@ -372,6 +374,8 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
   const { ticketId } = req.params;
   let { body, quotedMsg, mentions, sendAsDocument, compressVideo }: any = req.body;
   const medias = req.files as Express.Multer.File[];
+  const logUserId = req.user?.id || 1;
+  const clientIp = GetClientIp(req);
 
   if (mentions && typeof mentions === 'string') {
     try {
@@ -413,10 +417,55 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     if (mediaMessages && mediaMessages.length > 0) {
       messageId = mediaMessages[0].id.id;
     }
+
+    // LOG: Mensagem com mídia enviada
+    try {
+      await createActivityLog({
+        userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
+        action: ActivityActions.SEND,
+        description: `Mensagem com ${medias.length} mídia(s) enviada no ticket #${ticketId}`,
+        entityType: EntityTypes.TICKET,
+        entityId: ticket.id,
+        ip: clientIp,
+        additionalData: {
+          ticketId: parseInt(ticketId),
+          messageType: 'media',
+          mediaCount: medias.length,
+          mediaTypes: medias.map(m => m.mimetype),
+          contactId: ticket.contactId,
+          sendAsDocument: shouldSendAsDocument,
+          hasBody: !!body
+        }
+      });
+    } catch (error) {
+      console.error('Erro ao criar log de envio de mídia:', error);
+    }
   } else {
     const sentMessage = await SendWhatsAppMessage({ body, ticket, quotedMsg, mentions });
     if (sentMessage) {
       messageId = sentMessage.id.id;
+    }
+
+    // LOG: Mensagem de texto enviada
+    try {
+      await createActivityLog({
+        userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
+        action: ActivityActions.SEND,
+        description: `Mensagem enviada no ticket #${ticketId}`,
+        entityType: EntityTypes.TICKET,
+        entityId: ticket.id,
+        ip: clientIp,
+        additionalData: {
+          ticketId: parseInt(ticketId),
+          messageType: 'text',
+          messageLength: body?.length || 0,
+          hasQuote: !!quotedMsg,
+          hasMentions: !!(mentions && Array.isArray(mentions) && mentions.length > 0),
+          contactId: ticket.contactId
+        }
+      });
+    } catch (error) {
+      console.error('Erro ao criar log de envio de mensagem:', error);
     }
   }
 
@@ -426,8 +475,34 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
 export const edit = async (req: Request, res: Response): Promise<Response> => {
   const { messageId } = req.params;
   const { body }: MessageData = req.body;
+  const logUserId = req.user?.id || 1;
+  const clientIp = GetClientIp(req);
+
+  // Buscar mensagem antes de editar para comparar
+  const messageToEdit = await Message.findByPk(messageId);
 
   const message = await EditWhatsAppMessage(messageId, body);
+
+  // LOG: Mensagem editada
+  try {
+    await createActivityLog({
+      userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
+      action: ActivityActions.EDIT,
+      description: `Mensagem editada no ticket #${message.ticketId}`,
+      entityType: EntityTypes.TICKET,
+      entityId: message.ticketId,
+      ip: clientIp,
+      additionalData: {
+        ticketId: message.ticketId,
+        oldBody: messageToEdit?.body?.substring(0, 100), // Primeiros 100 caracteres
+        newBody: body?.substring(0, 100),
+        oldLength: messageToEdit?.body?.length || 0,
+        newLength: body?.length || 0
+      }
+    });
+  } catch (error) {
+    console.error('Erro ao criar log de edição de mensagem:', error);
+  }
 
   const io = getIO();
   io.to(message.ticketId.toString()).emit("appMessage", {
@@ -443,8 +518,33 @@ export const remove = async (
   res: Response
 ): Promise<Response> => {
   const { messageId } = req.params;
+  const logUserId = req.user?.id || 1;
+  const clientIp = GetClientIp(req);
+
+  // Buscar mensagem antes de deletar para log
+  const messageToDelete = await Message.findByPk(messageId);
 
   const message = await DeleteWhatsAppMessage(messageId);
+
+  // LOG: Mensagem excluída
+  try {
+    await createActivityLog({
+      userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
+      action: ActivityActions.DELETE,
+      description: `Mensagem excluída do ticket #${message.ticketId}`,
+      entityType: EntityTypes.TICKET,
+      entityId: message.ticketId,
+      ip: clientIp,
+      additionalData: {
+        ticketId: message.ticketId,
+        messageBody: messageToDelete?.body?.substring(0, 50), // Primeiros 50 caracteres
+        mediaType: messageToDelete?.mediaType,
+        fromMe: messageToDelete?.fromMe
+      }
+    });
+  } catch (error) {
+    console.error('Erro ao criar log de exclusão de mensagem:', error);
+  }
 
   const io = getIO();
   io.to(message.ticketId.toString()).emit("appMessage", {
@@ -479,6 +579,8 @@ export const markAsRead = async (req: Request, res: Response): Promise<Response>
 export const sendContacts = async (req: Request, res: Response): Promise<Response> => {
   const { ticketId } = req.params;
   const { contacts } = req.body;
+  const logUserId = req.user?.id || 1;
+  const clientIp = GetClientIp(req);
 
   if (!contacts || !Array.isArray(contacts) || contacts.length === 0) {
     return res.status(400).json({ error: "Contatos são obrigatórios" });
@@ -493,6 +595,26 @@ export const sendContacts = async (req: Request, res: Response): Promise<Respons
   try {
     const sentMessage = await SendWhatsAppContacts({ contacts, ticket });
     const messageId = sentMessage?.id?.id;
+
+    // LOG: Contatos enviados
+    try {
+      await createActivityLog({
+        userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
+        action: ActivityActions.SEND,
+        description: `${contacts.length} contato(s) enviado(s) no ticket #${ticketId}`,
+        entityType: EntityTypes.TICKET,
+        entityId: ticket.id,
+        ip: clientIp,
+        additionalData: {
+          ticketId: parseInt(ticketId),
+          messageType: 'vcard',
+          contactCount: contacts.length,
+          contactIds: contacts.map((c: any) => c.id)
+        }
+      });
+    } catch (error) {
+      console.error('Erro ao criar log de envio de contatos:', error);
+    }
 
     return res.json({ id: messageId });
   } catch (error) {

@@ -16,6 +16,7 @@ import SendWhatsAppMessage from "../services/WbotServices/SendWhatsAppMessage";
 import ShowWhatsAppService from "../services/WhatsappService/ShowWhatsAppService";
 import { createActivityLog, ActivityActions, EntityTypes } from "../services/ActivityLogService";
 import CountTicketsService from "../services/TicketServices/CountTicketsService";
+import GetClientIp from "../helpers/GetClientIp";
 
 interface AuthenticatedRequest extends Request {
   user: {
@@ -179,38 +180,154 @@ export const update = async (
 ): Promise<Response> => {
   const { ticketId } = req.params;
   const ticketData: TicketData = req.body;
+  const logUserId = req.user?.id || 1;
+  const clientIp = GetClientIp(req);
+
+  // Buscar ticket antes da atualização para comparar
+  const ticketBefore = await Ticket.findByPk(ticketId, {
+    include: [{ association: "queue" }, { association: "user" }]
+  });
 
   const { ticket } = await UpdateTicketService({
     ticketData,
     ticketId
   });
 
-  const logUserId = req.user?.id || 1;
-  let logAction = ActivityActions.UPDATE;
-  let logDescription = `Ticket #${ticket.id} atualizado`;
-  
-  if (ticketData.transf) {
-    logAction = ActivityActions.TRANSFER;
-    const queue = await ShowQueueService(ticketData.queueId);
-    logDescription = `Ticket #${ticket.id} transferido para a fila ${queue?.name || ticketData.queueId}`;
+  // LOG: Aceitar ticket (pending → open)
+  if (ticketBefore && ticketBefore.status === 'pending' && ticketData.status === 'open') {
+    try {
+      await createActivityLog({
+        userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
+        action: ActivityActions.ACCEPT,
+        description: `Ticket #${ticketId} aceito`,
+        entityType: EntityTypes.TICKET,
+        entityId: parseInt(ticketId),
+        ip: clientIp,
+        additionalData: {
+          previousUserId: ticketBefore.userId,
+          newUserId: ticketData.userId || logUserId,
+          contactId: ticket.contactId
+        }
+      });
+    } catch (error) {
+      console.error('Erro ao criar log de aceitar ticket:', error);
+    }
   }
-  
-  if (ticket.status === "closed") {
-    logAction = ActivityActions.CLOSE;
-    logDescription = `Ticket #${ticket.id} fechado`;
-  } else if (ticketData.status === "open" && ticket.status !== ticketData.status) {
-    logAction = ActivityActions.REOPEN;
-    logDescription = `Ticket #${ticket.id} reaberto`;
+
+  // LOG: Transferência de usuário
+  if (ticketBefore && ticketBefore.userId && ticketData.userId && 
+      ticketBefore.userId !== ticketData.userId) {
+    try {
+      const User = require("../models/User").default;
+      const oldUser = await User.findByPk(ticketBefore.userId);
+      const newUser = await User.findByPk(ticketData.userId);
+      
+      await createActivityLog({
+        userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
+        action: ActivityActions.TRANSFER,
+        description: `Ticket #${ticketId} transferido de ${oldUser?.name || 'N/A'} para ${newUser?.name || 'N/A'}`,
+        entityType: EntityTypes.TICKET,
+        entityId: parseInt(ticketId),
+        ip: clientIp,
+        additionalData: {
+          fromUserId: ticketBefore.userId,
+          toUserId: ticketData.userId,
+          fromUserName: oldUser?.name,
+          toUserName: newUser?.name,
+          contactId: ticket.contactId
+        }
+      });
+    } catch (error) {
+      console.error('Erro ao criar log de transferência de usuário:', error);
+    }
   }
-  
-  await createActivityLog({
-    userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
-    action: logAction,
-    description: logDescription,
-    entityType: EntityTypes.TICKET,
-    entityId: ticket.id,
-    additionalData: ticketData
-  });
+
+  // LOG: Transferência de setor
+  if (ticketBefore && ticketBefore.queueId !== undefined && 
+      ticketData.queueId !== undefined && ticketBefore.queueId !== ticketData.queueId) {
+    try {
+      const oldQueue = ticketBefore.queueId ? await ShowQueueService(ticketBefore.queueId) : null;
+      const newQueue = ticketData.queueId ? await ShowQueueService(ticketData.queueId) : null;
+      
+      await createActivityLog({
+        userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
+        action: ActivityActions.TRANSFER,
+        description: `Ticket #${ticketId} transferido de ${oldQueue?.name || 'Sem setor'} para ${newQueue?.name || 'Sem setor'}`,
+        entityType: EntityTypes.TICKET,
+        entityId: parseInt(ticketId),
+        ip: clientIp,
+        additionalData: {
+          fromQueueId: ticketBefore.queueId,
+          toQueueId: ticketData.queueId,
+          fromQueueName: oldQueue?.name,
+          toQueueName: newQueue?.name,
+          contactId: ticket.contactId
+        }
+      });
+    } catch (error) {
+      console.error('Erro ao criar log de transferência de setor:', error);
+    }
+  }
+
+  // LOG: Mover para aguardando
+  if (ticketBefore && ticketBefore.status !== 'pending' && ticketData.status === 'pending') {
+    try {
+      await createActivityLog({
+        userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
+        action: ActivityActions.UPDATE,
+        description: `Ticket #${ticketId} movido para aguardando`,
+        entityType: EntityTypes.TICKET,
+        entityId: parseInt(ticketId),
+        ip: clientIp,
+        additionalData: {
+          previousStatus: ticketBefore.status,
+          previousUserId: ticketBefore.userId,
+          contactId: ticket.contactId
+        }
+      });
+    } catch (error) {
+      console.error('Erro ao criar log de mover para aguardando:', error);
+    }
+  }
+
+  // LOG: Fechar ticket
+  if (ticket.status === "closed" && (!ticketBefore || ticketBefore.status !== "closed")) {
+    try {
+      await createActivityLog({
+        userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
+        action: ActivityActions.CLOSE,
+        description: `Ticket #${ticketId} fechado`,
+        entityType: EntityTypes.TICKET,
+        entityId: parseInt(ticketId),
+        ip: clientIp,
+        additionalData: {
+          previousStatus: ticketBefore?.status,
+          contactId: ticket.contactId
+        }
+      });
+    } catch (error) {
+      console.error('Erro ao criar log de fechar ticket:', error);
+    }
+  }
+
+  // LOG: Reabrir ticket
+  if (ticketBefore && ticketBefore.status === "closed" && ticketData.status === "open") {
+    try {
+      await createActivityLog({
+        userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
+        action: ActivityActions.REOPEN,
+        description: `Ticket #${ticketId} reaberto`,
+        entityType: EntityTypes.TICKET,
+        entityId: parseInt(ticketId),
+        ip: clientIp,
+        additionalData: {
+          contactId: ticket.contactId
+        }
+      });
+    } catch (error) {
+      console.error('Erro ao criar log de reabrir ticket:', error);
+    }
+  }
 
   if (ticketData.transf) {
     const { greetingMessage } = await ShowQueueService(ticketData.queueId);
@@ -246,6 +363,7 @@ export const remove = async (
   
   const ticket = await DeleteTicketService(ticketId);
   const logUserId = req.user?.id || 1;
+  const clientIp = GetClientIp(req);
   
   await createActivityLog({
     userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
@@ -253,6 +371,7 @@ export const remove = async (
     description: `Ticket #${ticketId} excluído`,
     entityType: EntityTypes.TICKET,
     entityId: parseInt(ticketId),
+    ip: clientIp,
     additionalData: {
       contactId: ticketToDelete.contactId,
       status: ticketToDelete.status,
@@ -372,6 +491,26 @@ export const closeTickets = async (
       userId,
       tickets
     });
+
+    // LOG: Fechar múltiplos tickets
+    const clientIp = GetClientIp(req);
+    try {
+      await createActivityLog({
+        userId,
+        action: ActivityActions.CLOSE,
+        description: `${tickets.length} ticket(s) fechado(s) em massa`,
+        entityType: EntityTypes.TICKET,
+        entityId: 0,
+        ip: clientIp,
+        additionalData: {
+          ticketCount: tickets.length,
+          statusFilter: status || 'all',
+          ticketIds: tickets.slice(0, 10).map(t => t.id)
+        }
+      });
+    } catch (error) {
+      console.error('Erro ao criar log de fechar tickets em massa:', error);
+    }
 
     const io = getIO();
     io.emit("ticket:update", {

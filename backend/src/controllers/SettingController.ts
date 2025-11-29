@@ -6,6 +6,7 @@ import { getIO } from "../libs/socket";
 import ListSettingsService from "../services/SettingServices/ListSettingsService";
 import UpdateSettingService from "../services/SettingServices/UpdateSettingService";
 import { createActivityLog, ActivityActions, EntityTypes } from "../services/ActivityLogService";
+import GetClientIp from "../helpers/GetClientIp";
 
 export const index = async (req: Request, res: Response): Promise<Response> => {
   if (req.user.profile === "") {
@@ -33,6 +34,7 @@ export const update = async (
   });
 
   const logUserId = req.user?.id || 1;
+  const clientIp = GetClientIp(req);
   
   if (setting) {
     await createActivityLog({
@@ -41,6 +43,7 @@ export const update = async (
       description: `Configuração "${key}" atualizada`,
       entityType: EntityTypes.SETTING,
       entityId: setting.id,
+      ip: clientIp,
       additionalData: {
         key: setting.key,
         value: setting.value

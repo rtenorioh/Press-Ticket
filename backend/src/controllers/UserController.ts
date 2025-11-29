@@ -10,6 +10,7 @@ import ListUsersService from "../services/UserServices/ListUsersService";
 import ShowUserService from "../services/UserServices/ShowUserService";
 import UpdateUserService from "../services/UserServices/UpdateUserService";
 import { createActivityLog, ActivityActions, EntityTypes } from "../services/ActivityLogService";
+import GetClientIp from "../helpers/GetClientIp";
 
 type IndexQuery = {
   searchParam: string;
@@ -70,6 +71,7 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
   });
 
   const logUserId = req.user?.id || 1;
+  const clientIp = GetClientIp(req);
   
   await createActivityLog({
     userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
@@ -77,6 +79,7 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     description: `Usuário ${user.name} (${user.email}) criado com perfil ${user.profile}`,
     entityType: EntityTypes.USER,
     entityId: user.id,
+    ip: clientIp,
     additionalData: {
       email: user.email,
       profile: user.profile
@@ -121,6 +124,7 @@ export const update = async (
 
   const user = await UpdateUserService({ userData, userId });
   const logUserId = req.user?.id || 1;
+  const clientIp = GetClientIp(req);
   
   if (user) {
     await createActivityLog({
@@ -129,6 +133,7 @@ export const update = async (
       description: `Usuário ${user.name} (${user.email}) atualizado`,
       entityType: EntityTypes.USER,
       entityId: user.id,
+      ip: clientIp,
       additionalData: userData
     });
   }
@@ -160,6 +165,7 @@ export const remove = async (
   
   await DeleteUserService(userId);
   const logUserId = req.user?.id || 1;
+  const clientIp = GetClientIp(req);
   
   await createActivityLog({
     userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
@@ -167,6 +173,7 @@ export const remove = async (
     description: `Usuário ${userToDelete.name} (${userToDelete.email}) excluído`,
     entityType: EntityTypes.USER,
     entityId: parseInt(userId),
+    ip: clientIp,
     additionalData: {
       email: userToDelete.email,
       profile: userToDelete.profile

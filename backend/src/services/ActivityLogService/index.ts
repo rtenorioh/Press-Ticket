@@ -62,7 +62,24 @@ export enum ActivityActions {
   CLOSE = "close",
   REOPEN = "reopen",
   ACCEPT = "accept",
-  SYSTEM = "system"
+  SYSTEM = "system",
+  SEND = "send",
+  EDIT = "edit",
+  VIEW = "view",
+  IMPORT = "import",
+  EXPORT = "export",
+  START = "start",
+  STOP = "stop",
+  CONNECT = "connect",
+  DISCONNECT = "disconnect",
+  PROMOTE = "promote",
+  DEMOTE = "demote",
+  JOIN = "join",
+  LEAVE = "leave",
+  REVOKE = "revoke",
+  REACT = "react",
+  BLOCK = "block",
+  UNBLOCK = "unblock"
 }
 
 export enum EntityTypes {
@@ -75,7 +92,12 @@ export enum EntityTypes {
   QUICKANSWER = "quickAnswer",
   SETTING = "setting",
   TAG = "tag",
-  SYSTEM = "system"
+  SYSTEM = "system",
+  GROUP = "group",
+  API_TOKEN = "api_token",
+  BACKUP = "backup",
+  INTEGRATION = "integration",
+  CLIENT_STATUS = "client_status"
 }
 
 export const logActivity = async (

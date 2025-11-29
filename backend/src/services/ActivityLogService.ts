@@ -6,6 +6,7 @@ import Contact from "../models/Contact";
 import Whatsapp from "../models/Whatsapp";
 import Queue from "../models/Queue";
 import Tag from "../models/Tag";
+import Message from "../models/Message";
 
 export enum ActivityActions {
   LOGIN = "login",
@@ -16,7 +17,25 @@ export enum ActivityActions {
   TRANSFER = "transfer",
   ACCEPT = "accept",
   CLOSE = "close",
-  REOPEN = "reopen"
+  REOPEN = "reopen",
+  SEND = "send",
+  EDIT = "edit",
+  VIEW = "view",
+  IMPORT = "import",
+  EXPORT = "export",
+  START = "start",
+  STOP = "stop",
+  CONNECT = "connect",
+  DISCONNECT = "disconnect",
+  PROMOTE = "promote",
+  DEMOTE = "demote",
+  JOIN = "join",
+  LEAVE = "leave",
+  REVOKE = "revoke",
+  REACT = "react",
+  BLOCK = "block",
+  UNBLOCK = "unblock",
+  SYSTEM = "system"
 }
 
 export enum EntityTypes {
@@ -30,7 +49,11 @@ export enum EntityTypes {
   BACKUP = "backup",
   APITOKEN = "apitoken",
   SETTING = "setting",
-  INTEGRATION = "integration"
+  INTEGRATION = "integration",
+  MESSAGE = "message",
+  GROUP = "group",
+  API_TOKEN = "api_token",
+  CLIENT_STATUS = "client_status"
 }
 
 interface LogRequest {
@@ -40,6 +63,7 @@ interface LogRequest {
   entityType?: EntityTypes | string;
   entityId?: number;
   additionalData?: object;
+  ip?: string;
 }
 
 interface ListRequest {
@@ -47,6 +71,9 @@ interface ListRequest {
   endDate?: string;
   userId?: number;
   action?: string;
+  entityType?: string;
+  ip?: string;
+  searchParam?: string;
   limit: number;
   offset: number;
 }
@@ -62,7 +89,8 @@ export const createActivityLog = async ({
   description,
   entityType,
   entityId,
-  additionalData
+  additionalData,
+  ip
 }: LogRequest): Promise<ActivityLog> => {
   try {
     const log = await ActivityLog.create({
@@ -72,6 +100,7 @@ export const createActivityLog = async ({
       entityType,
       entityId,
       additionalData: additionalData ? JSON.parse(JSON.stringify(additionalData)) : null,
+      ip: ip || null,
       createdAt: new Date(),
       updatedAt: new Date()
     });
@@ -88,7 +117,10 @@ export const listActivityLogs = async ({
   startDate,
   endDate,
   userId,
-  action
+  action,
+  entityType,
+  ip,
+  searchParam
 }: ListRequest): Promise<ListResponse> => {
   const where: any = {};
 
@@ -115,6 +147,22 @@ export const listActivityLogs = async ({
 
   if (action && action !== "") {
     where.action = action;
+  }
+
+  if (entityType && entityType !== "") {
+    where.entityType = entityType;
+  }
+
+  if (ip && ip !== "") {
+    where.ip = { [Op.like]: `%${ip}%` };
+  }
+
+  if (searchParam && searchParam !== "") {
+    where[Op.or] = [
+      { description: { [Op.like]: `%${searchParam}%` } },
+      { action: { [Op.like]: `%${searchParam}%` } },
+      { ip: { [Op.like]: `%${searchParam}%` } }
+    ];
   }
 
   const { count, rows: logs } = await ActivityLog.findAndCountAll({
@@ -153,14 +201,32 @@ export const getEntityDetails = async (
   switch (entityType.toLowerCase()) {
     case EntityTypes.TICKET:
       entityDetails = await Ticket.findByPk(entityId, {
-        attributes: ["id", "status", "unreadMessages", "queueId", "userId"],
+        attributes: ["id", "status", "unreadMessages", "queueId", "userId", "contactId"],
         include: [
           {
             model: Contact,
-            attributes: ["id", "name", "number"]
+            as: "contact",
+            attributes: ["id", "name", "number", "email"]
           }
         ]
       });
+      if (entityDetails) {
+        const plainTicket = entityDetails.get({ plain: true }) as any;
+        entityDetails = {
+          id: plainTicket.id,
+          status: plainTicket.status,
+          unreadMessages: plainTicket.unreadMessages,
+          queueId: plainTicket.queueId,
+          userId: plainTicket.userId,
+          contactId: plainTicket.contactId,
+          contact: plainTicket.contact ? {
+            id: plainTicket.contact.id,
+            name: plainTicket.contact.name,
+            number: plainTicket.contact.number,
+            email: plainTicket.contact.email
+          } : null
+        };
+      }
       break;
     case EntityTypes.CONTACT:
       entityDetails = await Contact.findByPk(entityId, {
@@ -186,6 +252,36 @@ export const getEntityDetails = async (
       entityDetails = await Tag.findByPk(entityId, {
         attributes: ["id", "name", "color"]
       });
+      break;
+    case EntityTypes.MESSAGE:
+    case "message":
+      entityDetails = await Message.findByPk(entityId, {
+        attributes: ["id", "body", "mediaType", "mediaUrl", "fromMe", "isDeleted", "createdAt"],
+        include: [
+          {
+            model: Ticket,
+            attributes: ["id", "status"],
+            include: [
+              {
+                model: Contact,
+                attributes: ["id", "name", "number"]
+              }
+            ]
+          }
+        ]
+      });
+      if (entityDetails) {
+        const plainMessage = entityDetails.get({ plain: true }) as any;
+        entityDetails = {
+          ...plainMessage,
+          bodyPreview: plainMessage.body ? plainMessage.body.substring(0, 100) : null,
+          ticket: plainMessage.ticket ? {
+            id: plainMessage.ticket.id,
+            status: plainMessage.ticket.status,
+            contact: plainMessage.ticket.contact
+          } : null
+        };
+      }
       break;
     default:
       entityDetails = { message: "Entity details not available" };

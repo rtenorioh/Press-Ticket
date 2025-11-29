@@ -3,6 +3,7 @@ import { getIO } from "../libs/socket";
 import { logger } from "../utils/logger";
 import { createBackup, listBackups, restoreBackup, deleteBackup } from "../services/BackupService";
 import { createActivityLog, ActivityActions, EntityTypes } from "../services/ActivityLogService";
+import GetClientIp from "../helpers/GetClientIp";
 
 interface BackupRequest {
   name?: string;
@@ -26,6 +27,8 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     const backupInfo = await createBackup(name);
     
     const logUserId = req.user?.id || 1;
+    
+    const clientIp = GetClientIp(req);
     
     await createActivityLog({
       userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
@@ -80,6 +83,8 @@ export const update = async (req: Request, res: Response): Promise<Response> => 
     
     const logUserId = req.user?.id || 1;
     
+    const clientIp = GetClientIp(req);
+    
     await createActivityLog({
       userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
       action: ActivityActions.UPDATE,
@@ -112,6 +117,8 @@ export const remove = async (req: Request, res: Response): Promise<Response> => 
     const result = await deleteBackup(filename);
     
     const logUserId = req.user?.id || 1;
+    
+    const clientIp = GetClientIp(req);
     
     await createActivityLog({
       userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,

@@ -14,7 +14,13 @@ const useAuth = () => {
     const [user, setUser] = useState({});
     const { socket } = useSocket();
 
-    const handleLogout = useCallback(() => {
+    const handleLogout = useCallback(async () => {
+        try {
+            await api.delete("/auth/logout");
+        } catch (err) {
+            console.error("Erro ao fazer logout:", err);
+        }
+        
         if (socket) {
             socket.emit("logout");
             socket.disconnect();

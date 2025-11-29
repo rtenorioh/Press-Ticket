@@ -11,6 +11,7 @@ import RestartWhatsAppService from "../services/WhatsappService/RestartWhatsAppS
 import ShowWhatsAppService from "../services/WhatsappService/ShowWhatsAppService";
 import UpdateWhatsAppService from "../services/WhatsappService/UpdateWhatsAppService";
 import { createActivityLog, ActivityActions, EntityTypes } from "../services/ActivityLogService";
+import GetClientIp from "../helpers/GetClientIp";
 
 interface WhatsappData {
   name: string;
@@ -58,6 +59,8 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
   StartWhatsAppSession(whatsapp);
   
   const logUserId = req.user?.id || 1;
+  
+  const clientIp = GetClientIp(req);
   
   await createActivityLog({
     userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
@@ -110,6 +113,8 @@ export const update = async (
 
   const logUserId = req.user?.id || 1;
   
+  const clientIp = GetClientIp(req);
+  
   await createActivityLog({
     userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
     action: ActivityActions.UPDATE,
@@ -147,6 +152,8 @@ export const remove = async (
   removeWbot(+whatsappId);
   
   const logUserId = req.user?.id || 1;
+  
+  const clientIp = GetClientIp(req);
   
   await createActivityLog({
     userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,

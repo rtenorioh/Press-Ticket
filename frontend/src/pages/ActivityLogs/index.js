@@ -28,7 +28,13 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  Chip
+  Chip,
+  Card,
+  CardContent,
+  TablePagination,
+  InputAdornment,
+  Collapse,
+  Divider
 } from "@mui/material";
 
 import {
@@ -37,7 +43,15 @@ import {
   Info,
   FilterList,
   Close,
-  Warning
+  Warning,
+  Download,
+  TrendingUp,
+  People,
+  Assessment,
+  ExpandMore,
+  ExpandLess,
+  Language,
+  Computer
 } from "@mui/icons-material";
 
 import { makeStyles } from "@mui/styles";
@@ -123,6 +137,64 @@ const useStyles = makeStyles(theme => ({
   detailsLabel: {
     fontWeight: "bold",
     marginRight: 1
+  },
+  statsCard: {
+    height: "100%",
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 2,
+    background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+    color: "#fff",
+    borderRadius: 2,
+    boxShadow: "0 4px 20px 0 rgba(0,0,0,0.12)"
+  },
+  statsCardGreen: {
+    background: "linear-gradient(135deg, #11998e 0%, #38ef7d 100%)"
+  },
+  statsCardBlue: {
+    background: "linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)"
+  },
+  statsCardOrange: {
+    background: "linear-gradient(135deg, #fa709a 0%, #fee140 100%)"
+  },
+  statsIcon: {
+    fontSize: 48,
+    marginBottom: 1,
+    opacity: 0.9
+  },
+  statsNumber: {
+    fontSize: 32,
+    fontWeight: "bold",
+    marginBottom: 0.5
+  },
+  statsLabel: {
+    fontSize: 14,
+    textTransform: "uppercase",
+    opacity: 0.9
+  },
+  searchField: {
+    marginBottom: 2,
+    backgroundColor: "#fff"
+  },
+  jsonPre: {
+    backgroundColor: "#f5f5f5",
+    padding: 2,
+    borderRadius: 1,
+    overflow: "auto",
+    maxHeight: 400,
+    fontSize: 12,
+    fontFamily: "monospace"
+  },
+  timelineItem: {
+    padding: 1,
+    borderLeft: "3px solid #667eea",
+    marginLeft: 2,
+    marginBottom: 1
+  },
+  exportButton: {
+    marginRight: 1
   }
 }));
 
@@ -161,8 +233,11 @@ const ActivityLogs = () => {
     startDate: null,
     endDate: null,
     userId: "",
-    action: ""
+    action: "",
+    entityType: "",
+    ip: ""
   });
+  const [searchTerm, setSearchTerm] = useState("");
   const [showFilters, setShowFilters] = useState(false);
   const [actions, setActions] = useState([]);
   const [users, setUsers] = useState([]);
@@ -170,13 +245,37 @@ const ActivityLogs = () => {
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [entityDetails, setEntityDetails] = useState(null);
   const [loadingDetails, setLoadingDetails] = useState(false);
+  const [stats, setStats] = useState({
+    totalLogs: 0,
+    uniqueUsers: 0,
+    topAction: "",
+    todayLogs: 0
+  });
+  const [entityTypes, setEntityTypes] = useState([]);
+  const [expandedRow, setExpandedRow] = useState(null);
 
   useEffect(() => {
     loadLogs();
     loadActions();
     loadUsers();
+    loadEntityTypes();
+    loadStats();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, rowsPerPage]);
+
+  // Busca em tempo real
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(() => {
+      if (page === 0) {
+        loadLogs();
+      } else {
+        setPage(0);
+      }
+    }, 500);
+
+    return () => clearTimeout(delayDebounceFn);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchTerm]);
 
   const loadLogs = async () => {
     setLoading(true);
@@ -184,7 +283,8 @@ const ActivityLogs = () => {
       const params = {
         limit: rowsPerPage,
         offset: page * rowsPerPage,
-        ...filters
+        ...filters,
+        searchParam: searchTerm
       };
 
       if (params.startDate) {
@@ -218,6 +318,24 @@ const ActivityLogs = () => {
     try {
       const { data } = await api.get("/users");
       setUsers(data.users);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const loadStats = async () => {
+    try {
+      const { data } = await api.get("/activity-logs/stats");
+      setStats(data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const loadEntityTypes = async () => {
+    try {
+      const { data } = await api.get("/activity-logs/entity-types");
+      setEntityTypes(data);
     } catch (err) {
       console.error(err);
     }
@@ -266,10 +384,47 @@ const ActivityLogs = () => {
       startDate: null,
       endDate: null,
       userId: "",
-      action: ""
+      action: "",
+      entityType: "",
+      ip: ""
     });
+    setSearchTerm("");
     setPage(0);
     loadLogs();
+  };
+
+  const handleExportCSV = () => {
+    try {
+      const headers = ["Usuário", "Ação", "Descrição", "IP", "Entidade", "Data/Hora"];
+      const csvContent = [
+        headers.join(","),
+        ...logs.map(log =>
+          [
+            log.username || "",
+            log.action || "",
+            `"${log.description || ""}"`,
+            log.ip || "",
+            log.entityType ? `${log.entityType} #${log.entityId || ""}` : "",
+            format(new Date(log.createdAt), "dd/MM/yyyy HH:mm:ss")
+          ].join(",")
+        )
+      ].join("\n");
+
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const link = document.createElement("a");
+      const url = URL.createObjectURL(blob);
+      link.setAttribute("href", url);
+      link.setAttribute("download", `activity-logs-${format(new Date(), "yyyyMMdd-HHmmss")}.csv`);
+      link.style.visibility = "hidden";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      toast.success("Logs exportados com sucesso!");
+    } catch (err) {
+      toast.error("Erro ao exportar logs");
+      console.error(err);
+    }
   };
 
   const renderEntityDetails = () => {
@@ -305,6 +460,16 @@ const ActivityLogs = () => {
           <Button
             variant="contained"
             color="primary"
+            onClick={handleExportCSV}
+            startIcon={<Download />}
+            className={classes.exportButton}
+            disabled={logs.length === 0}
+          >
+            Exportar CSV
+          </Button>
+          <Button
+            variant="contained"
+            color="primary"
             onClick={() => setShowFilters(true)}
             startIcon={<FilterList />}
             className={classes.filterButton}
@@ -322,7 +487,58 @@ const ActivityLogs = () => {
           </Button>
         </MainHeaderButtonsWrapper>
       </MainHeader>
+
+      {/* Cards de Estatísticas */}
+      <Grid container spacing={2} style={{ marginBottom: 16 }}>
+        <Grid item xs={12} sm={6} md={3}>
+          <Card className={`${classes.statsCard} ${classes.statsCardBlue}`}>
+            <Assessment className={classes.statsIcon} />
+            <Typography className={classes.statsNumber}>{stats.totalLogs}</Typography>
+            <Typography className={classes.statsLabel}>Total de Logs</Typography>
+          </Card>
+        </Grid>
+        <Grid item xs={12} sm={6} md={3}>
+          <Card className={`${classes.statsCard} ${classes.statsCardGreen}`}>
+            <People className={classes.statsIcon} />
+            <Typography className={classes.statsNumber}>{stats.uniqueUsers}</Typography>
+            <Typography className={classes.statsLabel}>Usuários Ativos</Typography>
+          </Card>
+        </Grid>
+        <Grid item xs={12} sm={6} md={3}>
+          <Card className={`${classes.statsCard} ${classes.statsCardOrange}`}>
+            <TrendingUp className={classes.statsIcon} />
+            <Typography className={classes.statsNumber}>{stats.todayLogs}</Typography>
+            <Typography className={classes.statsLabel}>Logs Hoje</Typography>
+          </Card>
+        </Grid>
+        <Grid item xs={12} sm={6} md={3}>
+          <Card className={`${classes.statsCard}`}>
+            <Computer className={classes.statsIcon} />
+            <Typography className={classes.statsNumber} style={{ fontSize: 20 }}>
+              {stats.topAction || "N/A"}
+            </Typography>
+            <Typography className={classes.statsLabel}>Ação Mais Comum</Typography>
+          </Card>
+        </Grid>
+      </Grid>
+
       <Paper className={classes.mainPaper} variant="outlined">
+        {/* Campo de Busca em Tempo Real */}
+        <TextField
+          className={classes.searchField}
+          fullWidth
+          variant="outlined"
+          placeholder="Buscar em logs (descrição, usuário, IP...)"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <Search />
+              </InputAdornment>
+            )
+          }}
+        />
         <TableContainer>
           <Table>
             <TableHead>
@@ -330,6 +546,7 @@ const ActivityLogs = () => {
                 <TableCell>{t("activityLogs.user")}</TableCell>
                 <TableCell>{t("activityLogs.action")}</TableCell>
                 <TableCell>{t("activityLogs.description")}</TableCell>
+                <TableCell>IP</TableCell>
                 <TableCell>{t("activityLogs.entity")}</TableCell>
                 <TableCell>{t("activityLogs.timestamp")}</TableCell>
                 <TableCell align="center">{t("activityLogs.details")}</TableCell>
@@ -338,13 +555,13 @@ const ActivityLogs = () => {
             <TableBody>
               {loading ? (
                 <TableRow>
-                  <TableCell colSpan={6} align="center">
+                  <TableCell colSpan={7} align="center">
                     <CircularProgress />
                   </TableCell>
                 </TableRow>
               ) : logs.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6}>
+                  <TableCell colSpan={7}>
                     <Box className={classes.noLogsMessage}>
                       <Warning className={classes.warningIcon} />
                       <Typography variant="body1">
@@ -366,6 +583,16 @@ const ActivityLogs = () => {
                       />
                     </TableCell>
                     <TableCell>{log.description}</TableCell>
+                    <TableCell>
+                      <Tooltip title={log.ip || "N/A"} arrow>
+                        <Chip
+                          icon={<Language />}
+                          label={log.ip || "N/A"}
+                          size="small"
+                          variant="outlined"
+                        />
+                      </Tooltip>
+                    </TableCell>
                     <TableCell>
                       {log.entityType && (
                         <Typography variant="body2">
@@ -392,6 +619,22 @@ const ActivityLogs = () => {
             </TableBody>
           </Table>
         </TableContainer>
+        
+        {/* Paginação */}
+        <TablePagination
+          component="div"
+          count={count}
+          page={page}
+          onPageChange={(e, newPage) => setPage(newPage)}
+          rowsPerPage={rowsPerPage}
+          onRowsPerPageChange={(e) => {
+            setRowsPerPage(parseInt(e.target.value, 10));
+            setPage(0);
+          }}
+          rowsPerPageOptions={[10, 25, 50, 100]}
+          labelRowsPerPage="Logs por página:"
+          labelDisplayedRows={({ from, to, count }) => `${from}-${to} de ${count}`}
+        />
       </Paper>
 
       <Dialog
@@ -464,6 +707,40 @@ const ActivityLogs = () => {
                   ))}
                 </Select>
               </FormControl>
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <FormControl fullWidth variant="outlined">
+                <InputLabel>Tipo de Entidade</InputLabel>
+                <Select
+                  value={filters.entityType}
+                  onChange={(e) => handleFilterChange("entityType", e.target.value)}
+                  label="Tipo de Entidade"
+                >
+                  <MenuItem value="">Todos os Tipos</MenuItem>
+                  {entityTypes.map((type) => (
+                    <MenuItem key={type} value={type}>
+                      {type}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <TextField
+                fullWidth
+                variant="outlined"
+                label="Filtrar por IP"
+                value={filters.ip}
+                onChange={(e) => handleFilterChange("ip", e.target.value)}
+                placeholder="Ex: 192.168.1.1"
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <Language />
+                    </InputAdornment>
+                  )
+                }}
+              />
             </Grid>
           </Grid>
         </DialogContent>
@@ -549,13 +826,19 @@ const ActivityLogs = () => {
                 )}
               </Grid>
               
-              {selectedLog.details && (
+              {selectedLog.additionalData && (
                 <Grid item xs={12}>
                   <Typography variant="h6" className={classes.detailsTitle}>
-                    {t("activityLogs.additionalDetails")}
+                    Dados Adicionais
                   </Typography>
-                  <Box className={classes.detailsItem}>
-                    <pre>{JSON.stringify(JSON.parse(selectedLog.details), null, 2)}</pre>
+                  <Box className={classes.jsonPre}>
+                    <pre>{JSON.stringify(
+                      typeof selectedLog.additionalData === 'string' 
+                        ? JSON.parse(selectedLog.additionalData) 
+                        : selectedLog.additionalData, 
+                      null, 
+                      2
+                    )}</pre>
                   </Box>
                 </Grid>
               )}

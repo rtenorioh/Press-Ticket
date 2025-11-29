@@ -8,6 +8,7 @@ import ListApiTokenService from "../services/ApiTokenService/ListApiTokenService
 import ListPermissionsService from "../services/ApiTokenService/ListPermissionsService";
 import ShowApiTokenService from "../services/ApiTokenService/ShowApiTokenService";
 import { createActivityLog, ActivityActions, EntityTypes } from "../services/ActivityLogService";
+import GetClientIp from "../helpers/GetClientIp";
 
 export const index = async (req: Request, res: Response): Promise<Response> => {
     const { pageNumber, pageSize } = req.query;
@@ -54,6 +55,7 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     });
 
     const logUserId = req.user?.id || 1;
+    const clientIp = GetClientIp(req);
     
     await createActivityLog({
         userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
@@ -61,6 +63,7 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
         description: `Token de API "${token.name}" criado`,
         entityType: EntityTypes.APITOKEN,
         entityId: token.id,
+        ip: clientIp,
         additionalData: {
             name: token.name,
             permissions: permissions
@@ -86,6 +89,7 @@ export const remove = async (req: Request, res: Response): Promise<Response> => 
     await DeleteApiTokenService(+id);
     
     const logUserId = req.user?.id || 1;
+    const clientIp = GetClientIp(req);
     
     await createActivityLog({
         userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
@@ -93,6 +97,7 @@ export const remove = async (req: Request, res: Response): Promise<Response> => 
         description: `Token de API "${tokenToDelete.name}" excluído`,
         entityType: EntityTypes.APITOKEN,
         entityId: +id,
+        ip: clientIp,
         additionalData: {
             name: tokenToDelete.name
         }

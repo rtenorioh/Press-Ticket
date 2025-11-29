@@ -8,6 +8,9 @@ interface ActivityLogRequest {
   endDate?: string;
   userId?: number;
   action?: string;
+  entityType?: string;
+  ip?: string;
+  searchParam?: string;
   limit?: number;
   offset?: number;
 }
@@ -19,6 +22,9 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
       endDate,
       userId,
       action,
+      entityType,
+      ip,
+      searchParam,
       limit,
       offset
     } = req.query as unknown as ActivityLogRequest;
@@ -28,6 +34,9 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
       endDate,
       userId: userId ? Number(userId) : undefined,
       action,
+      entityType,
+      ip,
+      searchParam,
       limit: limit ? Number(limit) : 10,
       offset: offset ? Number(offset) : 0
     });
@@ -86,6 +95,55 @@ export const entities = async (req: Request, res: Response): Promise<Response> =
     return res.status(200).json(entityTypes);
   } catch (err: any) {
     logger.error(`Erro ao listar tipos de entidades: ${err.message}`);
+    return res.status(500).json({ error: err.message });
+  }
+};
+
+export const stats = async (req: Request, res: Response): Promise<Response> => {
+  try {
+    const ActivityLog = require("../models/ActivityLog").default;
+    const User = require("../models/User").default;
+    const { Op } = require("sequelize");
+    const { startOfDay } = require("date-fns");
+
+    // Total de logs
+    const totalLogs = await ActivityLog.count();
+
+    // Usuários únicos que geraram logs
+    const uniqueUsers = await ActivityLog.count({
+      distinct: true,
+      col: 'userId'
+    });
+
+    // Ação mais comum
+    const topActionResult = await ActivityLog.findAll({
+      attributes: [
+        'action',
+        [require("sequelize").fn('COUNT', 'action'), 'count']
+      ],
+      group: ['action'],
+      order: [[require("sequelize").literal('count'), 'DESC']],
+      limit: 1
+    });
+    const topAction = topActionResult.length > 0 ? topActionResult[0].action : 'N/A';
+
+    // Logs de hoje
+    const todayLogs = await ActivityLog.count({
+      where: {
+        createdAt: {
+          [Op.gte]: startOfDay(new Date())
+        }
+      }
+    });
+
+    return res.status(200).json({
+      totalLogs,
+      uniqueUsers,
+      topAction,
+      todayLogs
+    });
+  } catch (err: any) {
+    logger.error(`Erro ao buscar estatísticas: ${err.message}`);
     return res.status(500).json({ error: err.message });
   }
 };

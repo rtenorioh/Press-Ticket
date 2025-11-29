@@ -9,9 +9,11 @@ import User from "../models/User";
 import { RefreshTokenService } from "../services/AuthServices/RefreshTokenService";
 import AuthUserService from "../services/UserServices/AuthUserService";
 import { createActivityLog, ActivityActions, EntityTypes } from "../services/ActivityLogService";
+import GetClientIp from "../helpers/GetClientIp";
 
 export const store = async (req: Request, res: Response): Promise<Response> => {
   const { email, password } = req.body;
+  const clientIp = GetClientIp(req);
 
   const { token, serializedUser, refreshToken } = await AuthUserService({
     email,
@@ -24,6 +26,7 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     description: `Usuário ${serializedUser.name} realizou login no sistema`,
     entityType: EntityTypes.USER,
     entityId: serializedUser.id,
+    ip: clientIp,
     additionalData: { email: serializedUser.email }
   });
 
@@ -60,20 +63,27 @@ export const remove = async (
   res: Response
 ): Promise<Response> => {
   const { id } = req.user;
+  const clientIp = GetClientIp(req);
   
   if (id) {
     const user = await User.findByPk(id);
     if (user) {
       await user.update({ online: false });
       
-      await createActivityLog({
-        userId: user.id,
-        action: ActivityActions.LOGOUT,
-        description: `Usuário ${user.name} realizou logout do sistema`,
-        entityType: EntityTypes.USER,
-        entityId: user.id,
-        additionalData: {}
-      });
+      // LOG: Logout
+      try {
+        await createActivityLog({
+          userId: user.id,
+          action: ActivityActions.LOGOUT,
+          description: `Usuário ${user.name} realizou logout do sistema`,
+          entityType: EntityTypes.USER,
+          entityId: user.id,
+          ip: clientIp,
+          additionalData: {}
+        });
+      } catch (error) {
+        console.error('Erro ao criar log de logout:', error);
+      }
       
       const io = require("../libs/socket").getIO();
       io.emit("userSessionUpdate", {
@@ -131,6 +141,25 @@ export const forgotPassword = async (req: Request, res: Response): Promise<Respo
     throw new AppError("Erro ao enviar e-mail de redefinição de senha. Tente novamente mais tarde.", 500);
   }
 
+  // LOG: Solicitação de redefinição de senha
+  const clientIp = GetClientIp(req);
+  try {
+    await createActivityLog({
+      userId: user.id,
+      action: ActivityActions.UPDATE,
+      description: `Usuário ${user.name} solicitou redefinição de senha`,
+      entityType: EntityTypes.USER,
+      entityId: user.id,
+      ip: clientIp,
+      additionalData: {
+        email: user.email,
+        action: 'forgot_password'
+      }
+    });
+  } catch (error) {
+    console.error('Erro ao criar log de solicitação de senha:', error);
+  }
+
   return res.status(200).json({ message: "E-mail enviado com sucesso." });
 };
 
@@ -152,6 +181,25 @@ export const resetPassword = async (req: Request, res: Response): Promise<Respon
   user.passwordResetToken = null;
   user.passwordResetExpires = null;
   await user.save();
+
+  // LOG: Senha redefinida
+  const clientIp = GetClientIp(req);
+  try {
+    await createActivityLog({
+      userId: user.id,
+      action: ActivityActions.UPDATE,
+      description: `Usuário ${user.name} redefiniu a senha`,
+      entityType: EntityTypes.USER,
+      entityId: user.id,
+      ip: clientIp,
+      additionalData: {
+        email: user.email,
+        action: 'reset_password'
+      }
+    });
+  } catch (error) {
+    console.error('Erro ao criar log de redefinição de senha:', error);
+  }
 
   return res.status(200).json({ message: "Senha redefinida com sucesso." });
 };

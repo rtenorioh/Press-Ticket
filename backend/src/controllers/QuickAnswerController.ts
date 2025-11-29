@@ -11,6 +11,7 @@ import DeleteAllQuickAnswerService from "../services/QuickAnswerService/DeleteAl
 
 import AppError from "../errors/AppError";
 import { createActivityLog, ActivityActions, EntityTypes } from "../services/ActivityLogService";
+import GetClientIp from "../helpers/GetClientIp";
 
 type IndexQuery = {
   searchParam: string;
@@ -58,6 +59,8 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
   });
 
   const logUserId = req.user?.id || 1;
+  
+  const clientIp = GetClientIp(req);
   
   await createActivityLog({
     userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
@@ -119,6 +122,8 @@ export const update = async (
 
   const logUserId = req.user?.id || 1;
   
+  const clientIp = GetClientIp(req);
+  
   await createActivityLog({
     userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
     action: ActivityActions.UPDATE,
@@ -149,6 +154,8 @@ export const remove = async (
   
   const logUserId = req.user?.id || 1;
   
+  const clientIp = GetClientIp(req);
+  
   await createActivityLog({
     userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
     action: ActivityActions.DELETE,
@@ -178,12 +185,16 @@ export const removeAll = async (
   
   const logUserId = req.user?.id || 1;
   
+  const clientIp = GetClientIp(req);
+  
   await createActivityLog({
     userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
     action: ActivityActions.DELETE,
     description: `Todas as respostas rápidas foram excluídas`,
     entityType: EntityTypes.QUICKANSWER,
     entityId: 0,
+    ip: clientIp,
+
     additionalData: {
       massDelete: true
     }

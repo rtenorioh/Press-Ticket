@@ -41,6 +41,9 @@ class ActivityLog extends Model<ActivityLog> {
   @Column(DataType.JSON)
   additionalData: object;
 
+  @Column
+  ip: string;
+
   @CreatedAt
   createdAt: Date;
 

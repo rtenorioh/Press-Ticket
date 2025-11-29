@@ -22,6 +22,7 @@ import SyncTagsService from "../services/TagServices/SyncTagsService";
 import { createActivityLog, ActivityActions, EntityTypes } from "../services/ActivityLogService";
 import Whatsapp from "../models/Whatsapp";
 import { getWbot } from "../libs/wbot";
+import GetClientIp from "../helpers/GetClientIp";
 
 type IndexQuery = {
   searchParam: string;
@@ -106,12 +107,14 @@ export const blockContact = async (
   }
 
   const logUserId = req.user?.id || 1;
+  const clientIp = GetClientIp(req);
   await createActivityLog({
     userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
     action: ActivityActions.UPDATE,
     description: `Contato ${contact.name} (${contact.number}) bloqueado no WhatsApp (sessão ${sessionId})`,
     entityType: EntityTypes.CONTACT,
     entityId: contact.id,
+    ip: clientIp,
     additionalData: { whatsappId: sessionId }
   });
 
@@ -441,6 +444,7 @@ export const removeAll = async (
 ): Promise<Response> => {
   await DeleteAllContactService();
   const logUserId = req.user?.id || 1;
+  const clientIp = GetClientIp(req);
   
   await createActivityLog({
     userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
@@ -448,6 +452,7 @@ export const removeAll = async (
     description: `Todos os contatos foram excluídos`,
     entityType: EntityTypes.CONTACT,
     entityId: 0,
+    ip: clientIp,
     additionalData: {
       massDelete: true
     }
@@ -511,6 +516,8 @@ export const exportContacts = async (
   res: Response
 ): Promise<Response> => {
   const { searchParam, tags, isGroup, status } = req.query as IndexQuery;
+  const logUserId = req.user?.id || 1;
+  const clientIp = GetClientIp(req);
 
   const tagIds = tags ? tags.split(",").map(tag => Number(tag)) : [];
 
@@ -560,6 +567,27 @@ export const exportContacts = async (
         lastContactAt: contact.lastContactAt ? new Date(contact.lastContactAt).toLocaleDateString('pt-BR') : ""
       };
     });
+
+    // LOG: Exportar contatos
+    try {
+      await createActivityLog({
+        userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
+        action: ActivityActions.EXPORT,
+        description: `${contacts.length} contato(s) exportado(s)`,
+        entityType: EntityTypes.CONTACT,
+        entityId: 0,
+        ip: clientIp,
+        additionalData: {
+          contactCount: contacts.length,
+          hasSearchParam: !!searchParam,
+          hasTags: tagIds.length > 0,
+          isGroup: isGroup === 'true',
+          status: status || 'all'
+        }
+      });
+    } catch (error) {
+      console.error('Erro ao criar log de exportar contatos:', error);
+    }
 
     return res.status(200).json(exportData);
   } catch (err) {
