@@ -41,6 +41,7 @@ import HistoryIcon from "@mui/icons-material/History";
 import NetworkCheckIcon from "@mui/icons-material/NetworkCheck";
 import QueueIcon from "@mui/icons-material/Queue";
 import QueueMonitorIcon from '@mui/icons-material/Assessment';
+import PeopleAltIcon from '@mui/icons-material/PeopleAlt';
 import SystemHealthIcon from '@mui/icons-material/HealthAndSafety';
 import MonitorHeartIcon from '@mui/icons-material/MonitorHeart';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
@@ -273,6 +274,10 @@ const MainListItems = (props) => {
   }, [whatsApps]);
 
   useEffect(() => {
+    if (user?.profile?.toUpperCase() !== "MASTERADMIN") {
+      return;
+    }
+
     const checkVersion = async () => {
       try {
         const { data } = await api.get("/version");
@@ -284,7 +289,6 @@ const MainListItems = (props) => {
           setLibWarning(false);
         }
       } catch (err) {
-        console.error("Erro ao verificar versão:", err);
         setSystemWarning(false);
         setLibWarning(false);
       }
@@ -295,7 +299,7 @@ const MainListItems = (props) => {
     const interval = setInterval(checkVersion, 24 * 60 * 60 * 1000);
     
     return () => clearInterval(interval);
-  }, []);
+  }, [user]);
 
   return (
     <div onClick={drawerClose ? drawerClose : undefined}>
@@ -423,6 +427,13 @@ const MainListItems = (props) => {
                 icon={<QueueMonitorIcon />}
                 active={location.pathname === '/queue-monitor'}
                 drawerClose={drawerClose}
+              />
+              <ListItemLink
+                to="user-monitor"
+                primary={t("mainDrawer.listItems.userMonitor")}
+                icon={<PeopleAltIcon />}
+                active={location.pathname === '/user-monitor'}
+                drawerClose={drawerClose}
               />  
               <ListItemLink
                 to="/settings"
@@ -530,28 +541,32 @@ const MainListItems = (props) => {
                 active={location.pathname === '/activity-logs'}
                 drawerClose={drawerClose}
               />
-              <ListItemLink
-                to="system-update"
-                primary={t("mainDrawer.listItems.systemUpdate")}
-                icon={
-                  <StyledBadge badgeContent={systemWarning ? "!" : 0} color="error" overlap="rectangular">
-                    <SystemUpdateAltIcon />
-                  </StyledBadge>
-                }
-                active={location.pathname === '/system-update'}
-                drawerClose={drawerClose}
-              />
-              <ListItemLink
-                to="versionCheck"
-                primary={t("mainDrawer.listItems.versionCheck")}
-                icon={
-                  <StyledBadge badgeContent={libWarning ? "!" : 0} color="error" overlap="rectangular">
-                    <SystemUpdateIcon />
-                  </StyledBadge>
-                }
-                active={location.pathname === '/versionCheck'}
-                drawerClose={drawerClose}
-              />
+              {user?.profile?.toUpperCase() === "MASTERADMIN" && (
+                <>
+                  <ListItemLink
+                    to="system-update"
+                    primary={t("mainDrawer.listItems.systemUpdate")}
+                    icon={
+                      <StyledBadge badgeContent={systemWarning ? "!" : 0} color="error" overlap="rectangular">
+                        <SystemUpdateAltIcon />
+                      </StyledBadge>
+                    }
+                    active={location.pathname === '/system-update'}
+                    drawerClose={drawerClose}
+                  />
+                  <ListItemLink
+                    to="versionCheck"
+                    primary={t("mainDrawer.listItems.versionCheck")}
+                    icon={
+                      <StyledBadge badgeContent={libWarning ? "!" : 0} color="error" overlap="rectangular">
+                        <SystemUpdateIcon />
+                      </StyledBadge>
+                    }
+                    active={location.pathname === '/versionCheck'}
+                    drawerClose={drawerClose}
+                  />
+                </>
+              )}
             </>
           )}
         />

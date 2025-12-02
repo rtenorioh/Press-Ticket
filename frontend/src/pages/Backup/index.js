@@ -28,7 +28,10 @@ import {
   Fade,
   useMediaQuery,
   useTheme,
-  alpha
+  alpha,
+  Chip,
+  Card,
+  CardContent
 } from "@mui/material";
 
 import {
@@ -39,10 +42,13 @@ import {
   Refresh,
   Warning,
   CloudUpload,
-  CloudDownload
+  CloudDownload,
+  Storage as StorageIcon,
+  Schedule as ScheduleIcon,
+  FolderZip as FolderZipIcon
 } from "@mui/icons-material";
 
-import { styled } from "@mui/material/styles";
+import { styled, keyframes } from "@mui/material/styles";
 import { green, red, blue } from "@mui/material/colors";
 
 import { AuthContext } from "../../context/Auth/AuthContext";
@@ -52,14 +58,56 @@ import MainHeaderButtonsWrapper from "../../components/MainHeaderButtonsWrapper"
 import Title from "../../components/Title";
 import api from "../../services/api";
 
+// Animações
+const fadeIn = keyframes`
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+`;
+
+const pulse = keyframes`
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+`;
+
 const BackupPaper = styled(Paper)(({ theme }) => ({
   flex: 1,
   padding: theme.spacing(3),
-  margin: theme.spacing(1),
-  overflowY: "auto",
-  borderRadius: theme.shape.borderRadius * 2,
-  boxShadow: "0 3px 10px rgba(0, 0, 0, 0.08)",
-  ...theme.scrollbarStyles
+  background: theme.palette.mode === 'dark' 
+    ? `linear-gradient(135deg, ${alpha(theme.palette.primary.dark, 0.1)} 0%, ${alpha(theme.palette.background.paper, 0.9)} 100%)`
+    : `linear-gradient(135deg, ${alpha(theme.palette.primary.light, 0.05)} 0%, ${theme.palette.background.paper} 100%)`,
+  backdropFilter: 'blur(10px)',
+  borderRadius: theme.spacing(2),
+  boxShadow: theme.palette.mode === 'dark'
+    ? `0 8px 32px 0 ${alpha('#000', 0.37)}`
+    : `0 8px 32px 0 ${alpha(theme.palette.primary.main, 0.15)}`,
+  animation: `${fadeIn} 0.5s ease-out`,
+  overflowY: 'auto',
+  maxHeight: 'calc(100vh - 180px)',
+  '&::-webkit-scrollbar': {
+    width: 8,
+  },
+  '&::-webkit-scrollbar-track': {
+    background: alpha(theme.palette.divider, 0.1),
+    borderRadius: 4,
+  },
+  '&::-webkit-scrollbar-thumb': {
+    background: alpha(theme.palette.primary.main, 0.3),
+    borderRadius: 4,
+    '&:hover': {
+      background: alpha(theme.palette.primary.main, 0.5),
+    }
+  }
+}));
+
+const HeaderSection = styled(Box)(({ theme }) => ({
+  marginBottom: theme.spacing(3),
+  padding: theme.spacing(3),
+  background: theme.palette.mode === 'dark'
+    ? `linear-gradient(135deg, ${alpha(theme.palette.primary.dark, 0.2)}, ${alpha(theme.palette.background.paper, 0.1)})`
+    : `linear-gradient(135deg, ${alpha(theme.palette.primary.light, 0.1)}, ${alpha('#fff', 0.5)})`,
+  borderRadius: theme.spacing(2),
+  backdropFilter: 'blur(10px)',
+  boxShadow: `0 4px 16px ${alpha(theme.palette.primary.main, 0.1)}`,
 }));
 
 const ActionButtons = styled(Box)(({ theme }) => ({
@@ -71,39 +119,100 @@ const ActionButtons = styled(Box)(({ theme }) => ({
 
 const StyledIconButton = styled(IconButton)(({ theme, color }) => ({
   backgroundColor: alpha(theme.palette[color || "primary"].main, 0.1),
-  transition: "all 0.2s",
+  border: `1.5px solid ${alpha(theme.palette[color || "primary"].main, 0.3)}`,
+  transition: "all 0.3s ease",
   "&:hover": {
-    backgroundColor: alpha(theme.palette[color || "primary"].main, 0.2),
-    transform: "translateY(-2px)"
+    backgroundColor: theme.palette[color || "primary"].main,
+    color: '#fff',
+    transform: "translateY(-2px) scale(1.05)",
+    boxShadow: `0 4px 12px ${alpha(theme.palette[color || "primary"].main, 0.4)}`
   }
 }));
 
 const CreateBackupButton = styled(Button)(({ theme }) => ({
-  borderRadius: theme.shape.borderRadius * 1.5,
-  boxShadow: "0 2px 8px rgba(0, 0, 0, 0.15)",
-  transition: "all 0.2s",
-  "&:hover": {
-    transform: "translateY(-2px)",
-    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.2)"
+  borderRadius: theme.spacing(2),
+  padding: theme.spacing(1.5, 3),
+  fontWeight: 600,
+  textTransform: 'none',
+  background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.primary.dark})`,
+  boxShadow: `0 4px 12px ${alpha(theme.palette.primary.main, 0.3)}`,
+  transition: 'all 0.3s ease',
+  '&:hover': {
+    transform: 'translateY(-2px)',
+    boxShadow: `0 6px 20px ${alpha(theme.palette.primary.main, 0.4)}`,
+    background: `linear-gradient(135deg, ${theme.palette.primary.dark}, ${theme.palette.primary.main})`,
+  },
+  '&:disabled': {
+    background: theme.palette.action.disabledBackground,
   }
 }));
 
 const InputContainer = styled(Paper)(({ theme }) => ({
   padding: theme.spacing(3),
-  borderRadius: theme.shape.borderRadius * 2,
-  boxShadow: "0 2px 8px rgba(0, 0, 0, 0.06)",
-  marginBottom: theme.spacing(3),
-  backgroundColor: alpha(theme.palette.background.paper, 0.8),
-  backdropFilter: "blur(10px)"
+  borderRadius: theme.spacing(2),
+  background: theme.palette.mode === 'dark'
+    ? `linear-gradient(135deg, ${alpha(theme.palette.background.paper, 0.8)}, ${alpha(theme.palette.background.default, 0.6)})`
+    : `linear-gradient(135deg, ${alpha('#fff', 0.95)}, ${alpha(theme.palette.grey[50], 0.8)})`,
+  backdropFilter: "blur(10px)",
+  boxShadow: `0 4px 16px ${alpha(theme.palette.primary.main, 0.1)}`,
+  border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+  marginBottom: theme.spacing(3)
+}));
+
+const StyledTextField = styled(TextField)(({ theme }) => ({
+  '& .MuiOutlinedInput-root': {
+    background: theme.palette.mode === 'dark'
+      ? alpha(theme.palette.background.paper, 0.8)
+      : alpha('#fff', 0.9),
+    borderRadius: theme.spacing(2),
+    transition: 'all 0.3s ease',
+    '&:hover': {
+      background: theme.palette.mode === 'dark'
+        ? alpha(theme.palette.background.paper, 0.9)
+        : '#fff',
+      transform: 'translateY(-2px)',
+      boxShadow: `0 4px 12px ${alpha(theme.palette.primary.main, 0.2)}`,
+    },
+    '&.Mui-focused': {
+      background: '#fff',
+      boxShadow: `0 4px 20px ${alpha(theme.palette.primary.main, 0.3)}`,
+    }
+  }
 }));
 
 const StyledTableContainer = styled(TableContainer)(({ theme }) => ({
-  borderRadius: theme.shape.borderRadius * 2,
-  boxShadow: "0 2px 8px rgba(0, 0, 0, 0.06)",
+  borderRadius: theme.spacing(2),
+  background: theme.palette.mode === 'dark'
+    ? alpha(theme.palette.background.paper, 0.6)
+    : alpha('#fff', 0.8),
+  backdropFilter: 'blur(10px)',
   overflow: "hidden",
-  "& .MuiTableCell-head": {
-    backgroundColor: alpha(theme.palette.primary.main, 0.05),
-    fontWeight: 600
+  border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+  boxShadow: `0 4px 16px ${alpha(theme.palette.primary.main, 0.1)}`
+}));
+
+const StyledTableHead = styled(TableHead)(({ theme }) => ({
+  background: theme.palette.mode === 'dark'
+    ? `linear-gradient(135deg, ${alpha(theme.palette.primary.dark, 0.3)}, ${alpha(theme.palette.primary.main, 0.2)})`
+    : `linear-gradient(135deg, ${alpha(theme.palette.primary.light, 0.2)}, ${alpha(theme.palette.primary.main, 0.1)})`,
+  '& .MuiTableCell-head': {
+    color: theme.palette.primary.main,
+    fontWeight: 700,
+    fontSize: '0.875rem',
+    textTransform: 'uppercase',
+    letterSpacing: '0.5px',
+    borderBottom: `2px solid ${alpha(theme.palette.primary.main, 0.2)}`,
+  }
+}));
+
+const StyledTableRow = styled(TableRow)(({ theme }) => ({
+  transition: 'all 0.2s ease',
+  '&:hover': {
+    background: theme.palette.mode === 'dark'
+      ? alpha(theme.palette.primary.main, 0.08)
+      : alpha(theme.palette.primary.main, 0.04),
+    transform: 'scale(1.01)',
+    boxShadow: `0 2px 8px ${alpha(theme.palette.primary.main, 0.1)}`,
   }
 }));
 
@@ -111,16 +220,18 @@ const NoBackupsContainer = styled(Box)(({ theme }) => ({
   display: "flex",
   justifyContent: "center",
   alignItems: "center",
-  padding: theme.spacing(6),
+  padding: theme.spacing(8),
   flexDirection: "column",
-  color: theme.palette.text.secondary
+  color: theme.palette.text.secondary,
+  animation: `${fadeIn} 0.8s ease-out`
 }));
 
 const WarningIcon = styled(Warning)(({ theme }) => ({
   color: theme.palette.warning.main,
-  fontSize: 64,
+  fontSize: 80,
   marginBottom: theme.spacing(2),
-  opacity: 0.7
+  opacity: 0.6,
+  animation: `${pulse} 2s ease-in-out infinite`
 }));
 
 const Backup = () => {
@@ -259,11 +370,46 @@ const Backup = () => {
       <BackupPaper elevation={0}>
         <Grid container spacing={3}>
           <Grid item xs={12}>
+            <HeaderSection>
+              <Box display="flex" alignItems="center" gap={2} mb={2}>
+                <Box
+                  sx={{
+                    width: 56,
+                    height: 56,
+                    borderRadius: '50%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    background: theme => `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.primary.dark})`,
+                    boxShadow: theme => `0 4px 20px ${alpha(theme.palette.primary.main, 0.4)}`,
+                  }}
+                >
+                  <StorageIcon sx={{ color: '#fff', fontSize: '2rem' }} />
+                </Box>
+                <Box flex={1}>
+                  <Typography variant="h4" fontWeight={700} gutterBottom>
+                    💾 Gerenciamento de Backups
+                  </Typography>
+                  <Typography variant="body2" color="textSecondary">
+                    Crie, restaure e gerencie backups do banco de dados de forma segura
+                  </Typography>
+                </Box>
+                {backups.length > 0 && (
+                  <Chip 
+                    icon={<FolderZipIcon />}
+                    label={`${backups.length} Backup${backups.length !== 1 ? 's' : ''}`}
+                    color="primary"
+                    sx={{ fontWeight: 600 }}
+                  />
+                )}
+              </Box>
+            </HeaderSection>
+
             <Fade in={true} timeout={800}>
               <InputContainer elevation={0}>
                 <Grid container spacing={2} alignItems="center">
                   <Grid item xs={12} md={8}>
-                    <TextField
+                    <StyledTextField
                       fullWidth
                       label={t("backup.nameLabel")}
                       placeholder={t("backup.namePlaceholder")}
@@ -271,11 +417,6 @@ const Backup = () => {
                       onChange={(e) => setBackupName(e.target.value)}
                       variant="outlined"
                       disabled={creatingBackup}
-                      InputProps={{
-                        sx: {
-                          borderRadius: theme.shape.borderRadius * 1.5
-                        }
-                      }}
                     />
                   </Grid>
                   <Grid item xs={12} md={4}>
@@ -308,14 +449,14 @@ const Backup = () => {
             <Fade in={true} timeout={1000}>
               <StyledTableContainer component={Paper} elevation={0}>
                 <Table>
-                  <TableHead>
+                  <StyledTableHead>
                     <TableRow>
                       <TableCell>{t("backup.filename")}</TableCell>
                       <TableCell>{t("backup.size")}</TableCell>
                       <TableCell>{isMobile ? "Data" : t("backup.createdAt")}</TableCell>
                       <TableCell align="center">{t("backup.actions")}</TableCell>
                     </TableRow>
-                  </TableHead>
+                  </StyledTableHead>
                   <TableBody>
                     {loading ? (
                       <TableRow>
@@ -338,7 +479,7 @@ const Backup = () => {
                       </TableRow>
                     ) : (
                       backups.map((backup) => (
-                        <TableRow key={backup.filename} hover>
+                        <StyledTableRow key={backup.filename}>
                           <TableCell sx={{ maxWidth: { xs: 120, md: 'none' }, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                             {backup.filename}
                           </TableCell>
@@ -400,7 +541,7 @@ const Backup = () => {
                               </Tooltip>
                             </ActionButtons>
                           </TableCell>
-                        </TableRow>
+                        </StyledTableRow>
                       ))
                     )}
                   </TableBody>

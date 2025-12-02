@@ -2,7 +2,6 @@ import Avatar from '@mui/material/Avatar';
 import Badge from '@mui/material/Badge';
 import Box from '@mui/material/Box';
 import Chip from '@mui/material/Chip';
-import Divider from '@mui/material/Divider';
 import IconButton from '@mui/material/IconButton';
 import ListItem from '@mui/material/ListItem';
 import ListItemAvatar from '@mui/material/ListItemAvatar';
@@ -44,14 +43,16 @@ import WhatsMarked from "react-whatsmarked";
 const StyledListItem = styled(ListItem)(({ theme }) => ({
 	position: "relative",
 	cursor: "pointer",
-	borderLeft: '5px solid transparent',
+	borderLeft: '4px solid transparent',
 	borderRadius: theme.shape.borderRadius,
-	margin: '6px 0',
+	margin: '1px 0',
+	padding: '3px 4px',
+	minHeight: '48px',
 	transition: 'all 0.2s ease',
 	backgroundColor: theme.palette.background.paper,
 	boxShadow: theme.shadows[1],
 	'&.Mui-selected': {
-		borderLeft: `5px solid ${theme.palette.primary.main}`,
+		borderLeft: `4px solid ${theme.palette.primary.main}`,
 		backgroundColor: theme.palette.mode === 'dark' 
 			? theme.palette.action.selected 
 			: theme.palette.primary.light + '15',
@@ -59,50 +60,53 @@ const StyledListItem = styled(ListItem)(({ theme }) => ({
 	},
 	'&:hover': {
 		backgroundColor: theme.palette.action.hover,
-		transform: 'translateY(-2px)',
-		boxShadow: theme.shadows[3]
+		transform: 'translateY(-1px)',
+		boxShadow: theme.shadows[2]
 	}
 }));
 
 const AvatarContainer = styled(ListItemAvatar)(({ theme }) => ({
 	position: "relative",
+	minWidth: '42px',
+	marginLeft: theme.spacing(1),
+	marginRight: theme.spacing(0.75)
 }));
 
 const TicketAvatar = styled(Avatar)(({ theme }) => ({
-	width: "50px",
-	height: "50px",
+	width: "36px",
+	height: "36px",
 	borderRadius: "25%",
 	transition: 'all 0.3s ease',
-	border: `2px solid ${theme.palette.primary.light}`,
-	boxShadow: theme.shadows[2],
+	border: `1.5px solid ${theme.palette.primary.light}`,
+	boxShadow: theme.shadows[1],
 	'&:hover': {
 		transform: 'scale(1.05)',
-		boxShadow: theme.shadows[4],
-		border: `2px solid ${theme.palette.primary.main}`
+		boxShadow: theme.shadows[2],
+		border: `1.5px solid ${theme.palette.primary.main}`
 	}
 }));
 
 const StyledBadge = styled(Badge)(({ theme }) => ({
 	color: "white",
 	position: "absolute",
-	top: "50px",
-	right: "51px",
+	top: "36px",
+	right: "38px",
 	transform: "translate(0, 0)",
 	'& .MuiBadge-badge': {
-		fontSize: '0.75rem',
+		fontSize: '0.6rem',
 		fontWeight: 'bold',
-		minWidth: '20px',
-		height: '20px',
-		borderRadius: '10px',
+		minWidth: '15px',
+		height: '15px',
+		borderRadius: '7.5px',
 		backgroundColor: theme.palette.success.main,
-		boxShadow: `0 2px 4px rgba(0,0,0,0.2), 0 0 0 2px ${theme.palette.background.paper}`,
+		boxShadow: `0 1px 2px rgba(0,0,0,0.2), 0 0 0 1.5px ${theme.palette.background.paper}`,
 		animation: 'pulse 1.5s infinite',
 		'@keyframes pulse': {
 			'0%': {
 				boxShadow: `0 0 0 0 ${theme.palette.success.light}`,
 			},
 			'70%': {
-				boxShadow: `0 0 0 6px rgba(0, 0, 0, 0)`,
+				boxShadow: `0 0 0 4px rgba(0, 0, 0, 0)`,
 			},
 			'100%': {
 				boxShadow: `0 0 0 0 rgba(0, 0, 0, 0)`,
@@ -116,14 +120,14 @@ const GroupBadge = styled(Badge)(({ theme }) => ({
 	color: "white",
 	position: "absolute",
 	top: 0,
-	left: 8,
+	left: 2,
 	transform: "translate(0, 0)",
 	'& .MuiBadge-badge': {
 		backgroundColor: theme.palette.primary.main,
-		minWidth: '20px',
-		height: '20px',
-		borderRadius: '10px',
-		boxShadow: `0 0 0 2px ${theme.palette.background.paper}`,
+		minWidth: '15px',
+		height: '15px',
+		borderRadius: '7.5px',
+		boxShadow: `0 0 0 1.5px ${theme.palette.background.paper}`,
 		transition: 'all 0.3s ease',
 		'&:hover': {
 			transform: 'scale(1.1)'
@@ -134,11 +138,12 @@ const GroupBadge = styled(Badge)(({ theme }) => ({
 const ClosedBadge = styled(Badge)(({ theme }) => ({
 	alignSelf: "center",
 	justifySelf: "flex-end",
-	marginRight: 70,
+	marginRight: 50,
 	marginLeft: "auto",
 	'& .MuiBadge-badge': {
 		backgroundColor: theme.palette.grey[500],
 		color: theme.palette.common.white,
+		fontSize: '0.65rem',
 		fontWeight: 'bold',
 		borderRadius: theme.shape.borderRadius,
 		boxShadow: theme.shadows[1],
@@ -151,15 +156,17 @@ const ClosedBadge = styled(Badge)(({ theme }) => ({
 
 const BottomButton = styled(IconButton)(({ theme }) => ({
 	position: "relative",
-	bottom: -25,
-	padding: 5,
+	padding: 4,
 	transition: 'all 0.2s ease',
 	backgroundColor: theme.palette.background.paper,
 	boxShadow: theme.shadows[1],
+	'& .MuiSvgIcon-root': {
+		fontSize: '1.1rem'
+	},
 	'&:hover': {
 		backgroundColor: theme.palette.action.hover,
-		transform: 'scale(1.1)',
-		boxShadow: theme.shadows[3]
+		transform: 'scale(1.05)',
+		boxShadow: theme.shadows[2]
 	}
 }));
 
@@ -167,8 +174,9 @@ const ButtonContainer = styled('div')(({ theme }) => ({
 	display: "flex",
 	justifyContent: "flex-end",
 	alignItems: "center",
-	gap: theme.spacing(1),
-	marginRight: theme.spacing(1)
+	gap: theme.spacing(0.5),
+	marginLeft: 'auto',
+	paddingLeft: theme.spacing(1)
 }));
 
 const TicketQueueColor = styled('span')(({ theme, color }) => ({
@@ -229,7 +237,8 @@ const CustomTooltip = styled(Tooltip)(({ theme }) => ({
 		borderRadius: theme.shape.borderRadius,
 		boxShadow: theme.shadows[3],
 		border: `1px solid ${theme.palette.divider}`,
-		padding: theme.spacing(1.5)
+		padding: theme.spacing(1.5),
+		fontSize: '0.75rem'
 	},
 	'& .MuiTooltip-arrow': {
 		color: theme.palette.background.paper
@@ -555,9 +564,10 @@ const TicketListItem = ({ ticket, filteredTags }) => {
 										color="textSecondary"
 										sx={{
 											position: "absolute",
-											right: 15,
-											top: 13,
-											height: 16,
+											right: 6,
+											top: 4,
+											height: 12,
+											fontSize: '0.65rem',
 											whiteSpace: "nowrap",
 											overflow: "hidden",
 										}}
@@ -572,27 +582,27 @@ const TicketListItem = ({ ticket, filteredTags }) => {
 							</div>
 							{ticket.contact.telegramId && (
 								<Tooltip title="Telegram" arrow placement="right" >
-									<Telegram fontSize="small" sx={{ color: theme.palette.mode === 'dark' ? theme.palette.info.light : "#85b2ff", marginRight: theme.spacing(1) }} />
+									<Telegram sx={{ fontSize: '0.9rem', color: theme.palette.mode === 'dark' ? theme.palette.info.light : "#85b2ff", marginRight: theme.spacing(0.5) }} />
 								</Tooltip>
 							)}
 							{ticket.contact.messengerId && (
 								<Tooltip title="Facebook" arrow placement="right" >
-									<Facebook fontSize="small" sx={{ color: theme.palette.mode === 'dark' ? theme.palette.primary.light : "#3b5998", marginRight: theme.spacing(1) }} />
+									<Facebook sx={{ fontSize: '0.9rem', color: theme.palette.mode === 'dark' ? theme.palette.primary.light : "#3b5998", marginRight: theme.spacing(0.5) }} />
 								</Tooltip>
 							)}
 							{ticket.contact.instagramId && (
 								<Tooltip title="Instagram" arrow placement="right" >
-									<Instagram fontSize="small" sx={{ color: theme.palette.mode === 'dark' ? theme.palette.secondary.light : "#cd486b", marginRight: theme.spacing(1) }} />
+									<Instagram sx={{ fontSize: '0.9rem', color: theme.palette.mode === 'dark' ? theme.palette.secondary.light : "#cd486b", marginRight: theme.spacing(0.5) }} />
 								</Tooltip>
 							)}
 							{ticket.contact.webchatId && (
 								<Tooltip title="Webchat" arrow placement="right" >
-									<Sms fontSize="small" sx={{ color: theme.palette.mode === 'dark' ? theme.palette.warning.light : "#EB6D58", marginRight: theme.spacing(1) }} />
+									<Sms sx={{ fontSize: '0.9rem', color: theme.palette.mode === 'dark' ? theme.palette.warning.light : "#EB6D58", marginRight: theme.spacing(0.5) }} />
 								</Tooltip>
 							)}
 							{ticket.contact.number && (
 								<Tooltip title="wwebjs" arrow placement="right" >
-									<WhatsApp fontSize="small" sx={{ color: theme.palette.mode === 'dark' ? theme.palette.success.light : "#075e54", marginRight: theme.spacing(1) }} />
+									<WhatsApp sx={{ fontSize: '0.9rem', color: theme.palette.mode === 'dark' ? theme.palette.success.light : "#075e54", marginRight: theme.spacing(0.5) }} />
 								</Tooltip>
 							)}
 							<Typography
@@ -600,6 +610,7 @@ const TicketListItem = ({ ticket, filteredTags }) => {
 								component="span"
 								variant="body2"
 								color="textPrimary"
+								sx={{ fontSize: '0.8rem', fontWeight: 500 }}
 							>
 								{ticket.contact.name}
 							</Typography>
@@ -614,7 +625,7 @@ const TicketListItem = ({ ticket, filteredTags }) => {
 						</ContactName>
 					}
 					secondary={
-						<div>
+						<Box sx={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
 							<CustomTooltip
 								title={
 									<Typography>
@@ -628,94 +639,79 @@ const TicketListItem = ({ ticket, filteredTags }) => {
 								arrow
 							>
 								<Typography
-									sx={{ paddingRight: 20}}
+									sx={{ paddingRight: 12, fontSize: '0.75rem' }}
 									noWrap
 									component="span"
 									variant="body2"
 									color="textSecondary"
 								>
-									<Box sx={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+									<Box sx={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
 										{(() => {
 											if (currentTicket.lastMessage) {
 												if (currentTicket.lastMessage.includes("🢅") === true) {
 													return (
-														<img src={sendIcon} alt="Msg Enviada" width="12px" style={{ flexShrink: 0 }} />
+														<img src={sendIcon} alt="Msg Enviada" width="9px" style={{ flexShrink: 0 }} />
 													)
 												} else if (currentTicket.lastMessage.includes("🢇") === true) {
 													return (
-														<img src={receiveIcon} alt="Msg Recebida" width="12px" style={{ flexShrink: 0 }} />
+														<img src={receiveIcon} alt="Msg Recebida" width="9px" style={{ flexShrink: 0 }} />
 													)
 												}
 											}
 											return null;
 										})()}
-										{currentTicket.lastMessage ? (
-									<WhatsMarked sx={{ wordBreak: 'break-word', display: 'inline' }}>
-										{currentTicket.lastMessage.slice(0, 30).replace("🢇", "").replace("🢅", "") + 
-										(currentTicket.lastMessage.length > 30 ? " ..." : "").replace("🢇", "").replace("🢅", "")}
-									</WhatsMarked>
-										) : (
-											<br />
+										{currentTicket.lastMessage && (
+											<WhatsMarked sx={{ wordBreak: 'break-word', display: 'inline', fontSize: '0.75rem' }}>
+												{currentTicket.lastMessage.slice(0, 40).replace("🢇", "").replace("🢅", "") + 
+												(currentTicket.lastMessage.length > 40 ? "..." : "").replace("🢇", "").replace("🢅", "")}
+											</WhatsMarked>
 										)}
 									</Box>
 								</Typography>
 							</CustomTooltip>
-							<br></br>
-							{ticket.whatsappId && (
-								<Tooltip title={t("ticketsList.items.connection")} placement="bottom" arrow>
-									<ChipRadiusDot
-										sx={{
-											backgroundColor: ticket.whatsapp?.color || theme.palette.grey[300],
-											fontSize: "0.8em",
-											fontWeight: "bold",
-											height: 16,
-											padding: "5px 0px",
-											position: "inherit",
-											borderRadius: theme.shape.borderRadius,
-											color: theme.palette.getContrastText(ticket.whatsapp?.color || theme.palette.grey[300]),
-											marginRight: "5px",
-											marginBottom: "3px",
-											boxShadow: theme.shadows[1],
-											transition: 'all 0.2s ease',
-											'&:hover': {
-												transform: 'translateY(-1px)',
-												boxShadow: theme.shadows[2]
-											}
-										}}
-										label={(ticket.whatsapp?.name || t("ticketsList.items.user")).toUpperCase()}
-									/>
-								</Tooltip>
-							)}
-							{ticket.status !== "pending" && ticket?.user?.name && (
-								<Tooltip title={t("ticketsList.items.user")} placement="bottom" arrow>
-									<ChipRadiusDot
-										sx={{
-											background: theme.palette.mode === 'dark' 
-												? `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`
-												: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
-											fontSize: "0.8em",
-											fontWeight: "bold",
-											height: 16,
-											padding: "5px 0px",
-											position: "inherit",
-											borderRadius: theme.shape.borderRadius,
-											color: theme.palette.common.white,
-											marginRight: "5px",
-											marginBottom: "3px",
-											boxShadow: theme.shadows[1],
-											transition: 'all 0.2s ease',
-											'&:hover': {
-												transform: 'translateY(-1px)',
-												boxShadow: theme.shadows[2]
-											}
-										}}
-										label={ticket?.user?.name.toUpperCase()}
-									/>
-								</Tooltip>
-							)}
-
-
-						</div>
+							<Box sx={{ display: 'flex', alignItems: 'center', gap: '4px', flexWrap: 'wrap' }}>
+								{ticket.whatsappId && (
+									<Tooltip title={t("ticketsList.items.connection")} placement="bottom" arrow>
+										<ChipRadiusDot
+											sx={{
+												backgroundColor: ticket.whatsapp?.color || theme.palette.grey[300],
+												fontSize: "0.6em",
+												fontWeight: "bold",
+												height: 12,
+												padding: "2px 0px",
+												position: "inherit",
+												borderRadius: theme.shape.borderRadius,
+												color: theme.palette.getContrastText(ticket.whatsapp?.color || theme.palette.grey[300]),
+												marginRight: "3px",
+												boxShadow: 'none'
+											}}
+											label={(ticket.whatsapp?.name || t("ticketsList.items.user")).toUpperCase()}
+										/>
+									</Tooltip>
+								)}
+								{ticket.status !== "pending" && ticket?.user?.name && (
+									<Tooltip title={t("ticketsList.items.user")} placement="bottom" arrow>
+										<ChipRadiusDot
+											sx={{
+												background: theme.palette.mode === 'dark' 
+													? `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`
+													: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
+												fontSize: "0.6em",
+												fontWeight: "bold",
+												height: 12,
+												padding: "2px 0px",
+												position: "inherit",
+												borderRadius: theme.shape.borderRadius,
+												color: theme.palette.common.white,
+												marginRight: "3px",
+												boxShadow: 'none'
+											}}
+											label={ticket?.user?.name.toUpperCase()}
+										/>
+									</Tooltip>
+								)}
+							</Box>
+						</Box>
 					}
 				/>
 				<ButtonContainer>
@@ -790,7 +786,6 @@ const TicketListItem = ({ ticket, filteredTags }) => {
 					)}
 				</ButtonContainer>
 			</StyledListItem>
-			<Divider variant="inset" component="li" />
 			<ConfirmationModal
 				title={t("tickets.confirmationModal.closeTicket.title")}
 				open={confirmationOpen}

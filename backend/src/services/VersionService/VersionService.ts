@@ -26,12 +26,50 @@ interface VersionInfo {
 
 const fetchLatestVersion = async (): Promise<string | null> => {
   try {
-    const response = await axios.get(
-      "https://api.github.com/repos/rtenorioh/Press-Ticket/releases/latest"
-    );
-    return response.data.tag_name;
-  } catch (error) {
-    console.error("Erro ao buscar a versão mais recente no GitHub:", error);
+    const headers: any = {
+      'Accept': 'application/vnd.github.v3+json',
+      'User-Agent': 'Press-Ticket'
+    };
+    
+    if (process.env.GITHUB_TOKEN) {
+      headers['Authorization'] = `token ${process.env.GITHUB_TOKEN}`;
+    }
+
+    try {
+      const response = await axios.get(
+        "https://api.github.com/repos/rtenorioh/Press-Ticket/releases/latest",
+        { headers }
+      );
+
+      return response.data.tag_name;
+    } catch (releaseError: any) {
+      const tagsResponse = await axios.get(
+        "https://api.github.com/repos/rtenorioh/Press-Ticket/tags",
+        { headers, params: { per_page: 1 } }
+      );
+      
+      if (tagsResponse.data && tagsResponse.data.length > 0) {
+        const latestTag = tagsResponse.data[0].name;
+        return latestTag;
+      }
+      
+      
+      return null;
+    }
+  } catch (error: any) {
+    if (error.response) {
+      console.error("[VERSION] Erro na API do GitHub:", {
+        status: error.response.status,
+        message: error.response.data?.message,
+        rateLimit: {
+          limit: error.response.headers['x-ratelimit-limit'],
+          remaining: error.response.headers['x-ratelimit-remaining'],
+          reset: error.response.headers['x-ratelimit-reset']
+        }
+      });
+    } else {
+      console.error("[VERSION] Erro ao buscar versão no GitHub:", error.message);
+    }
     return null;
   }
 };
@@ -131,7 +169,7 @@ const fetchWhatsappLibGitCommits = async (currentVersion: string | null): Promis
   }
 };
 
-export const getVersionInfo = async (): Promise<VersionInfo> => {
+export const getVersionInfo = async (): Promise<VersionInfo> => {  
   const latestVersion = await fetchLatestVersion();
   const whatsappLibVersion = getWhatsappLibVersion();
   const whatsappLibInfo = await fetchWhatsappLibLatestVersion();
@@ -140,7 +178,7 @@ export const getVersionInfo = async (): Promise<VersionInfo> => {
   const needsUpdate = latestVersion 
     ? systemVersion.localeCompare(latestVersion, undefined, { numeric: true, sensitivity: 'base' }) < 0
     : false;
-    
+  
   const whatsappLibNeedsUpdate = whatsappLibVersion && whatsappLibLatestVersion
     ? whatsappLibVersion.localeCompare(whatsappLibLatestVersion, undefined, { numeric: true, sensitivity: 'base' }) < 0
     : false;

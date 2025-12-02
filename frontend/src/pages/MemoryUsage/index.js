@@ -47,19 +47,34 @@ const classes = {
 
 const Root = styled('div')(({ theme }) => ({
   [`&.${classes.root}`]: {
-    padding: theme.spacing(2),
+    padding: theme.spacing(3),
     width: '100%',
     overflowY: 'auto'
   },
   [`& .${classes.card}`]: {
-    marginBottom: theme.spacing(2),
-    padding: theme.spacing(2)
+    marginBottom: theme.spacing(3),
+    padding: theme.spacing(3),
+    borderRadius: 12,
+    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+    transition: 'box-shadow 0.3s ease',
+    '&:hover': {
+      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)'
+    }
   },
   [`& .${classes.progressBar}`]: {
-    height: 20,
-    borderRadius: 5,
-    marginTop: theme.spacing(1),
-    marginBottom: theme.spacing(2)
+    height: 32,
+    borderRadius: 16,
+    marginTop: theme.spacing(2),
+    marginBottom: theme.spacing(2),
+    backgroundColor: theme.palette.mode === 'dark' 
+      ? 'rgba(255, 255, 255, 0.1)' 
+      : 'rgba(0, 0, 0, 0.08)',
+    '& .MuiLinearProgress-bar': {
+      borderRadius: 16,
+      background: theme.palette.mode === 'dark'
+        ? 'linear-gradient(90deg, #4caf50 0%, #81c784 100%)'
+        : 'linear-gradient(90deg, #66bb6a 0%, #4caf50 100%)'
+    }
   },
   [`& .${classes.warningText}`]: {
     color: theme.palette.warning.main,
@@ -67,25 +82,36 @@ const Root = styled('div')(({ theme }) => ({
   },
   [`& .${classes.infoIcon}`]: {
     marginRight: theme.spacing(1),
-    verticalAlign: 'middle'
+    verticalAlign: 'middle',
+    fontSize: '1.5rem'
   },
   [`& .${classes.healthyIcon}`]: {
     color: theme.palette.success.main,
     marginRight: theme.spacing(1),
-    verticalAlign: 'middle'
+    verticalAlign: 'middle',
+    fontSize: '1.5rem'
   },
   [`& .${classes.warningIcon}`]: {
     color: theme.palette.warning.main,
     marginRight: theme.spacing(1),
-    verticalAlign: 'middle'
+    verticalAlign: 'middle',
+    fontSize: '1.5rem'
   },
   [`& .${classes.criticalIcon}`]: {
     color: theme.palette.error.main,
     marginRight: theme.spacing(1),
-    verticalAlign: 'middle'
+    verticalAlign: 'middle',
+    fontSize: '1.5rem'
   },
   [`& .${classes.detailsCard}`]: {
-    height: '100%'
+    height: '100%',
+    borderRadius: 12,
+    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+    transition: 'transform 0.2s ease, box-shadow 0.3s ease',
+    '&:hover': {
+      transform: 'translateY(-4px)',
+      boxShadow: '0 6px 16px rgba(0, 0, 0, 0.15)'
+    }
   },
   [`& .${classes.loadingContainer}`]: {
     display: 'flex',
@@ -99,6 +125,7 @@ const Root = styled('div')(({ theme }) => ({
   [`& .${classes.processName}`]: {
     maxWidth: '300px',
     whiteSpace: 'nowrap',
+    overflow: 'hidden',
     textOverflow: 'ellipsis',
     display: 'block'
   }
@@ -225,29 +252,100 @@ const MemoryUsage = () => {
       
       <Root className={classes.root}>
         {loading ? (
-          <Box className={classes.loadingContainer}>
-            <CircularProgress />
+          <Box 
+            className={classes.loadingContainer}
+            sx={{
+              flexDirection: 'column',
+              gap: 2
+            }}
+          >
+            <CircularProgress size={60} thickness={4} />
+            <Typography variant="body1" color="textSecondary">
+              Carregando informações de memória...
+            </Typography>
           </Box>
         ) : error ? (
-          <Paper className={classes.card}>
-            <Typography variant="h6" color="error">
-              {error}
-            </Typography>
+          <Paper 
+            className={classes.card} 
+            elevation={3}
+            sx={{
+              backgroundColor: 'error.light',
+              borderLeft: 6,
+              borderColor: 'error.main'
+            }}
+          >
+            <Box display="flex" alignItems="center">
+              <Box
+                sx={{
+                  backgroundColor: 'error.main',
+                  color: 'white',
+                  borderRadius: '50%',
+                  padding: 1.5,
+                  display: 'flex',
+                  marginRight: 2
+                }}
+              >
+                <WarningIcon sx={{ fontSize: '1.8rem' }} />
+              </Box>
+              <Typography variant="h6" color="error.dark" fontWeight="600">
+                {error}
+              </Typography>
+            </Box>
           </Paper>
         ) : memoryInfo && (
           <>
-            <Paper className={classes.card}>
-              <Typography variant="h6" gutterBottom>
-                <MemoryIcon className={classes.infoIcon} />
-                {t('memoryUsage.systemMemory')}
-              </Typography>
+            <Paper className={classes.card} elevation={3}>
+              <Box display="flex" alignItems="center" justifyContent="space-between" mb={3}>
+                <Box display="flex" alignItems="center">
+                  <MemoryIcon className={classes.infoIcon} />
+                  <Typography variant="h5" fontWeight="600">
+                    {t('memoryUsage.systemMemory')}
+                  </Typography>
+                </Box>
+                <Box 
+                  display="flex" 
+                  alignItems="center"
+                  sx={{
+                    backgroundColor: memoryInfo.usedPercentage < 70 
+                      ? 'success.light' 
+                      : memoryInfo.usedPercentage < 90 
+                        ? 'warning.light' 
+                        : 'error.light',
+                    color: memoryInfo.usedPercentage < 70 
+                      ? 'success.dark' 
+                      : memoryInfo.usedPercentage < 90 
+                        ? 'warning.dark' 
+                        : 'error.dark',
+                    padding: '8px 16px',
+                    borderRadius: '20px',
+                    fontWeight: 'bold'
+                  }}
+                >
+                  {getStatusIcon(memoryInfo.usedPercentage)}
+                  <Typography 
+                    component="span" 
+                    fontWeight="bold"
+                    fontSize="0.95rem"
+                  >
+                    {memoryInfo.usedPercentage < 70 
+                      ? t('memoryUsage.healthy') 
+                      : memoryInfo.usedPercentage < 90 
+                        ? t('memoryUsage.warning') 
+                        : t('memoryUsage.critical')}
+                  </Typography>
+                </Box>
+              </Box>
               
-              <Box mt={2} mb={1}>
-                <Box display="flex" justifyContent="space-between">
-                  <Typography variant="body2">
+              <Box mb={1}>
+                <Box display="flex" justifyContent="space-between" alignItems="center" mb={1.5}>
+                  <Typography variant="body1" fontWeight="500" fontSize="1.1rem">
                     {memoryInfo.usedMemory} / {memoryInfo.totalMemory}
                   </Typography>
-                  <Typography variant="body2" color={getStatusColor(memoryInfo.usedPercentage)}>
+                  <Typography 
+                    variant="h6" 
+                    color={getStatusColor(memoryInfo.usedPercentage)}
+                    fontWeight="bold"
+                  >
                     {memoryInfo.usedPercentage}%
                   </Typography>
                 </Box>
@@ -260,86 +358,123 @@ const MemoryUsage = () => {
                   />
                 </Tooltip>
               </Box>
-              
-              <Box mt={2}>
-                {getStatusIcon(memoryInfo.usedPercentage)}
-                <Typography 
-                  component="span" 
-                  color={getStatusColor(memoryInfo.usedPercentage)}
-                  fontWeight="bold"
-                >
-                  {memoryInfo.usedPercentage < 70 
-                    ? t('memoryUsage.healthy') 
-                    : memoryInfo.usedPercentage < 90 
-                      ? t('memoryUsage.warning') 
-                      : t('memoryUsage.critical')}
-                </Typography>
-              </Box>
             </Paper>
             
-            <Grid container spacing={2}>
-              <Grid item xs={12} md={3}>
-                <Card className={classes.detailsCard}>
-                  <CardContent>
-                    <Typography variant="h6" gutterBottom>
-                      <MemoryIcon className={classes.infoIcon} />
-                      {t('memoryUsage.totalMemory')}
-                    </Typography>
-                    <Typography variant="h4" color="primary">
+            <Grid container spacing={3}>
+              <Grid item xs={12} sm={6} md={3}>
+                <Card className={classes.detailsCard} elevation={2}>
+                  <CardContent sx={{ padding: 3 }}>
+                    <Box display="flex" alignItems="center" mb={2}>
+                      <Box
+                        sx={{
+                          backgroundColor: 'primary.light',
+                          color: 'primary.main',
+                          borderRadius: '12px',
+                          padding: 1.5,
+                          display: 'flex',
+                          marginRight: 1.5
+                        }}
+                      >
+                        <MemoryIcon sx={{ fontSize: '1.8rem' }} />
+                      </Box>
+                      <Typography variant="subtitle1" fontWeight="600" color="textSecondary">
+                        {t('memoryUsage.totalMemory')}
+                      </Typography>
+                    </Box>
+                    <Typography variant="h4" fontWeight="bold" color="primary" mb={0.5}>
                       {memoryInfo.totalMemory}
                     </Typography>
-                    <Typography variant="body2" color="textSecondary">
+                    <Typography variant="caption" color="textSecondary">
                       {formatBytes(memoryInfo.totalMemoryBytes)}
                     </Typography>
                   </CardContent>
                 </Card>
               </Grid>
               
-              <Grid item xs={12} md={3}>
-                <Card className={classes.detailsCard}>
-                  <CardContent>
-                    <Typography variant="h6" gutterBottom>
-                      <MemoryIcon className={classes.infoIcon} />
-                      {t('memoryUsage.usedMemory')}
-                    </Typography>
-                    <Typography variant="h4" color="primary">
+              <Grid item xs={12} sm={6} md={3}>
+                <Card className={classes.detailsCard} elevation={2}>
+                  <CardContent sx={{ padding: 3 }}>
+                    <Box display="flex" alignItems="center" mb={2}>
+                      <Box
+                        sx={{
+                          backgroundColor: memoryInfo.usedPercentage > 70 ? 'error.light' : 'info.light',
+                          color: memoryInfo.usedPercentage > 70 ? 'error.main' : 'info.main',
+                          borderRadius: '12px',
+                          padding: 1.5,
+                          display: 'flex',
+                          marginRight: 1.5
+                        }}
+                      >
+                        <MemoryIcon sx={{ fontSize: '1.8rem' }} />
+                      </Box>
+                      <Typography variant="subtitle1" fontWeight="600" color="textSecondary">
+                        {t('memoryUsage.usedMemory')}
+                      </Typography>
+                    </Box>
+                    <Typography variant="h4" fontWeight="bold" color="primary" mb={0.5}>
                       {memoryInfo.usedMemory}
                     </Typography>
-                    <Typography variant="body2" color="textSecondary">
+                    <Typography variant="caption" color="textSecondary">
                       {formatBytes(memoryInfo.usedMemoryBytes)}
                     </Typography>
                   </CardContent>
                 </Card>
               </Grid>
               
-              <Grid item xs={12} md={3}>
-                <Card className={classes.detailsCard}>
-                  <CardContent>
-                    <Typography variant="h6" gutterBottom>
-                      <CachedIcon className={classes.infoIcon} />
-                      {t('memoryUsage.cachedMemory')}
-                    </Typography>
-                    <Typography variant="h4" color="primary">
+              <Grid item xs={12} sm={6} md={3}>
+                <Card className={classes.detailsCard} elevation={2}>
+                  <CardContent sx={{ padding: 3 }}>
+                    <Box display="flex" alignItems="center" mb={2}>
+                      <Box
+                        sx={{
+                          backgroundColor: 'warning.light',
+                          color: 'warning.main',
+                          borderRadius: '12px',
+                          padding: 1.5,
+                          display: 'flex',
+                          marginRight: 1.5
+                        }}
+                      >
+                        <CachedIcon sx={{ fontSize: '1.8rem' }} />
+                      </Box>
+                      <Typography variant="subtitle1" fontWeight="600" color="textSecondary">
+                        {t('memoryUsage.cachedMemory')}
+                      </Typography>
+                    </Box>
+                    <Typography variant="h4" fontWeight="bold" color="primary" mb={0.5}>
                       {memoryInfo.cachedMemory}
                     </Typography>
-                    <Typography variant="body2" color="textSecondary">
+                    <Typography variant="caption" color="textSecondary">
                       {formatBytes(memoryInfo.cachedMemoryBytes)}
                     </Typography>
                   </CardContent>
                 </Card>
               </Grid>
               
-              <Grid item xs={12} md={3}>
-                <Card className={classes.detailsCard}>
-                  <CardContent>
-                    <Typography variant="h6" gutterBottom>
-                      <MemoryIcon className={classes.infoIcon} />
-                      {t('memoryUsage.availableMemory')}
-                    </Typography>
-                    <Typography variant="h4" color="primary">
+              <Grid item xs={12} sm={6} md={3}>
+                <Card className={classes.detailsCard} elevation={2}>
+                  <CardContent sx={{ padding: 3 }}>
+                    <Box display="flex" alignItems="center" mb={2}>
+                      <Box
+                        sx={{
+                          backgroundColor: 'success.light',
+                          color: 'success.main',
+                          borderRadius: '12px',
+                          padding: 1.5,
+                          display: 'flex',
+                          marginRight: 1.5
+                        }}
+                      >
+                        <MemoryIcon sx={{ fontSize: '1.8rem' }} />
+                      </Box>
+                      <Typography variant="subtitle1" fontWeight="600" color="textSecondary">
+                        {t('memoryUsage.availableMemory')}
+                      </Typography>
+                    </Box>
+                    <Typography variant="h4" fontWeight="bold" color="primary" mb={0.5}>
                       {memoryInfo.availableMemory}
                     </Typography>
-                    <Typography variant="body2" color="textSecondary">
+                    <Typography variant="caption" color="textSecondary">
                       {formatBytes(memoryInfo.availableMemoryBytes)}
                     </Typography>
                   </CardContent>
@@ -348,22 +483,50 @@ const MemoryUsage = () => {
             </Grid>
             
             {memoryInfo.usedPercentage > 70 && (
-              <Paper className={classes.card} sx={{ mt: 2 }}>
-                <Typography variant="body1">
-                  <WarningIcon className={classes.warningIcon} />
-                  {memoryInfo.usedPercentage > 90 
-                    ? t('memoryUsage.criticalWarning') 
-                    : t('memoryUsage.warningMessage')}
-                </Typography>
+              <Paper 
+                className={classes.card} 
+                elevation={3}
+                sx={{ 
+                  mt: 3,
+                  backgroundColor: memoryInfo.usedPercentage > 90 ? 'error.light' : 'warning.light',
+                  borderLeft: 6,
+                  borderColor: memoryInfo.usedPercentage > 90 ? 'error.main' : 'warning.main'
+                }}
+              >
+                <Box display="flex" alignItems="center">
+                  <Box
+                    sx={{
+                      backgroundColor: memoryInfo.usedPercentage > 90 ? 'error.main' : 'warning.main',
+                      color: 'white',
+                      borderRadius: '50%',
+                      padding: 1.5,
+                      display: 'flex',
+                      marginRight: 2
+                    }}
+                  >
+                    <WarningIcon sx={{ fontSize: '1.8rem' }} />
+                  </Box>
+                  <Typography 
+                    variant="body1" 
+                    fontWeight="600"
+                    color={memoryInfo.usedPercentage > 90 ? 'error.dark' : 'warning.dark'}
+                  >
+                    {memoryInfo.usedPercentage > 90 
+                      ? t('memoryUsage.criticalWarning') 
+                      : t('memoryUsage.warningMessage')}
+                  </Typography>
+                </Box>
               </Paper>
             )}        
             
-            <Paper className={classes.card} sx={{ mt: 2 }}>
-              <Typography variant="h6" gutterBottom>
+            <Paper className={classes.card} elevation={3} sx={{ mt: 3 }}>
+              <Box display="flex" alignItems="center" mb={3}>
                 <MemoryIcon className={classes.infoIcon} />
-                {t('memoryUsage.topProcesses')}
-              </Typography>
-              <TableContainer sx={{ maxHeight: 650, width: '100%' }}>
+                <Typography variant="h5" fontWeight="600">
+                  {t('memoryUsage.topProcesses')}
+                </Typography>
+              </Box>
+              <TableContainer sx={{ maxHeight: 650, width: '100%', borderRadius: 2 }}>
                 <Table stickyHeader sx={{ width: '100%', tableLayout: 'fixed' }}>
                   <colgroup>
                     <col style={{ minWidth: 80, width: '10%' }} />
@@ -373,10 +536,52 @@ const MemoryUsage = () => {
                   </colgroup>
                   <TableHead>
                     <TableRow>
-                      <TableCell sx={{ padding: '12px 8px', fontWeight: 'bold' }}>{t('memoryUsage.pid')}</TableCell>
-                      <TableCell sx={{ padding: '12px 8px', fontWeight: 'bold' }}>{t('memoryUsage.process')}</TableCell>
-                      <TableCell align="right" sx={{ padding: '12px 8px', fontWeight: 'bold' }}>{t('memoryUsage.memoryUsage')}</TableCell>
-                      <TableCell align="right" sx={{ padding: '12px 8px', fontWeight: 'bold' }}>{t('memoryUsage.percentage')}</TableCell>
+                      <TableCell 
+                        sx={{ 
+                          padding: '16px 12px', 
+                          fontWeight: 'bold',
+                          fontSize: '0.95rem',
+                          backgroundColor: 'primary.main',
+                          color: 'primary.contrastText'
+                        }}
+                      >
+                        {t('memoryUsage.pid')}
+                      </TableCell>
+                      <TableCell 
+                        sx={{ 
+                          padding: '16px 12px', 
+                          fontWeight: 'bold',
+                          fontSize: '0.95rem',
+                          backgroundColor: 'primary.main',
+                          color: 'primary.contrastText'
+                        }}
+                      >
+                        {t('memoryUsage.process')}
+                      </TableCell>
+                      <TableCell 
+                        align="right" 
+                        sx={{ 
+                          padding: '16px 12px', 
+                          fontWeight: 'bold',
+                          fontSize: '0.95rem',
+                          backgroundColor: 'primary.main',
+                          color: 'primary.contrastText'
+                        }}
+                      >
+                        {t('memoryUsage.memoryUsage')}
+                      </TableCell>
+                      <TableCell 
+                        align="right" 
+                        sx={{ 
+                          padding: '16px 12px', 
+                          fontWeight: 'bold',
+                          fontSize: '0.95rem',
+                          backgroundColor: 'primary.main',
+                          color: 'primary.contrastText'
+                        }}
+                      >
+                        {t('memoryUsage.percentage')}
+                      </TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -388,23 +593,57 @@ const MemoryUsage = () => {
                         simplifiedCommand = simplifiedCommand.split(' ')[0];
 
                         return (
-                          <TableRow key={index}>
-                            <TableCell>{process.pid}</TableCell>
-                            <TableCell>
+                          <TableRow 
+                            key={index}
+                            sx={{
+                              '&:nth-of-type(odd)': {
+                                backgroundColor: 'action.hover',
+                              },
+                              '&:hover': {
+                                backgroundColor: 'action.selected',
+                                transition: 'background-color 0.2s ease'
+                              }
+                            }}
+                          >
+                            <TableCell sx={{ padding: '14px 12px', fontWeight: 500 }}>
+                              {process.pid}
+                            </TableCell>
+                            <TableCell sx={{ padding: '14px 12px' }}>
                               <Tooltip title={fullCommand} placement="top-start">
-                                <Typography className={classes.processName}>
+                                <Typography 
+                                  className={classes.processName}
+                                  sx={{ 
+                                    fontWeight: 500,
+                                    color: 'text.primary'
+                                  }}
+                                >
                                   {simplifiedCommand}
                                 </Typography>
                               </Tooltip>
                             </TableCell>
-                            <TableCell align="right">{process.memoryUsage}</TableCell>
-                            <TableCell align="right">{process.memoryPercentage}%</TableCell>
+                            <TableCell align="right" sx={{ padding: '14px 12px', fontWeight: 500 }}>
+                              {process.memoryUsage}
+                            </TableCell>
+                            <TableCell 
+                              align="right" 
+                              sx={{ 
+                                padding: '14px 12px', 
+                                fontWeight: 'bold',
+                                color: process.memoryPercentage > 5 ? 'warning.main' : 'text.primary'
+                              }}
+                            >
+                              {process.memoryPercentage}%
+                            </TableCell>
                           </TableRow>
                         );
                       })
                     ) : (
                       <TableRow>
-                        <TableCell colSpan={4} align="center">
+                        <TableCell 
+                          colSpan={4} 
+                          align="center"
+                          sx={{ padding: '24px 12px', color: 'text.secondary' }}
+                        >
                           {t('memoryUsage.noProcesses')}
                         </TableCell>
                       </TableRow>

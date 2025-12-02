@@ -4,6 +4,23 @@ import backgroundImageDark from "../assets/backgroundDark.jpg";
 const getDarkTheme = (config, locale) =>
     createTheme(
         {
+            typography: {
+                fontFamily: '"Poppins", "Helvetica", "Arial", sans-serif',
+                fontSize: 12,
+                h1: { fontSize: '2rem', fontWeight: 600 },
+                h2: { fontSize: '1.75rem', fontWeight: 600 },
+                h3: { fontSize: '1.5rem', fontWeight: 600 },
+                h4: { fontSize: '1.25rem', fontWeight: 600 },
+                h5: { fontSize: '1.125rem', fontWeight: 600 },
+                h6: { fontSize: '1rem', fontWeight: 600 },
+                subtitle1: { fontSize: '0.875rem' },
+                subtitle2: { fontSize: '0.8125rem' },
+                body1: { fontSize: '0.875rem' },
+                body2: { fontSize: '0.8125rem' },
+                button: { fontSize: '0.8125rem', fontWeight: 500 },
+                caption: { fontSize: '0.75rem' },
+                overline: { fontSize: '0.75rem' }
+            },
             components: {
                 MuiCssBaseline: {
                     styleOverrides: {

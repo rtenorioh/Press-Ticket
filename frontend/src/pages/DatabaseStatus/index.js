@@ -184,11 +184,12 @@ const DatabaseStatus = () => {
         <MainHeader>
           <Title>{t("Monitoramento do Banco de Dados")}</Title>
         </MainHeader>
-        <Root className={classes.root}>
-          <div className={classes.loadingContainer}>
-            <CircularProgress />
-          </div>
-        </Root>
+        <Paper sx={{ p: 4, m: 2, borderRadius: 3, textAlign: 'center' }}>
+          <CircularProgress size={60} thickness={4} />
+          <Typography variant="h6" sx={{ mt: 3, color: 'text.secondary' }}>
+            Carregando informações do banco de dados...
+          </Typography>
+        </Paper>
       </MainContainer>
     );
   }
@@ -214,25 +215,49 @@ const DatabaseStatus = () => {
       </MainHeader>
       <Root className={classes.root}>
         {error && (
-          <Paper className={classes.card}>
-            <Typography variant="h6" color="error">
-              <ErrorIcon className={classes.criticalIcon} />
-              {t("Erro ao carregar dados do banco de dados")}
-            </Typography>
-            <Typography variant="body2">{error}</Typography>
+          <Paper 
+            sx={{ 
+              p: 3, 
+              mb: 3, 
+              borderRadius: 3,
+              backgroundColor: 'error.lighter',
+              borderLeft: '4px solid',
+              borderColor: 'error.main'
+            }}
+          >
+            <Box display="flex" alignItems="center" mb={1}>
+              <ErrorIcon sx={{ color: 'error.main', fontSize: 32, mr: 2 }} />
+              <Typography variant="h6" color="error">
+                {t("Erro ao carregar dados do banco de dados")}
+              </Typography>
+            </Box>
+            <Typography variant="body2" sx={{ ml: 6 }}>{error}</Typography>
           </Paper>
         )}
         
         {dbInfo && (
           <>
-            <Paper className={classes.card}>
-              <Grid container spacing={2}>
-                <Grid item xs={12} md={6}>
-                  <Card className={classes.detailsCard}>
-                    <CardContent>
-                      <Typography variant="h6" gutterBottom>
+            <Grid container spacing={3} sx={{ mb: 3 }}>
+              <Grid item xs={12} md={6}>
+                <Card 
+                  elevation={3}
+                  sx={{
+                    height: '100%',
+                    borderRadius: 3,
+                    transition: 'all 0.3s ease',
+                    '&:hover': {
+                      transform: 'translateY(-5px)',
+                      boxShadow: 8
+                    }
+                  }}
+                >
+                  <CardContent sx={{ p: 3 }}>
+                    <Box display="flex" alignItems="center" mb={3}>
+                      <StorageIcon sx={{ fontSize: 40, color: 'primary.main', mr: 2 }} />
+                      <Typography variant="h6" fontWeight="600">
                         {t("Informações Gerais")}
                       </Typography>
+                    </Box>
                       <Grid container spacing={2}>
                         <Grid item xs={6}>
                           <Typography variant="body2" color="textSecondary">
@@ -290,12 +315,26 @@ const DatabaseStatus = () => {
                   </Card>
                 </Grid>
                 
-                <Grid item xs={12} md={6}>
-                  <Card className={classes.detailsCard}>
-                    <CardContent>
-                      <Typography variant="h6" gutterBottom>
+              <Grid item xs={12} md={6}>
+                <Card 
+                  elevation={3}
+                  sx={{
+                    height: '100%',
+                    borderRadius: 3,
+                    transition: 'all 0.3s ease',
+                    '&:hover': {
+                      transform: 'translateY(-5px)',
+                      boxShadow: 8
+                    }
+                  }}
+                >
+                  <CardContent sx={{ p: 3 }}>
+                    <Box display="flex" alignItems="center" mb={3}>
+                      <CheckCircleIcon sx={{ fontSize: 40, color: 'success.main', mr: 2 }} />
+                      <Typography variant="h6" fontWeight="600">
                         {t("Desempenho")}
                       </Typography>
+                    </Box>
                       <Grid container spacing={2}>
                         <Grid item xs={6}>
                           <Typography variant="body2" color="textSecondary">
@@ -341,22 +380,22 @@ const DatabaseStatus = () => {
                     </CardContent>
                   </Card>
                 </Grid>
-              </Grid>
-            </Paper>
+            </Grid>
 
-            <Typography variant="h6" className={classes.sectionTitle}>
+            <Typography variant="h6" sx={{ mt: 4, mb: 2, fontWeight: 'bold', display: 'flex', alignItems: 'center' }}>
+              <StorageIcon sx={{ mr: 1, color: 'primary.main' }} />
               {t("Tabelas do Banco de Dados")}
             </Typography>
-            <Paper className={classes.card}>
-              <TableContainer className={classes.tableContainer}>
-                <Table size="small">
+            <Paper elevation={3} sx={{ p: 3, borderRadius: 3, mb: 4 }}>
+              <TableContainer>
+                <Table>
                   <TableHead>
                     <TableRow>
-                      <TableCell>{t("Nome da Tabela")}</TableCell>
-                      <TableCell align="right">{t("Linhas")}</TableCell>
-                      <TableCell align="right">{t("Tamanho de Dados")}</TableCell>
-                      <TableCell align="right">{t("Tamanho de Índices")}</TableCell>
-                      <TableCell align="right">{t("Tamanho Total")}</TableCell>
+                      <TableCell><strong>{t("Nome da Tabela")}</strong></TableCell>
+                      <TableCell align="right"><strong>{t("Linhas")}</strong></TableCell>
+                      <TableCell align="right"><strong>{t("Tamanho de Dados")}</strong></TableCell>
+                      <TableCell align="right"><strong>{t("Tamanho de Índices")}</strong></TableCell>
+                      <TableCell align="right"><strong>{t("Tamanho Total")}</strong></TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -384,19 +423,20 @@ const DatabaseStatus = () => {
               </TableContainer>
             </Paper>
 
-            <Typography variant="h6" className={classes.sectionTitle}>
+            <Typography variant="h6" sx={{ mt: 4, mb: 2, fontWeight: 'bold', display: 'flex', alignItems: 'center' }}>
+              <WarningIcon sx={{ mr: 1, color: 'warning.main' }} />
               {t("Consultas Lentas (últimas 24h)")}
             </Typography>
-            <Paper className={classes.card}>
-              <TableContainer className={classes.tableContainer}>
-                <Table size="small">
+            <Paper elevation={3} sx={{ p: 3, borderRadius: 3, mb: 4 }}>
+              <TableContainer>
+                <Table>
                   <TableHead>
                     <TableRow>
-                      <TableCell>{t("Hora de Início")}</TableCell>
-                      <TableCell>{t("Banco")}</TableCell>
-                      <TableCell>{t("Tempo de Consulta")}</TableCell>
-                      <TableCell>{t("Linhas Examinadas")}</TableCell>
-                      <TableCell>{t("SQL")}</TableCell>
+                      <TableCell><strong>{t("Hora de Início")}</strong></TableCell>
+                      <TableCell><strong>{t("Banco")}</strong></TableCell>
+                      <TableCell><strong>{t("Tempo de Consulta")}</strong></TableCell>
+                      <TableCell><strong>{t("Linhas Examinadas")}</strong></TableCell>
+                      <TableCell><strong>{t("SQL")}</strong></TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -426,22 +466,23 @@ const DatabaseStatus = () => {
               </TableContainer>
             </Paper>
 
-            <Typography variant="h6" className={classes.sectionTitle}>
+            <Typography variant="h6" sx={{ mt: 4, mb: 2, fontWeight: 'bold', display: 'flex', alignItems: 'center' }}>
+              <CachedIcon sx={{ mr: 1, color: 'info.main' }} />
               {t("Processos Ativos")}
             </Typography>
-            <Paper className={classes.card}>
-              <TableContainer className={classes.tableContainer}>
-                <Table size="small">
+            <Paper elevation={3} sx={{ p: 3, borderRadius: 3, mb: 4 }}>
+              <TableContainer>
+                <Table>
                   <TableHead>
                     <TableRow>
-                      <TableCell>{t("ID")}</TableCell>
-                      <TableCell>{t("Usuário")}</TableCell>
-                      <TableCell>{t("Host")}</TableCell>
-                      <TableCell>{t("Banco")}</TableCell>
-                      <TableCell>{t("Comando")}</TableCell>
-                      <TableCell>{t("Tempo (s)")}</TableCell>
-                      <TableCell>{t("Estado")}</TableCell>
-                      <TableCell>{t("Consulta")}</TableCell>
+                      <TableCell><strong>{t("ID")}</strong></TableCell>
+                      <TableCell><strong>{t("Usuário")}</strong></TableCell>
+                      <TableCell><strong>{t("Host")}</strong></TableCell>
+                      <TableCell><strong>{t("Banco")}</strong></TableCell>
+                      <TableCell><strong>{t("Comando")}</strong></TableCell>
+                      <TableCell><strong>{t("Tempo (s)")}</strong></TableCell>
+                      <TableCell><strong>{t("Estado")}</strong></TableCell>
+                      <TableCell><strong>{t("Consulta")}</strong></TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>

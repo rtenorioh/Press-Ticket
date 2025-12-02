@@ -21,6 +21,7 @@ import {
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import StorageIcon from '@mui/icons-material/Storage';
 import FolderIcon from '@mui/icons-material/Folder';
 import WarningIcon from '@mui/icons-material/Warning';
@@ -33,6 +34,7 @@ import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import DescriptionIcon from '@mui/icons-material/Description';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import SettingsIcon from '@mui/icons-material/Settings';
 import toastError from '../../errors/toastError';
 import api from '../../services/api';
 import MainContainer from '../../components/MainContainer';
@@ -68,42 +70,69 @@ const Root = styled('div')(({ theme }) => ({
   [`& .${classes.container}`]: {
     display: 'flex',
     flexDirection: 'column',
-    padding: theme.spacing(2),
+    padding: theme.spacing(3),
     overflow: 'visible'
   },
   [`& .${classes.card}`]: {
-    marginBottom: theme.spacing(2),
-    padding: theme.spacing(2)
+    marginBottom: theme.spacing(3),
+    padding: theme.spacing(3),
+    borderRadius: 12,
+    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+    transition: 'box-shadow 0.3s ease',
+    '&:hover': {
+      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)'
+    }
   },
   [`& .${classes.progressBar}`]: {
-    height: 10,
-    borderRadius: 5
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: theme.palette.mode === 'dark' 
+      ? 'rgba(255, 255, 255, 0.1)' 
+      : 'rgba(0, 0, 0, 0.08)',
+    '& .MuiLinearProgress-bar': {
+      borderRadius: 16,
+      background: theme.palette.mode === 'dark'
+        ? 'linear-gradient(90deg, #4caf50 0%, #81c784 100%)'
+        : 'linear-gradient(90deg, #66bb6a 0%, #4caf50 100%)'
+    }
   },
   [`& .${classes.warningText}`]: {
-    color: theme.palette.warning.main
+    color: theme.palette.warning.main,
+    fontWeight: 'bold'
   },
   [`& .${classes.infoIcon}`]: {
     verticalAlign: 'middle',
     marginRight: theme.spacing(1),
-    color: theme.palette.primary.main
+    color: theme.palette.primary.main,
+    fontSize: '1.5rem'
   },
   [`& .${classes.healthyIcon}`]: {
     verticalAlign: 'middle',
     marginRight: theme.spacing(1),
-    color: theme.palette.success.main
+    color: theme.palette.success.main,
+    fontSize: '1.5rem'
   },
   [`& .${classes.warningIcon}`]: {
     verticalAlign: 'middle',
     marginRight: theme.spacing(1),
-    color: theme.palette.warning.main
+    color: theme.palette.warning.main,
+    fontSize: '1.5rem'
   },
   [`& .${classes.criticalIcon}`]: {
     verticalAlign: 'middle',
     marginRight: theme.spacing(1),
-    color: theme.palette.error.main
+    color: theme.palette.error.main,
+    fontSize: '1.5rem'
   },
   [`& .${classes.detailsCard}`]: {
-    height: '100%'
+    height: '100%',
+    borderRadius: 12,
+    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+    transition: 'transform 0.2s ease, box-shadow 0.3s ease',
+    '&:hover': {
+      transform: 'translateY(-4px)',
+      boxShadow: '0 6px 16px rgba(0, 0, 0, 0.15)'
+    }
   },
   [`& .${classes.loadingContainer}`]: {
     display: 'flex',
@@ -112,7 +141,7 @@ const Root = styled('div')(({ theme }) => ({
     padding: theme.spacing(4)
   },
   [`& .${classes.folderTable}`]: {
-    marginTop: theme.spacing(2)
+    marginTop: theme.spacing(3)
   },
   [`& .${classes.folderIcon}`]: {
     marginRight: theme.spacing(1),
@@ -171,6 +200,7 @@ const Root = styled('div')(({ theme }) => ({
 
 const DiskSpace = () => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [diskSpace, setDiskSpace] = useState(null);
   const [error, setError] = useState(null);
@@ -278,6 +308,24 @@ const DiskSpace = () => {
     };
   };
 
+  const sortItems = (items) => {
+    if (!items || items.length === 0) return items;
+    
+    const folders = items.filter(item => item.type === 'folder');
+    const files = items.filter(item => item.type !== 'folder');
+    
+    const sortAlphabetically = (a, b) => {
+      const nameA = (a.name.split('/').pop() || a.name).toLowerCase();
+      const nameB = (b.name.split('/').pop() || b.name).toLowerCase();
+      return nameA.localeCompare(nameB);
+    };
+    
+    folders.sort(sortAlphabetically);
+    files.sort(sortAlphabetically);
+    
+    return [...folders, ...files];
+  };
+
   const loadFolderContents = async (folderPath) => {
     try {
       const { data } = await api.get('/folder-contents', {
@@ -327,97 +375,94 @@ const DiskSpace = () => {
         }}
       >
         {loading ? (
-          <Box className={classes.loadingContainer}>
-            <CircularProgress />
+          <Box 
+            className={classes.loadingContainer}
+            sx={{
+              flexDirection: 'column',
+              gap: 2
+            }}
+          >
+            <CircularProgress size={60} thickness={4} />
+            <Typography variant="body1" color="textSecondary">
+              Carregando informações de disco...
+            </Typography>
           </Box>
         ) : error ? (
-          <Paper className={classes.card}>
-            <Typography variant="h6" color="error">
-              {error}
-            </Typography>
+          <Paper 
+            className={classes.card} 
+            elevation={3}
+            sx={{
+              p: 3,
+              backgroundColor: 'error.light',
+              borderLeft: 6,
+              borderColor: 'error.main',
+              borderRadius: 3
+            }}
+          >
+            <Box display="flex" alignItems="center">
+              <Box
+                sx={{
+                  backgroundColor: 'error.main',
+                  color: 'white',
+                  borderRadius: '50%',
+                  padding: 1.5,
+                  display: 'flex',
+                  marginRight: 2
+                }}
+              >
+                <WarningIcon sx={{ fontSize: '1.8rem' }} />
+              </Box>
+              <Typography variant="h6" color="error.dark" fontWeight="600">
+                {error}
+              </Typography>
+            </Box>
           </Paper>
         ) : diskSpace && (
           <>
-            <Paper className={classes.card} sx={{ 
-              boxShadow: 3, 
-              borderRadius: 2,
-              position: 'relative',
-              overflow: 'hidden',
-              mb: 3,
-              minHeight: '140px',
-              display: 'flex',
-              flexDirection: 'column'
-            }}>
-              <Box sx={{ 
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                width: '100%',
-                height: '5px',
-                backgroundColor: diskSpace.usedPercentage > 90 ? "error.main" : diskSpace.usedPercentage > 70 ? "warning.main" : "success.main"
-              }} />
-              
-              <Box sx={{ 
-                display: 'flex', 
-                alignItems: { xs: 'flex-start', sm: 'center' },
-                flexDirection: { xs: 'column', sm: 'row' },
-                padding: '0 16px',
-                paddingTop: '16px',
-                mb: 2, 
-                mt: 1,
-                gap: { xs: 2, sm: 0 }
-              }}>
-                <Box sx={{ 
-                  display: 'flex',
-                  alignItems: 'center',
-                  flex: 1,
-                  minWidth: 0
-                }}>
-                  <Box sx={{ 
-                    backgroundColor: diskSpace.usedPercentage > 90 ? "error.light" : diskSpace.usedPercentage > 70 ? "warning.light" : "success.light",
-                    borderRadius: '50%',
-                    p: 1.5,
-                    mr: 2,
-                    flexShrink: 0
-                  }}>
-                    <FolderIcon sx={{ color: '#fff', fontSize: 30 }} />
-                  </Box>
-                  <Box sx={{ minWidth: 0, flex: 1 }}>
-                    <Typography 
-                      variant="h5" 
-                      fontWeight="500"
-                      sx={{ 
-                        fontSize: { xs: '1.1rem', sm: '1.5rem' },
-                        wordBreak: 'break-word'
-                      }}
-                    >
-                      {t('diskSpace.systemFolder', { name: diskSpace.folderName }, `Pasta do Sistema: ${diskSpace.folderName}`)}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      {formatBytes(diskSpace.folderSizeBytes)} / {diskSpace.totalSpace}
-                    </Typography>
-                  </Box>
-                </Box>
-                <Box sx={{ 
-                  textAlign: { xs: 'left', sm: 'right' },
-                  alignSelf: { xs: 'flex-start', sm: 'center' },
-                  ml: { xs: 0, sm: 'auto' }
-                }}>
-                  <Typography 
-                    variant="h4" 
-                    fontWeight="bold" 
-                    color={getStatusColor(diskSpace.usedPercentage)}
-                    sx={{ 
-                      mb: -0.5,
-                      fontSize: { xs: '2rem', sm: '2.125rem' }
-                    }}
-                  >
-                    {diskSpace.usedPercentage}%
+            <Paper 
+              className={classes.card} 
+              elevation={3} 
+              sx={{ 
+                p: 3, 
+                borderRadius: 3,
+                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+                transition: 'box-shadow 0.3s ease',
+                '&:hover': {
+                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)'
+                }
+              }}
+            >
+              <Box display="flex" alignItems="center" justifyContent="space-between" mb={3}>
+                <Box display="flex" alignItems="center">
+                  <StorageIcon className={classes.infoIcon} />
+                  <Typography variant="h5" fontWeight="600">
+                    {t('diskSpace.systemDisk', 'Disco do Sistema')}
                   </Typography>
+                </Box>
+                <Box 
+                  display="flex" 
+                  alignItems="center"
+                  sx={{
+                    backgroundColor: diskSpace.usedPercentage < 70 
+                      ? 'success.light' 
+                      : diskSpace.usedPercentage < 90 
+                        ? 'warning.light' 
+                        : 'error.light',
+                    color: diskSpace.usedPercentage < 70 
+                      ? 'success.dark' 
+                      : diskSpace.usedPercentage < 90 
+                        ? 'warning.dark' 
+                        : 'error.dark',
+                    padding: '8px 16px',
+                    borderRadius: '20px',
+                    fontWeight: 'bold'
+                  }}
+                >
+                  {getStatusIcon(diskSpace.usedPercentage)}
                   <Typography 
-                    variant="body2" 
-                    color={getStatusColor(diskSpace.usedPercentage)}
-                    fontWeight="medium"
+                    component="span" 
+                    fontWeight="bold"
+                    fontSize="0.95rem"
                   >
                     {diskSpace.usedPercentage < 70 
                       ? t('diskSpace.healthy') 
@@ -428,131 +473,127 @@ const DiskSpace = () => {
                 </Box>
               </Box>
               
-              <Box sx={{ px: 2, pb: 2, pt: 1, mt: 'auto' }}>
+              <Box mb={1}>
+                <Box display="flex" justifyContent="space-between" alignItems="center" mb={1.5}>
+                  <Typography variant="body1" fontWeight="500" fontSize="1.1rem">
+                    {formatBytes(diskSpace.folderSizeBytes)} / {diskSpace.totalSpace}
+                  </Typography>
+                  <Typography 
+                    variant="h6" 
+                    color={getStatusColor(diskSpace.usedPercentage)}
+                    fontWeight="bold"
+                  >
+                    {diskSpace.usedPercentage}%
+                  </Typography>
+                </Box>
                 <Tooltip title={`${diskSpace.usedPercentage}% ${t('diskSpace.used')}`}>
                   <LinearProgress 
                     className={classes.progressBar}
                     variant="determinate" 
                     value={diskSpace.usedPercentage} 
                     color={diskSpace.usedPercentage > 90 ? "error" : diskSpace.usedPercentage > 70 ? "warning" : "success"}
-                    sx={{ height: 10, borderRadius: 5 }}
+                    sx={{
+                      height: 32,
+                      borderRadius: 16,
+                      backgroundColor: (theme) => theme.palette.mode === 'dark' 
+                        ? 'rgba(255, 255, 255, 0.1)' 
+                        : 'rgba(0, 0, 0, 0.08)',
+                      '& .MuiLinearProgress-bar': {
+                        borderRadius: 16
+                      }
+                    }}
                   />
                 </Tooltip>
               </Box>
             </Paper>
             
-            <Grid container spacing={2}>
-              <Grid item xs={12} md={4}>
-                <Card className={classes.detailsCard} sx={{ 
-                  boxShadow: 2, 
-                  transition: 'all 0.3s ease',
-                  '&:hover': { transform: 'translateY(-5px)', boxShadow: 4 }
-                }}>
-                  <CardContent sx={{ position: 'relative', pt: 3, pb: 3 }}>
-                    <Box sx={{ 
-                      position: 'absolute', 
-                      top: 0, 
-                      left: 0, 
-                      width: '100%', 
-                      height: '4px', 
-                      backgroundColor: 'primary.main' 
-                    }} />
-                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                      <Box sx={{ 
-                        backgroundColor: 'primary.light', 
-                        borderRadius: '50%', 
-                        p: 1, 
-                        display: 'flex', 
-                        mr: 2 
-                      }}>
-                        <FolderIcon sx={{ color: '#fff' }} />
+            <Box sx={{ mt: 3 }} />
+            
+            <Grid container spacing={3}>
+              <Grid item xs={12} sm={6} md={4}>
+                <Card className={classes.detailsCard} elevation={2}>
+                  <CardContent sx={{ padding: 3 }}>
+                    <Box display="flex" alignItems="center" mb={2}>
+                      <Box
+                        sx={{
+                          backgroundColor: 'primary.light',
+                          color: 'primary.main',
+                          borderRadius: '12px',
+                          padding: 1.5,
+                          display: 'flex',
+                          marginRight: 1.5
+                        }}
+                      >
+                        <FolderIcon sx={{ fontSize: '1.8rem' }} />
                       </Box>
-                      <Typography variant="h6">
+                      <Typography variant="subtitle1" fontWeight="600" color="textSecondary">
                         {t('diskSpace.folderSize')}
                       </Typography>
                     </Box>
-                    <Typography variant="h3" color="primary" sx={{ my: 2, fontWeight: 'bold' }}>
+                    <Typography variant="h4" fontWeight="bold" color="primary" mb={0.5}>
                       {diskSpace.folderSize}
                     </Typography>
-                    <Typography variant="body2" color="textSecondary">
+                    <Typography variant="caption" color="textSecondary">
                       {formatBytes(diskSpace.folderSizeBytes)}
                     </Typography>
                   </CardContent>
                 </Card>
               </Grid>
               
-              <Grid item xs={12} md={4}>
-                <Card className={classes.detailsCard} sx={{ 
-                  boxShadow: 2, 
-                  transition: 'all 0.3s ease',
-                  '&:hover': { transform: 'translateY(-5px)', boxShadow: 4 }
-                }}>
-                  <CardContent sx={{ position: 'relative', pt: 3, pb: 3 }}>
-                    <Box sx={{ 
-                      position: 'absolute', 
-                      top: 0, 
-                      left: 0, 
-                      width: '100%', 
-                      height: '4px', 
-                      backgroundColor: 'success.main' 
-                    }} />
-                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                      <Box sx={{ 
-                        backgroundColor: 'success.light', 
-                        borderRadius: '50%', 
-                        p: 1, 
-                        display: 'flex', 
-                        mr: 2 
-                      }}>
-                        <StorageIcon sx={{ color: '#fff' }} />
+              <Grid item xs={12} sm={6} md={4}>
+                <Card className={classes.detailsCard} elevation={2}>
+                  <CardContent sx={{ padding: 3 }}>
+                    <Box display="flex" alignItems="center" mb={2}>
+                      <Box
+                        sx={{
+                          backgroundColor: 'success.light',
+                          color: 'success.main',
+                          borderRadius: '12px',
+                          padding: 1.5,
+                          display: 'flex',
+                          marginRight: 1.5
+                        }}
+                      >
+                        <StorageIcon sx={{ fontSize: '1.8rem' }} />
                       </Box>
-                      <Typography variant="h6">
+                      <Typography variant="subtitle1" fontWeight="600" color="textSecondary">
                         {t('diskSpace.freeSpace')}
                       </Typography>
                     </Box>
-                    <Typography variant="h3" color="success.main" sx={{ my: 2, fontWeight: 'bold' }}>
+                    <Typography variant="h4" fontWeight="bold" color="primary" mb={0.5}>
                       {diskSpace.freeSpace}
                     </Typography>
-                    <Typography variant="body2" color="textSecondary">
+                    <Typography variant="caption" color="textSecondary">
                       {formatBytes(diskSpace.freeSpaceBytes)}
                     </Typography>
                   </CardContent>
                 </Card>
               </Grid>
               
-              <Grid item xs={12} md={4}>
-                <Card className={classes.detailsCard} sx={{ 
-                  boxShadow: 2, 
-                  transition: 'all 0.3s ease',
-                  '&:hover': { transform: 'translateY(-5px)', boxShadow: 4 }
-                }}>
-                  <CardContent sx={{ position: 'relative', pt: 3, pb: 3 }}>
-                    <Box sx={{ 
-                      position: 'absolute', 
-                      top: 0, 
-                      left: 0, 
-                      width: '100%', 
-                      height: '4px', 
-                      backgroundColor: 'info.main' 
-                    }} />
-                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                      <Box sx={{ 
-                        backgroundColor: 'info.light', 
-                        borderRadius: '50%', 
-                        p: 1, 
-                        display: 'flex', 
-                        mr: 2 
-                      }}>
-                        <StorageIcon sx={{ color: '#fff' }} />
+              <Grid item xs={12} sm={6} md={4}>
+                <Card className={classes.detailsCard} elevation={2}>
+                  <CardContent sx={{ padding: 3 }}>
+                    <Box display="flex" alignItems="center" mb={2}>
+                      <Box
+                        sx={{
+                          backgroundColor: 'info.light',
+                          color: 'info.main',
+                          borderRadius: '12px',
+                          padding: 1.5,
+                          display: 'flex',
+                          marginRight: 1.5
+                        }}
+                      >
+                        <StorageIcon sx={{ fontSize: '1.8rem' }} />
                       </Box>
-                      <Typography variant="h6">
+                      <Typography variant="subtitle1" fontWeight="600" color="textSecondary">
                         {t('diskSpace.totalSpace')}
                       </Typography>
                     </Box>
-                    <Typography variant="h3" color="info.main" sx={{ my: 2, fontWeight: 'bold' }}>
+                    <Typography variant="h4" fontWeight="bold" color="primary" mb={0.5}>
                       {diskSpace.totalSpace}
                     </Typography>
-                    <Typography variant="body2" color="textSecondary">
+                    <Typography variant="caption" color="textSecondary">
                       {formatBytes(diskSpace.totalSpaceBytes)}
                     </Typography>
                   </CardContent>
@@ -563,48 +604,53 @@ const DiskSpace = () => {
             {diskSpace.usedPercentage > 70 && (
               <Paper 
                 className={classes.card} 
+                elevation={3}
                 sx={{ 
-                  mt: 2, 
-                  mb: 3, 
-                  borderLeft: '4px solid', 
+                  mt: 3,
+                  p: 3,
+                  backgroundColor: diskSpace.usedPercentage > 90 ? 'error.light' : 'warning.light',
+                  borderLeft: 6,
                   borderColor: diskSpace.usedPercentage > 90 ? 'error.main' : 'warning.main',
-                  backgroundColor: diskSpace.usedPercentage > 90 ? 'rgba(211, 47, 47, 0.1)' : 'rgba(237, 108, 2, 0.1)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  p: 2
+                  borderRadius: 3
                 }}
-                elevation={diskSpace.usedPercentage > 90 ? 3 : 1}
               >
-                <Box sx={{ 
-                  backgroundColor: diskSpace.usedPercentage > 90 ? 'error.main' : 'warning.main',
-                  borderRadius: '50%',
-                  p: 1,
-                  mr: 2,
-                  display: 'flex'
-                }}>
-                  <WarningIcon sx={{ color: '#fff' }} />
-                </Box>
-                <Box>
-                  <Typography variant="h6" fontWeight="bold" color={diskSpace.usedPercentage > 90 ? 'error.main' : 'warning.main'}>
-                    {diskSpace.usedPercentage > 90 ? 'Alerta Crítico!' : 'Atenção!'}
-                  </Typography>
-                  <Typography variant="body1" sx={{ mt: 0.5 }}>
-                    {diskSpace.usedPercentage > 90 
-                      ? t('diskSpace.criticalWarning') 
-                      : t('diskSpace.warningMessage')}
-                  </Typography>
+                <Box display="flex" alignItems="center">
+                  <Box
+                    sx={{
+                      backgroundColor: diskSpace.usedPercentage > 90 ? 'error.main' : 'warning.main',
+                      color: 'white',
+                      borderRadius: '50%',
+                      padding: 1.5,
+                      display: 'flex',
+                      marginRight: 2
+                    }}
+                  >
+                    <WarningIcon sx={{ fontSize: '1.8rem' }} />
+                  </Box>
+                  <Box>
+                    <Typography 
+                      variant="h6" 
+                      fontWeight="600"
+                      color={diskSpace.usedPercentage > 90 ? 'error.dark' : 'warning.dark'}
+                      mb={0.5}
+                    >
+                      {diskSpace.usedPercentage > 90 ? 'Alerta Crítico!' : 'Atenção!'}
+                    </Typography>
+                    <Typography variant="body1">
+                      {diskSpace.usedPercentage > 90 
+                        ? t('diskSpace.criticalWarning') 
+                        : t('diskSpace.warningMessage')}
+                    </Typography>
+                  </Box>
                 </Box>
               </Paper>
             )}
             
-            <Paper className={`${classes.card} ${classes.folderTable}`} sx={{ mt: 3 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, borderBottom: '1px solid', borderColor: 'divider', pb: 1 }}>
-                <FolderOpenIcon sx={{ fontSize: 28, color: 'primary.main', mr: 1 }} />
-                <Typography variant="h5" fontWeight="500" color="primary.main">
-                  {t('diskSpace.largestFolders', 'Maiores Pastas')}
-                </Typography>
-                <Typography variant="caption" sx={{ ml: 2, color: 'text.secondary' }}>
-                  (Top 20)
+            <Paper className={`${classes.card} ${classes.folderTable}`} elevation={3} sx={{ mt: 4, p: 3, borderRadius: 3 }}>
+              <Box display="flex" alignItems="center" mb={3}>
+                <FolderOpenIcon className={classes.infoIcon} />
+                <Typography variant="h5" fontWeight="600">
+                  {t('diskSpace.folders', 'Pastas')}
                 </Typography>
                 <Box sx={{ ml: 'auto', display: 'flex', alignItems: 'center', gap: 2 }}>
                   <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -749,6 +795,28 @@ const DiskSpace = () => {
                                   {fileName}{isFolder ? '/' : ''}
                                 </Typography>
                                 
+                                {isFolder && fileName.toLowerCase() === 'public' && item.name.includes('backend') && (
+                                  <Tooltip title="Gerenciar Arquivos">
+                                    <IconButton
+                                      size="small"
+                                      sx={{ 
+                                        ml: 1,
+                                        color: 'primary.main',
+                                        '&:hover': {
+                                          backgroundColor: 'primary.light',
+                                          color: 'primary.dark'
+                                        }
+                                      }}
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        navigate('/file-manager');
+                                      }}
+                                    >
+                                      <SettingsIcon fontSize="small" />
+                                    </IconButton>
+                                  </Tooltip>
+                                )}
+                                
                                 {!isFolder && (
                                   <Typography 
                                     variant="caption" 
@@ -800,7 +868,7 @@ const DiskSpace = () => {
                             {isFolder && (
                               <Collapse in={isExpanded} timeout="auto" unmountOnExit>
                                 <Box sx={{ pl: 2, pb: 1 }}>
-                                  {contents.map((child) => renderTreeItem(child, depth + 1))}
+                                  {sortItems(contents).map((child) => renderTreeItem(child, depth + 1))}
                                 </Box>
                               </Collapse>
                             )}
@@ -809,7 +877,7 @@ const DiskSpace = () => {
                       );
                     };
 
-                    return diskSpace.largestFolders.map((item) => renderTreeItem(item, 0));
+                    return sortItems(diskSpace.largestFolders).map((item) => renderTreeItem(item, 0));
                   })()}
                 </Box>
               ) : (

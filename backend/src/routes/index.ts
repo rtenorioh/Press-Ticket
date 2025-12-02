@@ -10,6 +10,7 @@ import backupRoutes from "./backupRoutes";
 import networkMonitorRoutes from "./networkMonitorRoutes";
 import systemCleanupRoutes from "./systemCleanupRoutes";
 import queueMonitorRoutes from "./queueMonitorRoutes";
+import userMonitorRoutes from "./userMonitorRoutes";
 import systemHealthRoutes from "./systemHealthRoutes";
 import systemUpdateRoutes from "./systemUpdateRoutes";
 import contactRoutes from "./contactRoutes";
@@ -38,6 +39,7 @@ import groupEventRoutes from "./groupEventRoutes";
 import groupManagementRoutes from "./groupManagementRoutes";
 import pollVoteRoutes from "./pollVoteRoutes";
 import rateLimitRoutes from "./rateLimitRoutes";
+import fileManagerRoutes from "./fileManagerRoutes";
 
 const routes = Router();
 
@@ -69,6 +71,7 @@ routes.use(activityLogRoutes);
 routes.use(networkMonitorRoutes);
 routes.use(systemCleanupRoutes);
 routes.use(queueMonitorRoutes);
+routes.use(userMonitorRoutes);
 routes.use(systemHealthRoutes);
 routes.use(systemUpdateRoutes);
 routes.use(videoRoutes);
@@ -79,5 +82,6 @@ routes.use(groupEventRoutes);
 routes.use(groupManagementRoutes);
 routes.use(pollVoteRoutes);
 routes.use(rateLimitRoutes);
+routes.use(fileManagerRoutes);
 
 export default routes;

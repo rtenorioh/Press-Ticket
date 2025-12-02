@@ -18,6 +18,7 @@ interface UpdateInfo {
   needsUpdate: boolean;
   releaseNotes: string;
   downloadUrl: string;
+  publishedAt?: string;
 }
 
 interface UpdateStatus {
@@ -94,7 +95,8 @@ export const checkForUpdates = async (): Promise<UpdateInfo> => {
       latestVersion,
       needsUpdate,
       releaseNotes: latestRelease.body || "Nenhuma nota de lançamento disponível",
-      downloadUrl: latestRelease.zipball_url
+      downloadUrl: latestRelease.zipball_url,
+      publishedAt: latestRelease.published_at
     };
 
     updateStatus.status = "idle";

@@ -17,6 +17,7 @@ import VersionCheck from "../pages/VersionCheck/";
 import DiskSpace from "../pages/DiskSpace/";
 import MemoryUsage from "../pages/MemoryUsage/";
 import ErrorLogs from "../pages/ErrorLogs/";
+import FileManager from "../pages/FileManager/";
 import ForgotPassword from "../pages/ForgotPassword";
 import Login from "../pages/Login/";
 import Queues from "../pages/Queues/";
@@ -27,6 +28,7 @@ import Backup from "../pages/Backup";
 import ActivityLogs from "../pages/ActivityLogs";
 import NetworkStatus from "../pages/NetworkStatus";
 import QueueMonitor from "../pages/QueueMonitor";
+import UserMonitor from "../pages/UserMonitor";
 import DatabaseStatus from "../pages/DatabaseStatus";
 import SystemHealth from "../pages/SystemHealth";
 import SystemUpdate from "../pages/SystemUpdate";
@@ -40,6 +42,7 @@ import HealthCheck from "../pages/HealthCheck";
 import GroupManagement from "../pages/GroupManagement";
 import PrivateRoute from "./PrivateRoute";
 import AdminRoute from "./AdminRoute";
+import MasterAdminRoute from "./MasterAdminRoute";
 import PublicRoute from "./PublicRoute";
 
 const AppRoutes = ({ toggleTheme, onThemeConfigUpdate }) => {
@@ -78,16 +81,18 @@ const AppRoutes = ({ toggleTheme, onThemeConfigUpdate }) => {
             <Route path="ClientStatus" element={<ClientStatus />} />
             <Route path="errorLogs" element={<ErrorLogs />} />
             <Route path="diskSpace" element={<DiskSpace />} />
+            <Route path="file-manager" element={<FileManager />} />
             <Route path="memoryUsage" element={<MemoryUsage />} />
             <Route path="cpuUsage" element={<CpuUsage />} />
             <Route path="backup" element={<Backup />} />
             <Route path="activity-logs" element={<ActivityLogs />} />
             <Route path="network-status" element={<NetworkStatus />} />
             <Route path="queue-monitor" element={<QueueMonitor />} />
+            <Route path="user-monitor" element={<UserMonitor />} />
             <Route path="databaseStatus" element={<DatabaseStatus />} />
             <Route path="system-health" element={<SystemHealth />} />
-            <Route path="system-update" element={<SystemUpdate />} />
-            <Route path="versionCheck" element={<VersionCheck />} />
+            <Route path="system-update" element={<MasterAdminRoute element={<SystemUpdate />} />} />
+            <Route path="versionCheck" element={<MasterAdminRoute element={<VersionCheck />} />} />
             <Route path="videos" element={<Videos />} />
             <Route path="health-check" element={<HealthCheck />} />
             <Route path="group-management" element={<GroupManagement />} />

@@ -211,7 +211,9 @@ const ContactModal = ({ open, onClose, contactId, initialValues, onSave }) => {
 				.sort((a, b) => a.localeCompare(b));
 				setCountries(countryNames);
 			} catch (error) {
-				console.error("Erro ao carregar países:", error);
+				// Falha silenciosa - API externa pode estar indisponível
+				// Usuário ainda pode digitar país manualmente
+				setCountries([]);
 			}
 		};
 	

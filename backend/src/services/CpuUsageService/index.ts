@@ -27,6 +27,22 @@ function parseLoadAverage(loadavg: string): number[] {
   return loadavg.split(' ').slice(0, 3).map(Number);
 }
 
+function extractFrequencyFromModel(cpuModel: string): string | null {
+  
+  const ghzMatch = cpuModel.match(/@\s*(\d+\.?\d*)\s*GHz/i);
+  if (ghzMatch) {
+    const ghz = parseFloat(ghzMatch[1]);
+    return `${(ghz * 1000).toFixed(0)} MHz`;
+  }
+  
+  const mhzMatch = cpuModel.match(/@\s*(\d+)\s*MHz/i);
+  if (mhzMatch) {
+    return `${mhzMatch[1]} MHz`;
+  }
+  
+  return null;
+}
+
 export async function getCpuUsageInfo(): Promise<CpuUsageInfo> {
   const cpuModelCmd = `lscpu | grep 'Model name' | awk -F: '{print $2}' | xargs`;
   const coresCmd = `lscpu | grep '^CPU(s):' | awk '{print $2}'`;
@@ -75,12 +91,24 @@ export async function getCpuUsageInfo(): Promise<CpuUsageInfo> {
         };
       });
 
+    let frequency = 'N/A';
+    if (freqCurrent && !isNaN(Number(freqCurrent))) {
+      frequency = `${Number(freqCurrent).toFixed(0)} MHz`;
+    } else if (freqMax && !isNaN(Number(freqMax))) {
+      frequency = `${Number(freqMax).toFixed(0)} MHz`;
+    } else {
+      const extractedFreq = extractFrequencyFromModel(cpuModel);
+      if (extractedFreq) {
+        frequency = extractedFreq;
+      }
+    }
+
     return {
       cpuModel,
       cores: Number(cores),
       threads: Number(threads),
       cpuUsage: Number(Number(cpuUsage).toFixed(2)),
-      frequency: freqCurrent ? `${Number(freqCurrent).toFixed(0)} MHz` : (freqMax ? `${Number(freqMax).toFixed(0)} MHz` : 'N/A'),
+      frequency,
       maxFrequency: freqMax ? `${Number(freqMax).toFixed(0)} MHz` : '',
       uptime,
       loadAverage: parseLoadAverage(loadAvg),
