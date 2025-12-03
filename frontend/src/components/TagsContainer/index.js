@@ -46,7 +46,6 @@ export function TagsContainer({ contact }) {
             return responseData;
         } catch (err) {
             if (err.response?.data?.error === "Nenhuma tag válida fornecida") {
-                console.log("Removendo todas as tags do contato");
                 return { message: "Tags removidas com sucesso" };
             } else {
                 toastError(err, t);

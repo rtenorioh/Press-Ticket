@@ -1000,7 +1000,6 @@ const MessageInput = ({ ticketStatus }) => {
           }
         }
       } else {
-        console.log("channelType", channelType);
         if (channelType === "wwebjs") {
           response = await api.post(`/messages/${ticketId}`, message);
         } else {
@@ -1127,7 +1126,6 @@ const MessageInput = ({ ticketStatus }) => {
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
       let lastDebug = 0;
-      console.log('[wave] visualizador iniciado');
       const draw = (ts) => {
         const bufferLength = analyser.frequencyBinCount;
         const dataArray = new Uint8Array(bufferLength);

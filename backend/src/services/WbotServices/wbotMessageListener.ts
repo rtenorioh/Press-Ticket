@@ -219,7 +219,6 @@ const verifyMediaMessage = async (
   if (existingMessage) {
     const messageAge = Date.now() - new Date(existingMessage.createdAt).getTime();
     if (messageAge < 5000) {
-      console.log(`[WBOT_LISTENER] Mensagem com mídia ${messageData.id} já existe e foi criada há ${messageAge}ms, ignorando duplicação`);
       return existingMessage;
     }
   }
@@ -517,7 +516,6 @@ const verifyMessage = async (
   if (existingMessage) {
     const messageAge = Date.now() - new Date(existingMessage.createdAt).getTime();
     if (messageAge < 5000) {
-      console.log(`[WBOT_LISTENER] Mensagem ${messageData.id} já existe e foi criada há ${messageAge}ms, ignorando duplicação`);
       return;
     }
   }
@@ -808,7 +806,7 @@ const isValidMsg = (msg: WbotMessage): boolean => {
     msg.type === "e2e_notification" ||
     msg.type === "notification"
   ) {
-    console.log("Mensagem recebida - tipo de notificação ou broadcast:", msg.type);
+    console.info("Mensagem recebida - tipo de notificação ou broadcast:", msg.type);
     return false;
   }
 
@@ -1521,7 +1519,6 @@ const handleMsgAck = async (msg: WbotMessage, ack: MessageAck) => {
       logger.info(`[ACK_SOCKET] Socket emitido para ticket ${messageToUpdate.ticketId}, tempo: ${afterEmit - beforeEmit}ms`);
     } else {
       logger.info(`[ACK_IGNORADO] ACK ignorado: valor atual (${currentAck}) >= novo valor (${ackToUpdate})`);
-      console.log(`[ACK_IGNORADO] ACK ignorado: valor atual (${currentAck}) >= novo valor (${ackToUpdate})`);
     }
     
     if (ackToUpdate >= 2) {
@@ -1596,19 +1593,18 @@ const handleMsgEdit = async (
           messageId: msg.id.id,
           body: oldBody
         });
-        console.log(`[handleMsgEdit] Histórico salvo: "${oldBody}"`);
+        console.info(`[handleMsgEdit] Histórico salvo: "${oldBody}"`);
       } else {
-        console.log(`[handleMsgEdit] Histórico já existe (ID: ${existingHistory.id}), pulando duplicata`);
+        console.info(`[handleMsgEdit] Histórico já existe (ID: ${existingHistory.id}), pulando duplicata`);
       }
     } else {
-      console.log(`[handleMsgEdit] Sem mudança no corpo ou valores inválidos`);
+      console.info(`[handleMsgEdit] Sem mudança no corpo ou valores inválidos`);
     }
 
     if (editedMsg.body !== newBody) {
       await editedMsg.update({ body: newBody, isEdited: true });
-      console.log(`[handleMsgEdit] Mensagem atualizada no banco: "${newBody}"`);
     } else {
-      console.log(`[handleMsgEdit] Mensagem já está atualizada no banco`);
+      console.info(`[handleMsgEdit] Mensagem já está atualizada no banco`);
     }
 
     await editedMsg.reload({

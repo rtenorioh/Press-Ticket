@@ -102,19 +102,11 @@ export const SendMediaMessageService = async (
       media.originalname
     );
 
-    console.log({
-      token: connection.qrcode,
-      number: contactNumber,
-      content,
-      message
-    });
-
     let response = await channelClient.sendMessage(
       connection.qrcode,
       contactNumber,
       content
     );
-    console.log("response:", response);
 
     let data: any;
 

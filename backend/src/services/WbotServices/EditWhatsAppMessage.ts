@@ -28,12 +28,7 @@ const EditWhatsAppMessage = async (
   const { ticket } = message;
 
   const oldBody = message.body;
-  console.log(`[EditWhatsAppMessage] ========================================`);
-  console.log(`[EditWhatsAppMessage] Iniciando edição da mensagem ${messageId}`);
-  console.log(`[EditWhatsAppMessage] Corpo ATUAL no banco: "${oldBody}"`);
-  console.log(`[EditWhatsAppMessage] Corpo NOVO solicitado: "${newBody}"`);
-  console.log(`[EditWhatsAppMessage] ========================================`);
-
+  
   let messageToEdit;
   try {
     messageToEdit = await GetWbotMessage(ticket, messageId);
@@ -43,23 +38,18 @@ const EditWhatsAppMessage = async (
   }
 
   try {
-    console.log(`[EditWhatsAppMessage] Tentando editar mensagem com novo texto: "${newBody.substring(0, 50)}..."`);
     const res = await messageToEdit.edit(newBody);
     
     if (res === null) {
-      console.error(`[EditWhatsAppMessage] Edição retornou null - mensagem pode ser muito antiga ou não editável`);
       throw new Error("Não foi possível editar a mensagem. Ela pode ser muito antiga (mais de 15 minutos) ou não ser editável.");
     }
     
-    console.log(`[EditWhatsAppMessage] Mensagem editada com sucesso no WhatsApp`);
   } catch (err: any) {
-    console.error(`[EditWhatsAppMessage] Erro ao editar mensagem no WhatsApp:`, err.message);
     throw new AppError("ERR_EDITING_WAPP_MSG");
   }
 
 
   if (typeof oldBody === "string" && oldBody !== newBody) {
-    console.log(`[EditWhatsAppMessage] Salvando histórico: "${oldBody}" -> "${newBody}"`);
     
     const existingHistory = await OldMessage.findOne({
       where: {
@@ -73,7 +63,7 @@ const EditWhatsAppMessage = async (
         messageId: message.id,
         body: oldBody
       });
-      console.log(`[EditWhatsAppMessage] Histórico salvo com ID: ${newHistory.id}, body: "${newHistory.body}"`);
+
     } else {
       console.log(`[EditWhatsAppMessage] Histórico já existe (ID: ${existingHistory.id}), pulando duplicata`);
     }
@@ -113,7 +103,6 @@ const EditWhatsAppMessage = async (
     ]
   });
 
-  console.log(`[EditWhatsAppMessage] Mensagem recarregada com ${message.oldMessages?.length || 0} históricos`);
   if (message.oldMessages && message.oldMessages.length > 0) {
     console.log(`[EditWhatsAppMessage] Históricos encontrados:`, 
       message.oldMessages.map((om: any) => ({ id: om.id, body: om.body?.substring(0, 30) }))

@@ -103,21 +103,15 @@ const CameraModal = ({ open, onClose, onCapture }) => {
         constraints.video.facingMode = facingMode;
       }
 
-      console.log('Tentando acessar câmera com constraints:', constraints);
       const stream = await navigator.mediaDevices.getUserMedia(constraints);
       streamRef.current = stream;
-      
-      console.log('Stream obtido:', stream);
-      console.log('Tracks do stream:', stream.getTracks());
       
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
         
         try {
           await videoRef.current.play();
-          console.log('Vídeo iniciado com sucesso');
         } catch (playError) {
-          console.error('Erro ao reproduzir vídeo:', playError);
           setTimeout(async () => {
             try {
               await videoRef.current.play();

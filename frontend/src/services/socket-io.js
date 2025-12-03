@@ -43,9 +43,6 @@ const connectToSocket = () => {
             socketInstance.disconnect();
         }
         
-        console.log("[SOCKET] Conectando com token:", parsedToken.substring(0, 20) + "...");
-        console.log("[SOCKET] Backend URL:", getBackendUrl());
-        
         const socket = openSocket(getBackendUrl(), {
             transports: ["polling", "websocket"],
             query: {
@@ -60,11 +57,9 @@ const connectToSocket = () => {
 
         socket.on("connect", () => {
             const timestamp = new Date().toISOString();
-            console.log(`[SOCKET] ✅ CONECTADO! Socket ID: ${socket.id}`);
             
             const user = JSON.parse(localStorage.getItem("user") || "{}");
             if (user && user.id) {
-                console.log(`[SOCKET] Usuário: ${user.name} (ID: ${user.id})`);
                 socket.emit("getTickets", { userId: user.id });
                 socket.emit("userStatus", { userId: user.id, status: "online" });
                 socket.emit("subscribeTicketCounter");
@@ -94,7 +89,6 @@ const connectToSocket = () => {
         });
 
         socket.on("connect_error", (error) => {
-            const timestamp = new Date().toISOString();
             console.error(`[SOCKET] ❌ ERRO DE CONEXÃO:`, error.message);
             console.error(`[SOCKET] Tipo de erro:`, error.type);
             console.error(`[SOCKET] Stack:`, error?.stack || 'Sem stack disponível');
@@ -122,7 +116,6 @@ const connectToSocket = () => {
         });
         
         socket.on("disconnect", (reason) => {
-            const timestamp = new Date().toISOString();
             console.warn(`[SOCKET] ⚠️ DESCONECTADO! Motivo: ${reason}`);
         
             if (reason === 'transport error' || reason === 'transport close') {

@@ -33,21 +33,11 @@ const ReactToWhatsAppMessage = async ({ messageId, emoji }: ReactParams): Promis
     remoteJid = ticket.isGroup ? `${num}@g.us` : `${num}@c.us`;
   }
 
-  console.log('[ReactToWhatsAppMessage] Debug:', {
-    messageId,
-    ticketId: ticket.id,
-    isGroup: ticket.isGroup,
-    contactNumber: ticket.contact?.number,
-    remoteJid
-  });
-
   const serializedId = (() => {
     try { 
       const id = SerializeWbotMsgId(ticket as any, message as any);
-      console.log('[ReactToWhatsAppMessage] serializedId:', id);
       return id;
     } catch (err) {
-      console.log('[ReactToWhatsAppMessage] Erro ao gerar serializedId:', err);
       return null;
     }
   })();
@@ -56,10 +46,8 @@ const ReactToWhatsAppMessage = async ({ messageId, emoji }: ReactParams): Promis
       if (!remoteJid) return null;
       const from = message.fromMe ? 'true' : 'false';
       const id = `${from}_${remoteJid}_${message.id}`;
-      console.log('[ReactToWhatsAppMessage] altSerializedId:', id);
       return id;
     } catch (err) {
-      console.log('[ReactToWhatsAppMessage] Erro ao gerar altSerializedId:', err);
       return null;
     }
   })();
@@ -98,8 +86,6 @@ const ReactToWhatsAppMessage = async ({ messageId, emoji }: ReactParams): Promis
     console.log("[ReactToWhatsAppMessage] pupPage não disponível");
     throw new Error("WhatsApp page not ready");
   }
-
-  console.log("[ReactToWhatsAppMessage] Iniciando fallback Store com pupPage.evaluate");
   
   let result: any = null;
   try {
@@ -220,9 +206,6 @@ const ReactToWhatsAppMessage = async ({ messageId, emoji }: ReactParams): Promis
     console.error("[ReactToWhatsAppMessage] Erro no pupPage.evaluate:", evalError);
     throw new Error("Failed to evaluate Store reaction");
   }
-
-  console.log("[ReactToWhatsAppMessage] Logs do Store:", result?.logs || []);
-  console.log("[ReactToWhatsAppMessage] Resultado do fallback Store:", result?.success);
 
   if (!result?.success) {
     throw new Error("Failed to send reaction via WhatsApp Web");

@@ -34,12 +34,8 @@ export const updateWhatsappLibFromGit = async (): Promise<WhatsappLibGitUpdateRe
     const whatsappPackage = JSON.parse(whatsappPackageContent);
     const currentInstalledVersion = whatsappPackage.version;
     
-    console.log(`Versão instalada: ${currentInstalledVersion}`);
-    console.log('Instalando versão do GitHub (branch main)...');
-    
     const oldVersion = currentInstalledVersion;
     
-    // Instalar direto do GitHub
     packageJson.dependencies['whatsapp-web.js'] = 'github:pedroslopez/whatsapp-web.js#main';
     fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2));
     
@@ -59,23 +55,18 @@ export const updateWhatsappLibFromGit = async (): Promise<WhatsappLibGitUpdateRe
     fs.writeFileSync(path.resolve(tempDir, 'package.json'), JSON.stringify(tempPackageJson, null, 2));
     
     try {
-      console.log('Instalando a versão do GitHub em diretório temporário...');
       await execPromise('npm install --no-audit', { cwd: tempDir });
       
       const whatsappLibDir = path.resolve(rootDir, 'node_modules/whatsapp-web.js');
       const backupDir = path.resolve(rootDir, 'node_modules/whatsapp-web.js.backup');
       
-      // Criar backup da versão antiga antes de remover
       if (fs.existsSync(whatsappLibDir)) {
-        console.log('Criando backup da versão antiga...');
         if (fs.existsSync(backupDir)) {
           fs.rmSync(backupDir, { recursive: true, force: true });
         }
         fs.renameSync(whatsappLibDir, backupDir);
-        console.log('Backup criado com sucesso.');
       }
       
-      console.log('Copiando nova versão da biblioteca para o projeto...');
       const tempWhatsappDir = path.resolve(tempDir, 'node_modules/whatsapp-web.js');
       
       const copyDirRecursive = (src: string, dest: string) => {
@@ -106,11 +97,7 @@ export const updateWhatsappLibFromGit = async (): Promise<WhatsappLibGitUpdateRe
         const newWhatsappPackage = JSON.parse(newWhatsappPackageContent);
         const newInstalledVersion = newWhatsappPackage.version;
         
-        console.log(`Nova versão instalada: ${newInstalledVersion}`);
-        
-        // Tudo OK, remover backup
         if (fs.existsSync(backupDir)) {
-          console.log('Removendo backup da versão antiga...');
           fs.rmSync(backupDir, { recursive: true, force: true });
         }
         
@@ -124,22 +111,17 @@ export const updateWhatsappLibFromGit = async (): Promise<WhatsappLibGitUpdateRe
         throw new Error('Falha ao instalar a biblioteca: arquivo package.json não encontrado após instalação');
       }
     } catch (installError) {
-      console.error('Erro durante a instalação:', installError);
       
-      // Restaurar backup se existir
       const whatsappLibDir = path.resolve(rootDir, 'node_modules/whatsapp-web.js');
       const backupDir = path.resolve(rootDir, 'node_modules/whatsapp-web.js.backup');
       
       if (fs.existsSync(backupDir)) {
-        console.log('Restaurando versão anterior do backup...');
         if (fs.existsSync(whatsappLibDir)) {
           fs.rmSync(whatsappLibDir, { recursive: true, force: true });
         }
         fs.renameSync(backupDir, whatsappLibDir);
-        console.log('Versão anterior restaurada com sucesso.');
       }
       
-      // Reverter para versão anterior no package.json
       packageJson.dependencies['whatsapp-web.js'] = `^${oldVersion}`;
       fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2));
       

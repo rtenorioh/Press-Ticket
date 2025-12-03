@@ -100,15 +100,6 @@ const SendWhatsAppMedia = async ({
   let finalMediaPath = media.path;
   let shouldDeleteCompressed = false;
 
-  console.log('[SendWhatsAppMedia] Iniciando envio:', {
-    filename: media.filename,
-    mimetype: media.mimetype,
-    hasBody: !!body,
-    hasMentions: !!mentions,
-    mentionsCount: mentions?.length || 0,
-    forceSendAsDocument: !!forceSendAsDocument
-  });
-
   try {
     const wbot = await GetTicketWbot(ticket);
     

@@ -29,7 +29,6 @@ const MessageReactionsModal = ({ open, onClose, messageId, t }) => {
     setLoading(true);
     try {
       const { data } = await api.get(`/messages/${messageId}/reactions`);
-      console.log("Reactions", data);
       setReactions(Array.isArray(data?.reactions) ? data.reactions : []);
     } catch (e) {
       console.error("Erro ao buscar reações:", e);

@@ -13,25 +13,22 @@ if (!process.env.PORT) {
 	);
 }
 
-// Configuração do Helmet baseada no ambiente
 const isProduction = process.env.NODE_ENV === 'production';
 
 if (isProduction) {
-	// Em produção: Nginx envia os headers, então desabilitamos no Helmet
 	app.use(
 		helmet({
-			contentSecurityPolicy: false, // Nginx já envia
+			contentSecurityPolicy: false,	
 			crossOriginEmbedderPolicy: false,
-			frameguard: false, // Nginx já envia
-			xContentTypeOptions: false, // Nginx já envia
-			xXssProtection: false, // Nginx já envia
-			referrerPolicy: false, // Nginx já envia
-			permissionsPolicy: false, // Nginx já envia
+			frameguard: false,
+			xContentTypeOptions: false,
+			xXssProtection: false,
+			referrerPolicy: false,
+			permissionsPolicy: false,
 		})
 	);
 	console.log('🔒 Modo Produção: Security headers gerenciados pelo Nginx');
 } else {
-	// Em desenvolvimento: Helmet envia os headers (não tem Nginx)
 	app.use(
 		helmet({
 			contentSecurityPolicy: {

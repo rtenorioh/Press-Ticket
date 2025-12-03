@@ -86,9 +86,7 @@ const PollMessage = ({ message }) => {
     const socket = openSocket();
     if (socket) {
       const handlePollVoteUpdate = (data) => {
-        console.log("[POLL_VOTE_UPDATE] Evento recebido:", data);
         if (data.pollMessageId === message.id) {
-          console.log("[POLL_VOTE_UPDATE] Recarregando votos para poll:", message.id);
           loadVotes();
         }
       };

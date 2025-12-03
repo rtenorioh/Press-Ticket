@@ -18,7 +18,6 @@ export const GetWbotMessage = async (
   if (!chatId.includes("@")) {
     chatId = `${chatId}@${ticket.isGroup ? "g" : "c"}.us`;
   }
-  console.log(`[GetWbotMessage] Buscando chat: ${chatId} para mensagem: ${messageId}`);
 
   let wbotChat: Chat;
   try {
@@ -32,11 +31,9 @@ export const GetWbotMessage = async (
     console.error(`[GetWbotMessage] Erro ao buscar chat ${chatId}:`, getChatError.message);
     
     try {
-      console.log(`[GetWbotMessage] Tentando buscar mensagem diretamente pelo ID: ${messageId}`);
       const directMessage = await wbot.getMessageById(messageId);
       
       if (directMessage) {
-        console.log(`[GetWbotMessage] Mensagem encontrada diretamente pelo ID`);
         return directMessage;
       }
     } catch (directError: any) {
@@ -57,7 +54,6 @@ export const GetWbotMessage = async (
 
       if (!msgFound && limit < maxLimit) {
         limit += ticket.isGroup ? 50 : 20;
-        console.log(`[GetWbotMessage] Mensagem não encontrada, aumentando limite para ${limit}`);
         return fetchWbotMessagesGradually();
       }
 
@@ -80,7 +76,6 @@ export const GetWbotMessage = async (
       throw new Error(errorMsg);
     }
 
-    console.log(`[GetWbotMessage] Mensagem encontrada com sucesso: ${messageId}`);
     return msgFound;
   } catch (err) {
     console.error("[GetWbotMessage] Erro final:", err);

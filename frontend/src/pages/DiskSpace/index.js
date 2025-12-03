@@ -222,8 +222,6 @@ const DiskSpace = () => {
       try {
         setLoading(true);
         const { data } = await api.get('/disk-space');
-        console.log('Dados recebidos do backend:', data);
-        console.log('Maiores pastas:', data.largestFolders);
         setDiskSpace(data);
         setError(null);
       } catch (err) {
