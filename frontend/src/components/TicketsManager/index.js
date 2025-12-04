@@ -338,16 +338,29 @@ const TicketsManager = () => {
 
   const handleCloseTickets = async (status) => {
     try {
-      const { data } = await api.put(`/tickets/close-all?status=${status}`);
+      let groupsOnlyParam = '';
+      const originalStatus = status;
+      
+      if (status === 'open') {
+        groupsOnlyParam = '&groupsOnly=false';
+      } else if (status === 'groups') {
+        groupsOnlyParam = '&groupsOnly=true';
+        status = 'open';
+      }
+      
+      const { data } = await api.put(`/tickets/close-all?status=${status}${groupsOnlyParam}`);
       setAnchorEl(null);
       
-      if (status === "open") {
+      if (originalStatus === "open") {
         setTab(tab => tab === "open" ? "pending" : "open");
         setTimeout(() => setTab("open"), 100);
-      } else if (status === "pending") {
+      } else if (originalStatus === "pending") {
         setTab(tab => tab === "pending" ? "open" : "pending");
         setTimeout(() => setTab("pending"), 100);
-      } else if (status === "all") {
+      } else if (originalStatus === "groups") {
+        setTab(tab => tab === "groups" ? "open" : "groups");
+        setTimeout(() => setTab("groups"), 100);
+      } else if (originalStatus === "all") {
         setTab(tab => tab === "open" ? "pending" : "open");
         setTimeout(() => setTab("open"), 100);
       }
@@ -398,6 +411,8 @@ const TicketsManager = () => {
             ? t("ticketsManager.confirmationModal.closeAllTitle")
             : closeAction === "open"
             ? t("ticketsManager.confirmationModal.closeOpenTitle")
+            : closeAction === "groups"
+            ? t("ticketsManager.confirmationModal.closeGroupsTitle")
             : t("ticketsManager.confirmationModal.closePendingTitle")
         }
         open={confirmationOpen}
@@ -408,6 +423,8 @@ const TicketsManager = () => {
           ? t("ticketsManager.confirmationModal.closeAllMessage")
           : closeAction === "open"
           ? t("ticketsManager.confirmationModal.closeOpenMessage")
+          : closeAction === "groups"
+          ? t("ticketsManager.confirmationModal.closeGroupsMessage")
           : t("ticketsManager.confirmationModal.closePendingMessage")}
       </ConfirmationModal>
       <SearchContainerStyled elevation={0}>
@@ -563,6 +580,7 @@ const TicketsManager = () => {
           >
             <MenuItem onClick={() => handleOpenConfirmation("all")}>{t("ticketsManager.menu.all")}</MenuItem>
             <MenuItem onClick={() => handleOpenConfirmation("open")}>{t("ticketsManager.menu.open")}</MenuItem>
+            <MenuItem onClick={() => handleOpenConfirmation("groups")}>{t("ticketsManager.menu.groups")}</MenuItem>
             <MenuItem onClick={() => handleOpenConfirmation("pending")}>{t("ticketsManager.menu.pending")}</MenuItem>
           </Menu>
         </Box>

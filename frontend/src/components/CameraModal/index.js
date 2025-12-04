@@ -4,7 +4,6 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  Button,
   IconButton,
   Box,
   Typography,
@@ -20,7 +19,6 @@ import {
   FlipCameraIos,
   CameraAlt
 } from '@mui/icons-material';
-import { useTranslation } from 'react-i18next';
 
 const VideoContainer = styled(Box)(({ theme }) => ({
   position: 'relative',
@@ -62,7 +60,6 @@ const CaptureButton = styled(Fab)(({ theme, recording }) => ({
 }));
 
 const CameraModal = ({ open, onClose, onCapture }) => {
-  const { t } = useTranslation();
   const videoRef = useRef(null);
   const streamRef = useRef(null);
   const mediaRecorderRef = useRef(null);

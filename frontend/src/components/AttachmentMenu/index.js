@@ -3,21 +3,15 @@ import {
   Menu,
   MenuItem,
   ListItemIcon,
-  ListItemText,
-  IconButton,
-  Tooltip,
-  Box,
-  Typography
+  ListItemText
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import {
-  AttachFile,
   Description,
   PhotoCamera,
   Videocam,
   ContactPhone,
   AudioFile,
-  Close,
   Poll
 } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';

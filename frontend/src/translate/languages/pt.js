@@ -1434,15 +1434,18 @@ const messages = {
         menu: {
           all: "Todos os Tickets",
           open: "Todos Em Atendimento",
-          pending: "Todos no Aguardando"
+          pending: "Todos no Aguardando",
+          groups: "Todos os Grupos"
         },
         confirmationModal: {
           closeAllTitle: "Finalizar Todos os Tickets",
           closeOpenTitle: "Finalizar Tickets Em Atendimento",
           closePendingTitle: "Finalizar Tickets no Aguardando",
+          closeGroupsTitle: "Finalizar Todos os Grupos",
           closeAllMessage: "Tem certeza que deseja finalizar todos os Tickets?",
-          closeOpenMessage: "Tem certeza que deseja finalizar todos os Tickets Em Atendimento?",
-          closePendingMessage: "Tem certeza que deseja finalizar todos os Tickets no Aguardando?"
+          closeOpenMessage: "Tem certeza que deseja finalizar todos os Tickets Em Atendimento (individuais)?",
+          closePendingMessage: "Tem certeza que deseja finalizar todos os Tickets no Aguardando?",
+          closeGroupsMessage: "Tem certeza que deseja finalizar todos os Grupos em Atendimento?"
         }
       },
       ticketsQueueSelect: {

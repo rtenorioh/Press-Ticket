@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { Box, IconButton, styled } from "@mui/material";
 import { Close, NavigateBefore, NavigateNext } from "@mui/icons-material";
-import ModalImageCors from "../ModalImageCors";
 
 const AlbumContainer = styled(Box)(({ theme }) => ({
   display: "grid",

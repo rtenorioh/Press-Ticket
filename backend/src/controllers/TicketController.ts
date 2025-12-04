@@ -439,7 +439,7 @@ export const closeTickets = async (
   req: Request,
   res: Response
 ): Promise<Response> => {
-  const { status } = req.query;
+  const { status, groupsOnly } = req.query;
   
   let userId: number;
   
@@ -467,6 +467,12 @@ export const closeTickets = async (
           [Op.or]: ["open", "pending"]
         }
       };
+    }
+
+    if (groupsOnly === "true") {
+      whereCondition.isGroup = true;
+    } else if (groupsOnly === "false") {
+      whereCondition.isGroup = false;
     }
 
     const tickets = await Ticket.findAll({

@@ -13,7 +13,6 @@ import {
   ListItemText,
   ListItemAvatar,
   Avatar,
-  Chip,
   Divider,
   Tab,
   Tabs,
@@ -22,7 +21,6 @@ import {
   Info as InfoIcon,
   Group as GroupIcon,
 } from "@mui/icons-material";
-import { toast } from "react-toastify";
 import api from "../../services/api";
 import toastError from "../../errors/toastError";
 
@@ -36,6 +34,7 @@ const ContactAdvancedInfoModal = ({ open, onClose, contactId, whatsappId }) => {
     if (open && contactId) {
       loadContactInfo();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, contactId]);
 
   const loadContactInfo = async () => {
