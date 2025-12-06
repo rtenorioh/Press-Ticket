@@ -241,6 +241,8 @@ const ApiKey = () => {
             // Mensagens
             'create:messages': t("apiKey.permissions.createMessages"),
             'read:messages': t("apiKey.permissions.readMessages"),
+            'update:messages': t("apiKey.permissions.updateMessages"),
+            'delete:messages': t("apiKey.permissions.deleteMessages"),
             
             // Setores
             'create:queue': t("apiKey.permissions.createQueue"),
@@ -330,7 +332,10 @@ const ApiKey = () => {
             'write:groups': t("apiKey.permissions.writeGroups"),
             
             // Presença (Indicadores de Digitação/Gravação)
-            'write:presence': t("apiKey.permissions.writePresence")
+            'write:presence': t("apiKey.permissions.writePresence"),
+            
+            // Autenticação
+            'read:profile': t("apiKey.permissions.readProfile")
         };
         return names[permission] || permission;
     };
@@ -495,7 +500,7 @@ const ApiKey = () => {
                                             // Contatos
                                             'create:contacts', 'read:contacts', 'update:contacts', 'delete:contacts',
                                             // Mensagens
-                                            'create:messages', 'read:messages',
+                                            'create:messages', 'read:messages', 'update:messages', 'delete:messages',
                                             // Setores
                                             'create:queue', 'read:queue', 'update:queue', 'delete:queue',
                                             // Tags
@@ -533,7 +538,9 @@ const ApiKey = () => {
                                             // Grupos do WhatsApp
                                             'read:groups', 'write:groups',
                                             // Presença
-                                            'write:presence'
+                                            'write:presence',
+                                            // Autenticação
+                                            'read:profile'
                                         ];
                                         
                                         if (newToken.permissions.length === allPermissions.length) {
@@ -545,7 +552,7 @@ const ApiKey = () => {
                                     sx={{ borderRadius: 20, textTransform: 'none' }}
                                 >
                                     {newToken.permissions.length === 0 || 
-                                     newToken.permissions.length < 44 ? 
+                                     newToken.permissions.length < 47 ? 
                                         t("apiKey.modal.buttons.selectAll") : 
                                         t("apiKey.modal.buttons.unselectAll")}
                                 </Button>
@@ -599,7 +606,7 @@ const ApiKey = () => {
                             </AccordionSummary>
                             <AccordionDetails sx={{ pt: 2 }}>
                                 <Grid container spacing={1}>
-                                    {['create:messages', 'read:messages'].map((permission) => (
+                                    {['create:messages', 'read:messages', 'update:messages', 'delete:messages'].map((permission) => (
                                         <Grid item xs={12} sm={6} key={permission}>
                                             <FormControlLabel
                                                 control={
@@ -1226,6 +1233,39 @@ const ApiKey = () => {
                             <AccordionDetails sx={{ pt: 2 }}>
                                 <Grid container spacing={1}>
                                     {['write:presence'].map((permission) => (
+                                        <Grid item xs={12} sm={6} key={permission}>
+                                            <FormControlLabel
+                                                control={
+                                                    <Checkbox
+                                                        checked={newToken.permissions.includes(permission)}
+                                                        onChange={() => handlePermissionChange(permission)}
+                                                        color="primary"
+                                                        size="small"
+                                                    />
+                                                }
+                                                label={<Typography variant="body2">{renderPermissionName(permission)}</Typography>}
+                                            />
+                                        </Grid>
+                                    ))}
+                                </Grid>
+                            </AccordionDetails>
+                        </Accordion>
+                        
+                        <Accordion sx={{ mb: 1, boxShadow: '0 1px 3px rgba(0,0,0,0.1)', borderRadius: '4px !important', '&:before': { display: 'none' } }}>
+                            <AccordionSummary
+                                expandIcon={<ExpandMoreIcon />}
+                                sx={{ 
+                                    backgroundColor: theme.palette.background.default,
+                                    borderRadius: '4px',
+                                }}
+                            >
+                                <Typography variant="subtitle2" fontWeight={500}>
+                                    {t("apiKey.categories.authentication")}
+                                </Typography>
+                            </AccordionSummary>
+                            <AccordionDetails sx={{ pt: 2 }}>
+                                <Grid container spacing={1}>
+                                    {['read:profile'].map((permission) => (
                                         <Grid item xs={12} sm={6} key={permission}>
                                             <FormControlLabel
                                                 control={

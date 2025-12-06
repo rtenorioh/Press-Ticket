@@ -34,16 +34,29 @@ const options: swaggerJsdoc.Options = {
       }
     },
     tags: [
-      { name: 'Messages', description: 'Operações relacionadas a mensagens' },
-      { name: 'Contacts', description: 'Gerenciamento de contatos' },
-      { name: 'Tickets', description: 'Gerenciamento de tickets' },
-      { name: 'Setores', description: 'Gerenciamento de setores/filas' },
-      { name: 'Tags', description: 'Gerenciamento de tags' },
-      { name: 'Users', description: 'Gerenciamento de usuários' },
-      { name: 'Quick Answers', description: 'Respostas rápidas' },
+      { name: 'ActivityLogs', description: 'Logs de atividade do sistema' },
+      { name: 'Authentication', description: 'Autenticação e gerenciamento de sessão' },
+      { name: 'Backups', description: 'Backup e restauração do banco de dados' },
       { name: 'Client Status', description: 'Status de clientes' },
+      { name: 'Contacts', description: 'Gerenciamento de contatos' },
+      { name: 'ErrorLogs', description: 'Logs de erros do sistema' },
+      { name: 'Messages', description: 'Operações relacionadas a mensagens' },
+      { name: 'NetworkMonitor', description: 'Monitoramento de rede' },
+      { name: 'Presence', description: 'Indicadores de presença (digitando, gravando)' },
+      { name: 'QueueMonitor', description: 'Monitoramento de setores' },
+      { name: 'Quick Answers', description: 'Respostas rápidas' },
+      { name: 'Setores', description: 'Gerenciamento de setores' },
+      { name: 'System', description: 'Recursos e monitoramento do sistema' },
+      { name: 'SystemUpdate', description: 'Atualizações do sistema' },
+      { name: 'Tags', description: 'Gerenciamento de tags' },
+      { name: 'Tickets', description: 'Gerenciamento de tickets' },
+      { name: 'Users', description: 'Gerenciamento de usuários' },
+      { name: 'Version', description: 'Versão do sistema e biblioteca WhatsApp' },
+      { name: 'Videos', description: 'Gerenciamento de vídeos' },
+      { name: 'WhatsApp', description: 'Gerenciamento de conexões WhatsApp' },
       { name: 'WhatsApp Groups', description: 'Gerenciamento de grupos do WhatsApp' },
-      { name: 'Videos', description: 'Gerenciamento de vídeos' }
+      { name: 'WhatsAppLibrary', description: 'Biblioteca do WhatsApp' },
+      { name: 'WhatsAppSession', description: 'Sessões de WhatsApp' }
     ]
   },
   apis: [

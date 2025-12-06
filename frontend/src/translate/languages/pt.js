@@ -31,7 +31,8 @@ const messages = {
           quickAnswers: "Respostas Rápidas",
           clientStatus: "Status de Clientes",
           whatsappGroups: "Grupos do WhatsApp",
-          presence: "Presença (Indicadores)"
+          presence: "Presença (Indicadores)",
+          authentication: "Autenticação"
         },
         permissions: {
           createContacts: "Criar Contatos",
@@ -40,6 +41,8 @@ const messages = {
           deleteContacts: "Deletar Contatos",
           createMessages: "Enviar Mensagens",
           readMessages: "Visualizar Mensagens",
+          updateMessages: "Editar Mensagens",
+          deleteMessages: "Excluir Mensagens",
           createQueue: "Criar Setores",
           readQueue: "Visualizar Setores",
           updateQueue: "Editar Setores",
@@ -91,7 +94,8 @@ const messages = {
           deleteClientStatus: "Deletar Status de Clientes",
           readGroups: "Visualizar Grupos do WhatsApp",
           writeGroups: "Gerenciar Grupos do WhatsApp",
-          writePresence: "Enviar Indicadores de Digitação/Gravação"
+          writePresence: "Enviar Indicadores de Digitação/Gravação",
+          readProfile: "Acessar Perfil (Logout)"
         },
         messages: {
           success: {

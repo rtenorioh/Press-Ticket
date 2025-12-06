@@ -37,7 +37,22 @@ app.use((req, res, next) => {
       frameguard: false,
       xContentTypeOptions: false,
       permittedCrossDomainPolicies: { permittedPolicies: "none" }
-    })(req, res, next);
+    })(req, res, () => {
+      res.setHeader('X-Frame-Options', 'ALLOWALL');
+      res.setHeader('Access-Control-Allow-Origin', '*');
+      res.setHeader('Content-Security-Policy', 
+        "default-src * 'unsafe-inline' 'unsafe-eval' data: blob:; " +
+        "script-src * 'unsafe-inline' 'unsafe-eval'; " +
+        "style-src * 'unsafe-inline'; " +
+        "img-src * data: blob: 'unsafe-inline'; " +
+        "font-src * data:; " +
+        "connect-src *; " +
+        "frame-src *; " +
+        "media-src *; " +
+        "object-src *;"
+      );
+      next();
+    });
   } else {
     helmet({
       contentSecurityPolicy: false,
@@ -94,7 +109,11 @@ const openApiCorsOptions = {
   allowedHeaders: ["Content-Type", "Authorization", "x-api-token"],
 };
 
-app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
+app.use("/api-docs", (req: Request, res: Response, next: NextFunction) => {
+  res.setHeader('X-Frame-Options', 'ALLOWALL');
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  next();
+}, swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
   customCss: '.swagger-ui .topbar { display: none }',
   customSiteTitle: "Press Ticket® API Documentation"
 }));

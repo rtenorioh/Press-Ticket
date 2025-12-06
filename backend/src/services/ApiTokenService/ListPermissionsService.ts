@@ -10,6 +10,8 @@ const DEFAULT_PERMISSIONS = [
     // Mensagens
     'create:messages',
     'read:messages',
+    'update:messages',
+    'delete:messages',
     
     // Setores
     'create:queue',
@@ -99,7 +101,10 @@ const DEFAULT_PERMISSIONS = [
     'write:groups',
     
     // Presença (Indicadores de Digitação/Gravação)
-    'write:presence'
+    'write:presence',
+    
+    // Autenticação
+    'read:profile'
 ];
 
 const ListPermissionsService = async (): Promise<string[]> => {

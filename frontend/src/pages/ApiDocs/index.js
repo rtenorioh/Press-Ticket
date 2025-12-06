@@ -3,9 +3,18 @@ import React from "react";
 
 const Root = styled('div')(({ theme }) => ({
 	display: "flex",
-	alignItems: "center",
-	padding: theme.spacing(1)
+	alignItems: "stretch",
+	padding: theme.spacing(1),
+	height: 'calc(100vh - 80px)',
+	overflow: 'hidden'
 }));
+
+const StyledIframe = styled('iframe')({
+	border: 'none',
+	width: '100%',
+	height: '100%',
+	minHeight: '600px'
+});
 
 const ApiDocs = () => {
 	const back = process.env.REACT_APP_BACKEND_URL;
@@ -14,7 +23,11 @@ const ApiDocs = () => {
 
 	return (
 		<Root>
-			<iframe title="Doc da API" src={urlapi} height='550' width='100%' frameBorder="0" />
+			<StyledIframe 
+				title="Documentação da API" 
+				src={urlapi}
+				allow="fullscreen"
+			/>
 		</Root>
 	);
 };

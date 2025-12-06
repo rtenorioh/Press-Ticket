@@ -27,8 +27,10 @@ import * as VideoController from "../controllers/VideoController";
 import * as UserController from "../controllers/UserController";
 import * as QuickAnswerController from "../controllers/QuickAnswerController";
 import * as GroupController from "../controllers/GroupController";
+import * as GroupManagementController from "../controllers/GroupManagementController";
 import * as ClientStatusController from "../controllers/ClientStatusController";
 import * as MessageController from "../controllers/MessageController";
+import * as SessionController from "../controllers/SessionController";
 import isApiToken from "../middleware/isApiToken";
 
 const upload = multer(uploadConfig);
@@ -361,7 +363,7 @@ openApiRouter.put("/contacts/:contactId/tags", isApiToken('update:contacts'), Co
  * /v1/queue:
  *   get:
  *     summary: Listar Setores
- *     description: Retorna lista de todos os setores/filas
+ *     description: Retorna lista de todos os setores
  *     tags: [Setores]
  *     security:
  *       - apiToken: []
@@ -2763,5 +2765,1231 @@ openApiRouter.post("/presence/recording/:ticketId", isApiToken('write:presence')
  *         description: Erro ao definir presença
  */
 openApiRouter.post("/presence/available/:ticketId", isApiToken('write:presence'), MessageController.setAvailablePresence);
+
+/**
+ * @swagger
+ * /v1/messages/{messageId}/edit:
+ *   put:
+ *     summary: Editar Mensagem
+ *     description: Edita o conteúdo de uma mensagem já enviada
+ *     tags: [Messages]
+ *     security:
+ *       - apiToken: []
+ *     parameters:
+ *       - in: path
+ *         name: messageId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID da mensagem
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - body
+ *             properties:
+ *               body:
+ *                 type: string
+ *                 description: Novo conteúdo da mensagem
+ *                 example: "Mensagem corrigida"
+ *     responses:
+ *       200:
+ *         description: Mensagem editada com sucesso
+ *       401:
+ *         description: Token inválido
+ *       403:
+ *         description: Sem permissão update:messages
+ *       404:
+ *         description: Mensagem não encontrada
+ */
+openApiRouter.put("/messages/:messageId/edit", isApiToken('update:messages'), MessageController.edit);
+
+/**
+ * @swagger
+ * /v1/messages/{messageId}:
+ *   delete:
+ *     summary: Excluir Mensagem
+ *     description: Exclui uma mensagem enviada
+ *     tags: [Messages]
+ *     security:
+ *       - apiToken: []
+ *     parameters:
+ *       - in: path
+ *         name: messageId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID da mensagem
+ *     responses:
+ *       200:
+ *         description: Mensagem excluída com sucesso
+ *       401:
+ *         description: Token inválido
+ *       403:
+ *         description: Sem permissão delete:messages
+ *       404:
+ *         description: Mensagem não encontrada
+ */
+openApiRouter.delete("/messages/:messageId", isApiToken('delete:messages'), MessageController.remove);
+
+/**
+ * @swagger
+ * /v1/messages/{messageId}/react:
+ *   post:
+ *     summary: Reagir a Mensagem
+ *     description: Adiciona uma reação (emoji) a uma mensagem
+ *     tags: [Messages]
+ *     security:
+ *       - apiToken: []
+ *     parameters:
+ *       - in: path
+ *         name: messageId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID da mensagem
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               emoji:
+ *                 type: string
+ *                 description: Emoji para reagir
+ *                 example: "👍"
+ *               removeEmoji:
+ *                 type: string
+ *                 description: Emoji para remover (opcional)
+ *     responses:
+ *       200:
+ *         description: Reação adicionada com sucesso
+ *       401:
+ *         description: Token inválido
+ *       403:
+ *         description: Sem permissão create:messages
+ */
+openApiRouter.post("/messages/:messageId/react", isApiToken('create:messages'), MessageController.reactMessage);
+
+/**
+ * @swagger
+ * /v1/messages/{messageId}/reactions:
+ *   get:
+ *     summary: Obter Reações de Mensagem
+ *     description: Retorna todas as reações de uma mensagem
+ *     tags: [Messages]
+ *     security:
+ *       - apiToken: []
+ *     parameters:
+ *       - in: path
+ *         name: messageId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID da mensagem
+ *     responses:
+ *       200:
+ *         description: Reações retornadas com sucesso
+ *       401:
+ *         description: Token inválido
+ *       403:
+ *         description: Sem permissão read:messages
+ */
+openApiRouter.get("/messages/:messageId/reactions", isApiToken('read:messages'), MessageController.getReactions);
+
+/**
+ * @swagger
+ * /v1/messages/forward:
+ *   post:
+ *     summary: Encaminhar Mensagens
+ *     description: Encaminha uma ou mais mensagens para outros tickets
+ *     tags: [Messages]
+ *     security:
+ *       - apiToken: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - messageIds
+ *               - targetTicketIds
+ *             properties:
+ *               messageIds:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 description: IDs das mensagens a encaminhar
+ *                 example: ["123", "124"]
+ *               targetTicketIds:
+ *                 type: array
+ *                 items:
+ *                   type: integer
+ *                 description: IDs dos tickets destino
+ *                 example: [5, 6]
+ *     responses:
+ *       200:
+ *         description: Mensagens encaminhadas com sucesso
+ *       401:
+ *         description: Token inválido
+ *       403:
+ *         description: Sem permissão create:messages
+ */
+openApiRouter.post("/messages/forward", isApiToken('create:messages'), MessageController.forwardMessages);
+
+/**
+ * @swagger
+ * /v1/messages/{ticketId}/poll:
+ *   post:
+ *     summary: Enviar Enquete
+ *     description: Envia uma enquete no ticket
+ *     tags: [Messages]
+ *     security:
+ *       - apiToken: []
+ *     parameters:
+ *       - in: path
+ *         name: ticketId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID do ticket
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - pollName
+ *               - options
+ *             properties:
+ *               pollName:
+ *                 type: string
+ *                 description: Pergunta da enquete
+ *                 example: "Qual sua cor favorita?"
+ *               options:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 description: Opções da enquete
+ *                 example: ["Azul", "Verde", "Vermelho"]
+ *               allowMultipleAnswers:
+ *                 type: boolean
+ *                 description: Permitir múltiplas respostas
+ *                 default: false
+ *     responses:
+ *       200:
+ *         description: Enquete enviada com sucesso
+ *       401:
+ *         description: Token inválido
+ *       403:
+ *         description: Sem permissão create:messages
+ */
+openApiRouter.post("/messages/:ticketId/poll", isApiToken('create:messages'), MessageController.sendPoll);
+
+/**
+ * @swagger
+ * /v1/messages/{ticketId}/read:
+ *   post:
+ *     summary: Marcar Mensagens como Lidas
+ *     description: Marca todas as mensagens de um ticket como lidas
+ *     tags: [Messages]
+ *     security:
+ *       - apiToken: []
+ *     parameters:
+ *       - in: path
+ *         name: ticketId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID do ticket
+ *     responses:
+ *       200:
+ *         description: Mensagens marcadas como lidas
+ *       401:
+ *         description: Token inválido
+ *       403:
+ *         description: Sem permissão update:messages
+ */
+openApiRouter.post("/messages/:ticketId/read", isApiToken('update:messages'), MessageController.markAsRead);
+
+/**
+ * @swagger
+ * /v1/contacts/{contactId}/block:
+ *   post:
+ *     summary: Bloquear Contato
+ *     description: Bloqueia um contato no WhatsApp
+ *     tags: [Contacts]
+ *     security:
+ *       - apiToken: []
+ *     parameters:
+ *       - in: path
+ *         name: contactId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID do contato
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - whatsappId
+ *             properties:
+ *               whatsappId:
+ *                 type: integer
+ *                 description: ID da conexão WhatsApp
+ *                 example: 1
+ *     responses:
+ *       200:
+ *         description: Contato bloqueado com sucesso
+ *       401:
+ *         description: Token inválido
+ *       403:
+ *         description: Sem permissão update:contacts
+ *       404:
+ *         description: Contato não encontrado
+ */
+openApiRouter.post("/contacts/:contactId/block", isApiToken('update:contacts'), ContactController.blockContact);
+
+/**
+ * @swagger
+ * /v1/contacts/{contactId}/unblock:
+ *   post:
+ *     summary: Desbloquear Contato
+ *     description: Desbloqueia um contato no WhatsApp
+ *     tags: [Contacts]
+ *     security:
+ *       - apiToken: []
+ *     parameters:
+ *       - in: path
+ *         name: contactId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID do contato
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - whatsappId
+ *             properties:
+ *               whatsappId:
+ *                 type: integer
+ *                 description: ID da conexão WhatsApp
+ *                 example: 1
+ *     responses:
+ *       200:
+ *         description: Contato desbloqueado com sucesso
+ *       401:
+ *         description: Token inválido
+ *       403:
+ *         description: Sem permissão update:contacts
+ *       404:
+ *         description: Contato não encontrado
+ */
+openApiRouter.post("/contacts/:contactId/unblock", isApiToken('update:contacts'), ContactController.unblockContact);
+
+/**
+ * @swagger
+ * /v1/contacts/{contactId}/block-status:
+ *   get:
+ *     summary: Verificar Status de Bloqueio
+ *     description: Verifica se um contato está bloqueado
+ *     tags: [Contacts]
+ *     security:
+ *       - apiToken: []
+ *     parameters:
+ *       - in: path
+ *         name: contactId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID do contato
+ *       - in: query
+ *         name: whatsappId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID da conexão WhatsApp
+ *     responses:
+ *       200:
+ *         description: Status retornado com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 isBlocked:
+ *                   type: boolean
+ *       401:
+ *         description: Token inválido
+ *       403:
+ *         description: Sem permissão read:contacts
+ */
+openApiRouter.get("/contacts/:contactId/block-status", isApiToken('read:contacts'), ContactController.getBlockStatus);
+
+/**
+ * @swagger
+ * /v1/contacts/blocked:
+ *   get:
+ *     summary: Listar Contatos Bloqueados
+ *     description: Retorna lista de todos os contatos bloqueados de uma conexão
+ *     tags: [Contacts]
+ *     security:
+ *       - apiToken: []
+ *     parameters:
+ *       - in: query
+ *         name: whatsappId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID da conexão WhatsApp
+ *     responses:
+ *       200:
+ *         description: Lista de contatos bloqueados
+ *       401:
+ *         description: Token inválido
+ *       403:
+ *         description: Sem permissão read:contacts
+ */
+openApiRouter.get("/contacts/blocked", isApiToken('read:contacts'), ContactController.listBlockedContacts);
+
+/**
+ * @swagger
+ * /v1/contacts/{contactId}/about:
+ *   get:
+ *     summary: Obter "Sobre" do Contato
+ *     description: Retorna o texto "sobre" do perfil do contato no WhatsApp
+ *     tags: [Contacts]
+ *     security:
+ *       - apiToken: []
+ *     parameters:
+ *       - in: path
+ *         name: contactId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID do contato
+ *       - in: query
+ *         name: whatsappId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID da conexão WhatsApp
+ *     responses:
+ *       200:
+ *         description: Texto "sobre" retornado com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 about:
+ *                   type: string
+ *       401:
+ *         description: Token inválido
+ *       403:
+ *         description: Sem permissão read:contacts
+ */
+openApiRouter.get("/contacts/:contactId/about", isApiToken('read:contacts'), ContactController.getAbout);
+
+/**
+ * @swagger
+ * /v1/contacts/{contactId}/common-groups:
+ *   get:
+ *     summary: Obter Grupos em Comum
+ *     description: Retorna lista de grupos em comum com o contato
+ *     tags: [Contacts]
+ *     security:
+ *       - apiToken: []
+ *     parameters:
+ *       - in: path
+ *         name: contactId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID do contato
+ *       - in: query
+ *         name: whatsappId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID da conexão WhatsApp
+ *     responses:
+ *       200:
+ *         description: Grupos em comum retornados com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 commonGroups:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                       name:
+ *                         type: string
+ *       401:
+ *         description: Token inválido
+ *       403:
+ *         description: Sem permissão read:contacts
+ */
+openApiRouter.get("/contacts/:contactId/common-groups", isApiToken('read:contacts'), ContactController.getCommonGroups);
+
+/**
+ * @swagger
+ * /v1/contacts/export:
+ *   get:
+ *     summary: Exportar Contatos
+ *     description: Exporta contatos em formato CSV
+ *     tags: [Contacts]
+ *     security:
+ *       - apiToken: []
+ *     responses:
+ *       200:
+ *         description: Arquivo CSV gerado com sucesso
+ *         content:
+ *           text/csv:
+ *             schema:
+ *               type: string
+ *       401:
+ *         description: Token inválido
+ *       403:
+ *         description: Sem permissão read:contacts
+ */
+openApiRouter.get("/contacts/export", isApiToken('read:contacts'), ContactController.exportContacts);
+
+/**
+ * @swagger
+ * /v1/whatsapp/{whatsappId}/groups:
+ *   get:
+ *     summary: Listar Grupos do Canal
+ *     description: Retorna lista de todos os grupos de uma conexão WhatsApp
+ *     tags: [WhatsApp Groups]
+ *     security:
+ *       - apiToken: []
+ *     parameters:
+ *       - in: path
+ *         name: whatsappId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID da conexão WhatsApp
+ *     responses:
+ *       200:
+ *         description: Lista de grupos retornada com sucesso
+ *       401:
+ *         description: Token inválido
+ *       403:
+ *         description: Sem permissão read:groups
+ */
+openApiRouter.get("/whatsapp/:whatsappId/groups", isApiToken('read:groups'), GroupManagementController.listGroups);
+
+/**
+ * @swagger
+ * /v1/whatsapp/{whatsappId}/groups:
+ *   post:
+ *     summary: Criar Grupo
+ *     description: Cria um novo grupo no WhatsApp
+ *     tags: [WhatsApp Groups]
+ *     security:
+ *       - apiToken: []
+ *     parameters:
+ *       - in: path
+ *         name: whatsappId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID da conexão WhatsApp
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - name
+ *               - participants
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 description: Nome do grupo
+ *                 example: "Grupo de Trabalho"
+ *               participants:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 description: Números dos participantes (formato 5511999999999)
+ *                 example: ["5511999999999", "5511888888888"]
+ *     responses:
+ *       200:
+ *         description: Grupo criado com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 gid:
+ *                   type: string
+ *                   description: ID do grupo criado
+ *       401:
+ *         description: Token inválido
+ *       403:
+ *         description: Sem permissão write:groups
+ */
+openApiRouter.post("/whatsapp/:whatsappId/groups", isApiToken('write:groups'), GroupManagementController.createGroup);
+
+/**
+ * @swagger
+ * /v1/whatsapp/{whatsappId}/groups/{groupId}:
+ *   get:
+ *     summary: Obter Informações do Grupo
+ *     description: Retorna informações detalhadas de um grupo
+ *     tags: [WhatsApp Groups]
+ *     security:
+ *       - apiToken: []
+ *     parameters:
+ *       - in: path
+ *         name: whatsappId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID da conexão WhatsApp
+ *       - in: path
+ *         name: groupId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID do grupo (ex 120363...@g.us)
+ *     responses:
+ *       200:
+ *         description: Informações do grupo retornadas com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: string
+ *                 name:
+ *                   type: string
+ *                 description:
+ *                   type: string
+ *                 participants:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                 owner:
+ *                   type: string
+ *       401:
+ *         description: Token inválido
+ *       403:
+ *         description: Sem permissão read:groups
+ */
+openApiRouter.get("/whatsapp/:whatsappId/groups/:groupId", isApiToken('read:groups'), GroupManagementController.getGroupInfo);
+
+/**
+ * @swagger
+ * /v1/whatsapp/{whatsappId}/groups/{groupId}/name:
+ *   put:
+ *     summary: Atualizar Nome do Grupo
+ *     description: Altera o nome de um grupo
+ *     tags: [WhatsApp Groups]
+ *     security:
+ *       - apiToken: []
+ *     parameters:
+ *       - in: path
+ *         name: whatsappId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *       - in: path
+ *         name: groupId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - name
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 example: "Novo Nome do Grupo"
+ *     responses:
+ *       200:
+ *         description: Nome atualizado com sucesso
+ *       401:
+ *         description: Token inválido
+ *       403:
+ *         description: Sem permissão write:groups
+ */
+openApiRouter.put("/whatsapp/:whatsappId/groups/:groupId/name", isApiToken('write:groups'), GroupManagementController.updateGroupName);
+
+/**
+ * @swagger
+ * /v1/whatsapp/{whatsappId}/groups/{groupId}/description:
+ *   put:
+ *     summary: Atualizar Descrição do Grupo
+ *     description: Altera a descrição de um grupo
+ *     tags: [WhatsApp Groups]
+ *     security:
+ *       - apiToken: []
+ *     parameters:
+ *       - in: path
+ *         name: whatsappId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *       - in: path
+ *         name: groupId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - description
+ *             properties:
+ *               description:
+ *                 type: string
+ *                 example: "Descrição atualizada do grupo"
+ *     responses:
+ *       200:
+ *         description: Descrição atualizada com sucesso
+ *       401:
+ *         description: Token inválido
+ *       403:
+ *         description: Sem permissão write:groups
+ */
+openApiRouter.put("/whatsapp/:whatsappId/groups/:groupId/description", isApiToken('write:groups'), GroupManagementController.updateGroupDescription);
+
+/**
+ * @swagger
+ * /v1/whatsapp/{whatsappId}/groups/{groupId}/participants/add:
+ *   post:
+ *     summary: Adicionar Participantes ao Grupo (GroupManagement)
+ *     description: Adiciona participantes a um grupo via GroupManagementController
+ *     tags: [WhatsApp Groups]
+ *     security:
+ *       - apiToken: []
+ *     parameters:
+ *       - in: path
+ *         name: whatsappId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *       - in: path
+ *         name: groupId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - participants
+ *             properties:
+ *               participants:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 example: ["5511999999999", "5511888888888"]
+ *     responses:
+ *       200:
+ *         description: Participantes adicionados com sucesso
+ *       401:
+ *         description: Token inválido
+ *       403:
+ *         description: Sem permissão write:groups
+ */
+openApiRouter.post("/whatsapp/:whatsappId/groups/:groupId/participants/add", isApiToken('write:groups'), GroupManagementController.addParticipants);
+
+/**
+ * @swagger
+ * /v1/whatsapp/{whatsappId}/groups/{groupId}/participants/remove:
+ *   post:
+ *     summary: Remover Participantes do Grupo (GroupManagement)
+ *     description: Remove participantes de um grupo via GroupManagementController
+ *     tags: [WhatsApp Groups]
+ *     security:
+ *       - apiToken: []
+ *     parameters:
+ *       - in: path
+ *         name: whatsappId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *       - in: path
+ *         name: groupId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - participants
+ *             properties:
+ *               participants:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 example: ["5511999999999"]
+ *     responses:
+ *       200:
+ *         description: Participantes removidos com sucesso
+ *       401:
+ *         description: Token inválido
+ *       403:
+ *         description: Sem permissão write:groups
+ */
+openApiRouter.post("/whatsapp/:whatsappId/groups/:groupId/participants/remove", isApiToken('write:groups'), GroupManagementController.removeParticipants);
+
+/**
+ * @swagger
+ * /v1/whatsapp/{whatsappId}/groups/{groupId}/participants/promote:
+ *   post:
+ *     summary: Promover Participantes a Admin (GroupManagement)
+ *     description: Promove participantes a administradores via GroupManagementController
+ *     tags: [WhatsApp Groups]
+ *     security:
+ *       - apiToken: []
+ *     parameters:
+ *       - in: path
+ *         name: whatsappId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *       - in: path
+ *         name: groupId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - participants
+ *             properties:
+ *               participants:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 example: ["5511999999999"]
+ *     responses:
+ *       200:
+ *         description: Participantes promovidos com sucesso
+ *       401:
+ *         description: Token inválido
+ *       403:
+ *         description: Sem permissão write:groups
+ */
+openApiRouter.post("/whatsapp/:whatsappId/groups/:groupId/participants/promote", isApiToken('write:groups'), GroupManagementController.promoteParticipants);
+
+/**
+ * @swagger
+ * /v1/whatsapp/{whatsappId}/groups/{groupId}/participants/demote:
+ *   post:
+ *     summary: Rebaixar Admin a Participante (GroupManagement)
+ *     description: Remove privilégios de admin via GroupManagementController
+ *     tags: [WhatsApp Groups]
+ *     security:
+ *       - apiToken: []
+ *     parameters:
+ *       - in: path
+ *         name: whatsappId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *       - in: path
+ *         name: groupId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - participants
+ *             properties:
+ *               participants:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 example: ["5511999999999"]
+ *     responses:
+ *       200:
+ *         description: Participantes rebaixados com sucesso
+ *       401:
+ *         description: Token inválido
+ *       403:
+ *         description: Sem permissão write:groups
+ */
+openApiRouter.post("/whatsapp/:whatsappId/groups/:groupId/participants/demote", isApiToken('write:groups'), GroupManagementController.demoteParticipants);
+
+/**
+ * @swagger
+ * /v1/whatsapp/{whatsappId}/groups/{groupId}/leave:
+ *   post:
+ *     summary: Sair do Grupo (GroupManagement)
+ *     description: Faz o bot sair do grupo via GroupManagementController
+ *     tags: [WhatsApp Groups]
+ *     security:
+ *       - apiToken: []
+ *     parameters:
+ *       - in: path
+ *         name: whatsappId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *       - in: path
+ *         name: groupId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Saiu do grupo com sucesso
+ *       401:
+ *         description: Token inválido
+ *       403:
+ *         description: Sem permissão write:groups
+ */
+openApiRouter.post("/whatsapp/:whatsappId/groups/:groupId/leave", isApiToken('write:groups'), GroupManagementController.leaveGroup);
+
+/**
+ * @swagger
+ * /v1/whatsapp/{whatsappId}/groups/{groupId}/invite-link:
+ *   get:
+ *     summary: Obter Link de Convite (GroupManagement)
+ *     description: Retorna o link de convite do grupo via GroupManagementController
+ *     tags: [WhatsApp Groups]
+ *     security:
+ *       - apiToken: []
+ *     parameters:
+ *       - in: path
+ *         name: whatsappId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *       - in: path
+ *         name: groupId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Link de convite retornado com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 inviteLink:
+ *                   type: string
+ *       401:
+ *         description: Token inválido
+ *       403:
+ *         description: Sem permissão read:groups
+ */
+openApiRouter.get("/whatsapp/:whatsappId/groups/:groupId/invite-link", isApiToken('read:groups'), GroupManagementController.getGroupInviteLink);
+
+/**
+ * @swagger
+ * /v1/whatsapp/{whatsappId}/groups/{groupId}/invite-link/revoke:
+ *   post:
+ *     summary: Revogar Link de Convite (GroupManagement)
+ *     description: Revoga o link atual e gera um novo via GroupManagementController
+ *     tags: [WhatsApp Groups]
+ *     security:
+ *       - apiToken: []
+ *     parameters:
+ *       - in: path
+ *         name: whatsappId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *       - in: path
+ *         name: groupId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Link revogado e novo link gerado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 inviteLink:
+ *                   type: string
+ *       401:
+ *         description: Token inválido
+ *       403:
+ *         description: Sem permissão write:groups
+ */
+openApiRouter.post("/whatsapp/:whatsappId/groups/:groupId/invite-link/revoke", isApiToken('write:groups'), GroupManagementController.revokeGroupInviteLink);
+
+/**
+ * @swagger
+ * /v1/whatsapp/{whatsappId}/groups/{groupId}/settings:
+ *   put:
+ *     summary: Atualizar Configurações do Grupo
+ *     description: Atualiza configurações do grupo (mensagens apenas admin, edição apenas admin)
+ *     tags: [WhatsApp Groups]
+ *     security:
+ *       - apiToken: []
+ *     parameters:
+ *       - in: path
+ *         name: whatsappId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *       - in: path
+ *         name: groupId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               messagesAdminsOnly:
+ *                 type: boolean
+ *                 description: Apenas admins podem enviar mensagens
+ *                 example: true
+ *               editGroupInfoAdminsOnly:
+ *                 type: boolean
+ *                 description: Apenas admins podem editar informações
+ *                 example: true
+ *     responses:
+ *       200:
+ *         description: Configurações atualizadas com sucesso
+ *       401:
+ *         description: Token inválido
+ *       403:
+ *         description: Sem permissão write:groups
+ */
+openApiRouter.put("/whatsapp/:whatsappId/groups/:groupId/settings", isApiToken('write:groups'), GroupManagementController.updateGroupSettings);
+
+/**
+ * @swagger
+ * /v1/auth/login:
+ *   post:
+ *     summary: Login na API
+ *     description: Autentica usuário e retorna token de acesso
+ *     tags: [Authentication]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - password
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 description: Email do usuário
+ *                 example: "admin@example.com"
+ *               password:
+ *                 type: string
+ *                 format: password
+ *                 description: Senha do usuário
+ *                 example: "senha123"
+ *     responses:
+ *       200:
+ *         description: Login realizado com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 token:
+ *                   type: string
+ *                   description: Token JWT de acesso
+ *                 user:
+ *                   type: object
+ *                   description: Dados do usuário autenticado
+ *                   properties:
+ *                     id:
+ *                       type: integer
+ *                     name:
+ *                       type: string
+ *                     email:
+ *                       type: string
+ *                     profile:
+ *                       type: string
+ *       401:
+ *         description: Credenciais inválidas
+ *       404:
+ *         description: Usuário não encontrado
+ */
+openApiRouter.post("/auth/login", SessionController.store);
+
+/**
+ * @swagger
+ * /v1/auth/refresh:
+ *   put:
+ *     summary: Renovar Token
+ *     description: Renova o token de autenticação usando refresh token
+ *     tags: [Authentication]
+ *     responses:
+ *       200:
+ *         description: Token renovado com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 token:
+ *                   type: string
+ *                   description: Novo token JWT
+ *                 user:
+ *                   type: object
+ *                   description: Dados do usuário
+ *       401:
+ *         description: Sessão expirada ou refresh token inválido
+ */
+openApiRouter.put("/auth/refresh", SessionController.update);
+
+/**
+ * @swagger
+ * /v1/auth/logout:
+ *   delete:
+ *     summary: Logout
+ *     description: Realiza logout do usuário e invalida sessão
+ *     tags: [Authentication]
+ *     security:
+ *       - apiToken: []
+ *     responses:
+ *       200:
+ *         description: Logout realizado com sucesso
+ *       401:
+ *         description: Token inválido ou sessão expirada
+ */
+openApiRouter.delete("/auth/logout", isApiToken('read:profile'), SessionController.remove);
+
+/**
+ * @swagger
+ * /v1/auth/forgot-password:
+ *   post:
+ *     summary: Solicitar Redefinição de Senha
+ *     description: Envia email com link para redefinir senha
+ *     tags: [Authentication]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 description: Email do usuário
+ *                 example: "usuario@example.com"
+ *     responses:
+ *       200:
+ *         description: Email enviado com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "E-mail enviado com sucesso."
+ *       404:
+ *         description: Email não encontrado
+ *       500:
+ *         description: Erro ao enviar email
+ */
+openApiRouter.post("/auth/forgot-password", SessionController.forgotPassword);
+
+/**
+ * @swagger
+ * /v1/auth/reset-password:
+ *   post:
+ *     summary: Redefinir Senha
+ *     description: Redefine a senha usando token recebido por email
+ *     tags: [Authentication]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - token
+ *               - newPassword
+ *             properties:
+ *               token:
+ *                 type: string
+ *                 description: Token recebido por email
+ *                 example: "abc123def456..."
+ *               newPassword:
+ *                 type: string
+ *                 format: password
+ *                 description: Nova senha
+ *                 example: "novaSenha123"
+ *     responses:
+ *       200:
+ *         description: Senha redefinida com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Senha redefinida com sucesso."
+ *       400:
+ *         description: Token inválido ou expirado
+ */
+openApiRouter.post("/auth/reset-password", SessionController.resetPassword);
 
 export default openApiRouter;

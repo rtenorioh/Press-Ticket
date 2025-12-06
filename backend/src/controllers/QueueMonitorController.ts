@@ -7,7 +7,7 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
     const queueMonitorData = await getQueueMonitorData();
     return res.status(200).json(queueMonitorData);
   } catch (err: any) {
-    logger.error(`Erro ao obter dados de monitoramento de filas: ${err.message}`);
+    logger.error(`Erro ao obter dados de monitoramento de setores: ${err.message}`);
     return res.status(500).json({ error: err.message });
   }
 };
