@@ -52,7 +52,7 @@ const verifyContact = async (msgContact: WbotContact): Promise<Contact> => {
     isGroup: msgContact.isGroup
   };
 
-  const contact = CreateOrUpdateContactService(contactData);
+  const contact = await CreateOrUpdateContactService(contactData);
 
   return contact;
 };
@@ -837,10 +837,14 @@ const getSafeContact = async (
   useRemoteJid?: string
 ): Promise<WbotContact> => {
   try {
-    if (msg.fromMe) {
-      const jid = useRemoteJid || msg.to;
-      return await wbot.getContactById(jid);
+    if (useRemoteJid) {
+      return await wbot.getContactById(useRemoteJid);
     }
+    
+    if (msg.fromMe) {
+      return await wbot.getContactById(msg.to);
+    }
+    
     return await msg.getContact();
   } catch (err) {
     logger.warn(`[FALLBACK] Usando contato alternativo devido a limitação da lib whatsapp-web.js: ${err.message || String(err)}`);
@@ -867,17 +871,6 @@ const handleMessage = async (
       updateLastActivity(wbot.id);
     }
     
-    logger.info(`[MSG_RECEBIDA] Nova mensagem recebida: ID=${msg.id?.id || 'unknown'}, Timestamp=${new Date().toISOString()}`);
-    
-    logger.info(`[MSG_DETALHES] Detalhes básicos: ${JSON.stringify({
-      id: msg.id,
-      fromMe: msg.fromMe,
-      from: msg.from,
-      to: msg.to,
-      type: msg.type,
-      timestamp: msg.timestamp,
-      hasMedia: msg.hasMedia
-    })}`);
 
     // if (msg.type === 'poll_creation' || (msg as any).pollName) {
     //   logger.info(`[MSG_IGNORADA] Mensagem de enquete ignorada (processada pelo SendPollService): ID=${msg.id?.id || 'unknown'}`);
@@ -902,18 +895,23 @@ const handleMessage = async (
   });
 
   if (Integrationdb?.value) {
-    const baseContact = await getSafeContact(wbot, msg);
-    const contact = await verifyContact(baseContact);
-    
     const chat = await msg.getChat();
     let groupContact;
+    let baseContact: WbotContact;
     
     if (chat.isGroup) {
+      baseContact = msg.fromMe
+        ? await getSafeContact(wbot, msg, msg.to)
+        : await getSafeContact(wbot, msg, msg.from);
       const msgGroupContact = msg.fromMe
         ? await getSafeContact(wbot, msg, msg.to)
         : await getSafeContact(wbot, msg, msg.from);
       groupContact = await verifyContact(msgGroupContact);
+    } else {
+      baseContact = await getSafeContact(wbot, msg);
     }
+    
+    const contact = await verifyContact(baseContact);
     
     const unreadMessages = msg.fromMe ? 0 : chat.unreadCount;
     
@@ -968,6 +966,8 @@ const handleMessage = async (
     let userId;
     let queueId;
 
+    const chat = await msg.getChat();
+
     if (msg.fromMe) {
       if (/\u200e/.test(msg.body[0])) return;
 
@@ -985,8 +985,6 @@ const handleMessage = async (
     } else {
       msgContact = await getSafeContact(wbot, msg);
     }
-
-    const chat = await msg.getChat();
 
     if (chat.isGroup) {
       let msgGroupContact;
@@ -1046,8 +1044,8 @@ const handleMessage = async (
       contact,
       wbot.id!,
       unreadMessages,
-      queueId,
       userId,
+      queueId,
       groupContact
     );
 
