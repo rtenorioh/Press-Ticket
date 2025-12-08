@@ -129,6 +129,34 @@ finalizar() {
     exit "${2:-1}"
 }
 
+# Função para comparar versões semânticas
+version_compare() {
+    local ver1=$1
+    local ver2=$2
+    
+    # Remove 'v' do início se existir
+    ver1=${ver1#v}
+    ver2=${ver2#v}
+    
+    # Divide as versões em array
+    IFS='.' read -ra V1 <<< "$ver1"
+    IFS='.' read -ra V2 <<< "$ver2"
+    
+    # Compara cada parte
+    for i in 0 1 2; do
+        local num1=${V1[$i]:-0}
+        local num2=${V2[$i]:-0}
+        
+        if [ "$num1" -lt "$num2" ]; then
+            return 1  # ver1 < ver2
+        elif [ "$num1" -gt "$num2" ]; then
+            return 2  # ver1 > ver2
+        fi
+    done
+    
+    return 0  # ver1 == ver2
+}
+
 # Define o diretório base absoluto
 SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
 
@@ -164,7 +192,7 @@ else
 fi
 
 # Captura o fuso horário passado como argumento ou usa America/Sao_Paulo} como padrão
-SELECTED_TZ=${11:-America/Sao_Paulo}
+SELECTED_TZ=${12:-America/Sao_Paulo}
 
 # Configuração do arquivo de log (ajustado para usar o fuso horário)
 LOG_FILE="$CURRENT_LOG_DIR/install_${NOME_EMPRESA}_$(TZ=$SELECTED_TZ date +"%d-%m-%Y_%H-%M-%S").log"
@@ -538,6 +566,15 @@ else
     finalizar "${RED}Erro ao atualizar pacotes.${RESET}" 1
 fi
 
+# Removendo pacotes órfãos
+echo -e "${COLOR}Removendo pacotes órfãos...${RESET}" | tee -a "$LOG_FILE"
+sudo apt-get autoremove -y | tee -a "$LOG_FILE"
+if [ $? -eq 0 ]; then
+    echo -e "${GREEN}Pacotes órfãos removidos com sucesso.${RESET}" | tee -a "$LOG_FILE"
+else
+    echo -e "${YELLOW}Aviso: Não foi possível remover todos os pacotes órfãos.${RESET}" | tee -a "$LOG_FILE"
+fi
+
 # Reiniciar serviços que utilizam bibliotecas desatualizadas
 {
     echo "Reiniciando serviços para aplicar as atualizações..."
@@ -594,7 +631,14 @@ fi
 
 # Instalando bibliotecas necessárias para o Chrome
 echo -e "${COLOR}Instalando bibliotecas necessárias para o Chrome...${RESET}" | tee -a "$LOG_FILE"
-sudo apt-get install -y libgbm-dev wget unzip fontconfig locales gconf-service libasound2 libatk1.0-0 libc6 libcairo2 libcups2 libdbus-1-3 libexpat1 libfontconfig1 libgcc1 libgconf-2-4 libgdk-pixbuf2.0-0 libglib2.0-0 libgtk-3-0 libnspr4 libpango-1.0-0 libpangocairo-1.0-0 libstdc++6 libx11-6 libx11-xcb1 libxcb1 libxcomposite1 libxcursor1 libxdamage1 libxext6 libxfixes3 libxi6 libxrandr2 libxrender1 libxss1 libxtst6 ca-certificates fonts-liberation libappindicator1 libnss3 lsb-release xdg-utils | tee -a "$LOG_FILE"
+sudo apt-get install -y \
+    wget unzip fontconfig locales ca-certificates fonts-liberation lsb-release xdg-utils \
+    libasound2 libatk1.0-0 libatk-bridge2.0-0 libc6 libcairo2 libcups2 libdbus-1-3 \
+    libexpat1 libfontconfig1 libgbm1 libgbm-dev libgcc-s1 libgdk-pixbuf2.0-0 libglib2.0-0 \
+    libgtk-3-0 libnspr4 libpango-1.0-0 libpangocairo-1.0-0 libstdc++6 libx11-6 libx11-xcb1 \
+    libxcb1 libxcomposite1 libxcursor1 libxdamage1 libxext6 libxfixes3 libxi6 libxkbcommon0 \
+    libxrandr2 libxrender1 libxshmfence1 libxss1 libxtst6 libnss3 libdrm2 libappindicator3-1 \
+    libvulkan1 2>&1 | tee -a "$LOG_FILE"
 if [ $? -eq 0 ]; then
     echo -e "${GREEN}Bibliotecas necessárias instaladas com sucesso.${RESET}" | tee -a "$LOG_FILE"
 else
@@ -639,6 +683,16 @@ DEPLOY_HOME=$(eval echo ~deploy)
 # Trocar para o usuário deploy e clonar o repositório
 echo -e "${COLOR}Clonando o repositório como o usuário deploy...${RESET}" | tee -a "$LOG_FILE"
 sudo -u deploy -H bash -c "cd $DEPLOY_HOME && git clone --branch $BRANCH https://github.com/rtenorioh/Press-Ticket.git $NOME_EMPRESA" || finalizar "Erro ao clonar o repositório." 1 # Tratamento de erro
+
+# Obter a versão instalada do repositório clonado
+echo -e "${COLOR}Verificando versão instalada...${RESET}" | tee -a "$LOG_FILE"
+INSTALLED_VERSION=$(cd "$DEPLOY_HOME/$NOME_EMPRESA" && git describe --tags --abbrev=0 2>/dev/null || echo "unknown")
+if [ "$INSTALLED_VERSION" != "unknown" ]; then
+    echo -e "${GREEN}Versão detectada: $INSTALLED_VERSION${RESET}" | tee -a "$LOG_FILE"
+else
+    echo -e "${YELLOW}Aviso: Não foi possível detectar a versão. Usando configuração padrão.${RESET}" | tee -a "$LOG_FILE"
+    INSTALLED_VERSION="v999.0.0"  # Versão alta para usar npm install sem flag
+fi
 
 echo -e "${COLOR}Alterando proprietário e permissões dos arquivos...${RESET}" | tee -a "$LOG_FILE"
 
@@ -720,9 +774,9 @@ DB_NAME=$NOME_EMPRESA
 USER_LIMIT=$USER_LIMIT
 CONNECTIONS_LIMIT=$CONNECTION_LIMIT
 
-# ID do PM2 do Frontend e Backend para poder ser restartado na tela de Conexões
-PM2_FRONTEND=1
-PM2_BACKEND=0
+# Nome do PM2 do Frontend e Backend para poder ser restartado na tela de Conexões
+PM2_FRONTEND=${NOME_EMPRESA}-front
+PM2_BACKEND=${NOME_EMPRESA}-back
 
 # Modo DEMO que evita alterar algumas funções, para ativar: ON
 DEMO=OFF
@@ -797,7 +851,7 @@ echo -e "${GREEN}Email do MasterAdmin obtido com sucesso: $MASTERADMIN_EMAIL.${R
 echo -e "${COLOR}Instalando dependências do backend...${RESET}" | tee -a "$LOG_FILE"
 
 if ! sudo -u deploy -H bash -c "cd $DEPLOY_HOME/$NOME_EMPRESA/backend && npm install"; then
-    finalizar "Erro ao instalar dependências ou compilar o backend." 1
+    finalizar "Erro ao instalar dependências do backend." 1
 fi
 
 echo -e "${GREEN}Dependências do backend instaladas com sucesso.${RESET}" | tee -a "$LOG_FILE"
@@ -806,7 +860,7 @@ echo -e "${GREEN}Dependências do backend instaladas com sucesso.${RESET}" | tee
 echo -e "${COLOR}Compilando o backend...${RESET}" | tee -a "$LOG_FILE"
 
 if ! sudo -u deploy -H bash -c "cd $DEPLOY_HOME/$NOME_EMPRESA/backend && npm run build"; then
-    finalizar "Erro ao instalar dependências ou compilar o backend." 1
+    finalizar "Erro ao compilar o backend." 1
 fi
 
 echo -e "${GREEN}Backend compilado com sucesso.${RESET}" | tee -a "$LOG_FILE"
@@ -873,8 +927,22 @@ echo -e "${GREEN}Arquivo .env do frontend criado com sucesso.${RESET}" | tee -a 
 # Instalando as dependências
 echo -e "${COLOR}Instalando dependências do frontend...${RESET}" | tee -a "$LOG_FILE"
 
-if ! sudo -u deploy -H bash -c "cd $DEPLOY_HOME/$NOME_EMPRESA/frontend && npm install"; then
-    finalizar "Erro ao instalar dependências ou compilar o backend." 1
+# Verificar versão para decidir qual comando npm usar
+version_compare "$INSTALLED_VERSION" "1.14.0"
+VERSION_RESULT=$?
+
+if [ $VERSION_RESULT -eq 1 ]; then
+    # Versão < 1.14.0 - Usar --legacy-peer-deps
+    echo -e "${YELLOW}Versão < 1.14.0 detectada. Usando npm install --legacy-peer-deps${RESET}" | tee -a "$LOG_FILE"
+    NPM_INSTALL_CMD="npm install --legacy-peer-deps"
+else
+    # Versão >= 1.14.0 - Usar npm install normal
+    echo -e "${GREEN}Versão >= 1.14.0 detectada. Usando npm install${RESET}" | tee -a "$LOG_FILE"
+    NPM_INSTALL_CMD="npm install"
+fi
+
+if ! sudo -u deploy -H bash -c "cd $DEPLOY_HOME/$NOME_EMPRESA/frontend && $NPM_INSTALL_CMD"; then
+    finalizar "Erro ao instalar dependências do frontend." 1
 fi
 
 echo -e "${GREEN}Dependências do frontend instaladas com sucesso.${RESET}" | tee -a "$LOG_FILE"
@@ -883,7 +951,7 @@ echo -e "${GREEN}Dependências do frontend instaladas com sucesso.${RESET}" | te
 echo -e "${COLOR}Compilando o frontend...${RESET}" | tee -a "$LOG_FILE"
 
 if ! sudo -u deploy -H bash -c "cd $DEPLOY_HOME/$NOME_EMPRESA/frontend && npm run build"; then
-    finalizar "Erro ao instalar dependências ou compilar o frontend." 1
+    finalizar "Erro ao compilar o frontend." 1
 fi
 
 echo -e "${GREEN}Frontend compilado com sucesso.${RESET}" | tee -a "$LOG_FILE"
@@ -904,41 +972,25 @@ sudo -u deploy -H bash -c "pm2 save" || finalizar "Erro ao salvar a lista de pro
 
 echo -e "${GREEN}Lista de processos do PM2 salva com sucesso.${RESET}" | tee -a "$LOG_FILE"
 
-# Instalando o jq (caso ainda não esteja instalado)
-verificar_e_instalar jq
+# Verificando se os serviços PM2 estão rodando
+echo -e "${COLOR}Verificando serviços PM2...${RESET}" | tee -a "$LOG_FILE"
 
-# Listando os serviços iniciados pelo PM2 (usando pm2 jlist e jq no contexto do usuário deploy)
-echo -e "${COLOR}Listando os serviços iniciados pelo PM2 (formato JSON)...${RESET}" | tee -a "$LOG_FILE"
-sudo -u deploy -H bash -c "pm2 jlist" | tee -a "$LOG_FILE" # Registra a saída JSON no log
+# Listar processos PM2
+sudo -u deploy -H bash -c "pm2 list" | tee -a "$LOG_FILE"
 
-# Capturando os IDs dos serviços do PM2 no contexto do usuário deploy
-PM2_FRONTEND_ID=$(sudo -u deploy -H bash -c "pm2 jlist | jq -r '.[] | select(.name == \"${NOME_EMPRESA}-front\") | .pm_id'")
-PM2_BACKEND_ID=$(sudo -u deploy -H bash -c "pm2 jlist | jq -r '.[] | select(.name == \"${NOME_EMPRESA}-back\") | .pm_id'")
-
-if [[ -z "$PM2_FRONTEND_ID" || "$PM2_FRONTEND_ID" == "null" ]]; then
-    echo "Erro: ID do PM2 para o frontend não encontrado. Verifique se o processo foi iniciado corretamente."
-    sudo -u deploy -H bash -c "pm2 list"
-    exit 1
+# Verificar se o frontend está rodando
+if ! sudo -u deploy -H bash -c "pm2 list" | grep -q "${NOME_EMPRESA}-front"; then
+    echo -e "${RED}Erro: Processo frontend (${NOME_EMPRESA}-front) não encontrado no PM2.${RESET}"
+    finalizar "Erro: Frontend não está rodando no PM2." 1
 fi
 
-if [[ -z "$PM2_BACKEND_ID" || "$PM2_BACKEND_ID" == "null" ]]; then
-    echo "Erro: ID do PM2 para o backend não encontrado. Verifique se o processo foi iniciado corretamente."
-    sudo -u deploy -H bash -c "pm2 list"
-    exit 1
+# Verificar se o backend está rodando
+if ! sudo -u deploy -H bash -c "pm2 list" | grep -q "${NOME_EMPRESA}-back"; then
+    echo -e "${RED}Erro: Processo backend (${NOME_EMPRESA}-back) não encontrado no PM2.${RESET}"
+    finalizar "Erro: Backend não está rodando no PM2." 1
 fi
 
-echo -e "${GREEN}IDs do PM2 capturados com sucesso: Frontend: $PM2_FRONTEND_ID, Backend: $PM2_BACKEND_ID.${RESET}" | tee -a "$LOG_FILE"
-
-# Atualizando o arquivo .env do backend com os IDs do PM2
-echo -e "${COLOR}Atualizando o arquivo .env do backend com os IDs do PM2...${RESET}" | tee -a "$LOG_FILE"
-
-# Usando sudo -u deploy -H bash -c para executar os comandos sed no contexto correto
-if ! sudo -u deploy -H bash -c "cd $DEPLOY_HOME/$NOME_EMPRESA/backend && \
-    sed -i -e \"s/^PM2_FRONTEND=.*/PM2_FRONTEND=$PM2_FRONTEND_ID/\" -e \"s/^PM2_BACKEND=.*/PM2_BACKEND=$PM2_BACKEND_ID/\" .env"; then
-    finalizar "Erro ao atualizar o arquivo .env do backend com os IDs do PM2." 1
-fi
-
-echo -e "${GREEN}Arquivo .env do backend atualizado com os IDs do PM2 com sucesso.${RESET}" | tee -a "$LOG_FILE"
+echo -e "${GREEN}Serviços PM2 verificados com sucesso: ${NOME_EMPRESA}-front e ${NOME_EMPRESA}-back estão rodando.${RESET}" | tee -a "$LOG_FILE"
 
 ## Seção 9: Configuração do Nginx
 
