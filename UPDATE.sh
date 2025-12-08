@@ -74,6 +74,7 @@ fi
 
 COLOR="\e[38;5;92m"
 GREEN="\e[32m"
+YELLOW="\e[33m"
 RESET="\e[0m"
 BOLD="\e[1m"
 
@@ -329,6 +330,14 @@ if [[ "$UPDATE_SYSTEM" == "s" || "$UPDATE_SYSTEM" == "S" ]]; then
         echo "Erro ao atualizar os pacotes."
         finalizar "Erro ao atualizar os pacotes." 1
     fi
+
+    # Removendo pacotes órfãos
+    echo -e "${COLOR}Removendo pacotes órfãos...${RESET}" | tee -a "$LOG_FILE"
+    if sudo apt-get autoremove -y | tee -a "$LOG_FILE"; then
+        echo -e "${GREEN}Pacotes órfãos removidos com sucesso.${RESET}" | tee -a "$LOG_FILE"
+    else
+        echo -e "${YELLOW}Aviso: Não foi possível remover todos os pacotes órfãos.${RESET}" | tee -a "$LOG_FILE"
+    fi
 else
     echo "Atualização do sistema operacional ignorada." | tee -a "$LOG_FILE"
 fi
@@ -509,8 +518,16 @@ sleep 2
 
 sleep 2
 
-git reset --hard | tee -a "$LOG_FILE"
-git pull | tee -a "$LOG_FILE"
+# Garantir que está na branch main
+echo -e "${COLOR}Mudando para a branch main...${RESET}" | tee -a "$LOG_FILE"
+if git checkout main 2>&1 | tee -a "$LOG_FILE"; then
+    echo -e "${GREEN}Branch main selecionada com sucesso.${RESET}" | tee -a "$LOG_FILE"
+else
+    echo -e "${YELLOW}Aviso: Não foi possível mudar para a branch main.${RESET}" | tee -a "$LOG_FILE"
+fi
+
+git reset --hard 2>&1 | tee -a "$LOG_FILE"
+git pull 2>&1 | tee -a "$LOG_FILE"
 
 {
     echo " "
@@ -622,21 +639,22 @@ if [ -f "$ENV_FILE" ]; then
     if grep -q "^PM2_FRONTEND=" "$ENV_FILE"; then
         echo "A variável PM2_FRONTEND já existe no arquivo .env." | tee -a "$LOG_FILE"
     else
-        echo "PM2_FRONTEND=1" >>"$ENV_FILE"
-        echo "A variável PM2_FRONTEND foi adicionada ao arquivo .env." | tee -a "$LOG_FILE"
+        # Obter o nome da empresa a partir do diretório atual
+        NOME_EMPRESA=$(basename "$(dirname "$ENV_FILE")")
+        echo "# Nome do PM2 do Frontend e Backend para poder ser restartado na tela de Conexões" >> "$ENV_FILE"
+        echo "PM2_FRONTEND=${NOME_EMPRESA}-front" >>"$ENV_FILE"
+        echo "A variável PM2_FRONTEND=${NOME_EMPRESA}-front foi adicionada ao arquivo .env." | tee -a "$LOG_FILE"
     fi
 
     # Verifica se PM2_BACKEND existe no arquivo .env
     if grep -q "^PM2_BACKEND=" "$ENV_FILE"; then
         echo "A variável PM2_BACKEND já existe no arquivo .env." | tee -a "$LOG_FILE"
     else
-        echo "PM2_BACKEND=0" >>"$ENV_FILE"
-        echo "A variável PM2_BACKEND foi adicionada ao arquivo .env." | tee -a "$LOG_FILE"
+        # Obter o nome da empresa a partir do diretório atual (se não foi definido acima)
+        NOME_EMPRESA=${NOME_EMPRESA:-$(basename "$(dirname "$ENV_FILE")")}
+        echo "PM2_BACKEND=${NOME_EMPRESA}-back" >>"$ENV_FILE"
+        echo "A variável PM2_BACKEND=${NOME_EMPRESA}-back foi adicionada ao arquivo .env." | tee -a "$LOG_FILE"
     fi
-
-    # Mensagem informando que o usuário deve confirmar os IDs após a atualização
-    echo -e "${YELLOW}Atenção: Após a atualização, confirme os IDs do PM2 para o frontend e backend e atualize-os no arquivo .env do backend.${RESET}" | tee -a "$LOG_FILE"
-    sleep 10
 
 else
     echo "Erro: O arquivo .env não foi encontrado no diretório backend."
@@ -651,11 +669,11 @@ fi
 
 sleep 2
 
-sudo rm -rf node_modules | tee -a "$LOG_FILE"
-npm install | tee -a "$LOG_FILE"
+sudo rm -rf node_modules 2>&1 | tee -a "$LOG_FILE"
+npm install 2>&1 | tee -a "$LOG_FILE"
 
-sudo rm -rf dist | tee -a "$LOG_FILE"
-npm run build | tee -a "$LOG_FILE"
+sudo rm -rf dist 2>&1 | tee -a "$LOG_FILE"
+npm run build 2>&1 | tee -a "$LOG_FILE"
 
 {
     echo " "
@@ -665,7 +683,7 @@ npm run build | tee -a "$LOG_FILE"
 
 sleep 2
 
-npx sequelize db:migrate | tee -a "$LOG_FILE"
+npx sequelize db:migrate 2>&1 | tee -a "$LOG_FILE"
 
 {
     echo " "
@@ -675,7 +693,7 @@ npx sequelize db:migrate | tee -a "$LOG_FILE"
 
 sleep 2
 
-npx sequelize db:seed:all | tee -a "$LOG_FILE"
+npx sequelize db:seed:all 2>&1 | tee -a "$LOG_FILE"
 
 {
     echo " "
@@ -771,11 +789,11 @@ sleep 2
 
 sleep 2
 
-sudo rm -rf node_modules | tee -a "$LOG_FILE"
-npm install | tee -a "$LOG_FILE"
+sudo rm -rf node_modules 2>&1 | tee -a "$LOG_FILE"
+npm install 2>&1 | tee -a "$LOG_FILE"
 
-sudo rm -rf build | tee -a "$LOG_FILE"
-npm run build | tee -a "$LOG_FILE"
+sudo rm -rf build 2>&1 | tee -a "$LOG_FILE"
+npm run build 2>&1 | tee -a "$LOG_FILE"
 
 {
     echo " "
@@ -891,22 +909,22 @@ sleep 2
 SCRIPT_DIR=$(cd "$(dirname "$0")/.." && pwd)
 ENV_FILE="$SCRIPT_DIR/backend/.env"
 
-# Verifica se o arquivo .env existe e extrai os IDs necessários
+# Verifica se o arquivo .env existe e extrai os nomes dos processos PM2
 if [ -f "$ENV_FILE" ]; then
-    PM2_FRONTEND_ID=$(grep "^PM2_FRONTEND=" "$ENV_FILE" | cut -d '=' -f2 | tr -d '[:space:]')
-    PM2_BACKEND_ID=$(grep "^PM2_BACKEND=" "$ENV_FILE" | cut -d '=' -f2 | tr -d '[:space:]')
+    PM2_FRONTEND_NAME=$(grep "^PM2_FRONTEND=" "$ENV_FILE" | cut -d '=' -f2 | tr -d '[:space:]')
+    PM2_BACKEND_NAME=$(grep "^PM2_BACKEND=" "$ENV_FILE" | cut -d '=' -f2 | tr -d '[:space:]')
 
-    # Finaliza se os IDs não forem definidos
-    [ -z "$PM2_FRONTEND_ID" ] && finalizar "PM2_FRONTEND não definido no .env." 1
-    [ -z "$PM2_BACKEND_ID" ] && finalizar "PM2_BACKEND não definido no .env." 1
+    # Finaliza se os nomes não forem definidos
+    [ -z "$PM2_FRONTEND_NAME" ] && finalizar "PM2_FRONTEND não definido no .env." 1
+    [ -z "$PM2_BACKEND_NAME" ] && finalizar "PM2_BACKEND não definido no .env." 1
 
     echo "Caminho calculado para o arquivo .env: $ENV_FILE" | tee -a "$LOG_FILE"
-    echo "PM2_FRONTEND_ID: $PM2_FRONTEND_ID" | tee -a "$LOG_FILE"
-    echo "PM2_BACKEND_ID: $PM2_BACKEND_ID" | tee -a "$LOG_FILE"
+    echo "PM2_FRONTEND_NAME: $PM2_FRONTEND_NAME" | tee -a "$LOG_FILE"
+    echo "PM2_BACKEND_NAME: $PM2_BACKEND_NAME" | tee -a "$LOG_FILE"
 
-    # Reinicia os processos especificados usando os IDs
-    sudo -u deploy pm2 restart "$PM2_FRONTEND_ID" --update-env | tee -a "$LOG_FILE" || finalizar "Erro ao reiniciar PM2_FRONTEND com ID $PM2_FRONTEND_ID." 1
-    sudo -u deploy pm2 restart "$PM2_BACKEND_ID" --update-env | tee -a "$LOG_FILE" || finalizar "Erro ao reiniciar PM2_BACKEND com ID $PM2_BACKEND_ID." 1
+    # Reinicia os processos especificados usando os nomes
+    sudo -u deploy pm2 restart "$PM2_FRONTEND_NAME" --update-env | tee -a "$LOG_FILE" || finalizar "Erro ao reiniciar PM2_FRONTEND com nome $PM2_FRONTEND_NAME." 1
+    sudo -u deploy pm2 restart "$PM2_BACKEND_NAME" --update-env | tee -a "$LOG_FILE" || finalizar "Erro ao reiniciar PM2_BACKEND com nome $PM2_BACKEND_NAME." 1
 
 else
     finalizar "Erro: Arquivo .env não encontrado no backend." 1
