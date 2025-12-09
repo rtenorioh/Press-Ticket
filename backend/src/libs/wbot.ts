@@ -170,9 +170,10 @@ export const initWbot = async (whatsapp: Whatsapp): Promise<Session> => {
         sessionCfg = JSON.parse(whatsapp.session);
       }
 
-      let clientSession = `${process.env.COMPANY_NAME}_${whatsapp.id}`;
+      const sanitize = (str: string) => str.replace(/[^a-zA-Z0-9_-]/g, '_');
+      let clientSession = `${sanitize(process.env.COMPANY_NAME || '')}_${whatsapp.id}`;
       if (!process.env.COMPANY_NAME) {
-        clientSession = `${whatsapp.name}_${whatsapp.id}`;
+        clientSession = `${sanitize(whatsapp.name)}_${whatsapp.id}`;
       }
 
       const wbot: Session = new Client({

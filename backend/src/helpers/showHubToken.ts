@@ -12,6 +12,6 @@ export const showHubToken = async (): Promise<string | any> => {
   }
 
   if (notificameHubToken) {
-    return notificameHubToken.value;
+    return notificameHubToken.value.trim().replace(/[\r\n]/g, '');
   }
 };
