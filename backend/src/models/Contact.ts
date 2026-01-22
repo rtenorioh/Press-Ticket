@@ -107,6 +107,10 @@ class Contact extends Model<Contact> {
   @Column
   isGroup: boolean;
 
+  @Default(false)
+  @Column
+  nameManuallyEdited: boolean;
+
   @CreatedAt
   createdAt: Date;
 

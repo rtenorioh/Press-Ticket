@@ -48,7 +48,7 @@ const CreateOrUpdateContactService = async ({
 
     if (primary) {
       const updatedData: Partial<Contact> = {} as any;
-      if (name && name.trim() && primary.name !== name.trim()) {
+      if (name && name.trim() && primary.name !== name.trim() && !primary.nameManuallyEdited) {
         (updatedData as any).name = name.trim();
       }
       if (!primary.isGroup) {
@@ -89,7 +89,7 @@ const CreateOrUpdateContactService = async ({
   let contact = await Contact.findOne({ where: { number: digits } });
   if (contact) {
     const updatedData: Partial<Contact> = {} as any;
-    if (name && name.trim() && contact.name !== name.trim()) {
+    if (name && name.trim() && contact.name !== name.trim() && !contact.nameManuallyEdited) {
       (updatedData as any).name = name.trim();
     }
     if (profilePicUrl && contact.profilePicUrl !== profilePicUrl) {

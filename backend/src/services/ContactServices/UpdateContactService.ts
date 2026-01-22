@@ -105,7 +105,8 @@ const UpdateContactService = async ({
     neighborhood,
     city,
     state,
-    cpf
+    cpf,
+    nameManuallyEdited: name !== undefined && name !== contact.name ? true : contact.nameManuallyEdited
   });
 
   await contact.reload({
