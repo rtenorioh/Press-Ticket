@@ -129,6 +129,36 @@ export const restoreBackup = async (filename: string): Promise<{ success: boolea
   }
 };
 
+export const uploadBackup = async (file: Express.Multer.File): Promise<BackupInfo> => {
+  try {
+    if (!file.originalname.endsWith('.sql') && !file.originalname.endsWith('.sql.gz')) {
+      throw new Error('Formato de arquivo inválido. Apenas arquivos .sql ou .sql.gz são aceitos.');
+    }
+
+    const timestamp = format(new Date(), "yyyy-MM-dd_HH-mm-ss");
+    const sanitizedName = file.originalname.replace(/[^a-zA-Z0-9_.-]/g, '_');
+    const filename = `importado_${timestamp}_${sanitizedName}`;
+    const filePath = path.join(BACKUP_DIR, filename);
+
+    fs.writeFileSync(filePath, file.buffer);
+    
+    const stats = fs.statSync(filePath);
+    
+    logger.info(`Backup importado com sucesso: ${filePath} (${formatBytes(stats.size)})`);
+    
+    return {
+      filename,
+      path: filePath,
+      size: formatBytes(stats.size),
+      date: format(stats.mtime, "dd 'de' MMMM 'de' yyyy 'às' HH:mm:ss", { locale: pt }),
+      timestamp: stats.mtime.getTime()
+    };
+  } catch (error: any) {
+    logger.error(`Erro ao importar backup: ${error.message}`);
+    throw new Error(`Não foi possível importar o backup: ${error.message}`);
+  }
+};
+
 export const deleteBackup = async (filename: string): Promise<{ success: boolean; message: string }> => {
   try {
     const filePath = path.join(BACKUP_DIR, filename);

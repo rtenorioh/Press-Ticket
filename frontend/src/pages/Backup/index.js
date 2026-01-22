@@ -45,7 +45,8 @@ import {
   CloudDownload,
   Storage as StorageIcon,
   Schedule as ScheduleIcon,
-  FolderZip as FolderZipIcon
+  FolderZip as FolderZipIcon,
+  Publish as PublishIcon
 } from "@mui/icons-material";
 
 import { styled, keyframes } from "@mui/material/styles";
@@ -247,6 +248,7 @@ const Backup = () => {
   const [restoreConfirmOpen, setRestoreConfirmOpen] = useState(false);
   const [selectedBackup, setSelectedBackup] = useState(null);
   const [creatingBackup, setCreatingBackup] = useState(false);
+  const [importingBackup, setImportingBackup] = useState(false);
 
   useEffect(() => {
     loadBackups();
@@ -341,11 +343,69 @@ const Backup = () => {
     setSelectedBackup(null);
   };
 
+  const handleImportBackup = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    if (!file.name.endsWith('.sql') && !file.name.endsWith('.sql.gz')) {
+      toast.error(t("backup.importError") + ": Apenas arquivos .sql ou .sql.gz");
+      return;
+    }
+
+    setImportingBackup(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      await api.post("/backups/upload", formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+      
+      toast.success(t("backup.importSuccess"));
+      loadBackups();
+    } catch (err) {
+      toast.error(t("backup.importError"));
+      console.error(err);
+    }
+    setImportingBackup(false);
+    event.target.value = '';
+  };
+
   return (
     <MainContainer>
       <MainHeader>
         <Title>{t("backup.title")}</Title>
         <MainHeaderButtonsWrapper>
+          <input
+            type="file"
+            id="import-backup-input"
+            accept=".sql,.sql.gz"
+            style={{ display: 'none' }}
+            onChange={handleImportBackup}
+            disabled={importingBackup}
+          />
+          <Button
+            variant="contained"
+            color="secondary"
+            startIcon={importingBackup ? <CircularProgress size={20} sx={{ color: '#fff' }} /> : <PublishIcon />}
+            onClick={() => document.getElementById('import-backup-input').click()}
+            disabled={importingBackup}
+            sx={{
+              borderRadius: theme.shape.borderRadius * 1.5,
+              textTransform: "none",
+              boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+              transition: "all 0.2s",
+              marginRight: 1,
+              "&:hover": {
+                transform: "translateY(-2px)",
+                boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)"
+              }
+            }}
+          >
+            {isMobile ? "" : importingBackup ? t("backup.importing") : t("backup.import")}
+          </Button>
           <Button
             variant="contained"
             color="primary"
