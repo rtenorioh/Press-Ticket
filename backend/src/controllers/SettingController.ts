@@ -7,6 +7,7 @@ import ListSettingsService from "../services/SettingServices/ListSettingsService
 import UpdateSettingService from "../services/SettingServices/UpdateSettingService";
 import { createActivityLog, ActivityActions, EntityTypes } from "../services/ActivityLogService";
 import GetClientIp from "../helpers/GetClientIp";
+import EmailService from "../services/EmailService";
 
 export const index = async (req: Request, res: Response): Promise<Response> => {
   if (req.user.profile === "") {
@@ -49,6 +50,12 @@ export const update = async (
         value: setting.value
       }
     });
+
+    const emailSettings = ["emailUser", "emailPass", "emailHost", "emailPort"];
+    if (emailSettings.includes(key)) {
+      const emailService = EmailService.getInstance();
+      await emailService.reloadTransporter();
+    }
   }
 
   const io = getIO();

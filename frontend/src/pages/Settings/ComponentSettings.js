@@ -227,6 +227,87 @@ const ComponentSettings = ({ settings, getSettingValue, handleChangeBooleanSetti
                     </SettingItem>
                 </SettingCard>
             </Grid>
+
+            <Grid item xs={12}>
+                <SectionTitle variant="h6">Configurações de Email</SectionTitle>
+                <SettingCard>
+                    <SettingItem>
+                        <Box sx={{ width: '100%' }}>
+                            <Tooltip title="Endereço de email usado para envio de notificações" placement="top-start">
+                                <Typography variant="body1" sx={{ mb: 1 }}>
+                                    Email do Remetente
+                                </Typography>
+                            </Tooltip>
+                            <TextField
+                                fullWidth
+                                variant="outlined"
+                                size="small"
+                                name="emailUser"
+                                value={settings && settings.length > 0 ? getSettingValue("emailUser") : ""}
+                                onChange={handleChangeSetting}
+                                placeholder="seu-email@gmail.com"
+                                type="email"
+                            />
+                        </Box>
+                    </SettingItem>
+                    <SettingItem>
+                        <Box sx={{ width: '100%' }}>
+                            <Tooltip title="Senha de aplicativo do Gmail (não use sua senha normal)" placement="top-start">
+                                <Typography variant="body1" sx={{ mb: 1 }}>
+                                    Senha de Aplicativo
+                                </Typography>
+                            </Tooltip>
+                            <TextField
+                                fullWidth
+                                variant="outlined"
+                                size="small"
+                                name="emailPass"
+                                value={settings && settings.length > 0 ? getSettingValue("emailPass") : ""}
+                                onChange={handleChangeSetting}
+                                placeholder="xxxx xxxx xxxx xxxx"
+                                type="password"
+                            />
+                        </Box>
+                    </SettingItem>
+                    <SettingItem>
+                        <Box sx={{ width: '100%' }}>
+                            <Tooltip title="Servidor SMTP (padrão: smtp.gmail.com)" placement="top-start">
+                                <Typography variant="body1" sx={{ mb: 1 }}>
+                                    Servidor SMTP
+                                </Typography>
+                            </Tooltip>
+                            <TextField
+                                fullWidth
+                                variant="outlined"
+                                size="small"
+                                name="emailHost"
+                                value={settings && settings.length > 0 ? getSettingValue("emailHost") : "smtp.gmail.com"}
+                                onChange={handleChangeSetting}
+                                placeholder="smtp.gmail.com"
+                            />
+                        </Box>
+                    </SettingItem>
+                    <SettingItem>
+                        <Box sx={{ width: '100%' }}>
+                            <Tooltip title="Porta do servidor SMTP (padrão: 587)" placement="top-start">
+                                <Typography variant="body1" sx={{ mb: 1 }}>
+                                    Porta SMTP
+                                </Typography>
+                            </Tooltip>
+                            <TextField
+                                fullWidth
+                                variant="outlined"
+                                size="small"
+                                name="emailPort"
+                                value={settings && settings.length > 0 ? getSettingValue("emailPort") : "587"}
+                                onChange={handleChangeSetting}
+                                placeholder="587"
+                                type="number"
+                            />
+                        </Box>
+                    </SettingItem>
+                </SettingCard>
+            </Grid>
         </GridContainer>
     );
 };
