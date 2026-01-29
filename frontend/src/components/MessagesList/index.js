@@ -26,8 +26,12 @@ import {
 
 import {
   format,
-  parseISO
+  parseISO,
+  isToday,
+  isYesterday,
+  isSameDay
 } from "date-fns";
+import { ptBR } from "date-fns/locale";
 import React, { useCallback, useEffect, useReducer, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
@@ -60,6 +64,23 @@ const MessagesListWrapper = styled("div")(({ theme }) => ({
 const TicketNumber = styled("div")(({ theme }) => ({
   color: theme.palette.secondary.main,
   padding: 8,
+}));
+
+const DateSeparator = styled("div")(({ theme }) => ({
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+  margin: "16px 0",
+  "& > span": {
+    backgroundColor: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.08)' : '#e1f5fe',
+    color: theme.palette.text.primary,
+    padding: "6px 12px",
+    borderRadius: "8px",
+    fontSize: "13px",
+    fontWeight: 500,
+    textTransform: "uppercase",
+    boxShadow: theme.shadows[1],
+  }
 }));
 
 const MessagesListStyled = styled("div")(({ theme }) => ({
@@ -1256,15 +1277,48 @@ const MessagesList = ({ ticketId, isGroup, onClick }) => {
   };
   
   const renderDailyTimestamps = (message, index) => {
+    if (index === 0) {
+      return null;
+    }
+
+    const currentMessageDate = parseISO(message.createdAt);
+    const previousMessage = messagesList[index - 1];
+    
+    if (!previousMessage) {
+      return null;
+    }
+
+    const previousMessageDate = parseISO(previousMessage.createdAt);
+
+    if (!isSameDay(currentMessageDate, previousMessageDate)) {
+      let dateLabel = "";
+      
+      if (isToday(currentMessageDate)) {
+        dateLabel = t("messagesList.message.today");
+      } else if (isYesterday(currentMessageDate)) {
+        dateLabel = t("messagesList.message.yesterday");
+      } else {
+        dateLabel = format(currentMessageDate, "dd/MM/yyyy", { locale: ptBR });
+      }
+
+      return (
+        <DateSeparator key={`date-${message.id}`}>
+          <span>{dateLabel}</span>
+        </DateSeparator>
+      );
+    }
+
     if (index === messagesList.length - 1) {
       return (
         <div
           key={`ref-${message.createdAt}`}
           ref={lastMessageRef}
-          sx={{ float: "left", clear: "both" }}
+          style={{ float: "left", clear: "both" }}
         />
       );
     }
+
+    return null;
   };
 
   const renderNumberTicket = (message, index) => {

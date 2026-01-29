@@ -867,6 +867,8 @@ const messages = {
           voiceVideoLost: "Mensagem de voz ou video perdida às",
           deleted: "Mensagem apagada",
           edited: "Editada",
+          today: "Hoje",
+          yesterday: "Ontem"
         }
       },
       messagesInput: {
