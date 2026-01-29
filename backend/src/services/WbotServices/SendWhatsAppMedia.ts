@@ -330,6 +330,8 @@ const SendWhatsAppMedia = async ({
     await ticket.reload();
     
     let savedFilename = media.filename;
+    let downloadSuccess = false;
+    
     try {
       const downloadedMedia = await sentMessage.downloadMedia();
       
@@ -345,10 +347,41 @@ const SendWhatsAppMedia = async ({
         
         const publicPath = path.join(__dirname, "..", "..", "..", "public", downloadedMedia.filename);
         await writeFileAsync(publicPath, downloadedMedia.data, "base64");
-        savedFilename = downloadedMedia.filename;
+        
+        if (fs.existsSync(publicPath)) {
+          savedFilename = downloadedMedia.filename;
+          downloadSuccess = true;
+        } else {
+          console.error("[SendWhatsAppMedia] ❌ Arquivo NÃO existe no disco após salvar!");
+        }
+      } else {
+        console.warn("[SendWhatsAppMedia] downloadedMedia sem dados");
       }
     } catch (downloadErr) {
-      console.warn("[SendWhatsAppMedia] Não foi possível baixar/salvar a mídia enviada:", downloadErr?.message);
+      console.error("[SendWhatsAppMedia] Erro ao baixar/salvar mídia enviada:", downloadErr);
+    }
+    
+    if (!downloadSuccess && fs.existsSync(finalMediaPath)) {
+      try {
+        console.log("[SendWhatsAppMedia] FALLBACK: Copiando arquivo original para /public/");
+        const shortTime = new Date().getTime().toString().slice(-6);
+        const ext = path.extname(media.originalname || media.filename);
+        const baseName = path.basename(media.originalname || media.filename, ext);
+        const sanitizedBaseName = baseName.replace(/[^\w\s.-]/g, '_').substring(0, 50);
+        savedFilename = `${shortTime}_${sanitizedBaseName}${ext}`;
+        
+        const publicPath = path.join(__dirname, "..", "..", "..", "public", savedFilename);
+        fs.copyFileSync(finalMediaPath, publicPath);
+        
+        if (fs.existsSync(publicPath)) {
+          console.log("[SendWhatsAppMedia] ✅ FALLBACK: Arquivo copiado com sucesso:", savedFilename);
+          downloadSuccess = true;
+        } else {
+          console.error("[SendWhatsAppMedia] ❌ FALLBACK: Falha ao copiar arquivo");
+        }
+      } catch (copyErr) {
+        console.error("[SendWhatsAppMedia] Erro no fallback ao copiar arquivo:", copyErr);
+      }
     }
     
     let fileSize = null;

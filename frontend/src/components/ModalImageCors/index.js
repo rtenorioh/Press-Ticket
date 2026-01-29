@@ -164,13 +164,17 @@ const ModalImageCors = ({ imageUrl, allImages = [], currentIndex = 0, isDeleted 
 
   useEffect(() => {
     const imgUrl = currentImageUrl || imageUrl;
-    if (!imgUrl) return;
+    
+    if (!imgUrl) {
+      console.log("[ModalImageCors] URL vazia, abortando");
+      return;
+    }
     
     setFetching(true);
     setError(false);
     
     const fetchImage = async () => {
-      try {
+      try { 
         const { data, headers } = await api.get(imgUrl, {
           responseType: "blob",
         });
@@ -184,7 +188,14 @@ const ModalImageCors = ({ imageUrl, allImages = [], currentIndex = 0, isDeleted 
         setBlobUrl(url);
         setFetching(false);
       } catch (err) {
-        console.error("Erro ao carregar imagem:", err);
+        console.error("[ModalImageCors] Erro ao carregar imagem:", err);
+        console.error("[ModalImageCors] URL da imagem com erro:", imgUrl);
+        console.error("[ModalImageCors] Detalhes do erro:", {
+          message: err.message,
+          response: err.response,
+          status: err.response?.status,
+          statusText: err.response?.statusText
+        });
         setError(true);
         setFetching(false);
       }

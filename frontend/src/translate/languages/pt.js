@@ -933,6 +933,18 @@ const messages = {
       },
       modalImageCors: {
         alt: "Imagem do contato",
+        error: {
+          loadImage: "Erro ao carregar imagem"
+        },
+        navigation: {
+          previous: "Imagem anterior",
+          next: "Próxima imagem"
+        },
+        button: {
+          applyCrop: "Aplicar",
+          cancelCrop: "Cancelar"
+        },
+        dragToCrop: "Arraste para selecionar a área de recorte",
         toolBar: {
           rotateLeft: "Girar para esquerda",
           rotateRight: "Girar para direita",
@@ -940,7 +952,7 @@ const messages = {
           zoomOut: "Zoom out",
           resetZoom: "Reset zoom",
           fullscreen: "Tela cheia",
-          fullscreenExit: "Sair da tela cheia",
+          exitFullscreen: "Sair da tela cheia",
           copyLink: "Copiar link",
           download: "Baixar imagem",
           cancelCrop: "Cancelar recorte",
@@ -952,6 +964,8 @@ const messages = {
         snackbar: {
           copyLinkSuccess: "Link copiado com sucesso!",
           copyLinkError: "Erro ao copiar link. Tente novamente.",
+          cropSuccess: "Imagem recortada com sucesso!",
+          cropError: "Erro ao recortar imagem. Tente novamente."
         }
       },
       newTicketModal: {
