@@ -14,6 +14,7 @@ import Done from '@mui/icons-material/Done';
 import Facebook from '@mui/icons-material/Facebook';
 import Group from '@mui/icons-material/Group';
 import Instagram from '@mui/icons-material/Instagram';
+import LocalOfferIcon from '@mui/icons-material/LocalOffer';
 import Replay from '@mui/icons-material/Replay';
 import Sms from '@mui/icons-material/Sms';
 import Telegram from '@mui/icons-material/Telegram';
@@ -131,6 +132,26 @@ const GroupBadge = styled(Badge)(({ theme }) => ({
 		transition: 'all 0.3s ease',
 		'&:hover': {
 			transform: 'scale(1.1)'
+		}
+	}
+}));
+
+const TagBadge = styled(Badge)(({ theme }) => ({
+	position: "absolute",
+	bottom: 0,
+	left: 30,
+	transform: "translate(0, 0)",
+	'& .MuiBadge-badge': {
+		backgroundColor: theme.palette.warning.main,
+		minWidth: '15px',
+		height: '15px',
+		borderRadius: '7.5px',
+		boxShadow: `0 0 0 1.5px ${theme.palette.background.paper}`,
+		transition: 'all 0.3s ease',
+		cursor: 'pointer',
+		'&:hover': {
+			transform: 'scale(1.1)',
+			backgroundColor: theme.palette.warning.dark
 		}
 	}
 }));
@@ -286,11 +307,24 @@ const TicketListItem = ({ ticket, filteredTags }) => {
 			}
 		};
 
+		const handleContactUpdate = (data) => {
+			if (data.action === "update" && data.contact) {
+				if (data.contact.id === ticket.contactId || data.contact.id === ticket.contact?.id) {
+					if (data.contact.tags) {
+						setTag(data.contact.tags);
+					}
+				}
+			}
+		};
+
 		socket.on("appMessage", handleAppMessage);
+		socket.on("contact", handleContactUpdate);
+		
 		return () => {
 			socket.off("appMessage", handleAppMessage);
+			socket.off("contact", handleContactUpdate);
 		};
-	}, [ticket.id]);
+	}, [ticket.id, ticket.contactId, ticket.contact]);
 
 	useEffect(() => {
 		isMounted.current = true;
@@ -548,6 +582,92 @@ const TicketListItem = ({ ticket, filteredTags }) => {
 								color="primary"
 								overlap="circular"
 							/>
+						)}
+						{tag && tag.length > 0 && (
+							<Tooltip 
+								title={
+									<Box sx={{ minWidth: '180px' }}>
+										<Box sx={{ 
+											padding: '8px 12px', 
+											borderBottom: `1px solid ${theme.palette.divider}`,
+											marginBottom: '8px',
+										}}>
+											<Typography sx={{ 
+												fontSize: '0.75rem', 
+												fontWeight: 600,
+												color: theme.palette.text.primary,
+												textTransform: 'uppercase',
+												letterSpacing: '0.5px'
+											}}>
+												<LocalOfferIcon sx={{ fontSize: '0.75rem' }} />Tags
+											</Typography>
+										</Box>
+										<Box sx={{ padding: '0 12px 8px 12px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+											{tag.map((t, index) => (
+												<Box 
+													key={index} 
+													sx={{ 
+														display: 'flex', 
+														alignItems: 'center', 
+														gap: '10px',
+														padding: '6px 8px',
+														borderRadius: '20px',
+														cursor: 'pointer',
+														transition: 'background-color 0.2s ease',
+														'&:hover': {
+															backgroundColor: theme.palette.mode === 'dark' 
+																? 'rgba(255, 255, 255, 0.08)' 
+																: 'rgba(0, 0, 0, 0.04)'
+														}
+													}}
+												>
+													<Box
+														sx={{
+															width: '10px',
+															height: '10px',
+															borderRadius: '50%',
+															backgroundColor: t.color,
+															flexShrink: 0
+														}}
+													/>
+													<Typography sx={{ fontSize: '0.85rem', color: theme.palette.text.primary }}>{t.name}</Typography>
+												</Box>
+											))}
+										</Box>
+									</Box>
+								}
+								placement="right" 
+								arrow
+								componentsProps={{
+									tooltip: {
+										sx: {
+											bgcolor: theme.palette.background.paper,
+											color: theme.palette.text.primary,
+											boxShadow: theme.shadows[3],
+											border: `1px solid ${theme.palette.divider}`,
+											borderRadius: '8px',
+											padding: 0,
+											'& .MuiTooltip-arrow': {
+												color: theme.palette.background.paper,
+												'&::before': {
+													border: `1px solid ${theme.palette.divider}`
+												}
+											}
+										}
+									}
+								}}
+							>
+								<TagBadge
+									badgeContent={<LocalOfferIcon sx={{ fontSize: '0.65rem' }} />}
+									anchorOrigin={{
+										vertical: 'bottom',
+										horizontal: 'left',
+										marginLeft: '30px'
+									}}
+									color="warning"
+									overlap="circular"
+								/>
+							</Tooltip>
 						)}
 					</>
 				</AvatarContainer>

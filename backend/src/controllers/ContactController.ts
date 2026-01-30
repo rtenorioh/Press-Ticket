@@ -503,9 +503,10 @@ export const updateTags = async (
   }
 
   const io = getIO();
+  const contactData = contact?.toJSON ? contact.toJSON() : contact;
   io.emit("contact", {
     action: "update",
-    contact
+    contact: contactData
   });
 
   return res.status(200).json(contact);

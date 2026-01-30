@@ -6,6 +6,7 @@ import api from "../../services/api";
 import toastError from "../../errors/toastError";
 import React from "react";
 import { useTranslation } from "react-i18next";
+import openSocket from "../../services/socket-io";
 
 const StyledAvatar = styled(Avatar)(({ theme }) => ({
 	width: "52px",
@@ -121,6 +122,27 @@ const TicketInfo = ({ contact, ticket, onClick }) => {
 		};
 		fetchContactTags();
 	}, [ticket]);
+
+	useEffect(() => {
+		const socket = openSocket();
+		if (!socket) return;
+
+		const handleContactUpdate = (data) => {
+			if (data.action === "update" && data.contact) {
+				if (data.contact.id === contact?.id) {
+					if (data.contact.tags) {
+						setContactTags(data.contact.tags);
+					}
+				}
+			}
+		};
+
+		socket.on("contact", handleContactUpdate);
+		
+		return () => {
+			socket.off("contact", handleContactUpdate);
+		};
+	}, [contact?.id]);
 
 	const assignedTo = ticket.user ? ticket.user.name : t("messagesList.header.noAssignedUser");
 	const queueName = ticket.queue ? ticket.queue.name : t("messagesList.header.noQueue");
