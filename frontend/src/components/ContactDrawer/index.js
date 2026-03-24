@@ -10,7 +10,7 @@ import {
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import CloseIcon from "@mui/icons-material/Close";
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { AuthContext } from "../../context/Auth/AuthContext";
 import ContactDrawerSkeleton from "../ContactDrawerSkeleton";
@@ -20,6 +20,7 @@ import WhatsMarked from "react-whatsmarked";
 import { TagsContainer } from "../TagsContainer";
 import ModalImageContatc from "./ModalImage";
 import GroupActionsPanel from "./GroupActionsPanel";
+import ContactService from "../../services/contacts";
 
 const drawerWidth = 320;
 
@@ -88,7 +89,7 @@ const ContactExtraInfo = styled(Paper)(({ theme }) => ({
   border: `1px solid ${theme.palette.divider}`,
 }));
 
-const ContactDrawer = ({ open, handleDrawerClose, contact, loading, isGroup, messageContact }) => {
+const ContactDrawer = ({ open, handleDrawerClose, contact, loading, isGroup, messageContact, whatsappId }) => {
   const { user } = useContext(AuthContext);
   const [modalOpen, setModalOpen] = useState(false);
   const { t } = useTranslation();
@@ -106,6 +107,22 @@ const ContactDrawer = ({ open, handleDrawerClose, contact, loading, isGroup, mes
   const groupJid = isGroupContact && contact?.number
     ? (contact.number.includes("@g.us") ? contact.number : `${contact.number}@g.us`)
     : null;
+
+  useEffect(() => {
+    if (open && isGroupContact && contact?.id && whatsappId) {
+      const refreshGroupPic = async () => {
+        try {
+          console.log(`[ContactDrawer] Atualizando foto do grupo ${contact.id}`);
+          await ContactService.refreshGroupProfilePic(contact.id, whatsappId);
+        } catch (error) {
+          console.error("[ContactDrawer] Erro ao atualizar foto do grupo:", error);
+        }
+      };
+      
+      const timer = setTimeout(refreshGroupPic, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [open, isGroupContact, contact?.id, whatsappId]);
 
   return (
     <StyledDrawer

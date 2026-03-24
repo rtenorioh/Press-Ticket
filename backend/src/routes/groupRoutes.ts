@@ -1,8 +1,12 @@
 import { Router } from "express";
+import multer from "multer";
+import uploadConfig from "../config/upload";
 import isAuth from "../middleware/isAuth";
 import * as GroupController from "../controllers/GroupController";
 
 const groupRoutes = Router();
+
+const upload = multer(uploadConfig);
 
 // Participantes
 groupRoutes.post("/groups/:groupId/participants/add", isAuth, GroupController.addParticipants);
@@ -21,9 +25,10 @@ groupRoutes.post("/groups/:groupId/settings/announcement", isAuth, GroupControll
 groupRoutes.post("/groups/:groupId/settings/restrict", isAuth, GroupController.setRestrict);
 
 // Info
+groupRoutes.get("/groups/:groupId/info", isAuth, GroupController.getInfo);
 groupRoutes.post("/groups/:groupId/subject", isAuth, GroupController.setSubject);
 groupRoutes.post("/groups/:groupId/description", isAuth, GroupController.setDescription);
-groupRoutes.post("/groups/:groupId/picture", isAuth, GroupController.setPicture);
+groupRoutes.post("/groups/:groupId/picture", isAuth, upload.single("file"), GroupController.setPicture);
 groupRoutes.delete("/groups/:groupId/picture", isAuth, GroupController.deletePicture);
 
 // Membership Requests

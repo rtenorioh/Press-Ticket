@@ -173,6 +173,20 @@ const Ticket = () => {
       }
     });
 
+    socket.on("group", (data) => {
+      if (data.action === "update") {
+        const reloadContact = async () => {
+          try {
+            const { data: ticketData } = await api.get("/tickets/" + ticketId);
+            setContact(ticketData.contact);
+          } catch (err) {
+            console.error("Erro ao recarregar contato após atualização do grupo:", err);
+          }
+        };
+        reloadContact();
+      }
+    });
+
     return () => {
       socket.disconnect();
     };
@@ -252,6 +266,7 @@ const Ticket = () => {
         loading={loading}
         isGroup={ticket.isGroup}
         messageContact={messageContact}
+        whatsappId={ticket.whatsappId}
       />
     </Root>
   );

@@ -32,16 +32,20 @@ const SelectContactsModal = ({ open, onClose, onConfirm, excludeIds = [], title 
   const [pageNumber, setPageNumber] = useState(1);
   const [hasMore, setHasMore] = useState(false);
   const [selected, setSelected] = useState({}); 
+  const [error, setError] = useState("");
 
   const fetchContacts = async (reset = false) => {
     try {
       setLoading(true);
+      setError("");
       const { data } = await api.get("/contacts/", {
-        params: { searchParam, pageNumber }
+        params: { searchParam, pageNumber, isGroup: "false" }
       });
       setContacts(prev => reset ? data.contacts : [...prev, ...data.contacts]);
       setHasMore(Boolean(data.hasMore));
     } catch (e) {
+      console.error("[SelectContactsModal] Erro ao buscar contatos:", e);
+      setError("Erro ao carregar contatos");
     } finally { setLoading(false); }
   };
 
@@ -117,6 +121,11 @@ const SelectContactsModal = ({ open, onClose, onConfirm, excludeIds = [], title 
           </Tooltip>
         </Stack>
 
+        {error && (
+          <Typography variant="caption" color="error" sx={{ display: 'block', textAlign: 'center', py: 1 }}>
+            {error}
+          </Typography>
+        )}
         <List dense sx={{ maxHeight: 360, overflowY: "auto" }}>
           {filtered.map(c => {
             const checked = Boolean(selected[c.id]);

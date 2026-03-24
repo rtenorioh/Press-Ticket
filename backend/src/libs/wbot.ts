@@ -2,15 +2,15 @@ import fs from "fs/promises";
 import { Configuration, CreateImageRequestSizeEnum, OpenAIApi } from "openai";
 import path from "path";
 import qrCode from "qrcode-terminal";
-import { Client, LocalAuth, MessageMedia } from "whatsapp-web.js";
+import { Client, LocalAuth } from "whatsapp-web.js";
 import AppError from "../errors/AppError";
-import { getIO } from "./socket";
-import { logger } from "../utils/logger";
-import { StartWhatsAppSession } from "../services/WbotServices/StartWhatsAppSession";
-import { initializeHealthTracking, updateLastActivity } from "../services/WbotServices/HealthCheckService";
-import Whatsapp from "../models/Whatsapp";
 import Integration from "../models/Integration";
+import Whatsapp from "../models/Whatsapp";
+import GroupEventsService from "../services/WbotServices/GroupEventsService";
+import { initializeHealthTracking, updateLastActivity } from "../services/WbotServices/HealthCheckService";
 import { handleMessage } from "../services/WbotServices/wbotMessageListener";
+import { logger } from "../utils/logger";
+import { getIO } from "./socket";
 
 interface Session extends Client {
   id?: number;
@@ -228,10 +228,10 @@ export const initWbot = async (whatsapp: Whatsapp): Promise<Session> => {
             "--log-level=3"
           ]
         },
-        webVersionCache: {
-          type: 'remote',
-          remotePath: `https://raw.githubusercontent.com/wppconnect-team/wa-version/refs/heads/main/html/2.3000.1031490220-alpha.html`,    
-        },
+        // webVersionCache: {
+        //   type: 'remote',
+        //   remotePath: `https://raw.githubusercontent.com/wppconnect-team/wa-version/refs/heads/main/html/2.3000.1031490220-alpha.html`,    
+        // },
       });
 
       wbot.initialize();
@@ -344,6 +344,8 @@ export const initWbot = async (whatsapp: Whatsapp): Promise<Session> => {
 
         wbot.sendPresenceAvailable();
         void syncUnreadMessages(wbot);
+
+        GroupEventsService.setupGroupListeners(wbot, whatsapp.id);
 
         resolve(wbot);
       });

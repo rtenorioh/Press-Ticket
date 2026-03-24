@@ -363,7 +363,15 @@ const messages = {
         },
         extraInfo: "Outras informações",
       },
+      common: {
+        search: "Buscar",
+        selected: "selecionados",
+        cancel: "Cancelar",
+        confirm: "Confirmar",
+        refresh: "Atualizar",
+      },
       groupActions: {
+        selectContacts: "Selecionar contatos",
         title: "Ações do Grupo",
         buttons: {
           add: "Adicionar participantes",
@@ -425,6 +433,20 @@ const messages = {
           requestsApproveErr: "Erro ao aprovar solicitações.",
           requestsRejectOk: "Solicitações rejeitadas.",
           requestsRejectErr: "Erro ao rejeitar solicitações."
+        },
+        modals: {
+          subjectTitle: "Alterar Nome do Grupo",
+          subjectLabel: "Nome do grupo",
+          descriptionTitle: "Alterar Descrição do Grupo",
+          descriptionLabel: "Descrição do grupo",
+          removeTitle: "Remover Participantes",
+          promoteTitle: "Promover a Admin",
+          demoteTitle: "Rebaixar Admin",
+          owner: "Dono",
+          admin: "Admin",
+          noMembers: "Nenhum membro encontrado",
+          save: "Salvar",
+          cancel: "Cancelar",
         }
       },
       copyToClipboard: {

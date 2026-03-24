@@ -93,7 +93,12 @@ const CloseButton = styled(IconButton)(({ theme }) => ({
 const ModalImageContatc = ({ imageUrl }) => {
   const { t } = useTranslation();
   const defaultImage = '/default-profile.png';
-  const source = imageUrl && imageUrl.trim() !== '' ? imageUrl : defaultImage;
+  const addCacheBuster = (url) => {
+    if (!url || url === defaultImage) return url;
+    const separator = url.includes('?') ? '&' : '?';
+    return `${url}${separator}t=${Date.now()}`;
+  };
+  const source = imageUrl && imageUrl.trim() !== '' ? addCacheBuster(imageUrl) : defaultImage;
   const [open, setOpen] = useState(false);
   const [rotation, setRotation] = useState(0);
   const [scale, setScale] = useState(1);

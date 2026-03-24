@@ -16,6 +16,7 @@ interface GroupEventData {
 
 class GroupEventsService {
   private static instance: GroupEventsService;
+  private activeListeners: Map<number, boolean> = new Map();
 
   private constructor() {}
 
@@ -116,6 +117,25 @@ class GroupEventsService {
 
       const messageBody = this.formatEventMessage(data);
       
+      const fiveSecondsAgo = new Date(Date.now() - 5000);
+      const existingMessage = await Message.findOne({
+        where: {
+          ticketId: ticket.id,
+          body: messageBody,
+          mediaType: "event",
+          createdAt: {
+            [require("sequelize").Op.gte]: fiveSecondsAgo
+          }
+        }
+      });
+
+      if (existingMessage) {
+        logger.warn(`[GROUP_EVENT] Mensagem duplicada detectada e ignorada: "${messageBody}"`);
+        return;
+      }
+
+      logger.info(`[GROUP_EVENT] Criando mensagem de sistema: "${messageBody}"`);
+      
       const messageId = `${data.groupId}_${Date.now()}_event`;
 
       const message = await Message.create({
@@ -203,6 +223,11 @@ class GroupEventsService {
           ? `${performedByName} mudou a descrição do grupo`
           : `Descrição do grupo foi alterada`;
       
+      case "GROUP_PICTURE_CHANGED":
+        return performedByName
+          ? `${performedByName} mudou a imagem do grupo`
+          : `Imagem do grupo foi alterada`;
+      
       case "GROUP_ANNOUNCE_CHANGED":
         return newValue === "true"
           ? "Apenas administradores podem enviar mensagens"
@@ -212,6 +237,11 @@ class GroupEventsService {
         return newValue === "true"
           ? "Apenas administradores podem editar informações do grupo"
           : "Todos podem editar informações do grupo";
+      
+      case "GROUP_MEMBER_ADD_MODE_CHANGED":
+        return newValue === "admin_add"
+          ? "Apenas administradores podem adicionar participantes"
+          : "Todos os membros podem adicionar participantes";
       
       case "GROUP_JOINED":
         return "Você entrou no grupo";
@@ -225,9 +255,22 @@ class GroupEventsService {
   }
 
   public setupGroupListeners(wbot: any, whatsappId: number): void {
+    if (this.activeListeners.has(whatsappId)) {
+      logger.warn(`[GROUP_EVENT] Listeners already active for WhatsApp ${whatsappId}, skipping...`);
+      return;
+    }
+
     logger.info(`[GROUP_EVENT] Setting up group listeners for WhatsApp ${whatsappId}`);
+    
+    wbot.removeAllListeners("group_update");
+    wbot.removeAllListeners("group_join");
+    wbot.removeAllListeners("group_leave");
+    
+    this.activeListeners.set(whatsappId, true);
 
     wbot.on("group_update", async (notification: any) => {
+      logger.info(`[GROUP_EVENT] group_update received for WhatsApp ${whatsappId}, type: ${notification.type}`);
+
       try {
         const chat = await notification.getChat();
         const groupId = chat.id._serialized;
@@ -241,11 +284,44 @@ class GroupEventsService {
             performedBy: notification.author,
             performedByName: notification.author
           });
+
+          try {
+            const Contact = (await import("../../models/Contact")).default;
+            const groupContact = await Contact.findOne({
+              where: {
+                number: groupId,
+                isGroup: true
+              }
+            });
+
+            if (groupContact) {
+              await groupContact.update({ name: notification.body });
+              
+              const { getIO } = require("../../libs/socket");
+              const io = getIO();
+              io.emit("contact", {
+                action: "update",
+                contact: groupContact
+              });
+
+              logger.info(`[GROUP_EVENT] Nome do grupo atualizado: ${groupId} -> ${notification.body}`);
+            }
+          } catch (err) {
+            logger.error(`[GROUP_EVENT] Erro ao atualizar nome do contato: ${err}`);
+          }
         } else if (notification.type === "description") {
           await this.registerEvent({
             whatsappId,
             groupId,
             eventType: "GROUP_DESCRIPTION_CHANGED",
+            performedBy: notification.author,
+            performedByName: notification.author
+          });
+        } else if (notification.type === "picture") {
+          await this.registerEvent({
+            whatsappId,
+            groupId,
+            eventType: "GROUP_PICTURE_CHANGED",
             performedBy: notification.author,
             performedByName: notification.author
           });
@@ -262,6 +338,14 @@ class GroupEventsService {
             groupId,
             eventType: "GROUP_RESTRICT_CHANGED",
             newValue: notification.body === "on" ? "true" : "false"
+          });
+        } else if (notification.type === "member_add_mode") {
+          const isAdminOnly = chat.groupMetadata?.memberAddMode === "admin_add";
+          await this.registerEvent({
+            whatsappId,
+            groupId,
+            eventType: "GROUP_MEMBER_ADD_MODE_CHANGED",
+            newValue: isAdminOnly ? "admin_add" : "all_member_add"
           });
         } else if (notification.type === "add") {
           for (const participantId of notification.recipientIds) {

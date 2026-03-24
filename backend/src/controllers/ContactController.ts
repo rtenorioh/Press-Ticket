@@ -12,6 +12,7 @@ import UpdateContactService from "../services/ContactServices/UpdateContactServi
 import GetAboutService from "../services/ContactServices/GetAboutService";
 import GetCommonGroupsService from "../services/ContactServices/GetCommonGroupsService";
 import ListBlockedContactsService from "../services/ContactServices/ListBlockedContactsService";
+import UpdateGroupProfilePicService from "../services/ContactServices/UpdateGroupProfilePicService";
 
 import AppError from "../errors/AppError";
 import GetContactService from "../services/ContactServices/GetContactService";
@@ -660,6 +661,36 @@ export const listBlockedContacts = async (
       return res.status(err.statusCode).json({ error: err.message });
     }
     console.error("Erro ao listar contatos bloqueados:", err);
+    return res.status(500).json({ error: "ERR_INTERNAL_SERVER_ERROR" });
+  }
+};
+
+export const refreshGroupProfilePic = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  const { contactId } = req.params;
+  const { whatsappId } = req.query as { whatsappId?: string };
+
+  try {
+    if (!whatsappId) {
+      return res.status(400).json({ error: "whatsappId é obrigatório" });
+    }
+
+    const profilePicUrl = await UpdateGroupProfilePicService({
+      contactId: parseInt(contactId, 10),
+      whatsappId: parseInt(whatsappId, 10)
+    });
+
+    return res.status(200).json({ 
+      success: true,
+      profilePicUrl 
+    });
+  } catch (err: any) {
+    if (err instanceof AppError) {
+      return res.status(err.statusCode).json({ error: err.message });
+    }
+    console.error("Erro ao atualizar foto do grupo:", err);
     return res.status(500).json({ error: "ERR_INTERNAL_SERVER_ERROR" });
   }
 };

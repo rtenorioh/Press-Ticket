@@ -3,6 +3,9 @@ import isAuth from "../middleware/isAuth";
 import AppError from "../errors/AppError";
 import { getWbotByGroupId } from "../libs/wbot";
 import { MessageMedia } from "whatsapp-web.js";
+import fs from "fs";
+import { getIO } from "../libs/socket";
+import groupEventsService from "../services/WbotServices/GroupEventsService";
 
 async function getGroupChatOrFail(groupId: string) {
   const wbot = await getWbotByGroupId(groupId);
@@ -12,35 +15,106 @@ async function getGroupChatOrFail(groupId: string) {
   return { wbot, chat };
 }
 
+export const getInfo = async (req: Request, res: Response) => {
+  const { groupId } = req.params;
+  const { chat } = await getGroupChatOrFail(groupId);
+  return res.json({
+    name: chat.name || chat.subject || "",
+    description: chat.groupMetadata?.desc || chat.description || ""
+  });
+};
+
 export const addParticipants = async (req: Request, res: Response) => {
   const { groupId } = req.params;
   const { participantIds, options } = req.body;
+
+  if (!participantIds || !Array.isArray(participantIds) || !participantIds.length) {
+    throw new AppError("ERR_NO_PARTICIPANTS");
+  }
+
   const { chat } = await getGroupChatOrFail(groupId);
   const result = await chat.addParticipants(participantIds, options || {});
-  return res.json(result);
+
+  if (typeof result === "string") {
+    console.error("addParticipants retornou erro:", result);
+    throw new AppError(result, 400);
+  }
+
+  const summary: any[] = [];
+  let successCount = 0;
+  let failCount = 0;
+
+  for (const [pId, data] of Object.entries(result as Record<string, any>)) {
+    const code = data?.code;
+    const ok = code === 200;
+    if (ok) successCount++;
+    else failCount++;
+    summary.push({
+      id: pId,
+      code,
+      message: data?.message || "",
+      isInviteV4Sent: data?.isInviteV4Sent || false,
+      success: ok
+    });
+  }
+
+  return res.json({ summary, successCount, failCount });
 };
 
 export const removeParticipants = async (req: Request, res: Response) => {
   const { groupId } = req.params;
   const { participantIds } = req.body;
-  const { chat } = await getGroupChatOrFail(groupId);
+  const { wbot, chat } = await getGroupChatOrFail(groupId);
   const result = await chat.removeParticipants(participantIds);
+
+  const whatsappId = wbot.id as number;
+  for (const pId of participantIds) {
+    let pName = pId;
+    try { const c = await wbot.getContactById(pId); pName = c?.name || c?.pushname || pId; } catch (_) {}
+    groupEventsService.registerEvent({
+      whatsappId, groupId, eventType: "PARTICIPANT_REMOVED",
+      participantId: pId, participantName: pName
+    }).catch(() => {});
+  }
+
   return res.json(result);
 };
 
 export const promoteParticipants = async (req: Request, res: Response) => {
   const { groupId } = req.params;
   const { participantIds } = req.body;
-  const { chat } = await getGroupChatOrFail(groupId);
+  const { wbot, chat } = await getGroupChatOrFail(groupId);
   const result = await chat.promoteParticipants(participantIds);
+
+  const whatsappId = wbot.id as number;
+  for (const pId of participantIds) {
+    let pName = pId;
+    try { const c = await wbot.getContactById(pId); pName = c?.name || c?.pushname || pId; } catch (_) {}
+    groupEventsService.registerEvent({
+      whatsappId, groupId, eventType: "PARTICIPANT_PROMOTED",
+      participantId: pId, participantName: pName
+    }).catch(() => {});
+  }
+
   return res.json(result);
 };
 
 export const demoteParticipants = async (req: Request, res: Response) => {
   const { groupId } = req.params;
   const { participantIds } = req.body;
-  const { chat } = await getGroupChatOrFail(groupId);
+  const { wbot, chat } = await getGroupChatOrFail(groupId);
   const result = await chat.demoteParticipants(participantIds);
+
+  const whatsappId = wbot.id as number;
+  for (const pId of participantIds) {
+    let pName = pId;
+    try { const c = await wbot.getContactById(pId); pName = c?.name || c?.pushname || pId; } catch (_) {}
+    groupEventsService.registerEvent({
+      whatsappId, groupId, eventType: "PARTICIPANT_DEMOTED",
+      participantId: pId, participantName: pName
+    }).catch(() => {});
+  }
+
   return res.json(result);
 };
 
@@ -95,25 +169,89 @@ export const setDescription = async (req: Request, res: Response) => {
   const { groupId } = req.params;
   const { description } = req.body;
   if (description == null) throw new AppError("ERR_DESCRIPTION_REQUIRED");
-  const { chat } = await getGroupChatOrFail(groupId);
-  const ok = await chat.setDescription(description);
-  return res.json({ success: !!ok });
+  
+  const { wbot, chat } = await getGroupChatOrFail(groupId);
+  
+  try {
+    const chatId = JSON.stringify(chat.id._serialized);
+    const desc = JSON.stringify(description);
+    const success = await (wbot as any).pupPage.evaluate(`
+      (async () => {
+        var chatWid = window.Store.WidFactory.createWid(${chatId});
+        var metadataStore = window.Store.GroupMetadata || window.Store.WAWebGroupMetadataCollection;
+        await metadataStore.update(chatWid);
+        var metadata = metadataStore.get(chatWid);
+        var descId = metadata ? metadata.descId : undefined;
+        var newId = await window.Store.MsgKey.newId();
+        try {
+          await window.Store.GroupUtils.setGroupDescription(chatWid, ${desc}, newId, descId);
+          return true;
+        } catch (err) {
+          if (err.name === 'ServerStatusCodeError') return false;
+          throw err;
+        }
+      })()
+    `);
+
+    if (success) {
+      chat.groupMetadata = chat.groupMetadata || {};
+      chat.groupMetadata.desc = description;
+    }
+
+    return res.json({ success: !!success });
+  } catch (error: any) {
+    console.error("Erro ao alterar descrição do grupo:", error);
+    throw new AppError(
+      "Erro ao alterar descrição. Tente novamente ou reinicie a conexão WhatsApp.",
+      500
+    );
+  }
 };
 
 export const setPicture = async (req: Request, res: Response) => {
   const { groupId } = req.params;
-  const { data, mimetype, filename } = req.body;
-  if (!data || !mimetype) throw new AppError("ERR_MEDIA_REQUIRED");
-  const { chat } = await getGroupChatOrFail(groupId);
-  const media = new MessageMedia(mimetype, data, filename || "group.jpg");
-  const ok = await chat.setPicture(media);
-  return res.json({ success: !!ok });
+  const file = req.file as Express.Multer.File;
+  
+  if (!file) throw new AppError("ERR_FILE_REQUIRED");
+  
+  try {
+    const { chat } = await getGroupChatOrFail(groupId);
+    
+    const base64 = fs.readFileSync(file.path, { encoding: "base64" });
+    const media = new MessageMedia(file.mimetype, base64, file.filename);
+    
+    const ok = await chat.setPicture(media);
+    
+    fs.unlinkSync(file.path);
+    
+    const io = getIO();
+    io.emit("group", {
+      action: "update",
+      groupId
+    });
+    
+    return res.json({ success: !!ok });
+  } catch (error) {
+    if (req.file?.path) {
+      try {
+        fs.unlinkSync(req.file.path);
+      } catch {}
+    }
+    throw error;
+  }
 };
 
 export const deletePicture = async (req: Request, res: Response) => {
   const { groupId } = req.params;
   const { chat } = await getGroupChatOrFail(groupId);
   const ok = await chat.deletePicture();
+  
+  const io = getIO();
+  io.emit("group", {
+    action: "update",
+    groupId
+  });
+  
   return res.json({ success: !!ok });
 };
 

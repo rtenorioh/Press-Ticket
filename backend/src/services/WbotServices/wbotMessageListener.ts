@@ -804,7 +804,8 @@ const isValidMsg = (msg: WbotMessage): boolean => {
     msg.from === "status@broadcast" ||
     msg.type === "notification_template" ||
     msg.type === "e2e_notification" ||
-    msg.type === "notification"
+    msg.type === "notification" ||
+    msg.type === "group_notification"
   ) {
     console.info("Mensagem recebida - tipo de notificação ou broadcast:", msg.type);
     return false;
@@ -1002,23 +1003,49 @@ const handleMessage = async (
           || (msgGroupContact as any)?.id?._serialized
           || `${msgGroupContact.id.user}@g.us`;
         const groupName = (chat as any)?.name || (chat as any)?.subject || groupContact.name;
+        
         let profilePicUrl: string | undefined;
-        try {
-          profilePicUrl = await (wbot as any).getProfilePicUrl(fullJid);
-        } catch {}
+        let retries = 2;
+        
+        while (retries > 0) {
+          try {
+            profilePicUrl = await (wbot as any).getProfilePicUrl(fullJid);
+            if (profilePicUrl) {
+              logger.info(`[WBOT_LISTENER] Foto de grupo obtida: ${fullJid}`);
+              break;
+            }
+          } catch (picErr) {
+            retries--;
+            if (retries > 0) {
+              await new Promise(resolve => setTimeout(resolve, 500));
+            } else {
+              logger.warn(`[WBOT_LISTENER] Falha ao obter foto do grupo ${fullJid} após tentativas`);
+            }
+          }
+        }
 
-        await groupContact.update({
-          isGroup: true,
-          name: groupName || groupContact.name,
-          number: fullJid, 
-          profilePicUrl: profilePicUrl || groupContact.profilePicUrl
-        });
+        const needsUpdate = 
+          groupContact.name !== groupName ||
+          (profilePicUrl && groupContact.profilePicUrl !== profilePicUrl);
 
-        try {
-          const { getIO } = require("../../libs/socket");
-          const io = getIO();
-          io.emit("contact", { action: "update", contact: groupContact });
-        } catch {}
+        if (needsUpdate) {
+          await groupContact.update({
+            isGroup: true,
+            name: groupName || groupContact.name,
+            number: fullJid, 
+            profilePicUrl: profilePicUrl || groupContact.profilePicUrl
+          });
+
+          logger.info(`[WBOT_LISTENER] Contato de grupo atualizado: ${fullJid}`);
+
+          try {
+            const { getIO } = require("../../libs/socket");
+            const io = getIO();
+            io.emit("contact", { action: "update", contact: groupContact });
+          } catch (socketErr) {
+            logger.warn(`[WBOT_LISTENER] Erro ao emitir socket: ${socketErr}`);
+          }
+        }
       } catch (enrichErr) {
         logger.warn(`Falha ao enriquecer contato de grupo: ${String(enrichErr)}`);
       }

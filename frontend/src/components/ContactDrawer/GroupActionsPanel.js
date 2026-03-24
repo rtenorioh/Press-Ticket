@@ -24,7 +24,13 @@ import {
   Box,
   Accordion,
   AccordionSummary,
-  AccordionDetails
+  AccordionDetails,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  CircularProgress,
+  Checkbox
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { useTranslation } from "react-i18next";
@@ -62,6 +68,54 @@ const GroupActionsPanel = ({ groupId }) => {
   const [addModalOpen, setAddModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState(0);
   const [isAdmin, setIsAdmin] = useState(false);
+
+  const [subjectModalOpen, setSubjectModalOpen] = useState(false);
+  const [subjectValue, setSubjectValue] = useState("");
+  const [descriptionModalOpen, setDescriptionModalOpen] = useState(false);
+  const [descriptionValue, setDescriptionValue] = useState("");
+  const [infoLoading, setInfoLoading] = useState(false);
+
+  const [memberModalOpen, setMemberModalOpen] = useState(false);
+  const [memberModalAction, setMemberModalAction] = useState(null);
+  const [memberModalTitle, setMemberModalTitle] = useState("");
+  const [memberModalSelected, setMemberModalSelected] = useState({});
+  const [memberModalSearch, setMemberModalSearch] = useState("");
+
+  const memberModalFiltered = useMemo(() => {
+    let list = participants;
+    if (memberModalAction === "remove") {
+      list = list.filter(p => !p.isSuperAdmin);
+    } else if (memberModalAction === "promote") {
+      list = list.filter(p => !p.isAdmin && !p.isSuperAdmin);
+    } else if (memberModalAction === "demote") {
+      list = list.filter(p => p.isAdmin && !p.isSuperAdmin);
+    }
+    const term = memberModalSearch.trim().toLowerCase();
+    if (term) {
+      list = list.filter(p =>
+        (p.name || "").toLowerCase().includes(term) ||
+        (p.number || "").toLowerCase().includes(term)
+      );
+    }
+    return list;
+  }, [participants, memberModalAction, memberModalSearch]);
+
+  const openMemberModal = (action, title) => {
+    setMemberModalAction(action);
+    setMemberModalTitle(title);
+    setMemberModalSelected({});
+    setMemberModalSearch("");
+    setMemberModalOpen(true);
+  };
+
+  const toggleMemberSelection = (p) => {
+    setMemberModalSelected(prev => {
+      const next = { ...prev };
+      if (next[p.id]) delete next[p.id];
+      else next[p.id] = p;
+      return next;
+    });
+  };
 
   const filtered = useMemo(() => {
     const term = search.trim().toLowerCase();
@@ -129,48 +183,65 @@ const GroupActionsPanel = ({ groupId }) => {
     if (!participantIds.length) { setAddModalOpen(false); return; }
     try {
       setLoading(true);
-      await GroupService.addParticipants(groupId, participantIds, { autoSendInviteV4: true });
-      notify(t("groupActions.messages.addOk"));
+      const result = await GroupService.addParticipants(groupId, participantIds, { autoSendInviteV4: true });
+      const { summary = [], successCount = 0, failCount = 0 } = result || {};
+
+      if (successCount > 0 && failCount === 0) {
+        notify(t("groupActions.messages.addOk"));
+      } else if (successCount > 0 && failCount > 0) {
+        const invited = summary.filter(s => s.isInviteV4Sent).length;
+        const msgs = [];
+        msgs.push(`${successCount} adicionado(s)`);
+        if (invited) msgs.push(`${invited} convite(s) enviado(s)`);
+        if (failCount - invited > 0) msgs.push(`${failCount - invited} falha(s)`);
+        notify(msgs.join(", "), "warning");
+      } else if (failCount > 0) {
+        const invited = summary.filter(s => s.isInviteV4Sent).length;
+        if (invited > 0) {
+          notify(`${invited} convite(s) enviado(s) por link privado`, "info");
+        } else {
+          const firstFail = summary.find(s => !s.success);
+          const detail = firstFail ? ` (${firstFail.message || "código " + firstFail.code})` : "";
+          notify(t("groupActions.messages.addErr") + detail, "error");
+        }
+      } else {
+        notify(t("groupActions.messages.addOk"));
+      }
       await loadParticipants();
     } catch (e) {
-      notify(t("groupActions.messages.addErr"), "error");
+      console.error("[GroupActions] Erro ao adicionar participantes:", e);
+      const msg = e?.response?.data?.error || t("groupActions.messages.addErr");
+      notify(msg, "error");
     } finally { setLoading(false); setAddModalOpen(false); }
   };
 
-  const handleRemoveParticipants = async () => {
-    const ids = window.prompt(t("groupActions.prompts.participantsPlaceholder"));
-    if (!ids) return;
-    const participantIds = ids.split(',').map(s => s.trim()).filter(Boolean);
-    try {
-      setLoading(true);
-      await GroupService.removeParticipants(groupId, participantIds);
-      notify(t("groupActions.messages.removeOk"));
-      await loadParticipants();
-    } catch (e) { notify(t("groupActions.messages.removeErr"), "error"); } finally { setLoading(false); }
-  };
+  const handleRemoveParticipants = () => openMemberModal("remove", t("groupActions.modals.removeTitle"));
+  const handlePromote = () => openMemberModal("promote", t("groupActions.modals.promoteTitle"));
+  const handleDemote = () => openMemberModal("demote", t("groupActions.modals.demoteTitle"));
 
-  const handlePromote = async () => {
-    const ids = window.prompt(t("groupActions.prompts.participantsPlaceholder"));
-    if (!ids) return;
-    const participantIds = ids.split(',').map(s => s.trim()).filter(Boolean);
+  const handleConfirmMemberAction = async () => {
+    const ids = Object.values(memberModalSelected).map(p => p.id);
+    if (!ids.length) return;
     try {
       setLoading(true);
-      await GroupService.promoteParticipants(groupId, participantIds);
-      notify(t("groupActions.messages.promoteOk"));
+      if (memberModalAction === "remove") {
+        await GroupService.removeParticipants(groupId, ids);
+        notify(t("groupActions.messages.removeOk"));
+      } else if (memberModalAction === "promote") {
+        await GroupService.promoteParticipants(groupId, ids);
+        notify(t("groupActions.messages.promoteOk"));
+      } else if (memberModalAction === "demote") {
+        await GroupService.demoteParticipants(groupId, ids);
+        notify(t("groupActions.messages.demoteOk"));
+      }
       await loadParticipants();
-    } catch (e) { notify(t("groupActions.messages.promoteErr"), "error"); } finally { setLoading(false); }
-  };
-
-  const handleDemote = async () => {
-    const ids = window.prompt(t("groupActions.prompts.participantsPlaceholder"));
-    if (!ids) return;
-    const participantIds = ids.split(',').map(s => s.trim()).filter(Boolean);
-    try {
-      setLoading(true);
-      await GroupService.demoteParticipants(groupId, participantIds);
-      notify(t("groupActions.messages.demoteOk"));
-      await loadParticipants();
-    } catch (e) { notify(t("groupActions.messages.demoteErr"), "error"); } finally { setLoading(false); }
+    } catch (e) {
+      const errKey = memberModalAction === "remove" ? "removeErr" : memberModalAction === "promote" ? "promoteErr" : "demoteErr";
+      notify(t(`groupActions.messages.${errKey}`), "error");
+    } finally {
+      setLoading(false);
+      setMemberModalOpen(false);
+    }
   };
 
   const handleGetInvite = async () => {
@@ -219,35 +290,78 @@ const GroupActionsPanel = ({ groupId }) => {
     } catch (err) { notify(t("groupActions.messages.settingsErr"), "error"); } finally { setLoading(false); }
   };
 
-  const handleSetSubject = async () => {
-    const subject = window.prompt(t("groupActions.prompts.subject"));
-    if (subject == null) return;
-    try { setLoading(true); await GroupService.setSubject(groupId, subject); notify(t("groupActions.messages.subjectOk")); }
-    catch (e) { notify(t("groupActions.messages.subjectErr"), "error"); } finally { setLoading(false); }
+  const handleOpenSubjectModal = async () => {
+    setInfoLoading(true);
+    try {
+      const info = await GroupService.getInfo(groupId);
+      setSubjectValue(info.name || "");
+    } catch (e) {
+      setSubjectValue("");
+    } finally {
+      setInfoLoading(false);
+      setSubjectModalOpen(true);
+    }
   };
 
-  const handleSetDescription = async () => {
-    const description = window.prompt(t("groupActions.prompts.description"));
-    if (description == null) return;
-    try { setLoading(true); await GroupService.setDescription(groupId, description); notify(t("groupActions.messages.descriptionOk")); }
-    catch (e) { notify(t("groupActions.messages.descriptionErr"), "error"); } finally { setLoading(false); }
+  const handleConfirmSubject = async () => {
+    if (!subjectValue.trim()) return;
+    try {
+      setLoading(true);
+      await GroupService.setSubject(groupId, subjectValue.trim());
+      notify(t("groupActions.messages.subjectOk"));
+    } catch (e) {
+      notify(t("groupActions.messages.subjectErr"), "error");
+    } finally {
+      setLoading(false);
+      setSubjectModalOpen(false);
+    }
+  };
+
+  const handleOpenDescriptionModal = async () => {
+    setInfoLoading(true);
+    try {
+      const info = await GroupService.getInfo(groupId);
+      setDescriptionValue(info.description || "");
+    } catch (e) {
+      setDescriptionValue("");
+    } finally {
+      setInfoLoading(false);
+      setDescriptionModalOpen(true);
+    }
+  };
+
+  const handleConfirmDescription = async () => {
+    try {
+      setLoading(true);
+      await GroupService.setDescription(groupId, descriptionValue);
+      notify(t("groupActions.messages.descriptionOk"));
+    } catch (e) {
+      notify(t("groupActions.messages.descriptionErr"), "error");
+    } finally {
+      setLoading(false);
+      setDescriptionModalOpen(false);
+    }
   };
 
   const handleSetPicture = async () => {
-    const url = window.prompt(t("groupActions.prompts.pictureUrl"));
-    if (!url) return;
-    try {
-      setLoading(true);
-      const resp = await fetch(url);
-      const blob = await resp.blob();
-      const reader = new FileReader();
-      reader.onloadend = async () => {
-        const base64 = reader.result.toString().split(",").pop();
-        await GroupService.setPicture(groupId, { data: base64, mimetype: blob.type, filename: "group.jpg" });
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.onchange = async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      
+      try {
+        setLoading(true);
+        await GroupService.setPicture(groupId, file);
         notify(t("groupActions.messages.pictureOk"));
-      };
-      reader.readAsDataURL(blob);
-    } catch (e) { notify(t("groupActions.messages.pictureErr"), "error"); } finally { setLoading(false); }
+      } catch (e) {
+        notify(t("groupActions.messages.pictureErr"), "error");
+      } finally {
+        setLoading(false);
+      }
+    };
+    input.click();
   };
 
   const handleDeletePicture = async () => {
@@ -708,8 +822,8 @@ const GroupActionsPanel = ({ groupId }) => {
                         size="small" 
                         variant="outlined" 
                         startIcon={<TitleIcon fontSize="small" />} 
-                        onClick={handleSetSubject} 
-                        disabled={loading}
+                        onClick={handleOpenSubjectModal} 
+                        disabled={loading || infoLoading}
                         sx={{ fontSize: '0.75rem', py: 0.5 }}
                       >
                         Alterar Nome
@@ -719,8 +833,8 @@ const GroupActionsPanel = ({ groupId }) => {
                         size="small" 
                         variant="outlined" 
                         startIcon={<DescriptionIcon fontSize="small" />} 
-                        onClick={handleSetDescription} 
-                        disabled={loading}
+                        onClick={handleOpenDescriptionModal} 
+                        disabled={loading || infoLoading}
                         sx={{ fontSize: '0.75rem', py: 0.5 }}
                       >
                         Alterar Descrição
@@ -783,6 +897,140 @@ const GroupActionsPanel = ({ groupId }) => {
         onConfirm={handleConfirmAdd}
         title={t("groupActions.selectContacts") || "Selecionar contatos"}
       />
+
+      <Dialog 
+        open={subjectModalOpen} 
+        onClose={() => setSubjectModalOpen(false)} 
+        fullWidth 
+        maxWidth="sm"
+      >
+        <DialogTitle sx={{ pb: 1 }}>{t("groupActions.modals.subjectTitle")}</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            fullWidth
+            label={t("groupActions.modals.subjectLabel")}
+            value={subjectValue}
+            onChange={(e) => setSubjectValue(e.target.value)}
+            variant="outlined"
+            size="small"
+            sx={{ mt: 1 }}
+            disabled={loading}
+            onKeyDown={(e) => { if (e.key === "Enter") handleConfirmSubject(); }}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setSubjectModalOpen(false)} disabled={loading}>{t("groupActions.modals.cancel")}</Button>
+          <Button 
+            onClick={handleConfirmSubject} 
+            variant="contained" 
+            disabled={loading || !subjectValue.trim()}
+            startIcon={loading ? <CircularProgress size={16} /> : null}
+          >
+            {t("groupActions.modals.save")}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog 
+        open={descriptionModalOpen} 
+        onClose={() => setDescriptionModalOpen(false)} 
+        fullWidth 
+        maxWidth="sm"
+      >
+        <DialogTitle sx={{ pb: 1 }}>{t("groupActions.modals.descriptionTitle")}</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            fullWidth
+            label={t("groupActions.modals.descriptionLabel")}
+            value={descriptionValue}
+            onChange={(e) => setDescriptionValue(e.target.value)}
+            variant="outlined"
+            size="small"
+            multiline
+            minRows={3}
+            maxRows={6}
+            sx={{ mt: 1 }}
+            disabled={loading}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDescriptionModalOpen(false)} disabled={loading}>{t("groupActions.modals.cancel")}</Button>
+          <Button 
+            onClick={handleConfirmDescription} 
+            variant="contained" 
+            disabled={loading}
+            startIcon={loading ? <CircularProgress size={16} /> : null}
+          >
+            {t("groupActions.modals.save")}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog
+        open={memberModalOpen}
+        onClose={() => setMemberModalOpen(false)}
+        fullWidth
+        maxWidth="sm"
+      >
+        <DialogTitle sx={{ pb: 1 }}>{memberModalTitle}</DialogTitle>
+        <DialogContent dividers>
+          <TextField
+            fullWidth
+            size="small"
+            placeholder={t("common.search")}
+            value={memberModalSearch}
+            onChange={(e) => setMemberModalSearch(e.target.value)}
+            InputProps={{ startAdornment: <SearchIcon fontSize="small" sx={{ mr: 1 }} /> }}
+            sx={{ mb: 1 }}
+          />
+          <List dense sx={{ maxHeight: 360, overflowY: "auto" }}>
+            {memberModalFiltered.map(p => {
+              const checked = Boolean(memberModalSelected[p.id]);
+              const roleLabel = p.isSuperAdmin ? t("groupActions.modals.owner") : p.isAdmin ? t("groupActions.modals.admin") : "";
+              return (
+                <ListItem key={p.id} button onClick={() => toggleMemberSelection(p)}>
+                  <ListItemIcon>
+                    <Checkbox edge="start" checked={checked} tabIndex={-1} disableRipple />
+                  </ListItemIcon>
+                  <Avatar src={p.avatar || undefined} sx={{ mr: 1, width: 32, height: 32 }}>
+                    {(p.name || p.number || "?").substring(0, 1)}
+                  </Avatar>
+                  <ListItemText
+                    primary={
+                      <Stack direction="row" alignItems="center" spacing={0.5}>
+                        <Typography variant="body2" noWrap>{p.name || p.number}</Typography>
+                        {roleLabel && <Chip label={roleLabel} size="small" color={p.isSuperAdmin ? "error" : "warning"} sx={{ height: 18, fontSize: '0.65rem' }} />}
+                      </Stack>
+                    }
+                    secondary={p.number}
+                  />
+                </ListItem>
+              );
+            })}
+            {memberModalFiltered.length === 0 && (
+              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', textAlign: 'center', py: 2 }}>
+                {t("groupActions.modals.noMembers")}
+              </Typography>
+            )}
+          </List>
+          <Typography variant="caption" sx={{ mt: 1, display: 'block' }}>
+            {Object.keys(memberModalSelected).length} {t("common.selected")}
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setMemberModalOpen(false)} disabled={loading}>{t("groupActions.modals.cancel")}</Button>
+          <Button
+            onClick={handleConfirmMemberAction}
+            variant="contained"
+            disabled={loading || !Object.keys(memberModalSelected).length}
+            startIcon={loading ? <CircularProgress size={16} /> : null}
+          >
+            {t("common.confirm")}
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       <Snackbar open={snack.open} autoHideDuration={3000} onClose={() => setSnack({ ...snack, open: false })}>
         <Alert onClose={() => setSnack({ ...snack, open: false })} severity={snack.severity} sx={{ width: '100%' }}>

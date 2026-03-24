@@ -3,6 +3,7 @@ import api from "./api";
 const enc = (id) => encodeURIComponent(id);
 
 const GroupService = {
+  getInfo: (groupId) => api.get(`/groups/${enc(groupId)}/info`).then(r => r.data),
   listParticipants: (groupId) => api.get(`/groups/${enc(groupId)}/participants`).then(r => r.data),
   addParticipants: (groupId, participantIds, options) =>
     api.post(`/groups/${enc(groupId)}/participants/add`, { participantIds, options }).then(r => r.data),
@@ -19,7 +20,13 @@ const GroupService = {
   setRestrict: (groupId, adminsOnly) => api.post(`/groups/${enc(groupId)}/settings/restrict`, { adminsOnly }).then(r => r.data),
   setSubject: (groupId, subject) => api.post(`/groups/${enc(groupId)}/subject`, { subject }).then(r => r.data),
   setDescription: (groupId, description) => api.post(`/groups/${enc(groupId)}/description`, { description }).then(r => r.data),
-  setPicture: (groupId, { data, mimetype, filename }) => api.post(`/groups/${enc(groupId)}/picture`, { data, mimetype, filename }).then(r => r.data),
+  setPicture: (groupId, file) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return api.post(`/groups/${enc(groupId)}/picture`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    }).then(r => r.data);
+  },
   deletePicture: (groupId) => api.delete(`/groups/${enc(groupId)}/picture`).then(r => r.data),
   listRequests: (groupId) => api.get(`/groups/${enc(groupId)}/membership/requests`).then(r => r.data),
   approveRequests: (groupId, options) => api.post(`/groups/${enc(groupId)}/membership/approve`, { options }).then(r => r.data),
