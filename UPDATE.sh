@@ -537,10 +537,36 @@ git pull 2>&1 | tee -a "$LOG_FILE"
 
 sleep 2
 
+echo -e "${COLOR}Alterando proprietário e permissões dos arquivos...${RESET}" | tee -a "$LOG_FILE"
+
+# Alterar o proprietário dos arquivos
+sudo chown -R deploy:deploy "$DEPLOY_HOME/$NOME_EMPRESA" | tee -a "$LOG_FILE"
+if [ $? -eq 0 ]; then
+    echo -e "${GREEN}Proprietário dos arquivos alterado com sucesso para o usuário 'deploy'.${RESET}" | tee -a "$LOG_FILE"
+else
+    echo -e "${RED}Erro: Falha ao alterar o proprietário dos arquivos. Verifique as permissões.${RESET}"
+    finalizar ${RED}Erro: Falha ao alterar o proprietário dos arquivos. Verifique as permissões.${RESET} 1
+fi
+
+sleep 2
+
+# Alterar as permissões dos arquivos
+sudo chmod -R u+rwX "$DEPLOY_HOME/$NOME_EMPRESA" | tee -a "$LOG_FILE"
+if [ $? -eq 0 ]; then
+    echo -e "${GREEN}Permissões dos arquivos ajustadas com sucesso.${RESET}" | tee -a "$LOG_FILE"
+else
+    echo -e "${RED}Erro: Falha ao ajustar as permissões dos arquivos. Verifique as permissões.${RESET}"
+    finalizar "${RED}Erro: Falha ao ajustar as permissões dos arquivos. Verifique as permissões.${RESET}" 1
+fi
+
+echo -e "${GREEN}Proprietário e permissões configurados corretamente para o diretório: $DEPLOY_HOME/$NOME_EMPRESA.${RESET}" | tee -a "$LOG_FILE"
+
 cd backend || {
     echo "Erro ao acessar o diretório do backend."
     finalizar "Erro ao acessar o diretório do backend." 1
 }
+
+sleep 2 
 
 # Caminho do arquivo sequelizeData.json
 SEQUELIZE_DATA_FILE="sequelizeData.json"
@@ -838,7 +864,7 @@ if [ -f "$NGINX_FRONT_CONFIG" ]; then
     add_header X-Content-Type-Options "nosniff" always;
     add_header X-XSS-Protection "1; mode=block" always;
     add_header Referrer-Policy "strict-origin-when-cross-origin" always;
-    add_header Permissions-Policy "geolocation=(), microphone=(), camera=(), payment=(), usb=(), magnetometer=(), gyroscope=(), accelerometer=()" always;
+    add_header Permissions-Policy "geolocation=(self), microphone=(self), camera=(self), payment=(), usb=(), magnetometer=(), gyroscope=(), accelerometer=()" always;
     add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.youtube.com https://www.youtube-nocookie.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https: blob:; media-src 'self' https: blob:; connect-src 'self' https://BACKEND_URL_PLACEHOLDER wss://BACKEND_URL_PLACEHOLDER; frame-src 'self' https://BACKEND_URL_PLACEHOLDER https://www.youtube.com https://www.youtube-nocookie.com; object-src 'none'; base-uri 'self'; form-action 'self';" always;
 EOF
         

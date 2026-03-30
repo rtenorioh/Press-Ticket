@@ -377,13 +377,15 @@ echo -e "${COLOR}Verificando se MySQL já está instalado...${RESET}" | tee -a "
 if dpkg -l | grep -q mysql-server; then
     echo -e "${YELLOW}MySQL detectado no sistema.${RESET}" | tee -a "$LOG_FILE"
     echo -e "${GREEN}Utilizando MySQL existente ao invés de instalar MariaDB.${RESET}" | tee -a "$LOG_FILE"
+    DB_ENGINE="MySQL"
+    DB_SERVICE="mysql"
     
     # Configurar comando MySQL
     if sudo mysql -u root -e "SELECT 1;" &>/dev/null; then
         MYSQL_CMD="sudo mysql -u root"
         echo -e "${GREEN}Conexão com o MySQL realizada sem senha.${RESET}" | tee -a "$LOG_FILE"
     else
-        MYSQL_CMD="sudo mysql -u root --password='$DB_PASS'"
+        MYSQL_CMD="sudo MYSQL_PWD=$DB_PASS mysql -u root"
         echo -e "${YELLOW}O MySQL exige senha para conexão. Utilizando a senha fornecida.${RESET}" | tee -a "$LOG_FILE"
     fi
     
@@ -401,6 +403,8 @@ if dpkg -l | grep -q mysql-server; then
     fi
 else
     echo -e "${GREEN}MySQL não encontrado. Prosseguindo com a instalação do MariaDB...${RESET}" | tee -a "$LOG_FILE"
+    DB_ENGINE="MariaDB"
+    DB_SERVICE="mariadb"
     
     # Verificar se o MariaDB já está instalado
     echo -e "${COLOR}Verificando a instalação do MariaDB...${RESET}" | tee -a "$LOG_FILE"
@@ -426,7 +430,7 @@ else
         MYSQL_CMD="sudo mysql -u root"
         echo -e "${GREEN}Conexão com o MariaDB realizada sem senha.${RESET}" | tee -a "$LOG_FILE"
     else
-        MYSQL_CMD="sudo mysql -u root --password='$DB_PASS'"
+        MYSQL_CMD="sudo MYSQL_PWD=$DB_PASS mysql -u root"
         echo -e "${YELLOW}O MariaDB exige senha para conexão. Utilizando a senha fornecida.${RESET}" | tee -a "$LOG_FILE"
     fi
 
@@ -449,47 +453,46 @@ echo -e "${COLOR}Criar banco de dados e configurar...${RESET}" | tee -a "$LOG_FI
 
 # Verificar se o banco de dados já existe
 echo -e "${COLOR}Verificando se o banco de dados $NOME_EMPRESA já existe...${RESET}" | tee -a "$LOG_FILE"
-DB_EXISTS=$($MYSQL_CMD -e "SHOW DATABASES LIKE '$NOME_EMPRESA';" 2>/dev/null) | tee -a "$LOG_FILE"
-if [ "$DB_EXISTS" ]; then
-    echo -e "${RED}Erro: O banco de dados $NOME_EMPRESA já existe. Instalação interrompida.${RESET}"
-    finalizar "${RED}Erro: O banco de dados $NOME_EMPRESA já existe. Instalação interrompida.${RESET}" 1
-fi
+DB_EXISTS=$($MYSQL_CMD -N -s -e "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME='$NOME_EMPRESA';" 2>/dev/null)
+if [ "$DB_EXISTS" = "$NOME_EMPRESA" ]; then
+    echo -e "${GREEN}Banco de dados $NOME_EMPRESA já existe. O instalador irá utilizar o banco de dados informado.${RESET}" | tee -a "$LOG_FILE"
+else
+    # Criar o banco de dados e configurar autenticação corretamente
+    echo -e "${COLOR}Criando o banco de dados $NOME_EMPRESA...${RESET}" | tee -a "$LOG_FILE"
 
-# Criar o banco de dados e configurar autenticação corretamente
-echo -e "${COLOR}Criando o banco de dados $NOME_EMPRESA...${RESET}" | tee -a "$LOG_FILE"
-
-# Verificar se MariaDB já exige senha para conexão
-if sudo mysql -u root -e "SELECT 1;" &>/dev/null; then
-    echo -e "${GREEN}MariaDB está acessível sem senha. Definindo senha para o usuário root...${RESET}" | tee -a "$LOG_FILE"
-    
-# Executa os comandos completos, incluindo definição de senha
-{
-    sudo mysql -u root <<EOF
-    CREATE DATABASE $NOME_EMPRESA CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+    # Verificar se o banco de dados já exige senha para conexão
+    if sudo mysql -u root -e "SELECT 1;" &>/dev/null; then
+        echo -e "${GREEN}$DB_ENGINE está acessível sem senha. Definindo senha para o usuário root...${RESET}" | tee -a "$LOG_FILE"
+        
+        {
+            sudo mysql -u root <<EOF
+    CREATE DATABASE IF NOT EXISTS $NOME_EMPRESA CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
     ALTER USER 'root'@'localhost' IDENTIFIED BY '$DB_PASS';
     FLUSH PRIVILEGES;
 EOF
-    echo -e "${GREEN}Banco de dados criado e senha do root configurada com sucesso.${RESET}"
-} | tee -a "$LOG_FILE"
+            echo -e "${GREEN}Banco de dados criado e senha do root configurada com sucesso.${RESET}"
+        } | tee -a "$LOG_FILE"
 
-else
-    echo -e "${YELLOW}MariaDB exige senha para conexão. Criando apenas o banco de dados...${RESET}" | tee -a "$LOG_FILE"
+    else
+        echo -e "${YELLOW}$DB_ENGINE exige senha para conexão. Criando apenas o banco de dados...${RESET}" | tee -a "$LOG_FILE"
 
-# Executa apenas a criação do banco de dados, sem alterar a senha do root
-{
-    sudo mysql -u root --password="$DB_PASS" <<EOF
-CREATE DATABASE $NOME_EMPRESA CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+        {
+            sudo MYSQL_PWD=$DB_PASS mysql -u root <<EOF
+CREATE DATABASE IF NOT EXISTS $NOME_EMPRESA CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
 EOF
-    echo -e "${GREEN}Banco de dados criado com sucesso.${RESET}"
-} | tee -a "$LOG_FILE"
-fi
+            echo -e "${GREEN}Banco de dados criado com sucesso.${RESET}"
+        } | tee -a "$LOG_FILE"
+    fi
 
-# Reiniciar o MariaDB
-{
-    echo -e "${COLOR}Reiniciando o MariaDB...${RESET}"
-    sudo systemctl restart mariadb
-    echo -e "${GREEN}MariaDB reiniciado com sucesso.${RESET}" | tee -a "$LOG_FILE"
-} | tee -a "$LOG_FILE"
+    {
+        echo -e "${COLOR}Reiniciando o $DB_ENGINE...${RESET}"
+        if sudo systemctl restart "$DB_SERVICE"; then
+            echo -e "${GREEN}$DB_ENGINE reiniciado com sucesso.${RESET}" | tee -a "$LOG_FILE"
+        else
+            finalizar "Erro ao reiniciar o serviço do $DB_ENGINE ($DB_SERVICE)." 1
+        fi
+    } | tee -a "$LOG_FILE"
+fi
 
 # Seção 3: Configuração do Usuário
 echo -e "${COLOR}Configurando o usuário deploy...${RESET}" | tee -a "$LOG_FILE"
@@ -686,12 +689,21 @@ sudo -u deploy -H bash -c "cd $DEPLOY_HOME && git clone --branch $BRANCH https:/
 
 # Obter a versão instalada do repositório clonado
 echo -e "${COLOR}Verificando versão instalada...${RESET}" | tee -a "$LOG_FILE"
-INSTALLED_VERSION=$(cd "$DEPLOY_HOME/$NOME_EMPRESA" && git describe --tags --abbrev=0 2>/dev/null || echo "unknown")
-if [ "$INSTALLED_VERSION" != "unknown" ]; then
+INSTALLED_VERSION=$(sed -n 's/.*systemVersion *= *"\(v[0-9][0-9.]*\)".*/\1/p' "$DEPLOY_HOME/$NOME_EMPRESA/backend/src/config/version.ts" 2>/dev/null | head -n 1)
+if [ -z "$INSTALLED_VERSION" ]; then
+    INSTALLED_VERSION=$(cd "$DEPLOY_HOME/$NOME_EMPRESA" && git fetch --tags --force &>/dev/null && git describe --tags --abbrev=0 2>/dev/null || echo "")
+fi
+
+if [ -n "$INSTALLED_VERSION" ]; then
     echo -e "${GREEN}Versão detectada: $INSTALLED_VERSION${RESET}" | tee -a "$LOG_FILE"
 else
-    echo -e "${YELLOW}Aviso: Não foi possível detectar a versão. Usando configuração padrão.${RESET}" | tee -a "$LOG_FILE"
-    INSTALLED_VERSION="v999.0.0"  # Versão alta para usar npm install sem flag
+    if [ -n "$VERSION" ] && [ "$VERSION" != "unknown" ]; then
+        INSTALLED_VERSION="$VERSION"
+        echo -e "${YELLOW}Aviso: Não foi possível detectar a versão no repositório clonado. Usando a versão alvo: $INSTALLED_VERSION${RESET}" | tee -a "$LOG_FILE"
+    else
+        echo -e "${YELLOW}Aviso: Não foi possível detectar a versão. Usando configuração padrão.${RESET}" | tee -a "$LOG_FILE"
+        INSTALLED_VERSION="v999.0.0"  # Versão alta para usar npm install sem flag
+    fi
 fi
 
 echo -e "${COLOR}Alterando proprietário e permissões dos arquivos...${RESET}" | tee -a "$LOG_FILE"
@@ -888,7 +900,7 @@ echo -e "${GREEN}PM2 instalado globalmente com sucesso.${RESET}" | tee -a "$LOG_
 # Iniciando o backend com PM2 (como usuário deploy)
 echo -e "${COLOR}Iniciando o backend usando PM2...${RESET}" | tee -a "$LOG_FILE"
 
-if ! sudo -u deploy -H bash -c "cd $DEPLOY_HOME/$NOME_EMPRESA/backend && pm2 start dist/server.js --name $NOME_EMPRESA-back"; then
+if ! sudo -u deploy -H bash -c "cd $DEPLOY_HOME/$NOME_EMPRESA/backend && DBUS_SESSION_BUS_ADDRESS= pm2 start dist/server.js --name $NOME_EMPRESA-back"; then
     finalizar "Erro ao iniciar o backend com PM2." 1
 fi
 
@@ -1012,8 +1024,8 @@ server {
     add_header X-Content-Type-Options "nosniff" always;
     add_header X-XSS-Protection "1; mode=block" always;
     add_header Referrer-Policy "strict-origin-when-cross-origin" always;
-    add_header Permissions-Policy "geolocation=(), microphone=(), camera=(), payment=(), usb=(), magnetometer=(), gyroscope=(), accelerometer=()" always;
-    add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.youtube.com https://www.youtube-nocookie.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https: blob:; media-src 'self' https: blob:; connect-src 'self' https://$URL_BACKEND wss://$URL_BACKEND; frame-src 'self' https://$URL_BACKEND https://www.youtube.com https://www.youtube-nocookie.com; object-src 'none'; base-uri 'self'; form-action 'self';" always;
+    add_header Permissions-Policy "geolocation=(self), microphone=(self), camera=(self), payment=(), usb=(), magnetometer=(), gyroscope=(), accelerometer=()" always;
+    add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.youtube.com https://www.youtube-nocookie.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https: blob:; media-src 'self' https: blob:; connect-src 'self' https://$URL_BACKEND wss://$URL_BACKEND https://restcountries.com https://viacep.com.br; frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com; object-src 'none'; base-uri 'self'; form-action 'self';" always;
     
     location / {
         proxy_pass http://127.0.0.1:$PORT_FRONTEND;
