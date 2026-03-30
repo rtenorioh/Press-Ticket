@@ -1,26 +1,26 @@
+import AttachFileIcon from "@mui/icons-material/AttachFile";
+import CodeIcon from "@mui/icons-material/Code";
+import InfoIcon from "@mui/icons-material/Info";
+import SendIcon from "@mui/icons-material/Send";
 import {
-  Button,
-  Container,
-  Grid,
-  TextField,
-  Typography,
-  MenuItem,
-  Box,
-  Divider,
-  Card,
-  CardContent
+    Box,
+    Button,
+    Card,
+    CardContent,
+    Container,
+    Divider,
+    Grid,
+    MenuItem,
+    TextField,
+    Typography
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import SendIcon from "@mui/icons-material/Send";
-import AttachFileIcon from "@mui/icons-material/AttachFile";
-import InfoIcon from "@mui/icons-material/Info";
-import CodeIcon from "@mui/icons-material/Code";
 import axios from "axios";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+import { toast } from "react-toastify";
 import CodeSnippetGenerator from "../../components/CodeSnippetGenerator";
 import toastError from "../../errors/toastError";
 import api from "../../services/api";
-import { toast } from "react-toastify";
 
 const Root = styled(Container)(({ theme }) => ({
     display: "flex",
@@ -555,59 +555,63 @@ const Api = () => {
                                 <GridContainer container spacing={2}>
                                     <Grid item xs={12} sm={4}>
                                         <StyledInput
-                                            select
-                                            label="Usuário"
-                                            variant="outlined"
-                                            size="small"
-                                            fullWidth
-                                            value={userId || ""}
-                                            onChange={(e) => setUserId(e.target.value)}
+                                        select
+                                        label="Canal"
+                                        variant="outlined"
+                                        size="small"
+                                        fullWidth
+                                        value={whatsappId || ""}
+                                        onChange={(e) => setWhatsappId(e.target.value)}
                                         >
-                                            {users.map((user) => (
-                                                <MenuItem key={user.id} value={user.id}>
-                                                    {user.name}
-                                                </MenuItem>
+                                        {whatsapps
+                                            ?.filter(whatsapp => whatsapp.type === "wwebjs")
+                                            .sort((a, b) => a.id - b.id)
+                                            .map((whatsapp) => (
+                                            <MenuItem key={whatsapp.id} value={whatsapp.id}>
+                                                <strong>{whatsapp.id}</strong> - {whatsapp.name}
+                                            </MenuItem>
                                             ))}
                                         </StyledInput>
                                     </Grid>
                                     <Grid item xs={12} sm={4}>
                                         <StyledInput
-                                            select
-                                            label="Setor"
-                                            variant="outlined"
-                                            size="small"
-                                            fullWidth
-                                            value={queueId || ""}
-                                            onChange={(e) => setQueueId(e.target.value)}
+                                        select
+                                        label="Setor"
+                                        variant="outlined"
+                                        size="small"
+                                        fullWidth
+                                        value={queueId || ""}
+                                        onChange={(e) => setQueueId(e.target.value)}
                                         >
-                                            {queues.map((queue) => (
-                                                <MenuItem key={queue.id} value={queue.id}>
-                                                    {queue.name}
-                                                </MenuItem>
+                                        {queues
+                                            ?.sort((a, b) => a.id - b.id)
+                                            .map((queue) => (
+                                            <MenuItem key={queue.id} value={queue.id}>
+                                                <strong>{queue.id}</strong> - {queue.name}
+                                            </MenuItem>
                                             ))}
                                         </StyledInput>
                                     </Grid>
                                     <Grid item xs={12} sm={4}>
                                         <StyledInput
-                                            select
-                                            label="Conexão WhatsApp"
-                                            variant="outlined"
-                                            size="small"
-                                            fullWidth
-                                            value={whatsappId || ""}
-                                            onChange={(e) => setWhatsappId(e.target.value)}
+                                        select
+                                        label="Usuário"
+                                        variant="outlined"
+                                        size="small"
+                                        fullWidth
+                                        value={userId || ""}
+                                        onChange={(e) => setUserId(e.target.value)}
                                         >
-                                            {whatsapps
-                                                .filter(whatsapp => whatsapp.type === null)
-                                                .map((whatsapp) => (
-                                                    <MenuItem key={whatsapp.id} value={whatsapp.id}>
-                                                        {whatsapp.name}
-                                                    </MenuItem>
-                                                ))
-                                            }
+                                        {users
+                                            ?.sort((a, b) => a.id - b.id)
+                                            .map((user) => (
+                                            <MenuItem key={user.id} value={user.id}>
+                                                <strong>{user.id}</strong> - {user.name}
+                                            </MenuItem>
+                                            ))}
                                         </StyledInput>
                                     </Grid>
-                                </GridContainer>
+                                    </GridContainer>
                                 
                                 <FileInputContainer>
                                     <label htmlFor="media-upload">

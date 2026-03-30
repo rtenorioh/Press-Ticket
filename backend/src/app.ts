@@ -26,7 +26,7 @@ if (process.env.NODE_ENV === "production") {
 
 const app = express();
 
-app.set('trust proxy', true);
+app.set('trust proxy', 1);
 
 app.use((req, res, next) => {
   if (req.path === '/api-docs' || req.path.startsWith('/api-docs/')) {
@@ -90,7 +90,7 @@ const corsOptions = {
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'Range', 'Accept'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Range', 'Accept', 'x-api-token'],
   exposedHeaders: ['Content-Range', 'Accept-Ranges', 'Content-Length'],
   maxAge: 86400 // 24 horas de cache para preflight
 };

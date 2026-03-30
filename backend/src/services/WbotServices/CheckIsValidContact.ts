@@ -5,7 +5,7 @@ import { getWbot } from "../../libs/wbot";
 const CheckIsValidContact = async (number: string): Promise<void> => {
   const defaultWhatsapp = await GetDefaultWhatsApp();
 
-  const wbot = getWbot(defaultWhatsapp.id);
+  const wbot = await getWbot(defaultWhatsapp.id);
 
   try {
     const isValidNumber = await wbot.isRegisteredUser(`${number}@c.us`);

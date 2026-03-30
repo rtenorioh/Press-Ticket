@@ -199,18 +199,41 @@ const SendWhatsAppMessage = async ({
   }
 
   try {
-    try {
-      const chat = await wbot.getChatById(userId);
-      await chat.sendStateTyping();
-      await new Promise(resolve => setTimeout(resolve, 400));
-    } catch (e) {}
     const payload = formatBody(body, ticket);
     let sentMessage: any;
+    let lidError = false;
+
+    const preFn = new Function('pnId', 'lidId', [
+      'return (async function() {',
+      '  var ids = [pnId, lidId];',
+      '  for (var i = 0; i < ids.length; i++) {',
+      '    try {',
+      '      var wid = window.require("WAWebWidFactory").createWid(ids[i]);',
+      '      var chatResult = await window.require("WAWebFindChatAction").findOrCreateLatestChat(wid);',
+      '      var chat = chatResult && chatResult.chat ? chatResult.chat : chatResult;',
+      '      if (chat) { await window.require("WAWebCmd").Cmd.openChatBottom({ chat: chat }); break; }',
+      '    } catch(_) {}',
+      '  }',
+      '})();'
+    ].join('\n'));
+
+    const lidUserId = `${ticket.contact.number}@lid`;
+
+    try {
+      await (wbot as any).pupPage.evaluate(preFn, userId, lidUserId);
+      await new Promise(r => setTimeout(r, 2000));
+    } catch (_) {}
+
     try {
       sentMessage = await wbot.sendMessage(userId, payload, sendOptions);
-    } catch (e1) {
-      await new Promise(r => setTimeout(r, 500));
-      sentMessage = await wbot.sendMessage(userId, payload, sendOptions);
+    } catch (e: any) {
+      lidError = e?.message?.includes("No LID for user") || String(e).includes("No LID for user");
+      if (!lidError) throw e;
+    }
+
+    if (lidError) {
+      console.warn(`[LID_FALLBACK] Tentando com WID @lid: ${lidUserId}`);
+      sentMessage = await wbot.sendMessage(lidUserId, payload, sendOptions);
     }
 
     await ticket.update({ lastMessage: body });

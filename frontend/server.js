@@ -40,7 +40,7 @@ if (isProduction) {
 					imgSrc: ["'self'", "data:", "https:", "blob:"],
 					mediaSrc: ["'self'", "https:", "blob:"],
 					connectSrc: ["'self'", "http://localhost:*", "ws://localhost:*"],
-					frameSrc: ["'self'", "https://www.youtube.com", "https://www.youtube-nocookie.com"],
+					frameSrc: ["'self'", "https://www.youtube.com", "https://www.youtube-nocookie.com", process.env.REACT_APP_BACKEND_URL || ""].filter(Boolean),
 					objectSrc: ["'none'"],
 					baseUri: ["'self'"],
 					formAction: ["'self'"],

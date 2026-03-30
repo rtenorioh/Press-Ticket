@@ -164,11 +164,6 @@ export const initWbot = async (whatsapp: Whatsapp): Promise<Session> => {
       logger.level = "trace";
       const io = getIO();
       const sessionName = whatsapp.name;
-      let sessionCfg;
-
-      if (whatsapp && whatsapp.session) {
-        sessionCfg = JSON.parse(whatsapp.session);
-      }
 
       const sanitize = (str: string) => str.replace(/[^a-zA-Z0-9_-]/g, '_');
       let clientSession = `${sanitize(process.env.COMPANY_NAME || '')}_${whatsapp.id}`;
@@ -177,7 +172,6 @@ export const initWbot = async (whatsapp: Whatsapp): Promise<Session> => {
       }
 
       const wbot: Session = new Client({
-        session: sessionCfg,
         authStrategy: new LocalAuth({ clientId: clientSession }),
         browserName: 'Chrome',
         deviceName: process.env.DEVICE_NAME || 'Press Ticket®',
@@ -278,11 +272,10 @@ export const initWbot = async (whatsapp: Whatsapp): Promise<Session> => {
         logger.info(`Session: ${sessionName} REMOTE_SESSION_SAVED`);
       });
 
-      wbot.on("authenticated", async session => {
+      wbot.on("authenticated", async () => {
         logger.info(`Session: ${sessionName} AUTHENTICATED`);
         
         await whatsapp.update({
-          session: JSON.stringify(session),
           status: "AUTHENTICATED",
           type: "wwebjs"
         });

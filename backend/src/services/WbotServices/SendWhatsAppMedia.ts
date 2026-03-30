@@ -119,12 +119,37 @@ const SendWhatsAppMedia = async ({
       throw new AppError('WhatsApp não está conectado. Por favor, reconecte o WhatsApp.');
     }
     
+    const lidChatId = `${ticket.contact.number}@lid`;
+
+    const preFn = new Function('pnId', 'lidId', [
+      'return (async function() {',
+      '  var ids = [pnId, lidId];',
+      '  for (var i = 0; i < ids.length; i++) {',
+      '    try {',
+      '      var wid = window.require("WAWebWidFactory").createWid(ids[i]);',
+      '      var chatResult = await window.require("WAWebFindChatAction").findOrCreateLatestChat(wid);',
+      '      var chat = chatResult && chatResult.chat ? chatResult.chat : chatResult;',
+      '      if (chat) { await window.require("WAWebCmd").Cmd.openChatBottom({ chat: chat }); break; }',
+      '    } catch(_) {}',
+      '  }',
+      '})();'
+    ].join('\n'));
+
     try {
-      const chat = await wbot.getChatById(chatId);
-    } catch (chatError) {
-      console.error('[SendWhatsAppMedia] Erro ao buscar chat:', chatError.message);
-      throw new AppError(`Não foi possível encontrar o chat: ${chatError.message}`);
-    }
+      await (wbot as any).pupPage.evaluate(preFn, chatId, lidChatId);
+      await new Promise(r => setTimeout(r, 2000));
+    } catch (_) {}
+
+    const sendWithLidFallback = async (media: any, opts: any): Promise<any> => {
+      try {
+        return await wbot.sendMessage(chatId, media, opts);
+      } catch (e: any) {
+        const isLidErr = e?.message?.includes("No LID for user") || String(e).includes("No LID for user");
+        if (!isLidErr) throw e;
+        console.warn(`[LID_FALLBACK_MEDIA] Tentando com WID @lid: ${lidChatId}`);
+        return await wbot.sendMessage(lidChatId, media, opts);
+      }
+    };
     
     const { getIO } = require("../../libs/socket");
     const hasBody = body
@@ -245,11 +270,7 @@ const SendWhatsAppMedia = async ({
         }
 
         try {
-          sentMessage = await wbot.sendMessage(
-            chatId,
-            newMedia,
-            docOptions
-          );
+          sentMessage = await sendWithLidFallback(newMedia, docOptions);
           
         } catch (docError) {
           console.error('[SendWhatsAppMedia] Erro ao enviar documento:', {
@@ -280,11 +301,7 @@ const SendWhatsAppMedia = async ({
             }
             await new Promise(resolve => setTimeout(resolve, 400));
           } catch (e) {}
-          sentMessage = await wbot.sendMessage(
-            chatId,
-            newMedia,
-            options
-          );
+          sentMessage = await sendWithLidFallback(newMedia, options);
 
           try {
             const chat = await wbot.getChatById(chatId);
@@ -304,11 +321,7 @@ const SendWhatsAppMedia = async ({
           if (mentions && mentions.length > 0) {
             fallbackOptions.mentions = mentions;
           }
-          sentMessage = await wbot.sendMessage(
-            chatId,
-            newMedia,
-            fallbackOptions
-          );
+          sentMessage = await sendWithLidFallback(newMedia, fallbackOptions);
       
           try {
             const chat = await wbot.getChatById(chatId);
