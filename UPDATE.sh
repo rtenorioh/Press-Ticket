@@ -539,27 +539,33 @@ sleep 2
 
 echo -e "${COLOR}Alterando proprietário e permissões dos arquivos...${RESET}" | tee -a "$LOG_FILE"
 
+# Validação de segurança: garantir que o caminho alvo é válido e não é a raiz do sistema
+if [ -z "$SCRIPT_DIR" ] || [ "$SCRIPT_DIR" = "/" ] || [ "$SCRIPT_DIR" = "/." ]; then
+    echo -e "${RED}Erro: Caminho inválido ou perigoso detectado: '$SCRIPT_DIR'. Abortando chown/chmod.${RESET}" | tee -a "$LOG_FILE"
+    finalizar "Erro: Caminho inválido detectado. Operação abortada por segurança." 1
+fi
+
 # Alterar o proprietário dos arquivos
-sudo chown -R deploy:deploy "$DEPLOY_HOME/$NOME_EMPRESA" | tee -a "$LOG_FILE"
+sudo chown -R deploy:deploy "$SCRIPT_DIR" | tee -a "$LOG_FILE"
 if [ $? -eq 0 ]; then
     echo -e "${GREEN}Proprietário dos arquivos alterado com sucesso para o usuário 'deploy'.${RESET}" | tee -a "$LOG_FILE"
 else
     echo -e "${RED}Erro: Falha ao alterar o proprietário dos arquivos. Verifique as permissões.${RESET}"
-    finalizar ${RED}Erro: Falha ao alterar o proprietário dos arquivos. Verifique as permissões.${RESET} 1
+    finalizar "Erro: Falha ao alterar o proprietário dos arquivos. Verifique as permissões." 1
 fi
 
 sleep 2
 
 # Alterar as permissões dos arquivos
-sudo chmod -R u+rwX "$DEPLOY_HOME/$NOME_EMPRESA" | tee -a "$LOG_FILE"
+sudo chmod -R u+rwX "$SCRIPT_DIR" | tee -a "$LOG_FILE"
 if [ $? -eq 0 ]; then
     echo -e "${GREEN}Permissões dos arquivos ajustadas com sucesso.${RESET}" | tee -a "$LOG_FILE"
 else
     echo -e "${RED}Erro: Falha ao ajustar as permissões dos arquivos. Verifique as permissões.${RESET}"
-    finalizar "${RED}Erro: Falha ao ajustar as permissões dos arquivos. Verifique as permissões.${RESET}" 1
+    finalizar "Erro: Falha ao ajustar as permissões dos arquivos. Verifique as permissões." 1
 fi
 
-echo -e "${GREEN}Proprietário e permissões configurados corretamente para o diretório: $DEPLOY_HOME/$NOME_EMPRESA.${RESET}" | tee -a "$LOG_FILE"
+echo -e "${GREEN}Proprietário e permissões configurados corretamente para o diretório: $SCRIPT_DIR.${RESET}" | tee -a "$LOG_FILE"
 
 cd backend || {
     echo "Erro ao acessar o diretório do backend."
