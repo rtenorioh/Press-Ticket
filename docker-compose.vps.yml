@@ -1,0 +1,93 @@
+version: '3.8'
+
+services:
+  db:
+    image: mariadb:10.11
+    container_name: press_ticket_db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASS:-pressticket}
+      MYSQL_DATABASE: ${DB_NAME:-press_ticket}
+      MYSQL_ROOT_HOST: '%'
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - press_ticket_net
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--su-mysql", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: press_ticket_backend
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - ./backend/.env.vps
+    volumes:
+      - backend_public:/app/public
+      - wwebjs_auth:/app/.wwebjs_auth
+      - wwebjs_cache:/app/.wwebjs_cache
+    networks:
+      - press_ticket_net
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        REACT_APP_BACKEND_URL: https://api.seudominio.com
+        REACT_APP_HOURS_CLOSE_TICKETS_AUTO: ""
+        REACT_APP_MASTERADMIN: "ON"
+    container_name: press_ticket_frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    env_file:
+      - ./frontend/.env.vps
+    networks:
+      - press_ticket_net
+
+  nginx:
+    image: nginx:stable-alpine
+    container_name: press_ticket_nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.vps.conf:/etc/nginx/conf.d/default.conf:ro
+      - certbot_www:/var/www/certbot:ro
+      - certbot_conf:/etc/letsencrypt:ro
+    depends_on:
+      - backend
+      - frontend
+    networks:
+      - press_ticket_net
+
+  certbot:
+    image: certbot/certbot
+    container_name: press_ticket_certbot
+    volumes:
+      - certbot_www:/var/www/certbot
+      - certbot_conf:/etc/letsencrypt
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew --quiet; sleep 12h & wait $${!}; done;'"
+
+volumes:
+  db_data:
+  backend_public:
+  wwebjs_auth:
+  wwebjs_cache:
+  certbot_www:
+  certbot_conf:
+
+networks:
+  press_ticket_net:
+    driver: bridge
