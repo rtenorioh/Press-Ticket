@@ -1,0 +1,72 @@
+version: '3.8'
+
+services:
+  db:
+    image: mariadb:10.11
+    container_name: press_ticket_db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASS:-pressticket}
+      MYSQL_DATABASE: ${DB_NAME:-press_ticket}
+      MYSQL_ROOT_HOST: '%'
+    volumes:
+      - db_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    networks:
+      - press_ticket_net
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--su-mysql", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: press_ticket_backend
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - ./backend/.env.docker
+    ports:
+      - "8000:8000"
+    volumes:
+      - backend_public:/app/public
+      - wwebjs_auth:/app/.wwebjs_auth
+      - wwebjs_cache:/app/.wwebjs_cache
+    networks:
+      - press_ticket_net
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        REACT_APP_BACKEND_URL: ${REACT_APP_BACKEND_URL:-http://localhost:8000}
+        REACT_APP_HOURS_CLOSE_TICKETS_AUTO: ${REACT_APP_HOURS_CLOSE_TICKETS_AUTO:-}
+        REACT_APP_MASTERADMIN: ${REACT_APP_MASTERADMIN:-ON}
+    container_name: press_ticket_frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    env_file:
+      - ./frontend/.env.docker
+    ports:
+      - "3000:3000"
+    networks:
+      - press_ticket_net
+
+volumes:
+  db_data:
+  backend_public:
+  wwebjs_auth:
+  wwebjs_cache:
+
+networks:
+  press_ticket_net:
+    driver: bridge
