@@ -9,6 +9,7 @@ interface ExtraInfo {
 interface Request {
   name: string;
   number: string;
+  numberLid?: string | null;
   address?: string;
   email?: string;
   profilePicUrl?: string;
@@ -30,6 +31,7 @@ interface Request {
 const CreateContactService = async ({
   name,
   number,
+  numberLid = null,
   address = "",
   email = "",
   extraInfo = [],
@@ -58,6 +60,7 @@ const CreateContactService = async ({
     {
       name,
       number,
+      numberLid: numberLid || null,
       address,
       email,
       extraInfo,

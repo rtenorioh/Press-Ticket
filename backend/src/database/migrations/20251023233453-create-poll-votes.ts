@@ -40,10 +40,6 @@ module.exports = {
       }
     });
 
-    await queryInterface.sequelize.query(
-      "ALTER TABLE PollVotes MODIFY pollMessageId VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL"
-    );
-
     await queryInterface.addConstraint("PollVotes", {
       fields: ["pollMessageId"],
       type: "foreign key",

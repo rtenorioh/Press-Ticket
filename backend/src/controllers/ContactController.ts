@@ -97,7 +97,7 @@ export const blockContact = async (
   if (!numberId) {
     return res.status(404).json({ error: "Número não registrado no WhatsApp" });
   }
-  
+
   let result;
   try {
     const wContact = await wbot.getContactById(numberId._serialized);
@@ -149,7 +149,7 @@ export const unblockContact = async (
   if (!numberId) {
     return res.status(404).json({ error: "Número não registrado no WhatsApp" });
   }
-  
+
   let result;
   try {
     const wContact = await wbot.getContactById(numberId._serialized);
@@ -268,20 +268,24 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
 
   const isApiRequest = req.originalUrl.includes('/v1/');
   let validNumber: string = newContact.number;
+  let validNumberLid: string | null = null;
   let profilePicUrl: string | undefined = undefined;
 
   if (!isApiRequest) {
     try {
       await CheckIsValidContact(newContact.number);
-      validNumber = await CheckContactNumber(newContact.number);
+      const checked = await CheckContactNumber(newContact.number);
+      validNumber = checked.number;
+      validNumberLid = checked.numberLid;
       profilePicUrl = await GetProfilePicUrl(validNumber);
     } catch (err) {
       throw new AppError(err.message);
     }
   } else {
     try {
-      const checkedNumber = await CheckContactNumber(newContact.number);
-      validNumber = checkedNumber;
+      const checked = await CheckContactNumber(newContact.number);
+      validNumber = checked.number;
+      validNumberLid = checked.numberLid;
       profilePicUrl = await GetProfilePicUrl(validNumber);
     } catch (error) {
       console.log("Erro ao validar contato da API, continuando com o número original", error);
@@ -311,6 +315,7 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
   const contact = await CreateContactService({
     name,
     number,
+    numberLid: validNumberLid,
     address,
     email,
     extraInfo,
@@ -330,7 +335,7 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
   });
 
   const logUserId = req.user?.id || 1;
-  
+
   await createActivityLog({
     userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
     action: ActivityActions.CREATE,
@@ -387,7 +392,7 @@ export const update = async (
 
   const contact = await UpdateContactService({ contactData, contactId });
   const logUserId = req.user?.id || 1;
-  
+
   await createActivityLog({
     userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
     action: ActivityActions.UPDATE,
@@ -413,10 +418,10 @@ export const remove = async (
   const { contactId } = req.params;
 
   const contactToDelete = await ShowContactService(contactId);
-  
+
   await DeleteContactService(contactId);
   const logUserId = req.user?.id || 1;
-  
+
   await createActivityLog({
     userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
     action: ActivityActions.DELETE,
@@ -446,7 +451,7 @@ export const removeAll = async (
   await DeleteAllContactService();
   const logUserId = req.user?.id || 1;
   const clientIp = GetClientIp(req);
-  
+
   await createActivityLog({
     userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
     action: ActivityActions.DELETE,
@@ -487,9 +492,9 @@ export const updateTags = async (
     tags,
     contactId: +contactId
   });
-  
+
   const logUserId = req.user?.id || 1;
-  
+
   if (contact) {
     await createActivityLog({
       userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
@@ -682,9 +687,9 @@ export const refreshGroupProfilePic = async (
       whatsappId: parseInt(whatsappId, 10)
     });
 
-    return res.status(200).json({ 
+    return res.status(200).json({
       success: true,
-      profilePicUrl 
+      profilePicUrl
     });
   } catch (err: any) {
     if (err instanceof AppError) {

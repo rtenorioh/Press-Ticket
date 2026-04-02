@@ -120,6 +120,10 @@ class Contact extends Model<Contact> {
   @HasMany(() => Ticket)
   tickets: Ticket[];
 
+  @AllowNull(true)
+  @Column
+  numberLid: string;
+
   @Column
   messengerId: string;
 

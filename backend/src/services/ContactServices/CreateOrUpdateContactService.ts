@@ -15,6 +15,7 @@ interface Request {
   email?: string;
   profilePicUrl?: string;
   extraInfo?: ExtraInfo[];
+  numberLid?: string | null;
 }
 
 const CreateOrUpdateContactService = async ({
@@ -24,7 +25,8 @@ const CreateOrUpdateContactService = async ({
   isGroup,
   address = "",
   email = "",
-  extraInfo = []
+  extraInfo = [],
+  numberLid = null
 }: Request): Promise<Contact> => {
   const io = getIO();
   const digits = String(rawNumber || "").replace(/\D/g, "");
@@ -87,6 +89,13 @@ const CreateOrUpdateContactService = async ({
   }
 
   let contact = await Contact.findOne({ where: { number: digits } });
+  let foundByLid = false;
+
+  if (!contact && numberLid) {
+    contact = await Contact.findOne({ where: { numberLid } });
+    foundByLid = !!contact;
+  }
+
   if (contact) {
     const updatedData: Partial<Contact> = {} as any;
     if (name && name.trim() && contact.name !== name.trim() && !contact.nameManuallyEdited) {
@@ -101,6 +110,12 @@ const CreateOrUpdateContactService = async ({
     if (email !== undefined && contact.email !== email) {
       (updatedData as any).email = email;
     }
+    if (numberLid && contact.numberLid !== numberLid) {
+      (updatedData as any).numberLid = numberLid;
+    }
+    if (!foundByLid && digits && contact.number !== digits) {
+      (updatedData as any).number = digits;
+    }
     if (Object.keys(updatedData).length) {
       await contact.update(updatedData);
       io.emit("contact", { action: "update", contact });
@@ -111,6 +126,7 @@ const CreateOrUpdateContactService = async ({
   contact = await Contact.create({
     name,
     number: digits,
+    numberLid: numberLid || null,
     profilePicUrl,
     address,
     email,

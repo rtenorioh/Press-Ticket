@@ -39,15 +39,14 @@ const createContact = async (
 ) => {
   await CheckIsValidContact(newContact);
 
-  const validNumber: any = await CheckContactNumber(newContact);
+  const { number, numberLid } = await CheckContactNumber(newContact);
 
-  const profilePicUrl = await GetProfilePicUrl(validNumber);
-
-  const number = validNumber;
+  const profilePicUrl = await GetProfilePicUrl(number);
 
   const contactData = {
     name: `${number}`,
     number,
+    numberLid,
     profilePicUrl,
     isGroup: false
   };
@@ -265,7 +264,7 @@ export const getMediaBase64 = async (req: Request, res: Response): Promise<Respo
 
   try {
     const message = await Message.findByPk(messageId);
-    
+
     if (!message) {
       throw new AppError("Mensagem não encontrada", 404);
     }
@@ -276,7 +275,7 @@ export const getMediaBase64 = async (req: Request, res: Response): Promise<Respo
 
     const mediaUrlParts = message.mediaUrl.split('/');
     const filename = mediaUrlParts[mediaUrlParts.length - 1];
-    
+
     const publicFolder = path.resolve(__dirname, "..", "..", "public");
     const filePath = path.join(publicFolder, filename);
 
@@ -310,7 +309,7 @@ export const getMediaBase64 = async (req: Request, res: Response): Promise<Respo
       data: {
         mediaType: message.mediaType,
         filename,
-        mimeType,        
+        mimeType,
         base64Data: `data:${mimeType};base64,${base64Data}`
       }
     });
@@ -318,7 +317,7 @@ export const getMediaBase64 = async (req: Request, res: Response): Promise<Respo
     if (err instanceof AppError) {
       return res.status(err.statusCode).json({ error: err.message });
     }
-    
+
     console.error("Erro ao obter mídia em base64:", err);
     return res.status(500).json({ error: "Erro interno do servidor" });
   }

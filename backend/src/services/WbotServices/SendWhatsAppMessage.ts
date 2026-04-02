@@ -124,7 +124,7 @@ const SendWhatsAppMessage = async ({
     await ticket.reload();
     return sentMessage;
   }
-  
+
   if (ticket.isGroup) {
     try {
       try {
@@ -147,7 +147,7 @@ const SendWhatsAppMessage = async ({
 
       await ticket.update({ lastMessage: body });
       await ticket.reload();
-      
+
       const messageData = {
         id: sentMessage.id.id,
         ticketId: ticket.id,
@@ -161,13 +161,13 @@ const SendWhatsAppMessage = async ({
       };
 
       const CreateMessageService = require("../MessageServices/CreateMessageService").default;
-      
+
       try {
         await CreateMessageService({ messageData });
       } catch (err) {
         console.error("Erro ao salvar mensagem no banco de dados:", err);
       }
-      
+
       return sentMessage;
     } catch (err) {
       console.error("Erro ao enviar mensagem para grupo:", err);
@@ -217,7 +217,8 @@ const SendWhatsAppMessage = async ({
       '})();'
     ].join('\n'));
 
-    const lidUserId = `${ticket.contact.number}@lid`;
+    const lidBase = (ticket.contact as any).numberLid || ticket.contact.number;
+    const lidUserId = `${lidBase}@lid`;
 
     try {
       await (wbot as any).pupPage.evaluate(preFn, userId, lidUserId);
@@ -238,7 +239,7 @@ const SendWhatsAppMessage = async ({
 
     await ticket.update({ lastMessage: body });
     await ticket.reload();
-    
+
     const messageData = {
       id: sentMessage.id.id,
       ticketId: ticket.id,
@@ -252,13 +253,13 @@ const SendWhatsAppMessage = async ({
     };
 
     const CreateMessageService = require("../MessageServices/CreateMessageService").default;
-    
+
     try {
       await CreateMessageService({ messageData });
     } catch (err) {
       console.error("Erro ao salvar mensagem no banco de dados:", err);
     }
-    
+
     return sentMessage;
   } catch (err) {
     console.error("Erro ao enviar mensagem:", err);
