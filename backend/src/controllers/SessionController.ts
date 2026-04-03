@@ -1,15 +1,18 @@
 import crypto from "crypto";
 import { Request, Response } from "express";
+import { verify } from "jsonwebtoken";
 import nodemailer from "nodemailer";
 import EmailService from "../services/EmailService";
 import { Op } from "sequelize";
 import AppError from "../errors/AppError";
 import { SendRefreshToken } from "../helpers/SendRefreshToken";
 import User from "../models/User";
+import UserSession from "../models/UserSession";
 import { RefreshTokenService } from "../services/AuthServices/RefreshTokenService";
 import AuthUserService from "../services/UserServices/AuthUserService";
 import { createActivityLog, ActivityActions, EntityTypes } from "../services/ActivityLogService";
 import GetClientIp from "../helpers/GetClientIp";
+import authConfig from "../config/auth";
 
 export const store = async (req: Request, res: Response): Promise<Response> => {
   const { email, password } = req.body;
@@ -62,14 +65,32 @@ export const remove = async (
   req: Request,
   res: Response
 ): Promise<Response> => {
-  const { id } = req.user;
   const clientIp = GetClientIp(req);
-  
-  if (id) {
-    const user = await User.findByPk(id);
+
+  let userId: string | null = null;
+  const authHeader = req.headers.authorization;
+
+  if (authHeader) {
+    try {
+      const [, token] = authHeader.split(" ");
+      const decoded = verify(token, authConfig.secret) as { id: string };
+      userId = decoded.id;
+    } catch (err) {
+      // Token inválido ou expirado — prossegue com o logout mesmo assim
+    }
+  }
+
+  if (userId) {
+    const user = await User.findByPk(userId);
     if (user) {
-      await user.update({ online: false });
-      
+      await user.update({ online: false, currentSessionId: null });
+
+      // Fecha todas as sessões ativas do usuário
+      await UserSession.update(
+        { logoutAt: new Date() },
+        { where: { userId, logoutAt: null } }
+      );
+
       // LOG: Logout
       try {
         await createActivityLog({
@@ -84,7 +105,7 @@ export const remove = async (
       } catch (error) {
         console.error('Erro ao criar log de logout:', error);
       }
-      
+
       const io = require("../libs/socket").getIO();
       io.emit("userSessionUpdate", {
         userId: user.id,
@@ -92,7 +113,7 @@ export const remove = async (
       });
     }
   }
-  
+
   res.clearCookie("jrt");
   return res.send();
 };
@@ -113,7 +134,7 @@ export const forgotPassword = async (req: Request, res: Response): Promise<Respo
   await user.save();
 
   const emailService = EmailService.getInstance();
-  
+
   const sent = await emailService.sendEmail({
     to: email,
     subject: "Redefinição de Senha",
@@ -136,7 +157,7 @@ export const forgotPassword = async (req: Request, res: Response): Promise<Respo
       </div>
     `
   });
-  
+
   if (!sent) {
     throw new AppError("Erro ao enviar e-mail de redefinição de senha. Tente novamente mais tarde.", 500);
   }

@@ -100,7 +100,9 @@ api.interceptors.response.use(
         return Promise.reject(error);
       }
 
-      handleLogout();
+      if (!originalRequest?.url?.includes("/auth/logout")) {
+        handleLogout();
+      }
       return Promise.reject(error);
     }
 
