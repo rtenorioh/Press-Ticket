@@ -29,6 +29,11 @@ if (isProduction) {
 	);
 	console.log('🔒 Modo Produção: Security headers gerenciados pelo Nginx');
 } else {
+	const backendUrl = process.env.REACT_APP_BACKEND_URL || "http://localhost:8000";
+	const backendUrlAlt = backendUrl.startsWith("https://")
+		? backendUrl.replace("https://", "http://")
+		: backendUrl.replace("http://", "https://");
+	const backendUrls = [backendUrl, backendUrlAlt];
 	app.use(
 		helmet({
 			contentSecurityPolicy: {
@@ -37,10 +42,10 @@ if (isProduction) {
 					scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://www.youtube.com", "https://www.youtube-nocookie.com"],
 					styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
 					fontSrc: ["'self'", "https://fonts.gstatic.com"],
-					imgSrc: ["'self'", "data:", "https:", "blob:"],
+					imgSrc: ["'self'", "data:", "https:", "blob:", ...backendUrls],
 					mediaSrc: ["'self'", "https:", "blob:"],
-					connectSrc: ["'self'", "http://localhost:*", "ws://localhost:*"],
-					frameSrc: ["'self'", "https://www.youtube.com", "https://www.youtube-nocookie.com", process.env.REACT_APP_BACKEND_URL || ""].filter(Boolean),
+					connectSrc: ["'self'", "http://localhost:*", "ws://localhost:*", "wss://localhost:*", "https:", ...backendUrls],
+					frameSrc: ["'self'", "https://www.youtube.com", "https://www.youtube-nocookie.com", ...backendUrls],
 					objectSrc: ["'none'"],
 					baseUri: ["'self'"],
 					formAction: ["'self'"],

@@ -56,6 +56,8 @@ services:
       - backend
     env_file:
       - ./frontend/.env.docker
+    environment:
+      REACT_APP_BACKEND_URL: ${REACT_APP_BACKEND_URL:-http://localhost:8000}
     ports:
       - "3000:3000"
     networks:

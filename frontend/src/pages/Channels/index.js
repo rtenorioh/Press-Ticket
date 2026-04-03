@@ -450,7 +450,7 @@ const Channels = () => {
 				fetchWhatsApps();
 			}, 3000);
 		} catch (err) {
-			toastError(err);
+			toastError(err, t);
 			setLoadingActions(prev => ({ ...prev, [whatsAppId]: undefined }));
 			setActionMessages(prev => ({ ...prev, [whatsAppId]: undefined }));
 		}
@@ -485,7 +485,7 @@ const Channels = () => {
 				fetchWhatsApps();
 			}, 3000);
 		} catch (err) {
-			toastError(err);
+			toastError(err, t);
 			setLoadingActions(prev => ({ ...prev, [whatsAppId]: undefined }));
 			setActionMessages(prev => ({ ...prev, [whatsAppId]: undefined }));
 		}
@@ -596,7 +596,7 @@ const Channels = () => {
 					fetchWhatsApps();
 				}, 300);
 			} catch (err) {
-				toastError(err);
+				toastError(err, t);
 				setLoadingActions(prev => ({ ...prev, [whatsAppId]: undefined }));
 				setActionMessages(prev => ({ ...prev, [whatsAppId]: undefined }));
 			}
@@ -636,7 +636,7 @@ const Channels = () => {
 			
 			await countdown.startCountdown();
 		} catch (err) {
-			toastError(err);
+			toastError(err, t);
 			setLoadingActions(prev => ({ ...prev, [whatsAppId]: undefined }));
 			setActionMessages(prev => ({ ...prev, [whatsAppId]: undefined }));
 		}
@@ -670,7 +670,7 @@ const Channels = () => {
 			
 			await countdownToast.startCountdown();
 		} catch (err) {
-			toastError(err);
+			toastError(err, t);
 			setLoadingActions(prev => ({ ...prev, [whatsAppId]: undefined }));
 			setActionMessages(prev => ({ ...prev, [whatsAppId]: undefined }));
 		}
@@ -707,7 +707,7 @@ const Channels = () => {
 				fetchWhatsApps();
 			}, 300);
 		} catch (err) {
-			toastError(err);
+			toastError(err, t);
 			setLoadingActions(prev => ({ ...prev, [whatsAppId]: undefined }));
 			setActionMessages(prev => ({ ...prev, [whatsAppId]: undefined }));
 		}
@@ -878,7 +878,7 @@ const Channels = () => {
 			await countdownToast.startCountdown();
 		} catch (err) {
 			if (!(err && err.message && err.message.includes('Network Error'))) {
-				toastError(err);
+				toastError(err, t);
 			}
 		}
 	};
