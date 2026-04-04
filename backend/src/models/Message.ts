@@ -39,9 +39,12 @@ class Message extends Model<Message> {
   @Column(DataType.STRING)
   get mediaUrl(): string | null {
     if (this.getDataValue("mediaUrl")) {
-      return `${process.env.BACKEND_URL}:${
-        process.env.PROXY_PORT
-      }/public/${this.getDataValue("mediaUrl")}`;
+      const backendUrl = (process.env.BACKEND_URL || "").replace(/\/$/, "");
+      const proxyPort = process.env.PROXY_PORT;
+      const hostPart = backendUrl.replace(/^https?:\/\//, "").split("/")[0];
+      const hasPort = /:\d+$/.test(hostPart);
+      const baseUrl = hasPort ? backendUrl : `${backendUrl}:${proxyPort}`;
+      return `${baseUrl}/public/${this.getDataValue("mediaUrl")}`;
     }
     return null;
   }
