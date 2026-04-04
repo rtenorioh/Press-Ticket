@@ -14,6 +14,8 @@ const useAuth = () => {
     const [user, setUser] = useState({});
     const { socket } = useSocket();
 
+    const [sessionExpired, setSessionExpired] = useState(false);
+
     const handleLogout = useCallback(async () => {
         try {
             await api.delete("/auth/logout");
@@ -31,6 +33,29 @@ const useAuth = () => {
         setUser({});
         navigate("/login");
     }, [navigate, socket]);
+
+    const handleSessionExpiredConfirm = useCallback(async () => {
+        setSessionExpired(false);
+        await handleLogout();
+    }, [handleLogout]);
+
+    useEffect(() => {
+        const onSessionExpired = () => setSessionExpired(true);
+        window.addEventListener("session:expired", onSessionExpired);
+        return () => window.removeEventListener("session:expired", onSessionExpired);
+    }, []);
+
+    useEffect(() => {
+        if (!socket) return;
+        const onUserSessionExpired = (data) => {
+            const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+            if (storedUser.id && String(data.userId) === String(storedUser.id)) {
+                setSessionExpired(true);
+            }
+        };
+        socket.on("userSessionExpired", onUserSessionExpired);
+        return () => socket.off("userSessionExpired", onUserSessionExpired);
+    }, [socket]);
 
     const [userInactive, setUserInactive] = useState(false);
 
@@ -113,7 +138,7 @@ const useAuth = () => {
         }
     };
 
-    return { isAuth, user, loading, handleLogin, handleLogout };
+    return { isAuth, user, loading, handleLogin, handleLogout, sessionExpired, handleSessionExpiredConfirm };
 };
 
 export default useAuth;

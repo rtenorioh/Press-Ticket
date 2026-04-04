@@ -98,6 +98,8 @@ const Settings = ({ toggleTheme, onThemeConfigUpdate }) => {
 					const settingIndex = aux.findIndex((s) => s.key === data.setting.key);
 					if (settingIndex !== -1) {
 						aux[settingIndex].value = data.setting.value;
+					} else {
+						aux.push({ key: data.setting.key, value: data.setting.value });
 					}
 					return aux;
 				});
@@ -152,6 +154,8 @@ const Settings = ({ toggleTheme, onThemeConfigUpdate }) => {
 				const settingIndex = aux.findIndex((s) => s.key === settingKey);
 				if (settingIndex !== -1) {
 					aux[settingIndex].value = selectedValue;
+				} else {
+					aux.push({ key: settingKey, value: selectedValue });
 				}
 				return aux;
 			});

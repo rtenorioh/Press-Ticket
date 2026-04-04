@@ -24,6 +24,7 @@ import LanguageSelector from "../components/LanguageSelector";
 import NotificationsPopOver from "../components/NotificationsPopOver";
 import ThemeSelector from '../components/ThemeSelector';
 import UserModal from "../components/UserModal";
+import SessionExpiredModal from "../components/SessionExpiredModal";
 import { AuthContext } from "../context/Auth/AuthContext";
 import toastError from "../errors/toastError";
 import api from "../services/api";
@@ -122,7 +123,7 @@ const LoggedInLayout = ({ children, toggleTheme, onThemeConfigUpdate }) => {
   const [userModalOpen, setUserModalOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
-  const { handleLogout, loading } = useContext(AuthContext);
+  const { handleLogout, loading, sessionExpired, handleSessionExpiredConfirm } = useContext(AuthContext);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const { user } = useContext(AuthContext);
   const themeStorage = localStorage.getItem("theme");
@@ -324,6 +325,10 @@ const LoggedInLayout = ({ children, toggleTheme, onThemeConfigUpdate }) => {
         open={userModalOpen}
         onClose={() => setUserModalOpen(false)}
         userId={user?.id}
+      />
+      <SessionExpiredModal
+        open={sessionExpired}
+        onConfirm={handleSessionExpiredConfirm}
       />
       <StyledAppBar
         position="absolute"

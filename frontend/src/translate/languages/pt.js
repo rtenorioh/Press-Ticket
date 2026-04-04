@@ -1334,6 +1334,22 @@ const messages = {
               "2592000": "30 dias",
             },
           },
+          sessionTimeout: {
+            name: "Tempo de inatividade da sessão:",
+            note: "Define após quanto tempo de inatividade o usuário será desconectado automaticamente",
+            options: {
+              "1": "1 hora",
+              "2": "2 horas",
+              "4": "4 horas",
+              "6": "6 horas",
+              "8": "8 horas (padrão)",
+              "12": "12 horas",
+              "24": "24 horas",
+              "48": "48 horas",
+              "72": "3 dias",
+              "168": "7 dias",
+            },
+          },
         },
         personalize: {
           success: {
@@ -1372,6 +1388,11 @@ const messages = {
             }
           },
         }
+      },
+      sessionExpiredModal: {
+        title: "Sessão Encerrada por Inatividade",
+        message: "Sua sessão foi encerrada automaticamente por exceder o tempo de inatividade configurado. Clique em confirmar para ser redirecionado à tela de login.",
+        confirm: "Confirmar",
       },
       signup: {
         title: "Cadastre-se",

@@ -22,9 +22,7 @@ const processQueue = (error, token = null) => {
 };
 
 const handleLogout = () => {
-  api.delete("/auth/logout").catch(() => { });
-  localStorage.removeItem("token");
-  window.location.href = "/login";
+  window.dispatchEvent(new CustomEvent("session:expired"));
 };
 
 const refreshToken = async () => {

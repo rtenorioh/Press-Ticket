@@ -225,6 +225,32 @@ const ComponentSettings = ({ settings, getSettingValue, handleChangeBooleanSetti
                             </Select>
                         </StyledFormControl>
                     </SettingItem>
+                    <SettingItem>
+                        <Tooltip title={t("settings.general.sessionTimeout.note")} placement="top-start">
+                            <Typography variant="body1">
+                                {t("settings.general.sessionTimeout.name")}
+                            </Typography>
+                        </Tooltip>
+                        <StyledFormControl variant="outlined" size="small">
+                            <Select
+                                id="sessionTimeout-setting"
+                                name="sessionTimeout"
+                                value={settings && settings.length > 0 ? (getSettingValue("sessionTimeout") || "8") : "8"}
+                                onChange={handleChangeSetting}
+                            >
+                                <MenuItem value="1">{t("settings.general.sessionTimeout.options.1")}</MenuItem>
+                                <MenuItem value="2">{t("settings.general.sessionTimeout.options.2")}</MenuItem>
+                                <MenuItem value="4">{t("settings.general.sessionTimeout.options.4")}</MenuItem>
+                                <MenuItem value="6">{t("settings.general.sessionTimeout.options.6")}</MenuItem>
+                                <MenuItem value="8">{t("settings.general.sessionTimeout.options.8")}</MenuItem>
+                                <MenuItem value="12">{t("settings.general.sessionTimeout.options.12")}</MenuItem>
+                                <MenuItem value="24">{t("settings.general.sessionTimeout.options.24")}</MenuItem>
+                                <MenuItem value="48">{t("settings.general.sessionTimeout.options.48")}</MenuItem>
+                                <MenuItem value="72">{t("settings.general.sessionTimeout.options.72")}</MenuItem>
+                                <MenuItem value="168">{t("settings.general.sessionTimeout.options.168")}</MenuItem>
+                            </Select>
+                        </StyledFormControl>
+                    </SettingItem>
                 </SettingCard>
             </Grid>
 

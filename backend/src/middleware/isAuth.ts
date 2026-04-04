@@ -5,6 +5,7 @@ import AppError from "../errors/AppError";
 import authConfig from "../config/auth";
 import UserSession from "../models/UserSession";
 import User from "../models/User";
+import CheckSettings from "../helpers/CheckSettings";
 
 interface TokenPayload {
   id: string;
@@ -42,7 +43,15 @@ const isAuth = async (req: Request, res: Response, next: NextFunction): Promise<
     const currentTime = new Date().getTime();
     const diffHours = (currentTime - lastActivity) / (1000 * 60 * 60);
 
-    if (diffHours >= 8) {
+    let sessionTimeoutHours = 8;
+    try {
+      const timeoutValue = await CheckSettings("sessionTimeout");
+      sessionTimeoutHours = parseInt(timeoutValue, 10) || 8;
+    } catch {
+      // Setting não encontrado, usa o padrão de 8 horas
+    }
+
+    if (diffHours >= sessionTimeoutHours) {
       await session.update({
         logoutAt: new Date()
       });

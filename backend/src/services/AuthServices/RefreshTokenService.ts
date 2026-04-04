@@ -9,6 +9,7 @@ import {
 } from "../../helpers/CreateTokens";
 import User from "../../models/User";
 import UserSession from "../../models/UserSession";
+import CheckSettings from "../../helpers/CheckSettings";
 import ShowUserService from "../UserServices/ShowUserService";
 
 interface RefreshTokenPayload {
@@ -58,7 +59,15 @@ export const RefreshTokenService = async (
     const currentTime = new Date().getTime();
     const diffHours = (currentTime - lastActivity) / (1000 * 60 * 60);
 
-    if (diffHours >= 8) {
+    let sessionTimeoutHours = 8;
+    try {
+      const timeoutValue = await CheckSettings("sessionTimeout");
+      sessionTimeoutHours = parseInt(timeoutValue, 10) || 8;
+    } catch {
+      // Setting não encontrado, usa o padrão de 8 horas
+    }
+
+    if (diffHours >= sessionTimeoutHours) {
       await session.update({
         logoutAt: new Date()
       });
@@ -88,7 +97,7 @@ export const RefreshTokenService = async (
 
     return { user, newToken, refreshToken };
   } catch (err) {
-    if (err instanceof AppError) {  
+    if (err instanceof AppError) {
       if (err.message === "ERR_USER_INACTIVE") {
         throw err;
       }
