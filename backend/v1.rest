@@ -1,0 +1,1169 @@
+@baseUrl = https://devapi.pressticket.com.br
+@apiToken = a7753eab-63ae-49ad-9af8-67dd6152289a
+
+### Variáveis para testes
+@contactId = 1
+@searchParam = nome_ou_numero
+@pageNumber = 1
+@tags = 1,2,3
+@queueId = 1
+@tagId = 1
+@ticketId = 1
+@whatsappId = 8
+@messageId = abc123
+@userId = 1
+@quickAnswerId = 1
+@groupId = 120363000000000000@g.us
+@clientStatusId = 1
+@backupFilename = backup-2024-01-01.sql
+@errorLogId = 1
+@activityLogId = 1
+@videoId = 1
+
+### ============================================================
+### ROTAS DE AUTENTICAÇÃO
+### ============================================================
+
+### (Login) POST /v1/auth/login
+POST {{baseUrl}}/v1/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@example.com",
+  "password": "senha123"
+}
+
+### (Renovar Token) PUT /v1/auth/refresh
+PUT {{baseUrl}}/v1/auth/refresh
+Content-Type: application/json
+
+### (Logout) DELETE /v1/auth/logout
+DELETE {{baseUrl}}/v1/auth/logout
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+### (Solicitar Redefinição de Senha) POST /v1/auth/forgot-password
+POST {{baseUrl}}/v1/auth/forgot-password
+Content-Type: application/json
+
+{
+  "email": "usuario@example.com"
+}
+
+### (Redefinir Senha) POST /v1/auth/reset-password
+POST {{baseUrl}}/v1/auth/reset-password
+Content-Type: application/json
+
+{
+  "token": "abc123def456...",
+  "newPassword": "novaSenha123"
+}
+
+### ============================================================
+### ROTAS DE MENSAGENS
+### ============================================================
+
+### (Envio de Mensagens de Texto) POST /v1/messages/send
+POST {{baseUrl}}/v1/messages/send
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+{
+  "number": "5522999999999",
+  "body": "Mensagem de teste via API",
+  "userId": 1,
+  "queueId": 2,
+  "whatsappId": 4
+}
+
+### (Envio de Mensagens com Mídia) POST /v1/messages/send-media
+# Nota: Para testar no VS Code com a extensão REST Client, use o formato multipart/form-data
+# Para um teste real, utilize Postman ou Insomnia.
+POST {{baseUrl}}/v1/messages/send-media
+x-api-token: {{apiToken}}
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="number"
+
+5522992463080
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="body"
+
+Legenda da imagem enviada via API
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="userId"
+
+1
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="queueId"
+
+2
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="whatsappId"
+
+1
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="medias"; filename="example.jpg"
+Content-Type: image/jpeg
+
+< ./path/to/your/image.jpg
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
+
+### (Obter Mídia em Base64) GET /v1/messages/{messageId}/media
+GET {{baseUrl}}/v1/messages/{{messageId}}/media
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+### (Editar Mensagem) PUT /v1/messages/{messageId}/edit
+PUT {{baseUrl}}/v1/messages/{{messageId}}/edit
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+{
+  "body": "Mensagem corrigida"
+}
+
+### (Excluir Mensagem) DELETE /v1/messages/{messageId}
+DELETE {{baseUrl}}/v1/messages/{{messageId}}
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+### (Reagir a Mensagem) POST /v1/messages/{messageId}/react
+POST {{baseUrl}}/v1/messages/{{messageId}}/react
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+{
+  "emoji": "👍"
+}
+
+### (Obter Reações de Mensagem) GET /v1/messages/{messageId}/reactions
+GET {{baseUrl}}/v1/messages/{{messageId}}/reactions
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+### (Encaminhar Mensagens) POST /v1/messages/forward
+POST {{baseUrl}}/v1/messages/forward
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+{
+  "messageIds": ["123", "124"],
+  "targetTicketIds": [5, 6]
+}
+
+### (Enviar Enquete) POST /v1/messages/{ticketId}/poll
+POST {{baseUrl}}/v1/messages/{{ticketId}}/poll
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+{
+  "pollName": "Qual sua cor favorita?",
+  "options": ["Azul", "Verde", "Vermelho"],
+  "allowMultipleAnswers": false
+}
+
+### (Marcar Mensagens como Lidas) POST /v1/messages/{ticketId}/read
+POST {{baseUrl}}/v1/messages/{{ticketId}}/read
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+### ============================================================
+### ROTAS DE PRESENÇA
+### ============================================================
+
+### (Enviar Indicador de Digitação) POST /v1/presence/typing/{ticketId}
+POST {{baseUrl}}/v1/presence/typing/{{ticketId}}
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+{
+  "duration": 5000
+}
+
+### (Enviar Indicador de Gravação) POST /v1/presence/recording/{ticketId}
+POST {{baseUrl}}/v1/presence/recording/{{ticketId}}
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+{
+  "duration": 8000
+}
+
+### (Definir Presença como Disponível) POST /v1/presence/available/{ticketId}
+POST {{baseUrl}}/v1/presence/available/{{ticketId}}
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+### ============================================================
+### ROTAS DE CONTATOS
+### ============================================================
+
+### (Listar Contatos) GET /v1/contacts
+GET {{baseUrl}}/v1/contacts
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+### (Listar Contatos com Parâmetros) GET /v1/contacts
+GET {{baseUrl}}/v1/contacts?searchParam={{searchParam}}&pageNumber={{pageNumber}}&tags={{tags}}
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+### (Criar Contato - Básico) POST /v1/contacts
+POST {{baseUrl}}/v1/contacts
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+{
+  "name": "Test Contact API",
+  "number": "5522999999999"
+}
+
+### (Criar Contato - Completo) POST /v1/contacts
+POST {{baseUrl}}/v1/contacts
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+{
+  "name": "Test Contact API",
+  "number": "5522999999999",
+  "email": "test@example.com",
+  "address": "Street Name, 123",
+  "extraInfo": [
+    {
+      "name": "RG",
+      "value": "123456789"
+    },
+    {
+      "name": "CPF",
+      "value": "12345678901"
+    }
+  ]
+}
+
+### (Obter Contato) GET /v1/contacts/{contactId}
+GET {{baseUrl}}/v1/contacts/{{contactId}}
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+### (Atualizar Contato) PUT /v1/contacts/{contactId}
+PUT {{baseUrl}}/v1/contacts/{{contactId}}
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+{
+  "name": "Updated Contact Name",
+  "number": "5522999999999",
+  "email": "updated@example.com",
+  "address": "New Address, 456"
+}
+
+### (Excluir Contato) DELETE /v1/contacts/{contactId}
+DELETE {{baseUrl}}/v1/contacts/{{contactId}}
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+### (Buscar Contato por Número/Nome) POST /v1/contact
+POST {{baseUrl}}/v1/contact
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+{
+  "number": "5522999999999"
+}
+
+### (Atualizar Tags do Contato) PUT /v1/contacts/{contactId}/tags
+PUT {{baseUrl}}/v1/contacts/{{contactId}}/tags
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+{
+  "tags": [1, 2, 3]
+}
+
+### (Bloquear Contato) POST /v1/contacts/{contactId}/block
+POST {{baseUrl}}/v1/contacts/{{contactId}}/block
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+{
+  "whatsappId": {{whatsappId}}
+}
+
+### (Desbloquear Contato) POST /v1/contacts/{contactId}/unblock
+POST {{baseUrl}}/v1/contacts/{{contactId}}/unblock
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+{
+  "whatsappId": {{whatsappId}}
+}
+
+### (Verificar Status de Bloqueio) GET /v1/contacts/{contactId}/block-status
+GET {{baseUrl}}/v1/contacts/{{contactId}}/block-status?whatsappId={{whatsappId}}
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+### (Listar Contatos Bloqueados) GET /v1/contacts/blocked
+GET {{baseUrl}}/v1/contacts/blocked?whatsappId={{whatsappId}}
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+### (Obter "Sobre" do Contato) GET /v1/contacts/{contactId}/about
+GET {{baseUrl}}/v1/contacts/{{contactId}}/about?whatsappId={{whatsappId}}
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+### (Obter Grupos em Comum) GET /v1/contacts/{contactId}/common-groups
+GET {{baseUrl}}/v1/contacts/{{contactId}}/common-groups?whatsappId={{whatsappId}}
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+### (Exportar Contatos) GET /v1/contacts/export
+GET {{baseUrl}}/v1/contacts/export
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+### ============================================================
+### ROTAS DE SETORES
+### ============================================================
+
+### (Listar Setores) GET /v1/queue
+GET {{baseUrl}}/v1/queue
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+### (Criar Setor) POST /v1/queue
+POST {{baseUrl}}/v1/queue
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+{
+  "name": "Setor de Teste API",
+  "color": "#FF0000"
+}
+
+### (Obter Setor) GET /v1/queue/{queueId}
+GET {{baseUrl}}/v1/queue/{{queueId}}
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+### (Atualizar Setor) PUT /v1/queue/{queueId}
+PUT {{baseUrl}}/v1/queue/{{queueId}}
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+{
+  "name": "Setor Atualizado API",
+  "color": "#00FF00"
+}
+
+### (Excluir Setor) DELETE /v1/queue/{queueId}
+DELETE {{baseUrl}}/v1/queue/{{queueId}}
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+### ============================================================
+### ROTAS DE TAGS
+### ============================================================
+
+### (Listar Tags) GET /v1/tags
+GET {{baseUrl}}/v1/tags
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+### (Listar Tags Simplificado) GET /v1/tags/list
+GET {{baseUrl}}/v1/tags/list
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+### (Criar Tag) POST /v1/tags
+POST {{baseUrl}}/v1/tags
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+{
+  "name": "Tag de Teste API",
+  "color": "#0000FF"
+}
+
+### (Obter Tag) GET /v1/tags/{tagId}
+GET {{baseUrl}}/v1/tags/{{tagId}}
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+### (Atualizar Tag) PUT /v1/tags/{tagId}
+PUT {{baseUrl}}/v1/tags/{{tagId}}
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+{
+  "name": "Tag Atualizada API",
+  "color": "#00FFFF"
+}
+
+### (Excluir Tag) DELETE /v1/tags/{tagId}
+DELETE {{baseUrl}}/v1/tags/{{tagId}}
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+### (Sincronizar Tags) POST /v1/tags/sync
+POST {{baseUrl}}/v1/tags/sync
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+{
+  "tags": [1, 2, 3],
+  "ticketId": 1
+}
+
+### ============================================================
+### ROTAS DE TICKETS
+### ============================================================
+
+### (Listar Tickets) GET /v1/tickets
+GET {{baseUrl}}/v1/tickets
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+### (Listar Tickets com Parâmetros) GET /v1/tickets
+GET {{baseUrl}}/v1/tickets?status=open&searchParam={{searchParam}}&pageNumber={{pageNumber}}&tags={{tags}}
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+### (Contar Tickets) GET /v1/tickets/count
+GET {{baseUrl}}/v1/tickets/count
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+### (Criar Ticket) POST /v1/tickets
+POST {{baseUrl}}/v1/tickets
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+{
+  "contactId": 1,
+  "status": "open",
+  "queueId": 1,
+  "userId": 1
+}
+
+### (Obter Ticket) GET /v1/tickets/{ticketId}
+GET {{baseUrl}}/v1/tickets/{{ticketId}}
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+### (Atualizar Ticket) PUT /v1/tickets/{ticketId}
+PUT {{baseUrl}}/v1/tickets/{{ticketId}}
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+{
+  "status": "pending",
+  "queueId": 2,
+  "userId": 1
+}
+
+### (Excluir Ticket) DELETE /v1/tickets/{ticketId}
+DELETE {{baseUrl}}/v1/tickets/{{ticketId}}
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+### (Verificar Tickets Abertos do Contato) GET /v1/tickets/contact/{contactId}/open
+GET {{baseUrl}}/v1/tickets/contact/{{contactId}}/open
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+### (Fechar Todos os Tickets) PUT /v1/tickets/close-all
+PUT {{baseUrl}}/v1/tickets/close-all
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+{
+  "status": "closed"
+}
+
+### ============================================================
+### ROTAS DE WHATSAPP
+### ============================================================
+
+### (Listar Conexões WhatsApp) GET /v1/whatsapp
+GET {{baseUrl}}/v1/whatsapp
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+### (Criar Conexão WhatsApp) POST /v1/whatsapp
+POST {{baseUrl}}/v1/whatsapp
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+{
+  "name": "Conexão API",
+  "isDefault": false,
+  "greetingMessage": "Olá, como posso ajudar?",
+  "farewellMessage": "Obrigado pelo contato!",
+  "queueIds": [1, 2]
+}
+
+### (Obter Conexão WhatsApp) GET /v1/whatsapp/{whatsappId}
+GET {{baseUrl}}/v1/whatsapp/{{whatsappId}}
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+### (Atualizar Conexão WhatsApp) PUT /v1/whatsapp/{whatsappId}
+PUT {{baseUrl}}/v1/whatsapp/{{whatsappId}}
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+{
+  "name": "Conexão API Atualizada",
+  "isDefault": false,
+  "greetingMessage": "Olá, como posso ajudar hoje?",
+  "farewellMessage": "Obrigado pelo contato! Volte sempre.",
+  "queueIds": [1, 2, 3]
+}
+
+### (Excluir Conexão WhatsApp) DELETE /v1/whatsapp/{whatsappId}
+DELETE {{baseUrl}}/v1/whatsapp/{{whatsappId}}
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+### (Reiniciar Conexão WhatsApp) POST /v1/whatsapp/{whatsappId}/restart
+POST {{baseUrl}}/v1/whatsapp/{{whatsappId}}/restart
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+### (Desligar Conexão WhatsApp) POST /v1/whatsapp/{whatsappId}/shutdown
+POST {{baseUrl}}/v1/whatsapp/{{whatsappId}}/shutdown
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+### (Obter QR Code) GET /v1/whatsapp/{whatsappId}/qrcode
+GET {{baseUrl}}/v1/whatsapp/{{whatsappId}}/qrcode
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+### (Verificar Número WhatsApp) POST /v1/whatsapp/check-number
+POST {{baseUrl}}/v1/whatsapp/check-number
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+{
+  "number": "5511999999999"
+}
+
+### ============================================================
+### ROTAS DE SESSÃO DO WHATSAPP
+### ============================================================
+
+### (Criar Sessão WhatsApp) POST /v1/whatsappsession/{whatsappId}
+POST {{baseUrl}}/v1/whatsappsession/{{whatsappId}}
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+{
+  "qrcode": "data:image/png;base64,QRCODE_BASE64_AQUI",
+  "status": "CONNECTED",
+  "whatsappId": {{whatsappId}}
+}
+
+### (Atualizar Sessão WhatsApp) PUT /v1/whatsappsession/{whatsappId}
+PUT {{baseUrl}}/v1/whatsappsession/{{whatsappId}}
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+{
+  "qrcode": "data:image/png;base64,NOVO_QRCODE_BASE64_AQUI",
+  "status": "QRCODE",
+  "whatsappId": {{whatsappId}}
+}
+
+### (Excluir Sessão WhatsApp) DELETE /v1/whatsappsession/{whatsappId}
+DELETE {{baseUrl}}/v1/whatsappsession/{{whatsappId}}
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+### ============================================================
+### ROTAS DE GRUPOS DO WHATSAPP (GroupController)
+### ============================================================
+
+### (Adicionar Participantes ao Grupo) POST /v1/groups/{groupId}/participants/add
+POST {{baseUrl}}/v1/groups/{{groupId}}/participants/add
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+{
+  "participants": ["5511999999999@c.us"]
+}
+
+### (Remover Participantes do Grupo) POST /v1/groups/{groupId}/participants/remove
+POST {{baseUrl}}/v1/groups/{{groupId}}/participants/remove
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+{
+  "participants": ["5511999999999@c.us"]
+}
+
+### (Promover Participantes a Admin) POST /v1/groups/{groupId}/participants/promote
+POST {{baseUrl}}/v1/groups/{{groupId}}/participants/promote
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+{
+  "participants": ["5511999999999@c.us"]
+}
+
+### (Rebaixar Admin a Participante) POST /v1/groups/{groupId}/participants/demote
+POST {{baseUrl}}/v1/groups/{{groupId}}/participants/demote
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+{
+  "participants": ["5511999999999@c.us"]
+}
+
+### (Listar Participantes do Grupo) GET /v1/groups/{groupId}/participants
+GET {{baseUrl}}/v1/groups/{{groupId}}/participants
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+### (Obter Link de Convite) GET /v1/groups/{groupId}/invite
+GET {{baseUrl}}/v1/groups/{{groupId}}/invite
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+### (Revogar Link de Convite) POST /v1/groups/{groupId}/invite/revoke
+POST {{baseUrl}}/v1/groups/{{groupId}}/invite/revoke
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+### (Configurar Modo de Adicionar Membros) POST /v1/groups/{groupId}/settings/memberAddMode
+POST {{baseUrl}}/v1/groups/{{groupId}}/settings/memberAddMode
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+{
+  "mode": "admins_only"
+}
+
+### (Configurar Modo Anúncio) POST /v1/groups/{groupId}/settings/announcement
+POST {{baseUrl}}/v1/groups/{{groupId}}/settings/announcement
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+{
+  "enabled": true
+}
+
+### (Restringir Edição de Info do Grupo) POST /v1/groups/{groupId}/settings/restrict
+POST {{baseUrl}}/v1/groups/{{groupId}}/settings/restrict
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+{
+  "enabled": true
+}
+
+### (Alterar Nome do Grupo) POST /v1/groups/{groupId}/subject
+POST {{baseUrl}}/v1/groups/{{groupId}}/subject
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+{
+  "subject": "Novo Nome do Grupo"
+}
+
+### (Alterar Descrição do Grupo) POST /v1/groups/{groupId}/description
+POST {{baseUrl}}/v1/groups/{{groupId}}/description
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+{
+  "description": "Descrição do grupo"
+}
+
+### (Remover Foto do Grupo) DELETE /v1/groups/{groupId}/picture
+DELETE {{baseUrl}}/v1/groups/{{groupId}}/picture
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+### (Listar Solicitações de Entrada) GET /v1/groups/{groupId}/membership/requests
+GET {{baseUrl}}/v1/groups/{{groupId}}/membership/requests
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+### (Aprovar Solicitações de Entrada) POST /v1/groups/{groupId}/membership/approve
+POST {{baseUrl}}/v1/groups/{{groupId}}/membership/approve
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+{
+  "participants": ["5511999999999@c.us"]
+}
+
+### (Rejeitar Solicitações de Entrada) POST /v1/groups/{groupId}/membership/reject
+POST {{baseUrl}}/v1/groups/{{groupId}}/membership/reject
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+{
+  "participants": ["5511999999999@c.us"]
+}
+
+### (Sair do Grupo) POST /v1/groups/{groupId}/leave
+POST {{baseUrl}}/v1/groups/{{groupId}}/leave
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+### ============================================================
+### ROTAS DE GRUPOS DO WHATSAPP (GroupManagementController)
+### ============================================================
+
+### (Listar Grupos do Canal) GET /v1/whatsapp/{whatsappId}/groups
+GET {{baseUrl}}/v1/whatsapp/{{whatsappId}}/groups
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+### (Criar Grupo) POST /v1/whatsapp/{whatsappId}/groups
+POST {{baseUrl}}/v1/whatsapp/{{whatsappId}}/groups
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+{
+  "name": "Grupo de Trabalho",
+  "participants": ["5511999999999", "5511888888888"]
+}
+
+### (Obter Informações do Grupo) GET /v1/whatsapp/{whatsappId}/groups/{groupId}
+GET {{baseUrl}}/v1/whatsapp/{{whatsappId}}/groups/{{groupId}}
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+### (Atualizar Nome do Grupo) PUT /v1/whatsapp/{whatsappId}/groups/{groupId}/name
+PUT {{baseUrl}}/v1/whatsapp/{{whatsappId}}/groups/{{groupId}}/name
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+{
+  "name": "Novo Nome do Grupo"
+}
+
+### (Atualizar Descrição do Grupo) PUT /v1/whatsapp/{whatsappId}/groups/{groupId}/description
+PUT {{baseUrl}}/v1/whatsapp/{{whatsappId}}/groups/{{groupId}}/description
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+{
+  "description": "Descrição atualizada do grupo"
+}
+
+### (Adicionar Participantes) POST /v1/whatsapp/{whatsappId}/groups/{groupId}/participants/add
+POST {{baseUrl}}/v1/whatsapp/{{whatsappId}}/groups/{{groupId}}/participants/add
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+{
+  "participants": ["5511999999999", "5511888888888"]
+}
+
+### (Remover Participantes) POST /v1/whatsapp/{whatsappId}/groups/{groupId}/participants/remove
+POST {{baseUrl}}/v1/whatsapp/{{whatsappId}}/groups/{{groupId}}/participants/remove
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+{
+  "participants": ["5511999999999"]
+}
+
+### (Promover Participantes a Admin) POST /v1/whatsapp/{whatsappId}/groups/{groupId}/participants/promote
+POST {{baseUrl}}/v1/whatsapp/{{whatsappId}}/groups/{{groupId}}/participants/promote
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+{
+  "participants": ["5511999999999"]
+}
+
+### (Rebaixar Admin a Participante) POST /v1/whatsapp/{whatsappId}/groups/{groupId}/participants/demote
+POST {{baseUrl}}/v1/whatsapp/{{whatsappId}}/groups/{{groupId}}/participants/demote
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+{
+  "participants": ["5511999999999"]
+}
+
+### (Sair do Grupo) POST /v1/whatsapp/{whatsappId}/groups/{groupId}/leave
+POST {{baseUrl}}/v1/whatsapp/{{whatsappId}}/groups/{{groupId}}/leave
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+### (Obter Link de Convite) GET /v1/whatsapp/{whatsappId}/groups/{groupId}/invite-link
+GET {{baseUrl}}/v1/whatsapp/{{whatsappId}}/groups/{{groupId}}/invite-link
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+### (Revogar Link de Convite) POST /v1/whatsapp/{whatsappId}/groups/{groupId}/invite-link/revoke
+POST {{baseUrl}}/v1/whatsapp/{{whatsappId}}/groups/{{groupId}}/invite-link/revoke
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+### (Atualizar Configurações do Grupo) PUT /v1/whatsapp/{whatsappId}/groups/{groupId}/settings
+PUT {{baseUrl}}/v1/whatsapp/{{whatsappId}}/groups/{{groupId}}/settings
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+{
+  "messagesAdminsOnly": true,
+  "editGroupInfoAdminsOnly": true
+}
+
+### ============================================================
+### ROTAS DE USUÁRIOS
+### ============================================================
+
+### (Listar Usuários) GET /v1/users
+GET {{baseUrl}}/v1/users
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+### (Criar Usuário) POST /v1/users
+POST {{baseUrl}}/v1/users
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+{
+  "name": "Maria Santos",
+  "email": "maria@example.com",
+  "password": "senha123",
+  "profile": "user",
+  "queueIds": [1, 2, 3]
+}
+
+### (Obter Usuário) GET /v1/users/{userId}
+GET {{baseUrl}}/v1/users/{{userId}}
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+### (Atualizar Usuário) PUT /v1/users/{userId}
+PUT {{baseUrl}}/v1/users/{{userId}}
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+{
+  "name": "João Silva Atualizado",
+  "email": "joao.novo@example.com",
+  "profile": "admin",
+  "queueIds": [1, 3, 5]
+}
+
+### (Excluir Usuário) DELETE /v1/users/{userId}
+DELETE {{baseUrl}}/v1/users/{{userId}}
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+### ============================================================
+### ROTAS DE RESPOSTAS RÁPIDAS
+### ============================================================
+
+### (Listar Respostas Rápidas) GET /v1/quickAnswers
+GET {{baseUrl}}/v1/quickAnswers
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+### (Criar Resposta Rápida) POST /v1/quickAnswers
+POST {{baseUrl}}/v1/quickAnswers
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+{
+  "shortcut": "/ola",
+  "message": "Olá! Como posso ajudar?"
+}
+
+### (Obter Resposta Rápida) GET /v1/quickAnswers/{quickAnswerId}
+GET {{baseUrl}}/v1/quickAnswers/{{quickAnswerId}}
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+### (Atualizar Resposta Rápida) PUT /v1/quickAnswers/{quickAnswerId}
+PUT {{baseUrl}}/v1/quickAnswers/{{quickAnswerId}}
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+{
+  "shortcut": "/ola2",
+  "message": "Olá! Em que posso ajudar?"
+}
+
+### (Excluir Resposta Rápida) DELETE /v1/quickAnswers/{quickAnswerId}
+DELETE {{baseUrl}}/v1/quickAnswers/{{quickAnswerId}}
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+### (Excluir Todas as Respostas Rápidas) DELETE /v1/quickAnswers
+DELETE {{baseUrl}}/v1/quickAnswers
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+### ============================================================
+### ROTAS DE STATUS DE CLIENTES
+### ============================================================
+
+### (Listar Status de Clientes) GET /v1/client-status
+GET {{baseUrl}}/v1/client-status
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+### (Criar Status de Cliente) POST /v1/client-status
+POST {{baseUrl}}/v1/client-status
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+{
+  "name": "Ativo",
+  "color": "#00FF00"
+}
+
+### (Obter Estatísticas de Status) GET /v1/client-status/statistics
+GET {{baseUrl}}/v1/client-status/statistics
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+### (Obter Status de Cliente) GET /v1/client-status/{clientStatusId}
+GET {{baseUrl}}/v1/client-status/{{clientStatusId}}
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+### (Atualizar Status de Cliente) PUT /v1/client-status/{clientStatusId}
+PUT {{baseUrl}}/v1/client-status/{{clientStatusId}}
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+{
+  "name": "Inativo",
+  "color": "#FF0000"
+}
+
+### (Excluir Status de Cliente) DELETE /v1/client-status/{clientStatusId}
+DELETE {{baseUrl}}/v1/client-status/{{clientStatusId}}
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+### (Excluir Todos os Status) DELETE /v1/client-status
+DELETE {{baseUrl}}/v1/client-status
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+### ============================================================
+### ROTAS DE VÍDEOS
+### ============================================================
+
+### (Listar Vídeos) GET /v1/videos
+GET {{baseUrl}}/v1/videos
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+### (Obter Vídeo) GET /v1/videos/{id}
+GET {{baseUrl}}/v1/videos/{{videoId}}
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+### (Criar Vídeo) POST /v1/videos
+POST {{baseUrl}}/v1/videos
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+{
+  "title": "Vídeo Tutorial",
+  "url": "https://example.com/video.mp4"
+}
+
+### (Atualizar Vídeo) PUT /v1/videos/{id}
+PUT {{baseUrl}}/v1/videos/{{videoId}}
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+{
+  "title": "Vídeo Tutorial Atualizado",
+  "url": "https://example.com/video-v2.mp4"
+}
+
+### (Excluir Vídeo) DELETE /v1/videos/{id}
+DELETE {{baseUrl}}/v1/videos/{{videoId}}
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+### ============================================================
+### ROTAS DE LOGS DE ATIVIDADE
+### ============================================================
+
+### (Listar Logs de Atividade) GET /v1/activity-logs
+GET {{baseUrl}}/v1/activity-logs
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+### (Listar Ações) GET /v1/activity-logs/actions
+GET {{baseUrl}}/v1/activity-logs/actions
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+### (Listar Entidades) GET /v1/activity-logs/entities
+GET {{baseUrl}}/v1/activity-logs/entities
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+### (Detalhes do Log) GET /v1/activity-logs/{id}/details
+GET {{baseUrl}}/v1/activity-logs/{{activityLogId}}/details
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+### ============================================================
+### ROTAS DE LOGS DE ERRO
+### ============================================================
+
+### (Criar Log de Erro) POST /v1/error-logs
+POST {{baseUrl}}/v1/error-logs
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+{
+  "message": "Erro de teste",
+  "stack": "Error: Erro de teste\n  at test.js:10:5"
+}
+
+### (Listar Logs de Erro) GET /v1/error-logs
+GET {{baseUrl}}/v1/error-logs
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+### (Obter Log de Erro) GET /v1/error-logs/{id}
+GET {{baseUrl}}/v1/error-logs/{{errorLogId}}
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+### (Limpar Logs Antigos) DELETE /v1/error-logs/cleanup
+DELETE {{baseUrl}}/v1/error-logs/cleanup
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+### ============================================================
+### ROTAS DE BACKUP
+### ============================================================
+
+### (Listar Backups) GET /v1/backups
+GET {{baseUrl}}/v1/backups
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+### (Criar Backup) POST /v1/backups
+POST {{baseUrl}}/v1/backups
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+### (Obter Backup) GET /v1/backups/{filename}
+GET {{baseUrl}}/v1/backups/{{backupFilename}}
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+### (Restaurar Backup) POST /v1/backups/{filename}/restore
+POST {{baseUrl}}/v1/backups/{{backupFilename}}/restore
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+### (Excluir Backup) DELETE /v1/backups/{filename}
+DELETE {{baseUrl}}/v1/backups/{{backupFilename}}
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+### ============================================================
+### ROTAS DE MONITORAMENTO DE REDE
+### ============================================================
+
+### (Status da Rede) GET /v1/network-status
+GET {{baseUrl}}/v1/network-status
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+### ============================================================
+### ROTAS DE MONITORAMENTO DE SETORES
+### ============================================================
+
+### (Monitorar Setores) GET /v1/queue-monitor
+GET {{baseUrl}}/v1/queue-monitor
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+### ============================================================
+### ROTAS DE ATUALIZAÇÃO DO SISTEMA
+### ============================================================
+
+### (Verificar Atualizações) GET /v1/system-update/check
+GET {{baseUrl}}/v1/system-update/check
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+### (Instalar Atualização) POST /v1/system-update/install
+POST {{baseUrl}}/v1/system-update/install
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+### (Status da Atualização) GET /v1/system-update/status
+GET {{baseUrl}}/v1/system-update/status
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+### (Listar Backups de Atualização) GET /v1/system-update/backups
+GET {{baseUrl}}/v1/system-update/backups
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+### (Restaurar Backup de Atualização) POST /v1/system-update/restore/{backupFileName}
+POST {{baseUrl}}/v1/system-update/restore/{{backupFilename}}
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+### ============================================================
+### ROTAS DE VERSÃO E BIBLIOTECA WHATSAPP
+### ============================================================
+
+### (Obter Versão) GET /v1/version
+GET {{baseUrl}}/v1/version
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+### (Atualizar Biblioteca WhatsApp) POST /v1/whatsapp-lib/update
+POST {{baseUrl}}/v1/whatsapp-lib/update
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+### ============================================================
+### ROTAS DE SISTEMA
+### ============================================================
+
+### (Reiniciar PM2) POST /v1/restartpm2
+POST {{baseUrl}}/v1/restartpm2
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+### (Espaço em Disco) GET /v1/disk-space
+GET {{baseUrl}}/v1/disk-space
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+### (Uso de Memória) GET /v1/memory-usage
+GET {{baseUrl}}/v1/memory-usage
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+### (Uso de CPU) GET /v1/cpu-usage
+GET {{baseUrl}}/v1/cpu-usage
+x-api-token: {{apiToken}}
+Content-Type: application/json
+
+### (Status do Banco de Dados) GET /v1/database-status
+GET {{baseUrl}}/v1/database-status
+x-api-token: {{apiToken}}
+Content-Type: application/json
