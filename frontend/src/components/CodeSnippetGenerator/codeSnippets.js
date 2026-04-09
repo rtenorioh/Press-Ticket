@@ -14,10 +14,11 @@ Content-Length: ${85 + body.length}
             "queueId": "${queueId}",
             "whatsappId": "${whatsappId}"
         }`,
+        
   JavaScript_JQuery: (number, body, userId, queueId, whatsappId, token) => `const settings = {
   "async": true,
   "crossDomain": true,
-  "url": "${process.env.REACT_APP_BACKEND_URL}/api/messages/v1/send}",
+  "url": "${process.env.REACT_APP_BACKEND_URL}/v1/messages/send}",
   "method": "POST",
   "headers": {
     "user-agent": "vscode-restclient",
@@ -32,8 +33,9 @@ $.ajax(settings).done(function (response) {
   console.log(response);
 });
         `,
+
   JavaScript_fetch: (number, body, userId, queueId, whatsappId, token) => `
-        fetch("${process.env.REACT_APP_BACKEND_URL}/api/messages/v1/send", {
+        fetch("${process.env.REACT_APP_BACKEND_URL}/v1/messages/send", {
             "method": "POST",
             "headers": {
                 "user-agent": "vscode-restclient",
@@ -55,11 +57,12 @@ $.ajax(settings).done(function (response) {
   console.error(err);
 });
         `,
+
   NODEjs_Request: (number, body, userId, queueId, whatsappId, token) => `
         const request = require('request');
         const options = {
             method: 'POST',
-            url: '${process.env.REACT_APP_BACKEND_URL}/api/messages/v1/send',
+            url: '${process.env.REACT_APP_BACKEND_URL}/v1/messages/send',
             headers: {
                 'user-agent': 'vscode-restclient',
                 'x-api-token': '${token}',
@@ -80,6 +83,80 @@ $.ajax(settings).done(function (response) {
 
             console.log('Response:', body);
         });`,
+
+  Python_requests: (number, body, userId, queueId, whatsappId, token) => `import requests
+
+url = "${process.env.REACT_APP_BACKEND_URL}/v1/messages/send"
+
+payload = {
+    "number": "${number}",
+    "body": "${body}",
+    "userId": ${userId},
+    "queueId": ${queueId},
+    "whatsappId": ${whatsappId}
+}
+headers = {
+    "User-Agent": "vscode-restclient",
+    "x-api-token": "${token}",
+    "Content-Type": "application/json"
+}
+
+response = requests.request("POST", url, json=payload, headers=headers)
+
+print(response.text)`,
+
+  Python_http_client: (number, body, userId, queueId, whatsappId, token) => {
+    const urlObj = new URL(process.env.REACT_APP_BACKEND_URL);
+    const host = urlObj.host;
+    const connType = urlObj.protocol === "https:" ? "HTTPS" : "HTTP";
+    return `import http.client
+import json
+
+conn = http.client.${connType}Connection("${host}")
+
+payload = json.dumps({
+    "number": "${number}",
+    "body": "${body}",
+    "userId": ${userId},
+    "queueId": ${queueId},
+    "whatsappId": ${whatsappId}
+})
+headers = {
+    "User-Agent": "vscode-restclient",
+    "x-api-token": "${token}",
+    "Content-Type": "application/json"
+}
+
+conn.request("POST", "/v1/messages/send", payload, headers)
+
+res = conn.getresponse()
+data = res.read()
+
+print(data.decode("utf-8"))`;
+  },
+
+  Ruby_Net_HTTP: (number, body, userId, queueId, whatsappId, token) => {
+    const useSSL = process.env.REACT_APP_BACKEND_URL.startsWith("https");
+    return `require 'uri'
+require 'net/http'
+require 'openssl'
+
+url = URI("${process.env.REACT_APP_BACKEND_URL}/v1/messages/send")
+
+http = Net::HTTP.new(url.host, url.port)
+http.use_ssl = ${useSSL}
+http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+
+request = Net::HTTP::Post.new(url)
+request["User-Agent"] = 'vscode-restclient'
+request["x-api-token"] = '${token}'
+request["Content-Type"] = 'application/json'
+request.body = "{\"number\": \"${number}\",\"body\": \"${body}\",\"userId\": ${userId},\"queueId\": ${queueId},\"whatsappId\": ${whatsappId}}"
+
+response = http.request(request)
+puts response.read_body`;
+  },
+
   PHP_cURL: (number, body, userId, queueId, whatsappId, token) => `
         <?php
 
@@ -87,7 +164,7 @@ $curl = curl_init();
 
 curl_setopt_array($curl, [
   CURLOPT_PORT => "4000",
-  CURLOPT_URL => "${process.env.REACT_APP_BACKEND_URL}/api/messages/v1/send",
+  CURLOPT_URL => "${process.env.REACT_APP_BACKEND_URL}/v1/messages/send",
   CURLOPT_RETURNTRANSFER => true,
   CURLOPT_ENCODING => "",
   CURLOPT_MAXREDIRS => 10,
