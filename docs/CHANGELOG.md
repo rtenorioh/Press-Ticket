@@ -1,5 +1,35 @@
 # Changelog
 
+### v1.15.0 (08/04/2026)
+
+- [chore: atualizar versão do sistema de v1.14.0 para v1.15.0](https://github.com/rtenorioh/Press-Ticket/commit/6f15127ebf53e50836eb82848064ae4690439aeb);
+- [feat: corrigir URLs da API de /api/messages/v1/send para /v1/messages/send e adicionar snippets Python e Ruby](https://github.com/rtenorioh/Press-Ticket/commit/6f731a37412c384be01a9dc277e87faf566c3a94);
+- [feat: internacionalizar página de API com suporte a i18n e adicionar seletor de tokens com filtro de permissões](https://github.com/rtenorioh/Press-Ticket/commit/ea90a84d21644d1713dbcc2fd6ea4c1253ef54d6);
+- [feat: renomear arquivo de testes da API de api_v1.rest para v1.rest e expandir documentação com exemplos completos de todas as rotas](https://github.com/rtenorioh/Press-Ticket/commit/10e956ea95148c67b8f166cfba5f4a6f8984f337);
+- [feat: melhorar construção de URL de mídia com validação de porta e tratamento de BACKEND_URL](https://github.com/rtenorioh/Press-Ticket/commit/7d03d27ebf60d237641ab03d640358602986269e);
+- [feat: adicionar configuração de tempo de inatividade de sessão personalizável com modal de expiração e suporte a WebSocket](https://github.com/rtenorioh/Press-Ticket/commit/fe2d0c4dd41307ea4572b650a942f655943a35c7);
+- [feat: melhorar segurança do logout removendo dependência de autenticação e adicionar fechamento de sessões ativas](https://github.com/rtenorioh/Press-Ticket/commit/ffcb9ee160f3c2f493f8ad689748e1864901fb4c);
+- [feat: adicionar suporte ao Swagger UI React com configuração de variável de ambiente REACT_APP_BACKEND_URL](https://github.com/rtenorioh/Press-Ticket/commit/05eeb6f4e8a2e4a6399649a337e087af7e94e936);
+- [feat: adicionar suporte completo ao Docker para VPS com HTTPS, incluindo arquivos de configuração, Nginx com Let's Encrypt e documentação detalhada de instalação em produção](https://github.com/rtenorioh/Press-Ticket/commit/f6111898f1b0c97e83dfd2afe70a3d358d9a9a8d);
+- [feat: adicionar suporte completo ao Docker com arquivos de configuração, Dockerfiles e documentação para Localhost](https://github.com/rtenorioh/Press-Ticket/commit/e5c6ae0a37e63786324129badc9dbaebc62f130b);
+- [feat: adicionar suporte a numberLid para contatos com identificadores @lid do WhatsApp](https://github.com/rtenorioh/Press-Ticket/commit/43f2823b95477af4e78f6eec38ae13b689d20bef);
+- [feat: adicionar validação de segurança no script de atualização e padronizar uso de variáveis de caminho](https://github.com/rtenorioh/Press-Ticket/commit/a6daf6d8ee7f7353e17edf84e505da96f41970b5);
+- [feat: adicionar banner promocional da Hosteg ao README e incluir imagem do patrocinador](https://github.com/rtenorioh/Press-Ticket/commit/49bc1d78cdbdbf43696014d85fa773189a6b428d);
+- [feat: melhorar compatibilidade com MySQL/MariaDB e aprimorar scripts de instalação e atualização](https://github.com/rtenorioh/Press-Ticket/commit/1df24db29fb9969db3e2ef1297766286629b056c);
+- [feat: melhorar compatibilidade com WhatsApp Web e ajustar configurações de proxy e CORS](https://github.com/rtenorioh/Press-Ticket/commit/806a5a5a51759ce9cc22beef6a579b480ba0b44f);
+- [feat: aprimorar recursos de gerenciamento de grupos com novo endpoint para atualizar fotos de perfil do grupo, tratamento de eventos otimizado e mecanismo de cache](https://github.com/rtenorioh/Press-Ticket/commit/c77cffd4d4f989fd5e4b0e88f2cfca8a2ff18031);
+- [feat: adicionar atualização em tempo real de tags de contato via socket](https://github.com/rtenorioh/Press-Ticket/commit/314e34fba67e53f7a7f010d7b146d4c1720e7c64);
+- [feat: adicionar separadores de data nas mensagens do chat](https://github.com/rtenorioh/Press-Ticket/commit/8d9f2bc9ccfc2b69047b7cb4070647eeb73dfddd);
+- [feat: adicionar fallback para download de mídia e melhorar logs de erro no ModalImageCors](https://github.com/rtenorioh/Press-Ticket/commit/871e272e235fa43060952b6b6e115d8eabd4d6c5);
+- [feat: adicionar funcionalidade de importação de backups](https://github.com/rtenorioh/Press-Ticket/commit/65f813a4d293bc70849163641bc5053e17892702);
+- [feat: adicionar cache de versão web remota do WhatsApp no wbot](https://github.com/rtenorioh/Press-Ticket/commit/14a869f5723c21648578a8e668430829200a5a3f);
+- [feat: adicionar flag nameManuallyEdited para proteger nomes de contatos editados manualmente](https://github.com/rtenorioh/Press-Ticket/commit/381efed29b92fb5601fa6efc5cf23bd848ee00e8);
+- [feat: adicionar configurações de email no painel administrativo e migrar credenciais do .env para banco de dados](https://github.com/rtenorioh/Press-Ticket/commit/53e37bbfe3c3527d350686f31a57a5090579b8dc);
+- [fix: sanitizar tokens e nomes de sessão removendo caracteres especiais e quebras de linha](https://github.com/rtenorioh/Press-Ticket/commit/51530203030e7255317b165c17f4a0594aecaf2a);
+- [feat: ajustar migration de PollVotes para usar collation utf8mb4_bin e async/await](https://github.com/rtenorioh/Press-Ticket/commit/3713a0ca79e131d8a8437d9778cc16a4214adfbd);
+- [feat: melhorar script de atualização com detecção automática de nomes PM2 e otimizações de sistema](https://github.com/rtenorioh/Press-Ticket/commit/3ed972c77e18d186bb2e4777c391fc27132bcaa1); e
+- [feat: melhorar script de instalação com detecção de versão e otimizações de dependências](https://github.com/rtenorioh/Press-Ticket/commit/b07a8868750219f0c98017ab27b9ca3cf47771fe).
+
 ### v1.14.0 (06/12/2025)
 
 - [v1.14.0](https://github.com/rtenorioh/Press-Ticket/commit/c939f5925fd45ccc486efdd7bc5d6a274590d9d7);
