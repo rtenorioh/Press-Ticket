@@ -17,6 +17,7 @@ import {
 import { styled } from "@mui/material/styles";
 import axios from "axios";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 import CodeSnippetGenerator from "../../components/CodeSnippetGenerator";
 import toastError from "../../errors/toastError";
@@ -234,6 +235,7 @@ const SelectedFileChip = styled(Box)(({ theme }) => ({
 }));
 
 const Api = () => {
+    const { t } = useTranslation();
     const [number, setNumber] = useState("");
     const [body, setBody] = useState("");
     const [media, setMedia] = useState(null);
@@ -241,9 +243,24 @@ const Api = () => {
     const [queueId, setQueueId] = useState("");
     const [whatsappId, setWhatsappId] = useState("");
     const [manualToken, setManualToken] = useState("");
+    const [apiTokens, setApiTokens] = useState([]);
     const [users, setUsers] = useState([]);
     const [queues, setQueues] = useState([]);
     const [whatsapps, setWhatsapps] = useState([]);
+
+    useEffect(() => {
+        (async () => {
+            try {
+                const { data } = await api.get("/api-tokens", { params: { pageNumber: 1, pageSize: 100 } });
+                const filtered = (data.tokens || []).filter(tk =>
+                    Array.isArray(tk.permissions) && tk.permissions.includes("create:messages")
+                );
+                setApiTokens(filtered);
+            } catch (err) {
+                toastError(err);
+            }
+        })();
+    }, []);
 
     useEffect(() => {
         (async () => {
@@ -287,7 +304,7 @@ const Api = () => {
         const token = manualToken;
 
         if (!token) {
-            toast.error("É necessário fornecer um token de API válido para enviar mensagens.");
+            toast.error(t("apiPage.toasts.noToken"));
             return;
         }
 
@@ -324,13 +341,13 @@ const Api = () => {
                 }
             });
 
-            toast.success("Mensagem enviada com sucesso!");
+            toast.success(t("apiPage.toasts.success"));
             setBody("");
             setMedia(null);
 
         } catch (error) {
             console.error("Erro ao enviar mensagem:", error);
-            toast.error(`Erro ao enviar mensagem: ${error.response?.data?.message || error.message}`);
+            toast.error(`${t("apiPage.toasts.error")} ${error.response?.data?.message || error.message}`);
         }
     };
 
@@ -340,60 +357,60 @@ const Api = () => {
                 <Grid item xs={12} md={6}>
                     <InstructionContainer>
                         <InstructionContent>
-                            <SectionTitle variant="h5">Documentação para envio de mensagens</SectionTitle>
+                            <SectionTitle variant="h5">{t("apiPage.docs.title")}</SectionTitle>
                             <PermissionTag>
-                                <InfoIcon /> Permissão necessária: <code>create:messages</code>
+                                <InfoIcon /> {t("apiPage.docs.permissionTag")} <code>create:messages</code>
                             </PermissionTag>
 
-                            <SubTitle variant="h6">Métodos de Envio</SubTitle>
-                            <ListItem>Mensagens de Texto</ListItem>
-                            <ListItem>Mensagens de Mídia</ListItem>
+                            <SubTitle variant="h6">{t("apiPage.docs.sendMethods")}</SubTitle>
+                            <ListItem>{t("apiPage.docs.textMessages")}</ListItem>
+                            <ListItem>{t("apiPage.docs.mediaMessages")}</ListItem>
 
                             <Divider sx={{ my: 2 }} />
 
-                            <SubTitle variant="h6">Instruções</SubTitle>
+                            <SubTitle variant="h6">{t("apiPage.docs.instructions")}</SubTitle>
                             <Typography variant="subtitle2" fontWeight={600} sx={{ mt: 1, mb: 1 }}>
-                                Observações Importantes
+                                {t("apiPage.docs.importantNotes")}
                             </Typography>
                             
                             <ListItem>
                                 <Typography variant="body2">
-                                    Para obter o token da API, acesse a seção <b>API key</b> no menu lateral. Sem este token não será possível enviar mensagens.
+                                    {t("apiPage.docs.tokenNote")}
                                 </Typography>
                             </ListItem>
                             <ListItem>
                                 <Box>
                                     <Typography variant="body2" sx={{ mb: 1 }}>
-                                        O número para envio deve estar no formato internacional, sem caracteres especiais:
+                                        {t("apiPage.docs.phoneFormat")}
                                     </Typography>
                                     <Box sx={{ pl: 2 }}>
-                                        <Typography variant="body2" sx={{ mb: 0.5 }}>• Código do país - Ex: 55 (Brasil)</Typography>
-                                        <Typography variant="body2" sx={{ mb: 0.5 }}>• DDD - Ex: 22</Typography>
-                                        <Typography variant="body2" sx={{ mb: 0.5 }}>• Número - Ex: 999999999</Typography>
-                                        <Typography variant="body2" sx={{ mb: 0.5, fontWeight: 600 }}>• Formato final: 5522999999999</Typography>
+                                        <Typography variant="body2" sx={{ mb: 0.5 }}>• {t("apiPage.docs.countryCode")}</Typography>
+                                        <Typography variant="body2" sx={{ mb: 0.5 }}>• {t("apiPage.docs.dddEx")}</Typography>
+                                        <Typography variant="body2" sx={{ mb: 0.5 }}>• {t("apiPage.docs.numberEx")}</Typography>
+                                        <Typography variant="body2" sx={{ mb: 0.5, fontWeight: 600 }}>• {t("apiPage.docs.finalFormat")}</Typography>
                                     </Box>
                                 </Box>
                             </ListItem>
 
                             <Divider sx={{ my: 2 }} />
 
-                            <SubTitle variant="h6">1. Mensagens de Texto</SubTitle>
+                            <SubTitle variant="h6">{t("apiPage.docs.textTitle")}</SubTitle>
                             <Typography variant="body2" sx={{ mb: 2 }}>
-                                Informações necessárias para envio de mensagens de texto:
+                                {t("apiPage.docs.textInfo")}
                             </Typography>
 
                             <ApiUrl>
-                                <Typography variant="body2" fontWeight={600} sx={{ mb: 0.5 }}>URL:</Typography>
+                                <Typography variant="body2" fontWeight={600} sx={{ mb: 0.5 }}>{t("apiPage.docs.urlLabel")}</Typography>
                                 <Typography variant="body2" fontFamily="monospace">
                                     {process.env.REACT_APP_BACKEND_URL}/v1/messages/send
                                 </Typography>
                             </ApiUrl>
 
                             <ApiMethod>
-                                <CodeIcon sx={{ mr: 0.5, fontSize: '1rem' }} /> Método: POST
+                                <CodeIcon sx={{ mr: 0.5, fontSize: '1rem' }} /> {t("apiPage.docs.method")}
                             </ApiMethod>
 
-                            <Typography variant="body2" fontWeight={600} sx={{ mb: 1 }}>Headers:</Typography>
+                            <Typography variant="body2" fontWeight={600} sx={{ mb: 1 }}>{t("apiPage.docs.headers")}</Typography>
                             <ApiHeader>
                                 <Typography variant="body2" fontFamily="monospace">
                                     x-api-token: [seu_token]<br />
@@ -401,7 +418,7 @@ const Api = () => {
                                 </Typography>
                             </ApiHeader>
 
-                            <Typography variant="body2" fontWeight={600} sx={{ mb: 1 }}>Corpo da requisição (JSON):</Typography>
+                            <Typography variant="body2" fontWeight={600} sx={{ mb: 1 }}>{t("apiPage.docs.jsonBody")}</Typography>
                             <CodeBlock>
 {`{
   "number": "5522999999999",
@@ -412,44 +429,44 @@ const Api = () => {
 }`}
                             </CodeBlock>
 
-                            <Typography variant="body2" fontWeight={600} sx={{ mb: 1 }}>Parâmetros obrigatórios:</Typography>
+                            <Typography variant="body2" fontWeight={600} sx={{ mb: 1 }}>{t("apiPage.docs.requiredParams")}</Typography>
                             <Box sx={{ mb: 2 }}>
                                 <ListItem>
-                                    <Typography variant="body2"><b>number:</b> Número do destinatário no formato DDI+DDD+NÚMERO</Typography>
+                                    <Typography variant="body2"><b>number:</b> {t("apiPage.docs.paramNumber")}</Typography>
                                 </ListItem>
                                 <ListItem>
-                                    <Typography variant="body2"><b>body:</b> Conteúdo da mensagem</Typography>
+                                    <Typography variant="body2"><b>body:</b> {t("apiPage.docs.paramBody")}</Typography>
                                 </ListItem>
                                 <ListItem>
-                                    <Typography variant="body2"><b>userId:</b> ID do usuário que está enviando a mensagem</Typography>
+                                    <Typography variant="body2"><b>userId:</b> {t("apiPage.docs.paramUserId")}</Typography>
                                 </ListItem>
                                 <ListItem>
-                                    <Typography variant="body2"><b>queueId:</b> ID do Setor</Typography>
+                                    <Typography variant="body2"><b>queueId:</b> {t("apiPage.docs.paramQueueId")}</Typography>
                                 </ListItem>
                                 <ListItem>
-                                    <Typography variant="body2"><b>whatsappId:</b> ID do Canal WhatsApp(wwebjs)</Typography>
+                                    <Typography variant="body2"><b>whatsappId:</b> {t("apiPage.docs.paramWhatsappId")}</Typography>
                                 </ListItem>
                             </Box>
 
                             <Divider sx={{ my: 2 }} />
 
-                            <SubTitle variant="h6">2. Mensagens de Mídia</SubTitle>
+                            <SubTitle variant="h6">{t("apiPage.docs.mediaTitle")}</SubTitle>
                             <Typography variant="body2" sx={{ mb: 2 }}>
-                                Informações necessárias para envio de mensagens com mídia:
+                                {t("apiPage.docs.mediaInfo")}
                             </Typography>
 
                             <ApiUrl>
-                                <Typography variant="body2" fontWeight={600} sx={{ mb: 0.5 }}>URL:</Typography>
+                                <Typography variant="body2" fontWeight={600} sx={{ mb: 0.5 }}>{t("apiPage.docs.urlLabel")}</Typography>
                                 <Typography variant="body2" fontFamily="monospace">
                                     {process.env.REACT_APP_BACKEND_URL}/v1/messages/send-media
                                 </Typography>
                             </ApiUrl>
 
                             <ApiMethod>
-                                <CodeIcon sx={{ mr: 0.5, fontSize: '1rem' }} /> Método: POST
+                                <CodeIcon sx={{ mr: 0.5, fontSize: '1rem' }} /> {t("apiPage.docs.method")}
                             </ApiMethod>
 
-                            <Typography variant="body2" fontWeight={600} sx={{ mb: 1 }}>Headers:</Typography>
+                            <Typography variant="body2" fontWeight={600} sx={{ mb: 1 }}>{t("apiPage.docs.headers")}</Typography>
                             <ApiHeader>
                                 <Typography variant="body2" fontFamily="monospace">
                                     x-api-token: [seu_token]<br />
@@ -457,7 +474,7 @@ const Api = () => {
                                 </Typography>
                             </ApiHeader>
 
-                            <Typography variant="body2" fontWeight={600} sx={{ mb: 1 }}>Corpo da requisição (FormData):</Typography>
+                            <Typography variant="body2" fontWeight={600} sx={{ mb: 1 }}>{t("apiPage.docs.formDataBody")}</Typography>
                             <CodeBlock>
 {`{
   "number": "5522999999999",
@@ -469,47 +486,47 @@ const Api = () => {
 }`}
                             </CodeBlock>
 
-                            <Typography variant="body2" fontWeight={600} sx={{ mb: 1 }}>Parâmetros obrigatórios:</Typography>
+                            <Typography variant="body2" fontWeight={600} sx={{ mb: 1 }}>{t("apiPage.docs.requiredParams")}</Typography>
                             <Box sx={{ mb: 2 }}>
                                 <ListItem>
-                                    <Typography variant="body2"><b>number:</b> Número do destinatário no formato DDI+DDD+NÚMERO</Typography>
+                                    <Typography variant="body2"><b>number:</b> {t("apiPage.docs.paramNumber")}</Typography>
                                 </ListItem>
                                 <ListItem>
-                                    <Typography variant="body2"><b>body:</b> Mensagem que acompanha a mídia</Typography>
+                                    <Typography variant="body2"><b>body:</b> {t("apiPage.docs.paramBodyMedia")}</Typography>
                                 </ListItem>
                                 <ListItem>
-                                    <Typography variant="body2"><b>medias:</b> Arquivo de mídia (imagem, vídeo, áudio ou documento)</Typography>
+                                    <Typography variant="body2"><b>medias:</b> {t("apiPage.docs.paramMedias")}</Typography>
                                 </ListItem>
                                 <ListItem>
-                                    <Typography variant="body2"><b>userId:</b> ID do usuário que está enviando</Typography>
+                                    <Typography variant="body2"><b>userId:</b> {t("apiPage.docs.paramUserIdMedia")}</Typography>
                                 </ListItem>
                                 <ListItem>
-                                    <Typography variant="body2"><b>queueId:</b> ID do Setor</Typography>
+                                    <Typography variant="body2"><b>queueId:</b> {t("apiPage.docs.paramQueueId")}</Typography>
                                 </ListItem>
                                 <ListItem>
-                                    <Typography variant="body2"><b>whatsappId:</b> ID do Canal WhatsApp(wwebjs)</Typography>
+                                    <Typography variant="body2"><b>whatsappId:</b> {t("apiPage.docs.paramWhatsappId")}</Typography>
                                 </ListItem>
                             </Box>
 
                             <Divider sx={{ my: 2 }} />
 
-                            <Typography variant="body2" fontWeight={600} sx={{ mb: 1 }}>Respostas da API:</Typography>
+                            <Typography variant="body2" fontWeight={600} sx={{ mb: 1 }}>{t("apiPage.docs.apiResponses")}</Typography>
                             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                                 <Box sx={{ display: 'flex', alignItems: 'center' }}>
                                     <ResponseCode status={200}>200</ResponseCode>
-                                    <Typography variant="body2">Mensagem enviada com sucesso</Typography>
+                                    <Typography variant="body2">{t("apiPage.docs.resp200")}</Typography>
                                 </Box>
                                 <Box sx={{ display: 'flex', alignItems: 'center' }}>
                                     <ResponseCode status={401}>401</ResponseCode>
-                                    <Typography variant="body2">Token inválido ou não fornecido</Typography>
+                                    <Typography variant="body2">{t("apiPage.docs.resp401")}</Typography>
                                 </Box>
                                 <Box sx={{ display: 'flex', alignItems: 'center' }}>
                                     <ResponseCode status={403}>403</ResponseCode>
-                                    <Typography variant="body2">Token não tem permissão 'create:messages'</Typography>
+                                    <Typography variant="body2">{t("apiPage.docs.resp403")}</Typography>
                                 </Box>
                                 <Box sx={{ display: 'flex', alignItems: 'center' }}>
                                     <ResponseCode status={500}>500</ResponseCode>
-                                    <Typography variant="body2">Erro interno!</Typography>
+                                    <Typography variant="body2">{t("apiPage.docs.resp500")}</Typography>
                                 </Box>
                             </Box>
                         </InstructionContent>
@@ -518,30 +535,50 @@ const Api = () => {
                 <Grid item xs={12} md={6}>
                     <FormContainer>
                         <FormContent>
-                            <SectionTitle variant="h5">Envie Mensagens de Texto ou Mídia</SectionTitle>
+                            <SectionTitle variant="h5">{t("apiPage.form.title")}</SectionTitle>
                             <form onSubmit={handleSubmit}>
                                 <StyledInput
-                                    label="Token da API"
+                                    select
+                                    label={t("apiPage.tokenSelect.label")}
                                     variant="outlined"
                                     size="small"
                                     fullWidth
                                     value={manualToken}
                                     onChange={(e) => setManualToken(e.target.value)}
-                                    placeholder="Insira seu token da API aqui (sem 'Bearer')"
-                                    helperText="Usar apenas token com permissão 'create:messages'"
-                                />
+                                    helperText={t("apiPage.tokenSelect.helperText")}
+                                    InputLabelProps={{ shrink: true }}
+                                    SelectProps={{
+                                        displayEmpty: true,
+                                        renderValue: (selected) => {
+                                            if (!selected) return <em>{t("apiPage.tokenSelect.placeholder")}</em>;
+                                            return selected;
+                                        }
+                                    }}
+                                >
+                                    {apiTokens.length === 0 ? (
+                                        <MenuItem disabled value="">
+                                            {t("apiPage.tokenSelect.noTokens")}
+                                        </MenuItem>
+                                    ) : (
+                                        apiTokens.map((tk) => (
+                                            <MenuItem key={tk.id} value={tk.token}>
+                                                {tk.name} - {tk.token}
+                                            </MenuItem>
+                                        ))
+                                    )}
+                                </StyledInput>
                                 <StyledInput
-                                    label="Número de telefone"
+                                    label={t("apiPage.form.phoneLabel")}
                                     variant="outlined"
                                     size="small"
                                     fullWidth
                                     value={number}
                                     onChange={(e) => setNumber(e.target.value)}
-                                    placeholder="Ex: 5522999999999"
+                                    placeholder={t("apiPage.form.phonePlaceholder")}
                                     required
                                 />
                                 <StyledInput
-                                    label="Corpo da mensagem"
+                                    label={t("apiPage.form.messageLabel")}
                                     variant="outlined"
                                     size="small"
                                     fullWidth
@@ -550,13 +587,13 @@ const Api = () => {
                                     required
                                     multiline
                                     rows={3}
-                                    placeholder="Digite sua mensagem aqui"
+                                    placeholder={t("apiPage.form.messagePlaceholder")}
                                 />
                                 <GridContainer container spacing={2}>
                                     <Grid item xs={12} sm={4}>
                                         <StyledInput
                                         select
-                                        label="Canal"
+                                        label={t("apiPage.form.channelLabel")}
                                         variant="outlined"
                                         size="small"
                                         fullWidth
@@ -576,7 +613,7 @@ const Api = () => {
                                     <Grid item xs={12} sm={4}>
                                         <StyledInput
                                         select
-                                        label="Setor"
+                                        label={t("apiPage.form.queueLabel")}
                                         variant="outlined"
                                         size="small"
                                         fullWidth
@@ -595,7 +632,7 @@ const Api = () => {
                                     <Grid item xs={12} sm={4}>
                                         <StyledInput
                                         select
-                                        label="Usuário"
+                                        label={t("apiPage.form.userLabel")}
                                         variant="outlined"
                                         size="small"
                                         fullWidth
@@ -622,7 +659,7 @@ const Api = () => {
                                             startIcon={<AttachFileIcon />}
                                             sx={{ mr: 1 }}
                                         >
-                                            Selecionar Arquivo
+                                            {t("apiPage.form.selectFile")}
                                         </Button>
                                     </label>
                                     <FileInput
@@ -635,7 +672,7 @@ const Api = () => {
                                         {media ? (
                                             <SelectedFileChip>{media.name}</SelectedFileChip>
                                         ) : (
-                                            "Nenhum arquivo selecionado"
+                                            t("apiPage.form.noFile")
                                         )}
                                     </Typography>
                                 </FileInputContainer>
@@ -647,13 +684,13 @@ const Api = () => {
                                     fullWidth
                                     endIcon={<SendIcon />}
                                 >
-                                    Enviar Mensagem
+                                    {t("apiPage.form.sendButton")}
                                 </StyledButton>
                             </form>
                             
                             <Box sx={{ mt: 4, pt: 3, borderTop: '1px dashed', borderColor: 'divider' }}>
                                 <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 2 }}>
-                                    Gerador de Snippets
+                                    {t("apiPage.form.snippetTitle")}
                                 </Typography>
                                 <CodeSnippetGenerator
                                     number={number}

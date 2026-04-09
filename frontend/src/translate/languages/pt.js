@@ -133,6 +133,71 @@ const messages = {
           actions: "Ação"
         }
       },
+      apiPage: {
+        tokenSelect: {
+          label: "Token da API",
+          placeholder: "Selecione o token",
+          noTokens: "Cadastre um novo token com a permissão 'create:messages'",
+          helperText: "Usar apenas token com permissão 'create:messages'"
+        },
+        form: {
+          title: "Envie Mensagens de Texto ou Mídia",
+          phoneLabel: "Número de telefone",
+          phonePlaceholder: "Ex: 5522999999999",
+          messageLabel: "Corpo da mensagem",
+          messagePlaceholder: "Digite sua mensagem aqui",
+          channelLabel: "Canal",
+          queueLabel: "Setor",
+          userLabel: "Usuário",
+          selectFile: "Selecionar Arquivo",
+          noFile: "Nenhum arquivo selecionado",
+          sendButton: "Enviar Mensagem",
+          snippetTitle: "Gerador de Snippets"
+        },
+        toasts: {
+          noToken: "É necessário fornecer um token de API válido para enviar mensagens.",
+          success: "Mensagem enviada com sucesso!",
+          error: "Erro ao enviar mensagem:"
+        },
+        docs: {
+          title: "Documentação para envio de mensagens",
+          permissionTag: "Permissão necessária:",
+          sendMethods: "Métodos de Envio",
+          textMessages: "Mensagens de Texto",
+          mediaMessages: "Mensagens de Mídia",
+          instructions: "Instruções",
+          importantNotes: "Observações Importantes",
+          tokenNote: "Para obter o token da API, acesse a seção API key no menu lateral. Sem este token não será possível enviar mensagens.",
+          phoneFormat: "O número para envio deve estar no formato internacional, sem caracteres especiais:",
+          countryCode: "Código do país - Ex: 55 (Brasil)",
+          dddEx: "DDD - Ex: 22",
+          numberEx: "Número - Ex: 999999999",
+          finalFormat: "Formato final: 5522999999999",
+          textTitle: "1. Mensagens de Texto",
+          textInfo: "Informações necessárias para envio de mensagens de texto:",
+          urlLabel: "URL:",
+          method: "Método: POST",
+          headers: "Headers:",
+          jsonBody: "Corpo da requisição (JSON):",
+          requiredParams: "Parâmetros obrigatórios:",
+          paramNumber: "Número do destinatário no formato DDI+DDD+NÚMERO",
+          paramBody: "Conteúdo da mensagem",
+          paramUserId: "ID do usuário que está enviando a mensagem",
+          paramQueueId: "ID do Setor",
+          paramWhatsappId: "ID do Canal WhatsApp(wwebjs)",
+          mediaTitle: "2. Mensagens de Mídia",
+          mediaInfo: "Informações necessárias para envio de mensagens com mídia:",
+          formDataBody: "Corpo da requisição (FormData):",
+          paramBodyMedia: "Mensagem que acompanha a mídia",
+          paramMedias: "Arquivo de mídia (imagem, vídeo, áudio ou documento)",
+          paramUserIdMedia: "ID do usuário que está enviando",
+          apiResponses: "Respostas da API:",
+          resp200: "Mensagem enviada com sucesso",
+          resp401: "Token inválido ou não fornecido",
+          resp403: "Token não tem permissão 'create:messages'",
+          resp500: "Erro interno!"
+        }
+      },
       auth: {
         toasts: {
           success: "Login efetuado com sucesso!",
