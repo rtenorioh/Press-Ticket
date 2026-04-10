@@ -1,6 +1,5 @@
 /* eslint-disable no-plusplus */
 /* eslint-disable no-nested-ternary */
-import * as Sentry from "@sentry/node";
 import axios from "axios";
 import { writeFile } from "fs";
 import { join } from "path";
@@ -34,7 +33,11 @@ import ListSettingsServiceOne from "../SettingServices/ListSettingsServiceOne";
 import FindOrCreateTicketService from "../TicketServices/FindOrCreateTicketService";
 import UpdateTicketService from "../TicketServices/UpdateTicketService";
 import ShowWhatsAppService from "../WhatsappService/ShowWhatsAppService";
-import { incrementMessageCount, incrementErrorCount, updateLastActivity } from "./HealthCheckService";
+import {
+  incrementMessageCount,
+  incrementErrorCount,
+  updateLastActivity
+} from "./HealthCheckService";
 
 ffmpeg.setFfmpegPath("/usr/bin/ffmpeg");
 
@@ -123,7 +126,6 @@ const verifyRevoked = async (msgBody?: string): Promise<void> => {
         });
     }
   } catch (err) {
-    Sentry.captureException(err);
     logger.error(`Error Message Revoke. Err: ${err}`);
   }
 };
@@ -189,7 +191,6 @@ const verifyMediaMessage = async (
         console.error("Ocorreu um erro:", err);
       });
   } catch (err: any) {
-    Sentry.captureException(err);
     logger.error(err);
   }
 
@@ -1445,7 +1446,6 @@ const handleMessage = async (
     };
     await CreateOrUpdateContactService(contactData);
   } catch (err) {
-    Sentry.captureException(err);
     logger.error(`[MSG_ERRO] Erro ao processar mensagem do WhatsApp. ID=${msg?.id?.id || "unknown"}, Erro: ${err}`);
 
     logger.error(`[MSG_ERRO_DETALHES] Stack trace: ${err.stack || "Sem stack trace"}`);
@@ -1568,7 +1568,6 @@ const handleMsgAck = async (msg: WbotMessage, ack: MessageAck) => {
       }
     }
   } catch (err) {
-    Sentry.captureException(err);
     logger.error(`[ACK_ERRO] Erro ao processar ACK da mensagem. ID=${msg?.id?.id || "unknown"}, ACK=${ack}, Erro: ${err}`);
     console.error(`[ACK_ERRO] Erro ao processar ACK da mensagem. ID=${msg?.id?.id || "unknown"}, ACK=${ack}, Erro: ${err}`);
   }
@@ -1638,7 +1637,6 @@ const handleMsgEdit = async (
       message: editedMsg
     });
   } catch (err) {
-    Sentry.captureException(err);
     logger.error(`Error handling message edit. Err: ${err}`);
   }
 };
