@@ -1,6 +1,7 @@
 /* eslint-disable no-plusplus */
 /* eslint-disable no-nested-ternary */
 import * as Sentry from "@sentry/node";
+import axios from "axios";
 import { writeFile } from "fs";
 import { join } from "path";
 import { promisify } from "util";
@@ -36,8 +37,6 @@ import ShowWhatsAppService from "../WhatsappService/ShowWhatsAppService";
 import { incrementMessageCount, incrementErrorCount, updateLastActivity } from "./HealthCheckService";
 
 ffmpeg.setFfmpegPath("/usr/bin/ffmpeg");
-
-const request = require("request");
 
 interface Session extends Client {
   id?: number;
@@ -201,7 +200,7 @@ const verifyMediaMessage = async (
     albumId = `${msg.from}_${roundedTimestamp}`;
   }
 
-  const fileSize = media.data ? Buffer.from(media.data, 'base64').length : null;
+  const fileSize = media.data ? Buffer.from(media.data, "base64").length : null;
 
   const messageData = {
     id: msg.id.id,
@@ -286,25 +285,19 @@ const getGeocode = async (
   const safeLatitude = encodeURIComponent(String(latitude).trim());
   const safeLongitude = encodeURIComponent(String(longitude).trim());
 
-  const url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${safeLatitude},${safeLongitude}&key=${encodeURIComponent(apiKey?.value || '')}`;
+  const url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${safeLatitude},${safeLongitude}&key=${encodeURIComponent(apiKey?.value || "")}`;
 
-  return new Promise((resolve, reject) => {
-    try {
-      request(url, { json: true }, (err: any, res: any, body: any) => {
-        if (err) {
-          console.error("Erro na requisição da API do Google Maps:", err);
-          reject(err);
-        } else if (body && body.results && body.results.length > 0) {
-          resolve(body.results[0].formatted_address);
-        } else {
-          resolve(`${latitude}, ${longitude}`);
-        }
-      });
-    } catch (error) {
-      console.error("Erro ao processar requisição de geocodificação:", error);
-      resolve(`${latitude}, ${longitude}`);
+  try {
+    const response = await axios.get(url);
+    const body = response.data;
+    if (body && body.results && body.results.length > 0) {
+      return body.results[0].formatted_address;
     }
-  });
+    return `${latitude}, ${longitude}`;
+  } catch (error) {
+    console.error("Erro ao processar requisição de geocodificação:", error);
+    return `${latitude}, ${longitude}`;
+  }
 };
 
 const prepareLocation = async (msg: WbotMessage): Promise<WbotMessage> => {
@@ -322,8 +315,8 @@ const prepareLocation = async (msg: WbotMessage): Promise<WbotMessage> => {
       Number(msg.location.longitude)
     );
 
-    if (typeof msg.body !== 'string') {
-      msg.body = '';
+    if (typeof msg.body !== "string") {
+      msg.body = "";
     }
     msg.body = `data:image/png;base64,${msg.body}|${gmapsUrl}`;
     msg.body += `|${
@@ -332,8 +325,8 @@ const prepareLocation = async (msg: WbotMessage): Promise<WbotMessage> => {
   } catch (error) {
     console.error("Erro ao preparar a localização:", error);
 
-    if (typeof msg.body !== 'string') {
-      msg.body = '';
+    if (typeof msg.body !== "string") {
+      msg.body = "";
     }
     if (msg.location && msg.location.latitude && msg.location.longitude) {
       msg.body = `data:image/png;base64,${msg.body}|${gmapsUrl}|${msg.location.latitude}, ${msg.location.longitude}`;
@@ -371,7 +364,7 @@ const verifyMessage = async (
 
     pollOptions.forEach((option: any, index: number) => {
       const optionName = option?.name || option?.localName || option;
-      if (optionName && typeof optionName === 'string' && optionName.trim() !== '') {
+      if (optionName && typeof optionName === "string" && optionName.trim() !== "") {
         pollBody += `${index + 1}. ${optionName}\n`;
       }
     });
@@ -399,23 +392,23 @@ const verifyMessage = async (
       if (msg.vCards && Array.isArray(msg.vCards) && msg.vCards.length > 0) {
         const extractedContacts = [];
 
-        const vcardLines = msg.vCards.join(',').split('\n');
+        const vcardLines = msg.vCards.join(",").split("\n");
 
-        let currentName = '';
-        let currentNumber = '';
+        let currentName = "";
+        let currentNumber = "";
 
         for (let i = 0; i < vcardLines.length; i++) {
           const line = vcardLines[i];
 
-          const parts = line.split(':');
+          const parts = line.split(":");
 
           if (parts.length >= 2) {
             const key = parts[0];
-            const value = parts.slice(1).join(':');
+            const value = parts.slice(1).join(":");
 
-            if (key === 'FN') {
+            if (key === "FN") {
               currentName = value.trim();
-            } else if (key.includes('TEL') && value) {
+            } else if (key.includes("TEL") && value) {
               currentNumber = value.trim();
 
               if (currentName && currentNumber) {
@@ -624,12 +617,12 @@ const verifyQueue = async (
     const currentMinute = now.getMinutes();
     const currentTimeInMinutes = currentHour * 60 + currentMinute;
 
-    const startWorkParts = choosenQueue.startWork.split(':');
+    const startWorkParts = choosenQueue.startWork.split(":");
     const startWorkHour = parseInt(startWorkParts[0], 10);
     const startWorkMinute = parseInt(startWorkParts[1], 10);
     const startWorkInMinutes = startWorkHour * 60 + startWorkMinute;
 
-    const endWorkParts = choosenQueue.endWork.split(':');
+    const endWorkParts = choosenQueue.endWork.split(":");
     const endWorkHour = parseInt(endWorkParts[0], 10);
     const endWorkMinute = parseInt(endWorkParts[1], 10);
     const endWorkInMinutes = endWorkHour * 60 + endWorkMinute;
@@ -637,12 +630,12 @@ const verifyQueue = async (
     let isBreakTime = false;
     if (choosenQueue.startBreak && choosenQueue.endBreak) {
       try {
-        const startBreakParts = choosenQueue.startBreak.split(':');
+        const startBreakParts = choosenQueue.startBreak.split(":");
         const startBreakHour = parseInt(startBreakParts[0], 10);
         const startBreakMinute = parseInt(startBreakParts[1], 10);
         const startBreakInMinutes = startBreakHour * 60 + startBreakMinute;
 
-        const endBreakParts = choosenQueue.endBreak.split(':');
+        const endBreakParts = choosenQueue.endBreak.split(":");
         const endBreakHour = parseInt(endBreakParts[0], 10);
         const endBreakMinute = parseInt(endBreakParts[1], 10);
         const endBreakInMinutes = endBreakHour * 60 + endBreakMinute;
@@ -651,7 +644,7 @@ const verifyQueue = async (
           isBreakTime = true;
         }
       } catch (error) {
-        console.error('Erro ao processar horário de intervalo:', error);
+        console.error("Erro ao processar horário de intervalo:", error);
         isBreakTime = false;
       }
     }
@@ -878,17 +871,17 @@ const handleMessage = async (
     }
 
 
-    // if (msg.type === 'poll_creation' || (msg as any).pollName) {
-    //   logger.info(`[MSG_IGNORADA] Mensagem de enquete ignorada (processada pelo SendPollService): ID=${msg.id?.id || 'unknown'}`);
+    // if (msg.type === "poll_creation" || (msg as any).pollName) {
+    //   logger.info(`[MSG_IGNORADA] Mensagem de enquete ignorada (processada pelo SendPollService): ID=${msg.id?.id || "unknown"}`);
     //   return;
     // }
 
     if (!isValidMsg(msg)) {
-      logger.info(`[MSG_IGNORADA] Mensagem ignorada por não ser válida: ID=${msg.id?.id || 'unknown'}`);
+      logger.info(`[MSG_IGNORADA] Mensagem ignorada por não ser válida: ID=${msg.id?.id || "unknown"}`);
       return;
     }
 
-    logger.info(`[MSG_PROCESSANDO] Iniciando processamento da mensagem: ID=${msg.id?.id || 'unknown'}`);
+    logger.info(`[MSG_PROCESSANDO] Iniciando processamento da mensagem: ID=${msg.id?.id || "unknown"}`);
   } catch (err) {
     logger.error(`[MSG_ERRO_LOG] Erro ao registrar logs iniciais: ${err}`);
     if (wbot.id) {
@@ -930,20 +923,12 @@ const handleMessage = async (
       groupContact
     );
 
-    const options = {
-      method: "POST",
-      url: Integrationdb?.value,
-      headers: {
-        "Content-Type": "application/json"
-      },
-      json: {
-        message: msg,
-        ticket: ticket
-      }
-    };
-
     try {
-      await request(options);
+      await axios.post(
+        Integrationdb?.value,
+        { message: msg, ticket: ticket },
+        { headers: { "Content-Type": "application/json" } }
+      );
     } catch (error) {
       console.error("Erro ao enviar dados para o n8n:", error);
     }
@@ -1292,7 +1277,7 @@ const handleMessage = async (
           return;
         }
 
-        if ((typeof msg.vCards === 'string' && (msg.vCards as string).trim() === '') ||
+        if ((typeof msg.vCards === "string" && (msg.vCards as string).trim() === "") ||
           (Array.isArray(msg.vCards) && msg.vCards.length === 0)) {
           console.error("vCards data is empty");
           msg.body = JSON.stringify([{
@@ -1336,25 +1321,25 @@ const handleMessage = async (
         if (obj.length === 0) {
           console.warn("No contacts were extracted from vCard data");
 
-          if (typeof msg.vCards === 'object') {
+          if (typeof msg.vCards === "object") {
             console.info("vCards is an object, stringifying:", JSON.stringify(msg.vCards));
           }
 
-          if (msg.vCards && typeof msg.vCards === 'object') {
+          if (msg.vCards && typeof msg.vCards === "object") {
             try {
               if (Array.isArray(msg.vCards)) {
                 for (let i = 0; i < msg.vCards.length; i++) {
                   const vcard = msg.vCards[i];
 
-                  if (typeof vcard === 'string') {
+                  if (typeof vcard === "string") {
                     const vcardStr = vcard.toString();
                     const nameMatch = vcardStr.match(/FN:(.*?)\n/i);
                     const telMatch = vcardStr.match(/TEL[^:]*:(.*?)\n/i);
 
                     if (nameMatch || telMatch) {
                       obj.push({
-                        name: nameMatch ? nameMatch[1].trim() : 'Sem nome',
-                        number: telMatch ? telMatch[1].trim() : ''
+                        name: nameMatch ? nameMatch[1].trim() : "Sem nome",
+                        number: telMatch ? telMatch[1].trim() : ""
                       });
                     }
                   }
@@ -1371,8 +1356,8 @@ const handleMessage = async (
 
                   if (nameMatch || telMatch) {
                     obj.push({
-                      name: nameMatch ? nameMatch[1].trim() : 'Sem nome',
-                      number: telMatch ? telMatch[1].trim() : ''
+                      name: nameMatch ? nameMatch[1].trim() : "Sem nome",
+                      number: telMatch ? telMatch[1].trim() : ""
                     });
                   }
                 }
@@ -1445,7 +1430,7 @@ const handleMessage = async (
 
     let profilePicUrl;
     try {
-      if (typeof msgContact.getProfilePicUrl === 'function') {
+      if (typeof msgContact.getProfilePicUrl === "function") {
         profilePicUrl = await msgContact.getProfilePicUrl();
       }
     } catch (picErr) {
@@ -1461,17 +1446,17 @@ const handleMessage = async (
     await CreateOrUpdateContactService(contactData);
   } catch (err) {
     Sentry.captureException(err);
-    logger.error(`[MSG_ERRO] Erro ao processar mensagem do WhatsApp. ID=${msg?.id?.id || 'unknown'}, Erro: ${err}`);
+    logger.error(`[MSG_ERRO] Erro ao processar mensagem do WhatsApp. ID=${msg?.id?.id || "unknown"}, Erro: ${err}`);
 
-    logger.error(`[MSG_ERRO_DETALHES] Stack trace: ${err.stack || 'Sem stack trace'}`);
+    logger.error(`[MSG_ERRO_DETALHES] Stack trace: ${err.stack || "Sem stack trace"}`);
 
     try {
       logger.error(`[MSG_ERRO_CONTEXTO] Contexto da mensagem com erro: ${JSON.stringify({
-        id: msg?.id?.id || 'unknown',
+        id: msg?.id?.id || "unknown",
         fromMe: msg?.fromMe,
         from: msg?.from,
         to: msg?.to,
-        body: msg?.body?.substring(0, 100) || 'Sem corpo',
+        body: msg?.body?.substring(0, 100) || "Sem corpo",
         type: msg?.type,
         timestamp: msg?.timestamp,
         hasMedia: msg?.hasMedia
@@ -1480,7 +1465,7 @@ const handleMessage = async (
       logger.error(`[MSG_ERRO_LOG] Erro ao tentar registrar detalhes do erro: ${logErr}`);
     }
   } finally {
-    logger.info(`[MSG_FINALIZADA] Processamento da mensagem finalizado: ID=${msg?.id?.id || 'unknown'}, Timestamp=${new Date().toISOString()}`);
+    logger.info(`[MSG_FINALIZADA] Processamento da mensagem finalizado: ID=${msg?.id?.id || "unknown"}, Timestamp=${new Date().toISOString()}`);
   }
 };
 
@@ -1561,7 +1546,7 @@ const handleMsgAck = async (msg: WbotMessage, ack: MessageAck) => {
             id: { [Op.lt]: messageToUpdate.id },
             ack: { [Op.lt]: ackToUpdate }
           },
-          order: [['createdAt', 'DESC']]
+          order: [["createdAt", "DESC"]]
         });
 
         if (messagesToUpdate.length > 0) {
@@ -1584,8 +1569,8 @@ const handleMsgAck = async (msg: WbotMessage, ack: MessageAck) => {
     }
   } catch (err) {
     Sentry.captureException(err);
-    logger.error(`[ACK_ERRO] Erro ao processar ACK da mensagem. ID=${msg?.id?.id || 'unknown'}, ACK=${ack}, Erro: ${err}`);
-    console.error(`[ACK_ERRO] Erro ao processar ACK da mensagem. ID=${msg?.id?.id || 'unknown'}, ACK=${ack}, Erro: ${err}`);
+    logger.error(`[ACK_ERRO] Erro ao processar ACK da mensagem. ID=${msg?.id?.id || "unknown"}, ACK=${ack}, Erro: ${err}`);
+    console.error(`[ACK_ERRO] Erro ao processar ACK da mensagem. ID=${msg?.id?.id || "unknown"}, ACK=${ack}, Erro: ${err}`);
   }
 };
 
