@@ -135,7 +135,9 @@ const backupSystem = async (): Promise<string> => {
     updateStatus.progress = 30;
     await saveUpdateStatus();
 
-    await exec(`tar --exclude='./node_modules' --exclude='./dist' --exclude='./build' --exclude='./backups' --exclude='./public/media' -czf ${backupPath} .`);
+    await exec(
+      `tar --exclude='./node_modules' --exclude='./dist' --exclude='./build' --exclude='./backups' --exclude='./public/media' -czf ${backupPath} .`
+    );
 
     return backupPath;
   } catch (error: any) {
@@ -174,8 +176,8 @@ export const downloadAndInstallUpdate = async (updateInfo: UpdateInfo): Promise<
 
     response.data.pipe(writer);
 
-    await new Promise((resolve, reject) => {
-      writer.on('finish', resolve);
+    await new Promise<void>((resolve, reject) => {
+      writer.on('finish', () => resolve());
       writer.on('error', reject);
     });
 
