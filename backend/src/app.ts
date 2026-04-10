@@ -61,16 +61,7 @@ app.use((req, res, next) => {
 });
 
 app.use((req, res, next) => {
-  res.setHeader(
-    "Permissions-Policy",
-    `geolocation=(self),
-    microphone=(self),
-    camera=(self),
-    payment=(self),
-    usb=(),
-    magnetometer=(),
-    gyroscope=(),
-    accelerometer=()`
+  res.setHeader("Permissions-Policy", "geolocation=(self), microphone=(self), camera=(self), payment=(self), usb=(), magnetometer=(), gyroscope=(), accelerometer=()"
   );
   next();
 });
