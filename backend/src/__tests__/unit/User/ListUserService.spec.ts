@@ -1,4 +1,4 @@
-import faker from "faker";
+import { faker } from "@faker-js/faker";
 import User from "../../../models/User";
 import CreateUserService from "../../../services/UserServices/CreateUserService";
 import ListUsersService from "../../../services/UserServices/ListUsersService";
@@ -19,7 +19,7 @@ describe("User", () => {
 
   it("should be able to list users", async () => {
     await CreateUserService({
-      name: faker.name.findName(),
+      name: faker.person.fullName(),
       email: faker.internet.email(),
       password: faker.internet.password()
     });

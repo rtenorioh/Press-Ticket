@@ -1,4 +1,4 @@
-import faker from "faker";
+import { faker } from "@faker-js/faker";
 import AppError from "../../../errors/AppError";
 import AuthUserService from "../../../services/UserServices/AuthUserService";
 import CreateUserService from "../../../services/UserServices/CreateUserService";
@@ -22,9 +22,11 @@ describe("Auth", () => {
     const email = faker.internet.email();
 
     await CreateUserService({
-      name: faker.name.findName(),
+      name: faker.person.fullName(),
       email,
-      password
+      password,
+      startWork: "00:00",
+      endWork: "23:59"
     });
 
     const response = await AuthUserService({
@@ -50,9 +52,11 @@ describe("Auth", () => {
 
   it("should not be able to login with incorret password", async () => {
     await CreateUserService({
-      name: faker.name.findName(),
+      name: faker.person.fullName(),
       email: "mail@test.com",
-      password: faker.internet.password()
+      password: faker.internet.password(),
+      startWork: "00:00",
+      endWork: "23:59"
     });
 
     try {

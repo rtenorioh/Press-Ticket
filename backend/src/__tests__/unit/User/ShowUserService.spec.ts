@@ -1,4 +1,4 @@
-import faker from "faker";
+import { faker } from "@faker-js/faker";
 import AppError from "../../../errors/AppError";
 import User from "../../../models/User";
 import CreateUserService from "../../../services/UserServices/CreateUserService";
@@ -20,7 +20,7 @@ describe("User", () => {
 
   it("should be able to find a user", async () => {
     const newUser = await CreateUserService({
-      name: faker.name.findName(),
+      name: faker.person.fullName(),
       email: faker.internet.email(),
       password: faker.internet.password()
     });
@@ -32,7 +32,7 @@ describe("User", () => {
   });
 
   it("should not be able to find a inexisting user", async () => {
-    expect(ShowUserService(faker.random.number())).rejects.toBeInstanceOf(
+    expect(ShowUserService(faker.number.int())).rejects.toBeInstanceOf(
       AppError
     );
   });
