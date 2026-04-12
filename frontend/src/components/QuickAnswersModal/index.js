@@ -134,7 +134,7 @@ const QuickAnswersModal = ({
             
             if (data.mediaPath) {
               setFilePreview({
-                url: `${process.env.REACT_APP_BACKEND_URL}/public/${data.mediaPath}`,
+                url: `${import.meta.env.VITE_BACKEND_URL}/public/${data.mediaPath}`,
                 name: data.mediaPath,
                 type: 'application/octet-stream',
                 size: 0

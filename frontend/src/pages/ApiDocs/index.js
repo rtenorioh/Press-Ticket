@@ -21,7 +21,7 @@ const StyledIframe = styled('iframe')({
 
 const ApiDocs = () => {
   const [iframeError, setIframeError] = useState(false);
-  const backendUrl = process.env.REACT_APP_BACKEND_URL || '';
+  const backendUrl = import.meta.env.VITE_BACKEND_URL || '';
   const normalizedUrl = backendUrl.replace(/^https:\/\/(localhost|127\.0\.0\.1)/, 'http://$1');
   const urlapi = `${normalizedUrl}/api-docs/`;
 

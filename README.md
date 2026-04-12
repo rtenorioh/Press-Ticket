@@ -98,10 +98,20 @@ Este sistema é ideal para empresas que buscam melhorar seu atendimento ao clien
 
 ## Instalação
 
-- [Local - Instalação Manual](https://github.com/rtenorioh/Press-Ticket/blob/main/docs/INSTALL_localhost.md);
+### Localhost
+
+- [Local - Instalação Manual](https://github.com/rtenorioh/Press-Ticket/blob/main/docs/INSTALL_localhost.md); e
+- [Local - Instalação com Docker](https://github.com/rtenorioh/Press-Ticket/blob/main/docs/INSTALL_localhost_docker.md).
+
+### VPS
+
 - [VPS - Instalação Manual](https://github.com/rtenorioh/Press-Ticket/blob/main/docs/INSTALL_MANUAL_VPS.md);
-- [VPS - Instalador Automático](https://github.com/rtenorioh/Press-Ticket/blob/main/docs/INSTALL_AUTOMATICO_VPS.md);
-- [VPS - Atualizador Automático](https://github.com/rtenorioh/Press-Ticket/blob/main/docs/UPDATE_VPS.md);
+- [VPS - Instalação com Docker](https://github.com/rtenorioh/Press-Ticket/blob/main/docs/INSTALL_VPS_docker.md);
+- [VPS - Instalador Automático](https://github.com/rtenorioh/Press-Ticket/blob/main/docs/INSTALL_AUTOMATICO_VPS.md); e
+- [VPS - Atualizador Automático](https://github.com/rtenorioh/Press-Ticket/blob/main/docs/UPDATE_VPS.md).
+
+### Extras
+
 - [phpmyadmin](https://github.com/rtenorioh/Press-Ticket/blob/main/docs/INSTALL_phpmyadmin.md); e
 - [Fuso Horário](https://github.com/rtenorioh/Press-Ticket/blob/main/docs/INSTALL_horarioVPS.md).
 

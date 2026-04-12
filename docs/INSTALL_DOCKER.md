@@ -81,16 +81,16 @@ WEBHOOK=http://192.168.1.100:8000
 O arquivo `frontend/.env.docker` já vem configurado para desenvolvimento local.
 Normalmente não precisa de alteração para uso em localhost.
 
-### 4. Configurar a URL do Backend no React (build)
+### 4. Configurar a URL do Backend no Vite (build)
 
 Se precisar alterar a URL do backend, edite a variável no `docker-compose.yml`:
 
 ```yaml
 args:
-  REACT_APP_BACKEND_URL: http://localhost:8000  # altere aqui
+  VITE_BACKEND_URL: http://localhost:8000  # altere aqui
 ```
 
-> ⚠️ A variável `REACT_APP_BACKEND_URL` é **embutida no build do React**.
+> ⚠️ A variável `VITE_BACKEND_URL` é **embutida no build do Vite**.
 > Qualquer alteração exige reconstruir a imagem com `docker compose build frontend`.
 
 ---

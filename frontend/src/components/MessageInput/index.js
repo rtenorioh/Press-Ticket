@@ -750,7 +750,7 @@ const MessageInput = ({ ticketStatus }) => {
     
     if (mediaPath) {
       try {
-        const mediaUrl = `${process.env.REACT_APP_BACKEND_URL}/public/${mediaPath}`;
+        const mediaUrl = `${import.meta.env.VITE_BACKEND_URL}/public/${mediaPath}`;
         
         const response = await fetch(mediaUrl);
         const blob = await response.blob();

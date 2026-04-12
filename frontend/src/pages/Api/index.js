@@ -331,8 +331,8 @@ const Api = () => {
 
         try {
             const endpoint = media 
-                ? `${process.env.REACT_APP_BACKEND_URL}/v1/messages/send-media` 
-                : `${process.env.REACT_APP_BACKEND_URL}/v1/messages/send`;
+                ? `${import.meta.env.VITE_BACKEND_URL}/v1/messages/send-media` 
+                : `${import.meta.env.VITE_BACKEND_URL}/v1/messages/send`;
                 
             await axios.post(endpoint, payload, {
                 headers: {
@@ -402,7 +402,7 @@ const Api = () => {
                             <ApiUrl>
                                 <Typography variant="body2" fontWeight={600} sx={{ mb: 0.5 }}>{t("apiPage.docs.urlLabel")}</Typography>
                                 <Typography variant="body2" fontFamily="monospace">
-                                    {process.env.REACT_APP_BACKEND_URL}/v1/messages/send
+                                    {import.meta.env.VITE_BACKEND_URL}/v1/messages/send
                                 </Typography>
                             </ApiUrl>
 
@@ -458,7 +458,7 @@ const Api = () => {
                             <ApiUrl>
                                 <Typography variant="body2" fontWeight={600} sx={{ mb: 0.5 }}>{t("apiPage.docs.urlLabel")}</Typography>
                                 <Typography variant="body2" fontFamily="monospace">
-                                    {process.env.REACT_APP_BACKEND_URL}/v1/messages/send-media
+                                    {import.meta.env.VITE_BACKEND_URL}/v1/messages/send-media
                                 </Typography>
                             </ApiUrl>
 

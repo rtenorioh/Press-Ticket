@@ -43,9 +43,9 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       args:
-        REACT_APP_BACKEND_URL: https://api.seudominio.com
-        REACT_APP_HOURS_CLOSE_TICKETS_AUTO: ""
-        REACT_APP_MASTERADMIN: "ON"
+        VITE_BACKEND_URL: https://api.seudominio.com
+        VITE_HOURS_CLOSE_TICKETS_AUTO: ""
+        VITE_MASTERADMIN: "ON"
     container_name: press_ticket_frontend
     restart: unless-stopped
     depends_on:

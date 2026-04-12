@@ -780,15 +780,29 @@ if [ -f "$ENV_FILE" ]; then
         echo "A variável SERVER_PORT não foi encontrada no arquivo .env. Nenhuma alteração necessária." | tee -a "$LOG_FILE"
     fi
 
-    # Verifica e adiciona REACT_APP_MASTERADMIN, se necessário
+    # Migração: REACT_APP_* → VITE_* (CRA → Vite)
+    if grep -q "^REACT_APP_BACKEND_URL=" "$ENV_FILE"; then
+        sed -i 's/^REACT_APP_BACKEND_URL=/VITE_BACKEND_URL=/' "$ENV_FILE"
+        echo "Variável REACT_APP_BACKEND_URL renomeada para VITE_BACKEND_URL." | tee -a "$LOG_FILE"
+    fi
+    if grep -q "^REACT_APP_HOURS_CLOSE_TICKETS_AUTO=" "$ENV_FILE"; then
+        sed -i 's/^REACT_APP_HOURS_CLOSE_TICKETS_AUTO=/VITE_HOURS_CLOSE_TICKETS_AUTO=/' "$ENV_FILE"
+        echo "Variável REACT_APP_HOURS_CLOSE_TICKETS_AUTO renomeada para VITE_HOURS_CLOSE_TICKETS_AUTO." | tee -a "$LOG_FILE"
+    fi
     if grep -q "^REACT_APP_MASTERADMIN=" "$ENV_FILE"; then
-        echo "A variável REACT_APP_MASTERADMIN já está presente no arquivo .env." | tee -a "$LOG_FILE"
+        sed -i 's/^REACT_APP_MASTERADMIN=/VITE_MASTERADMIN=/' "$ENV_FILE"
+        echo "Variável REACT_APP_MASTERADMIN renomeada para VITE_MASTERADMIN." | tee -a "$LOG_FILE"
+    fi
+
+    # Verifica e adiciona VITE_MASTERADMIN, se necessário
+    if grep -q "^VITE_MASTERADMIN=" "$ENV_FILE"; then
+        echo "A variável VITE_MASTERADMIN já está presente no arquivo .env." | tee -a "$LOG_FILE"
     else
-        echo "Adicionando a variável REACT_APP_MASTERADMIN ao final do arquivo .env." | tee -a "$LOG_FILE"
+        echo "Adicionando a variável VITE_MASTERADMIN ao final do arquivo .env." | tee -a "$LOG_FILE"
         echo "" >>"$ENV_FILE"
         echo "# Para permitir acesso apenas do MasterAdmin (sempre ON)" >>"$ENV_FILE"
-        echo "REACT_APP_MASTERADMIN=ON" >>"$ENV_FILE"
-        echo "A variável REACT_APP_MASTERADMIN foi adicionada ao final do arquivo .env." | tee -a "$LOG_FILE"
+        echo "VITE_MASTERADMIN=ON" >>"$ENV_FILE"
+        echo "A variável VITE_MASTERADMIN foi adicionada ao final do arquivo .env." | tee -a "$LOG_FILE"
     fi
 else
     echo "O arquivo .env do frontend não foi encontrado. Certifique-se de que a instalação foi concluída."

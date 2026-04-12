@@ -175,16 +175,16 @@ Crie ou edite o arquivo `.env` no diretório `frontend` com as seguintes informa
 NODE_ENV=development
 
 #URL BACKEND
-REACT_APP_BACKEND_URL=http://localhost:4000
+VITE_BACKEND_URL=http://localhost:4000
 
 #Tempo de encerramento automático dos tickets em horas
-REACT_APP_HOURS_CLOSE_TICKETS_AUTO=
+VITE_HOURS_CLOSE_TICKETS_AUTO=
 
 #PORTA do frontend
 PORT=3000
 
 # Para permitir acesso apenas do MasterAdmin (sempre ON)
-REACT_APP_MASTERADMIN=ON
+VITE_MASTERADMIN=ON
 
 ```
 

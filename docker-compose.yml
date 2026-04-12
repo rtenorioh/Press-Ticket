@@ -47,9 +47,9 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       args:
-        REACT_APP_BACKEND_URL: ${REACT_APP_BACKEND_URL:-http://localhost:8000}
-        REACT_APP_HOURS_CLOSE_TICKETS_AUTO: ${REACT_APP_HOURS_CLOSE_TICKETS_AUTO:-}
-        REACT_APP_MASTERADMIN: ${REACT_APP_MASTERADMIN:-ON}
+        VITE_BACKEND_URL: ${VITE_BACKEND_URL:-http://localhost:8000}
+        VITE_HOURS_CLOSE_TICKETS_AUTO: ${VITE_HOURS_CLOSE_TICKETS_AUTO:-}
+        VITE_MASTERADMIN: ${VITE_MASTERADMIN:-ON}
     container_name: press_ticket_frontend
     restart: unless-stopped
     depends_on:
@@ -57,7 +57,7 @@ services:
     env_file:
       - ./frontend/.env.docker
     environment:
-      REACT_APP_BACKEND_URL: ${REACT_APP_BACKEND_URL:-http://localhost:8000}
+      VITE_BACKEND_URL: ${VITE_BACKEND_URL:-http://localhost:8000}
     ports:
       - "3000:3000"
     networks:

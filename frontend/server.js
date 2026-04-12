@@ -29,7 +29,7 @@ if (isProduction) {
 	);
 	console.log('🔒 Modo Produção: Security headers gerenciados pelo Nginx');
 } else {
-	const backendUrl = process.env.REACT_APP_BACKEND_URL || "http://localhost:8000";
+	const backendUrl = process.env.VITE_BACKEND_URL || "http://localhost:8000";
 	const backendUrlAlt = backendUrl.startsWith("https://")
 		? backendUrl.replace("https://", "http://")
 		: backendUrl.replace("http://", "https://");

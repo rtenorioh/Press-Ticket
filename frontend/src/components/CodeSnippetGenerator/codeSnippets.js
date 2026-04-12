@@ -1,6 +1,6 @@
 /* eslint-disable no-useless-escape */
 const codeSnippets = {
-  HTTP: (number, body, userId, queueId, whatsappId, token) => `POST ${process.env.REACT_APP_BACKEND_URL}/api/messages/send HTTP/1.1
+  HTTP: (number, body, userId, queueId, whatsappId, token) => `POST ${import.meta.env.VITE_BACKEND_URL}/api/messages/send HTTP/1.1
 User-Agent: vscode-restclient
 x-api-token: ${token}
 Content-Type: application/json
@@ -18,7 +18,7 @@ Content-Length: ${85 + body.length}
   JavaScript_JQuery: (number, body, userId, queueId, whatsappId, token) => `const settings = {
   "async": true,
   "crossDomain": true,
-  "url": "${process.env.REACT_APP_BACKEND_URL}/v1/messages/send}",
+  "url": "${import.meta.env.VITE_BACKEND_URL}/v1/messages/send}",
   "method": "POST",
   "headers": {
     "user-agent": "vscode-restclient",
@@ -35,7 +35,7 @@ $.ajax(settings).done(function (response) {
         `,
 
   JavaScript_fetch: (number, body, userId, queueId, whatsappId, token) => `
-        fetch("${process.env.REACT_APP_BACKEND_URL}/v1/messages/send", {
+        fetch("${import.meta.env.VITE_BACKEND_URL}/v1/messages/send", {
             "method": "POST",
             "headers": {
                 "user-agent": "vscode-restclient",
@@ -62,7 +62,7 @@ $.ajax(settings).done(function (response) {
         const request = require('request');
         const options = {
             method: 'POST',
-            url: '${process.env.REACT_APP_BACKEND_URL}/v1/messages/send',
+            url: '${import.meta.env.VITE_BACKEND_URL}/v1/messages/send',
             headers: {
                 'user-agent': 'vscode-restclient',
                 'x-api-token': '${token}',
@@ -86,7 +86,7 @@ $.ajax(settings).done(function (response) {
 
   Python_requests: (number, body, userId, queueId, whatsappId, token) => `import requests
 
-url = "${process.env.REACT_APP_BACKEND_URL}/v1/messages/send"
+url = "${import.meta.env.VITE_BACKEND_URL}/v1/messages/send"
 
 payload = {
     "number": "${number}",
@@ -106,7 +106,7 @@ response = requests.request("POST", url, json=payload, headers=headers)
 print(response.text)`,
 
   Python_http_client: (number, body, userId, queueId, whatsappId, token) => {
-    const urlObj = new URL(process.env.REACT_APP_BACKEND_URL);
+    const urlObj = new URL(import.meta.env.VITE_BACKEND_URL);
     const host = urlObj.host;
     const connType = urlObj.protocol === "https:" ? "HTTPS" : "HTTP";
     return `import http.client
@@ -136,12 +136,12 @@ print(data.decode("utf-8"))`;
   },
 
   Ruby_Net_HTTP: (number, body, userId, queueId, whatsappId, token) => {
-    const useSSL = process.env.REACT_APP_BACKEND_URL.startsWith("https");
+    const useSSL = import.meta.env.VITE_BACKEND_URL.startsWith("https");
     return `require 'uri'
 require 'net/http'
 require 'openssl'
 
-url = URI("${process.env.REACT_APP_BACKEND_URL}/v1/messages/send")
+url = URI("${import.meta.env.VITE_BACKEND_URL}/v1/messages/send")
 
 http = Net::HTTP.new(url.host, url.port)
 http.use_ssl = ${useSSL}
@@ -164,7 +164,7 @@ $curl = curl_init();
 
 curl_setopt_array($curl, [
   CURLOPT_PORT => "4000",
-  CURLOPT_URL => "${process.env.REACT_APP_BACKEND_URL}/v1/messages/send",
+  CURLOPT_URL => "${import.meta.env.VITE_BACKEND_URL}/v1/messages/send",
   CURLOPT_RETURNTRANSFER => true,
   CURLOPT_ENCODING => "",
   CURLOPT_MAXREDIRS => 10,

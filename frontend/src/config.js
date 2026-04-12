@@ -5,7 +5,7 @@ function getConfig(name, defaultValue = null, warn = true) {
         return configCache[name];
     }
 
-    const value = window.ENV?.[name] || process.env[name] || defaultValue;
+    const value = window.ENV?.[name] || import.meta.env[name] || defaultValue;
 
     if (value === null || value === undefined) {
         console.warn(`Configuração "${name}" não encontrada. Usando valor padrão: ${defaultValue}`);
@@ -16,9 +16,9 @@ function getConfig(name, defaultValue = null, warn = true) {
 }
 
 export function getBackendUrl() {
-    return getConfig("REACT_APP_BACKEND_URL", "http://localhost:4000");
+    return getConfig("VITE_BACKEND_URL", "http://localhost:4000");
 }
 
 export function getHoursCloseTicketsAuto() {
-    return getConfig("REACT_APP_HOURS_CLOSE_TICKETS_AUTO", "", false);
+    return getConfig("VITE_HOURS_CLOSE_TICKETS_AUTO", "", false);
 }

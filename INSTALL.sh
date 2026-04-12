@@ -922,16 +922,16 @@ sudo -u deploy -H bash -c "cd $DEPLOY_HOME/$NOME_EMPRESA/frontend && cat <<EOF >
 NODE_ENV=production
 
 # URL BACKEND
-REACT_APP_BACKEND_URL=https://$URL_BACKEND
+VITE_BACKEND_URL=https://$URL_BACKEND
 
 # Tempo de encerramento automático dos tickets em horas
-REACT_APP_HOURS_CLOSE_TICKETS_AUTO=
+VITE_HOURS_CLOSE_TICKETS_AUTO=
 
 # Porta do frontend
 PORT=$PORT_FRONTEND
 
 # Para permitir acesso apenas do MasterAdmin (sempre ON)
-REACT_APP_MASTERADMIN=ON
+VITE_MASTERADMIN=ON
 EOF" || finalizar "Erro ao criar o arquivo .env do frontend." 1
 
 echo -e "${GREEN}Arquivo .env do frontend criado com sucesso.${RESET}" | tee -a "$LOG_FILE"

@@ -294,7 +294,7 @@ docker compose -f docker-compose.vps.yml up --build -d backend
 docker compose -f docker-compose.vps.yml up --build -d frontend
 ```
 
-> ⚠️ O `REACT_APP_BACKEND_URL` está embutido no build. Se alterar o domínio, reconstruir obrigatoriamente.
+> ⚠️ O `VITE_BACKEND_URL` está embutido no build. Se alterar o domínio, reconstruir obrigatoriamente.
 
 ### Reconstruir tudo
 

@@ -13,7 +13,7 @@ export const getImageUrl = (imagePath) => {
 
     const finalPath = cleanPath.startsWith('logos/') ? cleanPath : `logos/${cleanPath}`;
 
-    const backendUrl = process.env.REACT_APP_BACKEND_URL || window.location.origin;
+    const backendUrl = import.meta.env.VITE_BACKEND_URL || window.location.origin;
         
     return `${backendUrl}/public/${finalPath}`;
 };

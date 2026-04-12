@@ -63,7 +63,7 @@ const Settings = ({ toggleTheme, onThemeConfigUpdate }) => {
 	const [settings, setSettings] = useState([]);
 	const [tabValue, setTabValue] = useState(0);
 	const { user } = useContext(AuthContext);
-	const isMasterAdmin = process.env.REACT_APP_MASTERADMIN === 'ON';
+	const isMasterAdmin = import.meta.env.VITE_MASTERADMIN === 'ON';
 	const isUserMaster = user?.profile === 'masteradmin';
 
 	useEffect(() => {
