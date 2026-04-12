@@ -4,7 +4,8 @@ module.exports = {
   up: async (queryInterface: QueryInterface) => {
     await queryInterface.removeConstraint("Tickets", "Tickets_ibfk_2");
 
-    await queryInterface.addConstraint("Tickets", ["userId"], {
+    await queryInterface.addConstraint("Tickets", {
+      fields: ["userId"],
       type: "foreign key",
       name: "Tickets_ibfk_2",
       references: {
@@ -19,7 +20,8 @@ module.exports = {
   down: async (queryInterface: QueryInterface) => {
     await queryInterface.removeConstraint("Tickets", "Tickets_ibfk_2");
 
-    await queryInterface.addConstraint("Tickets", ["userId"], {
+    await queryInterface.addConstraint("Tickets", {
+      fields: ["userId"],
       type: "foreign key",
       name: "Tickets_ibfk_2",
       references: {

@@ -1,3 +1,4 @@
+import { InferAttributes, InferCreationAttributes, CreationOptional, NonAttribute } from "sequelize";
 import {
   Table,
   Column,
@@ -6,16 +7,17 @@ import {
   Model,
   PrimaryKey,
   AutoIncrement,
+  DataType,
   HasMany
 } from "sequelize-typescript";
 import Contact from "./Contact";
 
 @Table({ tableName: "ClientStatus" })
-class ClientStatus extends Model<ClientStatus> {
+class ClientStatus extends Model<InferAttributes<ClientStatus>, InferCreationAttributes<ClientStatus>> {
   @PrimaryKey
   @AutoIncrement
-  @Column
-  id: number;
+  @Column(DataType.INTEGER)
+  declare id: CreationOptional<number>;
 
   @Column
   name: string;
@@ -24,13 +26,13 @@ class ClientStatus extends Model<ClientStatus> {
   color: string;
 
   @CreatedAt
-  createdAt: Date;
+  declare createdAt: CreationOptional<Date>;
 
   @UpdatedAt
-  updatedAt: Date;
+  declare updatedAt: CreationOptional<Date>;
 
   @HasMany(() => Contact, { foreignKey: "status", sourceKey: "name" })
-  contacts: Contact[];
+  declare contacts: NonAttribute<Contact[]>;
 }
 
 export default ClientStatus;

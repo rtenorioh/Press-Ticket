@@ -1,3 +1,4 @@
+import { InferAttributes, InferCreationAttributes, CreationOptional, NonAttribute } from "sequelize";
 import {
   Table,
   Column,
@@ -8,6 +9,7 @@ import {
   AutoIncrement,
   AllowNull,
   Unique,
+  DataType,
   BelongsToMany
 } from "sequelize-typescript";
 import User from "./User";
@@ -17,11 +19,11 @@ import Whatsapp from "./Whatsapp";
 import WhatsappQueue from "./WhatsappQueue";
 
 @Table
-class Queue extends Model<Queue> {
+class Queue extends Model<InferAttributes<Queue>, InferCreationAttributes<Queue>> {
   @PrimaryKey
   @AutoIncrement
-  @Column
-  id: number;
+  @Column(DataType.INTEGER)
+  declare id: CreationOptional<number>;
 
   @AllowNull(false)
   @Unique
@@ -33,38 +35,38 @@ class Queue extends Model<Queue> {
   @Column
   color: string;
 
-  @Column
-  greetingMessage: string;
+  @Column(DataType.STRING)
+  greetingMessage: CreationOptional<string>;
 
-  @Column
-  startWork: string;
+  @Column(DataType.STRING)
+  startWork: CreationOptional<string>;
 
-  @Column
-  endWork: string;
+  @Column(DataType.STRING)
+  endWork: CreationOptional<string>;
 
-  @Column
-  absenceMessage: string;
+  @Column(DataType.STRING)
+  absenceMessage: CreationOptional<string>;
 
-  @Column
-  startBreak: string;
+  @Column(DataType.STRING)
+  startBreak: CreationOptional<string>;
 
-  @Column
-  endBreak: string;
+  @Column(DataType.STRING)
+  endBreak: CreationOptional<string>;
 
-  @Column
-  breakMessage: string;
+  @Column(DataType.STRING)
+  breakMessage: CreationOptional<string>;
 
   @CreatedAt
-  createdAt: Date;
+  declare createdAt: CreationOptional<Date>;
 
   @UpdatedAt
-  updatedAt: Date;
+  declare updatedAt: CreationOptional<Date>;
 
   @BelongsToMany(() => Whatsapp, () => WhatsappQueue)
-  whatsapps: Array<Whatsapp & { WhatsappQueue: WhatsappQueue }>;
+  declare whatsapps: NonAttribute<Array<Whatsapp & { WhatsappQueue: WhatsappQueue }>>;
 
   @BelongsToMany(() => User, () => UserQueue)
-  users: Array<User & { UserQueue: UserQueue }>;
+  declare users: NonAttribute<Array<User & { UserQueue: UserQueue }>>;
 }
 
 export default Queue;

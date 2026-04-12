@@ -1,4 +1,5 @@
 import { compare, hash } from "bcryptjs";
+import { InferAttributes, InferCreationAttributes, CreationOptional, NonAttribute } from "sequelize";
 import {
   AutoIncrement,
   BeforeCreate,
@@ -21,11 +22,11 @@ import UserWhatsapp from "./UserWhatsapp";
 import Whatsapp from "./Whatsapp";
 
 @Table
-class User extends Model<User> {
+class User extends Model<InferAttributes<User>, InferCreationAttributes<User>> {
   @PrimaryKey
   @AutoIncrement
-  @Column
-  id: number;
+  @Column(DataType.INTEGER)
+  declare id: CreationOptional<number>;
 
   @Column
   name: string;
@@ -34,38 +35,38 @@ class User extends Model<User> {
   email: string;
 
   @Column(DataType.VIRTUAL)
-  password: string;
+  password: CreationOptional<string>;
 
-  @Column
-  passwordHash: string;
+  @Column(DataType.STRING)
+  passwordHash: CreationOptional<string>;
 
   @Default("admin")
-  @Column
-  profile: string;
+  @Column(DataType.STRING)
+  profile: CreationOptional<string>;
 
   @Default(true)
-  @Column
-  active: boolean;
+  @Column(DataType.BOOLEAN)
+  active: CreationOptional<boolean>;
 
   @Default(false)
-  @Column
-  online: boolean;
+  @Column(DataType.BOOLEAN)
+  online: CreationOptional<boolean>;
 
   @Default(false)
-  @Column
-  isTricked: boolean;
+  @Column(DataType.BOOLEAN)
+  isTricked: CreationOptional<boolean>;
 
   @Default(0)
-  @Column
-  tokenVersion: number;
+  @Column(DataType.INTEGER)
+  tokenVersion: CreationOptional<number>;
 
   @Default("00:00")
-  @Column
-  startWork: string;
+  @Column(DataType.STRING)
+  startWork: CreationOptional<string>;
 
   @Default("23:59")
-  @Column
-  endWork: string;
+  @Column(DataType.STRING)
+  endWork: CreationOptional<string>;
 
   @Column(DataType.STRING)
   passwordResetToken: string | null;
@@ -74,25 +75,25 @@ class User extends Model<User> {
   passwordResetExpires: Date | null;
 
   @Column(DataType.STRING)
-  currentSessionId: string;
+  currentSessionId: string | null;
 
   @Column(DataType.DATE)
-  lastLoginAt: Date;
+  lastLoginAt: CreationOptional<Date>;
 
   @CreatedAt
-  createdAt: Date;
+  declare createdAt: CreationOptional<Date>;
 
   @UpdatedAt
-  updatedAt: Date;
+  declare updatedAt: CreationOptional<Date>;
 
   @HasMany(() => Ticket)
-  tickets: Ticket[];
+  declare tickets: NonAttribute<Ticket[]>;
 
   @BelongsToMany(() => Queue, () => UserQueue)
-  queues: Queue[];
+  declare queues: NonAttribute<Queue[]>;
 
   @BelongsToMany(() => Whatsapp, () => UserWhatsapp)
-  whatsapps: Whatsapp[];
+  declare whatsapps: NonAttribute<Whatsapp[]>;
 
   @BeforeUpdate
   @BeforeCreate

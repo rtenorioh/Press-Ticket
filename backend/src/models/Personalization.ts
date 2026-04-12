@@ -1,3 +1,4 @@
+import { InferAttributes, InferCreationAttributes, CreationOptional } from "sequelize";
 import {
   AutoIncrement,
   Column,
@@ -10,11 +11,11 @@ import {
 } from "sequelize-typescript";
 
 @Table
-class Personalization extends Model<Personalization> {
+class Personalization extends Model<InferAttributes<Personalization>, InferCreationAttributes<Personalization>> {
   @PrimaryKey
   @AutoIncrement
-  @Column
-  id: number;
+  @Column(DataType.INTEGER)
+  declare id: CreationOptional<number>;
 
   @Column({ type: DataType.STRING, allowNull: true })
   theme: string;
@@ -69,11 +70,11 @@ class Personalization extends Model<Personalization> {
 
   @CreatedAt
   @Column(DataType.DATE(6))
-  createdAt: Date;
+  declare createdAt: CreationOptional<Date>;
 
   @UpdatedAt
   @Column(DataType.DATE(6))
-  updatedAt: Date;
+  declare updatedAt: CreationOptional<Date>;
 }
 
 export default Personalization;

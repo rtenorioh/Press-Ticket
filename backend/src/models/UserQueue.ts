@@ -1,3 +1,4 @@
+import { InferAttributes, InferCreationAttributes, CreationOptional } from "sequelize";
 import {
   Table,
   Column,
@@ -10,7 +11,7 @@ import Queue from "./Queue";
 import User from "./User";
 
 @Table
-class UserQueue extends Model<UserQueue> {
+class UserQueue extends Model<InferAttributes<UserQueue>, InferCreationAttributes<UserQueue>> {
   @ForeignKey(() => User)
   @Column
   userId: number;
@@ -20,10 +21,10 @@ class UserQueue extends Model<UserQueue> {
   queueId: number;
 
   @CreatedAt
-  createdAt: Date;
+  declare createdAt: CreationOptional<Date>;
 
   @UpdatedAt
-  updatedAt: Date;
+  declare updatedAt: CreationOptional<Date>;
 }
 
 export default UserQueue;

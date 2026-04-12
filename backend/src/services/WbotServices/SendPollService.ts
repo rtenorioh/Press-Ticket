@@ -54,9 +54,9 @@ class SendPollService {
 
       const pollOptions = options.map(opt => opt.name);
 
-      const chatId = ticket.contact.number.includes('@') 
-        ? ticket.contact.number 
-        : `${ticket.contact.number}@c.us`;
+      const chatId = ticket.contact.number!.includes('@')
+        ? ticket.contact.number!
+        : `${ticket.contact.number!}@c.us`;
 
       logger.info(`[POLL] Enviando enquete para ${chatId}`);
       logger.info(`[POLL] Nome: ${pollName}`);
@@ -79,9 +79,8 @@ class SendPollService {
         fromMe: true,
         read: true,
         mediaType: "poll",
-        quotedMsgId: null,
-        ack: 1,
-        timestamp: new Date()
+        quotedMsgId: undefined,
+        ack: 1
       });
 
       await ticket.update({

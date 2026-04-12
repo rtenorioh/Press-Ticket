@@ -118,8 +118,6 @@ const FindOrCreateContactService = async (
     await contactExists.update({
       name: name || firstName || "Name Unavailable",
       number: numberWct || null,
-      firstName,
-      lastName,
       isGroup: false,
       profilePicUrl: picture
     });
@@ -139,7 +137,7 @@ const FindOrCreateContactService = async (
     instagramId: numberIg || null,
     telegramId: numberTg || null,
     webchatId: numberWc || null,
-    email: numberEm || null
+    email: numberEm || undefined
   });
 
   io.emit("contact", {

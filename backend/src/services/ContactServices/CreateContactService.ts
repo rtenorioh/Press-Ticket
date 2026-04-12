@@ -56,7 +56,7 @@ const CreateContactService = async ({
     throw new AppError("ERR_DUPLICATED_CONTACT");
   }
 
-  const contact = await Contact.create(
+  const contact = await (Contact.create as any)(
     {
       name,
       number,

@@ -37,9 +37,9 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
   });
 
   const logUserId = req.user?.id || 1;
-  
+
   const clientIp = GetClientIp(req);
-  
+
   await createActivityLog({
     userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
     action: ActivityActions.CREATE,
@@ -75,7 +75,7 @@ export const update = async (
 ): Promise<Response> => {
   try {
     const isApiRequest = req.originalUrl.includes('/v1/');
-    
+
     if (!isApiRequest && req.user && req.user.profile !== "admin") {
       throw new AppError("ERR_NO_PERMISSION", 403);
     }
@@ -90,9 +90,9 @@ export const update = async (
     const clientStatus = await UpdateService({ clientStatusData, id: clientStatusId });
 
     const logUserId = req.user?.id || 1;
-    
+
     const clientIp = GetClientIp(req);
-    
+
     await createActivityLog({
       userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
       action: ActivityActions.UPDATE,
@@ -125,13 +125,13 @@ export const remove = async (
   const { clientStatusId } = req.params;
 
   const statusToDelete = await ShowService(clientStatusId);
-  
+
   await DeleteService(clientStatusId);
-  
+
   const logUserId = req.user?.id || 1;
-  
+
   const clientIp = GetClientIp(req);
-  
+
   await createActivityLog({
     userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
     action: ActivityActions.DELETE,
@@ -159,11 +159,11 @@ export const removeAll = async (
 ): Promise<Response> => {
 
   await DeleteAllService();
-  
+
   const logUserId = req.user?.id || 1;
-  
+
   const clientIp = GetClientIp(req);
-  
+
   await createActivityLog({
     userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
     action: ActivityActions.DELETE,
@@ -206,10 +206,11 @@ export const statistics = async (
 
   const contactsWithoutStatus = await Contact.count({
     where: {
-      status: {
-        [Op.or]: [null, ""]
-      }
-    }
+      [Op.or]: [
+        { status: { [Op.is]: null } },
+        { status: "" }
+      ]
+    } as any
   });
 
   const totalContacts = await Contact.count();

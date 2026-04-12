@@ -16,7 +16,8 @@ export default {
       );
     }
 
-    await queryInterface.addConstraint("Tickets", ["queueId"], {
+    await queryInterface.addConstraint("Tickets", {
+      fields: ["queueId"],
       type: "foreign key",
       name: "Tickets_queueId_custom_foreign",
       references: {
@@ -43,7 +44,8 @@ export default {
       );
     }
 
-    await queryInterface.addConstraint("Tickets", ["queueId"], {
+    await queryInterface.addConstraint("Tickets", {
+      fields: ["queueId"],
       type: "foreign key",
       name: "Tickets_queueId_foreign_idx",
       references: {

@@ -1,3 +1,4 @@
+import { Op } from "sequelize";
 import { getIO } from "../../libs/socket";
 import GroupEvent from "../../models/GroupEvent";
 import { logger } from "../../utils/logger";
@@ -61,7 +62,7 @@ class GroupEventsService {
           createdAt: event.createdAt
         }
       };
-      
+
       io.emit(`whatsapp-${data.whatsappId}:groupEvent`, eventPayload);
 
       logger.info(`[GROUP_EVENT] ${data.eventType} registered for group ${data.groupId}`);
@@ -116,7 +117,7 @@ class GroupEventsService {
       }
 
       const messageBody = this.formatEventMessage(data);
-      
+
       const fiveSecondsAgo = new Date(Date.now() - 5000);
       const existingMessage = await Message.findOne({
         where: {
@@ -124,7 +125,7 @@ class GroupEventsService {
           body: messageBody,
           mediaType: "event",
           createdAt: {
-            [require("sequelize").Op.gte]: fiveSecondsAgo
+            [Op.gte]: fiveSecondsAgo
           }
         }
       });
@@ -135,7 +136,7 @@ class GroupEventsService {
       }
 
       logger.info(`[GROUP_EVENT] Criando mensagem de sistema: "${messageBody}"`);
-      
+
       const messageId = `${data.groupId}_${Date.now()}_event`;
 
       const message = await Message.create({
@@ -145,11 +146,9 @@ class GroupEventsService {
         read: true,
         mediaType: "event",
         ticketId: ticket.id,
-        timestamp: new Date(),
-        isGroup: true,
         ack: 0
       });
-      
+
       ticket.lastMessage = messageBody;
       await ticket.save();
 
@@ -163,7 +162,7 @@ class GroupEventsService {
       });
 
       const io = getIO();
-      
+
       io.to(ticket.id.toString())
         .to(`ticket-${ticket.id}`)
         .to("notification")
@@ -194,61 +193,61 @@ class GroupEventsService {
         if (performedBy === "link") {
           return `${participantName} entrou usando o link do grupo`;
         }
-        return performedByName 
+        return performedByName
           ? `${performedByName} adicionou ${participantName}`
           : `${participantName} foi adicionado`;
-      
+
       case "PARTICIPANT_REMOVED":
         return performedByName
           ? `${performedByName} removeu ${participantName}`
           : `${participantName} saiu do grupo`;
-      
+
       case "PARTICIPANT_PROMOTED":
         return performedByName
           ? `${performedByName} promoveu ${participantName} a administrador`
           : `${participantName} agora é administrador`;
-      
+
       case "PARTICIPANT_DEMOTED":
         return performedByName
           ? `${performedByName} rebaixou ${participantName}`
           : `${participantName} não é mais administrador`;
-      
+
       case "GROUP_NAME_CHANGED":
         return performedByName
           ? `${performedByName} mudou o nome do grupo para "${newValue}"`
           : `Nome do grupo mudou para "${newValue}"`;
-      
+
       case "GROUP_DESCRIPTION_CHANGED":
         return performedByName
           ? `${performedByName} mudou a descrição do grupo`
           : `Descrição do grupo foi alterada`;
-      
+
       case "GROUP_PICTURE_CHANGED":
         return performedByName
           ? `${performedByName} mudou a imagem do grupo`
           : `Imagem do grupo foi alterada`;
-      
+
       case "GROUP_ANNOUNCE_CHANGED":
         return newValue === "true"
           ? "Apenas administradores podem enviar mensagens"
           : "Todos podem enviar mensagens";
-      
+
       case "GROUP_RESTRICT_CHANGED":
         return newValue === "true"
           ? "Apenas administradores podem editar informações do grupo"
           : "Todos podem editar informações do grupo";
-      
+
       case "GROUP_MEMBER_ADD_MODE_CHANGED":
         return newValue === "admin_add"
           ? "Apenas administradores podem adicionar participantes"
           : "Todos os membros podem adicionar participantes";
-      
+
       case "GROUP_JOINED":
         return "Você entrou no grupo";
-      
+
       case "GROUP_LEFT":
         return "Você saiu do grupo";
-      
+
       default:
         return `Evento: ${eventType}`;
     }
@@ -261,11 +260,11 @@ class GroupEventsService {
     }
 
     logger.info(`[GROUP_EVENT] Setting up group listeners for WhatsApp ${whatsappId}`);
-    
+
     wbot.removeAllListeners("group_update");
     wbot.removeAllListeners("group_join");
     wbot.removeAllListeners("group_leave");
-    
+
     this.activeListeners.set(whatsappId, true);
 
     wbot.on("group_update", async (notification: any) => {
@@ -296,8 +295,7 @@ class GroupEventsService {
 
             if (groupContact) {
               await groupContact.update({ name: notification.body });
-              
-              const { getIO } = require("../../libs/socket");
+
               const io = getIO();
               io.emit("contact", {
                 action: "update",
@@ -436,7 +434,7 @@ class GroupEventsService {
     wbot.on("group_join", async (notification: any) => {
       try {
         const groupId = notification.chatId;
-        
+
         for (const participantId of notification.recipientIds || []) {
           let participantName = participantId;
           try {
@@ -464,7 +462,7 @@ class GroupEventsService {
     wbot.on("group_leave", async (notification: any) => {
       try {
         const groupId = notification.chatId;
-        
+
         for (const participantId of notification.recipientIds || []) {
           let participantName = participantId;
           try {

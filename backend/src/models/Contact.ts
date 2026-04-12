@@ -1,9 +1,11 @@
+import { InferAttributes, InferCreationAttributes, CreationOptional, NonAttribute } from "sequelize";
 import {
   AllowNull,
   AutoIncrement,
   BelongsToMany,
   Column,
   CreatedAt,
+  DataType,
   Default,
   HasMany,
   Model,
@@ -18,129 +20,129 @@ import Tag from "./Tag";
 import Ticket from "./Ticket";
 
 @Table
-class Contact extends Model<Contact> {
+class Contact extends Model<InferAttributes<Contact>, InferCreationAttributes<Contact>> {
   @PrimaryKey
   @AutoIncrement
-  @Column
-  id: number;
+  @Column(DataType.INTEGER)
+  declare id: CreationOptional<number>;
 
   @Column
   name: string;
 
   @AllowNull(true)
   @Unique
-  @Column
-  number: string;
+  @Column(DataType.STRING)
+  number: string | null;
 
   @AllowNull(true)
   @Default("")
-  @Column
-  address: string;
+  @Column(DataType.STRING)
+  address: CreationOptional<string>;
 
   @AllowNull(true)
   @Default("")
-  @Column
-  email: string;
+  @Column(DataType.STRING)
+  email: CreationOptional<string>;
 
   @AllowNull(true)
-  @Column
-  birthdate: Date;
-
-  @AllowNull(true)
-  @Default("")
-  @Column
-  gender: string;
+  @Column(DataType.DATE)
+  birthdate: Date | null;
 
   @AllowNull(true)
   @Default("")
-  @Column
-  status: string;
-
-  @AllowNull(true)
-  @Column
-  lastContactAt: Date;
+  @Column(DataType.STRING)
+  gender: CreationOptional<string>;
 
   @AllowNull(true)
   @Default("")
-  @Column
-  country: string;
+  @Column(DataType.STRING)
+  status: CreationOptional<string>;
+
+  @AllowNull(true)
+  @Column(DataType.DATE)
+  lastContactAt: Date | null;
 
   @AllowNull(true)
   @Default("")
-  @Column
-  zip: string;
+  @Column(DataType.STRING)
+  country: CreationOptional<string>;
 
   @AllowNull(true)
   @Default("")
-  @Column
-  addressNumber: string;
+  @Column(DataType.STRING)
+  zip: CreationOptional<string>;
 
   @AllowNull(true)
   @Default("")
-  @Column
-  addressComplement: string;
+  @Column(DataType.STRING)
+  addressNumber: CreationOptional<string>;
 
   @AllowNull(true)
   @Default("")
-  @Column
-  neighborhood: string;
+  @Column(DataType.STRING)
+  addressComplement: CreationOptional<string>;
 
   @AllowNull(true)
   @Default("")
-  @Column
-  city: string;
+  @Column(DataType.STRING)
+  neighborhood: CreationOptional<string>;
 
   @AllowNull(true)
   @Default("")
-  @Column
-  state: string;
+  @Column(DataType.STRING)
+  city: CreationOptional<string>;
 
   @AllowNull(true)
   @Default("")
-  @Column
-  cpf: string;
+  @Column(DataType.STRING)
+  state: CreationOptional<string>;
 
-  @Column
-  profilePicUrl: string;
+  @AllowNull(true)
+  @Default("")
+  @Column(DataType.STRING)
+  cpf: CreationOptional<string>;
+
+  @Column(DataType.STRING)
+  profilePicUrl: CreationOptional<string>;
 
   @Default(false)
-  @Column
-  isGroup: boolean;
+  @Column(DataType.BOOLEAN)
+  isGroup: CreationOptional<boolean>;
 
   @Default(false)
-  @Column
-  nameManuallyEdited: boolean;
+  @Column(DataType.BOOLEAN)
+  nameManuallyEdited: CreationOptional<boolean>;
 
   @CreatedAt
-  createdAt: Date;
+  declare createdAt: CreationOptional<Date>;
 
   @UpdatedAt
-  updatedAt: Date;
+  declare updatedAt: CreationOptional<Date>;
 
   @HasMany(() => Ticket)
-  tickets: Ticket[];
+  declare tickets: NonAttribute<Ticket[]>;
 
   @AllowNull(true)
-  @Column
-  numberLid: string;
+  @Column(DataType.STRING)
+  numberLid: string | null;
 
-  @Column
-  messengerId: string;
+  @Column(DataType.STRING)
+  messengerId: string | null;
 
-  @Column
-  instagramId: string;
+  @Column(DataType.STRING)
+  instagramId: string | null;
 
-  @Column
-  telegramId: string;
+  @Column(DataType.STRING)
+  telegramId: string | null;
 
-  @Column
-  webchatId: string;
+  @Column(DataType.STRING)
+  webchatId: string | null;
 
   @BelongsToMany(() => Tag, () => ContactTag)
-  tags: Array<Tag & { ContactTag: ContactTag }>;
+  declare tags: NonAttribute<Array<Tag & { ContactTag: ContactTag }>>;
 
   @HasMany(() => ContactCustomField)
-  extraInfo: ContactCustomField[];
+  declare extraInfo: NonAttribute<ContactCustomField[]>;
 }
 
 export default Contact;

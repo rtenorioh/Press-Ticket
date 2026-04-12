@@ -1,3 +1,4 @@
+import { InferAttributes, InferCreationAttributes, CreationOptional, NonAttribute } from "sequelize";
 import {
   Table,
   Column,
@@ -6,17 +7,18 @@ import {
   Model,
   PrimaryKey,
   AutoIncrement,
+  DataType,
   ForeignKey,
   BelongsTo
 } from "sequelize-typescript";
 import Message from "./Message";
 
 @Table
-class PollVote extends Model<PollVote> {
+class PollVote extends Model<InferAttributes<PollVote>, InferCreationAttributes<PollVote>> {
   @PrimaryKey
   @AutoIncrement
-  @Column
-  id: number;
+  @Column(DataType.INTEGER)
+  declare id: CreationOptional<number>;
 
   @ForeignKey(() => Message)
   @Column
@@ -35,13 +37,13 @@ class PollVote extends Model<PollVote> {
   timestamp: Date;
 
   @CreatedAt
-  createdAt: Date;
+  declare createdAt: CreationOptional<Date>;
 
   @UpdatedAt
-  updatedAt: Date;
+  declare updatedAt: CreationOptional<Date>;
 
   @BelongsTo(() => Message)
-  message: Message;
+  declare message: NonAttribute<Message>;
 }
 
 export default PollVote;

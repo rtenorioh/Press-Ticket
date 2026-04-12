@@ -30,7 +30,7 @@ const GetAboutService = async ({
   }
 
   let sessionId: number | null = whatsappId || null;
-  
+
   if (!sessionId) {
     const connected = await Whatsapp.findOne({
       where: { status: "CONNECTED", type: "wwebjs" }
@@ -43,14 +43,14 @@ const GetAboutService = async ({
   }
 
   const wbot = await getWbot(sessionId);
-  
-  const numberId = await wbot.getNumberId(contact.number);
+
+  const numberId = await wbot.getNumberId(contact.number!);
   if (!numberId) {
     throw new AppError("ERR_NUMBER_NOT_REGISTERED", 404);
   }
 
   let about: string | null = null;
-  
+
   try {
     const wContact = await wbot.getContactById(numberId._serialized);
     if (typeof (wContact as any).getAbout === 'function') {
@@ -65,7 +65,7 @@ const GetAboutService = async ({
     about,
     contactId: contact.id,
     contactName: contact.name,
-    contactNumber: contact.number
+    contactNumber: contact.number!
   };
 };
 

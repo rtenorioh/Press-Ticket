@@ -1,3 +1,4 @@
+import { InferAttributes, InferCreationAttributes, CreationOptional, NonAttribute } from "sequelize";
 import {
   Table,
   Column,
@@ -6,6 +7,7 @@ import {
   Model,
   PrimaryKey,
   AutoIncrement,
+  DataType,
   BelongsToMany,
   HasMany
 } from "sequelize-typescript";
@@ -13,11 +15,11 @@ import Contact from "./Contact";
 import ContactTag from "./ContactTag";
 
 @Table
-class Tag extends Model<Tag> {
+class Tag extends Model<InferAttributes<Tag>, InferCreationAttributes<Tag>> {
   @PrimaryKey
   @AutoIncrement
-  @Column
-  id: number;
+  @Column(DataType.INTEGER)
+  declare id: CreationOptional<number>;
 
   @Column
   name: string;
@@ -26,16 +28,16 @@ class Tag extends Model<Tag> {
   color: string;
 
   @CreatedAt
-  createdAt: Date;
+  declare createdAt: CreationOptional<Date>;
 
   @UpdatedAt
-  updatedAt: Date;
+  declare updatedAt: CreationOptional<Date>;
 
   @BelongsToMany(() => Contact, () => ContactTag)
-  contacts: Array<Contact & { ContactTag: ContactTag }>;
+  declare contacts: NonAttribute<Array<Contact & { ContactTag: ContactTag }>>;
 
   @HasMany(() => ContactTag)
-  contacttag: ContactTag[];
+  declare contacttag: NonAttribute<ContactTag[]>;
 }
 
 export default Tag;

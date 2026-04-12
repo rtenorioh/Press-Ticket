@@ -1,3 +1,4 @@
+import { InferAttributes, InferCreationAttributes, CreationOptional, NonAttribute } from "sequelize";
 import {
   BelongsTo,
   Column,
@@ -16,22 +17,22 @@ import OldMessage from "./OldMessage";
 import Ticket from "./Ticket";
 
 @Table
-class Message extends Model<Message> {
+class Message extends Model<InferAttributes<Message>, InferCreationAttributes<Message>> {
   @PrimaryKey
   @Column
   id: string;
 
   @Default(0)
-  @Column
-  ack: number;
+  @Column(DataType.INTEGER)
+  ack: CreationOptional<number>;
 
   @Default(false)
-  @Column
-  read: boolean;
+  @Column(DataType.BOOLEAN)
+  read: CreationOptional<boolean>;
 
   @Default(false)
-  @Column
-  fromMe: boolean;
+  @Column(DataType.BOOLEAN)
+  fromMe: CreationOptional<boolean>;
 
   @Column(DataType.TEXT)
   body: string;
@@ -49,57 +50,57 @@ class Message extends Model<Message> {
     return null;
   }
 
-  @Column
-  mediaType: string;
+  @Column(DataType.STRING)
+  mediaType: CreationOptional<string>;
 
-  @Column
-  albumId: string;
+  @Column(DataType.STRING)
+  albumId: CreationOptional<string>;
 
-  @Column
-  fileSize: number;
+  @Column(DataType.INTEGER)
+  fileSize: CreationOptional<number>;
 
-  @Column
-  userId: number;
-
-  @Default(false)
-  @Column
-  isDeleted: boolean;
+  @Column(DataType.INTEGER)
+  userId: CreationOptional<number>;
 
   @Default(false)
-  @Column
-  isEdited: boolean;
+  @Column(DataType.BOOLEAN)
+  isDeleted: CreationOptional<boolean>;
+
+  @Default(false)
+  @Column(DataType.BOOLEAN)
+  isEdited: CreationOptional<boolean>;
 
   @CreatedAt
   @Column(DataType.DATE(6))
-  createdAt: Date;
+  declare createdAt: CreationOptional<Date>;
 
   @UpdatedAt
   @Column(DataType.DATE(6))
-  updatedAt: Date;
+  declare updatedAt: CreationOptional<Date>;
 
   @ForeignKey(() => Message)
-  @Column
-  quotedMsgId: string;
+  @Column(DataType.STRING)
+  quotedMsgId: CreationOptional<string>;
 
   @BelongsTo(() => Message, "quotedMsgId")
-  quotedMsg: Message;
+  declare quotedMsg: NonAttribute<Message>;
 
   @ForeignKey(() => Ticket)
-  @Column
-  ticketId: number;
+  @Column(DataType.INTEGER)
+  ticketId: CreationOptional<number>;
 
   @BelongsTo(() => Ticket)
-  ticket: Ticket;
+  declare ticket: NonAttribute<Ticket>;
 
   @HasMany(() => OldMessage)
-  oldMessages: OldMessage[];
+  declare oldMessages: NonAttribute<OldMessage[]>;
 
   @ForeignKey(() => Contact)
-  @Column
-  contactId: number;
+  @Column(DataType.INTEGER)
+  contactId: CreationOptional<number>;
 
   @BelongsTo(() => Contact, "contactId")
-  contact: Contact;
+  declare contact: NonAttribute<Contact>;
 }
 
 export default Message;

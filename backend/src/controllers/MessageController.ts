@@ -66,11 +66,11 @@ export const getReactions = async (req: Request, res: Response): Promise<Respons
     if (dbReactions.length > 0) {
       const ticket = await ShowTicketService(String(message.ticketId));
       const wbot = await GetTicketWbot(ticket);
-      
+
       const myNumber = wbot.info?.wid?._serialized || null;
-      
+
       const groupedReactions: any = {};
-      
+
       for (const reaction of dbReactions) {
         if (!groupedReactions[reaction.emoji]) {
           groupedReactions[reaction.emoji] = {
@@ -80,16 +80,16 @@ export const getReactions = async (req: Request, res: Response): Promise<Respons
             senders: []
           };
         }
-        
+
         const isMyReaction = myNumber && reaction.senderId === myNumber;
         if (isMyReaction) {
           groupedReactions[reaction.emoji].hasReactionByMe = true;
         }
-        
+
         let contactName = isMyReaction ? 'Você' : 'Contato';
         let profilePicUrl = null;
         let phoneNumber = null;
-        
+
         try {
           if (reaction.senderId.includes('@lid')) {
             try {
@@ -99,13 +99,13 @@ export const getReactions = async (req: Request, res: Response): Promise<Respons
                 if (!isMyReaction) {
                   contactName = contact.name || contact.pushname || contact.shortName || phoneNumber || 'Contato';
                 }
-                
+
                 try {
                   profilePicUrl = await (wbot as any).getProfilePicUrl(reaction.senderId);
                 } catch (e) {
                   console.error('[getReactions] Erro ao buscar foto do @lid:', e);
                 }
-              
+
               }
             } catch (e) {
               console.error('[getReactions] Erro ao buscar informações do @lid:', e);
@@ -116,14 +116,14 @@ export const getReactions = async (req: Request, res: Response): Promise<Respons
               .replace('@s.whatsapp.net', '')
               .replace('@g.us', '');
           }
-          
+
           if (phoneNumber && !isMyReaction && contactName === 'Contato') {
             const contact = await Contact.findOne({
               where: { number: phoneNumber }
             });
-            
+
             if (contact) {
-              contactName = contact.name || contact.number;
+              contactName = contact.name || contact.number || "";
               if (!profilePicUrl) {
                 profilePicUrl = contact.profilePicUrl;
               }
@@ -134,7 +134,7 @@ export const getReactions = async (req: Request, res: Response): Promise<Respons
         } catch (e) {
           console.error('[getReactions] Erro ao buscar contato:', e);
         }
-        
+
         groupedReactions[reaction.emoji].senders.push({
           id: { _serialized: reaction.senderId, user: reaction.senderId },
           contactName,
@@ -146,7 +146,7 @@ export const getReactions = async (req: Request, res: Response): Promise<Respons
           isSenderMe: isMyReaction
         });
       }
-      
+
       const reactions = Object.values(groupedReactions);
       return res.status(200).json({ reactions });
     }
@@ -202,7 +202,7 @@ export const getReactions = async (req: Request, res: Response): Promise<Respons
       try {
         const Store = (window as any).Store;
         const tryIds = [sId, altId, innerId].filter(Boolean) as string[];
-        
+
         const processReactions = (arr: any[]) => {
           return arr.map((reaction: any) => {
             const processed = { ...reaction };
@@ -210,7 +210,7 @@ export const getReactions = async (req: Request, res: Response): Promise<Respons
               processed.senders = processed.senders.map((sender: any) => {
                 const senderId = sender?.id?._serialized || sender?.id?.user || sender?.id;
                 let contactName = 'Contato';
-                
+
                 if (senderId) {
                   try {
                     const contact = Store?.Contact?.get?.(senderId);
@@ -219,7 +219,7 @@ export const getReactions = async (req: Request, res: Response): Promise<Respons
                     }
                   } catch (e) {}
                 }
-                
+
                 return {
                   ...sender,
                   contactName
@@ -229,7 +229,7 @@ export const getReactions = async (req: Request, res: Response): Promise<Respons
             return processed;
           });
         };
-        
+
         const tryGetReactionsFromMsg = (id: string) => {
           const msg = Store?.Msg?.get?.(id);
           if (!msg) {
@@ -245,14 +245,14 @@ export const getReactions = async (req: Request, res: Response): Promise<Respons
           }
           return null;
         };
-        
+
         for (const id of tryIds) {
           const result = tryGetReactionsFromMsg(id);
           if (result) {
             return { reactions: result, logs };
           }
         }
-        
+
         if (remote && innerId) {
           try {
             const possibleIds = [
@@ -261,14 +261,14 @@ export const getReactions = async (req: Request, res: Response): Promise<Respons
               sId,
               altId
             ].filter(Boolean);
-            
+
             for (const fullId of possibleIds) {
               const msg = Store?.Msg?.get?.(fullId);
               if (msg) {
                 const col = msg?.reactions || msg?.reactionCollection;
                 if (col) {
                   const arr = col.serialize ? col.serialize() : (col.getModelsArray ? col.getModelsArray() : (Array.isArray(col) ? col : []));
-                  
+
                   if (Array.isArray(arr) && arr.length > 0) {
                     const processed = processReactions(arr);
                     return { reactions: processed, logs };
@@ -278,37 +278,37 @@ export const getReactions = async (req: Request, res: Response): Promise<Respons
                 }
               }
             }
-            
+
             try {
               const allMsgs = Store?.Msg?.models || [];
-              
+
               const partialMatches = allMsgs.filter((m: any) => {
                 const sid = m?.id?._serialized || '';
                 const iid = m?.id?.id || '';
                 return sid.includes(innerId) || iid.includes(innerId);
               });
-              
+
               if (partialMatches.length > 0) {
-                
+
                 const firstMatch = partialMatches[0];
                 const col = firstMatch?.reactions || firstMatch?.reactionCollection;
                 if (col) {
                   const arr = col.serialize ? col.serialize() : (col.getModelsArray ? col.getModelsArray() : (Array.isArray(col) ? col : []));
-                  
+
                   if (Array.isArray(arr) && arr.length > 0) {
                     const processed = processReactions(arr);
                     return { reactions: processed, logs };
                   }
                 }
               }
-              
+
               if (allMsgs.length === 0 && remote) {
                 const chat = Store?.Chat?.get?.(remote);
                 if (chat) {
-                  
+
                   for (const tryId of possibleIds) {
                     try {
-                      
+
                       const msgInChat = chat.msgs?.get?.(tryId);
                       if (msgInChat) {
                         const col = msgInChat?.reactions || msgInChat?.reactionCollection;
@@ -333,7 +333,7 @@ export const getReactions = async (req: Request, res: Response): Promise<Respons
             logs.push(`Erro ao buscar com ID completo: ${e}`);
           }
         }
-      
+
         return { reactions: [], logs };
       } catch (e) {
         logs.push(`Erro geral: ${e}`);
@@ -404,10 +404,10 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
   if (medias) {
     const mediaMessages = await Promise.all(
       medias.map(async (media: Express.Multer.File) => {
-        const sentMessage = await SendWhatsAppMedia({ 
-          media, 
-          ticket, 
-          body, 
+        const sentMessage = await SendWhatsAppMedia({
+          media,
+          ticket,
+          body,
           mentions,
           sendAsDocument: shouldSendAsDocument
         });
@@ -560,12 +560,12 @@ export const markAsRead = async (req: Request, res: Response): Promise<Response>
 
   try {
     const ticket = await ShowTicketService(ticketId);
-    
+
     if (ticket.status === "open") {
       await MarkMessagesAsReadService({ ticketId });
       return res.status(200).json({ message: "Mensagens marcadas como lidas com sucesso" });
     } else {
-      return res.status(400).json({ 
+      return res.status(400).json({
         error: "Não é possível marcar mensagens como lidas. Ticket deve estar aceito (status 'open')",
         currentStatus: ticket.status
       });
@@ -636,15 +636,15 @@ export const forwardMessages = async (
 
   try {
     let ticket;
-    
+
     if (contactId) {
       const FindOrCreateTicketService = require("../services/TicketServices/FindOrCreateTicketService").default;
       const ShowContactService = require("../services/ContactServices/ShowContactService").default;
-      
+
       const contact = await ShowContactService(contactId);
       const GetDefaultWhatsApp = require("../helpers/GetDefaultWhatsApp").default;
       const whatsapp = await GetDefaultWhatsApp();
-      
+
       ticket = await FindOrCreateTicketService(contact, whatsapp.id, 0);
     } else {
       ticket = await ShowTicketService(ticketId);
@@ -656,7 +656,7 @@ export const forwardMessages = async (
 
     for (const messageData of messages) {
       let body = messageData.body || "";
-      
+
       if (body) {
         body = `↪ Encaminhada\n${body}`;
       } else if (messageData.mediaType) {
@@ -675,10 +675,10 @@ export const forwardMessages = async (
           path: messageData.mediaUrl
         } as Express.Multer.File;
 
-        await SendWhatsAppMedia({ 
-          media: mediaObject, 
-          ticket, 
-          body: body 
+        await SendWhatsAppMedia({
+          media: mediaObject,
+          ticket,
+          body: body
         });
       } else {
         await SendWhatsAppMessage({
@@ -689,21 +689,21 @@ export const forwardMessages = async (
       }
     }
 
-    return res.status(200).json({ 
+    return res.status(200).json({
       message: "Messages forwarded successfully",
       ticketId: ticket.id
     });
   } catch (error) {
     console.error("Erro ao encaminhar mensagens:", error);
-    
+
     if (error.message === "ERR_NO_DEF_WAPP_FOUND") {
-      return res.status(400).json({ 
-        error: "Nenhuma conexão WhatsApp ativa encontrada. Por favor, conecte um WhatsApp antes de encaminhar mensagens." 
+      return res.status(400).json({
+        error: "Nenhuma conexão WhatsApp ativa encontrada. Por favor, conecte um WhatsApp antes de encaminhar mensagens."
       });
     }
-    
-    return res.status(500).json({ 
-      error: error.message || "Erro ao encaminhar mensagens" 
+
+    return res.status(500).json({
+      error: error.message || "Erro ao encaminhar mensagens"
     });
   }
 };

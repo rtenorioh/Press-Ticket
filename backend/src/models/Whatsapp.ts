@@ -1,3 +1,4 @@
+import { InferAttributes, InferCreationAttributes, CreationOptional, NonAttribute } from "sequelize";
 import {
   AllowNull,
   AutoIncrement,
@@ -18,11 +19,11 @@ import Ticket from "./Ticket";
 import WhatsappQueue from "./WhatsappQueue";
 
 @Table
-class Whatsapp extends Model<Whatsapp> {
+class Whatsapp extends Model<InferAttributes<Whatsapp>, InferCreationAttributes<Whatsapp>> {
   @PrimaryKey
   @AutoIncrement
-  @Column
-  id: number;
+  @Column(DataType.INTEGER)
+  declare id: CreationOptional<number>;
 
   @AllowNull
   @Unique
@@ -30,60 +31,60 @@ class Whatsapp extends Model<Whatsapp> {
   name: string;
 
   @Column(DataType.TEXT)
-  session: string;
+  session: CreationOptional<string>;
 
   @Column(DataType.TEXT)
-  qrcode: string;
+  qrcode: CreationOptional<string>;
 
-  @Column
-  status: string;
+  @Column(DataType.STRING)
+  status: CreationOptional<string>;
 
-  @Column
-  number: string;
+  @Column(DataType.STRING)
+  number: CreationOptional<string>;
 
-  @Column
-  retries: number;
-
-  @Column(DataType.TEXT)
-  greetingMessage: string;
+  @Column(DataType.INTEGER)
+  retries: CreationOptional<number>;
 
   @Column(DataType.TEXT)
-  farewellMessage: string;
+  greetingMessage: CreationOptional<string>;
 
-  @Column
-  type: string;
+  @Column(DataType.TEXT)
+  farewellMessage: CreationOptional<string>;
+
+  @Column(DataType.STRING)
+  type: CreationOptional<string>;
 
   @Default(false)
   @AllowNull
-  @Column
-  isDefault: boolean;
+  @Column(DataType.BOOLEAN)
+  isDefault: CreationOptional<boolean>;
 
   @Default(false)
   @AllowNull
-  @Column
-  isDisplay: boolean;
+  @Column(DataType.BOOLEAN)
+  isDisplay: CreationOptional<boolean>;
 
   @AllowNull
   @Column({
     type: DataType.STRING,
     defaultValue: "#5C59A0"
   })
-  color: string;
+  color: CreationOptional<string>;
 
   @CreatedAt
-  createdAt: Date;
+  declare createdAt: CreationOptional<Date>;
 
   @UpdatedAt
-  updatedAt: Date;
+  declare updatedAt: CreationOptional<Date>;
 
   @HasMany(() => Ticket)
-  tickets: Ticket[];
+  declare tickets: NonAttribute<Ticket[]>;
 
   @BelongsToMany(() => Queue, () => WhatsappQueue)
-  queues: Array<Queue & { WhatsappQueue: WhatsappQueue }>;
+  declare queues: NonAttribute<Array<Queue & { WhatsappQueue: WhatsappQueue }>>;
 
   @HasMany(() => WhatsappQueue)
-  whatsappQueues: WhatsappQueue[];
+  declare whatsappQueues: NonAttribute<WhatsappQueue[]>;
 }
 
 export default Whatsapp;

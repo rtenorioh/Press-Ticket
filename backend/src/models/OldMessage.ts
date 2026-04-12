@@ -1,3 +1,4 @@
+import { InferAttributes, InferCreationAttributes, CreationOptional, NonAttribute } from "sequelize";
 import {
   AutoIncrement,
   BelongsTo,
@@ -14,29 +15,29 @@ import {
 import Message from "./Message";
 
 @Table
-class OldMessage extends Model<OldMessage> {
+class OldMessage extends Model<InferAttributes<OldMessage>, InferCreationAttributes<OldMessage>> {
   @PrimaryKey
   @AutoIncrement
-  @Column
-  id: number;
+  @Column(DataType.INTEGER)
+  declare id: CreationOptional<number>;
 
   @Column(DataType.TEXT)
   body: string;
 
   @CreatedAt
   @Column(DataType.DATE(6))
-  createdAt: Date;
+  declare createdAt: CreationOptional<Date>;
 
   @UpdatedAt
   @Column(DataType.DATE(6))
-  updatedAt: Date;
+  declare updatedAt: CreationOptional<Date>;
 
   @ForeignKey(() => Message)
   @Column(DataType.STRING)
   messageId: string;
 
   @BelongsTo(() => Message, "messageId")
-  message: Message;
+  declare message: NonAttribute<Message>;
 }
 
 export default OldMessage;

@@ -12,7 +12,7 @@ const UpdateGroupProfilePicService = async ({
   whatsappId
 }: Request): Promise<string | undefined> => {
   const contact = await Contact.findByPk(contactId);
-  
+
   if (!contact) {
     logger.warn(`[UpdateGroupProfilePic] Contato ${contactId} não encontrado`);
     return undefined;
@@ -25,13 +25,13 @@ const UpdateGroupProfilePicService = async ({
 
   try {
     const wbot = getWbot(whatsappId);
-    
-    const groupJid = contact.number.includes("@g.us") 
-      ? contact.number 
-      : `${contact.number}@g.us`;
+
+    const groupJid = contact.number!.includes("@g.us")
+      ? contact.number!
+      : `${contact.number!}@g.us`;
 
     let profilePicUrl: string | undefined;
-    
+
     try {
       profilePicUrl = await wbot.getProfilePicUrl(groupJid);
       logger.info(`[UpdateGroupProfilePic] Foto obtida para grupo ${groupJid}: ${profilePicUrl ? 'SIM' : 'NÃO'}`);
@@ -43,7 +43,7 @@ const UpdateGroupProfilePicService = async ({
     if (profilePicUrl && profilePicUrl !== contact.profilePicUrl) {
       await contact.update({ profilePicUrl });
       logger.info(`[UpdateGroupProfilePic] Foto do grupo ${groupJid} atualizada no banco`);
-      
+
       try {
         const { getIO } = require("../../libs/socket");
         const io = getIO();

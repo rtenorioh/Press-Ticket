@@ -1,3 +1,4 @@
+import { InferAttributes, InferCreationAttributes, CreationOptional } from "sequelize";
 import {
   Table,
   Column,
@@ -12,7 +13,7 @@ import Contact from "./Contact";
 @Table({
   tableName: "ContactTags"
 })
-class ContactTag extends Model<ContactTag> {
+class ContactTag extends Model<InferAttributes<ContactTag>, InferCreationAttributes<ContactTag>> {
   @ForeignKey(() => Contact)
   @Column
   contactId: number;
@@ -22,10 +23,10 @@ class ContactTag extends Model<ContactTag> {
   tagId: number;
 
   @CreatedAt
-  createdAt: Date;
+  declare createdAt: CreationOptional<Date>;
 
   @UpdatedAt
-  updatedAt: Date;
+  declare updatedAt: CreationOptional<Date>;
 }
 
 export default ContactTag;

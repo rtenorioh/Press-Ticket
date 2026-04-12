@@ -1,8 +1,10 @@
+import { InferAttributes, InferCreationAttributes, CreationOptional, NonAttribute } from "sequelize";
 import {
   AutoIncrement,
   BelongsTo,
   Column,
   CreatedAt,
+  DataType,
   Default,
   ForeignKey,
   HasMany,
@@ -19,67 +21,70 @@ import User from "./User";
 import Whatsapp from "./Whatsapp";
 
 @Table
-class Ticket extends Model<Ticket> {
+class Ticket extends Model<InferAttributes<Ticket>, InferCreationAttributes<Ticket>> {
   @PrimaryKey
   @AutoIncrement
-  @Column
-  id: number;
+  @Column(DataType.INTEGER)
+  declare id: CreationOptional<number>;
 
-  @Column({ defaultValue: "pending" })
-  status: string;
+  @Column({ type: DataType.STRING, defaultValue: "pending" })
+  status: CreationOptional<string>;
 
-  @Column
-  unreadMessages: number;
+  @Column(DataType.INTEGER)
+  unreadMessages: CreationOptional<number>;
 
-  @Column
-  lastMessage: string;
+  @Column(DataType.STRING)
+  lastMessage: CreationOptional<string>;
 
   @Default(false)
-  @Column
-  isGroup: boolean;
+  @Column(DataType.BOOLEAN)
+  isGroup: CreationOptional<boolean>;
 
   @CreatedAt
-  createdAt: Date;
+  declare createdAt: CreationOptional<Date>;
 
   @UpdatedAt
-  updatedAt: Date;
+  declare updatedAt: CreationOptional<Date>;
 
   @ForeignKey(() => User)
-  @Column
-  userId: number;
+  @Column(DataType.INTEGER)
+  userId: number | null;
 
   @BelongsTo(() => User, {
     onDelete: "CASCADE",
     onUpdate: "CASCADE"
   })
-  user: User;
+  declare user: NonAttribute<User>;
 
   @ForeignKey(() => Contact)
   @Column
   contactId: number;
 
   @BelongsTo(() => Contact)
-  contact: Contact;
+  declare contact: NonAttribute<Contact>;
 
   @ForeignKey(() => Whatsapp)
   @Column
   whatsappId: number;
 
   @BelongsTo(() => Whatsapp)
-  whatsapp: Whatsapp;
+  declare whatsapp: NonAttribute<Whatsapp>;
 
   @ForeignKey(() => Queue)
-  @Column
-  queueId: number;
+  @Column(DataType.INTEGER)
+  queueId: number | null;
 
   @BelongsTo(() => Queue, {
     onDelete: "SET NULL",
     onUpdate: "CASCADE"
   })
-  queue: Queue;
+  declare queue: NonAttribute<Queue>;
+
+  @Column(DataType.STRING)
+  channel: string | null;
 
   @HasMany(() => Message)
-  messages: Message[];
+  declare messages: NonAttribute<Message[]>;
 }
 
 export default Ticket;

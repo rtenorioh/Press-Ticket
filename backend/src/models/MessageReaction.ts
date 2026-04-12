@@ -1,19 +1,20 @@
-import { 
-  Table, 
-  Model, 
+import { InferAttributes, InferCreationAttributes, CreationOptional } from "sequelize";
+import {
+  Table,
+  Model,
   Column,
-  DataType, 
-  PrimaryKey, 
-  AutoIncrement, 
-  Index 
+  DataType,
+  PrimaryKey,
+  AutoIncrement,
+  Index
 } from "sequelize-typescript";
 
 @Table
-class MessageReaction extends Model<MessageReaction> {
+class MessageReaction extends Model<InferAttributes<MessageReaction>, InferCreationAttributes<MessageReaction>> {
   @PrimaryKey
   @AutoIncrement
-  @Column
-  id!: number;
+  @Column(DataType.INTEGER)
+  declare id: CreationOptional<number>;
 
   @Index
   @Column({ allowNull: false })
@@ -26,12 +27,12 @@ class MessageReaction extends Model<MessageReaction> {
   @Index
   @Column({ allowNull: false })
   senderId!: string;
-  
-  @Column(DataType.DATE)
-  createdAt!: Date;
 
   @Column(DataType.DATE)
-  updatedAt!: Date;
+  declare createdAt: CreationOptional<Date>;
+
+  @Column(DataType.DATE)
+  declare updatedAt: CreationOptional<Date>;
 }
 
 export default MessageReaction;

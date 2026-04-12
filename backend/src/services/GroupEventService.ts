@@ -24,7 +24,7 @@ interface ListGroupEventsParams {
 class GroupEventService {
   async createEvent(data: CreateGroupEventData): Promise<GroupEvent> {
     try {
-      const event = await GroupEvent.create({
+      const event = await (GroupEvent.create as any)({
         whatsappId: data.whatsappId,
         groupId: data.groupId,
         groupName: data.groupName,

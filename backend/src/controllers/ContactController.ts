@@ -56,7 +56,7 @@ export const getBlockStatus = async (
   }
 
   const wbot = getWbot(sessionId);
-  const numberId = await wbot.getNumberId(contact.number);
+  const numberId = await wbot.getNumberId(contact.number!);
   if (!numberId) {
     return res.status(404).json({ error: "Número não registrado no WhatsApp" });
   }
@@ -93,7 +93,7 @@ export const blockContact = async (
   }
 
   const wbot = getWbot(sessionId);
-  const numberId = await wbot.getNumberId(contact.number);
+  const numberId = await wbot.getNumberId(contact.number!);
   if (!numberId) {
     return res.status(404).json({ error: "Número não registrado no WhatsApp" });
   }
@@ -145,7 +145,7 @@ export const unblockContact = async (
   }
 
   const wbot = getWbot(sessionId);
-  const numberId = await wbot.getNumberId(contact.number);
+  const numberId = await wbot.getNumberId(contact.number!);
   if (!numberId) {
     return res.status(404).json({ error: "Número não registrado no WhatsApp" });
   }

@@ -1,3 +1,4 @@
+import { InferAttributes, InferCreationAttributes, CreationOptional, NonAttribute } from "sequelize";
 import {
   Table,
   Column,
@@ -6,33 +7,34 @@ import {
   Model,
   PrimaryKey,
   AutoIncrement,
+  DataType,
   ForeignKey,
   BelongsTo
 } from "sequelize-typescript";
 import Whatsapp from "./Whatsapp";
 
 @Table
-class WhatsappNotification extends Model<WhatsappNotification> {
+class WhatsappNotification extends Model<InferAttributes<WhatsappNotification>, InferCreationAttributes<WhatsappNotification>> {
   @PrimaryKey
   @AutoIncrement
-  @Column
-  id: number;
+  @Column(DataType.INTEGER)
+  declare id: CreationOptional<number>;
 
   @ForeignKey(() => Whatsapp)
   @Column
   whatsappId: number;
 
   @BelongsTo(() => Whatsapp)
-  whatsapp: Whatsapp;
+  declare whatsapp: NonAttribute<Whatsapp>;
 
   @Column
   lastNotificationTime: Date;
 
   @CreatedAt
-  createdAt: Date;
+  declare createdAt: CreationOptional<Date>;
 
   @UpdatedAt
-  updatedAt: Date;
+  declare updatedAt: CreationOptional<Date>;
 }
 
 export default WhatsappNotification;

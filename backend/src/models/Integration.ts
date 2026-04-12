@@ -1,3 +1,4 @@
+import { InferAttributes, InferCreationAttributes, CreationOptional } from "sequelize";
 import {
   Table,
   Column,
@@ -8,7 +9,7 @@ import {
 } from "sequelize-typescript";
 
 @Table
-class Integration extends Model<Integration> {
+class Integration extends Model<InferAttributes<Integration>, InferCreationAttributes<Integration>> {
   @PrimaryKey
   @Column
   key: string;
@@ -17,10 +18,10 @@ class Integration extends Model<Integration> {
   value: string;
 
   @CreatedAt
-  createdAt: Date;
+  declare createdAt: CreationOptional<Date>;
 
   @UpdatedAt
-  updatedAt: Date;
+  declare updatedAt: CreationOptional<Date>;
 }
 
 export default Integration;

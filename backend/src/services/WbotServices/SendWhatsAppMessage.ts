@@ -10,9 +10,9 @@ import formatBody from "../../helpers/Mustache";
 
 async function findMessageDirectlyFromWA(wbot: any, ticket: Ticket, quotedMsgId: string): Promise<any | null> {
   try {
-    const groupId = ticket.contact.number.includes("@")
-      ? ticket.contact.number
-      : `${ticket.contact.number}@g.us`;
+    const groupId = ticket.contact.number!.includes("@")
+      ? ticket.contact.number!
+      : `${ticket.contact.number!}@g.us`;
     const chat = await wbot.getChatById(groupId);
 
     const messages = await chat.fetchMessages({ limit: 500 });
@@ -44,12 +44,9 @@ const SendWhatsAppMessage = async ({
   mentions
 }: Request): Promise<WbotMessage> => {
   const wbot = await GetTicketWbot(ticket);
-  const groupId = ticket.contact.number.includes("@")
-    ? ticket.contact.number
-    : `${ticket.contact.number}@g.us`;
-  const userId = ticket.contact.number.includes("@")
-    ? ticket.contact.number
-    : `${ticket.contact.number}@c.us`;
+  const contactNumber = ticket.contact.number!;
+  const groupId = contactNumber.includes("@") ? contactNumber : `${contactNumber}@g.us`;
+  const userId = contactNumber.includes("@") ? contactNumber : `${contactNumber}@c.us`;
 
   if (quotedMsg && ticket.isGroup) {
     const originalMessage = await findMessageDirectlyFromWA(wbot, ticket, quotedMsg.id);

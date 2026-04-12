@@ -1,3 +1,4 @@
+import { InferAttributes, InferCreationAttributes, CreationOptional } from "sequelize";
 import {
   Column,
   CreatedAt,
@@ -10,46 +11,46 @@ import {
 } from "sequelize-typescript";
 
 @Table
-class ErrorLog extends Model<ErrorLog> {
+class ErrorLog extends Model<InferAttributes<ErrorLog>, InferCreationAttributes<ErrorLog>> {
   @PrimaryKey
   @AutoIncrement
-  @Column
-  id: number;
+  @Column(DataType.INTEGER)
+  declare id: CreationOptional<number>;
 
   @Column
-  source: string; 
+  source: string;
 
-  @Column
-  userId: number; 
+  @Column(DataType.INTEGER)
+  userId: CreationOptional<number>;
 
-  @Column
-  username: string; 
+  @Column(DataType.STRING)
+  username: CreationOptional<string>;
 
   @Column(DataType.TEXT)
-  message: string; 
+  message: string;
 
   @Column(DataType.TEXT)
-  stack: string; 
+  stack: CreationOptional<string>;
 
   @Column
-  url: string; 
+  url: string;
 
   @Column
-  userAgent: string; 
+  userAgent: string;
 
   @Column
-  component: string; 
+  component: string;
 
   @Column
-  severity: string; 
+  severity: string;
 
   @CreatedAt
   @Column(DataType.DATE(6))
-  createdAt: Date;
+  declare createdAt: CreationOptional<Date>;
 
   @UpdatedAt
   @Column(DataType.DATE(6))
-  updatedAt: Date;
+  declare updatedAt: CreationOptional<Date>;
 }
 
 export default ErrorLog;

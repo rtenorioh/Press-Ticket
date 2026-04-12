@@ -1,3 +1,4 @@
+import { InferAttributes, InferCreationAttributes, CreationOptional } from "sequelize";
 import {
   Table,
   Column,
@@ -10,11 +11,11 @@ import {
 } from "sequelize-typescript";
 
 @Table
-class QuickAnswer extends Model<QuickAnswer> {
+class QuickAnswer extends Model<InferAttributes<QuickAnswer>, InferCreationAttributes<QuickAnswer>> {
   @PrimaryKey
   @AutoIncrement
-  @Column
-  id: number;
+  @Column(DataType.INTEGER)
+  declare id: CreationOptional<number>;
 
   @Column(DataType.TEXT)
   shortcut: string;
@@ -23,13 +24,13 @@ class QuickAnswer extends Model<QuickAnswer> {
   message: string;
 
   @Column(DataType.STRING)
-  mediaPath: string;
+  mediaPath: CreationOptional<string>;
 
   @CreatedAt
-  createdAt: Date;
+  declare createdAt: CreationOptional<Date>;
 
   @UpdatedAt
-  updatedAt: Date;
+  declare updatedAt: CreationOptional<Date>;
 }
 
 export default QuickAnswer;

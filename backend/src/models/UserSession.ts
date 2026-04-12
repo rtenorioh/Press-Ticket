@@ -1,3 +1,4 @@
+import { InferAttributes, InferCreationAttributes, CreationOptional, NonAttribute } from "sequelize";
 import {
   Table,
   Column,
@@ -6,17 +7,18 @@ import {
   Model,
   PrimaryKey,
   AutoIncrement,
+  DataType,
   ForeignKey,
   BelongsTo
 } from "sequelize-typescript";
 import User from "./User";
 
 @Table
-class UserSession extends Model<UserSession> {
+class UserSession extends Model<InferAttributes<UserSession>, InferCreationAttributes<UserSession>> {
   @PrimaryKey
   @AutoIncrement
-  @Column
-  id: number;
+  @Column(DataType.INTEGER)
+  declare id: CreationOptional<number>;
 
   @ForeignKey(() => User)
   @Column
@@ -28,20 +30,20 @@ class UserSession extends Model<UserSession> {
   @Column
   loginAt: Date;
 
-  @Column
-  logoutAt: Date;
+  @Column(DataType.DATE)
+  logoutAt: Date | null;
 
   @Column
   lastActivity: Date;
 
   @BelongsTo(() => User)
-  user: User;
+  declare user: NonAttribute<User>;
 
   @CreatedAt
-  createdAt: Date;
+  declare createdAt: CreationOptional<Date>;
 
   @UpdatedAt
-  updatedAt: Date;
+  declare updatedAt: CreationOptional<Date>;
 }
 
 export default UserSession;

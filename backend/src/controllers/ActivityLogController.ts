@@ -1,6 +1,9 @@
 import { Request, Response } from "express";
+import { Op, fn, literal } from "sequelize";
+import { startOfDay } from "date-fns";
 import { getIO } from "../libs/socket";
 import { logger } from "../utils/logger";
+import ActivityLog from "../models/ActivityLog";
 import { listActivityLogs, getEntityDetails, ActivityActions, EntityTypes } from "../services/ActivityLogService";
 
 interface ActivityLogRequest {
@@ -80,7 +83,7 @@ export const show = async (req: Request, res: Response): Promise<Response> => {
 export const actions = async (req: Request, res: Response): Promise<Response> => {
   try {
     const actionTypes = Object.values(ActivityActions);
-    
+
     return res.status(200).json(actionTypes);
   } catch (err: any) {
     logger.error(`Erro ao listar tipos de ações: ${err.message}`);
@@ -91,7 +94,7 @@ export const actions = async (req: Request, res: Response): Promise<Response> =>
 export const entities = async (req: Request, res: Response): Promise<Response> => {
   try {
     const entityTypes = Object.values(EntityTypes);
-    
+
     return res.status(200).json(entityTypes);
   } catch (err: any) {
     logger.error(`Erro ao listar tipos de entidades: ${err.message}`);
@@ -101,11 +104,6 @@ export const entities = async (req: Request, res: Response): Promise<Response> =
 
 export const stats = async (req: Request, res: Response): Promise<Response> => {
   try {
-    const ActivityLog = require("../models/ActivityLog").default;
-    const User = require("../models/User").default;
-    const { Op } = require("sequelize");
-    const { startOfDay } = require("date-fns");
-
     // Total de logs
     const totalLogs = await ActivityLog.count();
 
@@ -119,10 +117,10 @@ export const stats = async (req: Request, res: Response): Promise<Response> => {
     const topActionResult = await ActivityLog.findAll({
       attributes: [
         'action',
-        [require("sequelize").fn('COUNT', 'action'), 'count']
+        [fn('COUNT', 'action'), 'count']
       ],
       group: ['action'],
-      order: [[require("sequelize").literal('count'), 'DESC']],
+      order: [[literal('count'), 'DESC']],
       limit: 1
     });
     const topAction = topActionResult.length > 0 ? topActionResult[0].action : 'N/A';

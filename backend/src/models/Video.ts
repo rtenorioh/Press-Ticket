@@ -1,3 +1,4 @@
+import { InferAttributes, InferCreationAttributes, CreationOptional, NonAttribute } from "sequelize";
 import {
   Table,
   Column,
@@ -14,11 +15,11 @@ import User from "./User";
 import VideoUser from "./VideoUser";
 
 @Table
-class Video extends Model<Video> {
+class Video extends Model<InferAttributes<Video>, InferCreationAttributes<Video>> {
   @PrimaryKey
   @AutoIncrement
-  @Column
-  id: number;
+  @Column(DataType.INTEGER)
+  declare id: CreationOptional<number>;
 
   @Column
   title: string;
@@ -27,17 +28,17 @@ class Video extends Model<Video> {
   url: string;
 
   @Default(true)
-  @Column
-  active: boolean;
+  @Column(DataType.BOOLEAN)
+  active: CreationOptional<boolean>;
 
   @CreatedAt
-  createdAt: Date;
+  declare createdAt: CreationOptional<Date>;
 
   @UpdatedAt
-  updatedAt: Date;
+  declare updatedAt: CreationOptional<Date>;
 
   @BelongsToMany(() => User, () => VideoUser)
-  users: User[];
+  declare users: NonAttribute<User[]>;
 }
 
 export default Video;

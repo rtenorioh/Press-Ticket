@@ -1,3 +1,4 @@
+import { InferAttributes, InferCreationAttributes, CreationOptional, NonAttribute } from "sequelize";
 import {
   Table,
   Column,
@@ -13,18 +14,18 @@ import {
 import User from "./User";
 
 @Table
-class ActivityLog extends Model<ActivityLog> {
+class ActivityLog extends Model<InferAttributes<ActivityLog>, InferCreationAttributes<ActivityLog>> {
   @PrimaryKey
   @AutoIncrement
-  @Column
-  id: number;
+  @Column(DataType.INTEGER)
+  declare id: CreationOptional<number>;
 
   @ForeignKey(() => User)
   @Column
   userId: number;
 
   @BelongsTo(() => User)
-  user: User;
+  declare user: NonAttribute<User>;
 
   @Column
   action: string;
@@ -32,23 +33,23 @@ class ActivityLog extends Model<ActivityLog> {
   @Column
   description: string;
 
-  @Column
-  entityType: string;
+  @Column(DataType.STRING)
+  entityType: CreationOptional<string>;
 
-  @Column
-  entityId: number;
+  @Column(DataType.INTEGER)
+  entityId: CreationOptional<number>;
 
   @Column(DataType.JSON)
-  additionalData: object;
+  additionalData: object | null;
 
-  @Column
-  ip: string;
+  @Column(DataType.STRING)
+  ip: string | null;
 
   @CreatedAt
-  createdAt: Date;
+  declare createdAt: CreationOptional<Date>;
 
   @UpdatedAt
-  updatedAt: Date;
+  declare updatedAt: CreationOptional<Date>;
 }
 
 export default ActivityLog;

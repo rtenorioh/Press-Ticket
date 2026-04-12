@@ -1,3 +1,4 @@
+import { InferAttributes, InferCreationAttributes, CreationOptional } from "sequelize";
 import {
     AutoIncrement,
     Column,
@@ -10,11 +11,11 @@ import {
 } from "sequelize-typescript";
 
 @Table
-class ApiToken extends Model<ApiToken> {
+class ApiToken extends Model<InferAttributes<ApiToken>, InferCreationAttributes<ApiToken>> {
     @PrimaryKey
     @AutoIncrement
-    @Column
-    id: number;
+    @Column(DataType.INTEGER)
+    declare id: CreationOptional<number>;
 
     @Column
     name: string;
@@ -57,10 +58,10 @@ class ApiToken extends Model<ApiToken> {
     permissions: string;
 
     @CreatedAt
-    createdAt: Date;
+    declare createdAt: CreationOptional<Date>;
 
     @UpdatedAt
-    updatedAt: Date;
+    declare updatedAt: CreationOptional<Date>;
 }
 
 export default ApiToken;

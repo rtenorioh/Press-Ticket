@@ -1,4 +1,5 @@
-import { Sequelize } from "sequelize";
+import { Op, Sequelize, WhereOptions } from "sequelize";
+import { InferAttributes } from "sequelize";
 import QuickAnswer from "../../models/QuickAnswer";
 
 interface Request {
@@ -16,13 +17,17 @@ const ListQuickAnswerService = async ({
   searchParam = "",
   pageNumber = "1"
 }: Request): Promise<Response> => {
-  const whereCondition = {
-    message: Sequelize.where(
-      Sequelize.fn("LOWER", Sequelize.col("shortcut")),
-      "LIKE",
-      `%${searchParam.toLowerCase().trim()}%`
-    )
-  };
+  const whereCondition: WhereOptions<InferAttributes<QuickAnswer>> = searchParam
+    ? ({
+        [Op.and]: [
+          Sequelize.where(
+            Sequelize.fn("LOWER", Sequelize.col("shortcut")),
+            "LIKE",
+            `%${searchParam.toLowerCase().trim()}%`
+          )
+        ]
+      } as WhereOptions<InferAttributes<QuickAnswer>>)
+    : {};
   const limit = 20;
   const offset = limit * (+pageNumber - 1);
 

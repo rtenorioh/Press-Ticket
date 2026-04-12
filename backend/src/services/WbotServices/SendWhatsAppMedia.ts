@@ -104,7 +104,7 @@ const SendWhatsAppMedia = async ({
     const wbot = await GetTicketWbot(ticket);
 
     const getChatId = () => {
-      let id = ticket.contact.number;
+      let id = ticket.contact.number!;
       if (!id.includes('@')) {
         id = `${id}@${ticket.isGroup ? "g" : "c"}.us`;
       }

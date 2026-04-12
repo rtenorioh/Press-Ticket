@@ -39,7 +39,7 @@ const CreateOrUpdateContactService = async ({
 
     let primary: Contact | null = null;
     if (candidates.length) {
-      candidates.sort((a, b) => Number(b.number.includes("@g.us")) - Number(a.number.includes("@g.us")) || Number(b.isGroup) - Number(a.isGroup));
+      candidates.sort((a, b) => Number(b.number?.includes("@g.us") ?? false) - Number(a.number?.includes("@g.us") ?? false) || Number(b.isGroup) - Number(a.isGroup));
       primary = candidates[0];
       for (const dup of candidates.slice(1)) {
         if (dup.id !== primary.id) {

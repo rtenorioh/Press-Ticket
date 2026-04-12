@@ -22,7 +22,7 @@ const CreateChannelsService = async ({
     };
   });
 
-  const whatsapps = await Whatsapp.bulkCreate(channels);
+  const whatsapps = await Whatsapp.bulkCreate(channels as any[]);
 
   return { whatsapps };
 };

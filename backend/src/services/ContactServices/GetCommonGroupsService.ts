@@ -38,7 +38,7 @@ const GetCommonGroupsService = async ({
   }
 
   let sessionId: number | null = whatsappId || null;
-  
+
   if (!sessionId) {
     const connected = await Whatsapp.findOne({
       where: { status: "CONNECTED", type: "wwebjs" }
@@ -51,8 +51,8 @@ const GetCommonGroupsService = async ({
   }
 
   const wbot = await getWbot(sessionId);
-  
-  const numberId = await wbot.getNumberId(contact.number);
+
+  const numberId = await wbot.getNumberId(contact.number!);
   if (!numberId) {
     throw new AppError("ERR_NUMBER_NOT_REGISTERED", 404);
   }
@@ -65,15 +65,15 @@ const GetCommonGroupsService = async ({
     console.warn(`[FALLBACK] Erro ao obter contato/grupos comuns do WhatsApp: ${error.message || error}`);
     commonGroups = [];
   }
-  
+
   const groupsInfo: GroupInfo[] = [];
-  
+
   for (const group of commonGroups) {
     const groupId = group._serialized || `${group.user}@g.us`;
 
     try {
       const groupChat = await wbot.getChatById(groupId);
-      
+
       let profilePicUrl: string | undefined;
       try {
         profilePicUrl = await wbot.getProfilePicUrl(groupId);
@@ -99,7 +99,7 @@ const GetCommonGroupsService = async ({
   return {
     contactId: contact.id,
     contactName: contact.name,
-    contactNumber: contact.number,
+    contactNumber: contact.number!,
     commonGroups: groupsInfo,
     totalGroups: groupsInfo.length
   };

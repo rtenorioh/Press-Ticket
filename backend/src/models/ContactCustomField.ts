@@ -1,3 +1,4 @@
+import { InferAttributes, InferCreationAttributes, CreationOptional, NonAttribute } from "sequelize";
 import {
   Table,
   Column,
@@ -6,17 +7,18 @@ import {
   Model,
   PrimaryKey,
   AutoIncrement,
+  DataType,
   ForeignKey,
   BelongsTo
 } from "sequelize-typescript";
 import Contact from "./Contact";
 
 @Table
-class ContactCustomField extends Model<ContactCustomField> {
+class ContactCustomField extends Model<InferAttributes<ContactCustomField>, InferCreationAttributes<ContactCustomField>> {
   @PrimaryKey
   @AutoIncrement
-  @Column
-  id: number;
+  @Column(DataType.INTEGER)
+  declare id: CreationOptional<number>;
 
   @Column
   name: string;
@@ -29,13 +31,13 @@ class ContactCustomField extends Model<ContactCustomField> {
   contactId: number;
 
   @BelongsTo(() => Contact)
-  contact: Contact;
+  declare contact: NonAttribute<Contact>;
 
   @CreatedAt
-  createdAt: Date;
+  declare createdAt: CreationOptional<Date>;
 
   @UpdatedAt
-  updatedAt: Date;
+  declare updatedAt: CreationOptional<Date>;
 }
 
 export default ContactCustomField;

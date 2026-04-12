@@ -1,3 +1,4 @@
+import { InferAttributes, InferCreationAttributes, CreationOptional, NonAttribute } from "sequelize";
 import {
   Table,
   Column,
@@ -11,7 +12,7 @@ import Queue from "./Queue";
 import Whatsapp from "./Whatsapp";
 
 @Table
-class WhatsappQueue extends Model<WhatsappQueue> {
+class WhatsappQueue extends Model<InferAttributes<WhatsappQueue>, InferCreationAttributes<WhatsappQueue>> {
   @ForeignKey(() => Whatsapp)
   @Column
   whatsappId: number;
@@ -21,13 +22,13 @@ class WhatsappQueue extends Model<WhatsappQueue> {
   queueId: number;
 
   @CreatedAt
-  createdAt: Date;
+  declare createdAt: CreationOptional<Date>;
 
   @UpdatedAt
-  updatedAt: Date;
+  declare updatedAt: CreationOptional<Date>;
 
   @BelongsTo(() => Queue)
-  queue: Queue;
+  declare queue: NonAttribute<Queue>;
 }
 
 export default WhatsappQueue;
