@@ -1,5 +1,5 @@
 import fs from "fs/promises";
-import { Configuration, CreateImageRequestSizeEnum, OpenAIApi } from "openai";
+import OpenAI from "openai";
 import path from "path";
 import qrCode from "qrcode-terminal";
 import { Client, LocalAuth } from "whatsapp-web.js";
@@ -16,13 +16,6 @@ interface Session extends Client {
   id?: number;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-interface CreateImageRequest {
-  prompt: string;
-  n?: number;
-  size?: CreateImageRequestSizeEnum;
-}
-
 async function findIntegrationValue(key: string): Promise<string | null> {
   const integration = await Integration.findOne({
     where: { key }
@@ -35,57 +28,45 @@ async function findIntegrationValue(key: string): Promise<string | null> {
   return null as string | null;
 }
 
-let openai: OpenAIApi;
+let openai: OpenAI;
 
 (async () => {
-  const organizationDB: string | null = await findIntegrationValue(
-    "organization"
-  );
+  const organizationDB: string | null = await findIntegrationValue("organization");
   const apiKeyDB: string | null = await findIntegrationValue("apikey");
 
-  const configuration = new Configuration({
-    organization: organizationDB ?? "",
-    apiKey: apiKeyDB ?? ""
+  openai = new OpenAI({
+    apiKey: apiKeyDB ?? "",
+    ...(organizationDB ? { organization: organizationDB } : {})
   });
-
-  openai = new OpenAIApi(configuration);
 })();
 
 const getDavinciResponse = async (clientText: string): Promise<string> => {
-  const options = {
-    model: "text-davinci-003",
-    prompt: clientText,
-    temperature: 1,
-    max_tokens: 4000
-  };
-
   try {
-    const response = await openai.createCompletion(options);
-    let botResponse = "";
-    response.data.choices.forEach(({ text }) => {
-      botResponse += text;
+    const response = await openai.chat.completions.create({
+      model: "gpt-3.5-turbo",
+      messages: [{ role: "user", content: clientText }],
+      temperature: 1,
+      max_tokens: 4000
     });
+    const botResponse = response.choices[0]?.message?.content ?? "";
     return `Chat GPT 🤖\n\n ${botResponse.trim()}`;
   } catch (e) {
-    return `❌ OpenAI Response Error: ${e.response.data.error.message}`;
+    return `❌ OpenAI Response Error: ${e instanceof Error ? e.message : String(e)}`;
   }
 };
 
 const getDalleResponse = async (
   clientText: string
 ): Promise<string | undefined> => {
-  const options: CreateImageRequest = {
-    prompt: clientText,
-    n: 1,
-    // eslint-disable-next-line no-underscore-dangle
-    size: CreateImageRequestSizeEnum._1024x1024
-  };
-
   try {
-    const response = await openai.createImage(options);
-    return response.data.data[0].url;
+    const response = await openai.images.generate({
+      prompt: clientText,
+      n: 1,
+      size: "1024x1024"
+    });
+    return response.data[0].url;
   } catch (e) {
-    return `❌ OpenAI Response Error: ${e.response.data.error.message}`;
+    return `❌ OpenAI Response Error: ${e instanceof Error ? e.message : String(e)}`;
   }
 };
 
@@ -93,7 +74,7 @@ const sessions: Session[] = [];
 
 const syncUnreadMessages = async (wbot: Session) => {
   const maxRetries = 3;
-  
+
   if (!wbot || !wbot.pupPage) {
     console.warn('syncUnreadMessages: sessão não está pronta');
     return;
@@ -102,7 +83,7 @@ const syncUnreadMessages = async (wbot: Session) => {
   for (let attempt = 1; attempt <= maxRetries; attempt += 1) {
     try {
       await new Promise((resolve) => setTimeout(resolve, 2000 * attempt));
-      
+
       const state = await wbot.getState();
       if (state !== 'CONNECTED') {
         console.warn(`syncUnreadMessages: WhatsApp não está conectado. Estado: ${state}`);
@@ -110,7 +91,7 @@ const syncUnreadMessages = async (wbot: Session) => {
       }
 
       const chats = await wbot.getChats();
-      
+
       if (!chats || !Array.isArray(chats)) {
         console.warn('syncUnreadMessages: chats inválidos');
         continue;
@@ -224,7 +205,7 @@ export const initWbot = async (whatsapp: Whatsapp): Promise<Session> => {
         },
         // webVersionCache: {
         //   type: 'remote',
-        //   remotePath: `https://raw.githubusercontent.com/wppconnect-team/wa-version/refs/heads/main/html/2.3000.1031490220-alpha.html`,    
+        //   remotePath: `https://raw.githubusercontent.com/wppconnect-team/wa-version/refs/heads/main/html/2.3000.1031490220-alpha.html`,
         // },
       });
 
@@ -233,11 +214,11 @@ export const initWbot = async (whatsapp: Whatsapp): Promise<Session> => {
       wbot.on("qr", async qr => {
         logger.info("Session:", sessionName);
         qrCode.generate(qr, { small: true });
-        await whatsapp.update({ 
-          qrcode: qr, 
-          status: "qrcode", 
-          retries: 0, 
-          type: "wwebjs" 
+        await whatsapp.update({
+          qrcode: qr,
+          status: "qrcode",
+          retries: 0,
+          type: "wwebjs"
         });
 
         const sessionIndex = sessions.findIndex(s => s.id === whatsapp.id);
@@ -255,7 +236,7 @@ export const initWbot = async (whatsapp: Whatsapp): Promise<Session> => {
 
       wbot.on("loading_screen", (percent, message) => {
         logger.info(`Session: ${sessionName} LOADING - ${percent}% - ${message}`);
-        
+
         io.emit("whatsappSession", {
           action: "update",
           session: {
@@ -274,12 +255,12 @@ export const initWbot = async (whatsapp: Whatsapp): Promise<Session> => {
 
       wbot.on("authenticated", async () => {
         logger.info(`Session: ${sessionName} AUTHENTICATED`);
-        
+
         await whatsapp.update({
           status: "AUTHENTICATED",
           type: "wwebjs"
         });
-        
+
         io.emit("whatsappSession", {
           action: "update",
           session: whatsapp
@@ -375,29 +356,29 @@ export const initWbot = async (whatsapp: Whatsapp): Promise<Session> => {
             if (ticket && action === "update" && emoji) {
               const myNumber = wbot.info?.wid?._serialized || null;
               const isMyReaction = myNumber && sender === myNumber;
-              
-              const reactionText = isMyReaction 
+
+              const reactionText = isMyReaction
                 ? `Você reagiu com ${emoji} a: "${msg.body || 'mídia'}"`
                 : `Reagiu com ${emoji} a: "${msg.body || 'mídia'}"`;
-              
+
               await ticket.update({ lastMessage: reactionText });
-              
+
               const ticketData = {
                 id: ticket.id,
                 lastMessage: reactionText,
                 updatedAt: new Date()
               };
-              
+
               io.to(ticket.id.toString()).emit("ticket", {
                 action: "update",
                 ticket: ticketData
               });
-              
+
               io.to(ticket.status).emit("ticket", {
                 action: "update",
                 ticket: ticketData
               });
-              
+
               io.emit("appMessage", {
                 action: "update",
                 ticket: ticketData
@@ -434,7 +415,7 @@ export const initWbot = async (whatsapp: Whatsapp): Promise<Session> => {
           logger.info(`[POLL_VOTE] ==========================================`);
 
           const PollVoteService = (await import("../services/PollVoteService")).default;
-          
+
           let voterName = vote.voter;
           try {
             const contact = await wbot.getContactById(vote.voter);
@@ -463,10 +444,10 @@ export const initWbot = async (whatsapp: Whatsapp): Promise<Session> => {
       });
 
       wbot.on("call", async (call: any) => {
-        try {          
+        try {
           const originalFrom = call.from;
           let realPhoneNumber = call.from;
-          
+
           if (call.from.includes('@lid')) {
             try {
               const contact = await wbot.getContactById(call.from);
@@ -477,26 +458,26 @@ export const initWbot = async (whatsapp: Whatsapp): Promise<Session> => {
               realPhoneNumber = call.from;
             }
           }
-          
+
           const Setting = (await import("../models/Setting")).default;
-          
+
           const autoRejectCallsSetting = await Setting.findOne({
             where: { key: "autoRejectCalls" }
           });
-          
+
           const callSetting = await Setting.findOne({
             where: { key: "call" }
           });
-          
+
           if (autoRejectCallsSetting && autoRejectCallsSetting.value === "enabled") {
             try {
               const pupPage = await wbot.pupPage;
-              
+
               if (pupPage) {
                 const rejected = await pupPage.evaluate((callId: string) => {
                   try {
                     const results: string[] = [];
-                    
+
                     results.push('Método 1: Tentando tecla ESC...');
                     try {
                       const escEvent = new KeyboardEvent('keydown', {
@@ -512,19 +493,19 @@ export const initWbot = async (whatsapp: Whatsapp): Promise<Session> => {
                     } catch (err: any) {
                       results.push(`❌ Tecla ESC falhou: ${err.message}`);
                     }
-                    
+
                     results.push('Método 2: Procurando botão vermelho...');
                     try {
                       const allButtons = Array.from(document.querySelectorAll('button, div[role="button"]'));
                       const redButton = allButtons.find((btn: any) => {
                         const style = window.getComputedStyle(btn);
                         const bgColor = style.backgroundColor;
-                        return bgColor.includes('234, 67, 53') || 
+                        return bgColor.includes('234, 67, 53') ||
                                bgColor.includes('244, 67, 54') ||
                                bgColor.includes('255, 0, 0') ||
                                bgColor.includes('220, 53, 69');
                       });
-                      
+
                       if (redButton) {
                         (redButton as HTMLElement).click();
                         results.push('✅ Botão vermelho clicado');
@@ -535,7 +516,7 @@ export const initWbot = async (whatsapp: Whatsapp): Promise<Session> => {
                     } catch (err: any) {
                       results.push(`❌ Busca por botão vermelho falhou: ${err.message}`);
                     }
-                    
+
                     results.push('Método 3: Procurando ícone call-end...');
                     try {
                       const callEndIcon = document.querySelector('[data-icon="call-end"]');
@@ -551,7 +532,7 @@ export const initWbot = async (whatsapp: Whatsapp): Promise<Session> => {
                     } catch (err: any) {
                       results.push(`❌ Busca por ícone call-end falhou: ${err.message}`);
                     }
-                    
+
                     results.push('Método 4: Tentando WWebJS.rejectCall...');
                     try {
                       const WWebJS = (window as any).WWebJS;
@@ -565,17 +546,17 @@ export const initWbot = async (whatsapp: Whatsapp): Promise<Session> => {
                     } catch (err: any) {
                       results.push(`❌ WWebJS.rejectCall falhou: ${err.message}`);
                     }
-                    
+
                     return { success: false, error: 'Todos os métodos falharam', results };
                   } catch (err: any) {
                     return { success: false, error: err.message, stack: err.stack, results: [] };
                   }
                 }, call.id);
-                
+
                 if (rejected.results && rejected.results.length > 0) {
                   logger.info(`[CALL] Resultados das tentativas:\n${rejected.results.join('\n')}`);
                 }
-                
+
                 if (rejected.success) {
                   logger.info(`[CALL] ✅ Chamada rejeitada via Puppeteer (método: ${rejected.method})`);
                 } else {
@@ -583,21 +564,21 @@ export const initWbot = async (whatsapp: Whatsapp): Promise<Session> => {
                   if (rejected.stack) {
                     logger.warn(`[CALL] Stack trace: ${rejected.stack}`);
                   }
-                  
+
                   logger.info(`[CALL] Tentando rejeitar via call.reject() - call.from: ${call.from}, call.id: ${call.id}`);
                   try {
                     const originalCallFrom = call.from;
                     const originalPeerJid = call.peerJid;
-                    
+
                     if (originalCallFrom.includes('@lid')) {
                       call.from = realPhoneNumber;
                       if (call.peerJid) {
                         call.peerJid = realPhoneNumber;
                       }
                     }
-                    
+
                     const rejectResult = await call.reject();
-                    
+
                     call.from = originalCallFrom;
                     if (originalPeerJid) {
                       call.peerJid = originalPeerJid;
@@ -616,11 +597,11 @@ export const initWbot = async (whatsapp: Whatsapp): Promise<Session> => {
               logger.error(`[CALL] Erro ao rejeitar chamada: ${rejectErr}`);
               logger.error(`[CALL] Stack trace: ${(rejectErr as Error).stack}`);
             }
-            
+
             const autoRejectMessageSetting = await Setting.findOne({
               where: { key: "autoRejectCallsMessage" }
             });
-            
+
             if (autoRejectMessageSetting && autoRejectMessageSetting.value) {
               try {
                 await wbot.sendMessage(realPhoneNumber, autoRejectMessageSetting.value);
@@ -629,7 +610,7 @@ export const initWbot = async (whatsapp: Whatsapp): Promise<Session> => {
                 logger.warn(`[CALL] Erro ao enviar mensagem automática: ${msgErr}`);
               }
             }
-            
+
             io.emit("callRejected", {
               whatsappId: whatsapp.id,
               from: call.from,
@@ -639,7 +620,7 @@ export const initWbot = async (whatsapp: Whatsapp): Promise<Session> => {
             });
           } else if (callSetting && callSetting.value === "enabled") {
             logger.info(`[CALL] Chamada de ${realPhoneNumber} não será aceita (call setting enabled)`);
-            
+
             try {
               await wbot.sendMessage(
                 realPhoneNumber,
@@ -649,7 +630,7 @@ export const initWbot = async (whatsapp: Whatsapp): Promise<Session> => {
             } catch (msgErr) {
               logger.warn(`[CALL] Erro ao enviar mensagem de não aceitação: ${msgErr}`);
             }
-            
+
             io.emit("callRejected", {
               whatsappId: whatsapp.id,
               from: call.from,
@@ -733,7 +714,7 @@ export const shutdownWbot = async (whatsappId: string): Promise<void> => {
 
   try {
     await sessions[sessionIndex].destroy();
-    
+
     await fs.rm(sessionPath, { recursive: true, force: true });
 
     sessions.splice(sessionIndex, 1);
