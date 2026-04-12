@@ -7,7 +7,7 @@ dist
 .wwebjs_auth
 .wwebjs_cache
 sequelizeData.json
-
+config/update_status.json
 yarn.lock
 yarn-error.log
 
