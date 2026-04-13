@@ -198,7 +198,7 @@ export const initWbot = async (whatsapp: Whatsapp): Promise<Session> => {
             "--no-pings",
             "--no-zygote",
             "--password-store=basic",
-            "--use-gl=swiftshader",
+            "--use-angle=swiftshader",
             "--use-mock-keychain",
             "--log-level=3"
           ]

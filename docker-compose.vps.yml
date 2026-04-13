@@ -31,6 +31,13 @@ services:
         condition: service_healthy
     env_file:
       - ./backend/.env.vps
+    shm_size: '2gb'
+    security_opt:
+      - seccomp:unconfined
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
     volumes:
       - backend_public:/app/public
       - wwebjs_auth:/app/.wwebjs_auth

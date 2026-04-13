@@ -40,7 +40,7 @@ import {
   SettingsEthernet
 } from "@mui/icons-material";
 
-import { makeStyles } from "@mui/styles";
+import { useTheme } from "@mui/material/styles";
 import { green, red, yellow, blue, grey } from "@mui/material/colors";
 
 import MainContainer from "../../components/MainContainer";
@@ -49,7 +49,7 @@ import MainHeaderButtonsWrapper from "../../components/MainHeaderButtonsWrapper"
 import Title from "../../components/Title";
 import api from "../../services/api";
 
-const useStyles = makeStyles(theme => ({
+const getStyles = (theme) => ({
   mainPaper: {
     flex: 1,
     padding: 2,
@@ -62,98 +62,73 @@ const useStyles = makeStyles(theme => ({
     alignItems: "center",
     justifyContent: "center"
   },
-  tooltip: {
-    backgroundColor: "#f5f5f9",
-    color: "rgba(0, 0, 0, 0.87)",
-    fontSize: "0.875rem", 
-    border: "1px solid #dadde9",
-    maxWidth: 450
-  },
-  tooltipPopper: {
-    textAlign: "center"
-  },
   card: {
-    marginBottom: 2
+    mb: 2
   },
   cardHeader: {
-    backgroundColor: "#3f51b5", 
-    color: "#fff" 
+    backgroundColor: "#3f51b5",
+    color: "#fff"
   },
   statusIcon: {
     fontSize: 48,
-    marginRight: 2
+    mr: 2
   },
   statusBox: {
     display: "flex",
     alignItems: "center",
-    marginBottom: 2
+    mb: 2
   },
   statusText: {
     fontWeight: "bold"
   },
   statusOnline: {
-    color: "#4caf50" 
+    color: "#4caf50"
   },
   statusOffline: {
-    color: "#f44336" 
-  },
-  statusWarning: {
-    color: "#fbc02d" 
-  },
-  latencyGood: {
-    backgroundColor: "#4caf50", 
-    color: "#fff"
-  },
-  latencyMedium: {
-    backgroundColor: "#fbc02d", 
-    color: "#000"
-  },
-  latencyBad: {
-    backgroundColor: "#f44336", 
-    color: "#fff"
+    color: "#f44336"
   },
   interfaceCard: {
-    marginBottom: 1
+    mb: 1
   },
   interfaceHeader: {
-    backgroundColor: "#1976d2", 
+    backgroundColor: "#1976d2",
     color: "#fff",
-    padding: 1
+    p: 1
   },
   interfaceContent: {
-    padding: 1
+    p: 1
   },
   interfaceStatusUp: {
-    color: "#4caf50", 
+    color: "#4caf50",
     fontWeight: "bold"
   },
   interfaceStatusDown: {
-    color: "#f44336", 
+    color: "#f44336",
     fontWeight: "bold"
   },
   statsGrid: {
-    marginTop: 1
+    mt: 1
   },
   statsItem: {
-    padding: 1,
-    border: "1px solid rgba(0, 0, 0, 0.12)", 
-    borderRadius: 4,
+    p: 1,
+    border: "1px solid rgba(0, 0, 0, 0.12)",
+    borderRadius: "4px",
     textAlign: "center"
   },
   statsLabel: {
     fontSize: "0.75rem",
-    color: "rgba(0, 0, 0, 0.6)" 
+    color: "rgba(0, 0, 0, 0.6)"
   },
   statsValue: {
     fontWeight: "bold"
   },
   lastUpdated: {
-    marginTop: 2,
-    color: "rgba(0, 0, 0, 0.6)", 
+    mt: 2,
+    color: "rgba(0, 0, 0, 0.6)",
     fontSize: "0.875rem",
     fontStyle: "italic"
   }
-}));
+});
 
 const formatBytes = (bytes, decimals = 2) => {
   if (bytes === 0) return "0 Bytes";
@@ -167,15 +142,16 @@ const formatBytes = (bytes, decimals = 2) => {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
 };
 
-const getLatencyClass = (latency) => {
-  if (latency < 50) return "latencyGood";
-  if (latency < 150) return "latencyMedium";
-  return "latencyBad";
+const getLatencyStyle = (latency) => {
+  if (latency < 50) return { bgcolor: "#4caf50", color: "#fff" };
+  if (latency < 150) return { bgcolor: "#fbc02d", color: "#000" };
+  return { bgcolor: "#f44336", color: "#fff" };
 };
 
 const NetworkStatus = () => {
   const { t } = useTranslation();
-  const classes = useStyles();
+  const theme = useTheme();
+  const classes = getStyles(theme);
   
   const [loading, setLoading] = useState(true);
   const [networkStatus, setNetworkStatus] = useState(null);
@@ -205,20 +181,20 @@ const NetworkStatus = () => {
     const isOnline = connectionStatus.internet;
     
     return (
-      <Card className={classes.card}>
+      <Card sx={classes.card}>
         <CardHeader
           title={t("networkStatus.internetConnection")}
-          className={classes.cardHeader}
+          sx={classes.cardHeader}
           avatar={<NetworkCheck />}
         />
         <CardContent>
-          <Box className={classes.statusBox}>
+          <Box sx={classes.statusBox}>
             {isOnline ? (
-              <CheckCircle className={`${classes.statusIcon} ${classes.statusOnline}`} />
+              <CheckCircle sx={{ ...classes.statusIcon, ...classes.statusOnline }} />
             ) : (
-              <SignalCellularConnectedNoInternet0Bar className={`${classes.statusIcon} ${classes.statusOffline}`} />
+              <SignalCellularConnectedNoInternet0Bar sx={{ ...classes.statusIcon, ...classes.statusOffline }} />
             )}
-            <Typography variant="h6" className={classes.statusText}>
+            <Typography variant="h6" sx={classes.statusText}>
               {isOnline ? t("networkStatus.online") : t("networkStatus.offline")}
             </Typography>
           </Box>
@@ -241,9 +217,9 @@ const NetworkStatus = () => {
                     <TableCell>{ping.host}</TableCell>
                     <TableCell>
                       {ping.alive ? (
-                        <CheckCircle fontSize="small" className={classes.statusOnline} />
+                        <CheckCircle fontSize="small" sx={classes.statusOnline} />
                       ) : (
-                        <Cancel fontSize="small" className={classes.statusOffline} />
+                        <Cancel fontSize="small" sx={classes.statusOffline} />
                       )}
                     </TableCell>
                     <TableCell>
@@ -251,7 +227,7 @@ const NetworkStatus = () => {
                         <Chip
                           label={`${ping.avg} ms`}
                           size="small"
-                          className={classes[getLatencyClass(ping.avg)]}
+                          sx={getLatencyStyle(ping.avg)}
                         />
                       ) : (
                         "-"
@@ -275,20 +251,20 @@ const NetworkStatus = () => {
     const { dnsStatus } = networkStatus;
     
     return (
-      <Card className={classes.card}>
+      <Card sx={classes.card}>
         <CardHeader
           title={t("networkStatus.dnsStatus")}
-          className={classes.cardHeader}
+          sx={classes.cardHeader}
           avatar={<Dns />}
         />
         <CardContent>
-          <Box className={classes.statusBox}>
+          <Box sx={classes.statusBox}>
             {dnsStatus.working ? (
-              <CheckCircle className={`${classes.statusIcon} ${classes.statusOnline}`} />
+              <CheckCircle sx={{ ...classes.statusIcon, ...classes.statusOnline }} />
             ) : (
-              <Cancel className={`${classes.statusIcon} ${classes.statusOffline}`} />
+              <Cancel sx={{ ...classes.statusIcon, ...classes.statusOffline }} />
             )}
-            <Typography variant="h6" className={classes.statusText}>
+            <Typography variant="h6" sx={classes.statusText}>
               {dnsStatus.working ? t("networkStatus.dnsWorking") : t("networkStatus.dnsFailed")}
             </Typography>
           </Box>
@@ -311,60 +287,60 @@ const NetworkStatus = () => {
     const { activeConnections } = networkStatus;
     
     return (
-      <Card className={classes.card}>
+      <Card sx={classes.card}>
         <CardHeader
           title={t("networkStatus.activeConnections")}
-          className={classes.cardHeader}
+          sx={classes.cardHeader}
           avatar={<SettingsEthernet />}
         />
         <CardContent>
-          <Grid container spacing={2} className={classes.statsGrid}>
+          <Grid container spacing={2} sx={classes.statsGrid}>
             <Grid item xs={4} sm={2}>
-              <Box className={classes.statsItem}>
-                <Typography className={classes.statsLabel}>
+              <Box sx={classes.statsItem}>
+                <Typography sx={classes.statsLabel}>
                   {t("networkStatus.total")}
                 </Typography>
-                <Typography className={classes.statsValue}>
+                <Typography sx={classes.statsValue}>
                   {activeConnections.total}
                 </Typography>
               </Box>
             </Grid>
             <Grid item xs={4} sm={2}>
-              <Box className={classes.statsItem}>
-                <Typography className={classes.statsLabel}>
+              <Box sx={classes.statsItem}>
+                <Typography sx={classes.statsLabel}>
                   {t("networkStatus.established")}
                 </Typography>
-                <Typography className={classes.statsValue}>
+                <Typography sx={classes.statsValue}>
                   {activeConnections.established}
                 </Typography>
               </Box>
             </Grid>
             <Grid item xs={4} sm={2}>
-              <Box className={classes.statsItem}>
-                <Typography className={classes.statsLabel}>
+              <Box sx={classes.statsItem}>
+                <Typography sx={classes.statsLabel}>
                   {t("networkStatus.listening")}
                 </Typography>
-                <Typography className={classes.statsValue}>
+                <Typography sx={classes.statsValue}>
                   {activeConnections.listening}
                 </Typography>
               </Box>
             </Grid>
             <Grid item xs={6} sm={3}>
-              <Box className={classes.statsItem}>
-                <Typography className={classes.statsLabel}>
+              <Box sx={classes.statsItem}>
+                <Typography sx={classes.statsLabel}>
                   {t("networkStatus.timeWait")}
                 </Typography>
-                <Typography className={classes.statsValue}>
+                <Typography sx={classes.statsValue}>
                   {activeConnections.timeWait}
                 </Typography>
               </Box>
             </Grid>
             <Grid item xs={6} sm={3}>
-              <Box className={classes.statsItem}>
-                <Typography className={classes.statsLabel}>
+              <Box sx={classes.statsItem}>
+                <Typography sx={classes.statsLabel}>
                   {t("networkStatus.closeWait")}
                 </Typography>
-                <Typography className={classes.statsValue}>
+                <Typography sx={classes.statsValue}>
                   {activeConnections.closeWait}
                 </Typography>
               </Box>
@@ -381,10 +357,10 @@ const NetworkStatus = () => {
     const { interfaces } = networkStatus;
     
     return (
-      <Card className={classes.card}>
+      <Card sx={classes.card}>
         <CardHeader
           title={t("networkStatus.networkInterfaces")}
-          className={classes.cardHeader}
+          sx={classes.cardHeader}
           avatar={<Router />}
         />
         <CardContent>
@@ -392,20 +368,20 @@ const NetworkStatus = () => {
             <Typography>{t("networkStatus.noInterfaces")}</Typography>
           ) : (
             interfaces.map((iface) => (
-              <Paper key={iface.name} className={classes.interfaceCard} variant="outlined">
-                <Box className={classes.interfaceHeader}>
+              <Paper key={iface.name} sx={classes.interfaceCard} variant="outlined">
+                <Box sx={classes.interfaceHeader}>
                   <Typography variant="subtitle1">
                     {iface.name} - {iface.ipAddress}
                   </Typography>
                 </Box>
-                <Box className={classes.interfaceContent}>
+                <Box sx={classes.interfaceContent}>
                   <Grid container spacing={2}>
                     <Grid item xs={12} sm={6}>
                       <Typography variant="body2">
                         <strong>{t("networkStatus.status")}:</strong>{" "}
-                        <span className={iface.status === "up" ? classes.interfaceStatusUp : classes.interfaceStatusDown}>
+                        <Box component="span" sx={iface.status === "up" ? classes.interfaceStatusUp : classes.interfaceStatusDown}>
                           {iface.status === "up" ? t("networkStatus.up") : t("networkStatus.down")}
-                        </span>
+                        </Box>
                       </Typography>
                       <Typography variant="body2">
                         <strong>{t("networkStatus.mac")}:</strong> {iface.macAddress}
@@ -455,7 +431,7 @@ const NetworkStatus = () => {
         </MainHeaderButtonsWrapper>
       </MainHeader>
       
-      <Paper className={classes.mainPaper} variant="outlined">
+      <Paper sx={classes.mainPaper} variant="outlined">
         {loading ? (
           <Box display="flex" justifyContent="center" alignItems="center" height="100%">
             <CircularProgress />
@@ -468,7 +444,7 @@ const NetworkStatus = () => {
             {renderNetworkInterfaces()}
             
             {lastUpdated && (
-              <Typography className={classes.lastUpdated}>
+              <Typography sx={classes.lastUpdated}>
                 {t("networkStatus.lastUpdated")}: {formatDistanceToNow(lastUpdated, { addSuffix: true, locale: ptBR })}
               </Typography>
             )}

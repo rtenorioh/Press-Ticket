@@ -3,7 +3,6 @@ import {
   CircularProgress,
   ClickAwayListener,
   FormControlLabel,
-  Hidden,
   IconButton,
   InputBase,
   Menu,
@@ -1412,7 +1411,7 @@ const MessageInput = ({ ticketStatus }) => {
         </Fade>
         {(replyingMessage && renderReplyingMessage(replyingMessage)) || (editingMessage && renderReplyingMessage(editingMessage))}
         <NewMessageBox>
-          <Hidden only={["sm", "xs"]}>
+          <Box sx={{ display: { xs: "none", sm: "none", md: "flex" }, alignItems: "center" }}>
             <Tooltip title={t("messagesInput.buttons.emoji")} arrow placement="top">
               <span>
                 <IconButton
@@ -1503,8 +1502,8 @@ const MessageInput = ({ ticketStatus }) => {
               }
             />
             )}
-          </Hidden>
-          <Hidden only={["md", "lg", "xl"]}>
+          </Box>
+          <Box sx={{ display: { xs: "flex", md: "none" } }}>
             <IconButton
               aria-controls="simple-menu"
               aria-haspopup="true"
@@ -1574,7 +1573,7 @@ const MessageInput = ({ ticketStatus }) => {
                 )}
               </MenuItem>
             </Menu>
-          </Hidden>
+          </Box>
           <InputWrapper onMouseEnter={() => {
             refreshBlockedStatus();
           }}>

@@ -54,7 +54,7 @@ import {
   Computer
 } from "@mui/icons-material";
 
-import { makeStyles } from "@mui/styles";
+import { useTheme } from "@mui/material/styles";
 import { green, red, blue, orange, grey } from "@mui/material/colors";
 
 import { AuthContext } from "../../context/Auth/AuthContext";
@@ -68,7 +68,7 @@ import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import ptBR from "date-fns/locale/pt-BR";
 
-const useStyles = makeStyles(theme => ({
+const getStyles = (theme) => ({
   mainPaper: {
     flex: 1,
     padding: 2,
@@ -76,67 +76,42 @@ const useStyles = makeStyles(theme => ({
     overflowY: "scroll",
     ...theme.scrollbarStyles
   },
-  customTableCell: {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center"
-  },
-  tooltip: {
-    backgroundColor: "#f5f5f9",
-    color: "rgba(0, 0, 0, 0.87)",
-    fontSize: "0.875rem", 
-    border: "1px solid #dadde9",
-    maxWidth: 450
-  },
-  tooltipPopper: {
-    textAlign: "center"
-  },
-  buttonProgress: {
-    color: green[500]
-  },
   actionChip: {
-    margin: 0.5,
+    m: 0.5,
     fontWeight: "bold"
   },
   noLogsMessage: {
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-    padding: 4,
+    p: 4,
     flexDirection: "column"
   },
   warningIcon: {
     color: red[500],
     fontSize: 48,
-    marginBottom: 2
-  },
-  filterContainer: {
-    padding: 2,
-    marginBottom: 2
-  },
-  filterButton: {
-    marginLeft: 1
+    mb: 2
   },
   closeButton: {
     position: "absolute",
     right: 1,
     top: 1,
-    color: "#9e9e9e" 
+    color: "#9e9e9e"
   },
   detailsContainer: {
-    padding: 2
+    p: 2
   },
   detailsTitle: {
-    marginBottom: 2,
+    mb: 2,
     fontWeight: "bold"
   },
   detailsItem: {
-    padding: 1,
-    borderBottom: "1px solid rgba(0, 0, 0, 0.12)" 
+    p: 1,
+    borderBottom: "1px solid rgba(0, 0, 0, 0.12)"
   },
   detailsLabel: {
     fontWeight: "bold",
-    marginRight: 1
+    mr: 1
   },
   statsCard: {
     height: "100%",
@@ -144,7 +119,7 @@ const useStyles = makeStyles(theme => ({
     flexDirection: "column",
     justifyContent: "center",
     alignItems: "center",
-    padding: 2,
+    p: 2,
     background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
     color: "#fff",
     borderRadius: 2,
@@ -161,13 +136,13 @@ const useStyles = makeStyles(theme => ({
   },
   statsIcon: {
     fontSize: 48,
-    marginBottom: 1,
+    mb: 1,
     opacity: 0.9
   },
   statsNumber: {
     fontSize: 32,
     fontWeight: "bold",
-    marginBottom: 0.5
+    mb: 0.5
   },
   statsLabel: {
     fontSize: 14,
@@ -175,28 +150,22 @@ const useStyles = makeStyles(theme => ({
     opacity: 0.9
   },
   searchField: {
-    marginBottom: 2,
+    mb: 2,
     backgroundColor: "#fff"
   },
   jsonPre: {
     backgroundColor: "#f5f5f5",
-    padding: 2,
+    p: 2,
     borderRadius: 1,
     overflow: "auto",
     maxHeight: 400,
     fontSize: 12,
     fontFamily: "monospace"
   },
-  timelineItem: {
-    padding: 1,
-    borderLeft: "3px solid #667eea",
-    marginLeft: 2,
-    marginBottom: 1
-  },
   exportButton: {
-    marginRight: 1
+    mr: 1
   }
-}));
+});
 
 const getActionColor = (action) => {
   switch (action) {
@@ -220,7 +189,8 @@ const getActionColor = (action) => {
 
 const ActivityLogs = () => {
   const { t } = useTranslation();
-  const classes = useStyles();
+  const theme = useTheme();
+  const classes = getStyles(theme);
   const { user } = useContext(AuthContext);
 
   const [loading, setLoading] = useState(false);
@@ -431,8 +401,8 @@ const ActivityLogs = () => {
     if (!entityDetails) return null;
 
     return (
-      <Box className={classes.detailsContainer}>
-        <Typography variant="h6" className={classes.detailsTitle}>
+      <Box sx={classes.detailsContainer}>
+        <Typography variant="h6" sx={classes.detailsTitle}>
           {t("activityLogs.entityDetails")}
         </Typography>
         
@@ -440,9 +410,9 @@ const ActivityLogs = () => {
           if (typeof value === "object" || value === null) return null;
           
           return (
-            <Box key={key} className={classes.detailsItem}>
+            <Box key={key} sx={classes.detailsItem}>
               <Typography variant="body2">
-                <span className={classes.detailsLabel}>{key}:</span>
+                <Box component="span" sx={classes.detailsLabel}>{key}:</Box>
                 {value.toString()}
               </Typography>
             </Box>
@@ -462,7 +432,7 @@ const ActivityLogs = () => {
             color="primary"
             onClick={handleExportCSV}
             startIcon={<Download />}
-            className={classes.exportButton}
+            sx={classes.exportButton}
             disabled={logs.length === 0}
           >
             Exportar CSV
@@ -472,7 +442,7 @@ const ActivityLogs = () => {
             color="primary"
             onClick={() => setShowFilters(true)}
             startIcon={<FilterList />}
-            className={classes.filterButton}
+            sx={classes.filterButton}
           >
             {t("activityLogs.filter")}
           </Button>
@@ -491,41 +461,41 @@ const ActivityLogs = () => {
       {/* Cards de Estatísticas */}
       <Grid container spacing={2} style={{ marginBottom: 16 }}>
         <Grid item xs={12} sm={6} md={3}>
-          <Card className={`${classes.statsCard} ${classes.statsCardBlue}`}>
-            <Assessment className={classes.statsIcon} />
-            <Typography className={classes.statsNumber}>{stats.totalLogs}</Typography>
-            <Typography className={classes.statsLabel}>Total de Logs</Typography>
+          <Card sx={{ ...classes.statsCard, ...classes.statsCardBlue }}>
+            <Assessment sx={classes.statsIcon} />
+            <Typography sx={classes.statsNumber}>{stats.totalLogs}</Typography>
+            <Typography sx={classes.statsLabel}>Total de Logs</Typography>
           </Card>
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
-          <Card className={`${classes.statsCard} ${classes.statsCardGreen}`}>
-            <People className={classes.statsIcon} />
-            <Typography className={classes.statsNumber}>{stats.uniqueUsers}</Typography>
-            <Typography className={classes.statsLabel}>Usuários Ativos</Typography>
+          <Card sx={{ ...classes.statsCard, ...classes.statsCardGreen }}>
+            <People sx={classes.statsIcon} />
+            <Typography sx={classes.statsNumber}>{stats.uniqueUsers}</Typography>
+            <Typography sx={classes.statsLabel}>Usuários Ativos</Typography>
           </Card>
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
-          <Card className={`${classes.statsCard} ${classes.statsCardOrange}`}>
-            <TrendingUp className={classes.statsIcon} />
-            <Typography className={classes.statsNumber}>{stats.todayLogs}</Typography>
-            <Typography className={classes.statsLabel}>Logs Hoje</Typography>
+          <Card sx={{ ...classes.statsCard, ...classes.statsCardOrange }}>
+            <TrendingUp sx={classes.statsIcon} />
+            <Typography sx={classes.statsNumber}>{stats.todayLogs}</Typography>
+            <Typography sx={classes.statsLabel}>Logs Hoje</Typography>
           </Card>
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
-          <Card className={`${classes.statsCard}`}>
-            <Computer className={classes.statsIcon} />
-            <Typography className={classes.statsNumber} style={{ fontSize: 20 }}>
+          <Card sx={classes.statsCard}>
+            <Computer sx={classes.statsIcon} />
+            <Typography sx={{ ...classes.statsNumber, fontSize: 20 }}>
               {stats.topAction || "N/A"}
             </Typography>
-            <Typography className={classes.statsLabel}>Ação Mais Comum</Typography>
+            <Typography sx={classes.statsLabel}>Ação Mais Comum</Typography>
           </Card>
         </Grid>
       </Grid>
 
-      <Paper className={classes.mainPaper} variant="outlined">
+      <Paper sx={classes.mainPaper} variant="outlined">
         {/* Campo de Busca em Tempo Real */}
         <TextField
-          className={classes.searchField}
+          sx={classes.searchField}
           fullWidth
           variant="outlined"
           placeholder="Buscar em logs (descrição, usuário, IP...)"
@@ -562,8 +532,8 @@ const ActivityLogs = () => {
               ) : logs.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={7}>
-                    <Box className={classes.noLogsMessage}>
-                      <Warning className={classes.warningIcon} />
+                    <Box sx={classes.noLogsMessage}>
+                      <Warning sx={classes.warningIcon} />
                       <Typography variant="body1">
                         {t("activityLogs.noLogs")}
                       </Typography>
@@ -577,8 +547,7 @@ const ActivityLogs = () => {
                     <TableCell>
                       <Chip
                         label={log.action}
-                        className={classes.actionChip}
-                        style={{ backgroundColor: getActionColor(log.action), color: "#fff" }}
+                        sx={{ ...classes.actionChip, backgroundColor: getActionColor(log.action), color: "#fff" }}
                         size="small"
                       />
                     </TableCell>
@@ -646,7 +615,7 @@ const ActivityLogs = () => {
         <DialogTitle>
           {t("activityLogs.filterTitle")}
           <IconButton
-            className={classes.closeButton}
+            sx={classes.closeButton}
             onClick={() => setShowFilters(false)}
           >
             <Close />
@@ -660,7 +629,7 @@ const ActivityLogs = () => {
                   label={t("activityLogs.startDate")}
                   value={filters.startDate}
                   onChange={(date) => handleFilterChange("startDate", date)}
-                  renderInput={(params) => <TextField {...params} fullWidth variant="outlined" />}
+                  slotProps={{ textField: { fullWidth: true, variant: "outlined" } }}
                 />
               </LocalizationProvider>
             </Grid>
@@ -670,7 +639,7 @@ const ActivityLogs = () => {
                   label={t("activityLogs.endDate")}
                   value={filters.endDate}
                   onChange={(date) => handleFilterChange("endDate", date)}
-                  renderInput={(params) => <TextField {...params} fullWidth variant="outlined" />}
+                  slotProps={{ textField: { fullWidth: true, variant: "outlined" } }}
                 />
               </LocalizationProvider>
             </Grid>
@@ -768,7 +737,7 @@ const ActivityLogs = () => {
         <DialogTitle>
           {t("activityLogs.logDetails")}
           <IconButton
-            className={classes.closeButton}
+            sx={classes.closeButton}
             onClick={handleCloseDetails}
           >
             <Close />
@@ -778,48 +747,47 @@ const ActivityLogs = () => {
           {selectedLog && (
             <Grid container spacing={2}>
               <Grid item xs={12}>
-                <Typography variant="h6" className={classes.detailsTitle}>
+                <Typography variant="h6" sx={classes.detailsTitle}>
                   {t("activityLogs.basicInfo")}
                 </Typography>
-                <Box className={classes.detailsItem}>
+                <Box sx={classes.detailsItem}>
                   <Typography variant="body2">
-                    <span className={classes.detailsLabel}>{t("activityLogs.user")}:</span>
+                    <Box component="span" sx={classes.detailsLabel}>{t("activityLogs.user")}:</Box>
                     {selectedLog.username}
                   </Typography>
                 </Box>
-                <Box className={classes.detailsItem}>
+                <Box sx={classes.detailsItem}>
                   <Typography variant="body2">
-                    <span className={classes.detailsLabel}>{t("activityLogs.action")}:</span>
+                    <Box component="span" sx={classes.detailsLabel}>{t("activityLogs.action")}:</Box>
                     <Chip
                       label={selectedLog.action}
-                      className={classes.actionChip}
-                      style={{ backgroundColor: getActionColor(selectedLog.action), color: "#fff" }}
+                      sx={{ ...classes.actionChip, backgroundColor: getActionColor(selectedLog.action), color: "#fff" }}
                       size="small"
                     />
                   </Typography>
                 </Box>
-                <Box className={classes.detailsItem}>
+                <Box sx={classes.detailsItem}>
                   <Typography variant="body2">
-                    <span className={classes.detailsLabel}>{t("activityLogs.description")}:</span>
+                    <Box component="span" sx={classes.detailsLabel}>{t("activityLogs.description")}:</Box>
                     {selectedLog.description}
                   </Typography>
                 </Box>
-                <Box className={classes.detailsItem}>
+                <Box sx={classes.detailsItem}>
                   <Typography variant="body2">
-                    <span className={classes.detailsLabel}>{t("activityLogs.timestamp")}:</span>
+                    <Box component="span" sx={classes.detailsLabel}>{t("activityLogs.timestamp")}:</Box>
                     {format(new Date(selectedLog.createdAt), "dd/MM/yyyy HH:mm:ss")}
                   </Typography>
                 </Box>
-                <Box className={classes.detailsItem}>
+                <Box sx={classes.detailsItem}>
                   <Typography variant="body2">
-                    <span className={classes.detailsLabel}>{t("activityLogs.ip")}:</span>
+                    <Box component="span" sx={classes.detailsLabel}>{t("activityLogs.ip")}:</Box>
                     {selectedLog.ip}
                   </Typography>
                 </Box>
                 {selectedLog.entityType && (
-                  <Box className={classes.detailsItem}>
+                  <Box sx={classes.detailsItem}>
                     <Typography variant="body2">
-                      <span className={classes.detailsLabel}>{t("activityLogs.entity")}:</span>
+                      <Box component="span" sx={classes.detailsLabel}>{t("activityLogs.entity")}:</Box>
                       {selectedLog.entityType} {selectedLog.entityId ? `#${selectedLog.entityId}` : ""}
                     </Typography>
                   </Box>
@@ -828,10 +796,10 @@ const ActivityLogs = () => {
               
               {selectedLog.additionalData && (
                 <Grid item xs={12}>
-                  <Typography variant="h6" className={classes.detailsTitle}>
+                  <Typography variant="h6" sx={classes.detailsTitle}>
                     Dados Adicionais
                   </Typography>
-                  <Box className={classes.jsonPre}>
+                  <Box sx={classes.jsonPre}>
                     <pre>{JSON.stringify(
                       typeof selectedLog.additionalData === 'string' 
                         ? JSON.parse(selectedLog.additionalData) 
