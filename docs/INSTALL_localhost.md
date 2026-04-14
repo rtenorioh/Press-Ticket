@@ -109,7 +109,7 @@ Se o arquivo `.env` ainda não existir, crie um novo arquivo e insira as informa
 Instale as dependências necessárias do projeto executando o seguinte comando no terminal:
 
 ```bash
-npm install
+npm ci
 ```
 
 ---
@@ -207,7 +207,7 @@ Se o arquivo `.env` ainda não existir, crie um novo arquivo e insira as informa
 No diretório `frontend`, instale as dependências com o comando:
 
 ```bash
-npm install
+npm ci
 ```
 
 ---

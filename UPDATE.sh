@@ -702,7 +702,7 @@ fi
 sleep 2
 
 sudo rm -rf node_modules 2>&1 | tee -a "$LOG_FILE"
-npm install 2>&1 | tee -a "$LOG_FILE"
+npm ci 2>&1 | tee -a "$LOG_FILE"
 
 sudo rm -rf dist 2>&1 | tee -a "$LOG_FILE"
 npm run build 2>&1 | tee -a "$LOG_FILE"
@@ -836,7 +836,7 @@ sleep 2
 sleep 2
 
 sudo rm -rf node_modules 2>&1 | tee -a "$LOG_FILE"
-npm install 2>&1 | tee -a "$LOG_FILE"
+npm ci 2>&1 | tee -a "$LOG_FILE"
 
 sudo rm -rf build 2>&1 | tee -a "$LOG_FILE"
 npm run build 2>&1 | tee -a "$LOG_FILE"

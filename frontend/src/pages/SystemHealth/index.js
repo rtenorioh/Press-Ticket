@@ -43,7 +43,6 @@ import Tooltip from "@mui/material/Tooltip";
 import IconButton from "@mui/material/IconButton";
 
 import api from "../../services/api";
-import { i18n } from "../../translate/i18n";
 import MainHeader from "../../components/MainHeader";
 import MainContainer from "../../components/MainContainer";
 import Title from "../../components/Title";

@@ -246,7 +246,7 @@ cd Press-Ticket/backend
 ### 7.6 Instalando as dependências
 
 ```
-npm install
+npm ci
 ```
 
 ### 7.7 Compilando o backend
@@ -276,7 +276,7 @@ sudo npm install -g pm2
 ### 7.11 Inicia o backend usando PM2, atribuindo o nome "Press-Ticket-backend" ao processo
 
 ```
-pm2 start dist/server.js --name Press-Ticket-backend
+pm2 start dist/server.js --name Press-Ticket-backend --node-args='--no-deprecation'
 ```
 
 ### 7.12 Configura o PM2 para que todos os processos gerenciados por ele iniciem automaticamente quando o Ubuntu for reiniciado, usando o usuário deploy
@@ -302,7 +302,7 @@ cd ../frontend
 ### 8.2 Instalando as dependências
 
 ```
-npm install
+npm ci
 ```
 
 ### 8.3 Editar os dados abaixo usando suas informações
@@ -338,7 +338,7 @@ npm run build
 ### 8.6 Iniciando o frontend com PM2
 
 ```
-pm2 start server.js --name Press-Ticket-frontend
+pm2 start server.js --name Press-Ticket-frontend --node-args='--no-deprecation'
 ```
 
 ### 8.7 Salvando os serviços iniciados pelo PM2

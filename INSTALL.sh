@@ -862,7 +862,7 @@ echo -e "${GREEN}Email do MasterAdmin obtido com sucesso: $MASTERADMIN_EMAIL.${R
 # Instalando as dependências
 echo -e "${COLOR}Instalando dependências do backend...${RESET}" | tee -a "$LOG_FILE"
 
-if ! sudo -u deploy -H bash -c "cd $DEPLOY_HOME/$NOME_EMPRESA/backend && npm install"; then
+if ! sudo -u deploy -H bash -c "cd $DEPLOY_HOME/$NOME_EMPRESA/backend && npm ci"; then
     finalizar "Erro ao instalar dependências do backend." 1
 fi
 
@@ -900,7 +900,7 @@ echo -e "${GREEN}PM2 instalado globalmente com sucesso.${RESET}" | tee -a "$LOG_
 # Iniciando o backend com PM2 (como usuário deploy)
 echo -e "${COLOR}Iniciando o backend usando PM2...${RESET}" | tee -a "$LOG_FILE"
 
-if ! sudo -u deploy -H bash -c "cd $DEPLOY_HOME/$NOME_EMPRESA/backend && DBUS_SESSION_BUS_ADDRESS= pm2 start dist/server.js --name $NOME_EMPRESA-back"; then
+if ! sudo -u deploy -H bash -c "cd $DEPLOY_HOME/$NOME_EMPRESA/backend && DBUS_SESSION_BUS_ADDRESS= pm2 start dist/server.js --name $NOME_EMPRESA-back --node-args='--no-deprecation'"; then
     finalizar "Erro ao iniciar o backend com PM2." 1
 fi
 
@@ -948,9 +948,9 @@ if [ $VERSION_RESULT -eq 1 ]; then
     echo -e "${YELLOW}Versão < 1.14.0 detectada. Usando npm install --legacy-peer-deps${RESET}" | tee -a "$LOG_FILE"
     NPM_INSTALL_CMD="npm install --legacy-peer-deps"
 else
-    # Versão >= 1.14.0 - Usar npm install normal
-    echo -e "${GREEN}Versão >= 1.14.0 detectada. Usando npm install${RESET}" | tee -a "$LOG_FILE"
-    NPM_INSTALL_CMD="npm install"
+    # Versão >= 1.14.0 - Usar npm ci
+    echo -e "${GREEN}Versão >= 1.14.0 detectada. Usando npm ci${RESET}" | tee -a "$LOG_FILE"
+    NPM_INSTALL_CMD="npm ci"
 fi
 
 if ! sudo -u deploy -H bash -c "cd $DEPLOY_HOME/$NOME_EMPRESA/frontend && $NPM_INSTALL_CMD"; then
@@ -971,7 +971,7 @@ echo -e "${GREEN}Frontend compilado com sucesso.${RESET}" | tee -a "$LOG_FILE"
 # Iniciando o frontend com PM2
 echo -e "${COLOR}Iniciando o frontend com PM2...${RESET}" | tee -a "$LOG_FILE"
 
-if ! sudo -u deploy -H bash -c "cd $DEPLOY_HOME/$NOME_EMPRESA/frontend && pm2 start server.js --name ${NOME_EMPRESA}-front"; then
+if ! sudo -u deploy -H bash -c "cd $DEPLOY_HOME/$NOME_EMPRESA/frontend && pm2 start server.js --name ${NOME_EMPRESA}-front --node-args='--no-deprecation'"; then
     finalizar "Erro ao iniciar o frontend com PM2." 1
 fi
 

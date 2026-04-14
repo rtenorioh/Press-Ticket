@@ -71,9 +71,12 @@ if (isProduction) {
 }
 
 const oneDay = 24 * 60 * 60 * 1000; // Cache de 1 dia em milissegundos
-app.use(express.static(path.join(__dirname, "build"), { maxAge: oneDay }));
+
+app.use("/assets", express.static(path.join(__dirname, "build", "assets"), { maxAge: oneDay }));
+app.use(express.static(path.join(__dirname, "build"), { maxAge: 0 }));
 
 app.get("/*", (req, res) => {
+	res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
 	res.sendFile(path.join(__dirname, "build", "index.html"));
 });
 

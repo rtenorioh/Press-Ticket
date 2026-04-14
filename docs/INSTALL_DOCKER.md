@@ -15,7 +15,7 @@
 Press-Ticket/
 ├── docker-compose.yml          # Orquestra todos os serviços
 ├── backend/
-│   ├── Dockerfile              # Imagem do backend (Node 18 + Chrome)
+│   ├── Dockerfile              # Imagem do backend (Node 22 + Chrome)
 │   ├── docker-entrypoint.sh    # Script de inicialização (migrations + seeds)
 │   ├── .dockerignore           # Arquivos ignorados no build
 │   └── .env.docker             # Variáveis de ambiente para Docker
@@ -32,7 +32,7 @@ Press-Ticket/
 | Serviço    | Imagem / Base         | Porta  | Descrição                          |
 |------------|-----------------------|--------|------------------------------------|
 | `db`       | `mariadb:10.11`       | 3306   | Banco de dados MariaDB             |
-| `backend`  | `node:18` + Chrome    | 8000   | API + WhatsApp Web.js              |
+| `backend`  | `node:22` + Chrome    | 8000   | API + WhatsApp Web.js              |
 | `frontend` | `node:22` (multi-stage)| 3000  | React + servidor Express           |
 
 ---
@@ -151,7 +151,7 @@ docker compose start
 ### Parar e remover os containers
 
 ```powershell
-
+docker compose down
 ```
 
 ### Parar e remover **tudo** (incluindo volumes - APAGA OS DADOS!)
@@ -254,8 +254,19 @@ docker compose logs -f backend
 
 Se houver erro de Chrome/Puppeteer, confirme que o container foi buildado corretamente:
 ```powershell
-docker compose exec backend google-chrome-stable --version
+# No Git Bash/MINGW64, use aspas simples ou sh -c para evitar conversão de paths:
+docker exec -it press_ticket_backend sh -c "/usr/bin/google-chrome-stable --version"
 ```
+
+### Erro de Puppeteer: `Failed to launch the browser process: Code: 21`
+
+Ocorre quando há **lock files** do Chrome de sessões anteriores. Remova e reinicie:
+```powershell
+docker exec -it press_ticket_backend sh -c "rm -rf /tmp/com.google.Chrome.* /app/.wwebjs_auth/*/SingletonLock /app/.wwebjs_auth/*/SingletonCookie 2>/dev/null"
+docker compose restart backend
+```
+
+> O entrypoint do backend já limpa esses arquivos automaticamente a cada reinício do container.
 
 ### Porta já em uso
 
