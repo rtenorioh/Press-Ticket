@@ -19,7 +19,6 @@ import {
   HourglassEmptyRounded,
   MoveToInbox,
   Search,
-  FilterList,
   Add,
   Close,
   Refresh,
@@ -27,7 +26,7 @@ import {
   AccountTreeOutlined,
   SyncAlt
 } from "@mui/icons-material";
-import React, { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { AuthContext } from "../../context/Auth/AuthContext";
 import { WhatsAppsContext } from "../../context/WhatsApp/WhatsAppsContext";

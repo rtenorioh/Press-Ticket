@@ -1,6 +1,6 @@
 import { IconButton, styled, Box, Tooltip } from "@mui/material";
 import { MoreVert, Replay, CheckCircle, ClearOutlined } from "@mui/icons-material";
-import React, { useContext, useState } from "react";
+import { useContext, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../../context/Auth/AuthContext";
@@ -105,8 +105,6 @@ const TicketActionButtons = ({ ticket, onTicketAccepted }) => {
 				status: status,
 				userId: userId || null
 			});
-			
-		
 			
 			if (status === "open") {
 				const isGroup = ticket?.contact?.isGroup;

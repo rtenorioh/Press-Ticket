@@ -1,17 +1,16 @@
-import { 
-	Dialog, 
-	DialogContent, 
-	DialogTitle,
-	Paper, 
-	Typography, 
-	Box,
-	CircularProgress,
-	IconButton,
-	Divider
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  Typography,
+  Box,
+  CircularProgress,
+  IconButton,
+  Divider
 } from "@mui/material";
 import { Close as CloseIcon, CheckCircle } from "@mui/icons-material";
 import { QRCodeSVG } from "qrcode.react";
-import React, { useEffect, useState } from "react";
+import { memo, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 import toastError from "../../errors/toastError";
@@ -283,4 +282,4 @@ const QrcodeModal = ({ open, onClose, whatsAppId }) => {
 	);
 };
 
-export default React.memo(QrcodeModal);
+export default memo(QrcodeModal);

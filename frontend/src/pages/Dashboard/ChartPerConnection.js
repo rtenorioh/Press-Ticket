@@ -1,6 +1,6 @@
 import { useTheme } from "@mui/material/styles";
 import { styled, Paper, Box } from "@mui/material";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
     Cell,

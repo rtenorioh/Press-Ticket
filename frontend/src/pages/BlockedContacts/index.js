@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import { Fragment, useContext, useEffect, useState } from "react";
 import {
   Paper,
   Typography,
@@ -15,9 +15,8 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  Button,
   IconButton,
-  Tooltip,
+  Tooltip
 } from "@mui/material";
 import {
   Block as BlockIcon,
@@ -145,7 +144,7 @@ const BlockedContacts = () => {
             </Typography>
             <List>
               {blockedContacts.map((contact, index) => (
-                <React.Fragment key={contact.id}>
+                <Fragment key={contact.id}>
                   <ListItem
                     secondaryAction={
                       <Tooltip title={t("contacts.buttons.unblock") || "Desbloquear"}>
@@ -182,7 +181,7 @@ const BlockedContacts = () => {
                     />
                   </ListItem>
                   {index < blockedContacts.length - 1 && <Divider variant="inset" component="li" />}
-                </React.Fragment>
+                </Fragment>
               ))}
             </List>
           </>

@@ -16,7 +16,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import CodeIcon from "@mui/icons-material/Code";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import React, { useCallback, useState } from "react";
+import { useCallback, useState } from "react";
 import codeSnippets from "./codeSnippets.js";
 
 const Root = styled(Box)(({ theme }) => ({

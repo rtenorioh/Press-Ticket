@@ -20,7 +20,7 @@ import FileCopyOutlinedIcon from '@mui/icons-material/FileCopyOutlined';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import EditIcon from '@mui/icons-material/Edit';
 import { Field, Form, Formik } from "formik";
-import React, { useEffect, useState } from "react";
+import { memo, useEffect, useState } from "react";
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
@@ -386,4 +386,4 @@ const NotificameHubModal = ({ open, onClose }) => {
 	);
 };
 
-export default React.memo(NotificameHubModal);
+export default memo(NotificameHubModal);

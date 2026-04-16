@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   Button,
   Paper,
@@ -25,8 +25,7 @@ import {
   Chip,
   CircularProgress,
   Box,
-  Card,
-  CardContent
+  Card
 } from "@mui/material";
 import { styled, alpha, keyframes } from "@mui/material/styles";
 import SearchIcon from "@mui/icons-material/Search";

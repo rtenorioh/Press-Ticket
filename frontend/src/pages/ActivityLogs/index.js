@@ -1,8 +1,7 @@
-import React, { useState, useEffect, useContext } from "react";
+import { useState, useEffect, useContext } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
-import { parseISO, format } from "date-fns";
-import { pt } from "date-fns/locale";
+import { format } from "date-fns";
 
 import {
   Button,
@@ -30,11 +29,8 @@ import {
   DialogActions,
   Chip,
   Card,
-  CardContent,
   TablePagination,
-  InputAdornment,
-  Collapse,
-  Divider
+  InputAdornment
 } from "@mui/material";
 
 import {
@@ -48,8 +44,6 @@ import {
   TrendingUp,
   People,
   Assessment,
-  ExpandMore,
-  ExpandLess,
   Language,
   Computer
 } from "@mui/icons-material";

@@ -1,11 +1,11 @@
 import { Button, Box, styled } from "@mui/material";
 import SpeedIcon from "@mui/icons-material/Speed";
-import React, {
+import {
   useCallback,
   useEffect,
   useMemo,
   useRef,
-  useState,
+  useState
 } from "react";
 
 const LS_NAME = "audioMessageRate";

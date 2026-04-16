@@ -1,6 +1,6 @@
 import { IconButton, Tooltip, useTheme } from "@mui/material";
 import { Email, Facebook, Instagram, Sms, Telegram } from "@mui/icons-material";
-import React from "react";
+import { createElement, Fragment } from "react";
 
 const ContactChannels = ({ contact, handleSaveTicket, setContactTicket, setNewTicketModalOpen }) => {
     const theme = useTheme();
@@ -48,18 +48,18 @@ const ContactChannels = ({ contact, handleSaveTicket, setContactTicket, setNewTi
     return (
         <>
             {channels.filter(channel => channel.id).map((channel, index) => (
-                <React.Fragment key={index}>
+                <Fragment key={index}>
                     <IconButton
                         size="small"
                         onClick={channel.action}
                         aria-label={`Open ${channel.label}`}
                     >
                         <Tooltip title={channel.label} arrow placement="left">
-                            {React.createElement(channel.Icon, { sx: { color: channel.color } })}
+                            {createElement(channel.Icon, { sx: { color: channel.color } })}
                         </Tooltip>
                     </IconButton>
                     {channel.id}
-                </React.Fragment>
+                </Fragment>
             ))}
         </>
     );

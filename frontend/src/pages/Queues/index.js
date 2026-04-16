@@ -17,7 +17,7 @@ import { styled } from '@mui/material/styles';
 import AddCircleOutline from '@mui/icons-material/AddCircleOutline';
 import DeleteOutline from '@mui/icons-material/DeleteOutline';
 import Edit from '@mui/icons-material/Edit';
-import React, { useEffect, useReducer, useState } from "react";
+import { useEffect, useReducer, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 import ConfirmationModal from "../../components/ConfirmationModal";

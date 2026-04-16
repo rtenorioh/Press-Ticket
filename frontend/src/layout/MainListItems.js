@@ -1,10 +1,10 @@
-import React, { useContext, useEffect, useState } from "react";
+import { forwardRef, useContext, useEffect, useMemo, useState } from "react";
 import { Link as RouterLink, useLocation } from "react-router-dom";
 
 import {
   Badge,
   Divider,
-  ListItem,
+  ListItemButton,
   ListItemIcon,
   ListItemText,
   ListSubheader,
@@ -39,10 +39,8 @@ import DatabaseIcon from "@mui/icons-material/Storage";
 import BackupIcon from "@mui/icons-material/Backup";
 import HistoryIcon from "@mui/icons-material/History";
 import NetworkCheckIcon from "@mui/icons-material/NetworkCheck";
-import QueueIcon from "@mui/icons-material/Queue";
 import QueueMonitorIcon from '@mui/icons-material/Assessment';
 import PeopleAltIcon from '@mui/icons-material/PeopleAlt';
-import SystemHealthIcon from '@mui/icons-material/HealthAndSafety';
 import MonitorHeartIcon from '@mui/icons-material/MonitorHeart';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import GroupIcon from '@mui/icons-material/Group';
@@ -102,7 +100,7 @@ const DividerStyled = styled(Divider)(({ theme }) => ({
   opacity: 0.6,
 }));
 
-const ActiveItemStyled = styled(ListItem)(({ theme }) => ({
+const ActiveItemStyled = styled(ListItemButton)(({ theme }) => ({
   background: `linear-gradient(90deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.light} 100%)`,
   color: theme.palette.primary.contrastText,
   borderRadius: 10,
@@ -123,20 +121,19 @@ const StyledBadge = styled(Badge)(({ theme }) => ({
 function ListItemLink(props) {
   const { icon, primary, to, active, drawerClose, sx: customSx, ...rest } = props;
 
-  const renderLink = React.useMemo(
+  const renderLink = useMemo(
     () =>
-      React.forwardRef((itemProps, ref) => (
+      forwardRef((itemProps, ref) => (
         <RouterLink to={to} ref={ref} {...itemProps} />
       )),
     [to]
   );
 
-  const ItemComponent = active ? ActiveItemStyled : ListItem;
+  const ItemComponent = active ? ActiveItemStyled : ListItemButton;
 
   return (
     <ListItemStyled>
       <ItemComponent 
-        button 
         component={renderLink} 
         onClick={drawerClose}
         sx={{
@@ -181,13 +178,12 @@ function ListItemLinkWithDropdown(props) {
     onToggle();
   };
 
-  const ItemComponent = active ? ActiveItemStyled : ListItem;
+  const ItemComponent = active ? ActiveItemStyled : ListItemButton;
 
   return (
     <>
       <ListItemStyled>
         <ItemComponent 
-          button 
           onClick={navigate}
           sx={{
             py: 0.5,

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Box, IconButton, styled } from "@mui/material";
 import { Close, NavigateBefore, NavigateNext } from "@mui/icons-material";
 

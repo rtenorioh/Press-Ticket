@@ -15,7 +15,12 @@ import {
 import Autocomplete, {
 	createFilterOptions,
 } from "@mui/material/Autocomplete";
-import React, { useCallback, useContext, useEffect, useState } from "react";
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useState
+} from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -23,7 +28,6 @@ import WhatsMarked from "react-whatsmarked";
 import { AuthContext } from "../../context/Auth/AuthContext";
 import toastError from "../../errors/toastError";
 import api from "../../services/api";
-import openSocket from "../../services/socket-io";
 import ButtonWithSpinner from "../ButtonWithSpinner";
 import ContactModal from "../ContactModal";
 

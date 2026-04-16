@@ -1,24 +1,17 @@
-import React, { useEffect, useState } from 'react';
-import { 
-  Box, 
-  Typography, 
-  Paper, 
-  LinearProgress, 
-  Card, 
-  CardContent, 
+import { useEffect, useState } from "react";
+import {
+  Box,
+  Typography,
+  Paper,
+  LinearProgress,
+  Card,
+  CardContent,
   Grid,
   Tooltip,
   CircularProgress,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
   IconButton,
   Collapse
-} from '@mui/material';
+} from "@mui/material";
 import { styled } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
@@ -207,7 +200,7 @@ const DiskSpace = () => {
   const [expandedFolders, setExpandedFolders] = useState(new Set());
   const [folderContents, setFolderContents] = useState(new Map());
   
-  React.useEffect(() => {
+  useEffect(() => {
     document.body.style.overflow = 'auto';
     document.body.style.height = '100%';
     
@@ -226,7 +219,7 @@ const DiskSpace = () => {
         setError(null);
       } catch (err) {
         setError(err.message || 'Erro ao carregar informações de espaço em disco');
-        toastError(err, t);
+        toastError(err);
       } finally {
         setLoading(false);
       }

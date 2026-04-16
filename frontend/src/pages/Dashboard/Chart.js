@@ -2,7 +2,7 @@ import { useTheme, styled } from "@mui/material/styles";
 import ResponsiveDateFilter from "../../components/ResponsiveDateFilter";
 import Paper from "@mui/material/Paper";
 import Box from "@mui/material/Box";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
 	Area,

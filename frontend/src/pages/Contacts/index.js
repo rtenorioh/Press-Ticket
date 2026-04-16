@@ -1,4 +1,9 @@
-import React, { useContext, useEffect, useReducer, useState } from "react";
+import {
+  useContext,
+  useEffect,
+  useReducer,
+  useState
+} from "react";
 import {
   Avatar,
   Button,
@@ -56,7 +61,6 @@ import WhatsMarked from "react-whatsmarked";
 
 import { Can } from "../../components/Can";
 import ConfirmationModal from "../../components/ConfirmationModal/";
-import ContactChannels from "../../components/ContactChannels";
 import ContactModal from "../../components/ContactModal";
 import ContactAdvancedInfoModal from "../../components/ContactAdvancedInfoModal";
 import ExportFieldsModal from "../../components/ExportFieldsModal";

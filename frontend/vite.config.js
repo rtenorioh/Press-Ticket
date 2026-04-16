@@ -45,7 +45,7 @@ export default defineConfig({
       async transform(code, id) {
         if (!id.match(/src\/.*\.js$/)) return null;
         const { transform } = await import("esbuild");
-        const result = await transform(code, { loader: "jsx" });
+        const result = await transform(code, { loader: "jsx", jsx: "automatic" });
         return { code: result.code, map: null };
       },
     },

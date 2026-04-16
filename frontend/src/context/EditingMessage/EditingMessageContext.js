@@ -1,5 +1,5 @@
 import PropTypes from "prop-types";
-import React, { createContext, useState } from "react";
+import { createContext, useState } from "react";
 
 const EditMessageContext = createContext();
 

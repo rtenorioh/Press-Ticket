@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { Fragment, useEffect, useState } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -139,7 +139,7 @@ const ContactAdvancedInfoModal = ({ open, onClose, contactId, whatsappId }) => {
                     </Typography>
                     <List>
                       {commonGroups.map((group, index) => (
-                        <React.Fragment key={group.id}>
+                        <Fragment key={group.id}>
                           <ListItem>
                             <ListItemAvatar>
                               <Avatar src={group.profilePicUrl}>
@@ -152,7 +152,7 @@ const ContactAdvancedInfoModal = ({ open, onClose, contactId, whatsappId }) => {
                             />
                           </ListItem>
                           {index < commonGroups.length - 1 && <Divider variant="inset" component="li" />}
-                        </React.Fragment>
+                        </Fragment>
                       ))}
                     </List>
                   </>

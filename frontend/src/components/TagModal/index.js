@@ -20,7 +20,7 @@ import {
     Formik
 } from "formik";
 import { HexColorPicker } from "react-colorful";
-import React, { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 import * as Yup from "yup";

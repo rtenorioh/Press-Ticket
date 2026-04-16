@@ -18,7 +18,7 @@ import { useTheme } from "@mui/material/styles";
 import { styled } from "@mui/material/styles";
 import { AccountTreeOutlined, Colorize, Edit } from "@mui/icons-material";
 import { Field, Form, Formik } from "formik";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 import * as Yup from "yup";

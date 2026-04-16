@@ -21,14 +21,13 @@ import ColorLensIcon from '@mui/icons-material/ColorLens';
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
 import EditIcon from '@mui/icons-material/Edit';
 import { Field, Form, Formik } from "formik";
-import React, { useEffect, useState } from "react";
+import { memo, useEffect, useState } from "react";
 import { SketchPicker } from 'react-color';
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 import * as Yup from "yup";
 import toastError from "../../errors/toastError";
 import api from "../../services/api";
-import openSocket from "../../services/socket-io";
 import QueueSelect from "../QueueSelect";
 
 const Root = styled('div')(({ theme }) => ({
@@ -410,4 +409,4 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
 	);
 };
 
-export default React.memo(WhatsAppModal);
+export default memo(WhatsAppModal);

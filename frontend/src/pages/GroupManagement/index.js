@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   Paper,
   Table,
@@ -19,11 +19,9 @@ import {
   Add as AddIcon,
   Search as SearchIcon,
   People as PeopleIcon,
-  Edit as EditIcon,
   ExitToApp as ExitIcon,
   Link as LinkIcon,
-  Settings as SettingsIcon,
-  History as HistoryIcon
+  Settings as SettingsIcon
 } from "@mui/icons-material";
 import { styled } from "@mui/material/styles";
 import { toast } from "react-toastify";

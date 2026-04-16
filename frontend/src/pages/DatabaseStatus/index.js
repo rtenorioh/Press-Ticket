@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from 'react';
-import { 
-  Box, 
-  Typography, 
-  Paper, 
-  Card, 
-  CardContent, 
+import { useEffect, useState } from "react";
+import {
+  Box,
+  Typography,
+  Paper,
+  Card,
+  CardContent,
   Grid,
   Tooltip,
   CircularProgress,
@@ -14,10 +14,9 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  Divider,
   Chip,
   IconButton
-} from '@mui/material';
+} from "@mui/material";
 import { styled } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
 import StorageIcon from '@mui/icons-material/Storage';

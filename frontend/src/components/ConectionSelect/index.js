@@ -1,6 +1,6 @@
 import { Chip, FormControl, MenuItem, Select, Typography, Box } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import toastError from "../../errors/toastError";
 import api from "../../services/api";

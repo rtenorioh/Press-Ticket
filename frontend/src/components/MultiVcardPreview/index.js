@@ -5,7 +5,7 @@ import {
   Button,
   styled
 } from "@mui/material";
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
 import VcardPreview from '../VcardPreview';
 import { useTranslation } from "react-i18next";
 import ContactsIcon from "@mui/icons-material/Contacts";

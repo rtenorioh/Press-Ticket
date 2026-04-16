@@ -1,6 +1,6 @@
 import { Button, Typography, Paper, Box, styled } from "@mui/material";
 import PropTypes from "prop-types";
-import React, { useRef, useEffect, useCallback } from "react";
+import { useRef, useEffect, useCallback } from "react";
 import toastError from "../../errors/toastError";
 import { useTranslation } from "react-i18next";
 import LocationOnOutlinedIcon from "@mui/icons-material/LocationOnOutlined";

@@ -11,7 +11,7 @@ import MenuItem from "@mui/material/MenuItem";
 import Select from "@mui/material/Select";
 import TextField from "@mui/material/TextField";
 import Autocomplete, { createFilterOptions } from "@mui/material/Autocomplete";
-import React, { useContext, useEffect, useState } from "react";
+import { Fragment, useContext, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../../context/Auth/AuthContext";
@@ -158,12 +158,12 @@ const TransferTicketModal = ({ modalOpen, onClose, ticketid, ticketWhatsappId })
                 InputProps={{
                   ...params.InputProps,
                   endAdornment: (
-                    <React.Fragment>
+                    <Fragment>
                       {loading ? (
                         <CircularProgress color="inherit" size={20} />
                       ) : null}
                       {params.InputProps.endAdornment}
-                    </React.Fragment>
+                    </Fragment>
                   ),
                 }}
               />

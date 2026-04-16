@@ -1,7 +1,7 @@
 import { useTheme } from "@mui/material";
 import { styled, Paper, Box } from "@mui/material";
 import ResponsiveDateFilter from "../../components/ResponsiveDateFilter";
-import React, { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import {
     Bar,

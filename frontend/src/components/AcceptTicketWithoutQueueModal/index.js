@@ -14,7 +14,12 @@ import {
 } from "@mui/material";
 import { styled, useTheme } from "@mui/material/styles";
 import PropTypes from "prop-types";
-import React, { useCallback, useContext, useEffect, useState } from "react";
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useState
+} from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../../context/Auth/AuthContext";
@@ -247,7 +252,6 @@ const AcceptTicketWithouSelectQueue = ({ modalOpen, onClose, ticketId, onSuccess
 		</StyledDialog>
 	);
 };
-
 
 AcceptTicketWithouSelectQueue.propTypes = {
 	modalOpen: PropTypes.bool.isRequired,

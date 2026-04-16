@@ -1,6 +1,5 @@
-import React, { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { styled } from "@mui/material/styles";
-import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 import Grid from "@mui/material/Grid";
@@ -11,14 +10,9 @@ import Button from "@mui/material/Button";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import CircularProgress from "@mui/material/CircularProgress";
 import Alert from "@mui/material/Alert";
-import Divider from "@mui/material/Divider";
 import LinearProgress from "@mui/material/LinearProgress";
 import Box from "@mui/material/Box";
 import Chip from "@mui/material/Chip";
-import List from "@mui/material/List";
-import ListItem from "@mui/material/ListItem";
-import ListItemIcon from "@mui/material/ListItemIcon";
-import ListItemText from "@mui/material/ListItemText";
 import { toast } from "react-toastify";
 import { useTranslation } from "react-i18next";
 
@@ -153,7 +147,6 @@ const ChipError = styled(Chip)(({ theme }) => ({
   backgroundColor: theme.palette.error.main,
   color: theme.palette.error.contrastText,
 }));
-
 
 const SystemHealth = () => {
   const { t } = useTranslation();

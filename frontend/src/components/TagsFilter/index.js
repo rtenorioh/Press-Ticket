@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Autocomplete, Chip, Paper, TextField } from "@mui/material";
 import toastError from "../../errors/toastError";
 import api from "../../services/api";

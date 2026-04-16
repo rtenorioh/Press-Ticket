@@ -1,6 +1,6 @@
 import { Paper } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { EditMessageProvider } from "../../context/EditingMessage/EditingMessageContext";
 import { ReplyMessageProvider } from "../../context/ReplyingMessage/ReplyingMessageContext";
@@ -126,7 +126,6 @@ const Ticket = () => {
     }, 500);
     return () => clearTimeout(delayDebounceFn);
   }, [ticketId, navigate, t]);
-
 
   useEffect(() => {
     const socket = openSocket();

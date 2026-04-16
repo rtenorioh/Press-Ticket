@@ -1,7 +1,7 @@
-import React from "react";
+import { Component } from "react";
 import ErrorLogService from "../../services/ErrorLogService";
 
-class ErrorBoundary extends React.Component {
+class ErrorBoundary extends Component {
     constructor(props) {
         super(props);
         this.state = { hasError: false };

@@ -1,6 +1,6 @@
 import { useTheme } from "@mui/material/styles";
 import { styled, Paper, Box, Typography } from "@mui/material";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   BarChart,
@@ -10,8 +10,7 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  Cell,
-  Legend,
+  Cell
 } from "recharts";
 import api from "../../services/api";
 import Title from "./Title";

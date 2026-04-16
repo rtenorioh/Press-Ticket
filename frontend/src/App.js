@@ -1,7 +1,7 @@
 import CssBaseline from "@mui/material/CssBaseline";
 import { ptBR } from "@mui/material/locale";
 import { ThemeProvider } from "@mui/material/styles";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import "react-toastify/dist/ReactToastify.css";
 import { SocketProvider, useSocket } from './context/SocketContext';
 import { ForwardingMessageProvider } from './context/ForwardingMessage';

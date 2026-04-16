@@ -1,6 +1,6 @@
 import { Chip, Paper, TextField, Autocomplete, createFilterOptions } from "@mui/material";
 import { isArray, isString } from "lodash";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import toastError from "../../errors/toastError";
 import api from "../../services/api";
 import { useTranslation } from "react-i18next";

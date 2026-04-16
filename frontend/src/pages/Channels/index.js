@@ -24,31 +24,30 @@ import { green } from "@mui/material/colors";
 import { styled } from '@mui/material/styles';
 import { Zoom } from "@mui/material"
 import {
-	CheckCircle,
-	CropFree,
-	DeleteOutline,
-	Edit,
-	Email,
-	Facebook,
-	GridView,
-	Instagram,
-	PlayCircleOutline,
-	QrCode2,
-	Replay,
-	SignalCellular4Bar,
-	SignalCellularConnectedNoInternet0Bar,
-	SignalCellularConnectedNoInternet2Bar,
-	Sms,
-	SyncOutlined,
-	TableRows,
-	Telegram,
-	WhatsApp
+  CheckCircle,
+  CropFree,
+  DeleteOutline,
+  Edit,
+  Email,
+  Facebook,
+  GridView,
+  Instagram,
+  PlayCircleOutline,
+  QrCode2,
+  SignalCellular4Bar,
+  SignalCellularConnectedNoInternet0Bar,
+  SignalCellularConnectedNoInternet2Bar,
+  Sms,
+  SyncOutlined,
+  TableRows,
+  Telegram,
+  WhatsApp
 } from "@mui/icons-material";
 import PowerSettingsNewIcon from "@mui/icons-material/PowerSettingsNew";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import VisibilityIcon from "@mui/icons-material/Visibility"; 
 import { format, parseISO } from "date-fns";
-import React, { useCallback, useContext, useState, useEffect } from "react";
+import { Fragment, useCallback, useContext, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -173,12 +172,12 @@ const CustomToolTip = ({ title, content, children }) => {
       arrow
       placement="top"
       title={
-        <React.Fragment>
+        <Fragment>
           <Typography variant="subtitle2" fontWeight={600} gutterBottom color="inherit">
             {title}
           </Typography>
           {content && <Typography variant="body2">{content}</Typography>}
-        </React.Fragment>
+        </Fragment>
       }
       TransitionComponent={Zoom}
     >

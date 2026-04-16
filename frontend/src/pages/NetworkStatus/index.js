@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 import { formatDistanceToNow } from "date-fns";
@@ -20,20 +20,14 @@ import {
   Card,
   CardContent,
   CardHeader,
-  Divider,
-  Chip,
-  IconButton,
-  Tooltip,
-  LinearProgress
+  Chip
 } from "@mui/material";
 
 import {
   Refresh,
-  SignalCellularAlt,
   SignalCellularConnectedNoInternet0Bar,
   CheckCircle,
   Cancel,
-  Speed,
   NetworkCheck,
   Router,
   Dns,
@@ -41,7 +35,6 @@ import {
 } from "@mui/icons-material";
 
 import { useTheme } from "@mui/material/styles";
-import { green, red, yellow, blue, grey } from "@mui/material/colors";
 
 import MainContainer from "../../components/MainContainer";
 import MainHeader from "../../components/MainHeader";

@@ -11,7 +11,7 @@ import {
 	InputAdornment
 } from "@mui/material";
 import { QrCode, Phone } from "@mui/icons-material";
-import React, { useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 const ConnectionMethodModal = ({ open, onClose, onSelectMethod, whatsAppId }) => {

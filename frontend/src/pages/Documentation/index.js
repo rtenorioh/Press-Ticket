@@ -1,6 +1,5 @@
-import React from "react";
+import { cloneElement, useContext } from "react";
 import { useTranslation } from "react-i18next";
-import { useContext } from "react";
 import { AuthContext } from "../../context/Auth/AuthContext";
 import { 
   Paper, 
@@ -376,7 +375,7 @@ const Documentation = () => {
                               <CardHeader
                                 title={
                                   <Box display="flex" alignItems="center">
-                                    {React.cloneElement(item.icon, { style: { marginRight: 8 } })}
+                                    {cloneElement(item.icon, { style: { marginRight: 8 } })}
                                     <Typography variant="h6">{item.name}</Typography>
                                   </Box>
                                 }
@@ -419,7 +418,7 @@ const Documentation = () => {
                               <CardHeader
                                 title={
                                   <Box display="flex" alignItems="center">
-                                    {React.cloneElement(item.icon, { style: { marginRight: 8 } })}
+                                    {cloneElement(item.icon, { style: { marginRight: 8 } })}
                                     <Typography variant="h6">{item.name}</Typography>
                                   </Box>
                                 }
@@ -462,7 +461,7 @@ const Documentation = () => {
                               <CardHeader
                                 title={
                                   <Box display="flex" alignItems="center">
-                                    {React.cloneElement(item.icon, { style: { marginRight: 8 } })}
+                                    {cloneElement(item.icon, { style: { marginRight: 8 } })}
                                     <Typography variant="h6">{item.name}</Typography>
                                   </Box>
                                 }
@@ -505,7 +504,7 @@ const Documentation = () => {
                               <CardHeader
                                 title={
                                   <Box display="flex" alignItems="center">
-                                    {React.cloneElement(item.icon, { style: { marginRight: 8 } })}
+                                    {cloneElement(item.icon, { style: { marginRight: 8 } })}
                                     <Typography variant="h6">{item.name}</Typography>
                                   </Box>
                                 }
@@ -551,7 +550,7 @@ const Documentation = () => {
                           <CardHeader
                             title={
                               <Box display="flex" alignItems="center">
-                                {React.cloneElement(item.icon, { style: { marginRight: 8 } })}
+                                {cloneElement(item.icon, { style: { marginRight: 8 } })}
                                 <Typography variant="h6">{item.name}</Typography>
                               </Box>
                             }

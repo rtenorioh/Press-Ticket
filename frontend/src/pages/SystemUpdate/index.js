@@ -1,4 +1,9 @@
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import {
+  useState,
+  useEffect,
+  useCallback,
+  useRef
+} from "react";
 import { styled, alpha, keyframes } from "@mui/material/styles";
 import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
@@ -12,7 +17,6 @@ import Button from "@mui/material/Button";
 import CircularProgress from "@mui/material/CircularProgress";
 import LinearProgress from "@mui/material/LinearProgress";
 import Alert from "@mui/material/Alert";
-import Divider from "@mui/material/Divider";
 import Box from "@mui/material/Box";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
@@ -26,7 +30,6 @@ import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import Tooltip from "@mui/material/Tooltip";
 import Chip from "@mui/material/Chip";
-import Badge from "@mui/material/Badge";
 import { toast } from "react-toastify";
 import { useTranslation } from "react-i18next";
 import WhatsMarked from "react-whatsmarked";
@@ -558,7 +561,6 @@ const SystemUpdate = () => {
         releaseNotes: data.releaseNotes,
         publishedAt: data.publishedAt
       }));
-      
       
       toast.success(t("systemUpdate.checkSuccess"));
     } catch (err) {
@@ -1243,4 +1245,3 @@ const SystemUpdate = () => {
 };
 
 export default SystemUpdate;
-

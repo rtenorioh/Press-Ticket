@@ -1,8 +1,6 @@
-import React, { useState, useEffect, useContext } from "react";
+import { useState, useEffect, useContext } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
-import { format, parseISO } from "date-fns";
-import { pt } from "date-fns/locale";
 
 import {
   Button,
@@ -29,28 +27,23 @@ import {
   useMediaQuery,
   useTheme,
   alpha,
-  Chip,
-  Card,
-  CardContent
+  Chip
 } from "@mui/material";
 
 import {
-  AddCircleOutline,
   Delete,
-  GetApp,
   Restore,
   Refresh,
   Warning,
   CloudUpload,
   CloudDownload,
   Storage as StorageIcon,
-  Schedule as ScheduleIcon,
   FolderZip as FolderZipIcon,
   Publish as PublishIcon
 } from "@mui/icons-material";
 
 import { styled, keyframes } from "@mui/material/styles";
-import { green, red, blue } from "@mui/material/colors";
+import { green, blue } from "@mui/material/colors";
 
 import { AuthContext } from "../../context/Auth/AuthContext";
 import MainContainer from "../../components/MainContainer";

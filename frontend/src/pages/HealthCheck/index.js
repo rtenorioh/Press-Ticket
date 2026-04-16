@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   Box,
   Card,
@@ -21,8 +21,7 @@ import {
   Speed,
   Message,
   Schedule,
-  SignalCellular4Bar,
-  SignalCellularConnectedNoInternet0Bar,
+  SignalCellularConnectedNoInternet0Bar
 } from "@mui/icons-material";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";

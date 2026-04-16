@@ -13,7 +13,12 @@ import {
   Typography
 } from "@mui/material";
 import { styled, useTheme } from "@mui/material/styles";
-import React, { useCallback, useContext, useEffect, useState } from "react";
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useState
+} from "react";
 import { useTranslation } from "react-i18next";
 import { AuthContext } from "../../context/Auth/AuthContext";
 import toastError from "../../errors/toastError";

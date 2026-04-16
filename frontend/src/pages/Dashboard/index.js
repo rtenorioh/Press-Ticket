@@ -11,7 +11,7 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty";
 import PeopleIcon from "@mui/icons-material/People";
 import SendIcon from "@mui/icons-material/Send";
-import React, { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Can } from "../../components/Can";
 import { AuthContext } from "../../context/Auth/AuthContext";
@@ -330,7 +330,6 @@ const Dashboard = () => {
 
 			<DashboardSection>
 				
-					
 				<Grid container spacing={3}>
 					<Grid item xs={12} sm={6}>
 						<ChartPerQueue

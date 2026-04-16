@@ -1,10 +1,8 @@
 import {
   Box,
-  Button,
   CircularProgress,
-  Divider,
   IconButton,
-  styled,
+  styled
 } from "@mui/material";
 import {
   blue,
@@ -32,7 +30,7 @@ import {
   isSameDay
 } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import React, { useCallback, useEffect, useReducer, useRef, useState } from "react";
+import { Fragment, useCallback, useEffect, useReducer, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 import toastError from "../../errors/toastError";
@@ -719,7 +717,6 @@ const MessagesList = ({ ticketId, isGroup, onClick }) => {
       
       const messageTicketIdStr = messageTicketId ? String(messageTicketId).trim() : null;
       const currentTicketIdStr = ticketId ? String(ticketId).trim() : null;
-      
       
       if (messageTicketIdStr && currentTicketIdStr && messageTicketIdStr === currentTicketIdStr) {
         
@@ -1530,7 +1527,7 @@ const MessagesList = ({ ticketId, isGroup, onClick }) => {
             // Álbum recebido (esquerda)
             const isSelected = selectedMessages.some(msg => albumMessages.some(am => am.id === msg.id));
             return (
-              <React.Fragment key={`album-${message.albumId}`}>
+              <Fragment key={`album-${message.albumId}`}>
                 {renderDailyTimestamps(firstMessage, index)}
                 {renderMessageDivider(firstMessage, index)}
                 {renderNumberTicket(firstMessage, index)}
@@ -1620,13 +1617,13 @@ const MessagesList = ({ ticketId, isGroup, onClick }) => {
                     </MessageTimestamp>
                   </MessageLeft>
                 </Box>
-              </React.Fragment>
+              </Fragment>
             );
           } else {
             // Álbum enviado (direita)
             const isSelected = selectedMessages.some(msg => albumMessages.some(am => am.id === msg.id));
             return (
-              <React.Fragment key={`album-${message.albumId}`}>
+              <Fragment key={`album-${message.albumId}`}>
                 {renderDailyTimestamps(firstMessage, index)}
                 {renderMessageDivider(firstMessage, index)}
                 {renderNumberTicket(firstMessage, index)}
@@ -1708,7 +1705,7 @@ const MessagesList = ({ ticketId, isGroup, onClick }) => {
                     </Box>
                   )}
                 </Box>
-              </React.Fragment>
+              </Fragment>
             );
           }
         }
@@ -1716,17 +1713,17 @@ const MessagesList = ({ ticketId, isGroup, onClick }) => {
         // Renderização normal para mensagens que não são álbuns
         if (message.mediaType === "event") {
           return (
-            <React.Fragment key={message.id}>
+            <Fragment key={message.id}>
               {renderDailyTimestamps(message, index)}
               <SystemMessage>
                 {message.body}
               </SystemMessage>
-            </React.Fragment>
+            </Fragment>
           );
         }
         if (message.mediaType === "poll" || message.mediaType === "poll_creation") {
           return (
-            <React.Fragment key={message.id}>
+            <Fragment key={message.id}>
               {renderDailyTimestamps(message, index)}
               {renderMessageDivider(message, index)}
               {renderNumberTicket(message, index)}
@@ -1737,12 +1734,12 @@ const MessagesList = ({ ticketId, isGroup, onClick }) => {
               }}>
                 <PollMessage message={message} />
               </div>
-            </React.Fragment>
+            </Fragment>
           );
         }
         if (message.mediaType === "call_log") {
           return (
-            <React.Fragment key={message.id}>
+            <Fragment key={message.id}>
               {renderDailyTimestamps(message, index)}
               {renderMessageDivider(message, index)}
               {renderNumberTicket(message, index)}
@@ -1774,12 +1771,12 @@ const MessagesList = ({ ticketId, isGroup, onClick }) => {
                   <span>{t("messagesList.message.voiceVideoLost")} {format(parseISO(message.createdAt), "HH:mm")}</span>
                 </div>
               </MessageCenter>
-            </React.Fragment>
+            </Fragment>
           );
         }
         if (unsupportedMediaTypes.includes(message.mediaType)) {
           return (
-            <React.Fragment key={message.id}>
+            <Fragment key={message.id}>
               {renderDailyTimestamps(message, index)}
               {renderMessageDivider(message, index)}
               {renderNumberTicket(message, index)}
@@ -1803,13 +1800,13 @@ const MessagesList = ({ ticketId, isGroup, onClick }) => {
                   {format(parseISO(message.createdAt), "HH:mm")}
                 </MessageTimestamp>
               </MessageLeft>
-            </React.Fragment>
+            </Fragment>
           );
         }
         if (!message.fromMe) {
           const isSelected = selectedMessages.some(msg => msg.id === message.id);
           return (
-            <React.Fragment key={message.id}>
+            <Fragment key={message.id}>
               {renderDailyTimestamps(message, index)}
               {renderMessageDivider(message, index)}
               {renderNumberTicket(message, index)}
@@ -1915,12 +1912,12 @@ const MessagesList = ({ ticketId, isGroup, onClick }) => {
                 </MessageItem>
               </MessageLeft>
               </Box>
-            </React.Fragment>
+            </Fragment>
           );
         }
         const isSelected = selectedMessages.some(msg => msg.id === message.id);
         return (
-          <React.Fragment key={message.id}>
+          <Fragment key={message.id}>
             {renderDailyTimestamps(message, index)}
             {renderMessageDivider(message, index)}
             {renderNumberTicket(message, index)}
@@ -2016,7 +2013,7 @@ const MessagesList = ({ ticketId, isGroup, onClick }) => {
                 </Box>
               )}
             </Box>
-          </React.Fragment>
+          </Fragment>
         );
       });
       // Filtrar mensagens null (álbuns já processados)

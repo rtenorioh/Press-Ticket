@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
@@ -22,7 +22,6 @@ import ErrorIcon from "@mui/icons-material/Error";
 import SystemUpdateIcon from "@mui/icons-material/SystemUpdate";
 import GitHubIcon from "@mui/icons-material/GitHub";
 import CloudDownloadIcon from "@mui/icons-material/CloudDownload";
-import { AuthContext } from "../../context/Auth/AuthContext";
 import MainContainer from "../../components/MainContainer";
 import MainHeader from "../../components/MainHeader";
 import MainHeaderButtonsWrapper from "../../components/MainHeaderButtonsWrapper";

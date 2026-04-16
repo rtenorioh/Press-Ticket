@@ -1,5 +1,5 @@
 import { Dialog } from "@mui/material";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { ChromePicker } from "react-color";
 
 const ColorPicker = ({ onChange, currentColor, handleClose, open, theme }) => {

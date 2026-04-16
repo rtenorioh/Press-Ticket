@@ -1,6 +1,6 @@
 import { Chip, Paper, Box, Typography } from "@mui/material";
 import { styled, useTheme } from "@mui/material/styles";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import api from "../../services/api";

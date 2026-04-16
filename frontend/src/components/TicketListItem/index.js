@@ -25,7 +25,7 @@ import {
 	isSameDay,
 	parseISO
 } from "date-fns";
-import React, { useContext, useEffect, useRef, useState } from "react";
+import { Fragment, useContext, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
 	useNavigate,
@@ -529,7 +529,7 @@ const TicketListItem = ({ ticket, filteredTags }) => {
 	};
 
 	return (
-		<React.Fragment key={ticket.id}>
+		<Fragment key={ticket.id}>
 			<AcceptTicketWithouSelectQueue
 				modalOpen={acceptTicketWithouSelectQueueOpen}
 				onClose={(e) => setAcceptTicketWithouSelectQueueOpen(false)}
@@ -914,7 +914,7 @@ const TicketListItem = ({ ticket, filteredTags }) => {
 			>
 				{t("tickets.confirmationModal.closeTicket.message")}
 			</ConfirmationModal>
-		</React.Fragment>
+		</Fragment>
 	);
 };
 

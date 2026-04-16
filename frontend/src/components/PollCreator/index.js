@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -13,7 +13,6 @@ import {
   Switch,
   List,
   ListItem,
-  ListItemText,
   ListItemSecondaryAction,
   Paper
 } from "@mui/material";

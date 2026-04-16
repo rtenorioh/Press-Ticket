@@ -1,6 +1,6 @@
 import { IconButton, Menu, MenuItem, Tooltip, Typography, Divider } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import React, { useState } from "react";
+import { useState } from "react";
 import Flag from "react-world-flags";
 import i18n from "../../translate/i18n";
 import { useTranslation } from "react-i18next";

@@ -30,7 +30,7 @@ import AddCircleOutline from '@mui/icons-material/AddCircleOutline';
 import VpnKeyRounded from '@mui/icons-material/VpnKeyRounded';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import Stack from '@mui/material/Stack';
-import React, { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from 'react-i18next';
 import { toast } from 'react-toastify';
 import ConfirmationModal from '../../components/ConfirmationModal';

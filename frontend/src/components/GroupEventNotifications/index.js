@@ -1,9 +1,8 @@
-import React, { useState } from "react";
+import { Fragment, useState } from "react";
 import {
   Badge,
   IconButton,
   Menu,
-  MenuItem,
   Typography,
   List,
   ListItem,
@@ -127,7 +126,7 @@ const GroupEventNotifications = ({ whatsappId }) => {
         ) : (
           <List sx={{ p: 0 }}>
             {events.slice(0, 10).map((event, index) => (
-              <React.Fragment key={event.id || index}>
+              <Fragment key={event.id || index}>
                 <EventListItem>
                   <ListItemIcon sx={{ minWidth: 40 }}>
                     {getEventIcon(event.eventType)}
@@ -149,7 +148,7 @@ const GroupEventNotifications = ({ whatsappId }) => {
                   />
                 </EventListItem>
                 {index < events.length - 1 && <Divider />}
-              </React.Fragment>
+              </Fragment>
             ))}
           </List>
         )}

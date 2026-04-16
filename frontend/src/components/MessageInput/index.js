@@ -31,7 +31,7 @@ import { useTheme } from "@mui/material/styles";
 import EmojiPicker, { Theme as EmojiTheme } from 'emoji-picker-react';
 import MicRecorder from "mic-recorder-to-mp3";
 import PropTypes from "prop-types";
-import React, {
+import {
   useContext,
   useEffect,
   useRef,

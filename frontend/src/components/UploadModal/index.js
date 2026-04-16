@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -459,7 +459,7 @@ const UploadModal = ({ open, onClose, files, onSend, loading, initialCaption }) 
     }
   }, [ticketId, open]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (files && files.length > 0) {
       const filesChanged = files.length !== localFiles.length || 
         files.some((file, index) => localFiles[index] !== file);
@@ -471,7 +471,7 @@ const UploadModal = ({ open, onClose, files, onSend, loading, initialCaption }) 
     }
   }, [files, localFiles]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (open && localFiles.length > 0) {
       const focusInput = () => {
         if (captionInputRef.current) {
@@ -553,14 +553,14 @@ const UploadModal = ({ open, onClose, files, onSend, loading, initialCaption }) 
     }
   };
 
-  const fileUrls = React.useMemo(() => {
+  const fileUrls = useMemo(() => {
     return localFiles.map(file => ({
       file,
       url: URL.createObjectURL(file)
     }));
   }, [localFiles]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     return () => {
       fileUrls.forEach(item => URL.revokeObjectURL(item.url));
     };
