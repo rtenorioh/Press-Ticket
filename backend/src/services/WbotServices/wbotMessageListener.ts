@@ -593,17 +593,19 @@ const verifyQueue = async (
       ticketId: ticket.id
     });
 
-    const chat = await msg.getChat();
-    await chat.sendStateTyping();
+    if (queues[0].greetingMessage && queues[0].greetingMessage.trim()) {
+      const chat = await msg.getChat();
+      await chat.sendStateTyping();
 
-    const body = formatBody(`\u200e${queues[0].greetingMessage}`, ticket);
+      const body = formatBody(`\u200e${queues[0].greetingMessage}`, ticket);
 
-    const sentMessage = await wbot.sendMessage(
-      `${contact.number}@c.us`,
-      body
-    );
+      const sentMessage = await wbot.sendMessage(
+        `${contact.number}@c.us`,
+        body
+      );
 
-    await verifyMessage(sentMessage, ticket, contact);
+      await verifyMessage(sentMessage, ticket, contact);
+    }
 
     return;
   }
@@ -665,20 +667,22 @@ const verifyQueue = async (
         ? choosenQueue.breakMessage
         : choosenQueue.absenceMessage;
 
-      const body = formatBody(`\u200e${messageToSend}\n\n*[ # ]* - Voltar ao Menu Principal`, ticket);
-      const debouncedSentMessage = debounce(
-        async () => {
-          const sentMessage = await wbot.sendMessage(
-            `${contact.number}@c.us`,
-            body
-          );
-          verifyMessage(sentMessage, ticket, contact);
-        },
-        3000,
-        ticket.id
-      );
+      if (messageToSend && messageToSend.trim()) {
+        const body = formatBody(`\u200e${messageToSend}\n\n*[ # ]* - Voltar ao Menu Principal`, ticket);
+        const debouncedSentMessage = debounce(
+          async () => {
+            const sentMessage = await wbot.sendMessage(
+              `${contact.number}@c.us`,
+              body
+            );
+            verifyMessage(sentMessage, ticket, contact);
+          },
+          3000,
+          ticket.id
+        );
 
-      debouncedSentMessage();
+        debouncedSentMessage();
+      }
     } else {
       await UpdateTicketService({
         ticketData: { queueId: choosenQueue.id },
@@ -688,20 +692,22 @@ const verifyQueue = async (
       const chat = await msg.getChat();
       await chat.sendStateTyping();
 
-      const body = formatBody(`\u200e${choosenQueue.greetingMessage}`, ticket);
+      if (choosenQueue.greetingMessage && choosenQueue.greetingMessage.trim()) {
+        const body = formatBody(`\u200e${choosenQueue.greetingMessage}`, ticket);
 
-      const debouncedSentMessage = debounce(
-        async () => {
-          const sentMessage = await wbot.sendMessage(
-            `${contact.number}@c.us`,
-            body
-          );
-          verifyMessage(sentMessage, ticket, contact);
-        },
-        3000,
-        ticket.id
-      );
-      debouncedSentMessage();
+        const debouncedSentMessage = debounce(
+          async () => {
+            const sentMessage = await wbot.sendMessage(
+              `${contact.number}@c.us`,
+              body
+            );
+            verifyMessage(sentMessage, ticket, contact);
+          },
+          3000,
+          ticket.id
+        );
+        debouncedSentMessage();
+      }
     }
   } else {
     let options = "";
@@ -734,7 +740,8 @@ const verifyQueue = async (
 
     if (queues.length >= 2) {
       if (greetingCounts[contactId] < greetingLimit) {
-        const body = formatBody(`\u200e${greetingMessage}\n\n${options}`, ticket);
+        const greeting = greetingMessage && greetingMessage.trim() ? `\u200e${greetingMessage}\n\n${options}` : `\u200e${options}`;
+        const body = formatBody(greeting, ticket);
 
         const debouncedSentMessage = debounce(
           async () => {
@@ -761,38 +768,43 @@ const verifyQueue = async (
         ticketId: ticket.id
       });
 
-      const body = formatBody(`\u200e${greetingMessage}`, ticket);
-      const body2 = formatBody(`\u200e${queues[0].greetingMessage}`, ticket);
+      if (greetingMessage && greetingMessage.trim()) {
+        const body = formatBody(`\u200e${greetingMessage}`, ticket);
 
-      const debouncedSentMessage = debounce(
-        async () => {
-          const sentMessage = await wbot.sendMessage(
-            `${contact.number}@c.us`,
-            body
-          );
-          verifyMessage(sentMessage, ticket, contact);
-        },
-        3000,
-        ticket.id
-      );
-
-      debouncedSentMessage();
-
-      setTimeout(() => {
-        const debouncedSecondMessage = debounce(
+        const debouncedSentMessage = debounce(
           async () => {
             const sentMessage = await wbot.sendMessage(
               `${contact.number}@c.us`,
-              body2
+              body
             );
             verifyMessage(sentMessage, ticket, contact);
           },
-          2000,
+          3000,
           ticket.id
         );
 
-        debouncedSecondMessage();
-      }, 5000);
+        debouncedSentMessage();
+      }
+
+      if (queues[0].greetingMessage && queues[0].greetingMessage.trim()) {
+        const body2 = formatBody(`\u200e${queues[0].greetingMessage}`, ticket);
+
+        setTimeout(() => {
+          const debouncedSecondMessage = debounce(
+            async () => {
+              const sentMessage = await wbot.sendMessage(
+                `${contact.number}@c.us`,
+                body2
+              );
+              verifyMessage(sentMessage, ticket, contact);
+            },
+            2000,
+            ticket.id
+          );
+
+          debouncedSecondMessage();
+        }, 5000);
+      }
     }
 
   }
