@@ -377,6 +377,11 @@ const messages = {
           startWork: "Start",
           endWork: "End",
           absenceMessage: "Absence message",
+          n8nTitle: "n8n Integration",
+          n8nEnabled: "Enable n8n integration for this queue",
+          n8nUrl: "n8n Webhook URL",
+          n8nUrlPlaceholder: "https://your-n8n.com/webhook/...",
+          n8nUrlHelper: "Enter the webhook URL or leave empty to use the global URL from Integrations",
         },
         buttons: {
           okAdd: "Add",

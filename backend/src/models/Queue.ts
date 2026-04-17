@@ -56,6 +56,12 @@ class Queue extends Model<InferAttributes<Queue>, InferCreationAttributes<Queue>
   @Column(DataType.STRING)
   breakMessage: CreationOptional<string>;
 
+  @Column(DataType.STRING)
+  n8nUrl: CreationOptional<string>;
+
+  @Column({ type: DataType.BOOLEAN, defaultValue: false })
+  n8nEnabled: CreationOptional<boolean>;
+
   @CreatedAt
   declare createdAt: CreationOptional<Date>;
 

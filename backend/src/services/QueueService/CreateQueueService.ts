@@ -12,6 +12,8 @@ interface QueueData {
   startBreak?: string;
   endBreak?: string;
   breakMessage?: string;
+  n8nUrl?: string;
+  n8nEnabled?: boolean;
 }
 
 const CreateQueueService = async (queueData: QueueData): Promise<Queue> => {

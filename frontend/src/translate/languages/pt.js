@@ -1121,6 +1121,11 @@ const messages = {
           endBreak: "Fim do intervalo",
           breakMessage: "Mensagem de intervalo",
           breakMessagePlaceholder: "Digite a mensagem que será enviada quando o setor estiver em intervalo",
+          n8nTitle: "Integração n8n",
+          n8nEnabled: "Ativar integração n8n neste setor",
+          n8nUrl: "URL do Webhook n8n",
+          n8nUrlPlaceholder: "https://seu-n8n.com/webhook/...",
+          n8nUrlHelper: "Informe a URL do webhook ou deixe vazio para usar a URL global de Integrações",
         },
         buttons: {
           okAdd: "Adicionar",

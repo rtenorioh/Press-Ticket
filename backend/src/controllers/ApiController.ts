@@ -94,7 +94,7 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
   const medias = req.files as Express.Multer.File[];
   const newContact: ContactData = req.body;
 
-  const formattedNumber = newContact.number.replace("-", "").replace(" ", "");
+  const formattedNumber = String(newContact.number).replace("-", "").replace(" ", "");
 
   const schema = Yup.object().shape({
     number: Yup.string()
@@ -158,7 +158,7 @@ export const sendMessage = async (req: Request, res: Response): Promise<Response
     req.body;
 
   const newContact: ContactData = req.body;
-  const formattedNumber = newContact.number.replace("-", "").replace(" ", "");
+  const formattedNumber = String(newContact.number).replace("-", "").replace(" ", "");
 
   const schema = Yup.object().shape({
     number: Yup.string()
@@ -204,7 +204,7 @@ export const sendMedia = async (req: Request, res: Response): Promise<Response> 
 
   const medias = req.files as Express.Multer.File[];
   const newContact: ContactData = req.body;
-  const formattedNumber = newContact.number.replace("-", "").replace(" ", "");
+  const formattedNumber = String(newContact.number).replace("-", "").replace(" ", "");
 
   const schema = Yup.object().shape({
     number: Yup.string()

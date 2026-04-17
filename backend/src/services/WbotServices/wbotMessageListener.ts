@@ -18,6 +18,7 @@ import Contact from "../../models/Contact";
 import Integration from "../../models/Integration";
 import Message from "../../models/Message";
 import OldMessage from "../../models/OldMessage";
+import Queue from "../../models/Queue";
 import Settings from "../../models/Setting";
 import Ticket from "../../models/Ticket";
 
@@ -604,7 +605,7 @@ const verifyQueue = async (
         body
       );
 
-      await verifyMessage(sentMessage, ticket, contact);
+      verifyMessage(sentMessage, ticket, contact);
     }
 
     return;
@@ -660,14 +661,13 @@ const verifyQueue = async (
         ticketId: ticket.id
       });
 
-      const chat = await msg.getChat();
-      await chat.sendStateTyping();
-
       const messageToSend = isBreakTime && choosenQueue.breakMessage
         ? choosenQueue.breakMessage
         : choosenQueue.absenceMessage;
 
       if (messageToSend && messageToSend.trim()) {
+        const chat = await msg.getChat();
+        await chat.sendStateTyping();
         const body = formatBody(`\u200e${messageToSend}\n\n*[ # ]* - Voltar ao Menu Principal`, ticket);
         const debouncedSentMessage = debounce(
           async () => {
@@ -689,10 +689,9 @@ const verifyQueue = async (
         ticketId: ticket.id
       });
 
-      const chat = await msg.getChat();
-      await chat.sendStateTyping();
-
       if (choosenQueue.greetingMessage && choosenQueue.greetingMessage.trim()) {
+        const chat = await msg.getChat();
+        await chat.sendStateTyping();
         const body = formatBody(`\u200e${choosenQueue.greetingMessage}`, ticket);
 
         const debouncedSentMessage = debounce(
@@ -717,14 +716,6 @@ const verifyQueue = async (
       greetingCounts[contactId] = 0;
     }
 
-    if (greetingCounts[contactId] < greetingLimit) {
-      const chat = await msg.getChat();
-      await chat.sendStateTyping();
-      greetingCounts[contactId]++;
-      console.info(`Contador de saudações para ${contactId}:`, greetingCounts[contactId]);
-      startGreetingCountResetTimer();
-    }
-
     queues.forEach((queue, index) => {
       if (queue.startWork && queue.endWork) {
         if (isDisplay) {
@@ -740,6 +731,8 @@ const verifyQueue = async (
 
     if (queues.length >= 2) {
       if (greetingCounts[contactId] < greetingLimit) {
+        const chat = await msg.getChat();
+        await chat.sendStateTyping();
         const greeting = greetingMessage && greetingMessage.trim() ? `\u200e${greetingMessage}\n\n${options}` : `\u200e${options}`;
         const body = formatBody(greeting, ticket);
 
@@ -905,8 +898,9 @@ const handleMessage = async (
   const Integrationdb = await Integration.findOne({
     where: { key: "urlApiN8N" }
   });
+  const globalN8nUrl = Integrationdb?.value || null;
 
-  if (Integrationdb?.value) {
+  {
     const chat = await msg.getChat();
     let groupContact;
     let baseContact: WbotContact;
@@ -927,7 +921,7 @@ const handleMessage = async (
 
     const unreadMessages = msg.fromMe ? 0 : chat.unreadCount;
 
-    const ticket = await FindOrCreateTicketService(
+    const n8nTicket = await FindOrCreateTicketService(
       contact,
       wbot.id!,
       unreadMessages,
@@ -936,14 +930,35 @@ const handleMessage = async (
       groupContact
     );
 
-    try {
-      await axios.post(
-        Integrationdb?.value,
-        { message: msg, ticket: ticket },
-        { headers: { "Content-Type": "application/json" } }
-      );
-    } catch (error) {
-      console.error("Erro ao enviar dados para o n8n:", error);
+    let n8nTargetUrl: string | null = null;
+
+    if (n8nTicket.queueId) {
+      const queueN8n = await Queue.findByPk(n8nTicket.queueId);
+      if (queueN8n?.n8nEnabled && queueN8n?.n8nUrl) {
+        n8nTargetUrl = queueN8n.n8nUrl;
+      } else if (queueN8n?.n8nEnabled && globalN8nUrl) {
+        n8nTargetUrl = globalN8nUrl;
+      }
+    } else if (globalN8nUrl) {
+      n8nTargetUrl = globalN8nUrl;
+    }
+
+    if (n8nTargetUrl) {
+      try {
+        await axios.post(
+          n8nTargetUrl,
+          {
+            message: msg,
+            ticket: n8nTicket,
+            contact,
+            whatsappId: wbot.id,
+            queueId: n8nTicket.queueId
+          },
+          { headers: { "Content-Type": "application/json" } }
+        );
+      } catch (error) {
+        logger.error(`[N8N] Erro ao enviar dados para o n8n (queue ${n8nTicket.queueId}): ${error}`);
+      }
     }
   }
 
@@ -1101,7 +1116,7 @@ const handleMessage = async (
       await verifyMessage(msg, ticket, contact);
     }
 
-    const backCommands = ["voltar", "menu", "inicio", "sair", "0", "#"];
+    const backCommands = ["voltar", "menu", "inicio", "sair", "#"];
     if (backCommands.includes(msg.body.toLowerCase().trim())) {
 
       await UpdateTicketService({

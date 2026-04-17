@@ -5,9 +5,12 @@ import {
 	DialogActions,
 	DialogContent,
 	DialogTitle,
+	Divider,
+	FormControlLabel,
 	Grid,
 	IconButton,
 	InputAdornment,
+	Switch,
 	TextField,
 	Typography,
 	Tooltip,
@@ -16,7 +19,7 @@ import {
 import { green } from "@mui/material/colors";
 import { useTheme } from "@mui/material/styles";
 import { styled } from "@mui/material/styles";
-import { AccountTreeOutlined, Colorize, Edit } from "@mui/icons-material";
+import { AccountTreeOutlined, Colorize, Edit, Webhook } from "@mui/icons-material";
 import { Field, Form, Formik } from "formik";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -108,6 +111,8 @@ const QueueModal = ({ open, onClose, queueId }) => {
 		startBreak: "00:00",
 		endBreak: "00:00",
 		breakMessage: "",
+		n8nEnabled: false,
+		n8nUrl: "",
 	};
 
 	const [colorPickerModalOpen, setColorPickerModalOpen] = useState(false);
@@ -412,6 +417,48 @@ const QueueModal = ({ open, onClose, queueId }) => {
 											}}
 										/>
 									</Grid>
+										<>
+										<Grid item xs={12}>
+											<Divider sx={{ my: 1 }} />
+											<Typography
+												variant="subtitle1"
+												color="textSecondary"
+												sx={{ mb: 1, display: 'flex', alignItems: 'center', gap: 1 }}
+											>
+												<Webhook fontSize="small" />
+												{t("queueModal.form.n8nTitle")}
+											</Typography>
+										</Grid>
+										<Grid item xs={12}>
+											<FormControlLabel
+												control={
+													<Switch
+														checked={values.n8nEnabled}
+														onChange={(e) => setFieldValue("n8nEnabled", e.target.checked)}
+														color="primary"
+													/>
+												}
+												label={t("queueModal.form.n8nEnabled")}
+											/>
+										</Grid>
+										{values.n8nEnabled && (
+											<Grid item xs={12}>
+												<Field
+													as={StyledTextField}
+													label={t("queueModal.form.n8nUrl")}
+													name="n8nUrl"
+													variant="outlined"
+													margin="dense"
+													fullWidth
+													placeholder={t("queueModal.form.n8nUrlPlaceholder")}
+													helperText={t("queueModal.form.n8nUrlHelper")}
+													InputProps={{
+														sx: { borderRadius: 2 }
+													}}
+												/>
+											</Grid>
+										)}
+									</>
 								</Grid>
 							</DialogContent>
 

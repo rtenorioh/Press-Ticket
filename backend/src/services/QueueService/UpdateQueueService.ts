@@ -14,6 +14,8 @@ interface QueueData {
   startBreak?: string;
   endBreak?: string;
   breakMessage?: string;
+  n8nUrl?: string;
+  n8nEnabled?: boolean;
 }
 
 const UpdateQueueService = async (
