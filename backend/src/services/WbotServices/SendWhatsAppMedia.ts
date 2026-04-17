@@ -11,6 +11,7 @@ import Ticket from "../../models/Ticket";
 const writeFileAsync = promisify(fs.writeFile);
 
 import formatBody from "../../helpers/Mustache";
+import { logger } from "../../utils/logger";
 
 interface Request {
   media: Express.Multer.File;
@@ -37,7 +38,6 @@ const compressVideo = (inputPath: string, outputPath: string, ticketId: number, 
       .on('progress', (progress) => {
         if (socketIo && progress.percent) {
           const percent = Math.round(progress.percent);
-          console.log(`Progresso da compressão: ${percent}%`);
           socketIo.emit(`video-compression-progress-${ticketId}`, {
             ticketId,
             progress: percent,
@@ -147,7 +147,6 @@ const SendWhatsAppMedia = async ({
       } catch (e: any) {
         const isLidErr = e?.message?.includes("No LID for user") || String(e).includes("No LID for user");
         if (!isLidErr) throw e;
-        console.warn(`[LID_FALLBACK_MEDIA] Tentando com WID @lid: ${lidChatId}`);
         return await wbot.sendMessage(lidChatId, media, opts);
       }
     };
@@ -187,7 +186,7 @@ const SendWhatsAppMedia = async ({
         finalMediaPath = oggOutput;
         shouldDeleteCompressed = true;
       } catch (audioErr) {
-        console.warn("Falha ao transcodificar áudio para Opus. Tentando enviar arquivo original:", audioErr?.message || audioErr);
+        logger.warn(`Falha ao transcodificar áudio para Opus: ${audioErr?.message || audioErr}`);
       }
     }
 
@@ -210,7 +209,7 @@ const SendWhatsAppMedia = async ({
         finalMediaPath = compressedPath;
         shouldDeleteCompressed = true;
       } catch (compressionError) {
-        console.error('Erro na compressão, enviando arquivo original:', compressionError);
+        logger.warn(`Erro na compressão, enviando original: ${compressionError}`);
       }
     }
 
@@ -247,7 +246,6 @@ const SendWhatsAppMedia = async ({
       const maxBase64Size = 140000000;
 
       if (fileData.length > maxBase64Size) {
-        console.log(`Arquivo muito grande para base64: ${(fileData.length / 1000000).toFixed(1)}MB`);
         throw new AppError(`Arquivo muito grande para processamento (${(fileData.length / 1000000).toFixed(1)}MB em base64). Tente comprimir o arquivo ou enviar um arquivo menor.`);
       }
       const sanitizedFilename = media.filename
@@ -274,10 +272,7 @@ const SendWhatsAppMedia = async ({
           sentMessage = await sendWithLidFallback(newMedia, docOptions);
 
         } catch (docError) {
-          console.error('[SendWhatsAppMedia] Erro ao enviar documento:', {
-            error: docError.message,
-            stack: docError.stack
-          });
+          logger.error(`Erro ao enviar documento: ${docError.message}`);
           throw docError;
         }
       } else {
@@ -332,7 +327,7 @@ const SendWhatsAppMedia = async ({
       }
 
     } catch (error) {
-      console.error('Erro no envio:', error);
+      logger.error(`Erro no envio de mídia: ${error}`);
       if (error.message && error.message.includes('base64')) {
         throw new AppError("Arquivo muito grande para processamento. Tente um arquivo menor.");
       }
@@ -366,18 +361,17 @@ const SendWhatsAppMedia = async ({
           savedFilename = downloadedMedia.filename;
           downloadSuccess = true;
         } else {
-          console.error("[SendWhatsAppMedia] ❌ Arquivo NÃO existe no disco após salvar!");
+          logger.error("Arquivo não existe no disco após salvar");
         }
       } else {
-        console.warn("[SendWhatsAppMedia] downloadedMedia sem dados");
+        logger.warn("downloadedMedia sem dados");
       }
     } catch (downloadErr) {
-      console.error("[SendWhatsAppMedia] Erro ao baixar/salvar mídia enviada:", downloadErr);
+      logger.error(`Erro ao baixar/salvar mídia enviada: ${downloadErr}`);
     }
 
     if (!downloadSuccess && fs.existsSync(finalMediaPath)) {
       try {
-        console.log("[SendWhatsAppMedia] FALLBACK: Copiando arquivo original para /public/");
         const shortTime = new Date().getTime().toString().slice(-6);
         const ext = path.extname(media.originalname || media.filename);
         const baseName = path.basename(media.originalname || media.filename, ext);
@@ -388,13 +382,12 @@ const SendWhatsAppMedia = async ({
         fs.copyFileSync(finalMediaPath, publicPath);
 
         if (fs.existsSync(publicPath)) {
-          console.log("[SendWhatsAppMedia] ✅ FALLBACK: Arquivo copiado com sucesso:", savedFilename);
           downloadSuccess = true;
         } else {
-          console.error("[SendWhatsAppMedia] ❌ FALLBACK: Falha ao copiar arquivo");
+          logger.error("Fallback: falha ao copiar arquivo");
         }
       } catch (copyErr) {
-        console.error("[SendWhatsAppMedia] Erro no fallback ao copiar arquivo:", copyErr);
+        logger.error(`Erro no fallback ao copiar arquivo: ${copyErr}`);
       }
     }
 
@@ -403,7 +396,6 @@ const SendWhatsAppMedia = async ({
       const stats = fs.statSync(path.join(__dirname, "..", "..", "..", "public", savedFilename));
       fileSize = stats.size;
     } catch (err) {
-      console.warn("[SendWhatsAppMedia] Não foi possível obter tamanho do arquivo:", err?.message);
     }
 
     const messageData = {
@@ -424,7 +416,7 @@ const SendWhatsAppMedia = async ({
     try {
       await CreateMessageService({ messageData });
     } catch (err) {
-      console.error("Erro ao salvar mensagem de mídia no banco de dados:", err);
+      logger.error(`Erro ao salvar mensagem de mídia: ${err}`);
     }
 
     fs.unlinkSync(media.path);
@@ -434,7 +426,7 @@ const SendWhatsAppMedia = async ({
 
     return sentMessage;
   } catch (err) {
-    console.error("Erro ao enviar mídia:", err);
+    logger.error(`Erro ao enviar mídia: ${err}`);
 
     if (fs.existsSync(media.path)) {
       fs.unlinkSync(media.path);

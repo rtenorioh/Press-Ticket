@@ -1,6 +1,7 @@
 import { showHubToken } from "../../helpers/showHubToken";
 import Contact from "../../models/Contact";
 import CreateMessageService from "./CreateHubMessageService";
+import { logger } from "../../utils/logger";
 
 require("dotenv").config();
 const { Client, TextContent } = require("notificamehubsdk");
@@ -36,16 +37,11 @@ export const SendTextMessageService = async (
     contactNumber = contact.webchatId;
     channelClient = client.setChannel("webchat");
   } else {
-    console.error("Nenhum canal disponível para este contato.");
+    logger.error("Nenhum canal disponível para este contato.");
   }
 
   try {
-    console.log({
-      token: connection.qrcode,
-      number: contactNumber,
-      content,
-      message
-    });
+
 
     let response = await channelClient.sendMessage(
       connection.qrcode,
@@ -73,6 +69,6 @@ export const SendTextMessageService = async (
 
     return newMessage;
   } catch (error) {
-    console.log("Error:", error);
+    logger.error(`Erro ao enviar mensagem Hub: ${error}`);
   }
 };

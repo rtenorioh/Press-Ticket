@@ -2,6 +2,7 @@ import { Message as WbotMessage, MessageMedia } from "whatsapp-web.js";
 import AppError from "../../errors/AppError";
 import GetTicketWbot from "../../helpers/GetTicketWbot";
 import Ticket from "../../models/Ticket";
+import { logger } from "../../utils/logger";
 
 interface ContactData {
   id: string;
@@ -96,7 +97,7 @@ END:VCARD`;
 
     return sentMessage;
   } catch (err) {
-    console.error("Erro ao enviar contatos:", err);
+    logger.error(`Erro ao enviar contatos: ${err}`);
     throw new AppError("ERR_SENDING_WAPP_CONTACTS");
   }
 };

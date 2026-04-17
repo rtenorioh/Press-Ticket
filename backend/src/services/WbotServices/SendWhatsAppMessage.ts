@@ -7,6 +7,7 @@ import Message from "../../models/Message";
 import Ticket from "../../models/Ticket";
 
 import formatBody from "../../helpers/Mustache";
+import { logger } from "../../utils/logger";
 
 async function findMessageDirectlyFromWA(wbot: any, ticket: Ticket, quotedMsgId: string): Promise<any | null> {
   try {
@@ -25,7 +26,7 @@ async function findMessageDirectlyFromWA(wbot: any, ticket: Ticket, quotedMsgId:
 
     return null;
   } catch (error) {
-    console.error(`Erro ao buscar mensagem diretamente do WhatsApp: ${error}`);
+    logger.error(`Erro ao buscar mensagem diretamente do WhatsApp: ${error}`);
     return null;
   }
 }
@@ -69,7 +70,7 @@ const SendWhatsAppMessage = async ({
         await ticket.reload();
         return sentMessage;
       } catch (replyError) {
-        console.error(`Erro ao usar reply nativo: ${replyError}`);
+        logger.error(`Erro ao usar reply nativo: ${replyError}`);
 
         try {
           try {
@@ -94,7 +95,7 @@ const SendWhatsAppMessage = async ({
           await ticket.reload();
           return sentMessage;
         } catch (idError) {
-          console.error(`Erro ao usar ID serializado diretamente: ${idError}`);
+          logger.error(`Erro ao usar ID serializado: ${idError}`);
         }
       }
     }
@@ -162,12 +163,12 @@ const SendWhatsAppMessage = async ({
       try {
         await CreateMessageService({ messageData });
       } catch (err) {
-        console.error("Erro ao salvar mensagem no banco de dados:", err);
+        logger.error(`Erro ao salvar mensagem: ${err}`);
       }
 
       return sentMessage;
     } catch (err) {
-      console.error("Erro ao enviar mensagem para grupo:", err);
+      logger.error(`Erro ao enviar mensagem para grupo: ${err}`);
       throw new AppError("ERR_SENDING_WAPP_MSG");
     }
   }
@@ -179,7 +180,7 @@ const SendWhatsAppMessage = async ({
       await GetWbotMessage(ticket, quotedMsg.id);
       quotedMsgSerializedId = SerializeWbotMsgId(ticket, quotedMsg);
     } catch (error) {
-      console.error(`Erro ao buscar mensagem citada: ${error}`);
+      logger.error(`Erro ao buscar mensagem citada: ${error}`);
       throw new AppError("ERR_FETCH_WAPP_MSG");
     }
   }
@@ -230,7 +231,6 @@ const SendWhatsAppMessage = async ({
     }
 
     if (lidError) {
-      console.warn(`[LID_FALLBACK] Tentando com WID @lid: ${lidUserId}`);
       sentMessage = await wbot.sendMessage(lidUserId, payload, sendOptions);
     }
 
@@ -254,12 +254,12 @@ const SendWhatsAppMessage = async ({
     try {
       await CreateMessageService({ messageData });
     } catch (err) {
-      console.error("Erro ao salvar mensagem no banco de dados:", err);
+      logger.error(`Erro ao salvar mensagem: ${err}`);
     }
 
     return sentMessage;
   } catch (err) {
-    console.error("Erro ao enviar mensagem:", err);
+    logger.error(`Erro ao enviar mensagem: ${err}`);
     throw new AppError("ERR_SENDING_WAPP_MSG");
   }
 };

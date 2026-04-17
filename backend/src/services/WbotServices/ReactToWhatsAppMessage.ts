@@ -3,6 +3,7 @@ import SerializeWbotMsgId from "../../helpers/SerializeWbotMsgId";
 import Message from "../../models/Message";
 import Ticket from "../../models/Ticket";
 import Contact from "../../models/Contact";
+import { logger } from "../../utils/logger";
 
 interface ReactParams {
   messageId: string;
@@ -34,7 +35,7 @@ const ReactToWhatsAppMessage = async ({ messageId, emoji }: ReactParams): Promis
   }
 
   const serializedId = (() => {
-    try { 
+    try {
       const id = SerializeWbotMsgId(ticket as any, message as any);
       return id;
     } catch (err) {
@@ -61,7 +62,7 @@ const ReactToWhatsAppMessage = async ({ messageId, emoji }: ReactParams): Promis
           return { ticketId: message.ticketId };
         }
       }
-        
+
       if (altSerializedId) {
         const byAlt = await (wbot as any).getMessageById?.(altSerializedId);
         if (byAlt && typeof byAlt.react === "function") {
@@ -76,17 +77,15 @@ const ReactToWhatsAppMessage = async ({ messageId, emoji }: ReactParams): Promis
         return { ticketId: message.ticketId };
       }
     } catch (err) {
-      console.warn("[ReactToWhatsAppMessage] Falha ao usar getMessageById/react, tentando fallback Store:", err);
+      logger.warn(`Falha ao reagir via getMessageById, tentando fallback: ${err}`);
     }
   } else {
-    console.log("[ReactToWhatsAppMessage] Grupo detectado, usando fallback Store diretamente");
   }
 
   if (!wbot.pupPage) {
-    console.log("[ReactToWhatsAppMessage] pupPage não disponível");
     throw new Error("WhatsApp page not ready");
   }
-  
+
   let result: any = null;
   try {
     result = await wbot.pupPage.evaluate((msgId: string, serialized: string | null, altSerialized: string | null, reaction: string, remote: string | null) => {
@@ -94,7 +93,7 @@ const ReactToWhatsAppMessage = async ({ messageId, emoji }: ReactParams): Promis
     try {
       const Store = (window as any).Store;
       logs.push(`Tentando IDs: ${JSON.stringify({ msgId, serialized, altSerialized, remote })}`);
-      
+
       const byAnyId = (id: string) => {
         logs.push(`Buscando por ID: ${id}`);
         let msg = Store?.Msg?.get?.(id);
@@ -109,7 +108,7 @@ const ReactToWhatsAppMessage = async ({ messageId, emoji }: ReactParams): Promis
           return sid === id || iid === id || (typeof sid === 'string' && sid.includes(id)) || (typeof id === 'string' && id.includes(iid));
         });
         if (msg) return Promise.resolve(msg);
-        
+
         if (remote) {
           try {
             const chat = Store?.Chat?.get?.(remote);
@@ -129,7 +128,7 @@ const ReactToWhatsAppMessage = async ({ messageId, emoji }: ReactParams): Promis
             logs.push(`Erro ao buscar no chat: ${e}`);
           }
         }
-        
+
         try {
           const allChats = Store?.Chat?.models || [];
           for (const c of allChats) {
@@ -147,13 +146,13 @@ const ReactToWhatsAppMessage = async ({ messageId, emoji }: ReactParams): Promis
         } catch (e) {
           logs.push(`Erro na busca global: ${e}`);
         }
-        
+
         return Promise.resolve(null);
       };
 
       const tryIds = [serialized, altSerialized, msgId].filter(Boolean) as string[];
       logs.push(`Lista de IDs para tentar: ${JSON.stringify(tryIds)}`);
-      
+
       const tryChain = () => {
         let promise = Promise.resolve(null);
         for (const id of tryIds) {
@@ -203,7 +202,7 @@ const ReactToWhatsAppMessage = async ({ messageId, emoji }: ReactParams): Promis
     }
   }, messageId, serializedId, altSerializedId, emoji, remoteJid);
   } catch (evalError) {
-    console.error("[ReactToWhatsAppMessage] Erro no pupPage.evaluate:", evalError);
+    logger.error(`Erro no pupPage.evaluate para reação: ${evalError}`);
     throw new Error("Failed to evaluate Store reaction");
   }
 

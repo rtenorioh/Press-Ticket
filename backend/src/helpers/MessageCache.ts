@@ -37,7 +37,7 @@ class MessageCacheHelper {
     }
 
     const message = await Message.findByPk(messageId);
-    
+
     if (message) {
       CacheService.set(cacheKey, message, ttl);
       logger.debug(`Message ${messageId} cached`);
@@ -49,7 +49,7 @@ class MessageCacheHelper {
   cacheTicketMessages(ticketId: number, messages: Message[]): void {
     const cacheKey = this.getTicketMessagesCacheKey(ticketId);
     CacheService.set(cacheKey, messages, this.TICKET_MESSAGES_TTL);
-    
+
     messages.forEach(message => {
       CacheService.set(
         this.getCacheKey(message.id),
@@ -57,18 +57,18 @@ class MessageCacheHelper {
         this.DEFAULT_TTL
       );
     });
-    
+
     logger.debug(`Cached ${messages.length} messages for ticket ${ticketId}`);
   }
 
   getTicketMessagesFromCache(ticketId: number): Message[] | undefined {
     const cacheKey = this.getTicketMessagesCacheKey(ticketId);
     const cached = CacheService.get<Message[]>(cacheKey);
-    
+
     if (cached) {
       logger.debug(`Retrieved ${cached.length} messages for ticket ${ticketId} from cache`);
     }
-    
+
     return cached;
   }
 
@@ -85,21 +85,20 @@ class MessageCacheHelper {
   }
 
   invalidateAll(): void {
-    const keys = CacheService.keys().filter(key => 
-      key.startsWith(this.CACHE_PREFIX) || 
+    const keys = CacheService.keys().filter(key =>
+      key.startsWith(this.CACHE_PREFIX) ||
       key.startsWith(this.TICKET_MESSAGES_PREFIX)
     );
     CacheService.del(keys);
-    logger.info(`Invalidated ${keys.length} message cache entries`);
   }
 
   getCacheStats() {
     const allKeys = CacheService.keys();
-    const messageKeys = allKeys.filter(key => 
-      key.startsWith(this.CACHE_PREFIX) || 
+    const messageKeys = allKeys.filter(key =>
+      key.startsWith(this.CACHE_PREFIX) ||
       key.startsWith(this.TICKET_MESSAGES_PREFIX)
     );
-    
+
     return {
       totalCached: messageKeys.length,
       cacheStats: CacheService.getStats()

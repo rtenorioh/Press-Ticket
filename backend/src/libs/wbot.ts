@@ -76,7 +76,6 @@ const syncUnreadMessages = async (wbot: Session) => {
   const maxRetries = 3;
 
   if (!wbot || !wbot.pupPage) {
-    console.warn('syncUnreadMessages: sessão não está pronta');
     return;
   }
 
@@ -86,14 +85,12 @@ const syncUnreadMessages = async (wbot: Session) => {
 
       const state = await wbot.getState();
       if (state !== 'CONNECTED') {
-        console.warn(`syncUnreadMessages: WhatsApp não está conectado. Estado: ${state}`);
         return;
       }
 
       const chats = await wbot.getChats();
 
       if (!chats || !Array.isArray(chats)) {
-        console.warn('syncUnreadMessages: chats inválidos');
         continue;
       }
 
@@ -110,22 +107,20 @@ const syncUnreadMessages = async (wbot: Session) => {
               try {
                 await handleMessage(msg, wbot);
               } catch (msgError) {
-                console.error(`Erro ao processar mensagem não lida: ${msgError}`);
+                logger.error(`Erro ao processar mensagem não lida: ${msgError}`);
               }
             }
 
             await chat.sendSeen();
           }
         } catch (chatError) {
-          console.error(`Erro ao processar chat ${chat.id._serialized}:`, chatError);
+          logger.error(`Erro ao processar chat: ${chatError}`);
         }
       }
       return;
     } catch (error) {
       if (attempt === maxRetries) {
-        console.warn(`syncUnreadMessages: falha após ${maxRetries} tentativas:`, error.message || error);
-      } else {
-        console.log(`syncUnreadMessages: tentativa ${attempt} falhou, tentando novamente...`);
+        logger.warn(`syncUnreadMessages: falha após ${maxRetries} tentativas: ${error.message || error}`);
       }
     }
   }
@@ -268,9 +263,7 @@ export const initWbot = async (whatsapp: Whatsapp): Promise<Session> => {
       });
 
       wbot.on("auth_failure", async msg => {
-        console.error(
-          `Session: ${sessionName} AUTHENTICATION FAILURE! Reason: ${msg}`
-        );
+        logger.error(`Session: ${sessionName} AUTHENTICATION FAILURE! Reason: ${msg}`);
 
         if (whatsapp.retries > 1) {
           await whatsapp.update({ session: "", retries: 0 });
@@ -406,13 +399,6 @@ export const initWbot = async (whatsapp: Whatsapp): Promise<Session> => {
 
       wbot.on("vote_update", async (vote: any) => {
         try {
-          logger.info(`[POLL_VOTE] ========== NOVO VOTO RECEBIDO ==========`);
-          logger.info(`[POLL_VOTE] Voter: ${vote.voter}`);
-          logger.info(`[POLL_VOTE] Poll ID (parentMsgKey): ${vote.parentMsgKey?.id}`);
-          logger.info(`[POLL_VOTE] Poll ID (parentMessage): ${vote.parentMessage?.id?.id}`);
-          logger.info(`[POLL_VOTE] Selected Options: ${JSON.stringify(vote.selectedOptions)}`);
-          logger.info(`[POLL_VOTE] Timestamp: ${vote.interractedAtTs}`);
-          logger.info(`[POLL_VOTE] ==========================================`);
 
           const PollVoteService = (await import("../services/PollVoteService")).default;
 
@@ -420,14 +406,11 @@ export const initWbot = async (whatsapp: Whatsapp): Promise<Session> => {
           try {
             const contact = await wbot.getContactById(vote.voter);
             voterName = contact.name || contact.pushname || vote.voter;
-            logger.info(`[POLL_VOTE] Nome do votante: ${voterName}`);
           } catch (err) {
             logger.warn(`[POLL_VOTE] Erro ao buscar nome do votante: ${err}`);
           }
 
           const pollMessageId = vote.parentMsgKey?.id || vote.parentMessage?.id?.id;
-          logger.info(`[POLL_VOTE] Salvando voto para poll: ${pollMessageId}`);
-
           await PollVoteService.createOrUpdate({
             pollMessageId,
             voterId: vote.voter,
@@ -435,11 +418,8 @@ export const initWbot = async (whatsapp: Whatsapp): Promise<Session> => {
             selectedOptions: vote.selectedOptions,
             timestamp: new Date(vote.interractedAtTs)
           });
-
-          logger.info(`[POLL_VOTE] Voto salvo com sucesso!`);
         } catch (error) {
           logger.error(`[POLL_VOTE] Erro ao processar voto: ${error}`);
-          logger.error(`[POLL_VOTE] Stack: ${error.stack}`);
         }
       });
 
@@ -553,19 +533,12 @@ export const initWbot = async (whatsapp: Whatsapp): Promise<Session> => {
                   }
                 }, call.id);
 
-                if (rejected.results && rejected.results.length > 0) {
-                  logger.info(`[CALL] Resultados das tentativas:\n${rejected.results.join('\n')}`);
-                }
-
-                if (rejected.success) {
-                  logger.info(`[CALL] ✅ Chamada rejeitada via Puppeteer (método: ${rejected.method})`);
-                } else {
-                  logger.warn(`[CALL] ❌ Falha ao rejeitar via Puppeteer: ${rejected.error}`);
+                if (!rejected.success) {
+                  logger.warn(`[CALL] Falha ao rejeitar via Puppeteer: ${rejected.error}`);
                   if (rejected.stack) {
                     logger.warn(`[CALL] Stack trace: ${rejected.stack}`);
                   }
 
-                  logger.info(`[CALL] Tentando rejeitar via call.reject() - call.from: ${call.from}, call.id: ${call.id}`);
                   try {
                     const originalCallFrom = call.from;
                     const originalPeerJid = call.peerJid;
@@ -591,7 +564,6 @@ export const initWbot = async (whatsapp: Whatsapp): Promise<Session> => {
               } else {
                 logger.warn(`[CALL] pupPage não disponível, usando método padrão`);
                 await call.reject();
-                logger.info(`[CALL] Chamada rejeitada via método padrão`);
               }
             } catch (rejectErr) {
               logger.error(`[CALL] Erro ao rejeitar chamada: ${rejectErr}`);
@@ -605,7 +577,6 @@ export const initWbot = async (whatsapp: Whatsapp): Promise<Session> => {
             if (autoRejectMessageSetting && autoRejectMessageSetting.value) {
               try {
                 await wbot.sendMessage(realPhoneNumber, autoRejectMessageSetting.value);
-                logger.info(`[CALL] Mensagem automática enviada para ${realPhoneNumber}`);
               } catch (msgErr) {
                 logger.warn(`[CALL] Erro ao enviar mensagem automática: ${msgErr}`);
               }
@@ -619,14 +590,11 @@ export const initWbot = async (whatsapp: Whatsapp): Promise<Session> => {
               reason: "autoReject"
             });
           } else if (callSetting && callSetting.value === "enabled") {
-            logger.info(`[CALL] Chamada de ${realPhoneNumber} não será aceita (call setting enabled)`);
-
             try {
               await wbot.sendMessage(
                 realPhoneNumber,
                 "*Mensagem Automática:*\nAs chamadas de voz e vídeo estão desabilitadas para esse WhatsApp, favor enviar uma mensagem de texto. Obrigado"
               );
-              logger.info(`[CALL] Mensagem de não aceitação enviada para ${realPhoneNumber}`);
             } catch (msgErr) {
               logger.warn(`[CALL] Erro ao enviar mensagem de não aceitação: ${msgErr}`);
             }
@@ -639,7 +607,6 @@ export const initWbot = async (whatsapp: Whatsapp): Promise<Session> => {
               reason: "notAccepted"
             });
           } else {
-            logger.info(`[CALL] Chamadas habilitadas - Chamada de ${call.from} permitida`);
           }
         } catch (err) {
           logger.error(`[CALL] Erro ao processar chamada: ${err}`);
@@ -703,7 +670,6 @@ export const shutdownWbot = async (whatsappId: string): Promise<void> => {
 
   const sessionIndex = sessions.findIndex(s => s.id === whatsappIDNumber);
   if (sessionIndex === -1) {
-    console.warn(`Sessão com ID ${whatsappIDNumber} não foi encontrada.`);
     throw new AppError("WhatsApp session not initialized.");
   }
 
@@ -718,9 +684,6 @@ export const shutdownWbot = async (whatsappId: string): Promise<void> => {
     await fs.rm(sessionPath, { recursive: true, force: true });
 
     sessions.splice(sessionIndex, 1);
-    console.info(
-      `Sessão com ID ${whatsappIDNumber} removida da lista de sessões.`
-    );
     const retry = whatsapp.retries;
     await whatsapp.update({
       status: "DISCONNECTED",
@@ -731,10 +694,7 @@ export const shutdownWbot = async (whatsappId: string): Promise<void> => {
     });
 
   } catch (error) {
-    console.error(
-      `Erro ao desligar ou limpar a sessão com ID ${whatsappIDNumber}:`,
-      error
-    );
+    logger.error(`Erro ao desligar sessão ${whatsappIDNumber}: ${error}`);
     throw new AppError("Failed to destroy WhatsApp session.");
   }
 };

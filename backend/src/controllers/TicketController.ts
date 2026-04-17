@@ -17,6 +17,7 @@ import ShowWhatsAppService from "../services/WhatsappService/ShowWhatsAppService
 import { createActivityLog, ActivityActions, EntityTypes } from "../services/ActivityLogService";
 import CountTicketsService from "../services/TicketServices/CountTicketsService";
 import GetClientIp from "../helpers/GetClientIp";
+import { logger } from "../utils/logger";
 
 interface AuthenticatedRequest extends Request {
   user: {
@@ -54,12 +55,12 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
     const isApiRequest = req.path.startsWith('/v1/');
     if (isApiRequest || 'apiToken' in req) {
       isAdmin = true;
-    } 
+    }
 
     else if (req.user) {
       userId = req.user.id.toString();
       isAdmin = req.user.profile === "admin" || req.user.profile === "masteradmin";
-    } 
+    }
 
     else {
       return res.status(401).json({ error: "Não autorizado" });
@@ -74,7 +75,7 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
           ? queueIdsStringified.map(Number)
           : JSON.parse(queueIdsStringified);
       } catch (error) {
-        console.error("Erro ao fazer JSON.parse:", error.message);
+        logger.error(`Erro ao parsear queueIds: ${error.message}`);
         return res.status(400).json({ error: "Formato JSON inválido para queueIds" });
       }
     }
@@ -85,7 +86,7 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
           ? channelIdsStringified.map(Number)
           : JSON.parse(channelIdsStringified);
       } catch (error) {
-        console.error("Erro ao fazer JSON.parse:", error.message);
+        logger.error(`Erro ao parsear channelIds: ${error.message}`);
         return res.status(400).json({ error: "Formato JSON inválido para channelIds" });
       }
     }
@@ -103,7 +104,7 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
 
     try {
       const apiUserId = isApiRequest ? undefined : userId;
-      
+
       const { tickets, count, hasMore } = await ListTicketsService({
         searchParam,
         pageNumber,
@@ -122,11 +123,11 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
 
       return res.status(200).json({ tickets, count, hasMore });
     } catch (serviceError) {
-      console.error("Erro no serviço de listagem de tickets:", serviceError);
+      logger.error(`Erro no serviço de listagem de tickets: ${serviceError}`);
       return res.status(500).json({ error: "Erro ao processar a listagem de tickets" });
     }
   } catch (error) {
-    console.error("Erro ao listar tickets:", error);
+    logger.error(`Erro ao listar tickets: ${error}`);
     return res.status(500).json({ error: "Erro interno ao listar tickets" });
   }
 };
@@ -144,7 +145,7 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
 
   const logUserId = req.user?.id || 1;
   const contact = await Contact.findByPk(contactId);
-  
+
   await createActivityLog({
     userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
     action: ActivityActions.CREATE,
@@ -210,18 +211,18 @@ export const update = async (
         }
       });
     } catch (error) {
-      console.error('Erro ao criar log de aceitar ticket:', error);
+      logger.error(`Erro ao criar log de aceitar ticket: ${error}`);
     }
   }
 
   // LOG: Transferência de usuário
-  if (ticketBefore && ticketBefore.userId && ticketData.userId && 
+  if (ticketBefore && ticketBefore.userId && ticketData.userId &&
       ticketBefore.userId !== ticketData.userId) {
     try {
       const User = require("../models/User").default;
       const oldUser = await User.findByPk(ticketBefore.userId);
       const newUser = await User.findByPk(ticketData.userId);
-      
+
       await createActivityLog({
         userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
         action: ActivityActions.TRANSFER,
@@ -238,17 +239,17 @@ export const update = async (
         }
       });
     } catch (error) {
-      console.error('Erro ao criar log de transferência de usuário:', error);
+      logger.error(`Erro ao criar log de transferência de usuário: ${error}`);
     }
   }
 
   // LOG: Transferência de setor
-  if (ticketBefore && ticketBefore.queueId !== undefined && 
+  if (ticketBefore && ticketBefore.queueId !== undefined &&
       ticketData.queueId !== undefined && ticketBefore.queueId !== ticketData.queueId) {
     try {
       const oldQueue = ticketBefore.queueId ? await ShowQueueService(ticketBefore.queueId) : null;
       const newQueue = ticketData.queueId ? await ShowQueueService(ticketData.queueId) : null;
-      
+
       await createActivityLog({
         userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
         action: ActivityActions.TRANSFER,
@@ -265,7 +266,7 @@ export const update = async (
         }
       });
     } catch (error) {
-      console.error('Erro ao criar log de transferência de setor:', error);
+      logger.error(`Erro ao criar log de transferência de setor: ${error}`);
     }
   }
 
@@ -286,7 +287,7 @@ export const update = async (
         }
       });
     } catch (error) {
-      console.error('Erro ao criar log de mover para aguardando:', error);
+      logger.error(`Erro ao criar log de mover para aguardando: ${error}`);
     }
   }
 
@@ -306,7 +307,7 @@ export const update = async (
         }
       });
     } catch (error) {
-      console.error('Erro ao criar log de fechar ticket:', error);
+      logger.error(`Erro ao criar log de fechar ticket: ${error}`);
     }
   }
 
@@ -325,7 +326,7 @@ export const update = async (
         }
       });
     } catch (error) {
-      console.error('Erro ao criar log de reabrir ticket:', error);
+      logger.error(`Erro ao criar log de reabrir ticket: ${error}`);
     }
   }
 
@@ -360,11 +361,11 @@ export const remove = async (
   const { ticketId } = req.params;
 
   const ticketToDelete = await ShowTicketService(ticketId);
-  
+
   const ticket = await DeleteTicketService(ticketId);
   const logUserId = req.user?.id || 1;
   const clientIp = GetClientIp(req);
-  
+
   await createActivityLog({
     userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
     action: ActivityActions.DELETE,
@@ -428,7 +429,7 @@ export const checkOpenTickets = async (
 
     return res.status(200).json({ hasOpenTicket: false });
   } catch (err) {
-    console.error("Erro ao verificar tickets abertos:", err.message);
+    logger.error(`Erro ao verificar tickets abertos: ${err.message}`);
     return res
       .status(500)
       .json({ error: "Erro ao verificar tickets abertos." });
@@ -440,16 +441,16 @@ export const closeTickets = async (
   res: Response
 ): Promise<Response> => {
   const { status, groupsOnly } = req.query;
-  
+
   let userId: number;
-  
+
   const isApiRequest = req.path.startsWith('/v1/');
   if (isApiRequest || 'apiToken' in req) {
     userId = 1;
-  } 
+  }
   else if (req.user) {
     userId = parseInt(req.user.id);
-  } 
+  }
   else {
     return res.status(401).json({ error: "Não autorizado" });
   }
@@ -486,9 +487,9 @@ export const closeTickets = async (
     });
 
     if (!tickets || !tickets.length) {
-      return res.status(404).json({ 
+      return res.status(404).json({
         error: "ERR_NO_TICKET_FOUND",
-        message: `Nenhum ticket ${status ? `com status ${status}` : ''} encontrado para fechar` 
+        message: `Nenhum ticket ${status ? `com status ${status}` : ''} encontrado para fechar`
       });
     }
 
@@ -515,7 +516,7 @@ export const closeTickets = async (
         }
       });
     } catch (error) {
-      console.error('Erro ao criar log de fechar tickets em massa:', error);
+      logger.error(`Erro ao criar log de fechar tickets em massa: ${error}`);
     }
 
     const io = getIO();
@@ -529,7 +530,7 @@ export const closeTickets = async (
       count: tickets.length
     });
   } catch (err) {
-    console.error("Erro ao fechar tickets:", err);
+    logger.error(`Erro ao fechar tickets: ${err}`);
     return res.status(500).json({ error: "Error closing tickets" });
   }
 };
@@ -537,10 +538,10 @@ export const closeTickets = async (
 export const count = async (req: AuthenticatedRequest, res: Response): Promise<Response> => {
   try {
     const { queueIds, showAll } = req.query;
-    
+
     let userId: number | null = null;
     let isAdmin = false;
-    
+
     const isApiRequest = req.path.startsWith('/v1/');
     if (isApiRequest || 'apiToken' in req) {
       isAdmin = true;
@@ -548,7 +549,7 @@ export const count = async (req: AuthenticatedRequest, res: Response): Promise<R
       userId = parseInt(req.user.id);
       isAdmin = req.user.profile === "admin" || req.user.profile === "masteradmin";
     }
-    
+
     let queueIdsArray: number[] = [];
     if (queueIds) {
       if (typeof queueIds === 'string') {
@@ -557,19 +558,19 @@ export const count = async (req: AuthenticatedRequest, res: Response): Promise<R
         queueIdsArray = queueIds.map(id => parseInt(id as string)).filter(id => !isNaN(id));
       }
     }
-    
+
     const showAllTickets = showAll === "true" || isAdmin;
-    
-    
+
+
     const counts = await CountTicketsService({
       queueIds: queueIdsArray,
       showAll: showAllTickets,
       userId
     });
-    
+
     return res.status(200).json(counts);
   } catch (err: any) {
-    console.error(`[BACK_COUNT_ERROR] Erro ao contar tickets:`, err);
+    logger.error(`Erro ao contar tickets: ${err}`);
     return res.status(500).json({ error: err.message });
   }
 };

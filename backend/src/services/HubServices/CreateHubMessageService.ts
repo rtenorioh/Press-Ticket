@@ -2,6 +2,7 @@ import { getIO } from "../../libs/socket";
 import Message from "../../models/Message";
 import Ticket from "../../models/Ticket";
 import Whatsapp from "../../models/Whatsapp";
+import { logger } from "../../utils/logger";
 
 interface MessageData {
   id: string;
@@ -95,7 +96,7 @@ const CreateMessageService = async (
     // eslint-disable-next-line consistent-return
     return newMessage;
   } catch (error) {
-    console.log(error);
+    logger.error(`Erro: ${error}`);
   }
 };
 

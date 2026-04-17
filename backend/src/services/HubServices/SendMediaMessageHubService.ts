@@ -5,6 +5,7 @@ import CreateMessageService from "./CreateHubMessageService";
 
 require("dotenv").config();
 const { Client, FileContent } = require("notificamehubsdk");
+import { logger } from "../../utils/logger";
 
 export const SendMediaMessageService = async (
   media: Express.Multer.File,
@@ -131,6 +132,6 @@ export const SendMediaMessageService = async (
 
     return newMessage;
   } catch (error) {
-    console.log("Error:", error);
+    logger.error(`Erro: ${error}`);
   }
 };

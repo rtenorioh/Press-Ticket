@@ -1,11 +1,12 @@
 import { Request, Response } from "express";
-import isAuth from "../middleware/isAuth"; 
+import isAuth from "../middleware/isAuth";
 import AppError from "../errors/AppError";
 import { getWbotByGroupId } from "../libs/wbot";
 import { MessageMedia } from "whatsapp-web.js";
 import fs from "fs";
 import { getIO } from "../libs/socket";
 import groupEventsService from "../services/WbotServices/GroupEventsService";
+import { logger } from "../utils/logger";
 
 async function getGroupChatOrFail(groupId: string) {
   const wbot = await getWbotByGroupId(groupId);
@@ -36,7 +37,7 @@ export const addParticipants = async (req: Request, res: Response) => {
   const result = await chat.addParticipants(participantIds, options || {});
 
   if (typeof result === "string") {
-    console.error("addParticipants retornou erro:", result);
+    logger.error(`addParticipants retornou erro: ${result}`);
     throw new AppError(result, 400);
   }
 
@@ -169,9 +170,9 @@ export const setDescription = async (req: Request, res: Response) => {
   const { groupId } = req.params;
   const { description } = req.body;
   if (description == null) throw new AppError("ERR_DESCRIPTION_REQUIRED");
-  
+
   const { wbot, chat } = await getGroupChatOrFail(groupId);
-  
+
   try {
     const chatId = JSON.stringify(chat.id._serialized);
     const desc = JSON.stringify(description);
@@ -200,7 +201,7 @@ export const setDescription = async (req: Request, res: Response) => {
 
     return res.json({ success: !!success });
   } catch (error: any) {
-    console.error("Erro ao alterar descrição do grupo:", error);
+    logger.error(`Erro ao alterar descrição do grupo: ${error}`);
     throw new AppError(
       "Erro ao alterar descrição. Tente novamente ou reinicie a conexão WhatsApp.",
       500
@@ -211,25 +212,25 @@ export const setDescription = async (req: Request, res: Response) => {
 export const setPicture = async (req: Request, res: Response) => {
   const { groupId } = req.params;
   const file = req.file as Express.Multer.File;
-  
+
   if (!file) throw new AppError("ERR_FILE_REQUIRED");
-  
+
   try {
     const { chat } = await getGroupChatOrFail(groupId);
-    
+
     const base64 = fs.readFileSync(file.path, { encoding: "base64" });
     const media = new MessageMedia(file.mimetype, base64, file.filename);
-    
+
     const ok = await chat.setPicture(media);
-    
+
     fs.unlinkSync(file.path);
-    
+
     const io = getIO();
     io.emit("group", {
       action: "update",
       groupId
     });
-    
+
     return res.json({ success: !!ok });
   } catch (error) {
     if (req.file?.path) {
@@ -245,13 +246,13 @@ export const deletePicture = async (req: Request, res: Response) => {
   const { groupId } = req.params;
   const { chat } = await getGroupChatOrFail(groupId);
   const ok = await chat.deletePicture();
-  
+
   const io = getIO();
   io.emit("group", {
     action: "update",
     groupId
   });
-  
+
   return res.json({ success: !!ok });
 };
 

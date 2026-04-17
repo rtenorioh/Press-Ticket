@@ -13,6 +13,7 @@ import AuthUserService from "../services/UserServices/AuthUserService";
 import { createActivityLog, ActivityActions, EntityTypes } from "../services/ActivityLogService";
 import GetClientIp from "../helpers/GetClientIp";
 import authConfig from "../config/auth";
+import { logger } from "../utils/logger";
 
 export const store = async (req: Request, res: Response): Promise<Response> => {
   const { email, password } = req.body;
@@ -103,7 +104,7 @@ export const remove = async (
           additionalData: {}
         });
       } catch (error) {
-        console.error('Erro ao criar log de logout:', error);
+        logger.error(`Erro ao criar log de logout: ${error}`);
       }
 
       const io = require("../libs/socket").getIO();
@@ -178,7 +179,7 @@ export const forgotPassword = async (req: Request, res: Response): Promise<Respo
       }
     });
   } catch (error) {
-    console.error('Erro ao criar log de solicitação de senha:', error);
+    logger.error(`Erro ao criar log de solicitação de senha: ${error}`);
   }
 
   return res.status(200).json({ message: "E-mail enviado com sucesso." });
@@ -219,7 +220,7 @@ export const resetPassword = async (req: Request, res: Response): Promise<Respon
       }
     });
   } catch (error) {
-    console.error('Erro ao criar log de redefinição de senha:', error);
+    logger.error(`Erro ao criar log de redefinição de senha: ${error}`);
   }
 
   return res.status(200).json({ message: "Senha redefinida com sucesso." });

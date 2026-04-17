@@ -1,4 +1,5 @@
 import { InferAttributes, InferCreationAttributes, CreationOptional } from "sequelize";
+import { logger } from "../utils/logger";
 import {
     AutoIncrement,
     Column,
@@ -32,7 +33,7 @@ class ApiToken extends Model<InferAttributes<ApiToken>, InferCreationAttributes<
                 const value = this.getDataValue("permissions") as string;
                 return value ? JSON.parse(value) : [];
             } catch (error) {
-                console.error("Error parsing permissions:", error);
+                logger.error(`Error parsing permissions: ${error}`);
                 return [];
             }
         },

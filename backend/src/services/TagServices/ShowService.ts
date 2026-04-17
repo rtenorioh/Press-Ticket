@@ -2,6 +2,7 @@ import { Sequelize } from "sequelize";
 import Tag from "../../models/Tag";
 import AppError from "../../errors/AppError";
 import Contact from "../../models/Contact";
+import { logger } from "../../utils/logger";
 
 const TagService = async (id: string | number): Promise<Tag> => {
   try {
@@ -31,7 +32,7 @@ const TagService = async (id: string | number): Promise<Tag> => {
     return tag!;
   } catch (error) {
     if (error.message !== "ERR_NO_TAG_FOUND") {
-      console.error("Erro ao buscar tag com contagem:", error);
+      logger.error(`Erro ao buscar tag com contagem: ${error}`);
       const tagBasic = await Tag.findByPk(id);
       if (!tagBasic) {
         throw new AppError("ERR_NO_TAG_FOUND", 404);

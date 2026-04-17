@@ -3,6 +3,7 @@ import * as Yup from "yup";
 import AppError from "../../errors/AppError";
 import ClientStatus from "../../models/ClientStatus";
 import ShowService from "./ShowService";
+import { logger } from "../../utils/logger";
 
 interface ClientStatusData {
   id?: number;
@@ -50,7 +51,7 @@ const UpdateService = async ({
       throw error;
     }
     
-    console.error("Erro ao atualizar status:", error);
+    logger.error(`Erro ao atualizar status: ${error}`);
     throw new AppError("Erro ao atualizar status. Verifique os dados e tente novamente.", 500);
   }
 };

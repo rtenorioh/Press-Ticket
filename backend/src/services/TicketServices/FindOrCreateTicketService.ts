@@ -5,6 +5,7 @@ import Ticket from "../../models/Ticket";
 import Whatsapp from "../../models/Whatsapp";
 import ListSettingsServiceOne from "../SettingServices/ListSettingsServiceOne";
 import ShowTicketService from "./ShowTicketService";
+import { logger } from "../../utils/logger";
 
 const FindOrCreateTicketService = async (
   contact: Contact,
@@ -62,15 +63,15 @@ const FindOrCreateTicketService = async (
     const listSettingsService = await ListSettingsServiceOne({
       key: "timeCreateNewTicket"
     });
-    
-    const timeCreateNewTicket = listSettingsService?.value 
-      ? parseInt(listSettingsService.value, 10) 
+
+    const timeCreateNewTicket = listSettingsService?.value
+      ? parseInt(listSettingsService.value, 10)
       : 60;
-    
+
     if (isNaN(timeCreateNewTicket)) {
-      console.error("Valor inválido para timeCreateNewTicket:", listSettingsService?.value);
+      logger.error(`Valor inválido para timeCreateNewTicket: ${listSettingsService?.value}`);
     }
-    
+
     ticket = await Ticket.findOne({
       where: {
         updatedAt: {

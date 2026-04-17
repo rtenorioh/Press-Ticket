@@ -1,6 +1,7 @@
 import { path as ffmpegPath } from "@ffmpeg-installer/ffmpeg";
 import ffmpeg from "fluent-ffmpeg";
 import fs from "fs";
+import { logger } from "../utils/logger";
 
 const convertMp3ToMp4 = (input: string, outputMP4: string): Promise<void> => {
   return new Promise((resolve, reject) => {
@@ -8,7 +9,7 @@ const convertMp3ToMp4 = (input: string, outputMP4: string): Promise<void> => {
 
     if (!fs.existsSync(input)) {
       const errorMsg = `Input file does not exist: ${input}`;
-      console.error(errorMsg);
+      logger.error(errorMsg);
       return reject(new Error(errorMsg));
     }
 
@@ -21,10 +22,8 @@ const convertMp3ToMp4 = (input: string, outputMP4: string): Promise<void> => {
         reject(error);
       })
       .on("progress", progress => {
-        console.log("Processing...");
       })
       .on("end", () => {
-        console.log("Transcoding succeeded !");
         resolve();
       })
       .run();

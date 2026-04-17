@@ -3,6 +3,7 @@ import GetWbotMessage from "../../helpers/GetWbotMessage";
 import Message from "../../models/Message";
 import Ticket from "../../models/Ticket";
 import OldMessage from "../../models/OldMessage";
+import { logger } from "../../utils/logger";
 
 const EditWhatsAppMessage = async (
   messageId: string,
@@ -28,29 +29,29 @@ const EditWhatsAppMessage = async (
   const { ticket } = message;
 
   const oldBody = message.body;
-  
+
   let messageToEdit;
   try {
     messageToEdit = await GetWbotMessage(ticket, messageId);
   } catch (getMessageError: any) {
-    console.error(`[EditWhatsAppMessage] Erro ao buscar mensagem no WhatsApp:`, getMessageError);
+    logger.error(`Erro ao buscar mensagem para edição: ${getMessageError}`);
     throw new AppError("ERR_FETCH_WAPP_MSG_TO_EDIT");
   }
 
   try {
     const res = await messageToEdit.edit(newBody);
-    
+
     if (res === null) {
       throw new Error("Não foi possível editar a mensagem. Ela pode ser muito antiga (mais de 15 minutos) ou não ser editável.");
     }
-    
+
   } catch (err: any) {
     throw new AppError("ERR_EDITING_WAPP_MSG");
   }
 
 
   if (typeof oldBody === "string" && oldBody !== newBody) {
-    
+
     const existingHistory = await OldMessage.findOne({
       where: {
         messageId: message.id,
@@ -65,10 +66,8 @@ const EditWhatsAppMessage = async (
       });
 
     } else {
-      console.log(`[EditWhatsAppMessage] Histórico já existe (ID: ${existingHistory.id}), pulando duplicata`);
     }
   } else {
-    console.log(`[EditWhatsAppMessage] Histórico não salvo - oldBody: "${oldBody}", newBody: "${newBody}", são iguais: ${oldBody === newBody}`);
   }
 
   await message.update({
@@ -103,11 +102,6 @@ const EditWhatsAppMessage = async (
     ]
   });
 
-  if (message.oldMessages && message.oldMessages.length > 0) {
-    console.log(`[EditWhatsAppMessage] Históricos encontrados:`, 
-      message.oldMessages.map((om: any) => ({ id: om.id, body: om.body?.substring(0, 30) }))
-    );
-  }
 
   return message;
 };

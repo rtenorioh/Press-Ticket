@@ -24,6 +24,7 @@ import { createActivityLog, ActivityActions, EntityTypes } from "../services/Act
 import Whatsapp from "../models/Whatsapp";
 import { getWbot } from "../libs/wbot";
 import GetClientIp from "../helpers/GetClientIp";
+import { logger } from "../utils/logger";
 
 type IndexQuery = {
   searchParam: string;
@@ -65,7 +66,7 @@ export const getBlockStatus = async (
     const wContact = await wbot.getContactById(numberId._serialized);
     return res.status(200).json({ isBlocked: Boolean((wContact as any).isBlocked) });
   } catch (err) {
-    console.warn(`[FALLBACK] Erro ao obter contato do WhatsApp: ${err.message || err}`);
+    logger.warn(`Erro ao obter contato do WhatsApp: ${err.message || err}`);
     return res.status(200).json({ isBlocked: false });
   }
 };
@@ -103,7 +104,7 @@ export const blockContact = async (
     const wContact = await wbot.getContactById(numberId._serialized);
     result = await (wContact as any).block();
   } catch (err) {
-    console.warn(`[FALLBACK] Erro ao obter/bloquear contato: ${err.message || err}`);
+    logger.warn(`Erro ao bloquear contato: ${err.message || err}`);
     return res.status(500).json({ error: "Erro ao bloquear contato no WhatsApp" });
   }
 
@@ -155,7 +156,7 @@ export const unblockContact = async (
     const wContact = await wbot.getContactById(numberId._serialized);
     result = await (wContact as any).unblock();
   } catch (err) {
-    console.warn(`[FALLBACK] Erro ao obter/desbloquear contato: ${err.message || err}`);
+    logger.warn(`Erro ao desbloquear contato: ${err.message || err}`);
     return res.status(500).json({ error: "Erro ao desbloquear contato no WhatsApp" });
   }
 
@@ -288,7 +289,7 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
       validNumberLid = checked.numberLid;
       profilePicUrl = await GetProfilePicUrl(validNumber);
     } catch (error) {
-      console.log("Erro ao validar contato da API, continuando com o número original", error);
+      logger.warn(`Erro ao validar contato da API: ${error}`);
     }
   }
 
@@ -593,12 +594,12 @@ export const exportContacts = async (
         }
       });
     } catch (error) {
-      console.error('Erro ao criar log de exportar contatos:', error);
+      logger.error(`Erro ao criar log de exportar contatos: ${error}`);
     }
 
     return res.status(200).json(exportData);
   } catch (err) {
-    console.error(err);
+    logger.error(`Erro ao exportar contatos: ${err}`);
     return res.status(500).json({ error: "Internal server error" });
   }
 };
@@ -621,7 +622,7 @@ export const getAbout = async (
     if (err instanceof AppError) {
       return res.status(err.statusCode).json({ error: err.message });
     }
-    console.error("Erro ao obter about do contato:", err);
+    logger.error(`Erro ao obter about do contato: ${err}`);
     return res.status(500).json({ error: "ERR_INTERNAL_SERVER_ERROR" });
   }
 };
@@ -644,7 +645,7 @@ export const getCommonGroups = async (
     if (err instanceof AppError) {
       return res.status(err.statusCode).json({ error: err.message });
     }
-    console.error("Erro ao obter grupos em comum:", err);
+    logger.error(`Erro ao obter grupos em comum: ${err}`);
     return res.status(500).json({ error: "ERR_INTERNAL_SERVER_ERROR" });
   }
 };
@@ -665,7 +666,7 @@ export const listBlockedContacts = async (
     if (err instanceof AppError) {
       return res.status(err.statusCode).json({ error: err.message });
     }
-    console.error("Erro ao listar contatos bloqueados:", err);
+    logger.error(`Erro ao listar contatos bloqueados: ${err}`);
     return res.status(500).json({ error: "ERR_INTERNAL_SERVER_ERROR" });
   }
 };
@@ -695,7 +696,7 @@ export const refreshGroupProfilePic = async (
     if (err instanceof AppError) {
       return res.status(err.statusCode).json({ error: err.message });
     }
-    console.error("Erro ao atualizar foto do grupo:", err);
+    logger.error(`Erro ao atualizar foto do grupo: ${err}`);
     return res.status(500).json({ error: "ERR_INTERNAL_SERVER_ERROR" });
   }
 };

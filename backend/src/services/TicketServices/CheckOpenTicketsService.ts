@@ -1,6 +1,7 @@
 import Ticket from "../../models/Ticket";
 import User from "../../models/User";
 import Whatsapp from "../../models/Whatsapp";
+import { logger } from "../../utils/logger";
 
 const CheckOpenTicketsService = async (contactId: number): Promise<Ticket | null> => {
     try {
@@ -25,7 +26,7 @@ const CheckOpenTicketsService = async (contactId: number): Promise<Ticket | null
 
         return openTicket;
     } catch (err) {
-        console.error("Erro ao verificar tickets abertos:", err.message);
+        logger.error(`Erro ao verificar tickets abertos: ${err.message}`);
         throw new Error("Erro ao verificar tickets abertos");
     }
 };

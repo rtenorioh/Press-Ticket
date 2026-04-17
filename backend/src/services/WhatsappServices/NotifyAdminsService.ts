@@ -2,6 +2,7 @@ import EmailService from "../EmailService";
 import FindAdminUsersService from "../UserServices/FindAdminUsersService";
 import Whatsapp from "../../models/Whatsapp";
 import AppError from "../../errors/AppError";
+import { logger } from "../../utils/logger";
 
 interface Request {
   whatsappId: number;
@@ -216,7 +217,7 @@ const NotifyAdminsService = async ({ whatsappId }: Request): Promise<void> => {
       });
       
       if (!sent) {
-        console.error(`Falha ao enviar e-mail para ${user.email}`);
+        logger.error(`Falha ao enviar e-mail para ${user.email}`);
       }
     }
   }

@@ -34,8 +34,6 @@ class GroupEventService {
         metadata: data.metadata
       });
 
-      logger.info(`[GROUP_EVENT] Evento criado: ${data.eventType} - Grupo: ${data.groupId}`);
-
       const io = getIO();
       io.emit("groupEvent", {
         action: "create",
@@ -100,8 +98,6 @@ class GroupEventService {
 
     await event.destroy();
 
-    logger.info(`[GROUP_EVENT] Evento deletado: ${eventId}`);
-
     const io = getIO();
     io.emit("groupEvent", {
       action: "delete",
@@ -120,8 +116,6 @@ class GroupEventService {
         }
       }
     });
-
-    logger.info(`[GROUP_EVENT] ${deleted} eventos antigos deletados (>${days} dias)`);
 
     return deleted;
   }

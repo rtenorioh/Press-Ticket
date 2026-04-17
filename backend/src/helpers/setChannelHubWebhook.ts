@@ -1,6 +1,7 @@
 import { IChannel } from "../controllers/ChannelHubController";
 import Whatsapp from "../models/Whatsapp";
 import { showHubToken } from "./showHubToken";
+import { logger } from "../utils/logger";
 
 const { Client, MessageSubscription } = require("notificamehubsdk");
 require("dotenv").config();
@@ -27,10 +28,9 @@ export const setChannelWebhook = async (
   client
     .createSubscription(subscription)
     .then((response: any) => {
-      console.log("Webhook subscribed:", response);
     })
     .catch((error: any) => {
-      console.log("Error:", error);
+      logger.error(`Erro ao subscribir webhook Hub: ${error}`);
     });
 
   await Whatsapp.update(

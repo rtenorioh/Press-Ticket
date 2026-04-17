@@ -2,6 +2,7 @@ import { systemVersion } from "../../config/version";
 import axios from "axios";
 import fs from "fs";
 import path from "path";
+import { logger } from "../../utils/logger";
 
 interface GitCommit {
   sha: string;
@@ -30,7 +31,7 @@ const fetchLatestVersion = async (): Promise<string | null> => {
       'Accept': 'application/vnd.github.v3+json',
       'User-Agent': 'Press-Ticket'
     };
-    
+
     if (process.env.GITHUB_TOKEN) {
       headers['Authorization'] = `token ${process.env.GITHUB_TOKEN}`;
     }
@@ -47,28 +48,20 @@ const fetchLatestVersion = async (): Promise<string | null> => {
         "https://api.github.com/repos/rtenorioh/Press-Ticket/tags",
         { headers, params: { per_page: 1 } }
       );
-      
+
       if (tagsResponse.data && tagsResponse.data.length > 0) {
         const latestTag = tagsResponse.data[0].name;
         return latestTag;
       }
-      
-      
+
+
       return null;
     }
   } catch (error: any) {
     if (error.response) {
-      console.error("[VERSION] Erro na API do GitHub:", {
-        status: error.response.status,
-        message: error.response.data?.message,
-        rateLimit: {
-          limit: error.response.headers['x-ratelimit-limit'],
-          remaining: error.response.headers['x-ratelimit-remaining'],
-          reset: error.response.headers['x-ratelimit-reset']
-        }
-      });
+      logger.error(`Erro na API do GitHub: ${error.response.status} - ${error.response.data?.message}`);
     } else {
-      console.error("[VERSION] Erro ao buscar versão no GitHub:", error.message);
+      logger.error(`Erro ao buscar versão no GitHub: ${error.message}`);
     }
     return null;
   }
@@ -79,11 +72,11 @@ const getWhatsappLibVersion = (): string | null => {
     const packageJsonPath = path.resolve(__dirname, "../../../node_modules/whatsapp-web.js/package.json");
     const packageJsonContent = fs.readFileSync(packageJsonPath, "utf8");
     const packageJson = JSON.parse(packageJsonContent);
-    
+
     const version = packageJson.version || null;
     return version;
   } catch (error) {
-    console.error("Erro ao ler a versão da biblioteca whatsapp-web.js:", error);
+    logger.error(`Erro ao ler versão whatsapp-web.js: ${error}`);
     return null;
   }
 };
@@ -98,22 +91,22 @@ const fetchWhatsappLibLatestVersion = async (): Promise<WhatsappLibVersionInfo> 
     const response = await axios.get(
       "https://api.github.com/repos/pedroslopez/whatsapp-web.js/releases"
     );
-    
+
     const stableReleases = response.data.filter((release: any) => !release.prerelease);
-    
+
     if (stableReleases.length > 0) {
       return {
         version: stableReleases[0].tag_name.replace("v", ""),
         releaseDate: stableReleases[0].published_at
       };
     }
-    
+
     return {
       version: null,
       releaseDate: null
     };
   } catch (error) {
-    console.error("Erro ao buscar a versão mais recente da biblioteca whatsapp-web.js:", error);
+    logger.error(`Erro ao buscar versão mais recente whatsapp-web.js: ${error}`);
     return {
       version: null,
       releaseDate: null
@@ -142,7 +135,7 @@ const fetchWhatsappLibGitCommits = async (currentVersion: string | null): Promis
     );
 
     const stableReleases = releasesResponse.data.filter((release: any) => !release.prerelease);
-    const currentRelease = stableReleases.find((release: any) => 
+    const currentRelease = stableReleases.find((release: any) =>
       release.tag_name === `v${currentVersion}` || release.tag_name === currentVersion
     );
 
@@ -164,21 +157,21 @@ const fetchWhatsappLibGitCommits = async (currentVersion: string | null): Promis
       url: commit.html_url
     }));
   } catch (error) {
-    console.error("Erro ao buscar commits do Git:", error);
+    logger.error(`Erro ao buscar commits do Git: ${error}`);
     return [];
   }
 };
 
-export const getVersionInfo = async (): Promise<VersionInfo> => {  
+export const getVersionInfo = async (): Promise<VersionInfo> => {
   const latestVersion = await fetchLatestVersion();
   const whatsappLibVersion = getWhatsappLibVersion();
   const whatsappLibInfo = await fetchWhatsappLibLatestVersion();
   const whatsappLibLatestVersion = whatsappLibInfo.version;
-  
-  const needsUpdate = latestVersion 
+
+  const needsUpdate = latestVersion
     ? systemVersion.localeCompare(latestVersion, undefined, { numeric: true, sensitivity: 'base' }) < 0
     : false;
-  
+
   const whatsappLibNeedsUpdate = whatsappLibVersion && whatsappLibLatestVersion
     ? whatsappLibVersion.localeCompare(whatsappLibLatestVersion, undefined, { numeric: true, sensitivity: 'base' }) < 0
     : false;

@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import UserSession from "../models/UserSession";
 import User from "../models/User";
+import { logger } from "../utils/logger";
 
 const updateLastActivity = async (
   req: Request,
@@ -46,7 +47,7 @@ const updateLastActivity = async (
         }
       }
     } catch (err) {
-      console.error("Error updating last activity:", err);
+      logger.error(`Error updating last activity: ${err}`);
     }
   }
 

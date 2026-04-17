@@ -4,6 +4,7 @@ import OldMessage from "../../models/OldMessage";
 import Ticket from "../../models/Ticket";
 import Whatsapp from "../../models/Whatsapp";
 import FormatLastMessage from "../../helpers/FormatLastMessage";
+import { logger } from "../../utils/logger";
 
 interface MessageData {
   id: string;
@@ -27,27 +28,6 @@ const CreateMessageService = async ({
 }: Request): Promise<Message> => {
   try {
 
-    if (messageData.mediaType === "multi_vcard") {
-      if (typeof messageData.body === 'string') {
-        try {
-          const parsedBody = JSON.parse(messageData.body);
-          if (Array.isArray(parsedBody)) {
-            console.log("Array length:", parsedBody.length);
-            console.log("First item:", parsedBody[0]);
-          }
-        } catch (error) {
-          console.error("Error parsing message body:", error);
-        }
-      }
-    }
-    
-    const existingMessage = await Message.findByPk(messageData.id);
-    if (existingMessage) {
-      console.info("Mensagem já existe no banco de dados, atualizando:", messageData.id);
-    } else {
-      console.info("Criando nova mensagem no banco de dados:", messageData.id);
-    }
-    
     await Message.upsert(messageData);
 
     const message = await Message.findByPk(messageData.id, {
@@ -87,7 +67,7 @@ const CreateMessageService = async ({
           lastContactAt: new Date()
         });
       } catch (error) {
-        console.error("Erro ao atualizar lastContactAt:", error);
+        logger.error(`Erro ao atualizar lastContactAt: ${error}`);
       }
     }
 
@@ -107,7 +87,7 @@ const CreateMessageService = async ({
         });
       }
     } catch (reloadError) {
-      console.error("Erro ao recarregar ticket antes de emitir appMessage:", reloadError);
+      logger.error(`Erro ao recarregar ticket: ${reloadError}`);
     }
 
     const composedLastMessage = FormatLastMessage({
@@ -122,7 +102,7 @@ const CreateMessageService = async ({
     const ticketPayload: any = message.ticket ? message.ticket.toJSON ? message.ticket.toJSON() : { ...message.ticket } : {};
     ticketPayload.lastMessage = composedLastMessage;
     ticketPayload.updatedAt = new Date();
-      
+
     io.to(message.ticketId.toString())
       .to(ticketPayload.status)
       .to("notification")
@@ -135,7 +115,7 @@ const CreateMessageService = async ({
 
     return message;
   } catch (error) {
-    console.error("Erro ao criar/atualizar mensagem:", error);
+    logger.error(`Erro ao criar/atualizar mensagem: ${error}`);
     throw error;
   }
 };

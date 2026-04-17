@@ -14,7 +14,7 @@ const MarkMessagesAsReadService = async ({
   ticketId
 }: Request): Promise<void> => {
   const io = getIO();
-  
+
   const unreadMessages = await Message.findAll({
     where: {
       ticketId,
@@ -45,11 +45,11 @@ const MarkMessagesAsReadService = async ({
     if (!whatsapp) {
       throw new Error(`WhatsApp não encontrado para o ticket ${ticketId}`);
     }
-    
+
     let wbot: any;
     try {
       wbot = getWbot(ticket.whatsappId);
-      
+
       if (!wbot.info || !wbot.info.wid) {
         logger.warn(`Sessão WhatsApp para o ticket ${ticketId} não está totalmente inicializada. Tentando reiniciar...`);
         wbot = await restartWbot(ticket.whatsappId);
@@ -66,29 +66,29 @@ const MarkMessagesAsReadService = async ({
         throw new Error(`Não foi possível obter uma sessão válida do WhatsApp: ${restartError.message}`);
       }
     }
-    
-    const chatId = ticket.isGroup 
-      ? `${ticket.contact.number}@g.us` 
+
+    const chatId = ticket.isGroup
+      ? `${ticket.contact.number}@g.us`
       : `${ticket.contact.number}@c.us`;
-    
+
     logger.info(`Marcando mensagens como lidas para o ticket ${ticket.id}, chat ${chatId}`);
-    
+
     try {
       const chat = await wbot.getChatById(chatId);
-      
+
       if (!chat || !chat.sendSeen) {
         logger.error(`Chat inválido para o ID ${chatId}`);
         throw new Error(`Chat inválido ou não inicializado para o ID ${chatId}`);
       }
-      
+
       const sendSeenWithRetry = async (retries = 3): Promise<boolean> => {
         try {
           wbot.sendPresenceAvailable();
-          
+
           await new Promise(resolve => setTimeout(resolve, 500));
-          
+
           await chat.sendSeen();
-          
+
           logger.info(`SendSeen executado com sucesso para o chat ${chatId}`);
           return true;
         } catch (seenError) {
@@ -101,26 +101,25 @@ const MarkMessagesAsReadService = async ({
           return false;
         }
       };
-      
+
       await sendSeenWithRetry();
     } catch (chatError) {
       logger.error(`Erro ao obter chat para marcar como lido: ${chatError.message}`);
     }
-    
+
     for (const message of unreadMessages) {
       await message.update({ read: true, ack: 3 });
-      
+
       io.to(message.ticketId.toString()).emit("appMessage", {
         action: "update",
         message
       });
     }
-    
+
     await ticket.update({ unreadMessages: 0 });
-    
+
   } catch (error) {
-    logger.error(`Erro ao marcar mensagens como lidas para o ticket ${ticketId}: ${error.message}`);
-    console.error("Erro ao marcar mensagens como lidas:", error);
+    logger.error(`Erro ao marcar mensagens como lidas para ticket ${ticketId}: ${error}`);
   }
 };
 

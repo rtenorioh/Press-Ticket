@@ -1,16 +1,17 @@
 import { Request, Response } from 'express';
 import * as FileManagerService from '../services/FileManagerService';
 import path from 'path';
+import { logger } from '../utils/logger';
 
 export const getPublicFolderStats = async (req: Request, res: Response): Promise<Response> => {
   try {
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 20;
-    
+
     const stats = await FileManagerService.getPublicFolderStats(page, limit);
     return res.status(200).json(stats);
   } catch (err) {
-    console.error('Erro ao obter estatísticas da pasta public:', err);
+    logger.error(`Erro ao obter estatísticas da pasta public: ${err}`);
     return res.status(500).json({ error: 'Erro ao obter estatísticas da pasta public' });
   }
 };
@@ -24,14 +25,14 @@ export const deleteFiles = async (req: Request, res: Response): Promise<Response
     }
 
     const result = await FileManagerService.deleteFiles(filePaths);
-    
+
     if (result.success) {
       return res.status(200).json(result);
     } else {
       return res.status(207).json(result);
     }
   } catch (err) {
-    console.error('Erro ao deletar arquivos:', err);
+    logger.error(`Erro ao deletar arquivos: ${err}`);
     return res.status(500).json({ error: 'Erro ao deletar arquivos' });
   }
 };
@@ -55,7 +56,7 @@ export const downloadFile = async (req: Request, res: Response): Promise<void> =
     const fileName = path.basename(fullPath);
     res.download(fullPath, fileName);
   } catch (err) {
-    console.error('Erro ao baixar arquivo:', err);
+    logger.error(`Erro ao baixar arquivo: ${err}`);
     res.status(500).json({ error: 'Erro ao baixar arquivo' });
   }
 };
@@ -104,14 +105,14 @@ export const viewFile = async (req: Request, res: Response): Promise<void> => {
     };
 
     const contentType = mimeTypes[ext] || 'application/octet-stream';
-    
+
     res.setHeader('Content-Type', contentType);
     res.setHeader('Accept-Ranges', 'bytes');
     res.setHeader('Cache-Control', 'public, max-age=31536000');
-    
+
     res.sendFile(fullPath);
   } catch (err) {
-    console.error('Erro ao visualizar arquivo:', err);
+    logger.error(`Erro ao visualizar arquivo: ${err}`);
     res.status(500).json({ error: 'Erro ao visualizar arquivo' });
   }
 };

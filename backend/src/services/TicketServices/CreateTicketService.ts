@@ -6,6 +6,7 @@ import User from "../../models/User";
 import Whatsapp from "../../models/Whatsapp";
 import ShowContactService from "../ContactServices/ShowContactService";
 import EmitTicketCounterService from "./EmitTicketCounterService";
+import { logger } from "../../utils/logger";
 
 interface Request {
   contactId: number;
@@ -23,7 +24,7 @@ const CreateTicketService = async ({
   whatsappId
 }: Request): Promise<Ticket> => {
   let whatsapp;
-  
+
   if (whatsappId) {
     whatsapp = await Whatsapp.findByPk(whatsappId);
     if (!whatsapp) {
@@ -57,11 +58,11 @@ const CreateTicketService = async ({
   }
 
   const timestamp = new Date().toISOString();
-  
+
   try {
     await EmitTicketCounterService();
   } catch (err) {
-    console.error(`[BACK_CREATE_TICKET_ERROR][${timestamp}] Erro ao emitir contadores:`, err);
+    logger.error(`Erro ao emitir contadores após criar ticket: ${err}`);
   }
 
   return ticket;

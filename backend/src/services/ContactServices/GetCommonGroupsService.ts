@@ -2,6 +2,7 @@ import { getWbot } from "../../libs/wbot";
 import AppError from "../../errors/AppError";
 import Contact from "../../models/Contact";
 import Whatsapp from "../../models/Whatsapp";
+import { logger } from "../../utils/logger";
 
 interface Request {
   contactId: string;
@@ -62,7 +63,7 @@ const GetCommonGroupsService = async ({
     const wContact = await wbot.getContactById(numberId._serialized);
     commonGroups = await (wContact as any).getCommonGroups();
   } catch (error) {
-    console.warn(`[FALLBACK] Erro ao obter contato/grupos comuns do WhatsApp: ${error.message || error}`);
+    logger.warn(`[FALLBACK] Erro ao obter contato/grupos comuns do WhatsApp: ${error.message || error}`);
     commonGroups = [];
   }
 

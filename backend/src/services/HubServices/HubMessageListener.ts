@@ -5,6 +5,7 @@ import FindOrCreateTicketService from "../TicketServices/FindOrCreateTicketServi
 import CreateMessageService from "./CreateHubMessageService";
 import FindOrCreateContactService from "./FindOrCreateHubContactService";
 import { UpdateMessageAck } from "./UpdateMessageHubAck";
+import { logger } from "../../utils/logger";
 
 export interface IContent {
   type: "text" | "image" | "audio" | "video" | "file" | "location";
@@ -127,13 +128,10 @@ const HubMessageListener = async (
     );
 
     if (isMessageSent) {
-      console.log("HubMessageListener: message sent");
       UpdateMessageAck(message.messageId);
     } else {
-      console.log(
-        "HubMessageListener: message not sent",
-        message.messageStatus.code,
-        message.messageStatus.description
+      logger.warn(
+        `HubMessageListener: message not sent - ${message.messageStatus.code}: ${message.messageStatus.description}`
       );
     }
 
@@ -234,7 +232,7 @@ const HubMessageListener = async (
       }
     }
   } catch (error: any) {
-    console.log(error);
+    logger.error(`HubMessageListener erro: ${error}`);
   }
 };
 export default HubMessageListener;

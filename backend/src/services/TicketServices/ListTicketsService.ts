@@ -7,6 +7,7 @@ import Ticket from "../../models/Ticket";
 import User from "../../models/User";
 import Whatsapp from "../../models/Whatsapp";
 import ListSettingsServiceOne from "../SettingServices/ListSettingsServiceOne";
+import { logger } from "../../utils/logger";
 
 interface Request {
   searchParam?: string;
@@ -333,7 +334,7 @@ const ListTicketsService = async ({
     hasMore
   };
   } catch (error) {
-    console.error("Erro ao listar tickets:", error);
+    logger.error(`Erro ao listar tickets: ${error}`);
     throw error;
   }
 };

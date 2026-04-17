@@ -2,6 +2,7 @@ import Tag from "../../models/Tag";
 import Contact from "../../models/Contact";
 import ContactTag from "../../models/ContactTag";
 import AppError from "../../errors/AppError";
+import { logger } from "../../utils/logger";
 
 interface Request {
   tags: number[] | Tag[];
@@ -58,7 +59,7 @@ const SyncTags = async (data: Request): Promise<Contact | null> => {
       throw error;
     }
     
-    console.error("Erro ao sincronizar tags:", error);
+    logger.error(`Erro ao sincronizar tags: ${error}`);
     throw new AppError("Erro ao sincronizar tags", 500);
   }
 };

@@ -1,6 +1,7 @@
 import { Sequelize } from "sequelize";
 import ClientStatus from "../../models/ClientStatus";
 import AppError from "../../errors/AppError";
+import { logger } from "../../utils/logger";
 
 const ShowService = async (id: string | number): Promise<ClientStatus> => {
   try {
@@ -28,7 +29,7 @@ const ShowService = async (id: string | number): Promise<ClientStatus> => {
     return clientStatus!;
   } catch (error) {
     if (error.message !== "ERR_NO_CLIENT_STATUS_FOUND") {
-      console.error("Erro ao buscar status com contagem:", error);
+      logger.error(`Erro ao buscar status com contagem: ${error}`);
       const statusBasic = await ClientStatus.findByPk(id);
       if (!statusBasic) {
         throw new AppError("ERR_NO_CLIENT_STATUS_FOUND", 404);

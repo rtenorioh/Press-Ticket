@@ -2,6 +2,7 @@ import { Message as WbotMessage, Chat } from "whatsapp-web.js";
 import AppError from "../errors/AppError";
 import Ticket from "../models/Ticket";
 import GetTicketWbot from "./GetTicketWbot";
+import { logger } from "../utils/logger";
 
 export const GetWbotMessage = async (
   ticket: Ticket,
@@ -10,7 +11,7 @@ export const GetWbotMessage = async (
   const wbot = await GetTicketWbot(ticket);
 
   if (!ticket.contact.number) {
-    console.error("Número do contato não encontrado no ticket:", ticket.id);
+    logger.error(`Número do contato não encontrado no ticket: ${ticket.id}`);
     throw new AppError("ERR_INVALID_CONTACT_NUMBER");
   }
 
@@ -22,24 +23,24 @@ export const GetWbotMessage = async (
   let wbotChat: Chat;
   try {
     wbotChat = await wbot.getChatById(chatId);
-    
+
     if (!wbotChat) {
-      console.error(`[GetWbotMessage] Chat não encontrado: ${chatId}`);
+      logger.error(`Chat não encontrado: ${chatId}`);
       throw new Error("Chat não encontrado");
     }
   } catch (getChatError: any) {
-    console.error(`[GetWbotMessage] Erro ao buscar chat ${chatId}:`, getChatError.message);
-    
+    logger.error(`Erro ao buscar chat ${chatId}: ${getChatError.message}`);
+
     try {
       const directMessage = await wbot.getMessageById(messageId);
-      
+
       if (directMessage) {
         return directMessage;
       }
     } catch (directError: any) {
-      console.error(`[GetWbotMessage] Falha ao buscar mensagem diretamente:`, directError.message);
+      logger.error(`Falha ao buscar mensagem diretamente: ${directError.message}`);
     }
-    
+
     throw new AppError("ERR_CHAT_NOT_FOUND");
   }
 
@@ -59,7 +60,7 @@ export const GetWbotMessage = async (
 
       return msgFound;
     } catch (fetchError) {
-      console.error("[GetWbotMessage] Erro ao buscar mensagens do chat:", fetchError);
+      logger.error(`Erro ao buscar mensagens do chat: ${fetchError}`);
       return undefined;
     }
   };
@@ -72,13 +73,13 @@ export const GetWbotMessage = async (
         ? `Não foi possível encontrar a mensagem nas últimas ${maxLimit} mensagens do grupo`
         : `Não foi possível encontrar a mensagem nas últimas ${maxLimit} mensagens`;
 
-      console.error(`[GetWbotMessage] ${errorMsg}`);
+      logger.error(errorMsg);
       throw new Error(errorMsg);
     }
 
     return msgFound;
   } catch (err) {
-    console.error("[GetWbotMessage] Erro final:", err);
+    logger.error(`GetWbotMessage erro: ${err}`);
     throw new AppError("ERR_FETCH_WAPP_MSG");
   }
 };

@@ -23,8 +23,6 @@ class PresenceService {
       const wbot = await getWbot(whatsappId);
       const chat = await wbot.getChatById(chatId);
 
-      logger.info(`[PRESENCE] Enviando indicador "${state}" para ${chatId} por ${duration}ms`);
-
       // Enviar estado de presença
       if (state === "composing") {
         await chat.sendStateTyping();
@@ -36,7 +34,6 @@ class PresenceService {
       // Aguardar a duração especificada
       if (state !== "available" && duration > 0) {
         await new Promise(resolve => setTimeout(resolve, duration));
-        logger.info(`[PRESENCE] Indicador "${state}" finalizado para ${chatId}`);
       }
     } catch (error) {
       logger.error(`[PRESENCE] Erro ao enviar presença: ${error}`);
@@ -103,9 +100,7 @@ class PresenceService {
     // Velocidade média: 40 palavras/min = ~200 caracteres/min = ~3.3 caracteres/segundo
     // Mínimo 1 segundo, máximo 10 segundos
     const duration = Math.min(Math.max(messageLength / 3.3 * 1000, 1000), 10000);
-    
-    logger.info(`[PRESENCE] Simulando digitação por ${duration}ms para mensagem de ${messageLength} caracteres`);
-    
+
     await this.simulateTyping(whatsappId, chatId, duration);
   }
 

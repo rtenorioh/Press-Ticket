@@ -44,7 +44,7 @@ export const initIO = (httpServer: Server): void => {
         if (!origin) {
           return callback(null, true);
         }
-        
+
         // Permitir origin configurada no .env (frontend)
         if (process.env.FRONTEND_URL && origin === process.env.FRONTEND_URL) {
           return callback(null, true);
@@ -77,11 +77,6 @@ export const initIO = (httpServer: Server): void => {
   });
 
   io.on("connection", async socket => {
-    logger.info("Tentativa de conexão socket", { 
-      socketId: socket.id,
-      transport: socket.conn.transport.name
-    });
-
     const { token } = socket.handshake.query;
 
     if (!token || typeof token !== "string") {
@@ -103,9 +98,9 @@ export const initIO = (httpServer: Server): void => {
       try {
         const user = await User.findByPk(userId);
         if (!user) {
-          logger.warn("Conexão rejeitada: Usuário não encontrado", { 
+          logger.warn("Conexão rejeitada: Usuário não encontrado", {
             socketId: socket.id,
-            userId 
+            userId
           });
           socket.disconnect();
           return;
@@ -119,10 +114,6 @@ export const initIO = (httpServer: Server): void => {
         }
 
         socket.join(userId.toString());
-        logger.info("Conexão socket estabelecida", { 
-          userId,
-          socketId: socket.id
-        });
 
       } catch (err) {
         logger.error("Erro ao processar usuário do socket", {
@@ -152,21 +143,7 @@ export const initIO = (httpServer: Server): void => {
       socket.disconnect();
     }
 
-    socket.onAny((eventName: string, ...args: unknown[]) => {
-      logger.debug("Evento recebido", {
-        event: eventName,
-        socketId: socket.id,
-        args
-      });
-    });
-
     socket.on("userStatus", async ({ userId, online }: UserStatus) => {
-      logger.info("Alteração de status do usuário", {
-        userId,
-        online,
-        socketId: socket.id
-      });
-
       try {
         await User.update({ online }, { where: { id: userId } });
       } catch (err) {
@@ -179,8 +156,6 @@ export const initIO = (httpServer: Server): void => {
     });
 
     socket.on("disconnect", async () => {
-      logger.info("Cliente desconectado", { socketId: socket.id });
-
       try {
         const { id: userId } = verify(token as string, authConfig.secret) as TokenPayload;
         const userRoom = io.sockets.adapter.rooms.get(userId.toString());
@@ -198,8 +173,6 @@ export const initIO = (httpServer: Server): void => {
     });
 
     socket.on("logout", async () => {
-      logger.info("Logout solicitado", { socketId: socket.id });
-
       try {
         const { id: userId } = verify(token as string, authConfig.secret) as TokenPayload;
         await User.update(
@@ -208,10 +181,6 @@ export const initIO = (httpServer: Server): void => {
         );
 
         socket.leave(userId.toString());
-        logger.info("Usuário removido da sala após logout", {
-          userId,
-          socketId: socket.id
-        });
       } catch (err) {
         logger.error("Erro ao processar logout", {
           error: err.message,
@@ -221,52 +190,25 @@ export const initIO = (httpServer: Server): void => {
     });
 
     socket.on("joinChatBox", (ticketId: string) => {
-      logger.info("Usuário entrou no chat", {
-        ticketId,
-        socketId: socket.id
-      });
       socket.join(ticketId);
     });
 
     socket.on("joinNotification", () => {
-      logger.info("Usuário entrou no canal de notificações", {
-        socketId: socket.id
-      });
       socket.join("notification");
-      
-      const notificationRoom = io.sockets.adapter.rooms.get("notification");
-      logger.info("Status do canal de notificações", {
-        socketId: socket.id,
-        totalClientsInNotificationRoom: notificationRoom ? notificationRoom.size : 0
-      });
     });
 
     socket.on("joinTickets", (status: string) => {
-      logger.info("Usuário entrou no canal de tickets", {
-        status,
-        socketId: socket.id
-      });
       socket.join(status);
     });
 
     socket.on("subscribeTicketCounter", () => {
-      logger.info("Usuário inscrito no canal de contadores de tickets", {
-        socketId: socket.id
-      });
       socket.join("ticketCounter");
     });
 
     socket.on("getTickets", async (data: GetTicketsData) => {
       try {
-        logger.info("Solicitação de sincronização de tickets", {
-          userId: data.userId,
-          status: data.status,
-          showAll: data.showAll,
-          socketId: socket.id
-        });
-
         const { id: userId } = verify(token as string, authConfig.secret) as TokenPayload;
-        
+
         if (userId !== data.userId && data.userId) {
           logger.warn("Tentativa de acesso a tickets de outro usuário", {
             tokenUserId: userId,
@@ -294,7 +236,7 @@ export const initIO = (httpServer: Server): void => {
         }
 
         const whereCondition: any = {};
-        
+
         if (data.status) {
           whereCondition.status = data.status;
         }
@@ -379,13 +321,7 @@ export const initIO = (httpServer: Server): void => {
             }
           ],
           order: [["updatedAt", "DESC"]],
-          limit: 50 
-        });
-
-        logger.info("Tickets sincronizados com sucesso", {
-          userId,
-          count: tickets.length,
-          socketId: socket.id
+          limit: 50
         });
 
         socket.emit("ticketList", { tickets });

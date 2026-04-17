@@ -65,7 +65,6 @@ class GroupEventsService {
 
       io.emit(`whatsapp-${data.whatsappId}:groupEvent`, eventPayload);
 
-      logger.info(`[GROUP_EVENT] ${data.eventType} registered for group ${data.groupId}`);
     } catch (error) {
       logger.error(`[GROUP_EVENT] Error registering event: ${error}`);
     }
@@ -134,8 +133,6 @@ class GroupEventsService {
         logger.warn(`[GROUP_EVENT] Mensagem duplicada detectada e ignorada: "${messageBody}"`);
         return;
       }
-
-      logger.info(`[GROUP_EVENT] Criando mensagem de sistema: "${messageBody}"`);
 
       const messageId = `${data.groupId}_${Date.now()}_event`;
 
@@ -259,8 +256,6 @@ class GroupEventsService {
       return;
     }
 
-    logger.info(`[GROUP_EVENT] Setting up group listeners for WhatsApp ${whatsappId}`);
-
     wbot.removeAllListeners("group_update");
     wbot.removeAllListeners("group_join");
     wbot.removeAllListeners("group_leave");
@@ -268,8 +263,6 @@ class GroupEventsService {
     this.activeListeners.set(whatsappId, true);
 
     wbot.on("group_update", async (notification: any) => {
-      logger.info(`[GROUP_EVENT] group_update received for WhatsApp ${whatsappId}, type: ${notification.type}`);
-
       try {
         const chat = await notification.getChat();
         const groupId = chat.id._serialized;
@@ -302,7 +295,6 @@ class GroupEventsService {
                 contact: groupContact
               });
 
-              logger.info(`[GROUP_EVENT] Nome do grupo atualizado: ${groupId} -> ${notification.body}`);
             }
           } catch (err) {
             logger.error(`[GROUP_EVENT] Erro ao atualizar nome do contato: ${err}`);
@@ -485,7 +477,6 @@ class GroupEventsService {
       }
     });
 
-    logger.info(`[GROUP_EVENT] Group listeners setup completed for WhatsApp ${whatsappId}`);
   }
 }
 

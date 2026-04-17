@@ -1,6 +1,7 @@
 import { Op } from "sequelize";
 import Ticket from "../../models/Ticket";
 import ListSettingsServiceOne from "../SettingServices/ListSettingsServiceOne";
+import { logger } from "../../utils/logger";
 
 interface CountTicketsParams {
   queueIds?: number[];
@@ -23,31 +24,31 @@ const CountTicketsService = async ({
   try {
     const allTickets = await ListSettingsServiceOne({ key: "allTicket" });
     const allTicketsEnabled = allTickets?.value === "enabled";
-    
+
     const baseConditions: any = {};
-    
+
     const openConditions: any = {
       ...baseConditions,
       status: "open",
       "$contact.isGroup$": { [Op.or]: [false, null] }
     };
-    
+
     const openGroupsConditions: any = {
       ...baseConditions,
       status: "open",
       "$contact.isGroup$": true
     };
-    
+
     const pendingConditions: any = {
       ...baseConditions,
       status: "pending"
     };
-    
+
     const closedConditions: any = {
       ...baseConditions,
       status: "closed"
     };
-    
+
     if (!showAll && userId) {
       if (allTicketsEnabled) {
         openConditions[Op.or] = [
@@ -55,13 +56,13 @@ const CountTicketsService = async ({
           { queueId: { [Op.in]: queueIds } },
           { queueId: null }
         ];
-        
+
         closedConditions[Op.or] = [
           { userId },
           { queueId: { [Op.in]: queueIds } },
           { queueId: null }
         ];
-        
+
         pendingConditions[Op.or] = [
           { queueId: { [Op.in]: queueIds } },
           { queueId: null }
@@ -71,12 +72,12 @@ const CountTicketsService = async ({
           { userId },
           { queueId: { [Op.in]: queueIds } }
         ];
-        
+
         closedConditions[Op.or] = [
           { userId },
           { queueId: { [Op.in]: queueIds } }
         ];
-        
+
         if (queueIds && queueIds.length > 0) {
           pendingConditions.queueId = { [Op.in]: queueIds };
         }
@@ -86,7 +87,7 @@ const CountTicketsService = async ({
       pendingConditions.queueId = { [Op.in]: queueIds };
       closedConditions.queueId = { [Op.in]: queueIds };
     }
-    
+
     if (!showAll && userId) {
       if (allTicketsEnabled) {
         openGroupsConditions[Op.or] = [
@@ -103,9 +104,9 @@ const CountTicketsService = async ({
     } else if (queueIds && queueIds.length > 0) {
       openGroupsConditions.queueId = { [Op.in]: queueIds };
     }
-    
+
     const [openCount, pendingCount, closedCount, openGroupsCount] = await Promise.all([
-      Ticket.count({ 
+      Ticket.count({
         where: openConditions,
         include: [{
           model: require("../../models/Contact").default,
@@ -115,7 +116,7 @@ const CountTicketsService = async ({
       }),
       Ticket.count({ where: pendingConditions }),
       Ticket.count({ where: closedConditions }),
-      Ticket.count({ 
+      Ticket.count({
         where: openGroupsConditions,
         include: [{
           model: require("../../models/Contact").default,
@@ -124,7 +125,7 @@ const CountTicketsService = async ({
         }]
       })
     ]);
-    
+
     return {
       open: openCount,
       pending: pendingCount,
@@ -132,7 +133,7 @@ const CountTicketsService = async ({
       openGroups: openGroupsCount
     };
   } catch (error) {
-    console.error(`[BACK_COUNT_ERROR] Erro ao contar tickets:`, error);
+    logger.error(`Erro ao contar tickets: ${error}`);
     throw error;
   }
 };

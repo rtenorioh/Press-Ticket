@@ -4,6 +4,7 @@ import Ticket from "../../models/Ticket";
 import Message from "../../models/Message";
 import Queue from "../../models/Queue";
 import Whatsapp from "../../models/Whatsapp";
+import { logger } from "../../utils/logger";
 
 interface UserStats {
   id: number;
@@ -271,7 +272,7 @@ const UserMonitorService = async (userId?: number): Promise<UserMonitorResponse>
       summary
     };
   } catch (error) {
-    console.error("[USER_MONITOR_SERVICE] Erro:", error);
+    logger.error(`[USER_MONITOR_SERVICE] Erro: ${error}`);
     throw error;
   }
 };

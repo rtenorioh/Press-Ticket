@@ -2,6 +2,7 @@ import { Request } from "express";
 import multer, { FileFilterCallback } from "multer";
 import path from "path";
 import fs from "fs";
+import { logger } from "../utils/logger";
 
 const UPLOAD_PATH = path.resolve(__dirname, "..", "..", "public", "logos");
 
@@ -41,7 +42,7 @@ const storage = multer.diskStorage({
 
       cb(null, fileName);
     } catch (error) {
-      console.error("Error in filename generation:", error);
+      logger.error(`Error in filename generation: ${error}`);
       cb(error, "");
     }
   }

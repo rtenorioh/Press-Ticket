@@ -1,6 +1,7 @@
 import GetDefaultWhatsApp from "../../helpers/GetDefaultWhatsApp";
 import { getWbot } from "../../libs/wbot";
 import AppError from "../../errors/AppError";
+import { logger } from "../../utils/logger";
 
 interface Response {
   exists: boolean;
@@ -31,7 +32,7 @@ const CheckWhatsAppNumberService = async (number: string): Promise<Response> => 
         : "Número não registrado no WhatsApp"
     };
   } catch (error) {
-    console.error("Erro ao verificar número no WhatsApp:", error);
+    logger.error(`Erro ao verificar número no WhatsApp: ${error}`);
     throw new AppError("Erro ao verificar número no WhatsApp. Verifique se há uma conexão ativa.");
   }
 };

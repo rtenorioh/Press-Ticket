@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import UserMonitorService from "../services/UserServices/UserMonitorService";
+import { logger } from "../utils/logger";
 
 export const index = async (req: Request, res: Response): Promise<Response> => {
   try {
@@ -9,7 +10,7 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
 
     return res.status(200).json(data);
   } catch (error: any) {
-    console.error("[USER_MONITOR_CONTROLLER] Erro:", error);
+    logger.error(`[USER_MONITOR_CONTROLLER] Erro: ${error}`);
     return res.status(500).json({ error: error.message });
   }
 };

@@ -3,7 +3,7 @@ import { logger } from "../utils/logger";
 
 class CacheService {
   private cache: NodeCache;
-  
+
   constructor() {
     this.cache = new NodeCache({
       stdTTL: 600,
@@ -12,13 +12,6 @@ class CacheService {
       deleteOnExpire: true
     });
 
-    this.cache.on("expired", (key, value) => {
-      logger.debug(`Cache expired: ${key}`);
-    });
-
-    this.cache.on("del", (key, value) => {
-      logger.debug(`Cache deleted: ${key}`);
-    });
   }
 
   set(key: string, value: any, ttl?: number): boolean {
@@ -51,7 +44,6 @@ class CacheService {
   flush(): void {
     try {
       this.cache.flushAll();
-      logger.info("Cache flushed successfully");
     } catch (err) {
       logger.error("Error flushing cache:", err);
     }

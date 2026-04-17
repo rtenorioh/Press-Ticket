@@ -2,6 +2,7 @@ import axios from "axios";
 import { writeFile } from "fs/promises";
 import mime from "mime-types";
 import { extname, join } from "path";
+import { logger } from "../utils/logger";
 
 export const downloadFiles = async (url: string) => {
   try {
@@ -35,7 +36,7 @@ export const downloadFiles = async (url: string) => {
 
     return media;
   } catch (error) {
-    console.error("Erro ao processar a requisição:", error);
+    logger.error(`Erro ao processar a requisição: ${error}`);
     throw error;
   }
 };

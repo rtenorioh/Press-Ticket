@@ -20,6 +20,7 @@ import MessageReaction from "../models/MessageReaction";
 import ReactToWhatsAppMessage from "../services/WbotServices/ReactToWhatsAppMessage";
 import { createActivityLog, ActivityActions, EntityTypes } from "../services/ActivityLogService";
 import GetClientIp from "../helpers/GetClientIp";
+import { logger } from "../utils/logger";
 
 type IndexQuery = {
   pageNumber: string;
@@ -45,7 +46,7 @@ export const reactMessage = async (req: Request, res: Response): Promise<Respons
 
     return res.status(200).json({ success: true });
   } catch (error: any) {
-    console.error("Erro ao reagir à mensagem:", error);
+    logger.error(`Erro ao reagir à mensagem: ${error}`);
     return res.status(500).json({ error: "Erro ao reagir à mensagem" });
   }
 };
@@ -103,12 +104,12 @@ export const getReactions = async (req: Request, res: Response): Promise<Respons
                 try {
                   profilePicUrl = await (wbot as any).getProfilePicUrl(reaction.senderId);
                 } catch (e) {
-                  console.error('[getReactions] Erro ao buscar foto do @lid:', e);
+                  logger.error(`[getReactions] Erro ao buscar foto do @lid: ${e}`);
                 }
 
               }
             } catch (e) {
-              console.error('[getReactions] Erro ao buscar informações do @lid:', e);
+              logger.error(`[getReactions] Erro ao buscar informações do @lid: ${e}`);
             }
           } else {
             phoneNumber = reaction.senderId
@@ -132,7 +133,7 @@ export const getReactions = async (req: Request, res: Response): Promise<Respons
             }
           }
         } catch (e) {
-          console.error('[getReactions] Erro ao buscar contato:', e);
+          logger.error(`[getReactions] Erro ao buscar contato: ${e}`);
         }
 
         groupedReactions[reaction.emoji].senders.push({
@@ -345,7 +346,7 @@ export const getReactions = async (req: Request, res: Response): Promise<Respons
 
     return res.status(200).json({ reactions: result.reactions });
   } catch (error: any) {
-    console.error("Erro ao listar reações:", error);
+    logger.error(`Erro ao listar reações: ${error}`);
     return res.status(500).json({ error: "Erro ao listar reações" });
   }
 };
@@ -381,14 +382,11 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     try {
       mentions = JSON.parse(mentions);
     } catch (e) {
-      console.error('[MessageController] Erro ao parsear mentions:', e);
+      logger.error(`Erro ao parsear mentions: ${e}`);
       mentions = undefined;
     }
   }
 
-  if (mentions) {
-    console.info('[MessageController] Mentions recebidas:', mentions, 'Tipo:', typeof mentions);
-  }
 
   const shouldSendAsDocument = sendAsDocument === 'true' || sendAsDocument === true;
   const shouldCompressVideo = compressVideo === 'true' || compressVideo === true;
@@ -438,7 +436,7 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
         }
       });
     } catch (error) {
-      console.error('Erro ao criar log de envio de mídia:', error);
+      logger.error(`Erro ao criar log de envio de mídia: ${error}`);
     }
   } else {
     const sentMessage = await SendWhatsAppMessage({ body, ticket, quotedMsg, mentions });
@@ -465,7 +463,7 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
         }
       });
     } catch (error) {
-      console.error('Erro ao criar log de envio de mensagem:', error);
+      logger.error(`Erro ao criar log de envio de mensagem: ${error}`);
     }
   }
 
@@ -501,7 +499,7 @@ export const edit = async (req: Request, res: Response): Promise<Response> => {
       }
     });
   } catch (error) {
-    console.error('Erro ao criar log de edição de mensagem:', error);
+    logger.error(`Erro ao criar log de edição de mensagem: ${error}`);
   }
 
   const io = getIO();
@@ -543,7 +541,7 @@ export const remove = async (
       }
     });
   } catch (error) {
-    console.error('Erro ao criar log de exclusão de mensagem:', error);
+    logger.error(`Erro ao criar log de exclusão de mensagem: ${error}`);
   }
 
   const io = getIO();
@@ -571,7 +569,7 @@ export const markAsRead = async (req: Request, res: Response): Promise<Response>
       });
     }
   } catch (error) {
-    console.error("Erro ao marcar mensagens como lidas:", error);
+    logger.error(`Erro ao marcar mensagens como lidas: ${error}`);
     return res.status(500).json({ error: "Erro ao marcar mensagens como lidas" });
   }
 };
@@ -613,12 +611,12 @@ export const sendContacts = async (req: Request, res: Response): Promise<Respons
         }
       });
     } catch (error) {
-      console.error('Erro ao criar log de envio de contatos:', error);
+      logger.error(`Erro ao criar log de envio de contatos: ${error}`);
     }
 
     return res.json({ id: messageId });
   } catch (error) {
-    console.error("Erro ao enviar contatos:", error);
+    logger.error(`Erro ao enviar contatos: ${error}`);
     return res.status(500).json({ error: "Erro ao enviar contatos" });
   }
 };
@@ -694,7 +692,7 @@ export const forwardMessages = async (
       ticketId: ticket.id
     });
   } catch (error) {
-    console.error("Erro ao encaminhar mensagens:", error);
+    logger.error(`Erro ao encaminhar mensagens: ${error}`);
 
     if (error.message === "ERR_NO_DEF_WAPP_FOUND") {
       return res.status(400).json({
@@ -738,7 +736,7 @@ export const sendPoll = async (req: Request, res: Response): Promise<Response> =
 
     return res.json(message);
   } catch (error: any) {
-    console.error("Erro ao enviar enquete:", error);
+    logger.error(`Erro ao enviar enquete: ${error}`);
     return res.status(500).json({ error: error.message || "Erro ao enviar enquete" });
   }
 };
@@ -759,7 +757,7 @@ export const sendTypingIndicator = async (req: Request, res: Response): Promise<
 
     return res.json({ success: true, message: "Indicador de digitação enviado" });
   } catch (error: any) {
-    console.error("Erro ao enviar indicador de digitação:", error);
+    logger.error(`Erro ao enviar indicador de digitação: ${error}`);
     return res.status(500).json({ error: error.message || "Erro ao enviar indicador de digitação" });
   }
 };
@@ -780,7 +778,7 @@ export const sendRecordingIndicator = async (req: Request, res: Response): Promi
 
     return res.json({ success: true, message: "Indicador de gravação enviado" });
   } catch (error: any) {
-    console.error("Erro ao enviar indicador de gravação:", error);
+    logger.error(`Erro ao enviar indicador de gravação: ${error}`);
     return res.status(500).json({ error: error.message || "Erro ao enviar indicador de gravação" });
   }
 };
@@ -799,7 +797,7 @@ export const setAvailablePresence = async (req: Request, res: Response): Promise
 
     return res.json({ success: true, message: "Presença definida como disponível" });
   } catch (error: any) {
-    console.error("Erro ao definir presença:", error);
+    logger.error(`Erro ao definir presença: ${error}`);
     return res.status(500).json({ error: error.message || "Erro ao definir presença" });
   }
 };

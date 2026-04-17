@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import ErrorLogService from "../services/ErrorLogService";
+import { logger } from "../utils/logger";
 
 const errorLogger = async (
   err: Error,
@@ -25,7 +26,7 @@ const errorLogger = async (
 
     await ErrorLogService.create(errorData);
   } catch (logError) {
-    console.error("Erro ao registrar log de erro:", logError);
+    logger.error(`Erro ao registrar log de erro: ${logError}`);
   }
 
   next(err);

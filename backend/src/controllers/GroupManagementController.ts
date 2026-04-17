@@ -5,6 +5,7 @@ import AppError from "../errors/AppError";
 import { getWbot } from "../libs/wbot";
 import { createActivityLog, ActivityActions, EntityTypes } from "../services/ActivityLogService";
 import GetClientIp from "../helpers/GetClientIp";
+import { logger } from "../utils/logger";
 
 export const createGroup = async (
   req: Request,
@@ -41,7 +42,7 @@ export const createGroup = async (
       }
     });
   } catch (error) {
-    console.error('Erro ao criar log de criar grupo:', error);
+    logger.error(`Erro ao criar log de criar grupo: ${error}`);
   }
 
   return res.json(group);
@@ -126,7 +127,7 @@ export const addParticipants = async (
         performedByName: "Você"
       });
     } catch (err) {
-      console.error(`Erro ao registrar evento de adição: ${err}`);
+      logger.error(`Erro ao registrar evento de adição: ${err}`);
     }
   }
 
@@ -146,12 +147,12 @@ export const addParticipants = async (
       }
     });
   } catch (error) {
-    console.error('Erro ao criar log de adicionar participantes:', error);
+    logger.error(`Erro ao criar log de adicionar participantes: ${error}`);
   }
 
-  return res.json({ 
+  return res.json({
     message: "Participantes adicionados com sucesso",
-    result 
+    result
   });
 };
 
@@ -188,7 +189,7 @@ export const removeParticipants = async (
         performedByName: "Você"
       });
     } catch (err) {
-      console.error(`Erro ao registrar evento de remoção: ${err}`);
+      logger.error(`Erro ao registrar evento de remoção: ${err}`);
     }
   }
 
@@ -208,7 +209,7 @@ export const removeParticipants = async (
       }
     });
   } catch (error) {
-    console.error('Erro ao criar log de remover participantes:', error);
+    logger.error(`Erro ao criar log de remover participantes: ${error}`);
   }
 
   return res.json({ message: "Participantes removidos com sucesso" });
@@ -247,7 +248,7 @@ export const promoteParticipants = async (
         performedByName: "Você"
       });
     } catch (err) {
-      console.error(`Erro ao registrar evento de promoção: ${err}`);
+      logger.error(`Erro ao registrar evento de promoção: ${err}`);
     }
   }
 
@@ -267,7 +268,7 @@ export const promoteParticipants = async (
       }
     });
   } catch (error) {
-    console.error('Erro ao criar log de promover participantes:', error);
+    logger.error(`Erro ao criar log de promover participantes: ${error}`);
   }
 
   return res.json({ message: "Participantes promovidos a admin com sucesso" });
@@ -306,7 +307,7 @@ export const demoteParticipants = async (
         performedByName: "Você"
       });
     } catch (err) {
-      console.error(`Erro ao registrar evento de rebaixamento: ${err}`);
+      logger.error(`Erro ao registrar evento de rebaixamento: ${err}`);
     }
   }
 
@@ -326,7 +327,7 @@ export const demoteParticipants = async (
       }
     });
   } catch (error) {
-    console.error('Erro ao criar log de rebaixar participantes:', error);
+    logger.error(`Erro ao criar log de rebaixar participantes: ${error}`);
   }
 
   return res.json({ message: "Participantes rebaixados com sucesso" });
@@ -385,7 +386,7 @@ export const revokeGroupInviteLink = async (
       }
     });
   } catch (error) {
-    console.error('Erro ao criar log de revogar link:', error);
+    logger.error(`Erro ao criar log de revogar link: ${error}`);
   }
 
   return res.json({ inviteLink: newInviteLink });

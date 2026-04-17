@@ -3,6 +3,7 @@ import * as Yup from "yup";
 import AppError from "../../errors/AppError";
 import Tag from "../../models/Tag";
 import ShowService from "./ShowService";
+import { logger } from "../../utils/logger";
 
 interface TagData {
   id?: number;
@@ -50,7 +51,7 @@ const UpdateUserService = async ({
       throw error;
     }
     
-    console.error("Erro ao atualizar tag:", error);
+    logger.error(`Erro ao atualizar tag: ${error}`);
     throw new AppError("Erro ao atualizar tag. Verifique os dados e tente novamente.", 500);
   }
 };

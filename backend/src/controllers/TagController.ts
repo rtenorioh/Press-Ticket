@@ -14,6 +14,7 @@ import SyncTagService from "../services/TagServices/SyncTagsService";
 import UpdateService from "../services/TagServices/UpdateService";
 import { createActivityLog, ActivityActions, EntityTypes } from "../services/ActivityLogService";
 import GetClientIp from "../helpers/GetClientIp";
+import { logger } from "../utils/logger";
 
 type IndexQuery = {
   searchParam?: string;
@@ -54,9 +55,9 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
   });
 
   const logUserId = req.user?.id || 1;
-  
+
   const clientIp = GetClientIp(req);
-  
+
   await createActivityLog({
     userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
     action: ActivityActions.CREATE,
@@ -92,7 +93,7 @@ export const update = async (
 ): Promise<Response> => {
   try {
     const isApiRequest = req.originalUrl.includes('/v1/');
-    
+
     if (!isApiRequest && req.user && req.user.profile !== "admin") {
       throw new AppError("ERR_NO_PERMISSION", 403);
     }
@@ -107,9 +108,9 @@ export const update = async (
     const tag = await UpdateService({ tagData, id: tagId });
 
     const logUserId = req.user?.id || 1;
-    
+
     const clientIp = GetClientIp(req);
-    
+
     await createActivityLog({
       userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
       action: ActivityActions.UPDATE,
@@ -130,7 +131,7 @@ export const update = async (
     if (error instanceof AppError) {
       return res.status(error.statusCode).json({ error: error.message });
     }
-    console.error("Erro ao atualizar tag:", error);
+    logger.error(`Erro ao atualizar tag: ${error}`);
     return res.status(500).json({ error: "Erro interno do servidor" });
   }
 };
@@ -142,13 +143,13 @@ export const remove = async (
   const { tagId } = req.params;
 
   const tagToDelete = await ShowService(tagId);
-  
+
   await DeleteService(tagId);
-  
+
   const logUserId = req.user?.id || 1;
-  
+
   const clientIp = GetClientIp(req);
-  
+
   await createActivityLog({
     userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
     action: ActivityActions.DELETE,
@@ -176,11 +177,11 @@ export const removeAll = async (
 ): Promise<Response> => {
 
   await DeleteAllService();
-  
+
   const logUserId = req.user?.id || 1;
-  
+
   const clientIp = GetClientIp(req);
-  
+
   await createActivityLog({
     userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
     action: ActivityActions.DELETE,
@@ -214,7 +215,7 @@ export const syncTags = async (req: Request, res: Response): Promise<Response> =
     }
 
     const contact = await SyncTagService(data);
-    
+
     const io = getIO();
     io.emit("contact", {
       action: "update",
@@ -226,8 +227,8 @@ export const syncTags = async (req: Request, res: Response): Promise<Response> =
     if (err instanceof AppError) {
       return res.status(err.statusCode).json({ error: err.message });
     }
-    
-    console.error("Erro ao sincronizar tags:", err);
+
+    logger.error(`Erro ao sincronizar tags: ${err}`);
     return res.status(500).json({ error: "Erro ao sincronizar tags" });
   }
 };

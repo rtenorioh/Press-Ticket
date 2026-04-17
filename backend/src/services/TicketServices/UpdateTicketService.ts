@@ -4,6 +4,7 @@ import { getIO } from "../../libs/socket";
 import Ticket from "../../models/Ticket";
 import ShowTicketService from "./ShowTicketService";
 import EmitTicketCounterService from "./EmitTicketCounterService";
+import { logger } from "../../utils/logger";
 
 interface TicketData {
   status?: string;
@@ -77,11 +78,11 @@ const UpdateTicketService = async ({
     });
 
   const timestamp = new Date().toISOString();
-  
+
   try {
     await EmitTicketCounterService();
   } catch (err) {
-    console.error(`[BACK_UPDATE_TICKET_ERROR][${timestamp}] Erro ao emitir contadores:`, err);
+    logger.error(`Erro ao emitir contadores após atualizar ticket: ${err}`);
   }
 
   return { ticket, oldStatus, oldUserId };

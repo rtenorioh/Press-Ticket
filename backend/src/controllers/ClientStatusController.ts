@@ -11,6 +11,7 @@ import ShowService from "../services/ClientStatusServices/ShowService";
 import UpdateService from "../services/ClientStatusServices/UpdateService";
 import { createActivityLog, ActivityActions, EntityTypes } from "../services/ActivityLogService";
 import GetClientIp from "../helpers/GetClientIp";
+import { logger } from "../utils/logger";
 
 type IndexQuery = {
   searchParam?: string;
@@ -113,7 +114,7 @@ export const update = async (
     if (error instanceof AppError) {
       return res.status(error.statusCode).json({ error: error.message });
     }
-    console.error("Erro ao atualizar status:", error);
+    logger.error(`Erro ao atualizar status: ${error}`);
     return res.status(500).json({ error: "Erro interno do servidor" });
   }
 };

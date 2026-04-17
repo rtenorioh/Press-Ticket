@@ -2,6 +2,7 @@ import { getWbot } from "../../libs/wbot";
 import AppError from "../../errors/AppError";
 import Contact from "../../models/Contact";
 import Whatsapp from "../../models/Whatsapp";
+import { logger } from "../../utils/logger";
 
 interface Request {
   contactId: string;
@@ -57,7 +58,7 @@ const GetAboutService = async ({
       about = await (wContact as any).getAbout();
     }
   } catch (error) {
-    console.warn(`[FALLBACK] Erro ao obter contato/about do WhatsApp: ${error.message || error}`);
+    logger.warn(`[FALLBACK] Erro ao obter contato/about do WhatsApp: ${error.message || error}`);
     about = null;
   }
 

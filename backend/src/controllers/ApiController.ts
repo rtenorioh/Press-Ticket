@@ -15,6 +15,7 @@ import CheckContactNumber from "../services/WbotServices/CheckNumber";
 import GetProfilePicUrl from "../services/WbotServices/GetProfilePicUrl";
 import SendWhatsAppMedia from "../services/WbotServices/SendWhatsAppMedia";
 import SendWhatsAppMessage from "../services/WbotServices/SendWhatsAppMessage";
+import { logger } from "../utils/logger";
 
 type WhatsappData = {
   whatsappId: number;
@@ -318,7 +319,7 @@ export const getMediaBase64 = async (req: Request, res: Response): Promise<Respo
       return res.status(err.statusCode).json({ error: err.message });
     }
 
-    console.error("Erro ao obter mídia em base64:", err);
+    logger.error(`Erro ao obter mídia em base64: ${err}`);
     return res.status(500).json({ error: "Erro interno do servidor" });
   }
 };

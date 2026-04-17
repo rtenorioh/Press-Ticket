@@ -58,11 +58,6 @@ class SendPollService {
         ? ticket.contact.number!
         : `${ticket.contact.number!}@c.us`;
 
-      logger.info(`[POLL] Enviando enquete para ${chatId}`);
-      logger.info(`[POLL] Nome: ${pollName}`);
-      logger.info(`[POLL] Opções: ${pollOptions.join(", ")}`);
-      logger.info(`[POLL] Múltipla escolha: ${allowMultipleAnswers}`);
-
       const poll = new Poll(pollName, pollOptions, {
         allowMultipleAnswers: allowMultipleAnswers || false
       } as any);
@@ -114,8 +109,6 @@ class SendPollService {
           action: "update",
           ticket
         });
-
-      logger.info(`[POLL] Enquete enviada com sucesso: ${sentMessage.id.id}`);
 
       return message;
     } catch (error) {

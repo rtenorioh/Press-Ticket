@@ -186,10 +186,9 @@ const verifyMediaMessage = async (
         });
       })
       .then(() => {
-        console.info("Conversão concluída!");
       })
       .catch(err => {
-        console.error("Ocorreu um erro:", err);
+        logger.error(`Erro na conversão: ${err}`);
       });
   } catch (err: any) {
     logger.error(err);
@@ -247,7 +246,7 @@ const verifyMediaMessage = async (
 
     return newMessage;
   } catch (error) {
-    console.error("Erro ao salvar mensagem com mídia no banco de dados:", error);
+    logger.error(`Erro ao salvar mensagem com mídia: ${error}`);
     return new Promise((resolve, reject) => {
       setTimeout(async () => {
         try {
@@ -268,7 +267,7 @@ const verifyMediaMessage = async (
 
           resolve(newMessage);
         } catch (retryError) {
-          console.error("Erro ao salvar mensagem com mídia na segunda tentativa:", retryError);
+          logger.error(`Erro ao salvar mensagem com mídia (retry): ${retryError}`);
           reject(retryError);
         }
       }, 1000);
@@ -297,7 +296,7 @@ const getGeocode = async (
     }
     return `${latitude}, ${longitude}`;
   } catch (error) {
-    console.error("Erro ao processar requisição de geocodificação:", error);
+    logger.error(`Erro ao processar geocodificação: ${error}`);
     return `${latitude}, ${longitude}`;
   }
 };
@@ -325,7 +324,7 @@ const prepareLocation = async (msg: WbotMessage): Promise<WbotMessage> => {
       address || `${msg.location.latitude}, ${msg.location.longitude}`
     }`;
   } catch (error) {
-    console.error("Erro ao preparar a localização:", error);
+    logger.error(`Erro ao preparar localização: ${error}`);
 
     if (typeof msg.body !== "string") {
       msg.body = "";
@@ -355,12 +354,6 @@ const verifyMessage = async (
     const pollName = poll.pollName || "Enquete";
     const pollOptions = poll.pollOptions || [];
 
-    logger.info(`[POLL_RECEIVED] Estrutura completa da enquete: ${JSON.stringify({
-      pollName,
-      pollOptions,
-      totalOptions: pollOptions.length
-    })}`);
-
     pollBody = `📊 Enquete: ${pollName}\n\n`;
     pollBody += `Selecione uma ou mais opções:\n\n`;
 
@@ -370,8 +363,6 @@ const verifyMessage = async (
         pollBody += `${index + 1}. ${optionName}\n`;
       }
     });
-
-    logger.info(`[POLL_RECEIVED] Enquete recebida: ${pollName} com ${pollOptions.length} opções`);
   }
 
   const messageData = {
@@ -455,7 +446,7 @@ const verifyMessage = async (
               }
             }
           } catch (err) {
-            console.error(`Error processing contact ${contact.name}:`, err);
+            logger.error(`Erro ao processar contato vCard: ${err}`);
           }
         }
 
@@ -468,7 +459,7 @@ const verifyMessage = async (
             messageData.body = jsonData;
             msg.body = messageData.body;
           } catch (jsonError) {
-            console.error("Error parsing JSON:", jsonError);
+            logger.error(`Erro ao parsear JSON vCard: ${jsonError}`);
             messageData.body = JSON.stringify([{
               id: 0,
               name: "Contato do vCard",
@@ -496,12 +487,11 @@ const verifyMessage = async (
       try {
         const bodyObj = JSON.parse(msg.body);
         if (!Array.isArray(bodyObj)) {
-          console.warn("multi_vcard body is not an array, converting to array");
           messageData.body = JSON.stringify([bodyObj]);
           msg.body = messageData.body;
         }
       } catch (error) {
-        console.error("Error parsing existing multi_vcard body:", error);
+        logger.error(`Erro ao parsear multi_vcard: ${error}`);
         messageData.body = JSON.stringify([{
           id: 0,
           name: "Contato do vCard",
@@ -536,7 +526,7 @@ const verifyMessage = async (
     await ticket.update({ lastMessage: formattedLastMessage });
     await ticket.reload();
   } catch (error) {
-    console.error("Erro ao salvar mensagem no banco de dados:", error);
+    logger.error(`Erro ao salvar mensagem: ${error}`);
     setTimeout(async () => {
       try {
         await CreateMessageService({ messageData });
@@ -554,7 +544,7 @@ const verifyMessage = async (
         await ticket.update({ lastMessage: formattedLastMessage });
         await ticket.reload();
       } catch (retryError) {
-        console.error("Erro ao salvar mensagem na segunda tentativa:", retryError);
+        logger.error(`Erro ao salvar mensagem (retry): ${retryError}`);
       }
     }, 1000);
   }
@@ -566,7 +556,6 @@ let resetGreetingCountTimeout: NodeJS.Timeout;
 
 const resetGreetingCounts = () => {
   greetingCounts = {};
-  console.info("Contadores de saudações resetados.");
 };
 
 const startGreetingCountResetTimer = () => {
@@ -648,7 +637,7 @@ const verifyQueue = async (
           isBreakTime = true;
         }
       } catch (error) {
-        console.error("Erro ao processar horário de intervalo:", error);
+        logger.error(`Erro ao processar horário de intervalo: ${error}`);
         isBreakTime = false;
       }
     }
@@ -750,10 +739,8 @@ const verifyQueue = async (
 
         debouncedSentMessage();
         greetingCounts[contactId]++;
-        console.info(`Contador de saudações para ${contactId}:`, greetingCounts[contactId]);
         startGreetingCountResetTimer();
       } else {
-        console.info(`Limite de saudações atingido para ${contactId}.`);
       }
     } else {
       await UpdateTicketService({
@@ -811,7 +798,6 @@ const isValidMsg = (msg: WbotMessage): boolean => {
     msg.type === "notification" ||
     msg.type === "group_notification"
   ) {
-    console.info("Mensagem recebida - tipo de notificação ou broadcast:", msg.type);
     return false;
   }
 
@@ -832,7 +818,7 @@ const isValidMsg = (msg: WbotMessage): boolean => {
     return true;
   }
 
-  console.warn("Tipo de mensagem desconhecido:", msgType);
+  logger.warn(`Tipo de mensagem desconhecido: ${msgType}`);
   return true;
 };
 
@@ -883,11 +869,8 @@ const handleMessage = async (
     // }
 
     if (!isValidMsg(msg)) {
-      logger.info(`[MSG_IGNORADA] Mensagem ignorada por não ser válida: ID=${msg.id?.id || "unknown"}`);
       return;
     }
-
-    logger.info(`[MSG_PROCESSANDO] Iniciando processamento da mensagem: ID=${msg.id?.id || "unknown"}`);
   } catch (err) {
     logger.error(`[MSG_ERRO_LOG] Erro ao registrar logs iniciais: ${err}`);
     if (wbot.id) {
@@ -1029,7 +1012,6 @@ const handleMessage = async (
           try {
             profilePicUrl = await (wbot as any).getProfilePicUrl(fullJid);
             if (profilePicUrl) {
-              logger.info(`[WBOT_LISTENER] Foto de grupo obtida: ${fullJid}`);
               break;
             }
           } catch (picErr) {
@@ -1054,8 +1036,6 @@ const handleMessage = async (
             profilePicUrl: profilePicUrl || groupContact.profilePicUrl
           });
 
-          logger.info(`[WBOT_LISTENER] Contato de grupo atualizado: ${fullJid}`);
-
           try {
             const { getIO } = require("../../libs/socket");
             const io = getIO();
@@ -1079,7 +1059,6 @@ const handleMessage = async (
         await contact.update({
           lastContactAt: new Date()
         });
-        logger.info(`[WBOT_LISTENER] lastContactAt atualizado para contato ${contact.id}`);
       } catch (error) {
         logger.error(`[WBOT_LISTENER] Erro ao atualizar lastContactAt: ${error}`);
       }
@@ -1270,7 +1249,7 @@ const handleMessage = async (
                 });
               }
             } else {
-              console.error(`Error processing vCard contact:`, err);
+              logger.error(`Erro ao processar contato vCard: ${err}`);
             }
           }
         }
@@ -1289,14 +1268,14 @@ const handleMessage = async (
           });
         }
       } catch (error) {
-        console.error("Error processing vcard:", error);
+        logger.error(`Erro ao processar vcard: ${error}`);
       }
     }
 
     if (msg.type === "multi_vcard") {
       try {
         if (!msg.vCards) {
-          console.error("vCards data is undefined");
+          logger.warn("vCards data is undefined");
           msg.body = JSON.stringify([{
             id: 0,
             name: "Contato do vCard",
@@ -1307,7 +1286,7 @@ const handleMessage = async (
 
         if ((typeof msg.vCards === "string" && (msg.vCards as string).trim() === "") ||
           (Array.isArray(msg.vCards) && msg.vCards.length === 0)) {
-          console.error("vCards data is empty");
+          logger.warn("vCards data is empty");
           msg.body = JSON.stringify([{
             id: 0,
             name: "Contato do vCard",
@@ -1347,11 +1326,6 @@ const handleMessage = async (
         }
 
         if (obj.length === 0) {
-          console.warn("No contacts were extracted from vCard data");
-
-          if (typeof msg.vCards === "object") {
-            console.info("vCards is an object, stringifying:", JSON.stringify(msg.vCards));
-          }
 
           if (msg.vCards && typeof msg.vCards === "object") {
             try {
@@ -1391,7 +1365,7 @@ const handleMessage = async (
                 }
               }
             } catch (err) {
-              console.error("Error processing vCards object:", err);
+              logger.error(`Erro ao processar vCards object: ${err}`);
             }
           }
         }
@@ -1421,7 +1395,7 @@ const handleMessage = async (
                 number: cont.number
               });
             } else {
-              console.error(`Error processing contact ${ob.name}:`, error);
+              logger.error(`Erro ao processar contato multi_vcard: ${error}`);
             }
           }
         }
@@ -1438,12 +1412,11 @@ const handleMessage = async (
           try {
             JSON.parse(jsonData);
           } catch (e) {
-            console.error("JSON validation failed:", e);
+            logger.error(`JSON validation failed: ${e}`);
           }
 
           msg.body = jsonData;
         } else {
-          console.warn("No contacts were processed from multi_vcard");
 
           msg.body = JSON.stringify([{
             id: 0,
@@ -1452,7 +1425,7 @@ const handleMessage = async (
           }]);
         }
       } catch (error) {
-        console.error("Error processing multi_vcard:", error);
+        logger.error(`Erro ao processar multi_vcard: ${error}`);
       }
     }
 
@@ -1492,7 +1465,6 @@ const handleMessage = async (
       logger.error(`[MSG_ERRO_LOG] Erro ao tentar registrar detalhes do erro: ${logErr}`);
     }
   } finally {
-    logger.info(`[MSG_FINALIZADA] Processamento da mensagem finalizado: ID=${msg?.id?.id || "unknown"}, Timestamp=${new Date().toISOString()}`);
   }
 };
 
@@ -1501,19 +1473,8 @@ const handleMsgAck = async (msg: WbotMessage, ack: MessageAck) => {
   await new Promise(r => setTimeout(r, 500));
 
   const io = getIO();
-  const timestamp = new Date().toISOString();
 
   try {
-    logger.info(`[ACK_EVENTO] Recebido evento de ACK: ID=${msg.id.id}, ACK=${ack}, Timestamp=${timestamp}`);
-
-    logger.info(`[ACK_DETALHES] Detalhes da mensagem: ${JSON.stringify({
-      id: msg.id,
-      fromMe: msg.fromMe,
-      to: msg.to,
-      deviceType: msg.deviceType,
-      timestamp: msg.timestamp
-    })}`);
-
     const messageToUpdate = await Message.findByPk(msg.id.id, {
       include: [
         "contact",
@@ -1530,43 +1491,23 @@ const handleMsgAck = async (msg: WbotMessage, ack: MessageAck) => {
     });
 
     if (!messageToUpdate) {
-      logger.warn(`[ACK_ERRO] Mensagem não encontrada no banco de dados: ${msg.id.id}`);
-      console.warn(`[ACK_ERRO] Mensagem não encontrada no banco de dados: ${msg.id.id}`);
       return;
     }
 
     const currentAck = messageToUpdate.ack || 0;
     let ackToUpdate = ack || 0;
 
-    if (messageToUpdate.read === true && ackToUpdate < 3 && messageToUpdate.fromMe) {
-      logger.info(`[ACK_DEBUG] Mensagem marcada como lida (read=true), mas ACK=${ackToUpdate}. Mantendo ACK original conforme documentação.`);
-    }
-
     if (ackToUpdate > currentAck) {
-      logger.info(`[ACK_ATUALIZACAO] Atualizando ACK da mensagem ${msg.id.id}: ${currentAck} -> ${ackToUpdate}`);
-
-      const beforeUpdate = new Date().getTime();
       await messageToUpdate.update({ ack: ackToUpdate });
-      const afterUpdate = new Date().getTime();
 
-      logger.info(`[ACK_PERFORMANCE] Tempo para atualizar ACK no banco: ${afterUpdate - beforeUpdate}ms`);
-
-      const beforeEmit = new Date().getTime();
       io.to(messageToUpdate.ticketId.toString()).emit("appMessage", {
         action: "update",
         message: messageToUpdate
       });
-      const afterEmit = new Date().getTime();
-
-      logger.info(`[ACK_SOCKET] Socket emitido para ticket ${messageToUpdate.ticketId}, tempo: ${afterEmit - beforeEmit}ms`);
-    } else {
-      logger.info(`[ACK_IGNORADO] ACK ignorado: valor atual (${currentAck}) >= novo valor (${ackToUpdate})`);
     }
 
     if (ackToUpdate >= 2) {
       try {
-        logger.info(`[ACK_BATCH_CHECK] Verificando outras mensagens do ticket ${messageToUpdate.ticketId} para sincronização`);
-
         const messagesToUpdate = await Message.findAll({
           where: {
             ticketId: messageToUpdate.ticketId,
@@ -1577,8 +1518,6 @@ const handleMsgAck = async (msg: WbotMessage, ack: MessageAck) => {
         });
 
         if (messagesToUpdate.length > 0) {
-          logger.info(`[ACK_BATCH_UPDATE] Encontradas ${messagesToUpdate.length} mensagens para atualização em lote`);
-
           for (const msg of messagesToUpdate) {
             await msg.update({ ack: ackToUpdate >= 3 ? 3 : 2 });
 
@@ -1587,8 +1526,6 @@ const handleMsgAck = async (msg: WbotMessage, ack: MessageAck) => {
               message: msg
             });
           }
-
-          logger.info(`[ACK_BATCH_COMPLETE] Atualização em lote concluída`);
         }
       } catch (batchErr) {
         logger.error(`[ACK_BATCH_ERROR] Erro ao processar atualização em lote: ${batchErr}`);
@@ -1596,7 +1533,6 @@ const handleMsgAck = async (msg: WbotMessage, ack: MessageAck) => {
     }
   } catch (err) {
     logger.error(`[ACK_ERRO] Erro ao processar ACK da mensagem. ID=${msg?.id?.id || "unknown"}, ACK=${ack}, Erro: ${err}`);
-    console.error(`[ACK_ERRO] Erro ao processar ACK da mensagem. ID=${msg?.id?.id || "unknown"}, ACK=${ack}, Erro: ${err}`);
   }
 };
 
@@ -1634,18 +1570,14 @@ const handleMsgEdit = async (
           messageId: msg.id.id,
           body: oldBody
         });
-        console.info(`[handleMsgEdit] Histórico salvo: "${oldBody}"`);
       } else {
-        console.info(`[handleMsgEdit] Histórico já existe (ID: ${existingHistory.id}), pulando duplicata`);
       }
     } else {
-      console.info(`[handleMsgEdit] Sem mudança no corpo ou valores inválidos`);
     }
 
     if (editedMsg.body !== newBody) {
       await editedMsg.update({ body: newBody, isEdited: true });
     } else {
-      console.info(`[handleMsgEdit] Mensagem já está atualizada no banco`);
     }
 
     await editedMsg.reload({
@@ -1700,7 +1632,7 @@ const updatePendingMessages = async (whatsappId: number): Promise<void> => {
       }
     }
   } catch (err) {
-    console.error("Erro ao atualizar mensagens antigas:", err);
+    logger.error(`Erro ao atualizar mensagens antigas: ${err}`);
   }
 };
 

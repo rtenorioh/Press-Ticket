@@ -5,6 +5,7 @@ import { getIO } from "../libs/socket";
 import createOrUpdatePersonalization from "../services/PersonalizationServices/CreateOrUpdatePersonalizationService";
 import deletePersonalization from "../services/PersonalizationServices/DeletePersonalizationService";
 import listPersonalizations from "../services/PersonalizationServices/ListPersonalizationsService";
+import { logger } from "../utils/logger";
 
 interface PersonalizationData {
   theme: string;
@@ -84,7 +85,7 @@ export const createOrUpdateLogos = async (
 
     return res.status(200).json(personalization.data);
   } catch (error) {
-    console.error("Erro no upload:", error);
+    logger.error(`Erro no upload: ${error}`);
     return res.status(500).json({ message: error.message });
   }
 };
@@ -130,20 +131,20 @@ export const deleteLogo = async (
   try {
     const { theme } = req.params;
     const logoType = req.params.logoType as 'favico' | 'logo' | 'logoTicket';
-    
+
     if (!['favico', 'logo', 'logoTicket'].includes(logoType)) {
       return res.status(400).json({ message: "Tipo de logo inválido" });
     }
 
     const personalizations = await listPersonalizations();
     const currentTheme = personalizations.find(p => p.theme === theme);
-    
+
     if (!currentTheme) {
       return res.status(404).json({ message: "Tema não encontrado" });
     }
 
     const currentFileName = currentTheme[logoType];
-    
+
     if (currentFileName) {
       const filePath = path.join(__dirname, "..", "..", "public", "logos", currentFileName);
       try {
@@ -151,7 +152,7 @@ export const deleteLogo = async (
           fs.unlinkSync(filePath);
         }
       } catch (err) {
-        console.error(`Erro ao deletar arquivo ${filePath}:`, err);
+        logger.error(`Erro ao deletar arquivo ${filePath}: ${err}`);
       }
     }
 
@@ -173,7 +174,7 @@ export const deleteLogo = async (
 
     return res.status(200).json(personalization.data);
   } catch (error) {
-    console.error("Erro ao deletar logo:", error);
+    logger.error(`Erro ao deletar logo: ${error}`);
     return res.status(500).json({ message: error.message });
   }
 };
