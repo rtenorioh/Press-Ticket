@@ -71,6 +71,7 @@ const getDalleResponse = async (
 };
 
 const sessions: Session[] = [];
+const keepAliveIntervals: Map<number, NodeJS.Timeout> = new Map();
 
 const syncUnreadMessages = async (wbot: Session) => {
   const maxRetries = 3;
@@ -310,6 +311,28 @@ export const initWbot = async (whatsapp: Whatsapp): Promise<Session> => {
         }
 
         wbot.sendPresenceAvailable();
+
+        // Keepalive periódico para evitar timeout de sessão
+        const existingInterval = keepAliveIntervals.get(whatsapp.id);
+        if (existingInterval) clearInterval(existingInterval);
+
+        const keepAlive = setInterval(async () => {
+          try {
+            if (wbot.pupPage && !wbot.pupPage.isClosed()) {
+              await wbot.sendPresenceAvailable();
+            } else {
+              clearInterval(keepAlive);
+              keepAliveIntervals.delete(whatsapp.id);
+            }
+          } catch (err) {
+            logger.warn(`[KEEPALIVE] Falha no keepalive da sessão ${sessionName}: ${err}`);
+            clearInterval(keepAlive);
+            keepAliveIntervals.delete(whatsapp.id);
+          }
+        }, 5 * 60 * 1000); // 5 minutos
+
+        keepAliveIntervals.set(whatsapp.id, keepAlive);
+
         void syncUnreadMessages(wbot);
 
         GroupEventsService.setupGroupListeners(wbot, whatsapp.id);
@@ -630,6 +653,12 @@ export const getWbot = (whatsappId: number): Session => {
 
 export const removeWbot = (whatsappId: number): void => {
   try {
+    const interval = keepAliveIntervals.get(whatsappId);
+    if (interval) {
+      clearInterval(interval);
+      keepAliveIntervals.delete(whatsappId);
+    }
+
     const sessionIndex = sessions.findIndex(s => s.id === whatsappId);
     if (sessionIndex !== -1) {
       sessions[sessionIndex].destroy();
@@ -679,6 +708,12 @@ export const shutdownWbot = async (whatsappId: string): Promise<void> => {
   );
 
   try {
+    const interval = keepAliveIntervals.get(whatsappIDNumber);
+    if (interval) {
+      clearInterval(interval);
+      keepAliveIntervals.delete(whatsappIDNumber);
+    }
+
     await sessions[sessionIndex].destroy();
 
     await fs.rm(sessionPath, { recursive: true, force: true });
