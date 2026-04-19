@@ -1125,7 +1125,7 @@ const messages = {
           n8nEnabled: "Ativar integração n8n neste setor",
           n8nUrl: "URL do Webhook n8n",
           n8nUrlPlaceholder: "https://seu-n8n.com/webhook/...",
-          n8nUrlHelper: "Informe a URL do webhook ou deixe vazio para usar a URL global de Integrações",
+          n8nUrlHelper: "Informe a URL do webhook do n8n para este setor",
         },
         buttons: {
           okAdd: "Adicionar",
@@ -1144,6 +1144,9 @@ const messages = {
           color: "Cor",
           greeting: "Ver mensagens",
           workHours: "Horários",
+          n8n: "n8n",
+          n8nDisabled: "n8n desativado",
+          n8nEnabledNoUrl: "n8n ativo (sem URL configurada)",
           actions: "Ações",
           startWork: "Abertura",
           endWork: "Fechamento",

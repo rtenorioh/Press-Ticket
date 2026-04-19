@@ -878,11 +878,6 @@ const handleMessage = async (
     }
   }
 
-  const Integrationdb = await Integration.findOne({
-    where: { key: "urlApiN8N" }
-  });
-  const globalN8nUrl = Integrationdb?.value || null;
-
   {
     const chat = await msg.getChat();
     let groupContact;
@@ -913,34 +908,24 @@ const handleMessage = async (
       groupContact
     );
 
-    let n8nTargetUrl: string | null = null;
-
     if (n8nTicket.queueId) {
       const queueN8n = await Queue.findByPk(n8nTicket.queueId);
       if (queueN8n?.n8nEnabled && queueN8n?.n8nUrl) {
-        n8nTargetUrl = queueN8n.n8nUrl;
-      } else if (queueN8n?.n8nEnabled && globalN8nUrl) {
-        n8nTargetUrl = globalN8nUrl;
-      }
-    } else if (globalN8nUrl) {
-      n8nTargetUrl = globalN8nUrl;
-    }
-
-    if (n8nTargetUrl) {
-      try {
-        await axios.post(
-          n8nTargetUrl,
-          {
-            message: msg,
-            ticket: n8nTicket,
-            contact,
-            whatsappId: wbot.id,
-            queueId: n8nTicket.queueId
-          },
-          { headers: { "Content-Type": "application/json" } }
-        );
-      } catch (error) {
-        logger.error(`[N8N] Erro ao enviar dados para o n8n (queue ${n8nTicket.queueId}): ${error}`);
+        try {
+          await axios.post(
+            queueN8n.n8nUrl,
+            {
+              message: msg,
+              ticket: n8nTicket,
+              contact,
+              whatsappId: wbot.id,
+              queueId: n8nTicket.queueId
+            },
+            { headers: { "Content-Type": "application/json" } }
+          );
+        } catch (error) {
+          logger.error(`[N8N] Erro ao enviar dados para o n8n (queue ${n8nTicket.queueId}): ${error}`);
+        }
       }
     }
   }

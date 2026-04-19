@@ -56,14 +56,12 @@ const Integrations = () => {
 	const [showKeys, setShowKeys] = useState({
 		organization: false,
 		apikey: false,
-		urlApiN8N: false,
 		hubToken: false,
 		apiMaps: false
 	});
 	const [maskedValues, setMaskedValues] = useState({
 		organization: "",
 		apikey: "",
-		urlApiN8N: "",
 		hubToken: "",
 		apiMaps: ""
 	});
@@ -189,37 +187,6 @@ const Integrations = () => {
 
 				<StyledPaper>
 					<Grid container spacing={2}>
-						<Grid item xs={12} sm={6}>
-							<IntegrationRow>
-								<Typography align="left" variant="body1">
-									{t("integrations.integrations.n8n.title")}
-								</Typography>
-
-								<TextFieldContainer>
-									<StyledTextField
-										id="urlApiN8N"
-										name="urlApiN8N"
-										margin="dense"
-										label={t("integrations.integrations.n8n.urlApiN8N")}
-										variant="outlined"
-										onChange={handleChangeIntegration}
-										fullWidth
-										value={
-											showKeys["urlApiN8N"]
-												? getIntegrationValue("urlApiN8N")
-												: maskedValues["urlApiN8N"]
-										}
-										type="text"
-									/>
-									<StyledIconButton
-										onClick={() => handleToggleShowKey("urlApiN8N")}
-									>
-										{showKeys["urlApiN8N"] ? <VisibilityOff /> : <Visibility />}
-									</StyledIconButton>
-								</TextFieldContainer>
-							</IntegrationRow>
-						</Grid>
-
 						<Grid item xs={12} sm={6}>
 							<IntegrationRow>
 								<Typography align="left" variant="body1">

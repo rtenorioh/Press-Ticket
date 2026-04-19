@@ -17,6 +17,7 @@ import { styled } from '@mui/material/styles';
 import AddCircleOutline from '@mui/icons-material/AddCircleOutline';
 import DeleteOutline from '@mui/icons-material/DeleteOutline';
 import Edit from '@mui/icons-material/Edit';
+import WebhookIcon from '@mui/icons-material/Webhook';
 import { useEffect, useReducer, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
@@ -265,6 +266,7 @@ const Queues = () => {
               <StyledTableCell align="center">{t("queues.table.color")}</StyledTableCell>
               <StyledTableCell align="center">{t("queues.table.greeting")}</StyledTableCell>
               <StyledTableCell align="center">{t("queues.table.workHours")}</StyledTableCell>
+              <StyledTableCell align="center">{t("queues.table.n8n")}</StyledTableCell>
               <StyledTableCell align="center">{t("queues.table.actions")}</StyledTableCell>
             </TableRow>
           </TableHead>
@@ -307,6 +309,31 @@ const Queues = () => {
                       >
                         <AccessTimeIcon />
                       </IconButton>
+                    </Tooltip>
+                  </StyledTableCell>
+                  <StyledTableCell align="center">
+                    <Tooltip
+                      title={
+                        queue.n8nEnabled && queue.n8nUrl
+                          ? `n8n ativo: ${queue.n8nUrl}`
+                          : queue.n8nEnabled
+                          ? t("queues.table.n8nEnabledNoUrl")
+                          : t("queues.table.n8nDisabled")
+                      }
+                      arrow
+                      placement="top"
+                    >
+                      <span>
+                        <WebhookIcon
+                          fontSize="small"
+                          sx={{
+                            color: queue.n8nEnabled && queue.n8nUrl
+                              ? 'success.main'
+                              : 'text.disabled',
+                            verticalAlign: 'middle'
+                          }}
+                        />
+                      </span>
                     </Tooltip>
                   </StyledTableCell>
                   <StyledTableCell align="center">
