@@ -17,12 +17,10 @@ export const SocketProvider = ({ children }) => {
 
         if (newSocket) {
             newSocket.on('connect', () => {
-                console.log('Socket conectado globalmente');
                 setConnected(true);
             });
 
             newSocket.on('disconnect', () => {
-                console.log('Socket desconectado globalmente');
                 setConnected(false);
             });
 

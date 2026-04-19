@@ -77,7 +77,7 @@ export const initIO = (httpServer: Server): void => {
   });
 
   io.on("connection", async socket => {
-    const { token } = socket.handshake.query;
+    const token = socket.handshake.auth?.token || socket.handshake.query?.token;
 
     if (!token || typeof token !== "string") {
       logger.warn("Conexão rejeitada: Token não fornecido ou inválido", { socketId: socket.id });

@@ -112,7 +112,6 @@ const ContactDrawer = ({ open, handleDrawerClose, contact, loading, isGroup, mes
     if (open && isGroupContact && contact?.id && whatsappId) {
       const refreshGroupPic = async () => {
         try {
-          console.log(`[ContactDrawer] Atualizando foto do grupo ${contact.id}`);
           await ContactService.refreshGroupProfilePic(contact.id, whatsappId);
         } catch (error) {
           console.error("[ContactDrawer] Erro ao atualizar foto do grupo:", error);

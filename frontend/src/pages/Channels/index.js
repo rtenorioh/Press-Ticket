@@ -312,14 +312,6 @@ const Channels = () => {
 			}
 		});
 
-		socket.on("connect", () => {
-			console.log("Socket conectado para atualizações em tempo real");
-		});
-
-		socket.on("disconnect", () => {
-			console.log("Socket desconectado");
-		});
-
 		return () => {
 			socket.disconnect();
 		};

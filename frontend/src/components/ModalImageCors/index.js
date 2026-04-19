@@ -166,7 +166,6 @@ const ModalImageCors = ({ imageUrl, allImages = [], currentIndex = 0, isDeleted 
     const imgUrl = currentImageUrl || imageUrl;
     
     if (!imgUrl) {
-      console.log("[ModalImageCors] URL vazia, abortando");
       return;
     }
     

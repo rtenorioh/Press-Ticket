@@ -125,9 +125,11 @@ const BlockedContacts = () => {
             </Select>
           </FormControl>
           <Tooltip title="Atualizar">
-            <IconButton onClick={loadBlockedContacts} disabled={!selectedWhatsappId}>
-              <RefreshIcon />
-            </IconButton>
+            <span>
+              <IconButton onClick={loadBlockedContacts} disabled={!selectedWhatsappId}>
+                <RefreshIcon />
+              </IconButton>
+            </span>
           </Tooltip>
         </MainHeaderButtonsWrapper>
       </MainHeader>

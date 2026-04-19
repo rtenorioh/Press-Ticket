@@ -210,11 +210,6 @@ const MessageOptionsMenu = ({ message, menuOpen, handleClose, anchorEl }) => {
   };
 
   const handleOpenMessageHistoryModal = (e) => {
-    console.log('[MessageOptionsMenu] Abrindo modal de histórico:', {
-      messageId: currentMessage?.id,
-      oldMessagesCount: currentMessage?.oldMessages?.length || 0,
-      oldMessages: currentMessage?.oldMessages?.map(om => ({ id: om.id, body: om.body?.substring(0, 30) }))
-    });
     setMessageHistoryOpen(true);
     handleClose();
   }

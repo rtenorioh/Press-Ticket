@@ -36,16 +36,6 @@ export const useSocket = () => {
                         }
                     });
 
-                    globalSocket.on('reconnect_attempt', (attemptNumber) => {
-                        const timestamp = new Date().toISOString();
-                        console.log(`[FRONT_SOCKET_RECONNECT][${timestamp}] Tentativa #${attemptNumber} de reconexão do socket`);
-                    });
-                    
-                    globalSocket.on('reconnect', (attemptNumber) => {
-                        const timestamp = new Date().toISOString();
-                        console.log(`[FRONT_SOCKET_RECONNECTED][${timestamp}] Socket reconectado com sucesso após ${attemptNumber} tentativa(s). ID: ${globalSocket.id}`);
-                    });
-                    
                     globalSocket.on('reconnect_error', (error) => {
                         const timestamp = new Date().toISOString();
                         console.error(`[FRONT_SOCKET_RECONNECT_ERROR][${timestamp}] Erro na tentativa de reconexão:`, error);

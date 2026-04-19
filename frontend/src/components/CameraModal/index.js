@@ -227,12 +227,6 @@ const CameraModal = ({ open, onClose, onCapture }) => {
         }
         
         const file = new File([blob], `video_${Date.now()}.${extension}`, { type: fileType });
-        console.log('Vídeo gravado:', {
-          name: file.name,
-          size: `${(file.size / 1024 / 1024).toFixed(2)}MB`,
-          type: file.type,
-          mimeType: selectedMimeType
-        });
         
         onCapture([file]);
         onClose();
@@ -241,8 +235,6 @@ const CameraModal = ({ open, onClose, onCapture }) => {
       mediaRecorderRef.current.start(1000); 
       setIsRecording(true);
       setRecordedChunks(chunks);
-      
-      console.log('Gravação iniciada com MIME type:', selectedMimeType);
     } catch (err) {
       console.error('Erro ao iniciar gravação:', err);
       setError('Não foi possível iniciar a gravação.');
@@ -372,12 +364,6 @@ const CameraModal = ({ open, onClose, onCapture }) => {
                 autoPlay
                 playsInline
                 muted
-                onCanPlay={() => {
-                  console.log('Video can play');
-                }}
-                onLoadedData={() => {
-                  console.log('Video loaded data');
-                }}
               />
               
               <ControlsContainer>

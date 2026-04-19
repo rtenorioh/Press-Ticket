@@ -11,23 +11,23 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty";
 import PeopleIcon from "@mui/icons-material/People";
 import SendIcon from "@mui/icons-material/Send";
-import { useContext, useEffect, useState } from "react";
+import { lazy, Suspense, useContext, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Can } from "../../components/Can";
 import { AuthContext } from "../../context/Auth/AuthContext";
 import useMessages from "../../hooks/useMessages";
 import useTickets from "../../hooks/useTickets";
 import useUsers from "../../hooks/useUsers";
-import Chart from "./Chart";
-import ChartMessages from "./ChartMessages";
-import ChartPerConnection from "./ChartPerConnection";
-import ChartPerUser from "./ChartPerUser";
-import ChartPerQueue from "./ChatsPerQueue";
-import ContactsWithTicketsChart from "./ContactsWithTicketsChart";
-import NewContactsChart from "./NewContactsChart";
-import TagCloud from "./TagCloud";
-import ClientStatusPieChart from "./ClientStatusPieChart";
-import ClientStatusBarChart from "./ClientStatusBarChart";
+const Chart = lazy(() => import("./Chart"));
+const ChartMessages = lazy(() => import("./ChartMessages"));
+const ChartPerConnection = lazy(() => import("./ChartPerConnection"));
+const ChartPerUser = lazy(() => import("./ChartPerUser"));
+const ChartPerQueue = lazy(() => import("./ChatsPerQueue"));
+const ContactsWithTicketsChart = lazy(() => import("./ContactsWithTicketsChart"));
+const NewContactsChart = lazy(() => import("./NewContactsChart"));
+const TagCloud = lazy(() => import("./TagCloud"));
+const ClientStatusPieChart = lazy(() => import("./ClientStatusPieChart"));
+const ClientStatusBarChart = lazy(() => import("./ClientStatusBarChart"));
 
 const StyledContainer = styled(Container)(({ theme }) => ({
 	paddingTop: theme.spacing(2),
@@ -122,12 +122,13 @@ const Dashboard = () => {
 	const userQueueIds = user?.queues?.map(q => q.id) || [];
 	const isAdmin = user?.profile === 'admin';
 
-	const [previousCounts, setPreviousCounts] = useState({
+	const previousCountsRef = useRef({
 		inAttendance: 0,
 		waiting: 0,
 		closed: 0,
 		users: 0,
 	});
+	const [previousCounts, setPreviousCounts] = useState(previousCountsRef.current);
 
 	const ticketsInAttendance = useTickets({
 		status: "open",
@@ -151,25 +152,27 @@ const Dashboard = () => {
 	});
 
 	useEffect(() => {
+		const prev = previousCountsRef.current;
 		if (
-			ticketsInAttendance.count !== previousCounts.inAttendance ||
-			ticketsWaiting.count !== previousCounts.waiting ||
-			ticketsClosed.count !== previousCounts.closed ||
-			usersCount !== previousCounts.users
+			ticketsInAttendance.count !== prev.inAttendance ||
+			ticketsWaiting.count !== prev.waiting ||
+			ticketsClosed.count !== prev.closed ||
+			usersCount !== prev.users
 		) {
-			setPreviousCounts({
+			const newCounts = {
 				inAttendance: ticketsInAttendance.count,
 				waiting: ticketsWaiting.count,
 				closed: ticketsClosed.count,
 				users: usersCount,
-			});
+			};
+			previousCountsRef.current = newCounts;
+			setPreviousCounts(newCounts);
 		}
 	}, [
 		ticketsInAttendance.count,
 		ticketsWaiting.count,
 		ticketsClosed.count,
 		usersCount,
-		previousCounts,
 	]);
 
 	const renderChangeIcon = (current, previous) => {
@@ -185,10 +188,6 @@ const Dashboard = () => {
 					sx={{ marginLeft: 0.5, fontSize: "1rem", color: "red" }}
 				/>
 			);
-		}
-
-		if (current !== previous) {
-			console.log("Nenhuma mudança significativa");
 		}
 
 		return null;
@@ -320,83 +319,84 @@ const Dashboard = () => {
 				</Grid>
 			</DashboardSection>
 
-			<DashboardSection>
-				<Grid container spacing={3}>
-					<Grid item xs={12}>
-						<Chart tickets={ticketsInAttendance.tickets} />
+			<Suspense fallback={null}>
+				<DashboardSection>
+					<Grid container spacing={3}>
+						<Grid item xs={12}>
+							<Chart tickets={ticketsInAttendance.tickets} />
+						</Grid>
 					</Grid>
-				</Grid>
-			</DashboardSection>
+				</DashboardSection>
 
-			<DashboardSection>
-				
-				<Grid container spacing={3}>
-					<Grid item xs={12} sm={6}>
-						<ChartPerQueue
-							queueIds={userQueueIds}
-							withUnreadMessages={false}
-						/>
+				<DashboardSection>
+					<Grid container spacing={3}>
+						<Grid item xs={12} sm={6}>
+							<ChartPerQueue
+								queueIds={userQueueIds}
+								withUnreadMessages={false}
+							/>
+						</Grid>
+
+						<Grid item xs={12} sm={6}>
+							<ChartPerConnection ticketsByConnection={ticketsInAttendance.tickets} />
+						</Grid>
 					</Grid>
+				</DashboardSection>
 
-					<Grid item xs={12} sm={6}>
-						<ChartPerConnection ticketsByConnection={ticketsInAttendance.tickets} />
-					</Grid>
-				</Grid>
-			</DashboardSection>
-
-			<Can
-				role={user?.profile}
-				perform="dashboard-admin-items:view"
-				yes={() => (
-					<>
-						<DashboardSection>
-							<Grid container spacing={3}>
-								<Grid item xs={12}>
-									<ChartMessages />
+				<Can
+					role={user?.profile}
+					perform="dashboard-admin-items:view"
+					yes={() => (
+						<>
+							<DashboardSection>
+								<Grid container spacing={3}>
+									<Grid item xs={12}>
+										<ChartMessages />
+									</Grid>
 								</Grid>
-							</Grid>
-						</DashboardSection>
+							</DashboardSection>
 
-						<DashboardSection>
-							<Grid container spacing={3}>
-								<Grid item xs={12}>
-									<ChartPerUser ticketsByUser={ticketsInAttendance.tickets} />
+							<DashboardSection>
+								<Grid container spacing={3}>
+									<Grid item xs={12}>
+										<ChartPerUser ticketsByUser={ticketsInAttendance.tickets} />
+									</Grid>
 								</Grid>
-							</Grid>
-						</DashboardSection>
+							</DashboardSection>
 
-						<DashboardSection>
-							<Grid container spacing={3}>
-								<Grid item xs={12} sm={6}>
-									<NewContactsChart />
+							<DashboardSection>
+								<Grid container spacing={3}>
+									<Grid item xs={12} sm={6}>
+										<NewContactsChart />
+									</Grid>
+									<Grid item xs={12} sm={6}>
+										<ContactsWithTicketsChart />
+									</Grid>
 								</Grid>
-								<Grid item xs={12} sm={6}>
-									<ContactsWithTicketsChart />
-								</Grid>
-							</Grid>
-						</DashboardSection>
-					</>
-				)}
-			/>
+							</DashboardSection>
+						</>
+					)}
+				/>
 
-			<DashboardSection>
-				<Grid container spacing={3}>
-					<Grid item xs={12} sm={6}>
-						<ClientStatusPieChart />
+				<DashboardSection>
+					<Grid container spacing={3}>
+						<Grid item xs={12} sm={6}>
+							<ClientStatusPieChart />
+						</Grid>
+						<Grid item xs={12} sm={6}>
+							<ClientStatusBarChart />
+						</Grid>
 					</Grid>
-					<Grid item xs={12} sm={6}>
-						<ClientStatusBarChart />
-					</Grid>
-				</Grid>
-			</DashboardSection>
+				</DashboardSection>
 
-			<DashboardSection>
-				<Grid container spacing={3}>
-					<Grid item xs={12}>
-						<TagCloud />
+				<DashboardSection>
+					<Grid container spacing={3}>
+						<Grid item xs={12}>
+							<TagCloud />
+						</Grid>
 					</Grid>
-				</Grid>
-			</DashboardSection>
+				</DashboardSection>
+			</Suspense>
 		</StyledContainer>
 	);
 };
