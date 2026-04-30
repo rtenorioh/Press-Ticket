@@ -15,6 +15,8 @@ hubMessageRoutes.post(
   MessageController.send
 );
 
+hubMessageRoutes.post("/hub-card/:ticketId", isAuth, MessageController.sendCard);
+
 hubMessageRoutes.post("/hub-ticket", isAuth, MessageController.store);
 
 export default hubMessageRoutes;

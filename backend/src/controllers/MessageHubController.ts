@@ -4,6 +4,7 @@ import Contact from "../models/Contact";
 import Ticket from "../models/Ticket";
 import Whatsapp from "../models/Whatsapp";
 import CreateHubTicketService from "../services/HubServices/CreateHubTicketService";
+import { SendCardMessageService } from "../services/HubServices/SendCardMessageHubService";
 import { SendMediaMessageService } from "../services/HubServices/SendMediaMessageHubService";
 import { SendTextMessageService } from "../services/HubServices/SendTextMessageHubService";
 import { logger } from "../utils/logger";
@@ -80,6 +81,58 @@ export const send = async (req: Request, res: Response): Promise<Response> => {
     logger.error(`Erro: ${error}`);
 
     return res.status(400).json({ message: error });
+  }
+};
+
+export const sendCard = async (req: Request, res: Response): Promise<Response> => {
+  const { title, media = "", text = "", buttons = [], quickReplyButtons = [] } = req.body;
+  const { ticketId } = req.params;
+
+  if (!title) {
+    return res.status(400).json({ error: "O campo 'title' é obrigatório." });
+  }
+
+  const ticket = await Ticket.findByPk(ticketId, {
+    include: [
+      {
+        model: Contact,
+        as: "contact",
+        attributes: ["number", "email", "messengerId", "instagramId", "telegramId", "webchatId"]
+      },
+      {
+        model: Whatsapp,
+        as: "whatsapp",
+        attributes: ["qrcode", "type"]
+      }
+    ]
+  });
+
+  if (!ticket) {
+    return res.status(404).json({ message: "Ticket not found" });
+  }
+
+  if (ticket.whatsapp?.type === "wwebjs") {
+    return res.status(400).json({
+      error: "Este ticket é do tipo wwebjs. CardContent não é suportado."
+    });
+  }
+
+  try {
+    const newMessage = await SendCardMessageService(
+      title,
+      media,
+      text,
+      buttons,
+      quickReplyButtons,
+      ticket.id,
+      ticket.contact,
+      ticket.whatsapp
+    );
+
+    return res.status(200).json(newMessage);
+  } catch (error) {
+    logger.error(`Erro ao enviar card Hub: ${error}`);
+    return res.status(400).json({ message: String(error) });
   }
 };
 

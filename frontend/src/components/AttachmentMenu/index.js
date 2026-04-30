@@ -13,7 +13,8 @@ import {
   ContactPhone,
   AudioFile,
   Poll,
-  LocationOn
+  LocationOn,
+  DashboardCustomize
 } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
 import CameraModal from '../CameraModal';
@@ -51,18 +52,19 @@ const MenuItemStyled = styled(MenuItem)(({ theme }) => ({
   gap: theme.spacing(1.5),
 }));
 
-const AttachmentMenu = ({ 
-  anchorEl, 
-  open, 
-  onClose, 
-  onDocumentSelect, 
-  onPhotoVideoSelect, 
-  onCameraSelect, 
+const AttachmentMenu = ({
+  anchorEl,
+  open,
+  onClose,
+  onDocumentSelect,
+  onPhotoVideoSelect,
+  onCameraSelect,
   onAudioSelect,
   onContactSelect,
   onPollClick,
   onLocationClick,
-  disabled = false 
+  onCardClick,
+  disabled = false
 }) => {
   const { t } = useTranslation();
   const documentInputRef = useRef(null);
@@ -113,6 +115,13 @@ const AttachmentMenu = ({
     onClose();
     if (onLocationClick) {
       onLocationClick();
+    }
+  };
+
+  const handleCardClick = () => {
+    onClose();
+    if (onCardClick) {
+      onCardClick();
     }
   };
 
@@ -235,11 +244,23 @@ const AttachmentMenu = ({
           <ListItemIcon>
             <LocationOn />
           </ListItemIcon>
-          <ListItemText 
-            primary="Localização" 
+          <ListItemText
+            primary="Localização"
             secondary="Enviar localização"
           />
         </MenuItemStyled>
+
+        {onCardClick && (
+          <MenuItemStyled onClick={handleCardClick} disabled={disabled}>
+            <ListItemIcon>
+              <DashboardCustomize />
+            </ListItemIcon>
+            <ListItemText
+              primary="Card"
+              secondary="Imagem, título e botões"
+            />
+          </MenuItemStyled>
+        )}
       </StyledMenu>
 
       <input

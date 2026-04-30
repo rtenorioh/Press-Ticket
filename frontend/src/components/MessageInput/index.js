@@ -45,6 +45,7 @@ import { EditMessageContext } from "../../context/EditingMessage/EditingMessageC
 import { ReplyMessageContext } from "../../context/ReplyingMessage/ReplyingMessageContext";
 import UploadModal from "../UploadModal";
 import AttachmentMenu from "../AttachmentMenu";
+import CardMessageModal from "../CardMessageModal";
 import PollCreator from "../PollCreator";
 import LocationSendModal from "../LocationSendModal";
 import toastError from "../../errors/toastError";
@@ -375,6 +376,7 @@ const MessageInput = ({ ticketStatus }) => {
   const [initialCaption, setInitialCaption] = useState("");
   const [showPollCreator, setShowPollCreator] = useState(false);
   const [showLocationModal, setShowLocationModal] = useState(false);
+  const [showCardModal, setShowCardModal] = useState(false);
   const { t } = useTranslation();
   const theme = useTheme();
   const mainWrapperRef = useRef(null);
@@ -1365,6 +1367,10 @@ const MessageInput = ({ ticketStatus }) => {
     setShowLocationModal(true);
   };
 
+  const handleCardClick = () => {
+    setShowCardModal(true);
+  };
+
   const handleContactSelect = (contacts) => {
     if (contacts && contacts.length > 0) {
       const contactsData = contacts.map(contact => ({
@@ -1477,6 +1483,7 @@ const MessageInput = ({ ticketStatus }) => {
               onContactSelect={handleContactSelect}
               onPollClick={handlePollClick}
               onLocationClick={handleLocationClick}
+              onCardClick={["facebook", "instagram", "telegram"].includes(channelType) ? handleCardClick : undefined}
               disabled={loading || recording || ticketStatus !== "open"}
             />
 
@@ -1489,6 +1496,12 @@ const MessageInput = ({ ticketStatus }) => {
             <LocationSendModal
               open={showLocationModal}
               onClose={() => setShowLocationModal(false)}
+              ticketId={ticketId}
+            />
+
+            <CardMessageModal
+              open={showCardModal}
+              onClose={() => setShowCardModal(false)}
               ticketId={ticketId}
             />
 
