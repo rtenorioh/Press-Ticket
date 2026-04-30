@@ -87,7 +87,10 @@ export const SendMediaMessageService = async (
         mediaUrl = `${backendUrl}/public/${media.filename}`;
         media.originalname = media.filename;
         media.mimetype = "audio";
-      } catch (e) { }
+      } catch (e) {
+        logger.error(`Erro ao converter MP3 para MP4 (Instagram): ${e}`);
+        logger.warn(`Enviando arquivo original sem conversão: ${media.originalname}`);
+      }
     }
 
     if (media.originalname.includes(".mp3") && type === "facebook") {
@@ -102,6 +105,8 @@ export const SendMediaMessageService = async (
       media.originalname,
       media.originalname
     );
+
+    channelClient.contentSupportValidation(content);
 
     let response = await channelClient.sendMessage(
       connection.qrcode,

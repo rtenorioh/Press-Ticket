@@ -3,7 +3,7 @@ import Whatsapp from "../models/Whatsapp";
 import { showHubToken } from "./showHubToken";
 import { logger } from "../utils/logger";
 
-const { Client, MessageSubscription } = require("notificamehubsdk");
+const { Client, MessageSubscription, MessageStatusSubscription } = require("notificamehubsdk");
 require("dotenv").config();
 
 export const setChannelWebhook = async (
@@ -26,6 +26,13 @@ export const setChannelWebhook = async (
   );
 
   await client.createSubscription(subscription);
+
+  const statusSubscription = new MessageStatusSubscription(
+    { url },
+    { channel: whatsapp.qrcode }
+  );
+  await client.createSubscription(statusSubscription);
+
   logger.info(`Webhook Hub registrado com sucesso para canal: ${whatsapp.qrcode}`);
 
   await Whatsapp.update(

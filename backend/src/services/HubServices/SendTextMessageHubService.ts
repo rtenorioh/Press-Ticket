@@ -42,7 +42,7 @@ export const SendTextMessageService = async (
   }
 
   try {
-
+    channelClient.contentSupportValidation(content);
 
     let response = await channelClient.sendMessage(
       connection.qrcode,
