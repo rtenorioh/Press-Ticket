@@ -46,6 +46,7 @@ import { ReplyMessageContext } from "../../context/ReplyingMessage/ReplyingMessa
 import UploadModal from "../UploadModal";
 import AttachmentMenu from "../AttachmentMenu";
 import CardMessageModal from "../CardMessageModal";
+import CarouselMessageModal from "../CarouselMessageModal";
 import PollCreator from "../PollCreator";
 import LocationSendModal from "../LocationSendModal";
 import toastError from "../../errors/toastError";
@@ -377,6 +378,7 @@ const MessageInput = ({ ticketStatus }) => {
   const [showPollCreator, setShowPollCreator] = useState(false);
   const [showLocationModal, setShowLocationModal] = useState(false);
   const [showCardModal, setShowCardModal] = useState(false);
+  const [showCarouselModal, setShowCarouselModal] = useState(false);
   const { t } = useTranslation();
   const theme = useTheme();
   const mainWrapperRef = useRef(null);
@@ -1371,6 +1373,10 @@ const MessageInput = ({ ticketStatus }) => {
     setShowCardModal(true);
   };
 
+  const handleCarouselClick = () => {
+    setShowCarouselModal(true);
+  };
+
   const handleContactSelect = (contacts) => {
     if (contacts && contacts.length > 0) {
       const contactsData = contacts.map(contact => ({
@@ -1484,6 +1490,7 @@ const MessageInput = ({ ticketStatus }) => {
               onPollClick={handlePollClick}
               onLocationClick={handleLocationClick}
               onCardClick={["facebook", "instagram", "telegram"].includes(channelType) ? handleCardClick : undefined}
+              onCarouselClick={["facebook", "instagram", "telegram"].includes(channelType) ? handleCarouselClick : undefined}
               disabled={loading || recording || ticketStatus !== "open"}
             />
 
@@ -1502,6 +1509,12 @@ const MessageInput = ({ ticketStatus }) => {
             <CardMessageModal
               open={showCardModal}
               onClose={() => setShowCardModal(false)}
+              ticketId={ticketId}
+            />
+
+            <CarouselMessageModal
+              open={showCarouselModal}
+              onClose={() => setShowCarouselModal(false)}
               ticketId={ticketId}
             />
 

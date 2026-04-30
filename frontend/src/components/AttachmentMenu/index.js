@@ -14,7 +14,8 @@ import {
   AudioFile,
   Poll,
   LocationOn,
-  DashboardCustomize
+  DashboardCustomize,
+  ViewCarousel
 } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
 import CameraModal from '../CameraModal';
@@ -64,6 +65,7 @@ const AttachmentMenu = ({
   onPollClick,
   onLocationClick,
   onCardClick,
+  onCarouselClick,
   disabled = false
 }) => {
   const { t } = useTranslation();
@@ -122,6 +124,13 @@ const AttachmentMenu = ({
     onClose();
     if (onCardClick) {
       onCardClick();
+    }
+  };
+
+  const handleCarouselClick = () => {
+    onClose();
+    if (onCarouselClick) {
+      onCarouselClick();
     }
   };
 
@@ -258,6 +267,18 @@ const AttachmentMenu = ({
             <ListItemText
               primary="Card"
               secondary="Imagem, título e botões"
+            />
+          </MenuItemStyled>
+        )}
+
+        {onCarouselClick && (
+          <MenuItemStyled onClick={handleCarouselClick} disabled={disabled}>
+            <ListItemIcon>
+              <ViewCarousel />
+            </ListItemIcon>
+            <ListItemText
+              primary="Carrossel"
+              secondary="Múltiplos cards em sequência"
             />
           </MenuItemStyled>
         )}

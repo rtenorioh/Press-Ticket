@@ -16,6 +16,7 @@ hubMessageRoutes.post(
 );
 
 hubMessageRoutes.post("/hub-card/:ticketId", isAuth, MessageController.sendCard);
+hubMessageRoutes.post("/hub-carousel/:ticketId", isAuth, MessageController.sendCarousel);
 
 hubMessageRoutes.post("/hub-ticket", isAuth, MessageController.store);
 
