@@ -5,7 +5,6 @@ import {
   DialogContent,
   DialogActions,
   Button,
-  TextField,
   List,
   ListItem,
   ListItemText,
@@ -27,6 +26,7 @@ import {
 import { styled } from "@mui/material/styles";
 import { toast } from "react-toastify";
 import api from "../../services/api";
+import ContactsAutocomplete from "../ContactsAutocomplete";
 
 const StyledDialog = styled(Dialog)(({ theme }) => ({
   '& .MuiDialog-paper': {
@@ -44,10 +44,6 @@ const StyledDialogTitle = styled(DialogTitle)(({ theme }) => ({
 const StyledDialogContent = styled(DialogContent)(({ theme }) => ({
   minHeight: 400,
   padding: theme.spacing(3),
-}));
-
-const ParticipantInput = styled(TextField)(({ theme }) => ({
-  marginBottom: theme.spacing(2),
 }));
 
 const StyledList = styled(List)(({ theme }) => ({
@@ -69,10 +65,10 @@ const StyledDialogActions = styled(DialogActions)(({ theme }) => ({
 }));
 
 const ManageParticipantsModal = ({ open, onClose, whatsappId, group, onSuccess }) => {
-  
+
   const [loading, setLoading] = useState(false);
   const [groupInfo, setGroupInfo] = useState(null);
-  const [newParticipant, setNewParticipant] = useState("");
+  const [selectedContacts, setSelectedContacts] = useState([]);
   const [tab, setTab] = useState(0);
 
   useEffect(() => {
@@ -92,26 +88,32 @@ const ManageParticipantsModal = ({ open, onClose, whatsappId, group, onSuccess }
     setLoading(false);
   };
 
-  const handleAddParticipant = async () => {
-    const cleanNumber = newParticipant.replace(/\D/g, "");
-    
-    if (!cleanNumber || cleanNumber.length < 10) {
-      toast.error("Digite um número válido");
+  const existingNumbers = groupInfo?.participants?.map((p) => p.id.user) || [];
+
+  const handleAddParticipants = async () => {
+    if (selectedContacts.length === 0) {
+      toast.error("Selecione ao menos um contato");
       return;
     }
+
+    const numbers = selectedContacts.map((c) => c.number.replace(/\D/g, ""));
 
     setLoading(true);
     try {
       await api.post(`/whatsapp/${whatsappId}/groups/${group.id}/participants/add`, {
-        participants: [cleanNumber],
+        participants: numbers,
       });
 
-      toast.success("Participante adicionado!");
-      setNewParticipant("");
+      toast.success(
+        numbers.length === 1
+          ? "Participante adicionado!"
+          : `${numbers.length} participantes adicionados!`
+      );
+      setSelectedContacts([]);
       loadGroupInfo();
       onSuccess();
     } catch (err) {
-      toast.error(err.response?.data?.message || "Erro ao adicionar participante");
+      toast.error(err.response?.data?.message || "Erro ao adicionar participante(s)");
     }
     setLoading(false);
   };
@@ -168,16 +170,11 @@ const ManageParticipantsModal = ({ open, onClose, whatsappId, group, onSuccess }
     setLoading(false);
   };
 
-  const isAdmin = (participantId) => {
-    return groupInfo?.admins?.includes(participantId);
-  };
-
-  const isOwner = (participantId) => {
-    return groupInfo?.owner === participantId;
-  };
+  const isAdmin = (participantId) => groupInfo?.admins?.includes(participantId);
+  const isOwner = (participantId) => groupInfo?.owner === participantId;
 
   const handleClose = () => {
-    setNewParticipant("");
+    setSelectedContacts([]);
     setTab(0);
     onClose();
   };
@@ -204,7 +201,7 @@ const ManageParticipantsModal = ({ open, onClose, whatsappId, group, onSuccess }
           {group?.name} • {groupInfo.size} participantes
         </Typography>
       </StyledDialogTitle>
-      
+
       <Tabs value={tab} onChange={(e, newValue) => setTab(newValue)}>
         <Tab label="Adicionar" />
         <Tab label={`Participantes (${groupInfo.size})`} />
@@ -213,27 +210,28 @@ const ManageParticipantsModal = ({ open, onClose, whatsappId, group, onSuccess }
       <StyledDialogContent>
         {tab === 0 && (
           <Box>
-            <ParticipantInput
-              label="Número do Participante"
-              value={newParticipant}
-              onChange={(e) => setNewParticipant(e.target.value)}
-              onKeyPress={(e) => e.key === "Enter" && handleAddParticipant()}
-              fullWidth
-              variant="outlined"
-              placeholder="5511999999999"
+            <ContactsAutocomplete
+              value={selectedContacts}
+              onChange={setSelectedContacts}
+              excludeNumbers={existingNumbers}
               disabled={loading}
-              helperText="Digite o número com código do país e DDD"
+              label="Selecionar Participantes"
             />
 
             <Button
               variant="contained"
               color="primary"
               startIcon={<PersonAddIcon />}
-              onClick={handleAddParticipant}
-              disabled={loading}
+              onClick={handleAddParticipants}
+              disabled={loading || selectedContacts.length === 0}
               fullWidth
+              sx={{ mt: 2 }}
             >
-              Adicionar Participante
+              {loading ? (
+                <CircularProgress size={22} color="inherit" />
+              ) : (
+                `Adicionar${selectedContacts.length > 1 ? ` (${selectedContacts.length})` : ""} Participante${selectedContacts.length > 1 ? "s" : ""}`
+              )}
             </Button>
           </Box>
         )}
@@ -246,21 +244,13 @@ const ManageParticipantsModal = ({ open, onClose, whatsappId, group, onSuccess }
                   primary={participant.id.user}
                   secondary={participant.id._serialized}
                 />
-                
+
                 {isOwner(participant.id._serialized) && (
-                  <AdminChip
-                    size="small"
-                    label="Dono"
-                    color="secondary"
-                  />
+                  <AdminChip size="small" label="Dono" color="secondary" />
                 )}
-                
+
                 {isAdmin(participant.id._serialized) && !isOwner(participant.id._serialized) && (
-                  <AdminChip
-                    size="small"
-                    label="Admin"
-                    color="primary"
-                  />
+                  <AdminChip size="small" label="Admin" color="primary" />
                 )}
 
                 <ListItemSecondaryAction>
@@ -281,7 +271,7 @@ const ManageParticipantsModal = ({ open, onClose, whatsappId, group, onSuccess }
                           <StarBorderIcon />
                         )}
                       </IconButton>
-                      
+
                       <IconButton
                         edge="end"
                         onClick={() => handleRemoveParticipant(participant.id._serialized)}
