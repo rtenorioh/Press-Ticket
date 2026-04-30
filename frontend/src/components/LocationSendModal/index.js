@@ -14,10 +14,11 @@ import CloseIcon from "@mui/icons-material/Close";
 import MyLocationIcon from "@mui/icons-material/MyLocation";
 import { useTranslation } from "react-i18next";
 import WhatsAppFeaturesService from "../../services/whatsappFeatures";
+import api from "../../services/api";
 import toastError from "../../errors/toastError";
 import toastSuccess from "../../errors/toastSuccess";
 
-const LocationSendModal = ({ open, onClose, ticketId }) => {
+const LocationSendModal = ({ open, onClose, ticketId, channelType }) => {
   const { t } = useTranslation();
   const [latitude, setLatitude] = useState("");
   const [longitude, setLongitude] = useState("");
@@ -25,6 +26,8 @@ const LocationSendModal = ({ open, onClose, ticketId }) => {
   const [address, setAddress] = useState("");
   const [loading, setLoading] = useState(false);
   const [gettingLocation, setGettingLocation] = useState(false);
+
+  const isWwebjs = channelType === "wwebjs";
 
   const handleGetCurrentLocation = () => {
     if (!navigator.geolocation) return;
@@ -54,7 +57,16 @@ const LocationSendModal = ({ open, onClose, ticketId }) => {
 
     setLoading(true);
     try {
-      await WhatsAppFeaturesService.sendLocation(ticketId, lat, lng, description, address);
+      if (isWwebjs) {
+        await WhatsAppFeaturesService.sendLocation(ticketId, lat, lng, description, address);
+      } else {
+        await api.post(`/hub-location/${ticketId}`, {
+          latitude: lat,
+          longitude: lng,
+          name: description,
+          address
+        });
+      }
       toastSuccess(t("locationSendModal.success"));
       handleClose();
     } catch (err) {
@@ -113,7 +125,7 @@ const LocationSendModal = ({ open, onClose, ticketId }) => {
           </Box>
           <TextField
             fullWidth
-            label={t("locationSendModal.description")}
+            label={isWwebjs ? t("locationSendModal.description") : "Nome do local"}
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             size="small"

@@ -1511,6 +1511,7 @@ const MessageInput = ({ ticketStatus }) => {
               open={showLocationModal}
               onClose={() => setShowLocationModal(false)}
               ticketId={ticketId}
+              channelType={channelType}
             />
 
             <CardMessageModal

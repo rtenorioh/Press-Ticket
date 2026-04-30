@@ -6,6 +6,7 @@ import Whatsapp from "../models/Whatsapp";
 import CreateHubTicketService from "../services/HubServices/CreateHubTicketService";
 import { SendCardMessageService } from "../services/HubServices/SendCardMessageHubService";
 import { SendCarouselMessageService } from "../services/HubServices/SendCarouselMessageHubService";
+import { SendLocationHubService } from "../services/HubServices/SendLocationHubService";
 import { SendMediaMessageService } from "../services/HubServices/SendMediaMessageHubService";
 import { SendReplyableTextService } from "../services/HubServices/SendReplyableTextHubService";
 import { SendTextMessageService } from "../services/HubServices/SendTextMessageHubService";
@@ -83,6 +84,60 @@ export const send = async (req: Request, res: Response): Promise<Response> => {
     logger.error(`Erro: ${error}`);
 
     return res.status(400).json({ message: error });
+  }
+};
+
+export const sendHubLocation = async (req: Request, res: Response): Promise<Response> => {
+  const { latitude, longitude, name = "", address = "" } = req.body;
+  const { ticketId } = req.params;
+
+  const lat = Number(latitude);
+  const lng = Number(longitude);
+
+  if (isNaN(lat) || isNaN(lng)) {
+    return res.status(400).json({ error: "Latitude e longitude devem ser números válidos." });
+  }
+
+  const ticket = await Ticket.findByPk(ticketId, {
+    include: [
+      {
+        model: Contact,
+        as: "contact",
+        attributes: ["number", "email", "messengerId", "instagramId", "telegramId", "webchatId"]
+      },
+      {
+        model: Whatsapp,
+        as: "whatsapp",
+        attributes: ["qrcode", "type"]
+      }
+    ]
+  });
+
+  if (!ticket) {
+    return res.status(404).json({ message: "Ticket not found" });
+  }
+
+  if (ticket.whatsapp?.type === "wwebjs") {
+    return res.status(400).json({
+      error: "Para canais wwebjs, use o endpoint /wa-features/:ticketId/location."
+    });
+  }
+
+  try {
+    const newMessage = await SendLocationHubService(
+      lat,
+      lng,
+      name,
+      address,
+      ticket.id,
+      ticket.contact,
+      ticket.whatsapp
+    );
+
+    return res.status(200).json(newMessage);
+  } catch (error) {
+    logger.error(`Erro ao enviar location Hub: ${error}`);
+    return res.status(400).json({ message: String(error) });
   }
 };
 
