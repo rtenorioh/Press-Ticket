@@ -21,6 +21,7 @@ import { TagsContainer } from "../TagsContainer";
 import ModalImageContatc from "./ModalImage";
 import GroupActionsPanel from "./GroupActionsPanel";
 import ContactService from "../../services/contacts";
+import LabelsPanel from "../LabelsPanel";
 
 const drawerWidth = 320;
 
@@ -197,6 +198,12 @@ const ContactDrawer = ({ open, handleDrawerClose, contact, loading, isGroup, mes
             <GroupActionsPanel groupId={groupJid} />
           )}
           <TagsContainer contact={contact} sx={{ marginTop: 2 }} />
+          {whatsappId && contact?.number && (
+            <LabelsPanel
+              whatsappId={whatsappId}
+              chatId={contact.number.includes("@") ? contact.number : `${contact.number}@${contact.isGroup ? 'g' : 'c'}.us`}
+            />
+          )}
           <ContactDetails square variant="outlined">
             <ContactModal
               open={modalOpen}

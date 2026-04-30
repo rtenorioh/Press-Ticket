@@ -4,6 +4,7 @@ import { getIO } from "../libs/socket";
 import Message from "../models/Message";
 import CountMessagesService from "../services/MessageServices/CountMessagesService";
 import ListMessagesService from "../services/MessageServices/ListMessagesService";
+import SearchMessagesInTicketService from "../services/MessageServices/SearchMessagesInTicketService";
 import MarkMessagesAsReadService from "../services/MessageServices/MarkMessagesAsReadService";
 import DeleteWhatsAppMessage from "../services/WbotServices/DeleteWhatsAppMessage";
 import EditWhatsAppMessage from "../services/WbotServices/EditWhatsAppMessage";
@@ -16,6 +17,7 @@ import ShowTicketService from "../services/TicketServices/ShowTicketService";
 import GetTicketWbot from "../helpers/GetTicketWbot";
 import SerializeWbotMsgId from "../helpers/SerializeWbotMsgId";
 import Contact from "../models/Contact";
+import Ticket from "../models/Ticket";
 import MessageReaction from "../models/MessageReaction";
 import ReactToWhatsAppMessage from "../services/WbotServices/ReactToWhatsAppMessage";
 import { createActivityLog, ActivityActions, EntityTypes } from "../services/ActivityLogService";
@@ -371,6 +373,39 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
   return res.json({ count, messages, ticket, hasMore });
 };
 
+export const searchInTicket = async (req: Request, res: Response): Promise<Response> => {
+  const { ticketId } = req.params;
+  const { query, pageNumber } = req.query as { query: string; pageNumber?: string };
+
+  try {
+    const result = await SearchMessagesInTicketService({ ticketId, query, pageNumber });
+    return res.json(result);
+  } catch (error: any) {
+    return res.status(400).json({ error: error.message || "Erro ao buscar mensagens" });
+  }
+};
+
+export const listStarred = async (req: Request, res: Response): Promise<Response> => {
+  const { ticketId } = req.params;
+
+  const messages = await Message.findAll({
+    where: { ticketId: parseInt(ticketId, 10), isStarred: true, isDeleted: false },
+    include: [{ model: Contact, as: "contact", attributes: ["name"] }],
+    order: [["createdAt", "ASC"]]
+  });
+
+  return res.json({
+    messages: messages.map(msg => ({
+      id: msg.id,
+      body: msg.body,
+      fromMe: msg.fromMe,
+      mediaType: msg.mediaType,
+      createdAt: msg.createdAt,
+      contactName: (msg as any).contact?.name || null
+    }))
+  });
+};
+
 export const store = async (req: Request, res: Response): Promise<Response> => {
   const { ticketId } = req.params;
   let { body, quotedMsg, mentions, sendAsDocument, compressVideo }: any = req.body;
@@ -653,6 +688,34 @@ export const forwardMessages = async (
     }
 
     for (const messageData of messages) {
+      // Tentar forward nativo primeiro (preserva indicação "Encaminhada" do WhatsApp)
+      if (messageData.id) {
+        try {
+          const GetTicketWbot = require("../helpers/GetTicketWbot").default;
+          const GetWbotMessage = require("../helpers/GetWbotMessage").default;
+
+          const sourceMessage = await Message.findByPk(messageData.id, {
+            include: [{ model: Ticket, as: "ticket", include: ["contact"] }]
+          });
+
+          if (sourceMessage && sourceMessage.ticket) {
+            const wbot = await GetTicketWbot(sourceMessage.ticket);
+            const wbotMsg = await GetWbotMessage(sourceMessage.ticket, messageData.id);
+
+            let targetChatId = ticket.contact.number!;
+            if (!targetChatId.includes("@")) {
+              targetChatId = `${targetChatId}@${ticket.isGroup ? "g" : "c"}.us`;
+            }
+
+            await wbotMsg.forward(targetChatId);
+            continue;
+          }
+        } catch (nativeErr) {
+          logger.warn(`[FORWARD] Forward nativo falhou, usando fallback manual: ${nativeErr}`);
+        }
+      }
+
+      // Fallback: método manual
       let body = messageData.body || "";
 
       if (body) {

@@ -10,6 +10,7 @@ import openSocket from "../../services/socket-io.js";
 import Integrations from "../Integrations";
 import ComponentSettings from "./ComponentSettings";
 import Personalize from "./Personalize.js";
+import WhatsAppProfilePanel from "../../components/WhatsAppProfilePanel";
 import MainContainer from "../../components/MainContainer";
 import MainHeader from "../../components/MainHeader";
 import Title from "../../components/Title";
@@ -192,7 +193,8 @@ const Settings = ({ toggleTheme, onThemeConfigUpdate }) => {
 	const tabList = [
 		{ key: "personalize", label: t("settings.tabs.personalize"), component: <Personalize toggleTheme={toggleTheme} onThemeConfigUpdate={onThemeConfigUpdate} /> },
 		{ key: "general", label: t("settings.tabs.general"), component: <ComponentSettings settings={settings} getSettingValue={getSettingValue} handleChangeBooleanSetting={handleChangeBooleanSetting} handleChangeSetting={handleChangeSetting} /> },
-		{ key: "integrations", label: t("settings.tabs.integrations"), component: <Integrations /> }
+		{ key: "integrations", label: t("settings.tabs.integrations"), component: <Integrations /> },
+		{ key: "whatsappProfile", label: t("profileSettings.title"), component: <WhatsAppProfilePanel /> }
 	];
 
 	const visibleTabs = tabList.filter(tab => shouldShowTab(tab.key));

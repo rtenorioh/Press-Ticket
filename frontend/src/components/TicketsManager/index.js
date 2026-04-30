@@ -36,6 +36,7 @@ import TabPanel from "../TabPanel";
 import TicketsList from "../TicketsList";
 import QueueMenuItems from "../QueueMenuItems";
 import ChannelMenuItems from "../ChannelMenuItems";
+import TicketLabelsFilter from "../TicketLabelsFilter";
 import toastError from "../../errors/toastError";
 import api from "../../services/api";
 import { toast } from "react-toastify";
@@ -201,6 +202,7 @@ const TicketsManager = () => {
   const [selectedChannelIds, setSelectedChannelIds] = useState([]);
   const [filterMenuAnchorEl, setFilterMenuAnchorEl] = useState(null);
   const [channelMenuAnchorEl, setChannelMenuAnchorEl] = useState(null);
+  const [labelFilter, setLabelFilter] = useState(null);
 
   const fetchTicketCounts = async () => {
     try {
@@ -443,6 +445,7 @@ const TicketsManager = () => {
           </ActionButton>
         </Tooltip>
       </SearchContainerStyled>
+      <TicketLabelsFilter onFilterChange={setLabelFilter} />
       <TabsHeaderStyled elevation={0}>
         <Tabs
           value={tab}
@@ -728,6 +731,7 @@ const TicketsManager = () => {
           selectedChannelIds={selectedChannelIds}
           updateCount={(val) => setOpenCount(val)}
           isGroup={false}
+          labelFilter={labelFilter}
         />
       </TabPanelStyled>
       <TabPanelStyled value={tab} name="groups">
@@ -738,6 +742,7 @@ const TicketsManager = () => {
           selectedChannelIds={selectedChannelIds}
           updateCount={(val) => setOpenGroupsCount(val)}
           isGroup={true}
+          labelFilter={labelFilter}
         />
       </TabPanelStyled>
       <TabPanelStyled value={tab} name="pending">
@@ -747,6 +752,7 @@ const TicketsManager = () => {
           selectedQueueIds={selectedQueueIds}
           selectedChannelIds={selectedChannelIds}
           updateCount={(val) => setPendingCount(val)}
+          labelFilter={labelFilter}
         />
       </TabPanelStyled>
       <TabPanelStyled value={tab} name="closed">
@@ -756,6 +762,7 @@ const TicketsManager = () => {
           selectedQueueIds={selectedQueueIds}
           selectedChannelIds={selectedChannelIds}
           updateCount={(val) => setClosedCount(val)}
+          labelFilter={labelFilter}
         />
       </TabPanelStyled>
       <TabPanelStyled value={tab} name="search">
@@ -764,6 +771,7 @@ const TicketsManager = () => {
           showAll={true}
           selectedQueueIds={selectedQueueIds}
           selectedChannelIds={selectedChannelIds}
+          labelFilter={labelFilter}
         />
       </TabPanelStyled>
     </TicketWrapperStyled>

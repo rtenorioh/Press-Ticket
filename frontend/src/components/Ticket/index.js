@@ -1,6 +1,7 @@
 import { Paper } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
 import { EditMessageProvider } from "../../context/EditingMessage/EditingMessageContext";
 import { ReplyMessageProvider } from "../../context/ReplyingMessage/ReplyingMessageContext";
@@ -13,7 +14,6 @@ import MessagesList from "../MessagesList";
 import TicketActionButtons from "../TicketActionButtons";
 import TicketHeader from "../TicketHeader";
 import TicketInfo from "../TicketInfo";
-import { useTranslation } from "react-i18next";
 
 const drawerWidth = 320;
 
@@ -252,6 +252,7 @@ const Ticket = () => {
             <MessagesList
               ticketId={ticketId}
               isGroup={ticket.isGroup}
+              ticket={ticket}
               onClick={handleDrawerOpen}
             ></MessagesList>
             <MessageInput ticketStatus={ticket.status} />

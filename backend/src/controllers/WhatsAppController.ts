@@ -57,11 +57,11 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
   });
 
   StartWhatsAppSession(whatsapp);
-  
+
   const logUserId = req.user?.id || 1;
-  
+
   const clientIp = GetClientIp(req);
-  
+
   await createActivityLog({
     userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
     action: ActivityActions.CREATE,
@@ -112,9 +112,9 @@ export const update = async (
   });
 
   const logUserId = req.user?.id || 1;
-  
+
   const clientIp = GetClientIp(req);
-  
+
   await createActivityLog({
     userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
     action: ActivityActions.UPDATE,
@@ -147,14 +147,14 @@ export const remove = async (
   const { whatsappId } = req.params;
 
   const whatsappToDelete = await ShowWhatsAppService(whatsappId);
-  
+
   await DeleteWhatsAppService(whatsappId);
-  removeWbot(+whatsappId);
-  
+  await removeWbot(+whatsappId);
+
   const logUserId = req.user?.id || 1;
-  
+
   const clientIp = GetClientIp(req);
-  
+
   await createActivityLog({
     userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
     action: ActivityActions.DELETE,
@@ -216,15 +216,15 @@ export const getQrCode = async (req: Request, res: Response): Promise<Response> 
 
   try {
     const whatsapp = await ShowWhatsAppService(whatsappId);
-    
+
     if (!whatsapp) {
       throw new AppError("ERR_NO_WHATSAPP_FOUND", 404);
     }
-    
+
     if (!whatsapp.qrcode) {
       throw new AppError("ERR_WHATSAPP_NOT_INITIALIZED_OR_ALREADY_CONNECTED", 404);
     }
-    
+
     return res.status(200).json({ qrcode: whatsapp.qrcode });
   } catch (err) {
     return res.status(500).json({ message: err.message });

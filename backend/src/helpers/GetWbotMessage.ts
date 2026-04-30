@@ -60,13 +60,29 @@ export const GetWbotMessage = async (
 
       return msgFound;
     } catch (fetchError) {
-      logger.error(`Erro ao buscar mensagens do chat: ${fetchError}`);
+      logger.warn(`[GetWbotMessage] fetchMessages indisponível, usando fallback: ${fetchError}`);
       return undefined;
     }
   };
 
   try {
-    const msgFound = await fetchWbotMessagesGradually();
+    let msgFound = await fetchWbotMessagesGradually();
+
+    if (!msgFound) {
+      // Fallback: tenta buscar a mensagem diretamente pelo ID serializado
+      for (const fromMe of [false, true]) {
+        try {
+          const serializedId = `${fromMe}_${chatId}_${messageId}`;
+          const directMsg = await wbot.getMessageById(serializedId);
+          if (directMsg) {
+            msgFound = directMsg;
+            break;
+          }
+        } catch {
+          // ignora falhas no fallback
+        }
+      }
+    }
 
     if (!msgFound) {
       const errorMsg = ticket.isGroup

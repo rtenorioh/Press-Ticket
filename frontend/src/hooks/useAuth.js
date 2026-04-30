@@ -40,10 +40,19 @@ const useAuth = () => {
     }, [handleLogout]);
 
     useEffect(() => {
-        const onSessionExpired = () => setSessionExpired(true);
+        const onSessionExpired = () => {
+            localStorage.removeItem("token");
+            localStorage.removeItem("user");
+            delete api.defaults.headers.Authorization;
+            setIsAuth(false);
+            setUser({});
+            setLoading(false);
+            setSessionExpired(true);
+            navigate("/login");
+        };
         window.addEventListener("session:expired", onSessionExpired);
         return () => window.removeEventListener("session:expired", onSessionExpired);
-    }, []);
+    }, [navigate]);
 
     useEffect(() => {
         if (!socket) return;
@@ -67,53 +76,45 @@ const useAuth = () => {
             }
 
             const tokenStr = localStorage.getItem("token");
-            if (tokenStr) {
-                try {
-                    const token = JSON.parse(tokenStr);
-                    api.defaults.headers.Authorization = `Bearer ${token}`;
-                    
-                    try {
-                        const userStr = localStorage.getItem("user");
-                        if (userStr) {
-                            const storedUser = JSON.parse(userStr);
-                            setUser(storedUser);
-                            setIsAuth(true);
-                        }
-                    } catch (parseErr) {
-                        console.error("Erro ao carregar usuário do localStorage:", parseErr);
-                    }
-
-                    const { data } = await api.post("/auth/refresh_token");
-                    api.defaults.headers.Authorization = `Bearer ${data.token}`;
-                    localStorage.setItem("token", JSON.stringify(data.token));
-                    localStorage.setItem("user", JSON.stringify(data.user));
-                    setIsAuth(true);
-                    setUser(data.user);
-                } catch (err) {
-                    if (err.response && err.response.data && err.response.data.error === "ERR_USER_INACTIVE") {
-                        setUserInactive(true);
-                        markUserAsInactive();
-
-                        toast.error(t("backendErrors.ERR_USER_INACTIVE") || "Este atendente está desativado!", {
-                            autoClose: 10000,
-                            onClose: () => {
-                                navigate("/login");
-                            }
-                        });
-
-                        localStorage.removeItem("token");
-                        localStorage.removeItem("user");
-                        setIsAuth(false);
-                        setUser({});
-
-                        delete api.defaults.headers.Authorization;
-                    } else {
-                        console.error("Erro ao atualizar token:", err);
-                        handleLogout();
-                    }
-                }
+            if (!tokenStr) {
+                setIsAuth(false);
+                setLoading(false);
+                return;
             }
-            setLoading(false);
+
+            try {
+                const token = JSON.parse(tokenStr);
+                api.defaults.headers.Authorization = `Bearer ${token}`;
+
+                const { data } = await api.post("/auth/refresh_token");
+                api.defaults.headers.Authorization = `Bearer ${data.token}`;
+                localStorage.setItem("token", JSON.stringify(data.token));
+                localStorage.setItem("user", JSON.stringify(data.user));
+                setIsAuth(true);
+                setUser(data.user);
+                setLoading(false);
+            } catch (err) {
+                if (err?.response?.data?.error === "ERR_USER_INACTIVE") {
+                    setUserInactive(true);
+                    markUserAsInactive();
+
+                    toast.error(t("backendErrors.ERR_USER_INACTIVE") || "Este atendente está desativado!", {
+                        autoClose: 10000,
+                        onClose: () => {
+                            navigate("/login");
+                        }
+                    });
+                } else if (err?.response?.data?.error === "ERR_SESSION_EXPIRED") {
+                    console.log("Sessão expirada detectada no checkAuth");
+                }
+
+                localStorage.removeItem("token");
+                localStorage.removeItem("user");
+                delete api.defaults.headers.Authorization;
+                setIsAuth(false);
+                setUser({});
+                setLoading(false);
+            }
         };
 
         checkAuth();

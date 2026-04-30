@@ -574,3 +574,69 @@ export const count = async (req: AuthenticatedRequest, res: Response): Promise<R
     return res.status(500).json({ error: err.message });
   }
 };
+
+export const toggleState = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  const { ticketId } = req.params;
+  const { field } = req.body;
+
+  const allowedFields = ["pinnedChat", "mutedChat", "favoritedChat"];
+  if (!allowedFields.includes(field)) {
+    return res.status(400).json({ error: "Campo inválido" });
+  }
+
+  try {
+    const ticket = await Ticket.findByPk(ticketId);
+    if (!ticket) {
+      return res.status(404).json({ error: "Ticket não encontrado" });
+    }
+
+    const currentValue = !!(ticket as any)[field];
+    const newValue = !currentValue;
+
+    if (field === "pinnedChat" && newValue === true) {
+      const pinnedCount = await Ticket.count({
+        where: {
+          pinnedChat: true,
+          status: { [Op.ne]: "closed" }
+        }
+      });
+      if (pinnedCount >= 3) {
+        return res.status(400).json({
+          error: "Limite de 3 tickets fixados atingido",
+          code: "PIN_LIMIT_REACHED"
+        });
+      }
+    }
+
+    await ticket.update({ [field]: newValue });
+    await ticket.reload({
+      include: [
+        { association: "contact" },
+        { association: "queue" },
+        { association: "whatsapp" },
+        { association: "user" }
+      ]
+    });
+
+    const io = getIO();
+    io.to(ticket.status)
+      .to("notification")
+      .to(ticketId.toString())
+      .emit("ticket", {
+        action: "update",
+        ticket
+      });
+
+    return res.status(200).json({
+      field,
+      value: newValue,
+      ticket
+    });
+  } catch (err: any) {
+    logger.error(`Erro ao alternar estado do ticket: ${err}`);
+    return res.status(500).json({ error: err.message });
+  }
+};

@@ -27,6 +27,8 @@ import MessageReaction from "../models/MessageReaction";
 import ClientStatus from "../models/ClientStatus";
 import GroupEvent from "../models/GroupEvent";
 import PollVote from "../models/PollVote";
+import WhatsappLabel from "../models/WhatsappLabel";
+import TicketLabel from "../models/TicketLabel";
 
 // eslint-disable-next-line
 const dbConfig = require("../config/database");
@@ -61,7 +63,9 @@ const models = [
   MessageReaction,
   ClientStatus,
   GroupEvent,
-  PollVote
+  PollVote,
+  WhatsappLabel,
+  TicketLabel
 ];
 
 sequelize.addModels(models);

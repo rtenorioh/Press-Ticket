@@ -20,15 +20,23 @@ import {
 import {
   Info as InfoIcon,
   Group as GroupIcon,
+  Block as BlockIcon,
 } from "@mui/icons-material";
-import api from "../../services/api";
+import { useTranslation } from "react-i18next";
+import WhatsAppFeaturesService from "../../services/whatsappFeatures";
 import toastError from "../../errors/toastError";
+import toastSuccess from "../../errors/toastSuccess";
+import ConfirmationModal from "../ConfirmationModal";
 
 const ContactAdvancedInfoModal = ({ open, onClose, contactId, whatsappId }) => {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [tabValue, setTabValue] = useState(0);
   const [aboutInfo, setAboutInfo] = useState(null);
   const [commonGroups, setCommonGroups] = useState([]);
+  const [isBlocked, setIsBlocked] = useState(false);
+  const [blockLoading, setBlockLoading] = useState(false);
+  const [blockConfirmOpen, setBlockConfirmOpen] = useState(false);
 
   useEffect(() => {
     if (open && contactId) {
@@ -40,23 +48,39 @@ const ContactAdvancedInfoModal = ({ open, onClose, contactId, whatsappId }) => {
   const loadContactInfo = async () => {
     setLoading(true);
     try {
-      // Carregar informações do "sobre"
-      const aboutResponse = await api.get(
-        `/contacts/${contactId}/about`,
-        { params: { whatsappId } }
-      );
-      setAboutInfo(aboutResponse.data);
+      const [aboutData, groupsData, contactInfo] = await Promise.allSettled([
+        WhatsAppFeaturesService.getContactAbout(whatsappId, contactId),
+        WhatsAppFeaturesService.getCommonGroups(whatsappId, contactId),
+        WhatsAppFeaturesService.getContactInfo(whatsappId, contactId)
+      ]);
 
-      // Carregar grupos em comum
-      const groupsResponse = await api.get(
-        `/contacts/${contactId}/common-groups`,
-        { params: { whatsappId } }
-      );
-      setCommonGroups(groupsResponse.data.commonGroups || []);
+      if (aboutData.status === "fulfilled") setAboutInfo(aboutData.value);
+      if (groupsData.status === "fulfilled") setCommonGroups(groupsData.value || []);
+      if (contactInfo.status === "fulfilled") setIsBlocked(contactInfo.value?.isBlocked || false);
     } catch (err) {
       toastError(err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleToggleBlock = async () => {
+    setBlockLoading(true);
+    try {
+      if (isBlocked) {
+        await WhatsAppFeaturesService.unblockContact(whatsappId, contactId);
+        setIsBlocked(false);
+        toastSuccess(t("contactActions.unblockSuccess"));
+      } else {
+        await WhatsAppFeaturesService.blockContact(whatsappId, contactId);
+        setIsBlocked(true);
+        toastSuccess(t("contactActions.blockSuccess"));
+      }
+    } catch (err) {
+      toastError(err);
+    } finally {
+      setBlockLoading(false);
+      setBlockConfirmOpen(false);
     }
   };
 
@@ -68,18 +92,20 @@ const ContactAdvancedInfoModal = ({ open, onClose, contactId, whatsappId }) => {
     setTabValue(0);
     setAboutInfo(null);
     setCommonGroups([]);
+    setIsBlocked(false);
     onClose();
   };
 
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
       <DialogTitle>
-        Informações Avançadas do Contato
+        {t("contactActions.info")}
       </DialogTitle>
       <DialogContent dividers>
         <Tabs value={tabValue} onChange={handleTabChange} sx={{ mb: 2 }}>
-          <Tab icon={<InfoIcon />} label="Sobre" />
-          <Tab icon={<GroupIcon />} label="Grupos em Comum" />
+          <Tab icon={<InfoIcon />} label={t("contactActions.about")} />
+          <Tab icon={<GroupIcon />} label={t("contactActions.commonGroups")} />
+          <Tab icon={<BlockIcon />} label={isBlocked ? t("contactActions.unblock") : t("contactActions.block")} />
         </Tabs>
 
         {loading ? (
@@ -164,6 +190,26 @@ const ContactAdvancedInfoModal = ({ open, onClose, contactId, whatsappId }) => {
               </Box>
             )}
 
+            {/* Aba Bloquear/Desbloquear */}
+            {tabValue === 2 && (
+              <Box sx={{ textAlign: "center", py: 2 }}>
+                <BlockIcon sx={{ fontSize: 48, color: isBlocked ? "error.main" : "text.secondary", mb: 2 }} />
+                <Typography variant="body1" gutterBottom>
+                  {isBlocked
+                    ? "Este contato está bloqueado. Deseja desbloquear?"
+                    : t("contactActions.blockConfirm")}
+                </Typography>
+                <Button
+                  variant="contained"
+                  color={isBlocked ? "primary" : "error"}
+                  onClick={() => setBlockConfirmOpen(true)}
+                  disabled={blockLoading}
+                  sx={{ mt: 2 }}
+                >
+                  {blockLoading ? <CircularProgress size={20} /> : (isBlocked ? t("contactActions.unblock") : t("contactActions.block"))}
+                </Button>
+              </Box>
+            )}
           </>
         )}
       </DialogContent>
@@ -172,6 +218,14 @@ const ContactAdvancedInfoModal = ({ open, onClose, contactId, whatsappId }) => {
           Fechar
         </Button>
       </DialogActions>
+      <ConfirmationModal
+        title={isBlocked ? t("contactActions.unblock") : t("contactActions.block")}
+        open={blockConfirmOpen}
+        onClose={() => setBlockConfirmOpen(false)}
+        onConfirm={handleToggleBlock}
+      >
+        {isBlocked ? "Deseja desbloquear este contato?" : t("contactActions.blockConfirm")}
+      </ConfirmationModal>
     </Dialog>
   );
 };

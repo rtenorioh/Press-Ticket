@@ -40,6 +40,8 @@ import groupManagementRoutes from "./groupManagementRoutes";
 import pollVoteRoutes from "./pollVoteRoutes";
 import rateLimitRoutes from "./rateLimitRoutes";
 import fileManagerRoutes from "./fileManagerRoutes";
+import whatsappFeaturesRoutes from "./whatsappFeaturesRoutes";
+import whatsappLabelRoutes from "./whatsappLabelRoutes";
 
 const routes = Router();
 
@@ -83,5 +85,7 @@ routes.use(groupManagementRoutes);
 routes.use(pollVoteRoutes);
 routes.use(rateLimitRoutes);
 routes.use(fileManagerRoutes);
+routes.use(whatsappFeaturesRoutes);
+routes.use(whatsappLabelRoutes);
 
 export default routes;

@@ -58,6 +58,12 @@ const NoTicketsDiv = styled('div')(({ theme }) => ({
 	justifyContent: "center",
 }));
 
+const sortWithPinned = (list) => {
+	const pinned = list.filter((t) => t.pinnedChat);
+	const unpinned = list.filter((t) => !t.pinnedChat);
+	return [...pinned, ...unpinned];
+};
+
 const reducer = (state, action) => {
 	if (action.type === "LOAD_TICKETS") {
 		const newTickets = action.payload;
@@ -80,7 +86,7 @@ const reducer = (state, action) => {
 					merged.unreadMessages = incoming.unreadMessages;
 				}
 				state[ticketIndex] = merged;
-				if (merged.unreadMessages > 0) {
+				if (merged.unreadMessages > 0 && !merged.pinnedChat) {
 					state.unshift(state.splice(ticketIndex, 1)[0]);
 				}
 			} else {
@@ -88,7 +94,7 @@ const reducer = (state, action) => {
 			}
 		});
 
-		return [...state];
+		return sortWithPinned([...state]);
 	}
 
 	if (action.type === "RESET_UNREAD") {
@@ -114,14 +120,14 @@ const reducer = (state, action) => {
 				lastMessage: incoming.lastMessage || existing.lastMessage,
 			};
 			state[ticketIndex] = merged;
-			if (merged.unreadMessages > 0) {
+			if (merged.unreadMessages > 0 && !merged.pinnedChat) {
 				state.unshift(state.splice(ticketIndex, 1)[0]);
 			}
 		} else {
 			state.unshift(incoming);
 		}
 
-		return [...state];
+		return sortWithPinned([...state]);
 	}
 
 	if (action.type === "UPDATE_TICKET_UNREAD_MESSAGES") {
@@ -142,14 +148,14 @@ const reducer = (state, action) => {
 			const oldMsg = typeof oldTicket.lastMessage === 'string' ? oldTicket.lastMessage : JSON.stringify(oldTicket.lastMessage);
 			const newMsg = typeof ticket.lastMessage === 'string' ? ticket.lastMessage : JSON.stringify(ticket.lastMessage);
 			
-			if (ticket.lastMessage && newMsg !== oldMsg) {
+			if (ticket.lastMessage && newMsg !== oldMsg && !updatedTicket.pinnedChat) {
 				state.unshift(state.splice(ticketIndex, 1)[0]);
 			}
 		} else {
 			state.unshift(ticket);
 		}
 
-		return [...state];
+		return sortWithPinned([...state]);
 	}
 
 	if (action.type === "UPDATE_TICKET_CONTACT") {
@@ -198,6 +204,7 @@ const TicketsList = (props) => {
 		style,
 		tags,
 		isGroup,
+		labelFilter,
 	} = props;
 	const { t } = useTranslation();
 	const [pageNumber, setPageNumber] = useState(1);
@@ -439,7 +446,12 @@ const TicketsList = (props) => {
 
 		registerSocketEvents();
 
-		if (!socket.connected) {
+		if (socket.connected) {
+			socket.emit("joinTickets", "pending");
+			if (status && status !== "pending") {
+				socket.emit("joinTickets", status);
+			}
+		} else {
 			socket.connect();
 		}
 
@@ -484,22 +496,40 @@ const TicketsList = (props) => {
 				onScroll={handleScroll}
 			>
 				<List sx={{ paddingTop: 0 }}>
-					{ticketsList.length === 0 && !loading ? (
-						<NoTicketsDiv>
-							<NoTicketsTitle>
-								{t("ticketsList.noTicketsTitle")}
-							</NoTicketsTitle>
-							<NoTicketsText>
-								{t("ticketsList.noTicketsMessage")}
-							</NoTicketsText>
-						</NoTicketsDiv>
-					) : (
-						<>
-							{ticketsList.map((ticket) => (
-								<TicketListItem key={ticket.id} ticket={ticket} filteredTags={filteredTags} />
-							))}
-						</>
-					)}
+					{(() => {
+						let displayList = ticketsList;
+
+						if (labelFilter) {
+							if (labelFilter.type === "favorited") {
+								displayList = ticketsList.filter((t) => t.favoritedChat);
+							} else if (labelFilter.type === "unread") {
+								displayList = ticketsList.filter((t) => t.unreadMessages > 0);
+							} else if (labelFilter.type === "groups") {
+								displayList = ticketsList.filter((t) => !!t.contact?.isGroup || !!t.isGroup);
+							} else if (labelFilter.type === "label" && labelFilter.ticketIds) {
+								displayList = ticketsList.filter((t) =>
+									labelFilter.ticketIds.includes(t.id)
+								);
+							}
+						}
+
+						if (displayList.length === 0 && !loading) {
+							return (
+								<NoTicketsDiv>
+									<NoTicketsTitle>
+										{t("ticketsList.noTicketsTitle")}
+									</NoTicketsTitle>
+									<NoTicketsText>
+										{t("ticketsList.noTicketsMessage")}
+									</NoTicketsText>
+								</NoTicketsDiv>
+							);
+						}
+
+						return displayList.map((ticket) => (
+							<TicketListItem key={ticket.id} ticket={ticket} filteredTags={filteredTags} />
+						));
+					})()}
 					{loading && <TicketsListSkeleton />}
 				</List>
 			</TicketsListStyled>

@@ -64,6 +64,10 @@ class Whatsapp extends Model<InferAttributes<Whatsapp>, InferCreationAttributes<
   @Column(DataType.BOOLEAN)
   isDisplay: CreationOptional<boolean>;
 
+  @Default(false)
+  @Column(DataType.BOOLEAN)
+  isBusiness: CreationOptional<boolean>;
+
   @AllowNull
   @Column({
     type: DataType.STRING,

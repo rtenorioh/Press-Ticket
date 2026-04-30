@@ -84,7 +84,7 @@ const remove = async (req: Request, res: Response): Promise<Response> => {
     } catch (wbotError) {
     }
 
-    removeWbot(whatsapp.id);
+    await removeWbot(whatsapp.id);
 
     await UpdateWhatsAppService({
       whatsappId,

@@ -1,15 +1,19 @@
-import { IconButton, styled, Box, Tooltip } from "@mui/material";
-import { MoreVert, Replay, CheckCircle, ClearOutlined } from "@mui/icons-material";
-import { useContext, useState } from "react";
+import { IconButton, styled, Box, Tooltip, Chip } from "@mui/material";
+import { MoreVert, Replay, CheckCircle, ClearOutlined, Search, Archive, StarBorder } from "@mui/icons-material";
+import { useContext, useState, useEffect, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../../context/Auth/AuthContext";
 import toastError from "../../errors/toastError";
 import api from "../../services/api";
+import WhatsAppFeaturesService from "../../services/whatsappFeatures";
 import { Can } from "../Can";
 import TicketOptionsMenu from "../TicketOptionsMenu";
 import ConfirmationModal from "../ConfirmationModal";
 import AcceptTicketWithouSelectQueue from "../AcceptTicketWithoutQueueModal";
+import ChatActionsMenu from "../ChatActionsMenu";
+import SearchMessagesPanel from "../SearchMessagesPanel";
+import FavoriteMessagesPanel from "../FavoriteMessagesPanel";
 
 const ActionButtonsContainer = styled(Box)(({ theme }) => ({
 	marginRight: theme.spacing(1),
@@ -87,8 +91,32 @@ const TicketActionButtons = ({ ticket, onTicketAccepted }) => {
 	const [loading, setLoading] = useState(false);
 	const [confirmationOpen, setConfirmationOpen] = useState(false);
 	const [acceptTicketWithouSelectQueueOpen, setAcceptTicketWithouSelectQueueOpen] = useState(false);
+	const [chatActionsAnchor, setChatActionsAnchor] = useState(null);
+	const [searchOpen, setSearchOpen] = useState(false);
+	const [favoritesOpen, setFavoritesOpen] = useState(false);
+	const [chatState, setChatState] = useState(null);
 	const ticketOptionsMenuOpen = Boolean(anchorEl);
 	const { user } = useContext(AuthContext);
+
+	const chatId = ticket?.contact?.number
+		? `${ticket.contact.number}@${ticket.contact.isGroup ? 'g' : 'c'}.us`
+		: '';
+
+	const fetchChatState = useCallback(async () => {
+		if (!ticket?.whatsappId || !chatId) return;
+		try {
+			const info = await WhatsAppFeaturesService.getChatInfo(ticket.whatsappId, chatId, ticket.id);
+			setChatState(info);
+		} catch (err) {
+			setChatState(null);
+		}
+	}, [ticket?.whatsappId, ticket?.id, chatId]);
+
+	useEffect(() => {
+		if (ticket?.status === "open") {
+			fetchChatState();
+		}
+	}, [ticket?.status, fetchChatState]);
 
 	const handleOpenTicketOptionsMenu = e => {
 		setAnchorEl(e.currentTarget);
@@ -160,6 +188,18 @@ const TicketActionButtons = ({ ticket, onTicketAccepted }) => {
 			)}
 			{ticket.status === "open" && (
 				<>
+					{chatState?.archived && (
+						<Tooltip title={t("chatActions.archivedIndicator")} arrow placement="top">
+							<Chip
+								icon={<Archive sx={{ fontSize: '0.8rem' }} />}
+								label={t("chatActions.archived")}
+								size="small"
+								variant="outlined"
+								color="default"
+								sx={{ height: 22, fontSize: '0.65rem', '& .MuiChip-icon': { ml: '4px' } }}
+							/>
+						</Tooltip>
+					)}
 					<LoadingIconButton
 						title={t("messagesList.header.buttons.return")}
 						loading={loading}
@@ -183,6 +223,16 @@ const TicketActionButtons = ({ ticket, onTicketAccepted }) => {
 					>
 						{t("tickets.confirmationModal.closeTicket.message")}
 					</ConfirmationModal>
+					<Tooltip title={t("searchMessages.title")} arrow placement="top">
+						<ActionIconButton onClick={() => setSearchOpen(true)}>
+							<Search />
+						</ActionIconButton>
+					</Tooltip>
+					<Tooltip title="Mensagens favoritas" arrow placement="top">
+						<ActionIconButton onClick={() => setFavoritesOpen(true)}>
+							<StarBorder />
+						</ActionIconButton>
+					</Tooltip>
 					<Tooltip title={t("messagesList.header.buttons.options")} arrow placement="top">
 						<ActionIconButton
 							onClick={handleOpenTicketOptionsMenu}>
@@ -221,6 +271,30 @@ const TicketActionButtons = ({ ticket, onTicketAccepted }) => {
 				ticketId={ticket.id}
 				onSuccess={onTicketAccepted}
 			/>
+			<ChatActionsMenu
+				anchorEl={chatActionsAnchor}
+				open={Boolean(chatActionsAnchor)}
+				onClose={() => setChatActionsAnchor(null)}
+				whatsappId={ticket?.whatsappId}
+				chatId={chatId}
+				ticketId={ticket?.id}
+				parentChatState={chatState}
+				onActionDone={fetchChatState}
+			/>
+			{searchOpen && (
+				<SearchMessagesPanel
+					open={searchOpen}
+					onClose={() => setSearchOpen(false)}
+					ticketId={ticket?.id}
+				/>
+			)}
+			{favoritesOpen && (
+				<FavoriteMessagesPanel
+					open={favoritesOpen}
+					onClose={() => setFavoritesOpen(false)}
+					ticketId={ticket?.id}
+				/>
+			)}
 		</ActionButtonsContainer>
 	);
 };

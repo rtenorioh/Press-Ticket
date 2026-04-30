@@ -15,10 +15,13 @@ import Facebook from '@mui/icons-material/Facebook';
 import Group from '@mui/icons-material/Group';
 import Instagram from '@mui/icons-material/Instagram';
 import LocalOfferIcon from '@mui/icons-material/LocalOffer';
+import Favorite from '@mui/icons-material/Favorite';
+import PushPin from '@mui/icons-material/PushPin';
 import Replay from '@mui/icons-material/Replay';
 import Sms from '@mui/icons-material/Sms';
 import Telegram from '@mui/icons-material/Telegram';
 import Visibility from '@mui/icons-material/Visibility';
+import VolumeOff from '@mui/icons-material/VolumeOff';
 import WhatsApp from '@mui/icons-material/WhatsApp';
 import {
 	format,
@@ -40,6 +43,7 @@ import AcceptTicketWithouSelectQueue from "../AcceptTicketWithoutQueueModal";
 import ConfirmationModal from "../ConfirmationModal";
 import openSocket from "../../services/socket-io";
 import WhatsMarked from "react-whatsmarked";
+import TicketListItemMenu from "../TicketListItemMenu";
 
 const StyledListItem = styled(ListItem)(({ theme }) => ({
 	position: "relative",
@@ -63,7 +67,7 @@ const StyledListItem = styled(ListItem)(({ theme }) => ({
 		backgroundColor: theme.palette.action.hover,
 		transform: 'translateY(-1px)',
 		boxShadow: theme.shadows[2]
-	}
+	},
 }));
 
 const AvatarContainer = styled(ListItemAvatar)(({ theme }) => ({
@@ -284,7 +288,7 @@ const TicketListItem = ({ ticket, filteredTags }) => {
 	
 	useEffect(() => {
 		setCurrentTicket(ticket);
-	}, [ticket.id, ticket.lastMessage, ticket.unreadMessages, ticket.status, ticket.userId]);
+	}, [ticket.id, ticket.lastMessage, ticket.unreadMessages, ticket.status, ticket.userId, ticket.pinnedChat, ticket.mutedChat, ticket.favoritedChat]);
 
 	useEffect(() => {
 		const socket = openSocket();
@@ -676,30 +680,26 @@ const TicketListItem = ({ ticket, filteredTags }) => {
 					disableTypography
 					primary={
 						<ContactName>
-							<div>
-								{ticket.whatsappId && (
-									<Typography
-										component="span"
-										variant="body2"
-										color="textSecondary"
-										sx={{
-											position: "absolute",
-											right: 6,
-											top: 4,
-											height: 12,
-											fontSize: '0.65rem',
-											whiteSpace: "nowrap",
-											overflow: "hidden",
-										}}
-									>
-										{isSameDay(parseISO(ticket.updatedAt), new Date()) ? (
-											<>{format(parseISO(ticket.updatedAt), "HH:mm")}</>
-										) : (
-											<>{format(parseISO(ticket.updatedAt), "dd/MM/yyyy")}</>
-										)}
-									</Typography>
-								)}
-							</div>
+							<Box sx={{ position: "absolute", right: 4, top: 2, display: "flex", alignItems: "center", gap: "2px" }}>
+							{ticket.whatsappId && (
+								<Typography
+									component="span"
+									variant="body2"
+									color="textSecondary"
+									sx={{
+										fontSize: '0.65rem',
+										whiteSpace: "nowrap",
+										overflow: "hidden",
+									}}
+								>
+									{isSameDay(parseISO(ticket.updatedAt), new Date()) ? (
+										<>{format(parseISO(ticket.updatedAt), "HH:mm")}</>
+									) : (
+										<>{format(parseISO(ticket.updatedAt), "dd/MM/yyyy")}</>
+									)}
+								</Typography>
+							)}
+						</Box>
 							{ticket.contact.telegramId && (
 								<Tooltip title="Telegram" arrow placement="right" >
 									<Telegram sx={{ fontSize: '0.9rem', color: theme.palette.mode === 'dark' ? theme.palette.info.light : "#85b2ff", marginRight: theme.spacing(0.5) }} />
@@ -734,6 +734,21 @@ const TicketListItem = ({ ticket, filteredTags }) => {
 							>
 								{ticket.contact.name}
 							</Typography>
+							{currentTicket.pinnedChat && (
+								<Tooltip title={t("chatActions.pinnedIndicator")} arrow placement="top">
+									<PushPin sx={{ fontSize: '0.85rem', color: theme.palette.primary.main, ml: 0.3, transform: 'rotate(45deg)' }} />
+								</Tooltip>
+							)}
+							{currentTicket.mutedChat && (
+								<Tooltip title={t("chatActions.mutedIndicator")} arrow placement="top">
+									<VolumeOff sx={{ fontSize: '0.85rem', color: theme.palette.warning.main, ml: 0.3 }} />
+								</Tooltip>
+							)}
+							{currentTicket.favoritedChat && (
+								<Tooltip title={t("ticketListMenu.favoritedIndicator")} arrow placement="top">
+									<Favorite sx={{ fontSize: '0.85rem', color: theme.palette.error.main, ml: 0.3 }} />
+								</Tooltip>
+							)}
 							{ticket.status === "closed" && (
 								<ClosedBadge
 									overlap="rectangular"
@@ -904,6 +919,9 @@ const TicketListItem = ({ ticket, filteredTags }) => {
 							<Replay />
 						</BottomButton>
 					)}
+					<Box>
+						<TicketListItemMenu ticket={currentTicket} />
+					</Box>
 				</ButtonContainer>
 			</StyledListItem>
 			<ConfirmationModal

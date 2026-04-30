@@ -1,0 +1,11 @@
+{
+  "watch": ["dist"],
+  "ignore": [
+    ".wwebjs_auth",
+    ".wwebjs_cache",
+    "node_modules",
+    "logs",
+    "*.log"
+  ],
+  "ext": "js,json"
+}

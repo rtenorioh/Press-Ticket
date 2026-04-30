@@ -10,6 +10,8 @@ const messageRoutes = Router();
 const upload = multer(uploadConfig);
 
 messageRoutes.get("/messages/count", isAuth, MessageController.count);
+messageRoutes.get("/messages/:ticketId/search", isAuth, MessageController.searchInTicket);
+messageRoutes.get("/messages/:ticketId/starred", isAuth, MessageController.listStarred);
 messageRoutes.get("/messages/:ticketId", isAuth, MessageController.index);
 messageRoutes.post("/messages/:ticketId", isAuth, upload.array("medias"), MessageController.store);
 messageRoutes.post("/messages/:ticketId/contacts", isAuth, MessageController.sendContacts);

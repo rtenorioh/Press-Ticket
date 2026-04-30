@@ -22,6 +22,11 @@ const processQueue = (error, token = null) => {
 };
 
 const handleLogout = () => {
+  localStorage.removeItem("token");
+  localStorage.removeItem("user");
+  delete api.defaults.headers.Authorization;
+  isRefreshing = false;
+  failedQueue = [];
   window.dispatchEvent(new CustomEvent("session:expired"));
 };
 

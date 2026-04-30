@@ -1,4 +1,19 @@
 import {
+  AccessTime,
+  Block,
+  Description,
+  Done,
+  DoneAll,
+  Error,
+  ExpandMore,
+  GetApp,
+  InsertDriveFile,
+  KeyboardArrowDown,
+  PictureAsPdf,
+  PushPin,
+  Star,
+} from "@mui/icons-material";
+import {
   Box,
   CircularProgress,
   IconButton,
@@ -8,48 +23,37 @@ import {
   blue,
   red
 } from "@mui/material/colors";
-import {
-  AccessTime,
-  Block,
-  Done,
-  DoneAll,
-  Error,
-  ExpandMore,
-  GetApp,
-  KeyboardArrowDown,
-  PictureAsPdf,
-  Description,
-  InsertDriveFile,
-} from "@mui/icons-material";
 
+import { useTheme } from "@mui/material/styles";
 import {
   format,
-  parseISO,
+  isSameDay,
   isToday,
   isYesterday,
-  isSameDay
+  parseISO
 } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Fragment, useCallback, useEffect, useReducer, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
+import WhatsMarked from "react-whatsmarked";
+import { useForwardingMessage } from "../../context/ForwardingMessage";
 import toastError from "../../errors/toastError";
 import api from "../../services/api";
 import openSocket from "../../services/socket-io";
+import AlbumPreview from "../AlbumPreview";
 import Audio from "../Audio";
-import LocationPreview from "../LocationPreview";
-import WhatsMarked from "react-whatsmarked";
-import MessageOptionsMenu from "../MessageOptionsMenu";
-import ModalImageCors from "../ModalImageCors";
-import MultiVcardPreview from "../MultiVcardPreview";
-import VcardPreview from "../VcardPreview";
 import ForwardingBar from "../ForwardingBar";
 import ForwardMessageModal from "../ForwardMessageModal";
-import { useForwardingMessage } from "../../context/ForwardingMessage";
-import { useTheme } from "@mui/material/styles";
+import LocationPreview from "../LocationPreview";
+import MessageOptionsMenu from "../MessageOptionsMenu";
 import MessageReactionsModal from "../MessageReactionsModal";
+import ModalImageCors from "../ModalImageCors";
+import MultiVcardPreview from "../MultiVcardPreview";
+// eslint-disable-next-line import/no-unresolved
+import PinnedMessagesBanner from "../PinnedMessagesBanner";
 import PollMessage from "../PollMessage";
-import AlbumPreview from "../AlbumPreview";
+import VcardPreview from "../VcardPreview";
 
 const MessagesListWrapper = styled("div")(({ theme }) => ({
   overflow: "hidden",
@@ -544,6 +548,15 @@ const reducer = (state, action) => {
     return [...state];
   }
 
+  if (action.type === "UPDATE_MESSAGE_STATE") {
+    const { messageId, ...updates } = action.payload;
+    const idx = state.findIndex(m => m && m.id === messageId);
+    if (idx === -1) return state;
+    const newState = [...state];
+    newState[idx] = { ...newState[idx], ...updates };
+    return newState;
+  }
+
   if (action.type === "RESET") {
     return [];
   }
@@ -581,7 +594,7 @@ const reducer = (state, action) => {
   }
 };
 
-const MessagesList = ({ ticketId, isGroup, onClick }) => {
+const MessagesList = ({ ticketId, isGroup, ticket, onClick }) => {
   const [messagesList, dispatch] = useReducer(reducer, []);
   const [pageNumber, setPageNumber] = useState(1);
   const [hasMore, setHasMore] = useState(false);
@@ -1272,7 +1285,21 @@ const MessagesList = ({ ticketId, isGroup, onClick }) => {
     
     return <AccessTime fontSize="small" sx={{ fontSize: 16, verticalAlign: "middle", color: "orange" }} />;
   };
-  
+
+  const renderMessageStateIcons = (msg) => {
+    if (!msg?.isPinned && !msg?.isStarred) return null;
+    return (
+      <>
+        {msg.isPinned && (
+          <PushPin sx={{ fontSize: 10, verticalAlign: "middle", opacity: 0.65, mr: 0.3 }} />
+        )}
+        {msg.isStarred && (
+          <Star sx={{ fontSize: 10, verticalAlign: "middle", opacity: 0.65, mr: 0.3 }} />
+        )}
+      </>
+    );
+  };
+
   const renderDailyTimestamps = (message, index) => {
     if (index === 0) {
       return null;
@@ -1400,6 +1427,26 @@ const MessagesList = ({ ticketId, isGroup, onClick }) => {
       }
     }
   };
+
+  useEffect(() => {
+    const handler = (e) => {
+      if (e.detail?.messageId) {
+        scrollToMessage(e.detail.messageId);
+      }
+    };
+    window.addEventListener("scrollToMessage", handler);
+    return () => window.removeEventListener("scrollToMessage", handler);
+  }, [pageNumber, hasMore, ticketId]);
+
+  useEffect(() => {
+    const handler = (e) => {
+      if (e.detail?.messageId) {
+        dispatch({ type: "UPDATE_MESSAGE_STATE", payload: e.detail });
+      }
+    };
+    window.addEventListener("messageStateUpdate", handler);
+    return () => window.removeEventListener("messageStateUpdate", handler);
+  }, []);
 
   const checkScroll = useCallback(() => {
     const messagesList = document.getElementById("messagesList");
@@ -1613,6 +1660,7 @@ const MessagesList = ({ ticketId, isGroup, onClick }) => {
                     )}
                     {renderReactions(firstMessage)}
                     <MessageTimestamp>
+                      {renderMessageStateIcons(firstMessage)}
                       {format(parseISO(firstMessage.createdAt), "HH:mm")}
                     </MessageTimestamp>
                   </MessageLeft>
@@ -1669,6 +1717,7 @@ const MessagesList = ({ ticketId, isGroup, onClick }) => {
                     )}
                     {renderReactions(firstMessage)}
                     <MessageTimestamp>
+                      {renderMessageStateIcons(firstMessage)}
                       {renderMessageAck(firstMessage)}
                       {format(parseISO(firstMessage.createdAt), "HH:mm")}
                     </MessageTimestamp>
@@ -1797,6 +1846,7 @@ const MessagesList = ({ ticketId, isGroup, onClick }) => {
                 {t("messagesList.message.viewOnMobile")} <br />
                 {renderReactions(message)}
                 <MessageTimestamp>
+                  {renderMessageStateIcons(message)}
                   {format(parseISO(message.createdAt), "HH:mm")}
                 </MessageTimestamp>
               </MessageLeft>
@@ -1906,6 +1956,7 @@ const MessagesList = ({ ticketId, isGroup, onClick }) => {
                   {message.mediaType !== "multi_vcard" && message.mediaType !== "location" && message.mediaType !== "vcard" && <WhatsMarked sx={{ fontSize: 'inherit', lineHeight: 'inherit', display: 'flex', width: '100%' }}>{message.body}</WhatsMarked>}
                   {renderReactions(message)}
                   <MessageTimestamp>
+                    {renderMessageStateIcons(message)}
                     {message.isEdited && <span>{t("messagesList.message.edited")} </span>}
                     {format(parseISO(message.createdAt), "HH:mm")}
                   </MessageTimestamp>
@@ -1976,6 +2027,7 @@ const MessagesList = ({ ticketId, isGroup, onClick }) => {
                   {message.mediaType !== "multi_vcard" && message.mediaType !== "location" && message.mediaType !== "vcard" && <WhatsMarked sx={{ fontSize: 'inherit', lineHeight: 'inherit', display: 'flex', width: '100%' }}>{message.body}</WhatsMarked>}
                   {renderReactions(message)}
                   <MessageTimestamp>
+                    {renderMessageStateIcons(message)}
                     {message.isEdited && <span>{t("messagesList.message.edited")} </span>}
                     {format(parseISO(message.createdAt), "HH:mm")}
                     {renderMessageAck(message)}
@@ -2023,6 +2075,12 @@ const MessagesList = ({ ticketId, isGroup, onClick }) => {
     }
   };
 
+  const [showPinnedBanner, setShowPinnedBanner] = useState(true);
+
+  const handlePinnedMessageClick = (messageId) => {
+    scrollToMessage(messageId);
+  };
+
   return (
     <MessagesListWrapper>
       <MessageOptionsMenu
@@ -2031,6 +2089,13 @@ const MessagesList = ({ ticketId, isGroup, onClick }) => {
         menuOpen={messageOptionsMenuOpen}
         handleClose={handleCloseMessageOptionsMenu}
       />
+      {ticket && ticket.whatsappId && showPinnedBanner && (
+        <PinnedMessagesBanner
+          ticket={ticket}
+          onMessageClick={handlePinnedMessageClick}
+          onClose={() => setShowPinnedBanner(false)}
+        />
+      )}
       <MessagesListStyled
         id="messagesList"
         className="messages-list-scrollable"

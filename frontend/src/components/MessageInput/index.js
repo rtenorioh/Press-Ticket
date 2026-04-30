@@ -46,6 +46,7 @@ import { ReplyMessageContext } from "../../context/ReplyingMessage/ReplyingMessa
 import UploadModal from "../UploadModal";
 import AttachmentMenu from "../AttachmentMenu";
 import PollCreator from "../PollCreator";
+import LocationSendModal from "../LocationSendModal";
 import toastError from "../../errors/toastError";
 import { useLocalStorage } from "../../hooks/useLocalStorage";
 import api from "../../services/api";
@@ -373,6 +374,7 @@ const MessageInput = ({ ticketStatus }) => {
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [initialCaption, setInitialCaption] = useState("");
   const [showPollCreator, setShowPollCreator] = useState(false);
+  const [showLocationModal, setShowLocationModal] = useState(false);
   const { t } = useTranslation();
   const theme = useTheme();
   const mainWrapperRef = useRef(null);
@@ -1359,6 +1361,10 @@ const MessageInput = ({ ticketStatus }) => {
     setShowPollCreator(true);
   };
 
+  const handleLocationClick = () => {
+    setShowLocationModal(true);
+  };
+
   const handleContactSelect = (contacts) => {
     if (contacts && contacts.length > 0) {
       const contactsData = contacts.map(contact => ({
@@ -1470,12 +1476,19 @@ const MessageInput = ({ ticketStatus }) => {
               onAudioSelect={handleAudioSelect}
               onContactSelect={handleContactSelect}
               onPollClick={handlePollClick}
+              onLocationClick={handleLocationClick}
               disabled={loading || recording || ticketStatus !== "open"}
             />
 
             <PollCreator
               open={showPollCreator}
               onClose={() => setShowPollCreator(false)}
+              ticketId={ticketId}
+            />
+
+            <LocationSendModal
+              open={showLocationModal}
+              onClose={() => setShowLocationModal(false)}
               ticketId={ticketId}
             />
 

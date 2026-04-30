@@ -12,7 +12,8 @@ import {
   Videocam,
   ContactPhone,
   AudioFile,
-  Poll
+  Poll,
+  LocationOn
 } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
 import CameraModal from '../CameraModal';
@@ -60,6 +61,7 @@ const AttachmentMenu = ({
   onAudioSelect,
   onContactSelect,
   onPollClick,
+  onLocationClick,
   disabled = false 
 }) => {
   const { t } = useTranslation();
@@ -104,6 +106,13 @@ const AttachmentMenu = ({
     onClose();
     if (onPollClick) {
       onPollClick();
+    }
+  };
+
+  const handleLocationClick = () => {
+    onClose();
+    if (onLocationClick) {
+      onLocationClick();
     }
   };
 
@@ -219,6 +228,16 @@ const AttachmentMenu = ({
           <ListItemText 
             primary="Enquete" 
             secondary="Criar enquete"
+          />
+        </MenuItemStyled>
+
+        <MenuItemStyled onClick={handleLocationClick} disabled={disabled}>
+          <ListItemIcon>
+            <LocationOn />
+          </ListItemIcon>
+          <ListItemText 
+            primary="Localização" 
+            secondary="Enviar localização"
           />
         </MenuItemStyled>
       </StyledMenu>

@@ -30,7 +30,7 @@ const connectToSocket = () => {
             if (tokenData.exp * 1000 < Date.now()) {
                 console.warn("Token expirado, socket não será inicializado");
                 localStorage.removeItem("token");
-                window.location.reload();
+                localStorage.removeItem("user");
                 return null;
             }
         } catch (err) {
@@ -73,7 +73,8 @@ const connectToSocket = () => {
                 error.message.includes("jwt malformed")) {
                 socket.disconnect();
                 localStorage.removeItem("token");
-                window.location.href = "/login";
+                localStorage.removeItem("user");
+                window.dispatchEvent(new CustomEvent("session:expired"));
             }
         });
 

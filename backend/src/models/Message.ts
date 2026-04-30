@@ -70,6 +70,14 @@ class Message extends Model<InferAttributes<Message>, InferCreationAttributes<Me
   @Column(DataType.BOOLEAN)
   isEdited: CreationOptional<boolean>;
 
+  @Default(false)
+  @Column(DataType.BOOLEAN)
+  isStarred: CreationOptional<boolean>;
+
+  @Default(false)
+  @Column(DataType.BOOLEAN)
+  isPinned: CreationOptional<boolean>;
+
   @CreatedAt
   @Column(DataType.DATE(6))
   declare createdAt: CreationOptional<Date>;

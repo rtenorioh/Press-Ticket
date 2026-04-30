@@ -10,7 +10,7 @@
     "migrate:undo": "tsc && npx sequelize-cli db:migrate:undo",
     "sequelize": "npx sequelize-cli db:migrate && npx sequelize-cli db:seed:all",
     "watch": "tsc -w",
-    "start": "nodemon dist/server.js",
+    "start": "nodemon --watch dist --ignore .wwebjs_auth --ignore .wwebjs_cache --ignore logs dist/server.js",
     "dev": "ts-node-dev --respawn --transpile-only --ignore node_modules src/server.ts",
     "pretest": "NODE_ENV=test sequelize db:migrate && NODE_ENV=test sequelize db:seed:all",
     "test": "NODE_ENV=test jest",

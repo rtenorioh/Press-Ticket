@@ -1,36 +1,43 @@
+import AddRoundedIcon from "@mui/icons-material/AddRounded";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import EditIcon from "@mui/icons-material/Edit";
+import ForwardIcon from "@mui/icons-material/Forward";
+import HistoryIcon from "@mui/icons-material/History";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
+import PushPinIcon from "@mui/icons-material/PushPin";
+import PushPinOutlinedIcon from "@mui/icons-material/PushPinOutlined";
+import ReplyIcon from "@mui/icons-material/Reply";
+import SentimentSatisfiedAltIcon from "@mui/icons-material/SentimentSatisfiedAlt";
+import StarIcon from "@mui/icons-material/Star";
+import StarBorderIcon from "@mui/icons-material/StarBorder";
 import {
-  MenuItem,
-  ListItemIcon,
-  ListItemText,
-  Divider,
-  Popper,
-  Paper,
   Box,
   ClickAwayListener,
+  Divider,
   IconButton,
-  MenuList
+  ListItemIcon,
+  ListItemText,
+  MenuItem,
+  MenuList,
+  Paper,
+  Popper
 } from "@mui/material";
+import EmojiPicker, { Theme as EmojiTheme } from 'emoji-picker-react';
 import PropTypes from "prop-types";
-import { useContext, useState, useEffect } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { EditMessageContext } from "../../context/EditingMessage/EditingMessageContext";
-import { ReplyMessageContext } from "../../context/ReplyingMessage/ReplyingMessageContext";
 import { useForwardingMessage } from "../../context/ForwardingMessage";
+import { ReplyMessageContext } from "../../context/ReplyingMessage/ReplyingMessageContext";
 import toastError from "../../errors/toastError";
 import toastSuccess from "../../errors/toastSuccess";
 import api from "../../services/api";
+import openSocket from "../../services/socket-io";
+import WhatsAppFeaturesService from "../../services/whatsappFeatures";
 import ConfirmationModal from "../ConfirmationModal";
 import MessageHistoryModal from "../MessageHistoryModal";
-import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
-import EditIcon from "@mui/icons-material/Edit";
-import ReplyIcon from "@mui/icons-material/Reply";
-import SentimentSatisfiedAltIcon from "@mui/icons-material/SentimentSatisfiedAlt";
-import AddRoundedIcon from "@mui/icons-material/AddRounded";
-import EmojiPicker, { Theme as EmojiTheme } from 'emoji-picker-react';
-import HistoryIcon from "@mui/icons-material/History";
-import ContentCopyIcon from "@mui/icons-material/ContentCopy";
-import ForwardIcon from "@mui/icons-material/Forward";
-import openSocket from "../../services/socket-io";
+import MessageInfoModal from "../MessageInfoModal";
 
 const MessageOptionsMenu = ({ message, menuOpen, handleClose, anchorEl }) => {
   const { setReplyingMessage } = useContext(ReplyMessageContext);
@@ -44,6 +51,9 @@ const MessageOptionsMenu = ({ message, menuOpen, handleClose, anchorEl }) => {
   const [reactionVirtualAnchor, setReactionVirtualAnchor] = useState(null);
   const [reactionPopperOpen, setReactionPopperOpen] = useState(false);
   const [emojiPickerAnchorEl, setEmojiPickerAnchorEl] = useState(null);
+  const [messageInfoOpen, setMessageInfoOpen] = useState(false);
+  const [pinning, setPinning] = useState(false);
+  const [starring, setStarring] = useState(false);
   const [emojiPickerVirtualAnchor, setEmojiPickerVirtualAnchor] = useState(null);
   const emojiPickerOpen = Boolean(emojiPickerAnchorEl);
   const [recentReactions, setRecentReactions] = useState(() => {
@@ -232,6 +242,77 @@ const MessageOptionsMenu = ({ message, menuOpen, handleClose, anchorEl }) => {
     enterForwardingMode();
     handleClose();
   }
+
+  const dispatchMessageState = (messageId, updates) => {
+    window.dispatchEvent(
+      new CustomEvent("messageStateUpdate", { detail: { messageId, ...updates } })
+    );
+  };
+
+  const handlePinMessage = async () => {
+    try {
+      setPinning(true);
+      await WhatsAppFeaturesService.pinMessage(message.id, 604800);
+      setCurrentMessage(prev => ({ ...prev, isPinned: true }));
+      dispatchMessageState(message.id, { isPinned: true });
+      toastSuccess(t("messageOptionsMenu.pinSuccess"));
+    } catch (err) {
+      toastError(err, t);
+    } finally {
+      setPinning(false);
+      handleClose();
+    }
+  };
+
+  const handleUnpinMessage = async () => {
+    try {
+      setPinning(true);
+      await WhatsAppFeaturesService.unpinMessage(message.id);
+      setCurrentMessage(prev => ({ ...prev, isPinned: false }));
+      dispatchMessageState(message.id, { isPinned: false });
+      toastSuccess(t("messageOptionsMenu.unpinSuccess"));
+    } catch (err) {
+      toastError(err, t);
+    } finally {
+      setPinning(false);
+      handleClose();
+    }
+  };
+
+  const handleStarMessage = async () => {
+    try {
+      setStarring(true);
+      await WhatsAppFeaturesService.starMessage(message.id);
+      setCurrentMessage(prev => ({ ...prev, isStarred: true }));
+      dispatchMessageState(message.id, { isStarred: true });
+      toastSuccess(t("messageOptionsMenu.starSuccess"));
+    } catch (err) {
+      toastError(err, t);
+    } finally {
+      setStarring(false);
+      handleClose();
+    }
+  };
+
+  const handleUnstarMessage = async () => {
+    try {
+      setStarring(true);
+      await WhatsAppFeaturesService.unstarMessage(message.id);
+      setCurrentMessage(prev => ({ ...prev, isStarred: false }));
+      dispatchMessageState(message.id, { isStarred: false });
+      toastSuccess(t("messageOptionsMenu.unstarSuccess"));
+    } catch (err) {
+      toastError(err, t);
+    } finally {
+      setStarring(false);
+      handleClose();
+    }
+  };
+
+  const handleOpenMessageInfo = () => {
+    setMessageInfoOpen(true);
+    handleClose();
+  };
   
   const hasTextToCopy = () => {
     return message.body && typeof message.body === 'string' && message.body.trim() !== '';
@@ -253,6 +334,11 @@ const MessageOptionsMenu = ({ message, menuOpen, handleClose, anchorEl }) => {
         oldMessages={currentMessage?.oldMessages || []}
       >
       </MessageHistoryModal>
+      <MessageInfoModal
+        open={messageInfoOpen}
+        onClose={() => setMessageInfoOpen(false)}
+        messageId={message?.id}
+      />
       <Popper
         open={menuOpen}
         anchorEl={anchorEl}
@@ -329,6 +415,49 @@ const MessageOptionsMenu = ({ message, menuOpen, handleClose, anchorEl }) => {
               
               {message.fromMe && <Divider />}
               
+              {!currentMessage?.isPinned ? (
+                <MenuItem key="pin" onClick={handlePinMessage} disabled={pinning}>
+                  <ListItemIcon>
+                    <PushPinOutlinedIcon fontSize="small" />
+                  </ListItemIcon>
+                  <ListItemText primary={t("messageOptionsMenu.pin")} />
+                </MenuItem>
+              ) : (
+                <MenuItem key="unpin" onClick={handleUnpinMessage} disabled={pinning}>
+                  <ListItemIcon>
+                    <PushPinIcon fontSize="small" />
+                  </ListItemIcon>
+                  <ListItemText primary={t("messageOptionsMenu.unpin")} />
+                </MenuItem>
+              )}
+
+              {!currentMessage?.isStarred ? (
+                <MenuItem key="star" onClick={handleStarMessage} disabled={starring}>
+                  <ListItemIcon>
+                    <StarBorderIcon fontSize="small" />
+                  </ListItemIcon>
+                  <ListItemText primary={t("messageOptionsMenu.star")} />
+                </MenuItem>
+              ) : (
+                <MenuItem key="unstar" onClick={handleUnstarMessage} disabled={starring}>
+                  <ListItemIcon>
+                    <StarIcon fontSize="small" />
+                  </ListItemIcon>
+                  <ListItemText primary={t("messageOptionsMenu.unstar")} />
+                </MenuItem>
+              )}
+
+              {message.fromMe && (
+                <MenuItem key="info" onClick={handleOpenMessageInfo}>
+                  <ListItemIcon>
+                    <InfoOutlinedIcon fontSize="small" />
+                  </ListItemIcon>
+                  <ListItemText primary={t("messageOptionsMenu.info")} />
+                </MenuItem>
+              )}
+
+              {message.fromMe && <Divider />}
+
               {message.fromMe && (
                 <MenuItem 
                   key="delete" 

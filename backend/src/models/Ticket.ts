@@ -17,6 +17,7 @@ import {
 import Contact from "./Contact";
 import Message from "./Message";
 import Queue from "./Queue";
+import TicketLabel from "./TicketLabel";
 import User from "./User";
 import Whatsapp from "./Whatsapp";
 
@@ -83,8 +84,23 @@ class Ticket extends Model<InferAttributes<Ticket>, InferCreationAttributes<Tick
   @Column(DataType.STRING)
   channel: string | null;
 
+  @Default(false)
+  @Column(DataType.BOOLEAN)
+  pinnedChat: CreationOptional<boolean>;
+
+  @Default(false)
+  @Column(DataType.BOOLEAN)
+  mutedChat: CreationOptional<boolean>;
+
+  @Default(false)
+  @Column(DataType.BOOLEAN)
+  favoritedChat: CreationOptional<boolean>;
+
   @HasMany(() => Message)
   declare messages: NonAttribute<Message[]>;
+
+  @HasMany(() => TicketLabel)
+  declare ticketLabels: NonAttribute<TicketLabel[]>;
 }
 
 export default Ticket;

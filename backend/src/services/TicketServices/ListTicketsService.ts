@@ -49,7 +49,7 @@ const ListTicketsService = async ({
   try {
 
   let whereCondition: any = {};
-  
+
   const allTickets = await ListSettingsServiceOne({ key: "allTicket" });
   const allTicketsEnabled = allTickets?.value === "enabled";
 
@@ -270,11 +270,11 @@ const ListTicketsService = async ({
       };
     } else if (isGroup === "false") {
       const hasExistingOr = whereCondition[Op.or] !== undefined;
-      
+
       if (hasExistingOr) {
         const existingOr = whereCondition[Op.or];
         delete whereCondition[Op.or];
-        
+
         whereCondition = {
           ...whereCondition,
           [Op.and]: [
@@ -323,7 +323,7 @@ const ListTicketsService = async ({
     distinct: true,
     limit,
     offset,
-    order: [[settingCreated, settingASC]]
+    order: [["pinnedChat", "DESC"], [settingCreated, settingASC]]
   });
 
   const hasMore = !(all === "true") && count > offset + defaultLimit;
