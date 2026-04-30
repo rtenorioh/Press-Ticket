@@ -38,6 +38,7 @@ export const SendTextMessageService = async (
     channelClient = client.setChannel("webchat");
   } else {
     logger.error("Nenhum canal disponível para este contato.");
+    throw new Error("Nenhum canal disponível para este contato.");
   }
 
   try {
@@ -52,10 +53,15 @@ export const SendTextMessageService = async (
     let data: any;
 
     try {
-      const jsonStart = response.indexOf("{");
-      const jsonResponse = response.substring(jsonStart);
-      data = JSON.parse(jsonResponse);
+      if (typeof response === "object") {
+        data = response;
+      } else {
+        const jsonStart = response.indexOf("{");
+        const jsonResponse = response.substring(jsonStart);
+        data = JSON.parse(jsonResponse);
+      }
     } catch (error) {
+      logger.error(`Erro ao parsear resposta Hub: ${error} | Response: ${JSON.stringify(response)}`);
       data = response;
     }
 

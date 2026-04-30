@@ -25,13 +25,8 @@ export const setChannelWebhook = async (
     }
   );
 
-  client
-    .createSubscription(subscription)
-    .then((response: any) => {
-    })
-    .catch((error: any) => {
-      logger.error(`Erro ao subscribir webhook Hub: ${error}`);
-    });
+  await client.createSubscription(subscription);
+  logger.info(`Webhook Hub registrado com sucesso para canal: ${whatsapp.qrcode}`);
 
   await Whatsapp.update(
     {

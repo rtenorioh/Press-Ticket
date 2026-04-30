@@ -112,10 +112,15 @@ export const SendMediaMessageService = async (
     let data: any;
 
     try {
-      const jsonStart = response.indexOf("{");
-      const jsonResponse = response.substring(jsonStart);
-      data = JSON.parse(jsonResponse);
+      if (typeof response === "object") {
+        data = response;
+      } else {
+        const jsonStart = response.indexOf("{");
+        const jsonResponse = response.substring(jsonStart);
+        data = JSON.parse(jsonResponse);
+      }
     } catch (error) {
+      logger.error(`Erro ao parsear resposta Hub: ${error} | Response: ${JSON.stringify(response)}`);
       data = response;
     }
 
