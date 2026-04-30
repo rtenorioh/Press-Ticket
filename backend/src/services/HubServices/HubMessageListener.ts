@@ -8,7 +8,7 @@ import { UpdateMessageAck } from "./UpdateMessageHubAck";
 import { logger } from "../../utils/logger";
 
 export interface IContent {
-  type: "text" | "image" | "audio" | "video" | "file" | "location";
+  type: "text" | "image" | "audio" | "video" | "file" | "location" | "reply_text";
   text?: string;
   url?: string;
   fileUrl?: string;
@@ -17,6 +17,7 @@ export interface IContent {
   filename?: string;
   fileSize?: number;
   fileMimeType?: string;
+  messsageId?: string;
 }
 
 export interface HubInMessage {
@@ -207,7 +208,7 @@ const HubMessageListener = async (
     }
 
 
-    if (contents[0]?.type === "text") {
+    if (contents[0]?.type === "text" || contents[0]?.type === "reply_text") {
       await CreateMessageService({
         id,
         contactId: contact.id,

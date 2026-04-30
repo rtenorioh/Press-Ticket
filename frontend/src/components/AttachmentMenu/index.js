@@ -15,7 +15,8 @@ import {
   Poll,
   LocationOn,
   DashboardCustomize,
-  ViewCarousel
+  ViewCarousel,
+  QuickreplyOutlined
 } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
 import CameraModal from '../CameraModal';
@@ -66,6 +67,7 @@ const AttachmentMenu = ({
   onLocationClick,
   onCardClick,
   onCarouselClick,
+  onReplyableClick,
   disabled = false
 }) => {
   const { t } = useTranslation();
@@ -131,6 +133,13 @@ const AttachmentMenu = ({
     onClose();
     if (onCarouselClick) {
       onCarouselClick();
+    }
+  };
+
+  const handleReplyableClick = () => {
+    onClose();
+    if (onReplyableClick) {
+      onReplyableClick();
     }
   };
 
@@ -279,6 +288,18 @@ const AttachmentMenu = ({
             <ListItemText
               primary="Carrossel"
               secondary="Múltiplos cards em sequência"
+            />
+          </MenuItemStyled>
+        )}
+
+        {onReplyableClick && (
+          <MenuItemStyled onClick={handleReplyableClick} disabled={disabled}>
+            <ListItemIcon>
+              <QuickreplyOutlined />
+            </ListItemIcon>
+            <ListItemText
+              primary="Respostas rápidas"
+              secondary="Texto com botões de resposta"
             />
           </MenuItemStyled>
         )}

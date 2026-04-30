@@ -7,6 +7,7 @@ import CreateHubTicketService from "../services/HubServices/CreateHubTicketServi
 import { SendCardMessageService } from "../services/HubServices/SendCardMessageHubService";
 import { SendCarouselMessageService } from "../services/HubServices/SendCarouselMessageHubService";
 import { SendMediaMessageService } from "../services/HubServices/SendMediaMessageHubService";
+import { SendReplyableTextService } from "../services/HubServices/SendReplyableTextHubService";
 import { SendTextMessageService } from "../services/HubServices/SendTextMessageHubService";
 import { logger } from "../utils/logger";
 
@@ -82,6 +83,59 @@ export const send = async (req: Request, res: Response): Promise<Response> => {
     logger.error(`Erro: ${error}`);
 
     return res.status(400).json({ message: error });
+  }
+};
+
+export const sendReplyableText = async (req: Request, res: Response): Promise<Response> => {
+  const { text, quickReplyButtons = [] } = req.body;
+  const { ticketId } = req.params;
+
+  if (!text?.trim()) {
+    return res.status(400).json({ error: "O campo 'text' é obrigatório." });
+  }
+
+  if (!Array.isArray(quickReplyButtons) || quickReplyButtons.length === 0) {
+    return res.status(400).json({ error: "Pelo menos um botão de resposta rápida é obrigatório." });
+  }
+
+  const ticket = await Ticket.findByPk(ticketId, {
+    include: [
+      {
+        model: Contact,
+        as: "contact",
+        attributes: ["number", "email", "messengerId", "instagramId", "telegramId", "webchatId"]
+      },
+      {
+        model: Whatsapp,
+        as: "whatsapp",
+        attributes: ["qrcode", "type"]
+      }
+    ]
+  });
+
+  if (!ticket) {
+    return res.status(404).json({ message: "Ticket not found" });
+  }
+
+  if (ticket.whatsapp?.type === "wwebjs") {
+    return res.status(400).json({
+      error: "Este ticket é do tipo wwebjs. ReplyableTextContent não é suportado."
+    });
+  }
+
+  try {
+    const newMessage = await SendReplyableTextService(
+      text,
+      quickReplyButtons,
+      ticket.id,
+      ticket.contact,
+      ticket.whatsapp
+    );
+
+    return res.status(200).json(newMessage);
+  } catch (error) {
+    logger.error(`Erro ao enviar replyable-text Hub: ${error}`);
+    return res.status(400).json({ message: String(error) });
   }
 };
 

@@ -47,6 +47,7 @@ import UploadModal from "../UploadModal";
 import AttachmentMenu from "../AttachmentMenu";
 import CardMessageModal from "../CardMessageModal";
 import CarouselMessageModal from "../CarouselMessageModal";
+import ReplyableTextModal from "../ReplyableTextModal";
 import PollCreator from "../PollCreator";
 import LocationSendModal from "../LocationSendModal";
 import toastError from "../../errors/toastError";
@@ -379,6 +380,7 @@ const MessageInput = ({ ticketStatus }) => {
   const [showLocationModal, setShowLocationModal] = useState(false);
   const [showCardModal, setShowCardModal] = useState(false);
   const [showCarouselModal, setShowCarouselModal] = useState(false);
+  const [showReplyableModal, setShowReplyableModal] = useState(false);
   const { t } = useTranslation();
   const theme = useTheme();
   const mainWrapperRef = useRef(null);
@@ -1377,6 +1379,10 @@ const MessageInput = ({ ticketStatus }) => {
     setShowCarouselModal(true);
   };
 
+  const handleReplyableClick = () => {
+    setShowReplyableModal(true);
+  };
+
   const handleContactSelect = (contacts) => {
     if (contacts && contacts.length > 0) {
       const contactsData = contacts.map(contact => ({
@@ -1491,6 +1497,7 @@ const MessageInput = ({ ticketStatus }) => {
               onLocationClick={handleLocationClick}
               onCardClick={["facebook", "instagram", "telegram"].includes(channelType) ? handleCardClick : undefined}
               onCarouselClick={["facebook", "instagram", "telegram"].includes(channelType) ? handleCarouselClick : undefined}
+              onReplyableClick={["facebook", "instagram", "telegram"].includes(channelType) ? handleReplyableClick : undefined}
               disabled={loading || recording || ticketStatus !== "open"}
             />
 
@@ -1515,6 +1522,12 @@ const MessageInput = ({ ticketStatus }) => {
             <CarouselMessageModal
               open={showCarouselModal}
               onClose={() => setShowCarouselModal(false)}
+              ticketId={ticketId}
+            />
+
+            <ReplyableTextModal
+              open={showReplyableModal}
+              onClose={() => setShowReplyableModal(false)}
               ticketId={ticketId}
             />
 
