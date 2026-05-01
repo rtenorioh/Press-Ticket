@@ -44,6 +44,7 @@ import PeopleAltIcon from '@mui/icons-material/PeopleAlt';
 import MonitorHeartIcon from '@mui/icons-material/MonitorHeart';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import GroupIcon from '@mui/icons-material/Group';
+import MailOutlinedIcon from '@mui/icons-material/MailOutlined';
 import { useTranslation } from "react-i18next";
 import { Can } from "../components/Can";
 import { AuthContext } from "../context/Auth/AuthContext";
@@ -346,6 +347,13 @@ const MainListItems = (props) => {
           />
         )}
       </ListItemLinkWithDropdown>
+      <ListItemLink
+        to="/email"
+        primary="Email"
+        icon={<MailOutlinedIcon />}
+        active={location.pathname === '/email'}
+        drawerClose={drawerClose}
+      />
       <ListItemLink
         to="/quickAnswers"
         primary={t("mainDrawer.listItems.quickAnswers")}

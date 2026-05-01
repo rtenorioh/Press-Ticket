@@ -29,6 +29,8 @@ import GroupEvent from "../models/GroupEvent";
 import PollVote from "../models/PollVote";
 import WhatsappLabel from "../models/WhatsappLabel";
 import TicketLabel from "../models/TicketLabel";
+import Email from "../models/Email";
+import EmailAttachment from "../models/EmailAttachment";
 
 // eslint-disable-next-line
 const dbConfig = require("../config/database");
@@ -65,7 +67,9 @@ const models = [
   GroupEvent,
   PollVote,
   WhatsappLabel,
-  TicketLabel
+  TicketLabel,
+  Email,
+  EmailAttachment
 ];
 
 sequelize.addModels(models);

@@ -42,6 +42,7 @@ import rateLimitRoutes from "./rateLimitRoutes";
 import fileManagerRoutes from "./fileManagerRoutes";
 import whatsappFeaturesRoutes from "./whatsappFeaturesRoutes";
 import whatsappLabelRoutes from "./whatsappLabelRoutes";
+import emailRoutes from "./emailRoutes";
 
 const routes = Router();
 
@@ -87,5 +88,6 @@ routes.use(rateLimitRoutes);
 routes.use(fileManagerRoutes);
 routes.use(whatsappFeaturesRoutes);
 routes.use(whatsappLabelRoutes);
+routes.use(emailRoutes);
 
 export default routes;

@@ -40,6 +40,7 @@ import Users from "../pages/Users";
 import Videos from "../pages/Videos";
 import HealthCheck from "../pages/HealthCheck";
 import GroupManagement from "../pages/GroupManagement";
+import EmailPage from "../pages/Email";
 import PrivateRoute from "./PrivateRoute";
 import AdminRoute from "./AdminRoute";
 import MasterAdminRoute from "./MasterAdminRoute";
@@ -96,6 +97,7 @@ const AppRoutes = ({ toggleTheme, onThemeConfigUpdate }) => {
             <Route path="videos" element={<Videos />} />
             <Route path="health-check" element={<HealthCheck />} />
             <Route path="group-management" element={<GroupManagement />} />
+            <Route path="email" element={<EmailPage />} />
           </Route>
         </Routes>
         <ToastContainer 
