@@ -136,7 +136,10 @@ export const listActiveWbotIds = (): number[] => {
   }
 };
 
-export const initWbot = async (whatsapp: Whatsapp): Promise<Session> => {
+export const initWbot = async (
+  whatsapp: Whatsapp,
+  options?: { method?: "pairing"; phoneNumber?: string }
+): Promise<Session> => {
   return new Promise(async (resolve, reject) => {
     try {
       // Garantir que sessão anterior está destruída antes de iniciar nova
@@ -217,9 +220,13 @@ export const initWbot = async (whatsapp: Whatsapp): Promise<Session> => {
             remotePath: process.env.WEB_VERSION_URL,
           }
         } : {}),
+        ...(options?.method === "pairing" && options.phoneNumber ? {
+          pairWithPhoneNumber: { phoneNumber: options.phoneNumber }
+        } : {}),
       });
 
       let isResolved = false;
+      const isPairingMode = !!options?.phoneNumber;
 
       // Workaround: whatsapp-web.js tem uma race condition onde o evento
       // 'change:hasSynced' pode disparar ANTES do listener ser registrado
@@ -265,29 +272,55 @@ export const initWbot = async (whatsapp: Whatsapp): Promise<Session> => {
         reject(err);
       });
 
-      wbot.on("qr", async qr => {
-        logger.info("Session:", sessionName);
-        clearInterval(syncCheckInterval);
-        qrCode.generate(qr, { small: true });
-        await whatsapp.update({
-          qrcode: qr,
-          status: "qrcode",
-          retries: 0,
-          type: "wwebjs"
-        });
+      if (!isPairingMode) {
+        wbot.on("qr", async qr => {
+          logger.info(`Session: ${sessionName} QR_CODE`);
+          clearInterval(syncCheckInterval);
+          qrCode.generate(qr, { small: true });
+          await whatsapp.update({
+            qrcode: qr,
+            status: "qrcode",
+            retries: 0,
+            type: "wwebjs"
+          });
 
-        const sessionIndex = sessions.findIndex(s => s.id === whatsapp.id);
-        if (sessionIndex === -1) {
-          wbot.id = whatsapp.id;
-          sessions.push(wbot);
-        }
+          const sessionIndex = sessions.findIndex(s => s.id === whatsapp.id);
+          if (sessionIndex === -1) {
+            wbot.id = whatsapp.id;
+            sessions.push(wbot);
+          }
 
-        io.emit("whatsappSession", {
-          action: "update",
-          session: whatsapp,
-          number: ""
+          io.emit("whatsappSession", {
+            action: "update",
+            session: whatsapp,
+            number: ""
+          });
         });
-      });
+      }
+
+      if (isPairingMode) {
+        wbot.on("code", async (code: string) => {
+          logger.info(`Session: ${sessionName} PAIRING_CODE`);
+          const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
+          await whatsapp.update({
+            pairingCode: code,
+            pairingCodeExpiresAt: expiresAt,
+            status: "qrcode",
+            retries: 0
+          });
+
+          const sessionIndex = sessions.findIndex(s => s.id === whatsapp.id);
+          if (sessionIndex === -1) {
+            wbot.id = whatsapp.id;
+            sessions.push(wbot);
+          }
+
+          io.emit("whatsappSession", {
+            action: "update",
+            session: whatsapp
+          });
+        });
+      }
 
       wbot.on("loading_screen", (percent, message) => {
         logger.info(`Session: ${sessionName} LOADING - ${percent}% - ${message}`);
@@ -376,6 +409,8 @@ export const initWbot = async (whatsapp: Whatsapp): Promise<Session> => {
         await whatsapp.update({
           status: "CONNECTED",
           qrcode: "",
+          pairingCode: "",
+          pairingCodeExpiresAt: undefined,
           retries: 0,
           number: wbot.info.wid._serialized.split("@")[0],
           type: "wwebjs",

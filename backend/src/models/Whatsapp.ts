@@ -75,6 +75,14 @@ class Whatsapp extends Model<InferAttributes<Whatsapp>, InferCreationAttributes<
   })
   color: CreationOptional<string>;
 
+  @AllowNull
+  @Column(DataType.STRING(20))
+  pairingCode: CreationOptional<string>;
+
+  @AllowNull
+  @Column(DataType.DATE)
+  pairingCodeExpiresAt: CreationOptional<Date>;
+
   @CreatedAt
   declare createdAt: CreationOptional<Date>;
 

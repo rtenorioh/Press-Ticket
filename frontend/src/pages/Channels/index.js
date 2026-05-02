@@ -57,6 +57,7 @@ import MainContainer from "../../components/MainContainer";
 import MainHeader from "../../components/MainHeader";
 import MainHeaderButtonsWrapper from "../../components/MainHeaderButtonsWrapper";
 import QrcodeModal from "../../components/QrcodeModal";
+import ConnectionMethodModal from "../../components/ConnectionMethodModal";
 import TableRowSkeleton from "../../components/TableRowSkeleton";
 import Title from "../../components/Title";
 import WhatsAppModal from "../../components/WhatsAppModal";
@@ -196,6 +197,7 @@ const Channels = () => {
 	const [whatsAppModalOpen, setWhatsAppModalOpen] = useState(false);
 	const [notificameHubModalOpen, setNotificameHubModalOpen] = useState(false);
 	const [qrModalOpen, setQrModalOpen] = useState(false);
+	const [connectionMethodModalOpen, setConnectionMethodModalOpen] = useState(false);
 	const [selectedWhatsApp, setSelectedWhatsApp] = useState(null);
 	const [confirmModalOpen, setConfirmModalOpen] = useState(false);
 	const confirmationModalInitialState = {
@@ -506,13 +508,26 @@ const Channels = () => {
 
 	const handleOpenQrModal = whatsApp => {
 		setSelectedWhatsApp(whatsApp);
-		setQrModalOpen(true);
+		setConnectionMethodModalOpen(true);
 	};
 
 	const handleCloseQrModal = useCallback(() => {
 		setSelectedWhatsApp(null);
 		setQrModalOpen(false);
 	}, [setQrModalOpen, setSelectedWhatsApp]);
+
+	const handleCloseConnectionMethodModal = useCallback(() => {
+		setConnectionMethodModalOpen(false);
+		setSelectedWhatsApp(null);
+	}, []);
+
+	const handleConnectionMethodSelect = (method) => {
+		// "pairing" is handled entirely inside ConnectionMethodModal (API call + socket)
+		if (method === "qrcode") {
+			setConnectionMethodModalOpen(false);
+			setQrModalOpen(true);
+		}
+	};
 
 	const handleEditWhatsApp = whatsApp => {
 		setSelectedWhatsApp(whatsApp);
@@ -1008,6 +1023,12 @@ const Channels = () => {
 				open={qrModalOpen}
 				onClose={handleCloseQrModal}
 				whatsAppId={!whatsAppModalOpen && selectedWhatsApp?.id}
+			/>
+			<ConnectionMethodModal
+				open={connectionMethodModalOpen}
+				onClose={handleCloseConnectionMethodModal}
+				onSelectMethod={handleConnectionMethodSelect}
+				whatsAppId={selectedWhatsApp?.id}
 			/>
 			<WhatsAppModal
 				open={whatsAppModalOpen}

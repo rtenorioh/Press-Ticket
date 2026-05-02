@@ -231,6 +231,34 @@ export const getQrCode = async (req: Request, res: Response): Promise<Response> 
   }
 };
 
+export const requestPairingCode = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  const { whatsappId } = req.params;
+  const { phoneNumber } = req.body;
+
+  if (!phoneNumber) {
+    throw new AppError("ERR_INVALID_PHONE_NUMBER");
+  }
+
+  const cleaned = String(phoneNumber).replace(/\D/g, "");
+  if (cleaned.length < 12 || cleaned.length > 13) {
+    throw new AppError("ERR_INVALID_PHONE_NUMBER");
+  }
+
+  const whatsapp = await Whatsapp.findByPk(whatsappId);
+  if (!whatsapp) {
+    throw new AppError("ERR_NO_WHATSAPP_FOUND", 404);
+  }
+
+  // Fire-and-forget: pairing code arrives via socket event "code"
+  // Do NOT await — initWbot only resolves on "ready" (fully connected)
+  initWbot(whatsapp, { method: "pairing", phoneNumber: cleaned }).catch(() => {});
+
+  return res.status(200).json({ message: "Pairing code requested." });
+};
+
 export const start = async (req: Request, res: Response): Promise<Response> => {
   const { whatsappId } = req.params;
   const whatsapp = await Whatsapp.findByPk(whatsappId);

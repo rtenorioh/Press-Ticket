@@ -30,4 +30,10 @@ whatsappRoutes.post(
   WhatsAppController.shutdown
 );
 
+whatsappRoutes.post(
+  "/whatsapp/:whatsappId/request-pairing-code",
+  isAuth,
+  WhatsAppController.requestPairingCode
+);
+
 export default whatsappRoutes;
