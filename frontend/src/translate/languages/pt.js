@@ -32,7 +32,8 @@ const messages = {
           clientStatus: "Status de Clientes",
           whatsappGroups: "Grupos do WhatsApp",
           presence: "Presença (Indicadores)",
-          authentication: "Autenticação"
+          authentication: "Autenticação",
+          settings: "Configurações"
         },
         permissions: {
           createContacts: "Criar Contatos",
@@ -95,7 +96,9 @@ const messages = {
           readGroups: "Visualizar Grupos do WhatsApp",
           writeGroups: "Gerenciar Grupos do WhatsApp",
           writePresence: "Enviar Indicadores de Digitação/Gravação",
-          readProfile: "Acessar Perfil (Logout)"
+          readProfile: "Acessar Perfil (Logout)",
+          readSettings: "Visualizar Configurações",
+          writeSettings: "Editar Configurações"
         },
         messages: {
           success: {

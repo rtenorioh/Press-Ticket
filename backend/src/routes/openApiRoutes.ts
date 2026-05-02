@@ -32,6 +32,8 @@ import * as ClientStatusController from "../controllers/ClientStatusController";
 import * as MessageController from "../controllers/MessageController";
 import * as SessionController from "../controllers/SessionController";
 import isApiToken from "../middleware/isApiToken";
+import ListSettingsService from "../services/SettingServices/ListSettingsService";
+import UpdateSettingService from "../services/SettingServices/UpdateSettingService";
 
 const upload = multer(uploadConfig);
 
@@ -3991,5 +3993,260 @@ openApiRouter.post("/auth/forgot-password", SessionController.forgotPassword);
  *         description: Token inválido ou expirado
  */
 openApiRouter.post("/auth/reset-password", SessionController.resetPassword);
+
+/**
+ * @swagger
+ * /v1/messages/{ticketId}:
+ *   get:
+ *     summary: Listar Mensagens de um Ticket
+ *     description: Retorna as mensagens de um ticket específico com paginação
+ *     tags: [Messages]
+ *     security:
+ *       - apiToken: []
+ *     parameters:
+ *       - in: path
+ *         name: ticketId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID do ticket
+ *         example: 1
+ *       - in: query
+ *         name: pageNumber
+ *         schema:
+ *           type: integer
+ *         description: Número da página
+ *         example: 1
+ *     responses:
+ *       200:
+ *         description: Lista de mensagens retornada com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 messages:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: string
+ *                       body:
+ *                         type: string
+ *                       fromMe:
+ *                         type: boolean
+ *                       createdAt:
+ *                         type: string
+ *                         format: date-time
+ *                 count:
+ *                   type: integer
+ *                 hasMore:
+ *                   type: boolean
+ *       401:
+ *         description: Token inválido ou sem permissão
+ *       404:
+ *         description: Ticket não encontrado
+ */
+openApiRouter.get("/messages/:ticketId", isApiToken("read:messages"), MessageController.index);
+
+/**
+ * @swagger
+ * /v1/tickets/{ticketId}/toggle-state:
+ *   put:
+ *     summary: Alternar Estado do Ticket
+ *     description: Alterna campos booleanos do ticket (pinnedChat, mutedChat, favoritedChat)
+ *     tags: [Tickets]
+ *     security:
+ *       - apiToken: []
+ *     parameters:
+ *       - in: path
+ *         name: ticketId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID do ticket
+ *         example: 1
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - field
+ *             properties:
+ *               field:
+ *                 type: string
+ *                 enum: [pinnedChat, mutedChat, favoritedChat]
+ *                 description: Campo a ser alternado
+ *                 example: "pinnedChat"
+ *     responses:
+ *       200:
+ *         description: Estado alterado com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: integer
+ *                 pinnedChat:
+ *                   type: boolean
+ *                 mutedChat:
+ *                   type: boolean
+ *                 favoritedChat:
+ *                   type: boolean
+ *       401:
+ *         description: Token inválido ou sem permissão
+ *       404:
+ *         description: Ticket não encontrado
+ */
+openApiRouter.put("/tickets/:ticketId/toggle-state", isApiToken("update:tickets"), TicketController.toggleState);
+
+/**
+ * @swagger
+ * /v1/whatsapp/{whatsappId}/request-pairing-code:
+ *   post:
+ *     summary: Solicitar Código de Pareamento
+ *     description: Solicita um código de pareamento por número de telefone para conectar o WhatsApp
+ *     tags: [WhatsApp]
+ *     security:
+ *       - apiToken: []
+ *     parameters:
+ *       - in: path
+ *         name: whatsappId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID da conexão WhatsApp
+ *         example: 1
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - phoneNumber
+ *             properties:
+ *               phoneNumber:
+ *                 type: string
+ *                 description: Número de telefone com código do país (ex: 5511999999999)
+ *                 example: "5511999999999"
+ *     responses:
+ *       200:
+ *         description: Código de pareamento solicitado — chegará via socket
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Pairing code requested."
+ *       400:
+ *         description: Número de telefone inválido
+ *       401:
+ *         description: Token inválido ou sem permissão
+ *       404:
+ *         description: Conexão WhatsApp não encontrada
+ */
+openApiRouter.post("/whatsapp/:whatsappId/request-pairing-code", isApiToken("update:whatsapp"), WhatsAppController.requestPairingCode);
+
+const SENSITIVE_KEYS = /^(pass|password|secret|emailPass|smtpPass)/i;
+
+/**
+ * @swagger
+ * /v1/settings:
+ *   get:
+ *     summary: Listar Configurações
+ *     description: Retorna todas as configurações do sistema (chaves sensíveis são omitidas)
+ *     tags: [Settings]
+ *     security:
+ *       - apiToken: []
+ *     responses:
+ *       200:
+ *         description: Configurações retornadas com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   key:
+ *                     type: string
+ *                     example: "userCreation"
+ *                   value:
+ *                     type: string
+ *                     example: "enabled"
+ *       401:
+ *         description: Token inválido ou sem permissão
+ */
+openApiRouter.get("/settings", isApiToken("read:settings"), async (req, res) => {
+  const settings = await ListSettingsService();
+  const safe = (settings || []).filter(s => !SENSITIVE_KEYS.test(s.key));
+  return res.status(200).json(safe);
+});
+
+/**
+ * @swagger
+ * /v1/settings/{settingKey}:
+ *   put:
+ *     summary: Atualizar Configuração
+ *     description: Atualiza o valor de uma configuração pelo nome da chave (chaves sensíveis são bloqueadas)
+ *     tags: [Settings]
+ *     security:
+ *       - apiToken: []
+ *     parameters:
+ *       - in: path
+ *         name: settingKey
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Chave da configuração
+ *         example: "userCreation"
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - value
+ *             properties:
+ *               value:
+ *                 type: string
+ *                 description: Novo valor da configuração
+ *                 example: "enabled"
+ *     responses:
+ *       200:
+ *         description: Configuração atualizada com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 key:
+ *                   type: string
+ *                   example: "userCreation"
+ *                 value:
+ *                   type: string
+ *                   example: "enabled"
+ *       400:
+ *         description: Chave sensível — atualização não permitida via API
+ *       401:
+ *         description: Token inválido ou sem permissão
+ */
+openApiRouter.put("/settings/:settingKey", isApiToken("write:settings"), async (req, res) => {
+  const { settingKey } = req.params;
+  const { value } = req.body;
+  if (SENSITIVE_KEYS.test(settingKey)) {
+    return res.status(400).json({ error: "ERR_SENSITIVE_SETTING" });
+  }
+  const setting = await UpdateSettingService({ key: settingKey, value });
+  return res.status(200).json(setting);
+});
 
 export default openApiRouter;

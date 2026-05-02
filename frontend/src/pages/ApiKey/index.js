@@ -335,7 +335,11 @@ const ApiKey = () => {
             'write:presence': t("apiKey.permissions.writePresence"),
             
             // Autenticação
-            'read:profile': t("apiKey.permissions.readProfile")
+            'read:profile': t("apiKey.permissions.readProfile"),
+
+            // Configurações
+            'read:settings': t("apiKey.permissions.readSettings"),
+            'write:settings': t("apiKey.permissions.writeSettings")
         };
         return names[permission] || permission;
     };
@@ -540,9 +544,11 @@ const ApiKey = () => {
                                             // Presença
                                             'write:presence',
                                             // Autenticação
-                                            'read:profile'
+                                            'read:profile',
+                                            // Configurações
+                                            'read:settings', 'write:settings'
                                         ];
-                                        
+
                                         if (newToken.permissions.length === allPermissions.length) {
                                             setNewToken(prev => ({ ...prev, permissions: [] }));
                                         } else {
@@ -551,9 +557,9 @@ const ApiKey = () => {
                                     }}
                                     sx={{ borderRadius: 20, textTransform: 'none' }}
                                 >
-                                    {newToken.permissions.length === 0 || 
-                                     newToken.permissions.length < 47 ? 
-                                        t("apiKey.modal.buttons.selectAll") : 
+                                    {newToken.permissions.length === 0 ||
+                                     newToken.permissions.length < 49 ?
+                                        t("apiKey.modal.buttons.selectAll") :
                                         t("apiKey.modal.buttons.unselectAll")}
                                 </Button>
                             </Box>
@@ -1254,7 +1260,7 @@ const ApiKey = () => {
                         <Accordion sx={{ mb: 1, boxShadow: '0 1px 3px rgba(0,0,0,0.1)', borderRadius: '4px !important', '&:before': { display: 'none' } }}>
                             <AccordionSummary
                                 expandIcon={<ExpandMoreIcon />}
-                                sx={{ 
+                                sx={{
                                     backgroundColor: theme.palette.background.default,
                                     borderRadius: '4px',
                                 }}
@@ -1266,6 +1272,39 @@ const ApiKey = () => {
                             <AccordionDetails sx={{ pt: 2 }}>
                                 <Grid container spacing={1}>
                                     {['read:profile'].map((permission) => (
+                                        <Grid item xs={12} sm={6} key={permission}>
+                                            <FormControlLabel
+                                                control={
+                                                    <Checkbox
+                                                        checked={newToken.permissions.includes(permission)}
+                                                        onChange={() => handlePermissionChange(permission)}
+                                                        color="primary"
+                                                        size="small"
+                                                    />
+                                                }
+                                                label={<Typography variant="body2">{renderPermissionName(permission)}</Typography>}
+                                            />
+                                        </Grid>
+                                    ))}
+                                </Grid>
+                            </AccordionDetails>
+                        </Accordion>
+
+                        <Accordion sx={{ mb: 1, boxShadow: '0 1px 3px rgba(0,0,0,0.1)', borderRadius: '4px !important', '&:before': { display: 'none' } }}>
+                            <AccordionSummary
+                                expandIcon={<ExpandMoreIcon />}
+                                sx={{
+                                    backgroundColor: theme.palette.background.default,
+                                    borderRadius: '4px',
+                                }}
+                            >
+                                <Typography variant="subtitle2" fontWeight={500}>
+                                    {t("apiKey.categories.settings")}
+                                </Typography>
+                            </AccordionSummary>
+                            <AccordionDetails sx={{ pt: 2 }}>
+                                <Grid container spacing={1}>
+                                    {['read:settings', 'write:settings'].map((permission) => (
                                         <Grid item xs={12} sm={6} key={permission}>
                                             <FormControlLabel
                                                 control={

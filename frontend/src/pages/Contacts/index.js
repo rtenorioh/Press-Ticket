@@ -1,68 +1,68 @@
 import {
-  useContext,
-  useEffect,
-  useReducer,
-  useState
-} from "react";
+  AddCircleOutline,
+  AllInclusive,
+  Archive,
+  Block as BlockIcon,
+  DeleteForever,
+  DeleteOutline,
+  Edit,
+  Group,
+  Groups,
+  ImportContacts,
+  Lock as LockIcon,
+  LockOpen as LockOpenIcon,
+  Person,
+  Search,
+  WhatsApp
+} from "@mui/icons-material";
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import {
   Avatar,
+  Box,
   Button,
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  Fade,
+  FormControl,
   IconButton,
   InputAdornment,
+  InputLabel,
+  LinearProgress,
+  MenuItem,
+  Modal,
   Paper,
+  Select,
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableRow,
   TextField,
-  Tooltip,
-  Box,
   ToggleButton,
   ToggleButtonGroup,
-  Modal,
-  Divider,
-  Typography,
-  Fade,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  LinearProgress,
-  Dialog,
-  DialogContent,
-  DialogTitle
+  Tooltip,
+  Typography
 } from "@mui/material";
-import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
+import Tabs from '@mui/material/Tabs';
 import { styled } from '@mui/material/styles';
 import {
-  AddCircleOutline,
-  Archive,
-  DeleteForever,
-  DeleteOutline,
-  Edit,
-  ImportContacts,
-  Block as BlockIcon,
-  LockOpen as LockOpenIcon,
-  Lock as LockIcon,
-  Search,
-  WhatsApp,
-  Group,
-  Groups,
-  Person,
-  AllInclusive
-} from "@mui/icons-material";
-import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+  useContext,
+  useEffect,
+  useReducer,
+  useState
+} from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import WhatsMarked from "react-whatsmarked";
 
 import { Can } from "../../components/Can";
 import ConfirmationModal from "../../components/ConfirmationModal/";
-import ContactModal from "../../components/ContactModal";
 import ContactAdvancedInfoModal from "../../components/ContactAdvancedInfoModal";
+import ContactModal from "../../components/ContactModal";
 import ExportFieldsModal from "../../components/ExportFieldsModal";
 import MainContainer from "../../components/MainContainer";
 import MainHeader from "../../components/MainHeader";
@@ -834,6 +834,7 @@ const Contacts = () => {
         <Table size="small">
           <TableHead>
             <TableRow>
+              <TableCell align="center" sx={{ width: 60, color: "text.secondary" }}>ID</TableCell>
               <TableCell padding="checkbox"></TableCell>
               <TableCell>{t("contacts.table.name")}</TableCell>
               <TableCell align="center">{t("contacts.table.whatsapp")}</TableCell>
@@ -884,6 +885,9 @@ const Contacts = () => {
                 })
                 .map((contact) => (
                   <TableRow key={contact.id}>
+                    <TableCell align="center" sx={{ width: 60, color: "text.secondary", fontSize: "0.75rem" }}>
+                      {contact.id}
+                    </TableCell>
                     <TableCell sx={{ paddingRight: 0 }}>
                       <AvatarStyled src={contact?.profilePicUrl || defaultImage} alt="contact_image" />
                     </TableCell>
