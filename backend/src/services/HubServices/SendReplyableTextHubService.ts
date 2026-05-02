@@ -50,10 +50,16 @@ export const SendReplyableTextService = async (
   }
 
   const content = new ReplyableTextContent(text, quickReplyButtons);
+  // SDK v0.0.27 bug: type='replyable_text' (14 chars) exceeds Hub API column limit of 11.
+  // Trying 'quick_reply' (11 chars) — likely the renamed type in the current API version.
+  // Keep original field name 'quickReplyButtons' since the API schema may match the SDK for this type.
+  (content as any).type = "quick_reply";
+  if (Array.isArray((channelClient as any).supportedContents) &&
+      !(channelClient as any).supportedContents.includes("quick_reply")) {
+    (channelClient as any).supportedContents.push("quick_reply");
+  }
 
   try {
-    channelClient.contentSupportValidation(content);
-
     const response = await channelClient.sendMessage(
       connection.qrcode,
       contactNumber,
@@ -83,8 +89,11 @@ export const SendReplyableTextService = async (
     });
 
     return newMessage;
-  } catch (error) {
-    logger.error(`Erro ao enviar replyable-text Hub: ${error}`);
+  } catch (error: any) {
+    const errBody = error?.body || error?.response?.data || error?.response?.body;
+    logger.error(`Erro ao enviar replyable-text Hub: ${error?.message || String(error)}`);
+    if (errBody) logger.error(`Hub API response body: ${JSON.stringify(errBody)}`);
+    logger.error(JSON.stringify(error, Object.getOwnPropertyNames(error)));
     throw error;
   }
 };

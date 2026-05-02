@@ -13,10 +13,7 @@ import {
   ContactPhone,
   AudioFile,
   Poll,
-  LocationOn,
-  DashboardCustomize,
-  ViewCarousel,
-  QuickreplyOutlined
+  LocationOn
 } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
 import CameraModal from '../CameraModal';
@@ -65,9 +62,6 @@ const AttachmentMenu = ({
   onContactSelect,
   onPollClick,
   onLocationClick,
-  onCardClick,
-  onCarouselClick,
-  onReplyableClick,
   disabled = false
 }) => {
   const { t } = useTranslation();
@@ -119,27 +113,6 @@ const AttachmentMenu = ({
     onClose();
     if (onLocationClick) {
       onLocationClick();
-    }
-  };
-
-  const handleCardClick = () => {
-    onClose();
-    if (onCardClick) {
-      onCardClick();
-    }
-  };
-
-  const handleCarouselClick = () => {
-    onClose();
-    if (onCarouselClick) {
-      onCarouselClick();
-    }
-  };
-
-  const handleReplyableClick = () => {
-    onClose();
-    if (onReplyableClick) {
-      onReplyableClick();
     }
   };
 
@@ -268,41 +241,6 @@ const AttachmentMenu = ({
           />
         </MenuItemStyled>
 
-        {onCardClick && (
-          <MenuItemStyled onClick={handleCardClick} disabled={disabled}>
-            <ListItemIcon>
-              <DashboardCustomize />
-            </ListItemIcon>
-            <ListItemText
-              primary="Card"
-              secondary="Imagem, título e botões"
-            />
-          </MenuItemStyled>
-        )}
-
-        {onCarouselClick && (
-          <MenuItemStyled onClick={handleCarouselClick} disabled={disabled}>
-            <ListItemIcon>
-              <ViewCarousel />
-            </ListItemIcon>
-            <ListItemText
-              primary="Carrossel"
-              secondary="Múltiplos cards em sequência"
-            />
-          </MenuItemStyled>
-        )}
-
-        {onReplyableClick && (
-          <MenuItemStyled onClick={handleReplyableClick} disabled={disabled}>
-            <ListItemIcon>
-              <QuickreplyOutlined />
-            </ListItemIcon>
-            <ListItemText
-              primary="Respostas rápidas"
-              secondary="Texto com botões de resposta"
-            />
-          </MenuItemStyled>
-        )}
       </StyledMenu>
 
       <input

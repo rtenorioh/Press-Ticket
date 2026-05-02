@@ -40,17 +40,15 @@ export const SendEmailHubService = async ({
     );
   }
 
-  const body = htmlBody || textBody || "";
-
-  logger.info(
-    `SendEmailHubService: enviando para ${to} via conta ${connection.qrcode}`
-  );
+  const cleanHtml = htmlBody
+    ? `<!DOCTYPE html><html><head><meta charset="UTF-8"></head><body>${htmlBody}</body></html>`
+    : `<!DOCTYPE html><html><head><meta charset="UTF-8"></head><body><p>${textBody || ""}</p></body></html>`;
 
   const notificameHubToken = await showHubToken();
   const client = new Client(notificameHubToken);
   const emailChannel = client.setChannel("email");
 
-  const content = new EmailContent(subject, [], body);
+  const content = new EmailContent(subject || "", [], cleanHtml);
 
   try {
     emailChannel.contentSupportValidation(content);

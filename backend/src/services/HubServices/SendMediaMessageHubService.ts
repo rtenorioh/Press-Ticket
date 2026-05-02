@@ -102,7 +102,7 @@ export const SendMediaMessageService = async (
     const content = new FileContent(
       mediaUrl,
       media.mimetype,
-      media.originalname,
+      message,
       media.originalname
     );
 

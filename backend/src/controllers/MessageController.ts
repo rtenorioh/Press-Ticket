@@ -428,6 +428,12 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
 
   const ticket = await ShowTicketService(ticketId);
 
+  if (ticket.whatsapp?.type && ticket.whatsapp.type !== "wwebjs") {
+    return res.status(400).json({
+      error: "Este ticket pertence a um canal Hub. Use o endpoint /hub-message/:ticketId"
+    });
+  }
+
   if (ticket.status === "open") {
     await SetTicketMessagesAsRead(ticket);
   }

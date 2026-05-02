@@ -1,27 +1,29 @@
-import { useState } from "react";
+import AddIcon from "@mui/icons-material/Add";
+import CloseIcon from "@mui/icons-material/Close";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  TextField,
   Box,
+  Button,
   CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   IconButton,
+  TextField,
   Typography
 } from "@mui/material";
-import CloseIcon from "@mui/icons-material/Close";
-import AddIcon from "@mui/icons-material/Add";
-import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
-import api from "../../services/api";
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import toastError from "../../errors/toastError";
 import toastSuccess from "../../errors/toastSuccess";
+import api from "../../services/api";
 
 const ReplyableTextModal = ({ open, onClose, ticketId }) => {
   const [text, setText] = useState("");
   const [buttons, setButtons] = useState([{ label: "" }]);
   const [loading, setLoading] = useState(false);
+  const { t } = useTranslation();
 
   const handleClose = () => {
     setText("");
@@ -62,7 +64,7 @@ const ReplyableTextModal = ({ open, onClose, ticketId }) => {
       toastSuccess("Mensagem com respostas rápidas enviada.");
       handleClose();
     } catch (err) {
-      toastError(err);
+      toastError(err, t);
     } finally {
       setLoading(false);
     }

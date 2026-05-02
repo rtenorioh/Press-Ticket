@@ -1,4 +1,4 @@
-import { Chip, FormControl, MenuItem, Select, Typography, Box } from "@mui/material";
+import { Box, Chip, FormControl, MenuItem, Select, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -33,7 +33,7 @@ const ConectionSelect = ({ selectedWhatsappIds, onChange }) => {
         setWhatsapps(data);
         loaded.current = true;
       } catch (err) {
-        toastError(err);
+        toastError(err, t);
       }
     })();
   }, []);

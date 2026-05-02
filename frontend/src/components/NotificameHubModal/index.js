@@ -1,24 +1,23 @@
+import EditIcon from '@mui/icons-material/Edit';
+import FileCopyOutlinedIcon from '@mui/icons-material/FileCopyOutlined';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import {
+	Box,
 	Button,
 	CircularProgress,
 	Dialog,
 	DialogActions,
 	DialogContent,
 	DialogTitle,
+	Divider,
 	IconButton,
 	MenuItem,
 	TextField,
 	Tooltip,
 	Typography,
-	Box,
-	Divider,
 } from '@mui/material';
 import { green } from '@mui/material/colors';
-import { styled } from '@mui/material/styles';
-import { useTheme } from '@mui/material/styles';
-import FileCopyOutlinedIcon from '@mui/icons-material/FileCopyOutlined';
-import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
-import EditIcon from '@mui/icons-material/Edit';
+import { styled, useTheme } from '@mui/material/styles';
 import { Field, Form, Formik } from "formik";
 import { memo, useEffect, useState } from "react";
 import { CopyToClipboard } from 'react-copy-to-clipboard';
@@ -204,7 +203,7 @@ const NotificameHubModal = ({ open, onClose }) => {
 				}
 			}
 		} catch (err) {
-			toastError(err);
+			toastError(err, t);
 		} finally {
 			setIsSubmitting(false);
 		}

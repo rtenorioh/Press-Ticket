@@ -51,7 +51,7 @@ export const update = async (
       }
     });
 
-    const emailSettings = ["emailUser", "emailPass", "emailHost", "emailPort"];
+    const emailSettings = ["emailUser", "emailPass", "emailHost", "emailPort", "smtpSecure"];
     if (emailSettings.includes(key)) {
       const emailService = EmailService.getInstance();
       await emailService.reloadTransporter();

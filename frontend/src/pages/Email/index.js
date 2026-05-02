@@ -106,10 +106,13 @@ const formatDate = (iso) => {
   return d.toLocaleDateString("pt-BR", { day: "2-digit", month: "short" });
 };
 
-const getInitials = (name = "") => {
-  const parts = name.trim().split(" ");
+const getInitials = (name) => {
+  if (!name || typeof name !== "string") return "?";
+  const clean = name.trim();
+  if (!clean) return "?";
+  const parts = clean.split(" ");
   if (parts.length >= 2) return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
-  return (name[0] || "?").toUpperCase();
+  return (clean[0] || "?").toUpperCase();
 };
 
 const FOLDERS = [
@@ -137,7 +140,7 @@ const EmailPage = () => {
   const [loading, setLoading] = useState(false);
   const [selectedEmail, setSelectedEmail] = useState(null);
   const [search, setSearch] = useState("");
-  const [unreadCount, setUnreadCount] = useState(0);
+  const [folderCounts, setFolderCounts] = useState({ inbox: 0, sent: 0, starred: 0, trash: 0 });
   const [composeOpen, setComposeOpen] = useState(false);
   const [composeDefaults, setComposeDefaults] = useState({});
 
@@ -179,16 +182,20 @@ const EmailPage = () => {
     }
   }, [selectedAccount, activeFolder, fetchEmails]);
 
-  // Count unread inbox
+  // Fetch folder counts
+  const fetchCounts = useCallback(async (accountId) => {
+    if (!accountId) return;
+    try {
+      const { data } = await api.get("/emails/counts", { params: { whatsappId: accountId } });
+      setFolderCounts(data);
+    } catch (err) {
+      /* silent */
+    }
+  }, []);
+
   useEffect(() => {
-    if (!selectedAccount) return;
-    api
-      .get("/emails", { params: { whatsappId: selectedAccount.id, folder: "inbox", limit: 100 } })
-      .then(({ data }) => {
-        setUnreadCount((data.emails || []).filter((e) => !e.isRead).length);
-      })
-      .catch(() => {});
-  }, [selectedAccount, emails]);
+    if (selectedAccount) fetchCounts(selectedAccount.id);
+  }, [selectedAccount, emails, fetchCounts]);
 
   // Socket.IO
   useEffect(() => {
@@ -199,6 +206,7 @@ const EmailPage = () => {
       if (activeFolder === "inbox") {
         setEmails((prev) => [payload.email, ...prev]);
       }
+      fetchCounts(selectedAccount.id);
     };
 
     const handleSent = (payload) => {
@@ -206,6 +214,7 @@ const EmailPage = () => {
       if (activeFolder === "sent") {
         setEmails((prev) => [payload.email, ...prev]);
       }
+      fetchCounts(selectedAccount.id);
     };
 
     socket.on("email:new", handleNew);
@@ -215,7 +224,7 @@ const EmailPage = () => {
       socket.off("email:new", handleNew);
       socket.off("email:sent", handleSent);
     };
-  }, [socket, selectedAccount, activeFolder]);
+  }, [socket, selectedAccount, activeFolder, fetchCounts]);
 
   // Select email → mark read
   const handleSelectEmail = async (email) => {
@@ -350,32 +359,36 @@ const EmailPage = () => {
 
         {/* Folder list */}
         <List dense disablePadding sx={{ flex: 1, overflowY: "auto" }}>
-          {FOLDERS.map((f) => (
-            <ListItemButton
-              key={f.key}
-              selected={activeFolder === f.key}
-              onClick={() => setActiveFolder(f.key)}
-              sx={{
-                borderRadius: 2,
-                mx: 0.5,
-                my: 0.25,
-                "&.Mui-selected": {
-                  backgroundColor: "primary.light",
-                  color: "primary.contrastText",
-                  "& .MuiListItemIcon-root": { color: "primary.contrastText" }
-                }
-              }}
-            >
-              <ListItemIcon sx={{ minWidth: 36 }}>{f.icon}</ListItemIcon>
-              <ListItemText
-                primary={f.label}
-                primaryTypographyProps={{ fontSize: "0.875rem", fontWeight: activeFolder === f.key ? 700 : 400 }}
-              />
-              {f.key === "inbox" && unreadCount > 0 && (
-                <Badge badgeContent={unreadCount} color="primary" max={99} />
-              )}
-            </ListItemButton>
-          ))}
+          {FOLDERS.map((f) => {
+            const count = folderCounts[f.key] || 0;
+            const badgeColor = f.key === "inbox" ? "error" : "default";
+            return (
+              <ListItemButton
+                key={f.key}
+                selected={activeFolder === f.key}
+                onClick={() => setActiveFolder(f.key)}
+                sx={{
+                  borderRadius: 2,
+                  mx: 0.5,
+                  my: 0.25,
+                  "&.Mui-selected": {
+                    backgroundColor: "primary.light",
+                    color: "primary.contrastText",
+                    "& .MuiListItemIcon-root": { color: "primary.contrastText" }
+                  }
+                }}
+              >
+                <ListItemIcon sx={{ minWidth: 36 }}>{f.icon}</ListItemIcon>
+                <ListItemText
+                  primary={f.label}
+                  primaryTypographyProps={{ fontSize: "0.875rem", fontWeight: activeFolder === f.key ? 700 : 400 }}
+                />
+                {count > 0 && (
+                  <Badge badgeContent={count} color={badgeColor} max={99} />
+                )}
+              </ListItemButton>
+            );
+          })}
         </List>
       </Sidebar>
 
@@ -431,7 +444,11 @@ const EmailPage = () => {
                 <Box sx={{ width: "100%" }}>
                   <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 0.25 }}>
                     <Avatar sx={{ width: 30, height: 30, fontSize: "0.7rem", bgcolor: "primary.main" }}>
-                      {getInitials(email.contact?.name || email.fromAddress || email.toAddress)}
+                      {getInitials(
+                        email.contact?.name ||
+                        (email.direction === "in" ? email.fromAddress : email.toAddress) ||
+                        "?"
+                      )}
                     </Avatar>
                     <Typography
                       variant="body2"
@@ -460,7 +477,16 @@ const EmailPage = () => {
                     noWrap
                     sx={{ pl: 4.5, color: email.isRead ? "text.secondary" : "text.primary" }}
                   >
-                    {email.subject || (email.bodyText ? email.bodyText.substring(0, 50) + "..." : "(Sem assunto)")}
+                    {email.subject ? (
+                      <span style={{ fontWeight: email.isRead ? "normal" : "bold" }}>
+                        {email.subject}
+                      </span>
+                    ) : (
+                      <span style={{ fontStyle: "italic", color: "#888", fontWeight: email.isRead ? "normal" : "bold" }}>
+                        {(email.bodyText || "").substring(0, 60).trim()}
+                        {(email.bodyText || "").length > 60 ? "..." : ""}
+                      </span>
+                    )}
                   </Typography>
                 </Box>
               </EmailListItem>

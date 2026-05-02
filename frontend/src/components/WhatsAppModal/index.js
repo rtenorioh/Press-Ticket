@@ -1,25 +1,24 @@
+import ColorLensIcon from '@mui/icons-material/ColorLens';
+import EditIcon from '@mui/icons-material/Edit';
+import WhatsAppIcon from '@mui/icons-material/WhatsApp';
 import {
+	Box,
 	Button,
 	CircularProgress,
 	Dialog,
 	DialogActions,
 	DialogContent,
 	DialogTitle,
+	Divider,
 	FormControlLabel,
 	IconButton,
 	InputAdornment,
 	Switch,
 	TextField,
 	Typography,
-	Box,
-	Divider,
 } from '@mui/material';
 import { green } from '@mui/material/colors';
-import { styled } from '@mui/material/styles';
-import { useTheme } from '@mui/material/styles';
-import ColorLensIcon from '@mui/icons-material/ColorLens';
-import WhatsAppIcon from '@mui/icons-material/WhatsApp';
-import EditIcon from '@mui/icons-material/Edit';
+import { styled, useTheme } from '@mui/material/styles';
 import { Field, Form, Formik } from "formik";
 import { memo, useEffect, useState } from "react";
 import { SketchPicker } from 'react-color';
@@ -138,7 +137,7 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
 				const whatsQueueIds = data?.queues?.map(queue => queue.id);
 				setSelectedQueueIds(whatsQueueIds);
 			} catch (err) {
-				toastError(err);
+				toastError(err, t);
 			}
 		};
 		fetchSession();
@@ -155,7 +154,7 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
 			toast.success(t("whatsappModal.success"));
 			handleClose();
 		} catch (err) {
-			toastError(err);
+			toastError(err, t);
 		}
 	};
 

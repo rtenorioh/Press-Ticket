@@ -45,9 +45,6 @@ import { EditMessageContext } from "../../context/EditingMessage/EditingMessageC
 import { ReplyMessageContext } from "../../context/ReplyingMessage/ReplyingMessageContext";
 import UploadModal from "../UploadModal";
 import AttachmentMenu from "../AttachmentMenu";
-import CardMessageModal from "../CardMessageModal";
-import CarouselMessageModal from "../CarouselMessageModal";
-import ReplyableTextModal from "../ReplyableTextModal";
 import PollCreator from "../PollCreator";
 import LocationSendModal from "../LocationSendModal";
 import toastError from "../../errors/toastError";
@@ -378,9 +375,6 @@ const MessageInput = ({ ticketStatus }) => {
   const [initialCaption, setInitialCaption] = useState("");
   const [showPollCreator, setShowPollCreator] = useState(false);
   const [showLocationModal, setShowLocationModal] = useState(false);
-  const [showCardModal, setShowCardModal] = useState(false);
-  const [showCarouselModal, setShowCarouselModal] = useState(false);
-  const [showReplyableModal, setShowReplyableModal] = useState(false);
   const { t } = useTranslation();
   const theme = useTheme();
   const mainWrapperRef = useRef(null);
@@ -1371,18 +1365,6 @@ const MessageInput = ({ ticketStatus }) => {
     setShowLocationModal(true);
   };
 
-  const handleCardClick = () => {
-    setShowCardModal(true);
-  };
-
-  const handleCarouselClick = () => {
-    setShowCarouselModal(true);
-  };
-
-  const handleReplyableClick = () => {
-    setShowReplyableModal(true);
-  };
-
   const handleContactSelect = (contacts) => {
     if (contacts && contacts.length > 0) {
       const contactsData = contacts.map(contact => ({
@@ -1495,9 +1477,6 @@ const MessageInput = ({ ticketStatus }) => {
               onContactSelect={handleContactSelect}
               onPollClick={handlePollClick}
               onLocationClick={handleLocationClick}
-              onCardClick={["facebook", "instagram", "telegram"].includes(channelType) ? handleCardClick : undefined}
-              onCarouselClick={["facebook", "instagram", "telegram"].includes(channelType) ? handleCarouselClick : undefined}
-              onReplyableClick={["facebook", "instagram", "telegram"].includes(channelType) ? handleReplyableClick : undefined}
               disabled={loading || recording || ticketStatus !== "open"}
             />
 
@@ -1512,24 +1491,6 @@ const MessageInput = ({ ticketStatus }) => {
               onClose={() => setShowLocationModal(false)}
               ticketId={ticketId}
               channelType={channelType}
-            />
-
-            <CardMessageModal
-              open={showCardModal}
-              onClose={() => setShowCardModal(false)}
-              ticketId={ticketId}
-            />
-
-            <CarouselMessageModal
-              open={showCarouselModal}
-              onClose={() => setShowCarouselModal(false)}
-              ticketId={ticketId}
-            />
-
-            <ReplyableTextModal
-              open={showReplyableModal}
-              onClose={() => setShowReplyableModal(false)}
-              ticketId={ticketId}
             />
 
             {canSignMessage() && (

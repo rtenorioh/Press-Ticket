@@ -6,6 +6,7 @@ import CreateMessageService from "./CreateHubMessageService";
 import FindOrCreateContactService from "./FindOrCreateHubContactService";
 import { UpdateMessageAck } from "./UpdateMessageHubAck";
 import { logger } from "../../utils/logger";
+import { getIO } from "../../libs/socket";
 
 export interface IContent {
   type: "text" | "image" | "audio" | "video" | "file" | "location" | "reply_text";
@@ -156,7 +157,11 @@ const HubMessageListener = async (
     let groupContact: Contact | undefined;
     if (isGroup && group.id) {
       groupContact = await FindOrCreateContactService({
-        ...visitor,
+        name: group.name || "Grupo",
+        number: "",
+        firstName: "",
+        lastName: "",
+        picture: visitor.picture || "",
         from: group.id,
         group,
         isGroup: true,
@@ -174,6 +179,23 @@ const HubMessageListener = async (
       groupContact
     );
 
+    const textCaption = contents.find(c => c.type === "text")?.text || "";
+    const firstContent = contents[0];
+    let caption: string;
+    if (!firstContent || firstContent.type === "text" || firstContent.type === "reply_text") {
+      caption = textCaption;
+    } else if (firstContent.type === "image") {
+      caption = textCaption || "📷 Imagem";
+    } else if (firstContent.type === "video") {
+      caption = textCaption || "🎥 Vídeo";
+    } else if (firstContent.type === "audio") {
+      caption = textCaption || "🎵 Áudio";
+    } else if (firstContent.type === "location") {
+      caption = "📍 Localização";
+    } else {
+      caption = textCaption || "📎 Arquivo";
+    }
+
     if (ticket) {
       let newStatus = ticket.status;
       let newQueueId = ticket.queueId;
@@ -183,28 +205,28 @@ const HubMessageListener = async (
       }
 
       await ticket.update({
-        lastMessage: contents[0].text,
+        lastMessage: caption,
         status: newStatus,
         queueId: newQueueId
       });
 
       await ticket.reload({
         include: [
-          {
-            association: "contact"
-          },
-          {
-            association: "user"
-          },
-          {
-            association: "queue"
-          },
-          {
-            association: "whatsapp"
-          }
+          { association: "contact" },
+          { association: "user" },
+          { association: "queue" },
+          { association: "whatsapp" }
         ]
       });
 
+      const io = getIO();
+      io.to(ticket.status)
+        .to("notification")
+        .to(ticket.id.toString())
+        .emit("ticket", {
+          action: "update",
+          ticket
+        });
     }
 
 
@@ -212,7 +234,7 @@ const HubMessageListener = async (
       await CreateMessageService({
         id,
         contactId: contact.id,
-        body: contents[0].text || "",
+        body: caption,
         ticketId: ticket.id,
         fromMe: false
       });
@@ -223,7 +245,7 @@ const HubMessageListener = async (
         await CreateMessageService({
           id,
           contactId: contact.id,
-          body: contents[0].text || "",
+          body: caption,
           ticketId: ticket.id,
           fromMe: false,
           fileName: `${media.filename}`,

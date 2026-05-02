@@ -53,6 +53,19 @@ const CreateMessageService = async (
     data.mediaType = "chat";
   }
 
+  // Determine preview text for ticket list
+  let lastMessage: string;
+  if (!fileName) {
+    lastMessage = body || "";
+  } else {
+    const mt = mediaType === "photo" ? "image" : (mediaType || "");
+    lastMessage =
+      mt === "image"  ? "📷 Imagem"  :
+      mt === "video"  ? "🎥 Vídeo"   :
+      mt === "audio"  ? "🎵 Áudio"   :
+      "📎 Arquivo";
+  }
+
   try {
     const newMessage = await Message.create(data);
 
@@ -81,6 +94,12 @@ const CreateMessageService = async (
     });
 
     if (message) {
+      // Update lastMessage on ticket
+      if (lastMessage) {
+        await Ticket.update({ lastMessage }, { where: { id: ticketId } });
+        message.ticket.lastMessage = lastMessage;
+      }
+
       const io = getIO();
       io.to(message.ticketId.toString())
         .to(message.ticket.status)
@@ -90,6 +109,14 @@ const CreateMessageService = async (
           message,
           ticket: message.ticket,
           contact: message.ticket.contact
+        });
+
+      io.to(message.ticket.status)
+        .to("notification")
+        .to(ticketId.toString())
+        .emit("ticket", {
+          action: "update",
+          ticket: message.ticket
         });
     }
 

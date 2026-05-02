@@ -45,12 +45,29 @@ const extractTextFromHtml = (html: string): string => {
     .trim();
 };
 
+const isBase64 = (str: string): boolean => {
+  if (!str || str.length < 50) return false;
+  // Check first 100 chars stripped of line breaks — base64 has no spaces or HTML tags
+  const sample = str.substring(0, 100).replace(/[\r\n]/g, "");
+  return /^[A-Za-z0-9+/]{50,}={0,2}$/.test(sample);
+};
+
+const decodeIfBase64 = (text: string, label: string): string => {
+  if (isBase64(text)) {
+    try {
+      return Buffer.from(text, "base64").toString("utf-8");
+    } catch {
+      logger.warn(`HubEmailListener: falha ao decodificar base64 em ${label}, usando raw`);
+    }
+  }
+  return text;
+};
+
 const HubEmailListener = async (
   payload: IEmailWebhookPayload,
   whatsapp: Whatsapp
 ): Promise<void> => {
   if (payload.direction === "OUT") {
-    logger.info("HubEmailListener: ignorando webhook direction=OUT");
     return;
   }
 
@@ -59,8 +76,6 @@ const HubEmailListener = async (
   }
 
   const { message } = payload;
-
-  logger.info(`HubEmailListener: processando email recebido de ${message.from}`);
 
   try {
     const fromAddress = message.from || message.visitor?.email || "";
@@ -82,11 +97,10 @@ const HubEmailListener = async (
         name: visitorName,
         email: fromAddress
       });
-      logger.info(`HubEmailListener: novo contato criado para ${fromAddress}`);
     }
 
-    // Extract subject — may not exist in webhook
-    const subject = (message as any).subject || "";
+    // Subject does not exist in the NotificaMe email webhook payload
+    const subject = undefined;
 
     // Extract content from contents array (real webhook structure)
     let bodyHtml = "";
@@ -94,15 +108,17 @@ const HubEmailListener = async (
     const fileContents: IEmailContent[] = [];
 
     if (message.contents && Array.isArray(message.contents)) {
-      const textContent = message.contents.find(c => c.type === "text");
-      if (textContent?.text) {
-        const raw = textContent.text;
-        if (/<[^>]+>/.test(raw)) {
-          bodyHtml = raw;
-          bodyText = extractTextFromHtml(raw);
-        } else {
-          bodyText = raw;
-        }
+      const rawText = decodeIfBase64(message.contents[0]?.text || "", "contents[0]");
+      const htmlIndex = rawText.search(/<[a-z][^>]*>/i);
+
+      if (htmlIndex > 0) {
+        bodyText = rawText.substring(0, htmlIndex).replace(/\r\n/g, "\n").trim();
+        bodyHtml = rawText.substring(htmlIndex).trim();
+      } else if (htmlIndex === 0) {
+        bodyHtml = rawText.trim();
+        bodyText = extractTextFromHtml(rawText);
+      } else {
+        bodyText = rawText.replace(/\r\n/g, "\n").trim();
       }
 
       message.contents
@@ -126,7 +142,7 @@ const HubEmailListener = async (
       direction: "in",
       fromAddress,
       toAddress: message.to || "",
-      subject: subject || undefined,
+      subject,
       bodyHtml: bodyHtml || undefined,
       bodyText: bodyText || undefined,
       folder: "inbox",

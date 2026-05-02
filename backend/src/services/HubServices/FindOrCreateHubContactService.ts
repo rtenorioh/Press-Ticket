@@ -118,7 +118,6 @@ const FindOrCreateContactService = async (
     await contactExists.update({
       name: name || firstName || "Name Unavailable",
       number: numberWct || null,
-      isGroup: false,
       profilePicUrl: picture
     });
     io.emit("contact", {

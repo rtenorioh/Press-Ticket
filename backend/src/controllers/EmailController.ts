@@ -70,6 +70,26 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
   }
 };
 
+// GET /emails/counts?whatsappId=
+export const countFolders = async (req: Request, res: Response): Promise<Response> => {
+  const whatsappId = Number(req.query.whatsappId);
+  if (!whatsappId) {
+    return res.status(400).json({ error: "whatsappId é obrigatório." });
+  }
+  try {
+    const [inbox, sent, starred, trash] = await Promise.all([
+      Email.count({ where: { whatsappId, folder: "inbox", isRead: false, deletedAt: { [Op.is]: null as any } } }),
+      Email.count({ where: { whatsappId, folder: "sent", deletedAt: { [Op.is]: null as any } } }),
+      Email.count({ where: { whatsappId, isStarred: true, deletedAt: { [Op.is]: null as any } } }),
+      Email.count({ where: { whatsappId, folder: "trash" } })
+    ]);
+    return res.status(200).json({ inbox, sent, starred, trash });
+  } catch (error) {
+    logger.error(`EmailController.countFolders: ${error}`);
+    return res.status(500).json({ error: String(error) });
+  }
+};
+
 // GET /emails/:id
 export const show = async (req: Request, res: Response): Promise<Response> => {
   const { id } = req.params;

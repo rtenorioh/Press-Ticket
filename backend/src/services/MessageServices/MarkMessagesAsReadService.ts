@@ -46,6 +46,18 @@ const MarkMessagesAsReadService = async ({
       throw new Error(`WhatsApp não encontrado para o ticket ${ticketId}`);
     }
 
+    if (whatsapp.type !== "wwebjs") {
+      for (const message of unreadMessages) {
+        await message.update({ read: true });
+        io.to(message.ticketId.toString()).emit("appMessage", {
+          action: "update",
+          message
+        });
+      }
+      await ticket.update({ unreadMessages: 0 });
+      return;
+    }
+
     let wbot: any;
     try {
       wbot = getWbot(ticket.whatsappId);

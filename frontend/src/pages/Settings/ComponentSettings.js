@@ -1,10 +1,20 @@
-import { 
-    Checkbox, 
-    FormControlLabel, 
-    Grid, 
-    Select, 
-    Tooltip, 
-    Typography, 
+import {
+    Accordion,
+    AccordionDetails,
+    AccordionSummary,
+    Checkbox,
+    FormControlLabel,
+    FormHelperText,
+    Grid,
+    Select,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    Tooltip,
+    Typography,
     Box,
     MenuItem,
     FormControl,
@@ -259,11 +269,9 @@ const ComponentSettings = ({ settings, getSettingValue, handleChangeBooleanSetti
                 <SettingCard>
                     <SettingItem>
                         <Box sx={{ width: '100%' }}>
-                            <Tooltip title="Endereço de email usado para envio de notificações" placement="top-start">
-                                <Typography variant="body1" sx={{ mb: 1 }}>
-                                    Email do Remetente
-                                </Typography>
-                            </Tooltip>
+                            <Typography variant="body1" sx={{ mb: 1 }}>
+                                Email do Remetente
+                            </Typography>
                             <TextField
                                 fullWidth
                                 variant="outlined"
@@ -274,15 +282,15 @@ const ComponentSettings = ({ settings, getSettingValue, handleChangeBooleanSetti
                                 placeholder="seu-email@gmail.com"
                                 type="email"
                             />
+                            <FormHelperText>Email que aparecerá como remetente nos envios do sistema</FormHelperText>
                         </Box>
                     </SettingItem>
+
                     <SettingItem>
                         <Box sx={{ width: '100%' }}>
-                            <Tooltip title="Senha de aplicativo do Gmail (não use sua senha normal)" placement="top-start">
-                                <Typography variant="body1" sx={{ mb: 1 }}>
-                                    Senha de Aplicativo
-                                </Typography>
-                            </Tooltip>
+                            <Typography variant="body1" sx={{ mb: 1 }}>
+                                Senha
+                            </Typography>
                             <TextField
                                 fullWidth
                                 variant="outlined"
@@ -290,18 +298,20 @@ const ComponentSettings = ({ settings, getSettingValue, handleChangeBooleanSetti
                                 name="emailPass"
                                 value={settings && settings.length > 0 ? getSettingValue("emailPass") : ""}
                                 onChange={handleChangeSetting}
-                                placeholder="xxxx xxxx xxxx xxxx"
+                                placeholder="Senha do email ou senha de app"
                                 type="password"
                             />
+                            <FormHelperText>
+                                Senha do email. Para Gmail use uma Senha de App em: Conta Google → Segurança → Verificação em 2 etapas → Senhas de app
+                            </FormHelperText>
                         </Box>
                     </SettingItem>
+
                     <SettingItem>
                         <Box sx={{ width: '100%' }}>
-                            <Tooltip title="Servidor SMTP (padrão: smtp.gmail.com)" placement="top-start">
-                                <Typography variant="body1" sx={{ mb: 1 }}>
-                                    Servidor SMTP
-                                </Typography>
-                            </Tooltip>
+                            <Typography variant="body1" sx={{ mb: 1 }}>
+                                Servidor SMTP
+                            </Typography>
                             <TextField
                                 fullWidth
                                 variant="outlined"
@@ -311,15 +321,15 @@ const ComponentSettings = ({ settings, getSettingValue, handleChangeBooleanSetti
                                 onChange={handleChangeSetting}
                                 placeholder="smtp.gmail.com"
                             />
+                            <FormHelperText>Endereço do servidor de envio do seu provedor de email</FormHelperText>
                         </Box>
                     </SettingItem>
+
                     <SettingItem>
                         <Box sx={{ width: '100%' }}>
-                            <Tooltip title="Porta do servidor SMTP (padrão: 587)" placement="top-start">
-                                <Typography variant="body1" sx={{ mb: 1 }}>
-                                    Porta SMTP
-                                </Typography>
-                            </Tooltip>
+                            <Typography variant="body1" sx={{ mb: 1 }}>
+                                Porta SMTP
+                            </Typography>
                             <TextField
                                 fullWidth
                                 variant="outlined"
@@ -330,6 +340,97 @@ const ComponentSettings = ({ settings, getSettingValue, handleChangeBooleanSetti
                                 placeholder="587"
                                 type="number"
                             />
+                            <FormHelperText>587 para TLS (recomendado) ou 465 para SSL</FormHelperText>
+                        </Box>
+                    </SettingItem>
+
+                    <SettingItem>
+                        <Box sx={{ width: '100%' }}>
+                            <Typography variant="body1" sx={{ mb: 1 }}>
+                                Segurança
+                            </Typography>
+                            <FormControl fullWidth size="small" variant="outlined">
+                                <Select
+                                    name="smtpSecure"
+                                    value={settings && settings.length > 0 ? (getSettingValue("smtpSecure") || "tls") : "tls"}
+                                    onChange={handleChangeSetting}
+                                >
+                                    <MenuItem value="tls">TLS — STARTTLS (porta 587)</MenuItem>
+                                    <MenuItem value="ssl">SSL (porta 465)</MenuItem>
+                                    <MenuItem value="none">Nenhuma (não recomendado)</MenuItem>
+                                </Select>
+                            </FormControl>
+                            <FormHelperText>Escolha conforme a porta: TLS para 587, SSL para 465</FormHelperText>
+                        </Box>
+                    </SettingItem>
+
+                    <SettingItem>
+                        <Box sx={{ width: '100%' }}>
+                            <Accordion
+                                elevation={0}
+                                sx={{ border: '1px solid', borderColor: 'divider', borderRadius: '4px !important' }}
+                            >
+                                <AccordionSummary expandIcon={<Typography sx={{ fontSize: '1rem' }}>▾</Typography>}>
+                                    <Typography variant="body2" color="text.secondary">
+                                        Configurações por provedor
+                                    </Typography>
+                                </AccordionSummary>
+                                <AccordionDetails sx={{ p: 0 }}>
+                                    <TableContainer>
+                                        <Table size="small">
+                                            <TableHead>
+                                                <TableRow>
+                                                    <TableCell sx={{ fontWeight: 600 }}>Provedor</TableCell>
+                                                    <TableCell sx={{ fontWeight: 600 }}>Servidor</TableCell>
+                                                    <TableCell sx={{ fontWeight: 600 }}>Porta</TableCell>
+                                                    <TableCell sx={{ fontWeight: 600 }}>Segurança</TableCell>
+                                                </TableRow>
+                                            </TableHead>
+                                            <TableBody>
+                                                {[
+                                                    ["Gmail",      "smtp.gmail.com",                       "587", "TLS", true],
+                                                    ["Gmail",      "smtp.gmail.com",                       "465", "SSL", false],
+                                                    ["Hostinger",  "smtp.hostinger.com",                   "587", "TLS", true],
+                                                    ["Hostinger",  "smtp.hostinger.com",                   "465", "SSL", false],
+                                                    ["Outlook",    "smtp.office365.com",                   "587", "TLS", true],
+                                                    ["Yahoo",      "smtp.mail.yahoo.com",                  "587", "TLS", true],
+                                                    ["Yahoo",      "smtp.mail.yahoo.com",                  "465", "SSL", false],
+                                                    ["Locaweb",    "email.locaweb.com.br",                 "587", "TLS", true],
+                                                    ["Locaweb",    "email.locaweb.com.br",                 "465", "SSL", false],
+                                                    ["SendGrid",   "smtp.sendgrid.net",                    "587", "TLS", true],
+                                                    ["Amazon SES", "email-smtp.[região].amazonaws.com",    "587", "TLS", true],
+                                                    ["Amazon SES", "email-smtp.[região].amazonaws.com",    "465", "SSL", false],
+                                                ].map(([provider, server, port, security, recommended], _idx, arr) => {
+                                                    const providerOrder = [...new Set(arr.map(r => r[0]))];
+                                                    const isEvenGroup = providerOrder.indexOf(provider) % 2 === 0;
+                                                    return (
+                                                        <TableRow key={`${provider}-${port}`} hover sx={{ bgcolor: isEvenGroup ? 'transparent' : 'action.hover' }}>
+                                                            <TableCell sx={{ fontWeight: recommended ? 600 : 400 }}>{provider}</TableCell>
+                                                            <TableCell sx={{ fontFamily: 'monospace', fontSize: '0.8rem', fontWeight: recommended ? 600 : 400 }}>{server}</TableCell>
+                                                            <TableCell sx={{ fontWeight: recommended ? 600 : 400 }}>{port}</TableCell>
+                                                            <TableCell>
+                                                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                                                    <Typography variant="body2" sx={{ fontWeight: recommended ? 600 : 400 }}>{security}</Typography>
+                                                                    {recommended && (
+                                                                        <Typography variant="caption" sx={{ color: 'success.main', fontWeight: 600, fontSize: '0.7rem' }}>
+                                                                            ✓ rec.
+                                                                        </Typography>
+                                                                    )}
+                                                                </Box>
+                                                            </TableCell>
+                                                        </TableRow>
+                                                    );
+                                                })}
+                                            </TableBody>
+                                        </Table>
+                                    </TableContainer>
+                                    <Box sx={{ px: 2, py: 1.5, borderTop: '1px solid', borderColor: 'divider' }}>
+                                        <Typography variant="caption" color="text.secondary">
+                                            💡 TLS (porta 587) é recomendado para a maioria dos casos. Use SSL (porta 465) se TLS não funcionar no seu provedor.
+                                        </Typography>
+                                    </Box>
+                                </AccordionDetails>
+                            </Accordion>
                         </Box>
                     </SettingItem>
                 </SettingCard>

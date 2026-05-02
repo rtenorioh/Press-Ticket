@@ -8,6 +8,10 @@ export const listen = async (
   req: Request,
   res: Response
 ): Promise<Response> => {
+  if (!req.body.type || !req.body.channel) {
+    return res.status(200).json({ ok: true });
+  }
+
   const medias = req.files as Express.Multer.File[];
   const { channelId } = req.params;
 
@@ -16,7 +20,9 @@ export const listen = async (
   });
 
   if (!connection) {
-    logger.warn(`WebhookHub: channelId "${channelId}" não encontrado na tabela Whatsapps`);
+    logger.warn(
+      `WebhookHub: channelId "${channelId}" não encontrado na tabela Whatsapps`
+    );
     return res.status(404).json({ message: "Whatsapp channel not found" });
   }
 
@@ -28,7 +34,6 @@ export const listen = async (
     );
 
     if (payload.channel === "email" && payload.type === "MESSAGE") {
-      logger.info(`WebhookHub: roteando para HubEmailListener — from="${payload.message?.from}"`);
       await HubEmailListener(payload, connection);
     } else {
       await HubMessageListener(payload, connection, medias);
@@ -37,6 +42,6 @@ export const listen = async (
     return res.status(200).json({ message: "Webhook received" });
   } catch (error) {
     logger.error(`WebhookHub: erro ao processar webhook — ${error}`);
-    return res.status(400).json({ message: error });
+    return res.status(400).json({ message: String(error) });
   }
 };

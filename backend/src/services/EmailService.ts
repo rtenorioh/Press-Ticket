@@ -19,15 +19,19 @@ class EmailService {
 
   private async initializeTransporter() {
     try {
-      const emailUser = await Setting.findOne({ where: { key: "emailUser" } });
-      const emailPass = await Setting.findOne({ where: { key: "emailPass" } });
-      const emailHost = await Setting.findOne({ where: { key: "emailHost" } });
-      const emailPort = await Setting.findOne({ where: { key: "emailPort" } });
+      const [emailUser, emailPass, emailHost, emailPort, smtpSecureSetting] = await Promise.all([
+        Setting.findOne({ where: { key: "emailUser" } }),
+        Setting.findOne({ where: { key: "emailPass" } }),
+        Setting.findOne({ where: { key: "emailHost" } }),
+        Setting.findOne({ where: { key: "emailPort" } }),
+        Setting.findOne({ where: { key: "smtpSecure" } })
+      ]);
 
       const user = emailUser?.value?.trim() || "";
       const pass = emailPass?.value?.trim() || "";
       const host = emailHost?.value?.trim() || "smtp.gmail.com";
       const port = parseInt(emailPort?.value || "587");
+      const smtpSecure = smtpSecureSetting?.value?.trim() || "tls";
 
       if (!user || !pass) {
         logger.warn("Credenciais de email não configuradas. Configure em: Configurações > Configurações de Email");
@@ -35,22 +39,35 @@ class EmailService {
         return;
       }
 
+      let secureConfig: object;
+      if (smtpSecure === "ssl") {
+        secureConfig = {
+          secure: true,
+          tls: { rejectUnauthorized: false }
+        };
+      } else if (smtpSecure === "tls") {
+        secureConfig = {
+          secure: false,
+          requireTLS: true,
+          tls: { rejectUnauthorized: false }
+        };
+      } else {
+        secureConfig = {
+          secure: false,
+          tls: { rejectUnauthorized: false }
+        };
+      }
+
       this.transporter = nodemailer.createTransport({
         host,
         port,
-        secure: false,
-        auth: {
-          user,
-          pass,
-        },
-        tls: {
-          rejectUnauthorized: false
-        },
+        auth: { user, pass },
+        ...secureConfig,
         debug: process.env.NODE_ENV !== "production",
         logger: process.env.NODE_ENV !== "production"
       });
 
-      logger.info("Transporter de email configurado com sucesso");
+      logger.info(`Transporter de email configurado com sucesso (${host}:${port}, segurança: ${smtpSecure})`);
     } catch (error) {
       logger.error(`Erro ao inicializar transporter de email: ${error}`);
       this.transporter = null;

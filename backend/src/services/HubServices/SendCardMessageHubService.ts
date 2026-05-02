@@ -79,8 +79,11 @@ export const SendCardMessageService = async (
     });
 
     return newMessage;
-  } catch (error) {
-    logger.error(`Erro ao enviar card Hub: ${error}`);
+  } catch (error: any) {
+    const errBody = error?.body || error?.response?.data || error?.response?.body;
+    logger.error(`Erro ao enviar card Hub: ${error?.message || String(error)}`);
+    if (errBody) logger.error(`Hub API response body: ${JSON.stringify(errBody)}`);
+    logger.error(JSON.stringify(error, Object.getOwnPropertyNames(error)));
     throw error;
   }
 };

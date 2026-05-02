@@ -198,6 +198,7 @@ const UploadModal = ({ open, onClose, files, onSend, loading, initialCaption }) 
   const [mentionStartPos, setMentionStartPos] = useState(0);
   const [selectedMentions, setSelectedMentions] = useState([]);
   const [isGroup, setIsGroup] = useState(false);
+  const [ticketChannel, setTicketChannel] = useState('wwebjs');
 
   const FILE_LIMITS = {
     image: 100,
@@ -369,7 +370,11 @@ const UploadModal = ({ open, onClose, files, onSend, loading, initialCaption }) 
 
         setUploadProgress(prev => ({ ...prev, [i]: 50 }));
 
-        const response = await api.post(`/messages/${ticketId}`, formData, {
+        const mediaEndpoint = ticketChannel && ticketChannel !== 'wwebjs'
+          ? `/hub-message/${ticketId}`
+          : `/messages/${ticketId}`;
+
+        const response = await api.post(mediaEndpoint, formData, {
           onUploadProgress: (progressEvent) => {
             const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
             setUploadProgress(prev => ({ ...prev, [i]: Math.max(50, progress) }));
@@ -434,6 +439,7 @@ const UploadModal = ({ open, onClose, files, onSend, loading, initialCaption }) 
         const { data } = await api.get(`/tickets/${ticketId}`);
         const isGroupChat = Boolean(data.contact?.isGroup);
         setIsGroup(isGroupChat);
+        setTicketChannel(data.whatsapp?.type || 'wwebjs');
         
         if (isGroupChat) {
           const gId = data.contact?.number || data.contact?.remoteJid;

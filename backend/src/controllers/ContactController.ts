@@ -56,6 +56,10 @@ export const getBlockStatus = async (
     return res.status(400).json({ error: "Nenhuma sessão WhatsApp conectada" });
   }
 
+  if (!contact.number) {
+    return res.status(200).json({ isBlocked: false });
+  }
+
   const wbot = getWbot(sessionId);
   const numberId = await wbot.getNumberId(contact.number!);
   if (!numberId) {
@@ -91,6 +95,10 @@ export const blockContact = async (
   }
   if (!sessionId) {
     return res.status(400).json({ error: "Nenhuma sessão WhatsApp conectada" });
+  }
+
+  if (!contact.number) {
+    return res.status(400).json({ error: "Este contato não possui número de telefone" });
   }
 
   const wbot = getWbot(sessionId);
@@ -143,6 +151,10 @@ export const unblockContact = async (
   }
   if (!sessionId) {
     return res.status(400).json({ error: "Nenhuma sessão WhatsApp conectada" });
+  }
+
+  if (!contact.number) {
+    return res.status(400).json({ error: "Este contato não possui número de telefone" });
   }
 
   const wbot = getWbot(sessionId);

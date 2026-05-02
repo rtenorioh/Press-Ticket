@@ -1,23 +1,23 @@
-import "./bootstrap";
-import "reflect-metadata";
-import "express-async-errors";
-import express, { Request, Response, NextFunction } from "express";
-import cors from "cors";
-import cookieParser from "cookie-parser";
-import swaggerUi from "swagger-ui-express";
-import helmet from "helmet";
 import compression from "compression";
-import { logger } from "./utils/logger";
-import updateLastActivity from "./middleware/updateLastActivity";
+import cookieParser from "cookie-parser";
+import cors from "cors";
+import express, { NextFunction, Request, Response } from "express";
+import "express-async-errors";
+import helmet from "helmet";
+import "reflect-metadata";
+import swaggerUi from "swagger-ui-express";
+import "./bootstrap";
 import errorLogger from "./middleware/errorLogger";
+import updateLastActivity from "./middleware/updateLastActivity";
+import { logger } from "./utils/logger";
 
-import "./database";
-import uploadConfig from "./config/upload";
-import AppError from "./errors/AppError";
-import openApiRoutes from "./routes/openApiRoutes";
-import routes from "./routes";
-import swaggerSpec from "./config/swagger";
 import { apiLimiter } from "./config/rateLimiter";
+import swaggerSpec from "./config/swagger";
+import uploadConfig from "./config/upload";
+import "./database";
+import AppError from "./errors/AppError";
+import routes from "./routes";
+import openApiRoutes from "./routes/openApiRoutes";
 
 const app = express();
 
@@ -38,14 +38,14 @@ app.use((req, res, next) => {
       res.setHeader(
         "Content-Security-Policy",
         "default-src * 'unsafe-inline' 'unsafe-eval' data: blob:; " +
-        "script-src * 'unsafe-inline' 'unsafe-eval'; " +
-        "style-src * 'unsafe-inline'; " +
-        "img-src * data: blob: 'unsafe-inline'; " +
-        "font-src * data:; " +
-        "connect-src *; " +
-        "frame-src *; " +
-        "media-src *; " +
-        "object-src *;"
+          "script-src * 'unsafe-inline' 'unsafe-eval'; " +
+          "style-src * 'unsafe-inline'; " +
+          "img-src * data: blob: 'unsafe-inline'; " +
+          "font-src * data:; " +
+          "connect-src *; " +
+          "frame-src *; " +
+          "media-src *; " +
+          "object-src *;"
       );
       next();
     });
@@ -61,15 +61,35 @@ app.use((req, res, next) => {
 });
 
 app.use((req, res, next) => {
-  res.setHeader("Permissions-Policy", "geolocation=(self), microphone=(self), camera=(self), payment=(self), usb=(), magnetometer=(), gyroscope=(), accelerometer=()"
+  res.setHeader(
+    "Permissions-Policy",
+    "geolocation=(self), microphone=(self), camera=(self), payment=(self), usb=(), magnetometer=(), gyroscope=(), accelerometer=()"
   );
   next();
 });
 
 app.use(compression());
 
+app.use(
+  "/hub-webhook",
+  cors({
+    origin: true,
+    credentials: false,
+    methods: ["POST", "OPTIONS"],
+    allowedHeaders: [
+      "Content-Type",
+      "Authorization",
+      "x-hub-signature",
+      "x-webhook-token"
+    ]
+  })
+);
+
 const corsOptions = {
-  origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
+  origin: (
+    origin: string | undefined,
+    callback: (err: Error | null, allow?: boolean) => void
+  ) => {
     if (!origin) {
       return callback(null, true);
     }
@@ -106,17 +126,22 @@ app.use(express.urlencoded({ limit: "500mb", extended: true }));
 const openApiCorsOptions = {
   credentials: true,
   origin: "*",
-  allowedHeaders: ["Content-Type", "Authorization", "x-api-token"],
+  allowedHeaders: ["Content-Type", "Authorization", "x-api-token"]
 };
 
-app.use("/api-docs",(req: Request, res: Response, next: NextFunction) => {
-  res.setHeader("X-Frame-Options", "ALLOWALL");
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  next();
-}, swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
-  customCss: ".swagger-ui .topbar { display: none }",
-  customSiteTitle: "Press Ticket® API Documentation"
-}));
+app.use(
+  "/api-docs",
+  (req: Request, res: Response, next: NextFunction) => {
+    res.setHeader("X-Frame-Options", "ALLOWALL");
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    next();
+  },
+  swaggerUi.serve,
+  swaggerUi.setup(swaggerSpec, {
+    customCss: ".swagger-ui .topbar { display: none }",
+    customSiteTitle: "Press Ticket® API Documentation"
+  })
+);
 
 app.get("/api-docs.json", (req, res) => {
   res.setHeader("Content-Type", "application/json");
@@ -140,11 +165,16 @@ const publicCorsOptions = {
   optionsSuccessStatus: 200
 };
 
-app.use("/public", cors(publicCorsOptions), (req, res, next) => {
-  res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
-  res.setHeader("Cross-Origin-Embedder-Policy", "unsafe-none");
-  next();
-}, express.static(uploadConfig.directory));
+app.use(
+  "/public",
+  cors(publicCorsOptions),
+  (req, res, next) => {
+    res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
+    res.setHeader("Cross-Origin-Embedder-Policy", "unsafe-none");
+    next();
+  },
+  express.static(uploadConfig.directory)
+);
 app.use(routes);
 app.use(updateLastActivity);
 
