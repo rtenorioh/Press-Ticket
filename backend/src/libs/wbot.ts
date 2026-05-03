@@ -65,7 +65,7 @@ const getDalleResponse = async (
       n: 1,
       size: "1024x1024"
     });
-    return response.data[0].url;
+    return response.data?.[0]?.url;
   } catch (e) {
     return `❌ OpenAI Response Error: ${e instanceof Error ? e.message : String(e)}`;
   }
