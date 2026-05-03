@@ -1,6 +1,6 @@
 import { Dialog } from "@mui/material";
 import { useEffect, useState } from "react";
-import { ChromePicker } from "react-color";
+import { HexColorPicker } from "react-colorful";
 
 const ColorPicker = ({ onChange, currentColor, handleClose, open, theme }) => {
   const [selectedColor, setSelectedColor] = useState(currentColor);
@@ -9,9 +9,9 @@ const ColorPicker = ({ onChange, currentColor, handleClose, open, theme }) => {
     setSelectedColor(currentColor);
   }, [currentColor]);
 
-  const handleChange = (color) => {
-    setSelectedColor(color.hex);
-    onChange(color.hex);
+  const handleChange = (hex) => {
+    setSelectedColor(hex);
+    onChange(hex);
   };
 
   const handleSave = () => {
@@ -39,18 +39,10 @@ const ColorPicker = ({ onChange, currentColor, handleClose, open, theme }) => {
         }}
       >
         <div style={{ width: "100%" }}>
-          <ChromePicker
-            color={selectedColor}
+          <HexColorPicker
+            color={selectedColor || "#000000"}
             onChange={handleChange}
-            disableAlpha={false}
-            styles={{
-              default: {
-                picker: {
-                  boxShadow: "none",
-                  borderRadius: "4px",
-                },
-              },
-            }}
+            style={{ width: "100%", borderRadius: "4px" }}
           />
         </div>
         <div style={{ marginTop: 16 }}>

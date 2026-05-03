@@ -1,4 +1,3 @@
-import { v4 as uuidv4 } from "uuid";
 import AppError from "../../errors/AppError";
 import {
   createAccessToken,
@@ -117,7 +116,7 @@ const AuthUserService = async ({
       lastActivity: new Date()
     });
   } else {
-    const newSessionId = uuidv4();
+    const newSessionId = crypto.randomUUID();
 
     await UserSession.create({
       userId: user.id,

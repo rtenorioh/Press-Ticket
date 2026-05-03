@@ -21,7 +21,7 @@ import { green } from '@mui/material/colors';
 import { styled, useTheme } from '@mui/material/styles';
 import { Field, Form, Formik } from "formik";
 import { memo, useEffect, useState } from "react";
-import { SketchPicker } from 'react-color';
+import { HexColorPicker } from 'react-colorful';
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 import * as Yup from "yup";
@@ -122,8 +122,8 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
 	const [color, setColor] = useState("#5C59A0");
 	const [showColorPicker, setShowColorPicker] = useState(false);
 
-	const handleColorChange = (color) => {
-		setColor(color.hex);
+	const handleColorChange = (hex) => {
+		setColor(hex);
 	};
 
 	useEffect(() => {
@@ -318,7 +318,7 @@ const WhatsAppModal = ({ open, onClose, whatsAppId }) => {
                   />
                   {showColorPicker && (
                     <Box sx={{ position: 'absolute', zIndex: 2, mt: 1, boxShadow: 3, borderRadius: 1, overflow: 'hidden' }}>
-                      <SketchPicker color={color} onChangeComplete={handleColorChange} />
+                      <HexColorPicker color={color || "#5C59A0"} onChange={handleColorChange} />
                     </Box>
                   )}
                 </Box>
