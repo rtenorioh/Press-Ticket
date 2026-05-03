@@ -1,7 +1,6 @@
 import crypto from "crypto";
 import { Request, Response } from "express";
 import { verify } from "jsonwebtoken";
-import nodemailer from "nodemailer";
 import EmailService from "../services/EmailService";
 import { Op } from "sequelize";
 import AppError from "../errors/AppError";
