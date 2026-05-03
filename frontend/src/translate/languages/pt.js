@@ -60,6 +60,7 @@ const messages = {
           readWhatsapp: "Visualizar Conexões",
           updateWhatsapp: "Editar Conexões",
           deleteWhatsapp: "Deletar Conexões",
+          writeWhatsappPairing: "Código de Pareamento",
           createWhatsappSession: "Criar Sessões",
           updateWhatsappSession: "Editar Sessões",
           deleteWhatsappSession: "Deletar Sessões",
@@ -118,6 +119,8 @@ const messages = {
           name: "Nome",
           permissions: "Permissões",
           permissionsRequired: "Selecione ao menos uma permissão",
+          permissionsSelected: "permissões selecionadas",
+          permissionsOf: "de",
           buttons: {
             cancel: "Cancelar",
             save: "Salvar",
@@ -132,6 +135,8 @@ const messages = {
           name: "Nome",
           token: "Token",
           permissions: "Permissões",
+          permissionsCount: "Qtd.",
+          permissionsGranted: "permissões concedidas",
           created_at: "Criado em:",
           actions: "Ação"
         }

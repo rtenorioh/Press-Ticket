@@ -1,35 +1,36 @@
-import {
-  Button,
-  Checkbox,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  FormControlLabel,
-  Grid,
-  IconButton,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  TextField,
-  Typography,
-  Tooltip,
-  Box,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails
-} from '@mui/material';
-import { styled, useTheme } from '@mui/material/styles';
-import DeleteOutline from '@mui/icons-material/DeleteOutline';
-import FileCopy from '@mui/icons-material/FileCopy';
 import AddCircleOutline from '@mui/icons-material/AddCircleOutline';
-import VpnKeyRounded from '@mui/icons-material/VpnKeyRounded';
+import DeleteOutline from '@mui/icons-material/DeleteOutline';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import FileCopy from '@mui/icons-material/FileCopy';
+import VpnKeyRounded from '@mui/icons-material/VpnKeyRounded';
+import {
+    Accordion,
+    AccordionDetails,
+    AccordionSummary,
+    Box,
+    Button,
+    Checkbox,
+    Chip,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    FormControlLabel,
+    Grid,
+    IconButton,
+    Paper,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    TextField,
+    Tooltip,
+    Typography
+} from '@mui/material';
 import Stack from '@mui/material/Stack';
+import { styled, useTheme } from '@mui/material/styles';
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from 'react-i18next';
 import { toast } from 'react-toastify';
@@ -102,6 +103,32 @@ const TokenText = styled(Typography)(({ theme }) => ({
     padding: theme.spacing(0.5, 1),
     borderRadius: theme.shape.borderRadius,
 }));
+
+const ALL_PERMISSIONS = [
+    'create:contacts', 'read:contacts', 'update:contacts', 'delete:contacts',
+    'create:messages', 'read:messages', 'update:messages', 'delete:messages',
+    'create:queue', 'read:queue', 'update:queue', 'delete:queue',
+    'create:tags', 'read:tags', 'update:tags', 'delete:tags',
+    'create:tickets', 'read:tickets', 'update:tickets', 'delete:tickets',
+    'create:whatsapp', 'read:whatsapp', 'update:whatsapp', 'delete:whatsapp', 'write:whatsapp-pairing',
+    'create:whatsappsession', 'update:whatsappsession', 'delete:whatsappsession',
+    'read:activity-logs',
+    'create:backups', 'read:backups', 'update:backups', 'delete:backups',
+    'create:error-logs', 'read:error-logs', 'delete:error-logs',
+    'read:network-status',
+    'read:queue-monitor',
+    'read:system-update', 'write:system-update',
+    'read:version', 'write:whatsapp-lib',
+    'write:system', 'read:system-resources',
+    'read:videos', 'write:videos',
+    'create:users', 'read:users', 'update:users', 'delete:users',
+    'create:quickAnswers', 'read:quickAnswers', 'update:quickAnswers', 'delete:quickAnswers',
+    'create:client-status', 'read:client-status', 'update:client-status', 'delete:client-status',
+    'read:groups', 'write:groups',
+    'write:presence',
+    'read:profile',
+    'read:settings', 'update:settings',
+];
 
 const ApiKey = () => {
     const { t } = useTranslation();
@@ -267,6 +294,7 @@ const ApiKey = () => {
             'read:whatsapp': t("apiKey.permissions.readWhatsapp"),
             'update:whatsapp': t("apiKey.permissions.updateWhatsapp"),
             'delete:whatsapp': t("apiKey.permissions.deleteWhatsapp"),
+            'write:whatsapp-pairing': t("apiKey.permissions.writeWhatsappPairing"),
             
             // Sessões de WhatsApp
             'create:whatsappsession': t("apiKey.permissions.createWhatsappSession"),
@@ -339,7 +367,7 @@ const ApiKey = () => {
 
             // Configurações
             'read:settings': t("apiKey.permissions.readSettings"),
-            'write:settings': t("apiKey.permissions.writeSettings")
+            'update:settings': t("apiKey.permissions.writeSettings")
         };
         return names[permission] || permission;
     };
@@ -380,16 +408,17 @@ const ApiKey = () => {
                                 <StyledTableCell>{t("apiKey.table.name")}</StyledTableCell>
                                 <StyledTableCell>{t("apiKey.table.token")}</StyledTableCell>
                                 <StyledTableCell>{t("apiKey.table.permissions")}</StyledTableCell>
+                                <StyledTableCell align="center">{t("apiKey.table.permissionsCount")}</StyledTableCell>
                                 <StyledTableCell>{t("apiKey.table.created_at")}</StyledTableCell>
                                 <StyledTableCell align="center">{t("apiKey.table.actions")}</StyledTableCell>
                             </TableRow>
                         </StyledTableHead>
                         <TableBody>
                             {loading && tokens.length === 0 ? (
-                                <TableRowSkeleton columns={5} />
+                                <TableRowSkeleton columns={6} />
                             ) : tokens.length === 0 ? (
                                 <TableRow>
-                                    <StyledTableCell colSpan={5} align="center">
+                                    <StyledTableCell colSpan={6} align="center">
                                         <Typography variant="body2" color="textSecondary">
                                             {t("apiKey.messages.noTokens")}
                                         </Typography>
@@ -423,6 +452,15 @@ const ApiKey = () => {
                                             {Array.isArray(token.permissions) ? token.permissions.map(renderPermissionName).join(', ') : ''}
                                         </Typography>
                                     </StyledTableCell>
+                                    <StyledTableCell align="center">
+                                        <Tooltip title={`${token.permissions?.length || 0} ${t("apiKey.table.permissionsGranted")}`} arrow>
+                                            <Chip
+                                                label={token.permissions?.length || 0}
+                                                size="small"
+                                                color="primary"
+                                            />
+                                        </Tooltip>
+                                    </StyledTableCell>
                                     <StyledTableCell>
                                         <Typography variant="body2" color="textSecondary">
                                             {new Date(token.createdAt).toLocaleString()}
@@ -444,7 +482,7 @@ const ApiKey = () => {
                                     </StyledTableCell>
                                 </TableRow>
                             ))}
-                            {loading && <TableRowSkeleton columns={5} />}
+                            {loading && <TableRowSkeleton columns={6} />}
                         </TableBody>
                     </Table>
                 </TableContainer>
@@ -485,82 +523,33 @@ const ApiKey = () => {
                             <Typography variant="subtitle1" fontWeight={500}>
                                 {t("apiKey.modal.permissions")}
                             </Typography>
-                            <Box>
-                                {!hasSelectedPermissions && (
-                                    <Typography 
-                                        variant="caption" 
-                                        color="error.main" 
-                                        sx={{ fontWeight: 500, mr: 2 }}
-                                    >
-                                        ({t("apiKey.modal.permissionsRequired")})
-                                    </Typography>
-                                )}
-                                <Button 
-                                    size="small" 
-                                    variant="outlined" 
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                                <Typography
+                                    variant="caption"
+                                    sx={{ fontWeight: 500 }}
+                                    color={newToken.permissions.length === 0 ? 'error.main' : 'success.main'}
+                                >
+                                    {newToken.permissions.length === 0
+                                        ? `0 ${t("apiKey.modal.permissionsSelected")}`
+                                        : `${newToken.permissions.length} ${t("apiKey.modal.permissionsOf")} ${ALL_PERMISSIONS.length} ${t("apiKey.modal.permissionsSelected")}`
+                                    }
+                                </Typography>
+                                <Button
+                                    size="small"
+                                    variant="outlined"
                                     color="primary"
                                     onClick={() => {
-                                        const allPermissions = [
-                                            // Contatos
-                                            'create:contacts', 'read:contacts', 'update:contacts', 'delete:contacts',
-                                            // Mensagens
-                                            'create:messages', 'read:messages', 'update:messages', 'delete:messages',
-                                            // Setores
-                                            'create:queue', 'read:queue', 'update:queue', 'delete:queue',
-                                            // Tags
-                                            'create:tags', 'read:tags', 'update:tags', 'delete:tags',
-                                            // Tickets
-                                            'create:tickets', 'read:tickets', 'update:tickets', 'delete:tickets',
-                                            // WhatsApp
-                                            'create:whatsapp', 'read:whatsapp', 'update:whatsapp', 'delete:whatsapp',
-                                            // Sessões de WhatsApp
-                                            'create:whatsappsession', 'update:whatsappsession', 'delete:whatsappsession',
-                                            // Logs de Atividade
-                                            'read:activity-logs',
-                                            // Backups
-                                            'create:backups', 'read:backups', 'update:backups', 'delete:backups',
-                                            // Logs de Erro
-                                            'create:error-logs', 'read:error-logs', 'delete:error-logs',
-                                            // Monitoramento de Rede
-                                            'read:network-status',
-                                            // Monitoramento de Setor
-                                            'read:queue-monitor',
-                                            // Atualização do Sistema
-                                            'read:system-update', 'write:system-update',
-                                            // Versão e Biblioteca WhatsApp
-                                            'read:version', 'write:whatsapp-lib',
-                                            // Sistema e Recursos
-                                            'write:system', 'read:system-resources',
-                                            // Vídeos
-                                            'read:videos', 'write:videos',
-                                            // Usuários
-                                            'create:users', 'read:users', 'update:users', 'delete:users',
-                                            // Respostas Rápidas
-                                            'create:quickAnswers', 'read:quickAnswers', 'update:quickAnswers', 'delete:quickAnswers',
-                                            // Status de Clientes
-                                            'create:client-status', 'read:client-status', 'update:client-status', 'delete:client-status',
-                                            // Grupos do WhatsApp
-                                            'read:groups', 'write:groups',
-                                            // Presença
-                                            'write:presence',
-                                            // Autenticação
-                                            'read:profile',
-                                            // Configurações
-                                            'read:settings', 'write:settings'
-                                        ];
-
-                                        if (newToken.permissions.length === allPermissions.length) {
+                                        if (newToken.permissions.length === ALL_PERMISSIONS.length) {
                                             setNewToken(prev => ({ ...prev, permissions: [] }));
                                         } else {
-                                            setNewToken(prev => ({ ...prev, permissions: allPermissions }));
+                                            setNewToken(prev => ({ ...prev, permissions: ALL_PERMISSIONS }));
                                         }
                                     }}
                                     sx={{ borderRadius: 20, textTransform: 'none' }}
                                 >
-                                    {newToken.permissions.length === 0 ||
-                                     newToken.permissions.length < 49 ?
-                                        t("apiKey.modal.buttons.selectAll") :
-                                        t("apiKey.modal.buttons.unselectAll")}
+                                    {newToken.permissions.length === ALL_PERMISSIONS.length
+                                        ? t("apiKey.modal.buttons.unselectAll")
+                                        : t("apiKey.modal.buttons.selectAll")}
                                 </Button>
                             </Box>
                         </Box>
@@ -744,7 +733,7 @@ const ApiKey = () => {
                             </AccordionSummary>
                             <AccordionDetails sx={{ pt: 2 }}>
                                 <Grid container spacing={1}>
-                                    {['create:whatsapp', 'read:whatsapp', 'update:whatsapp', 'delete:whatsapp'].map((permission) => (
+                                    {['create:whatsapp', 'read:whatsapp', 'update:whatsapp', 'delete:whatsapp', 'write:whatsapp-pairing'].map((permission) => (
                                         <Grid item xs={12} sm={6} key={permission}>
                                             <FormControlLabel
                                                 control={
@@ -1304,7 +1293,7 @@ const ApiKey = () => {
                             </AccordionSummary>
                             <AccordionDetails sx={{ pt: 2 }}>
                                 <Grid container spacing={1}>
-                                    {['read:settings', 'write:settings'].map((permission) => (
+                                    {['read:settings', 'update:settings'].map((permission) => (
                                         <Grid item xs={12} sm={6} key={permission}>
                                             <FormControlLabel
                                                 control={
