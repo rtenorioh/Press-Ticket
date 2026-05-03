@@ -3,4 +3,4 @@ export default {
   expiresIn: "8h",
   refreshSecret: process.env.JWT_REFRESH_SECRET || "myanothersecret",
   refreshExpiresIn: "1d"
-};
+} as const;
