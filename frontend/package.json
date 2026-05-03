@@ -20,7 +20,7 @@
     "@mui/x-date-pickers": "^7.0.0",
     "axios": "^1.16.0",
     "date-fns": "^2.30.0",
-    "dotenv": "^16.4.5",
+    "dotenv": "^17.4.2",
     "emoji-picker-react": "^4.19.1",
     "express": "^4.21.2",
     "formik": "^2.4.9",
