@@ -343,20 +343,72 @@ openApiRouter.post("/contact", isApiToken('read:contacts'), ContactController.ge
  *         schema:
  *           type: integer
  *     requestBody:
+ *       required: true
  *       content:
  *         application/json:
  *           schema:
  *             type: object
+ *             required:
+ *               - tags
  *             properties:
  *               tags:
  *                 type: array
  *                 items:
- *                   type: integer
+ *                   type: object
+ *                   required:
+ *                     - id
+ *                   properties:
+ *                     id:
+ *                       type: integer
+ *           example:
+ *             tags:
+ *               - id: 11
+ *               - id: 12
  *     responses:
  *       200:
  *         description: Tags atualizadas
  */
 openApiRouter.put("/contacts/:contactId/tags", isApiToken('update:contacts'), ContactController.updateTags);
+
+/**
+ * @swagger
+ * /v1/contacts/{contactId}/tags/{tagId}:
+ *   delete:
+ *     summary: Remover Tag do Contato
+ *     description: Remove uma tag específica do contato mantendo as demais
+ *     tags: [Contacts]
+ *     security:
+ *       - apiToken: []
+ *     parameters:
+ *       - in: path
+ *         name: contactId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID do contato
+ *       - in: path
+ *         name: tagId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID da tag a remover
+ *     responses:
+ *       200:
+ *         description: Tag removida com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Tag removida com sucesso
+ *                 contact:
+ *                   type: object
+ *       404:
+ *         description: Contato ou tag não encontrada
+ */
+openApiRouter.delete("/contacts/:contactId/tags/:tagId", isApiToken('update:contacts'), ContactController.removeTag);
 
 // Rotas de setores
 
@@ -4132,7 +4184,7 @@ openApiRouter.put("/tickets/:ticketId/toggle-state", isApiToken("update:tickets"
  *             properties:
  *               phoneNumber:
  *                 type: string
- *                 description: Número de telefone com código do país (ex: 5511999999999)
+ *                 description: 'Número de telefone com código do país (ex: 5511999999999)'
  *                 example: "5511999999999"
  *     responses:
  *       200:

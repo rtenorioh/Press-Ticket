@@ -20,6 +20,7 @@ import CheckIsValidContact from "../services/WbotServices/CheckIsValidContact";
 import CheckContactNumber from "../services/WbotServices/CheckNumber";
 import GetProfilePicUrl from "../services/WbotServices/GetProfilePicUrl";
 import SyncTagsService from "../services/TagServices/SyncTagsService";
+import RemoveTagFromContactService from "../services/TagServices/RemoveTagFromContactService";
 import { createActivityLog, ActivityActions, EntityTypes } from "../services/ActivityLogService";
 import Whatsapp from "../models/Whatsapp";
 import { getWbot } from "../libs/wbot";
@@ -529,6 +530,37 @@ export const updateTags = async (
   });
 
   return res.status(200).json(contact);
+};
+
+export const removeTag = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  const { contactId, tagId } = req.params;
+
+  const contact = await RemoveTagFromContactService({
+    contactId: +contactId,
+    tagId: +tagId
+  });
+
+  const logUserId = req.user?.id || 1;
+
+  await createActivityLog({
+    userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
+    action: ActivityActions.UPDATE,
+    description: `Tag ${tagId} removida do contato ${contact.name}`,
+    entityType: EntityTypes.CONTACT,
+    entityId: contact.id,
+    additionalData: { tagId: +tagId }
+  });
+
+  const io = getIO();
+  io.emit("contact", {
+    action: "update",
+    contact: contact.toJSON ? contact.toJSON() : contact
+  });
+
+  return res.status(200).json({ message: "Tag removida com sucesso", contact });
 };
 
 export const exportContacts = async (
