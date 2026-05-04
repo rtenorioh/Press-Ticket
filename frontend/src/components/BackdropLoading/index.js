@@ -1,4 +1,3 @@
-import PropTypes from "prop-types";
 import React from "react";
 
 import CircularProgress from "@mui/material/CircularProgress";
@@ -24,12 +23,6 @@ const BackdropLoading = ({ open = true, color = "inherit", ariaLabel = "Loading.
 			<CircularProgress color={color} />
 		</BackdropStyled>
 	);
-};
-
-BackdropLoading.propTypes = {
-	open: PropTypes.bool,
-	color: PropTypes.oneOf(["primary", "secondary", "inherit"]),
-	ariaLabel: PropTypes.string,
 };
 
 export default BackdropLoading;

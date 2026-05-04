@@ -1,4 +1,3 @@
-import PropTypes from "prop-types";
 import rules from "../../rules";
 
 const check = (role, action, data) => {
@@ -30,14 +29,6 @@ const check = (role, action, data) => {
 
 const Can = ({ role, perform, data, yes = () => null, no = () => null }) =>
 	check(role, perform, data) ? yes() : no();
-
-Can.propTypes = {
-	role: PropTypes?.string?.isRequired,
-	perform: PropTypes.string.isRequired,
-	data: PropTypes.object,
-	yes: PropTypes.func,
-	no: PropTypes.func,
-};
 
 export { Can };
 

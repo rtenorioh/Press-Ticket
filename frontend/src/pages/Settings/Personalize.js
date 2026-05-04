@@ -12,7 +12,6 @@ import {
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import DeleteIcon from "@mui/icons-material/Delete";
-import PropTypes from "prop-types";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
@@ -190,12 +189,6 @@ const TabPanel = (props) => {
             )}
         </div>
     );
-};
-
-TabPanel.propTypes = {
-    children: PropTypes.node,
-    index: PropTypes.any.isRequired,
-    value: PropTypes.any.isRequired,
 };
 
 const PersonalizeSettings = ({ toggleTheme, onThemeConfigUpdate }) => {

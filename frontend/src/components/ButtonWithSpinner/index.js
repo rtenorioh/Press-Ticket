@@ -1,6 +1,5 @@
 import { Button, CircularProgress } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import PropTypes from "prop-types";
 import React from "react";
 
 const StyledButton = styled(Button)({
@@ -42,14 +41,6 @@ const ButtonWithSpinner = ({
 			)}
 		</StyledButton>
 	);
-};
-
-ButtonWithSpinner.propTypes = {
-	loading: PropTypes.bool.isRequired,
-	children: PropTypes.node.isRequired,
-	spinnerSize: PropTypes.number,
-	spinnerColor: PropTypes.string,
-	ariaLabel: PropTypes.string,
 };
 
 export default ButtonWithSpinner;

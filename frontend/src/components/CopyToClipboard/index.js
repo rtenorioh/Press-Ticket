@@ -1,6 +1,5 @@
 import { IconButton, Tooltip } from "@mui/material";
 import { FileCopyOutlined } from "@mui/icons-material";
-import PropTypes from "prop-types";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -43,11 +42,6 @@ const CopyToClipboard = ({ content, color = "inherit" }) => {
       </IconButton>
     </Tooltip>
   );
-};
-
-CopyToClipboard.propTypes = {
-  content: PropTypes?.string?.isRequired,
-  color: PropTypes.string,
 };
 
 export default CopyToClipboard;

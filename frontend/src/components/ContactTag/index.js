@@ -1,5 +1,4 @@
 import { styled } from "@mui/material/styles";
-import PropTypes from "prop-types";
 import React from "react";
 
 const Tag = styled('div', {
@@ -25,13 +24,6 @@ const ContactTag = ({ tag }) => {
       {tag.name?.toUpperCase() || "UNKNOWN"}
     </Tag>
   );
-};
-
-ContactTag.propTypes = {
-  tag: PropTypes.shape({
-    name: PropTypes.string.isRequired,
-    color: PropTypes.string,
-  }).isRequired,
 };
 
 export default ContactTag;

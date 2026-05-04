@@ -24,7 +24,6 @@ import {
   Popper
 } from "@mui/material";
 import EmojiPicker, { Theme as EmojiTheme } from 'emoji-picker-react';
-import PropTypes from "prop-types";
 import { useContext, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { EditMessageContext } from "../../context/EditingMessage/EditingMessageContext";
@@ -554,12 +553,5 @@ const MessageOptionsMenu = ({ message, menuOpen, handleClose, anchorEl }) => {
     </>
   );
 };
-
-MessageOptionsMenu.propTypes = {
-  message: PropTypes.object,
-  menuOpen: PropTypes.bool.isRequired,
-  handleClose: PropTypes.func.isRequired,
-  anchorEl: PropTypes.object
-}
 
 export default MessageOptionsMenu;

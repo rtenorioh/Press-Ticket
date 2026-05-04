@@ -13,7 +13,6 @@ import {
 	Typography
 } from "@mui/material";
 import { styled, useTheme } from "@mui/material/styles";
-import PropTypes from "prop-types";
 import {
   useCallback,
   useContext,
@@ -251,13 +250,6 @@ const AcceptTicketWithouSelectQueue = ({ modalOpen, onClose, ticketId, onSuccess
 			</DialogActions>
 		</StyledDialog>
 	);
-};
-
-AcceptTicketWithouSelectQueue.propTypes = {
-	modalOpen: PropTypes.bool.isRequired,
-	onClose: PropTypes.func.isRequired,
-	ticketId: PropTypes.number.isRequired,
-	onSuccess: PropTypes.func,
 };
 
 export default AcceptTicketWithouSelectQueue;

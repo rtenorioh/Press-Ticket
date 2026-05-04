@@ -6,7 +6,6 @@ import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
 import { format, parseISO } from "date-fns";
-import PropTypes from "prop-types";
 
 import { useTranslation } from "react-i18next";
 import WhatsMarked from "react-whatsmarked";
@@ -114,12 +113,6 @@ const MessageHistoryModal = ({ open, onClose, oldMessages }) => {
       </DialogActions>
     </StyledDialog>
   );
-};
-
-MessageHistoryModal.propTypes = {
-  open: PropTypes.bool.isRequired,
-  onClose: PropTypes.func.isRequired,
-  oldMessages: PropTypes.array,
 };
 
 export default MessageHistoryModal;

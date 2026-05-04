@@ -1,5 +1,4 @@
 import { Button, Typography, Paper, Box, styled } from "@mui/material";
-import PropTypes from "prop-types";
 import { useRef, useEffect, useCallback } from "react";
 import toastError from "../../errors/toastError";
 import { useTranslation } from "react-i18next";
@@ -98,7 +97,7 @@ const StyledButton = styled(Button)(({ theme }) => ({
   }
 }));
 
-const LocationPreview = ({ image, link, description }) => {
+const LocationPreview = ({ image = null, link = null, description = "" }) => {
   const { t } = useTranslation();
   const containerRef = useRef(null);
   
@@ -227,18 +226,6 @@ const LocationPreview = ({ image, link, description }) => {
       </ContentContainer>
     </Container>
   );
-};
-
-LocationPreview.propTypes = {
-  image: PropTypes.string,
-  link: PropTypes.string,
-  description: PropTypes.string,
-};
-
-LocationPreview.defaultProps = {
-  image: null,
-  link: null,
-  description: "",
 };
 
 export default LocationPreview;
