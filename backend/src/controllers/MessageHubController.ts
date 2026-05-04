@@ -174,7 +174,7 @@ export const sendReplyableText = async (req: Request, res: Response): Promise<Re
 
   if (ticket.whatsapp?.type === "wwebjs") {
     return res.status(400).json({
-      error: "Este ticket é do tipo wwebjs. ReplyableTextContent não é suportado."
+      error: "Respostas rápidas não são suportadas em canais WhatsApp (wwebjs)."
     });
   }
 
@@ -223,7 +223,7 @@ export const sendCard = async (req: Request, res: Response): Promise<Response> =
 
   if (ticket.whatsapp?.type === "wwebjs") {
     return res.status(400).json({
-      error: "Este ticket é do tipo wwebjs. CardContent não é suportado."
+      error: "Envio de cards não é suportado em canais WhatsApp (wwebjs)."
     });
   }
 
@@ -275,7 +275,7 @@ export const sendCarousel = async (req: Request, res: Response): Promise<Respons
 
   if (ticket.whatsapp?.type === "wwebjs") {
     return res.status(400).json({
-      error: "Este ticket é do tipo wwebjs. CarouselContent não é suportado."
+      error: "Envio de carrossel não é suportado em canais WhatsApp (wwebjs)."
     });
   }
 
