@@ -6,14 +6,13 @@ import {
 } from "@mui/icons-material";
 import {
 	Box,
-	Chip,
 	CircularProgress,
 	Container,
 	Grid,
 	IconButton,
 	Paper,
 	TextField,
-	Typography,
+	Typography
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import axios from "axios";
@@ -232,7 +231,7 @@ const Integrations = () => {
 
 				<StyledPaper>
 					<Grid container spacing={2}>
-						<Grid item xs={12} sm={6}>
+						<Grid item xs={12}>
 							<IntegrationRow>
 								<Typography align="left" variant="body1">
 									{t("integrations.integrations.hub.title")}
@@ -279,12 +278,6 @@ const Integrations = () => {
 												{hubTokenInfo.name}
 												{hubTokenInfo.email ? ` — ${hubTokenInfo.email}` : ''}
 											</Typography>
-											<Chip
-												label={hubTokenInfo.type === 'principal' ? 'Principal' : 'Subconta'}
-												size="small"
-												color={hubTokenInfo.type === 'principal' ? 'primary' : 'default'}
-												sx={{ height: 16, fontSize: 10 }}
-											/>
 										</Box>
 									)}
 
