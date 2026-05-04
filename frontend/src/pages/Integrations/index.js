@@ -1,4 +1,8 @@
+import axios from "axios";
 import {
+	Box,
+	Chip,
+	CircularProgress,
 	Container,
 	Grid,
 	IconButton,
@@ -7,7 +11,12 @@ import {
 	Typography,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { Visibility, VisibilityOff } from "@mui/icons-material";
+import {
+	CheckCircleOutlined,
+	ErrorOutlined,
+	Visibility,
+	VisibilityOff,
+} from "@mui/icons-material";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
@@ -65,6 +74,30 @@ const Integrations = () => {
 		hubToken: "",
 		apiMaps: ""
 	});
+	const [hubTokenInfo, setHubTokenInfo] = useState(null);
+	const [hubTokenStatus, setHubTokenStatus] = useState('idle');
+	// 'idle' | 'loading' | 'valid' | 'invalid'
+
+	const validateHubToken = async (token) => {
+		if (!token) return;
+		setHubTokenStatus('loading');
+		try {
+			const response = await axios.post(
+				'https://api.pressticket.com.br/validate-token',
+				{ token }
+			);
+			if (response.data.isValid) {
+				setHubTokenInfo(response.data.info);
+				setHubTokenStatus('valid');
+			} else {
+				setHubTokenInfo(null);
+				setHubTokenStatus('invalid');
+			}
+		} catch {
+			setHubTokenInfo(null);
+			setHubTokenStatus('idle');
+		}
+	};
 
 	useEffect(() => {
 		const fetchSession = async () => {
@@ -77,6 +110,10 @@ const Integrations = () => {
 						return acc;
 					}, {})
 				);
+				const hubIntegration = data.find((s) => s.key === 'hubToken');
+				if (hubIntegration?.value) {
+					validateHubToken(hubIntegration.value);
+				}
 			} catch (err) {
 				toastError(err);
 			}
@@ -93,19 +130,23 @@ const Integrations = () => {
 				value: selectedValue,
 			});
 			toast.success(t("integrations.success"));
-			
+
 			setMaskedValues((prevState) => ({
 				...prevState,
 				[integrationKey]: maskValue(selectedValue),
 			}));
-			
-			setIntegrations((prevIntegrations) => 
-				prevIntegrations.map((integration) => 
-					integration.key === integrationKey 
-						? { ...integration, value: selectedValue } 
+
+			setIntegrations((prevIntegrations) =>
+				prevIntegrations.map((integration) =>
+					integration.key === integrationKey
+						? { ...integration, value: selectedValue }
 						: integration
 				)
 			);
+
+			if (integrationKey === 'hubToken') {
+				validateHubToken(selectedValue);
+			}
 		} catch (err) {
 			toastError(err, t);
 		}
@@ -193,28 +234,64 @@ const Integrations = () => {
 									{t("integrations.integrations.hub.title")}
 								</Typography>
 
-								<TextFieldContainer>
-									<StyledTextField
-										id="hubToken"
-										name="hubToken"
-										margin="dense"
-										label={t("integrations.integrations.hub.hubToken")}
-										variant="outlined"
-										onChange={handleChangeIntegration}
-										fullWidth
-										value={
-											showKeys["hubToken"]
-												? getIntegrationValue("hubToken")
-												: maskedValues["hubToken"]
-										}
-										type="text"
-									/>
-									<StyledIconButton
-										onClick={() => handleToggleShowKey("hubToken")}
-									>
-										{showKeys["hubToken"] ? <VisibilityOff /> : <Visibility />}
-									</StyledIconButton>
-								</TextFieldContainer>
+								<Box sx={{ flex: 1 }}>
+									<TextFieldContainer>
+										<StyledTextField
+											id="hubToken"
+											name="hubToken"
+											margin="dense"
+											label={t("integrations.integrations.hub.hubToken")}
+											variant="outlined"
+											onChange={handleChangeIntegration}
+											fullWidth
+											value={
+												showKeys["hubToken"]
+													? getIntegrationValue("hubToken")
+													: maskedValues["hubToken"]
+											}
+											type="text"
+										/>
+										<StyledIconButton
+											onClick={() => handleToggleShowKey("hubToken")}
+										>
+											{showKeys["hubToken"] ? <VisibilityOff /> : <Visibility />}
+										</StyledIconButton>
+									</TextFieldContainer>
+
+									{hubTokenStatus === 'loading' && (
+										<Box sx={{ mt: 0.5, display: 'flex', alignItems: 'center', gap: 1 }}>
+											<CircularProgress size={12} />
+											<Typography variant="caption" color="text.secondary">
+												Verificando token...
+											</Typography>
+										</Box>
+									)}
+
+									{hubTokenStatus === 'valid' && hubTokenInfo && (
+										<Box sx={{ mt: 0.5, display: 'flex', alignItems: 'center', gap: 0.5, flexWrap: 'wrap' }}>
+											<CheckCircleOutlined sx={{ color: 'success.main', fontSize: 16 }} />
+											<Typography variant="caption" color="success.main">
+												{hubTokenInfo.name}
+												{hubTokenInfo.email ? ` — ${hubTokenInfo.email}` : ''}
+											</Typography>
+											<Chip
+												label={hubTokenInfo.type === 'principal' ? 'Principal' : 'Subconta'}
+												size="small"
+												color={hubTokenInfo.type === 'principal' ? 'primary' : 'default'}
+												sx={{ height: 16, fontSize: 10 }}
+											/>
+										</Box>
+									)}
+
+									{hubTokenStatus === 'invalid' && (
+										<Box sx={{ mt: 0.5, display: 'flex', alignItems: 'center', gap: 1 }}>
+											<ErrorOutlined sx={{ color: 'error.main', fontSize: 16 }} />
+											<Typography variant="caption" color="error.main">
+												Token inválido ou não autorizado
+											</Typography>
+										</Box>
+									)}
+								</Box>
 							</IntegrationRow>
 						</Grid>
 					</Grid>
