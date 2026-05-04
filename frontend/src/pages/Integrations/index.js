@@ -1,4 +1,9 @@
-import axios from "axios";
+import {
+	CheckCircleOutlined,
+	ErrorOutlined,
+	Visibility,
+	VisibilityOff,
+} from "@mui/icons-material";
 import {
 	Box,
 	Chip,
@@ -11,12 +16,7 @@ import {
 	Typography,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import {
-	CheckCircleOutlined,
-	ErrorOutlined,
-	Visibility,
-	VisibilityOff,
-} from "@mui/icons-material";
+import axios from "axios";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
@@ -83,10 +83,14 @@ const Integrations = () => {
 		setHubTokenStatus('loading');
 		try {
 			const response = await axios.post(
-				'https://api.pressticket.com.br/validate-token',
-				{ token }
+				'https://api.pressticket.com.br/validate-token/',
+				{ token },
+				{
+					timeout: 10000,
+					headers: { 'Content-Type': 'application/json' }
+				}
 			);
-			if (response.data.isValid) {
+			if (response.data?.isValid) {
 				setHubTokenInfo(response.data.info);
 				setHubTokenStatus('valid');
 			} else {
@@ -271,6 +275,7 @@ const Integrations = () => {
 										<Box sx={{ mt: 0.5, display: 'flex', alignItems: 'center', gap: 0.5, flexWrap: 'wrap' }}>
 											<CheckCircleOutlined sx={{ color: 'success.main', fontSize: 16 }} />
 											<Typography variant="caption" color="success.main">
+												{console.log(hubTokenInfo)}
 												{hubTokenInfo.name}
 												{hubTokenInfo.email ? ` — ${hubTokenInfo.email}` : ''}
 											</Typography>
