@@ -18,7 +18,7 @@ export const SendReplyableTextService = async (
   connection: any
 ): Promise<any> => {
   if (connection.type === "wwebjs") {
-    throw new Error("ReplyableTextContent não é suportado em canais wwebjs.");
+    throw new Error("Envio de respostas rápidas não suportado neste canal.");
   }
 
   if (!text?.trim()) {
@@ -26,13 +26,13 @@ export const SendReplyableTextService = async (
   }
 
   if (!quickReplyButtons?.length) {
-    throw new Error("ReplyableTextContent requer pelo menos um botão de resposta rápida.");
+    throw new Error("Informe pelo menos um botão de resposta rápida.");
   }
 
   const channel = resolveChannel(contact);
   if (!channel || channel === "webchat") {
     logger.error("SendReplyableTextService: requer canal facebook, instagram ou telegram.");
-    throw new Error("ReplyableTextContent requer canal facebook, instagram ou telegram. Nenhum desses IDs foi encontrado no contato.");
+    throw new Error("Envio de respostas rápidas não suportado neste canal.");
   }
 
   const contactId = resolveContactId(contact, channel);

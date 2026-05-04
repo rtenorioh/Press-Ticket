@@ -22,13 +22,13 @@ export const SendCardMessageService = async (
   connection: any
 ): Promise<any> => {
   if (connection.type === "wwebjs") {
-    throw new Error("CardContent não é suportado em canais wwebjs.");
+    throw new Error("Envio de card não suportado neste canal.");
   }
 
   const channel = resolveChannel(contact);
   if (!channel || channel === "webchat") {
-    logger.error("SendCardMessageService: CardContent requer canal facebook, instagram ou telegram.");
-    throw new Error("CardContent requer canal facebook, instagram ou telegram. Nenhum desses IDs foi encontrado no contato.");
+    logger.error("SendCardMessageService: canal incompatível para envio de card.");
+    throw new Error("Envio de card não suportado neste canal.");
   }
 
   const contactId = resolveContactId(contact, channel);

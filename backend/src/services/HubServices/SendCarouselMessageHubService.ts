@@ -24,11 +24,11 @@ export const SendCarouselMessageService = async (
   connection: any
 ): Promise<any> => {
   if (connection.type === "wwebjs") {
-    throw new Error("CarouselContent não é suportado em canais wwebjs.");
+    throw new Error("Envio de carrossel não suportado neste canal.");
   }
 
   if (!Array.isArray(cards) || cards.length < 2) {
-    throw new Error("CarouselContent requer pelo menos 2 cards.");
+    throw new Error("O carrossel requer pelo menos 2 cards.");
   }
 
   const missingTitle = cards.findIndex(c => !c.title?.trim());
@@ -38,8 +38,8 @@ export const SendCarouselMessageService = async (
 
   const channel = resolveChannel(contact);
   if (!channel || channel === "webchat") {
-    logger.error("SendCarouselMessageService: CarouselContent requer canal facebook, instagram ou telegram.");
-    throw new Error("CarouselContent requer canal facebook, instagram ou telegram. Nenhum desses IDs foi encontrado no contato.");
+    logger.error("SendCarouselMessageService: canal incompatível para envio de carrossel.");
+    throw new Error("Envio de carrossel não suportado neste canal.");
   }
 
   const contactId = resolveContactId(contact, channel);
