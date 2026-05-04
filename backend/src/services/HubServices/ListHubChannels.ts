@@ -1,6 +1,6 @@
+import { createNotificameClient } from "../../libs/notificameClient";
 import { showHubToken } from "../../helpers/showHubToken";
 
-const { Client } = require("notificamehubsdk");
 require("dotenv").config();
 
 const ListChannels = async () => {
@@ -11,10 +11,9 @@ const ListChannels = async () => {
       throw new Error("NOTIFICAMEHUB_TOKEN_NOT_FOUND");
     }
 
-    const client = new Client(notificameHubToken);
-
-    const response = await client.listChannels();
-    return response;
+    const client = createNotificameClient(notificameHubToken);
+    const response = await client.get('/v1/channels');
+    return response.data;
   } catch (error) {
     throw new Error("Error");
   }

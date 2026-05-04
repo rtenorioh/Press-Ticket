@@ -1,8 +1,10 @@
+import FormData from "form-data";
+import fs from "fs";
+import { createNotificameClient } from "../../libs/notificameClient";
 import { showHubToken } from "../../helpers/showHubToken";
 import { logger } from "../../utils/logger";
 
 require("dotenv").config();
-const { Client } = require("notificamehubsdk");
 
 export interface HubBatchContent {
   type: "text" | "file";
@@ -45,26 +47,33 @@ export const BatchSendHubService = async (
   }
 
   const notificameHubToken = await showHubToken();
-  const client = new Client(notificameHubToken);
 
   logger.info(
     `Iniciando envio em lote — canal: ${batch.channel}, from: ${batch.from}, arquivo: ${contactsCsvPath}`
   );
 
   try {
-    const response = await client.sendMessageBatch(contactsCsvPath, batch);
+    const form = new FormData();
+    form.append("contacts", fs.createReadStream(contactsCsvPath), {
+      filename: "contacts.csv",
+      contentType: "text/csv"
+    });
+    form.append("channel", batch.channel);
+    form.append("from", batch.from);
+    form.append("message", JSON.stringify(batch.message));
 
-    let data: HubBatchResult;
-    try {
-      data = typeof response === "object" ? response : JSON.parse(response);
-    } catch {
-      data = response;
-    }
+    const client = createNotificameClient(notificameHubToken);
+    const response = await client.post('/v1/messages/batch', form, {
+      headers: form.getHeaders()
+    });
+
+    const data: HubBatchResult =
+      typeof response.data === "object" ? response.data : JSON.parse(response.data);
 
     logger.info(`Envio em lote aceito pela API Hub: ${JSON.stringify(data)}`);
     return data;
   } catch (error) {
-    logger.error(`Erro no envio em lote Hub: ${error}`);
+    logger.error(`BatchSendHubService: erro no envio em lote Hub: ${error}`);
     throw error;
   }
 };

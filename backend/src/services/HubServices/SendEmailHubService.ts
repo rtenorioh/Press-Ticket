@@ -1,11 +1,11 @@
 import Email from "../../models/Email";
 import Whatsapp from "../../models/Whatsapp";
+import { createNotificameClient } from "../../libs/notificameClient";
 import { showHubToken } from "../../helpers/showHubToken";
 import { getIO } from "../../libs/socket";
 import { logger } from "../../utils/logger";
 
 require("dotenv").config();
-const { Client, EmailContent } = require("notificamehubsdk");
 
 interface SendEmailParams {
   whatsappId: number;
@@ -44,35 +44,23 @@ export const SendEmailHubService = async ({
     ? `<!DOCTYPE html><html><head><meta charset="UTF-8"></head><body>${htmlBody}</body></html>`
     : `<!DOCTYPE html><html><head><meta charset="UTF-8"></head><body><p>${textBody || ""}</p></body></html>`;
 
-  const notificameHubToken = await showHubToken();
-  const client = new Client(notificameHubToken);
-  const emailChannel = client.setChannel("email");
+  const hubToken = await showHubToken();
+  const client = createNotificameClient(hubToken);
 
-  const content = new EmailContent(subject || "", [], cleanHtml);
+  const payload = {
+    from: connection.qrcode,
+    to,
+    contents: [{
+      type: 'email',
+      subject: subject || '',
+      html: cleanHtml,
+      attachments: []
+    }]
+  };
 
   try {
-    emailChannel.contentSupportValidation(content);
-
-    const response = await emailChannel.sendMessage(
-      connection.qrcode,
-      to,
-      content
-    );
-
-    let data: any;
-    try {
-      if (typeof response === "object") {
-        data = response;
-      } else {
-        const jsonStart = response.indexOf("{");
-        data = JSON.parse(response.substring(jsonStart));
-      }
-    } catch (parseError) {
-      logger.error(
-        `SendEmailHubService: erro ao parsear resposta: ${parseError} | Response: ${JSON.stringify(response)}`
-      );
-      data = response;
-    }
+    const response = await client.post('/v1/channels/email/messages', payload);
+    const data = response.data;
 
     const email = await Email.create({
       messageId: data?.id || undefined,

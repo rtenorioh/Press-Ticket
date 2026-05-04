@@ -1,10 +1,10 @@
-import { showHubToken } from "../../helpers/showHubToken";
+import { createNotificameClient, resolveChannel, resolveContactId, NotificameMessagePayload } from "../../libs/notificameClient";
 import Contact from "../../models/Contact";
 import CreateMessageService from "./CreateHubMessageService";
+import { showHubToken } from "../../helpers/showHubToken";
 import { logger } from "../../utils/logger";
 
 require("dotenv").config();
-const { Client, TextContent } = require("notificamehubsdk");
 
 export const SendTextMessageService = async (
   message: string,
@@ -12,58 +12,31 @@ export const SendTextMessageService = async (
   contact: Contact,
   connection: any
 ) => {
-  const notificameHubToken = await showHubToken();
-
-  const client = new Client(notificameHubToken);
-
-  let channelClient;
-
-  message = message.replace(/\n/g, " ");
-
-  const content = new TextContent(message);
-
-  let contactNumber;
-
-  if (contact.messengerId) {
-    contactNumber = contact.messengerId;
-    channelClient = client.setChannel("facebook");
-  } else if (contact.instagramId) {
-    contactNumber = contact.instagramId;
-    channelClient = client.setChannel("instagram");
-  } else if (contact.telegramId) {
-    contactNumber = contact.telegramId;
-    channelClient = client.setChannel("telegram");
-  } else if (contact.webchatId) {
-    contactNumber = contact.webchatId;
-    channelClient = client.setChannel("webchat");
-  } else {
-    logger.error("Nenhum canal disponível para este contato.");
+  const channel = resolveChannel(contact);
+  if (!channel) {
+    logger.error("SendTextMessageService: nenhum canal disponível para este contato.");
     throw new Error("Nenhum canal disponível para este contato.");
   }
 
+  const contactId = resolveContactId(contact, channel);
+  if (!contactId) {
+    throw new Error(`SendTextMessageService: ID do destinatário não encontrado para canal ${channel}`);
+  }
+
+  message = message.replace(/\n/g, " ");
+
+  const hubToken = await showHubToken();
+  const client = createNotificameClient(hubToken);
+
+  const payload: NotificameMessagePayload = {
+    from: connection.qrcode,
+    to: contactId,
+    contents: [{ type: 'text', text: message }]
+  };
+
   try {
-    channelClient.contentSupportValidation(content);
-
-    let response = await channelClient.sendMessage(
-      connection.qrcode,
-      contactNumber,
-      content
-    );
-
-    let data: any;
-
-    try {
-      if (typeof response === "object") {
-        data = response;
-      } else {
-        const jsonStart = response.indexOf("{");
-        const jsonResponse = response.substring(jsonStart);
-        data = JSON.parse(jsonResponse);
-      }
-    } catch (error) {
-      logger.error(`Erro ao parsear resposta Hub: ${error} | Response: ${JSON.stringify(response)}`);
-      data = response;
-    }
+    const response = await client.post(`/v1/channels/${channel}/messages`, payload);
+    const data = response.data;
 
     const newMessage = await CreateMessageService({
       id: data.id,
@@ -75,6 +48,7 @@ export const SendTextMessageService = async (
 
     return newMessage;
   } catch (error) {
-    logger.error(`Erro ao enviar mensagem Hub: ${error}`);
+    logger.error(`SendTextMessageService: erro ao enviar mensagem Hub: ${error}`);
+    throw error;
   }
 };

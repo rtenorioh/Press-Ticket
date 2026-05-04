@@ -1,11 +1,11 @@
-import { showHubToken } from "../../helpers/showHubToken";
+import { createNotificameClient, resolveChannel, resolveContactId, NotificameMessagePayload } from "../../libs/notificameClient";
 import Contact from "../../models/Contact";
 import CreateMessageService from "./CreateHubMessageService";
-import { logger } from "../../utils/logger";
+import { showHubToken } from "../../helpers/showHubToken";
 import { HubCardButton } from "./SendCardMessageHubService";
+import { logger } from "../../utils/logger";
 
 require("dotenv").config();
-const { Client, CardContent, CarouselContent } = require("notificamehubsdk");
 
 export interface HubCarouselCard {
   title: string;
@@ -36,60 +36,45 @@ export const SendCarouselMessageService = async (
     throw new Error(`Card ${missingTitle + 1} está sem título. Todos os cards precisam de título.`);
   }
 
-  const notificameHubToken = await showHubToken();
-  const client = new Client(notificameHubToken);
-
-  let channelClient;
-  let contactNumber;
-
-  if (contact.messengerId) {
-    contactNumber = contact.messengerId;
-    channelClient = client.setChannel("facebook");
-  } else if (contact.instagramId) {
-    contactNumber = contact.instagramId;
-    channelClient = client.setChannel("instagram");
-  } else if (contact.telegramId) {
-    contactNumber = contact.telegramId;
-    channelClient = client.setChannel("telegram");
-  } else {
-    logger.error("CarouselContent: nenhum canal compatível encontrado. Requer facebook, instagram ou telegram.");
+  const channel = resolveChannel(contact);
+  if (!channel || channel === "webchat") {
+    logger.error("SendCarouselMessageService: CarouselContent requer canal facebook, instagram ou telegram.");
     throw new Error("CarouselContent requer canal facebook, instagram ou telegram. Nenhum desses IDs foi encontrado no contato.");
   }
 
-  const cardInstances = cards.map(card =>
-    new CardContent(
-      card.title,
-      card.media ?? "",
-      card.text ?? "",
-      card.buttons ?? [],
-      card.quickReplyButtons ?? []
-    )
-  );
+  const contactId = resolveContactId(contact, channel);
+  if (!contactId) {
+    throw new Error(`SendCarouselMessageService: ID do destinatário não encontrado para canal ${channel}`);
+  }
 
-  const content = new CarouselContent(cardInstances, cardWidth, quickReplyButtons);
+  const elements = cards.map(card => ({
+    title: card.title,
+    image_url: card.media || undefined,
+    subtitle: card.text || undefined,
+    buttons: [
+      ...(card.buttons ?? []).map(b => ({ type: 'web_url', url: b.url || '#', title: b.label })),
+      ...(card.quickReplyButtons ?? []).map(b => ({ type: 'web_url', url: b.url || '#', title: b.label }))
+    ]
+  }));
+
+  const hubToken = await showHubToken();
+  const client = createNotificameClient(hubToken);
+
+  const payload: NotificameMessagePayload = {
+    from: connection.qrcode,
+    to: contactId,
+    contents: [{
+      type: 'template',
+      template: {
+        template_type: 'generic',
+        elements
+      }
+    }]
+  };
 
   try {
-    channelClient.contentSupportValidation(content);
-
-    const response = await channelClient.sendMessage(
-      connection.qrcode,
-      contactNumber,
-      content
-    );
-
-    let data: any;
-    try {
-      if (typeof response === "object") {
-        data = response;
-      } else {
-        const jsonStart = response.indexOf("{");
-        const jsonResponse = response.substring(jsonStart);
-        data = JSON.parse(jsonResponse);
-      }
-    } catch (error) {
-      logger.error(`Erro ao parsear resposta Hub carousel: ${error} | Response: ${JSON.stringify(response)}`);
-      data = response;
-    }
+    const response = await client.post(`/v1/channels/${channel}/messages`, payload);
+    const data = response.data;
 
     const newMessage = await CreateMessageService({
       id: data.id,
@@ -101,7 +86,7 @@ export const SendCarouselMessageService = async (
 
     return newMessage;
   } catch (error) {
-    logger.error(`Erro ao enviar carousel Hub: ${error}`);
+    logger.error(`SendCarouselMessageService: erro ao enviar carousel Hub: ${error}`);
     throw error;
   }
 };

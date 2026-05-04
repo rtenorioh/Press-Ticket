@@ -1,11 +1,11 @@
 import { convertMp3ToMp4 } from "../../helpers/ConvertMp3ToMp4";
-import { showHubToken } from "../../helpers/showHubToken";
+import { createNotificameClient, resolveChannel, resolveContactId, NotificameMessagePayload } from "../../libs/notificameClient";
 import Contact from "../../models/Contact";
 import CreateMessageService from "./CreateHubMessageService";
+import { showHubToken } from "../../helpers/showHubToken";
+import { logger } from "../../utils/logger";
 
 require("dotenv").config();
-const { Client, FileContent } = require("notificamehubsdk");
-import { logger } from "../../utils/logger";
 
 export const SendMediaMessageService = async (
   media: Express.Multer.File,
@@ -14,120 +14,74 @@ export const SendMediaMessageService = async (
   contact: Contact,
   connection: any
 ) => {
-  const notificameHubToken = await showHubToken();
-
-  const client = new Client(notificameHubToken);
-
-  let channelClient;
-  let contactNumber;
-  let type;
-  let mediaUrl;
-
-  if (contact.messengerId && !contact.instagramId) {
-    contactNumber = contact.messengerId;
-    type = "facebook";
-    channelClient = client.setChannel(type);
+  const channel = resolveChannel(contact);
+  if (!channel) {
+    logger.error("SendMediaMessageService: nenhum canal disponível para este contato.");
+    throw new Error("Nenhum canal disponível para este contato.");
   }
-  if (!contact.messengerId && contact.instagramId) {
-    contactNumber = contact.instagramId;
-    type = "instagram";
-    channelClient = client.setChannel(type);
-  }
-  if (!contact.messengerId && !contact.instagramId && contact.telegramId) {
-    contactNumber = contact.telegramId;
-    type = "telegram";
-    channelClient = client.setChannel(type);
-  }
-  if (
-    !contact.messengerId &&
-    !contact.instagramId &&
-    !contact.telegramId &&
-    contact.webchatId
-  ) {
-    contactNumber = contact.webchatId;
-    type = "webchat";
-    channelClient = client.setChannel(type);
+
+  const contactId = resolveContactId(contact, channel);
+  if (!contactId) {
+    throw new Error(`SendMediaMessageService: ID do destinatário não encontrado para canal ${channel}`);
   }
 
   message = message.replace(/\n/g, " ");
 
   const backendUrl = process.env.WEBHOOK;
-
   const filename = encodeURIComponent(media.filename);
-  mediaUrl = `${backendUrl}/public/${filename}`;
+  let mediaUrl = `${backendUrl}/public/${filename}`;
+
+  // Normalizar mimetype para o padrão da API Notificame
+  let fileMimeType: string = media.mimetype;
 
   if (media.mimetype.includes("image")) {
-    if (type === "telegram") {
-      media.mimetype = "photo";
-    } else {
-      media.mimetype = "image";
-    }
-  } else if (
-    (type === "telegram" || type === "facebook") &&
-    media.mimetype.includes("audio")
-  ) {
-    media.mimetype = "audio";
-  } else if (
-    (type === "telegram" || type === "facebook") &&
-    media.mimetype.includes("video")
-  ) {
-    media.mimetype = "video";
-  } else if (type === "telegram" || type === "facebook") {
-    media.mimetype = "file";
+    fileMimeType = channel === "telegram" ? "photo" : "image";
+  } else if ((channel === "telegram" || channel === "facebook") && media.mimetype.includes("audio")) {
+    fileMimeType = "audio";
+  } else if ((channel === "telegram" || channel === "facebook") && media.mimetype.includes("video")) {
+    fileMimeType = "video";
+  } else if (channel === "telegram" || channel === "facebook") {
+    fileMimeType = "file";
   }
 
-  try {
-    if (media.originalname.includes(".mp3") && type === "instagram") {
-      const inputPath = media.path;
-      const outputMP4Path = `${media.destination}/${media.filename.split(".")[0]
-        }.mp4`;
-      try {
-        await convertMp3ToMp4(inputPath, outputMP4Path);
-        media.filename = outputMP4Path.split("/").pop() ?? "default.mp4";
-        mediaUrl = `${backendUrl}/public/${media.filename}`;
-        media.originalname = media.filename;
-        media.mimetype = "audio";
-      } catch (e) {
-        logger.error(`Erro ao converter MP3 para MP4 (Instagram): ${e}`);
-        logger.warn(`Enviando arquivo original sem conversão: ${media.originalname}`);
-      }
-    }
-
-    if (media.originalname.includes(".mp3") && type === "facebook") {
+  // Converter MP3 para MP4 no Instagram (não suporta audio direto)
+  if (media.originalname.includes(".mp3") && channel === "instagram") {
+    const outputMP4Path = `${media.destination}/${media.filename.split(".")[0]}.mp4`;
+    try {
+      await convertMp3ToMp4(media.path, outputMP4Path);
+      media.filename = outputMP4Path.split("/").pop() ?? "default.mp4";
       mediaUrl = `${backendUrl}/public/${media.filename}`;
       media.originalname = media.filename;
-      media.mimetype = "audio";
+      fileMimeType = "audio";
+    } catch (e) {
+      logger.error(`SendMediaMessageService: erro ao converter MP3 para MP4 (Instagram): ${e}`);
+      logger.warn(`Enviando arquivo original sem conversão: ${media.originalname}`);
     }
+  }
 
-    const content = new FileContent(
-      mediaUrl,
-      media.mimetype,
-      message,
-      media.originalname
-    );
+  if (media.originalname.includes(".mp3") && channel === "facebook") {
+    mediaUrl = `${backendUrl}/public/${media.filename}`;
+    media.originalname = media.filename;
+    fileMimeType = "audio";
+  }
 
-    channelClient.contentSupportValidation(content);
+  const hubToken = await showHubToken();
+  const client = createNotificameClient(hubToken);
 
-    let response = await channelClient.sendMessage(
-      connection.qrcode,
-      contactNumber,
-      content
-    );
+  const payload: NotificameMessagePayload = {
+    from: connection.qrcode,
+    to: contactId,
+    contents: [{
+      type: 'file',
+      fileMimeType,
+      fileUrl: mediaUrl,
+      fileCaption: message || undefined
+    }]
+  };
 
-    let data: any;
-
-    try {
-      if (typeof response === "object") {
-        data = response;
-      } else {
-        const jsonStart = response.indexOf("{");
-        const jsonResponse = response.substring(jsonStart);
-        data = JSON.parse(jsonResponse);
-      }
-    } catch (error) {
-      logger.error(`Erro ao parsear resposta Hub: ${error} | Response: ${JSON.stringify(response)}`);
-      data = response;
-    }
+  try {
+    const response = await client.post(`/v1/channels/${channel}/messages`, payload);
+    const data = response.data;
 
     const newMessage = await CreateMessageService({
       id: data.id,
@@ -142,6 +96,7 @@ export const SendMediaMessageService = async (
 
     return newMessage;
   } catch (error) {
-    logger.error(`Erro: ${error}`);
+    logger.error(`SendMediaMessageService: erro ao enviar mídia Hub: ${error}`);
+    throw error;
   }
 };

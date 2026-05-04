@@ -1,18 +1,18 @@
 import { IChannel } from "../controllers/ChannelHubController";
+import { createNotificameClient } from "../libs/notificameClient";
 import Whatsapp from "../models/Whatsapp";
 import { showHubToken } from "./showHubToken";
 import { logger } from "../utils/logger";
 
-const { Client, MessageSubscription, MessageStatusSubscription } = require("notificamehubsdk");
 require("dotenv").config();
 
 const createSubscriptionSafe = async (
-  client: any,
-  subscription: any,
+  client: ReturnType<typeof createNotificameClient>,
+  payload: object,
   label: string
 ): Promise<void> => {
   try {
-    await client.createSubscription(subscription);
+    await client.post('/v1/subscriptions/', payload);
     logger.info(`Webhook Hub: subscription "${label}" registrada com sucesso`);
   } catch (err: any) {
     const status = err?.response?.status || err?.status || err?.statusCode;
@@ -28,18 +28,24 @@ const createSubscriptionSafe = async (
 export const setChannelWebhook = async (
   whatsapp: IChannel | any,
   whatsappId: string
-) => {
-  const notificameHubToken = await showHubToken();
-  const client = new Client(notificameHubToken);
+): Promise<void> => {
+  const hubToken = await showHubToken();
+  const client = createNotificameClient(hubToken);
 
   const url = `${process.env.WEBHOOK}/hub-webhook/${whatsapp.qrcode}`;
   const criteria = { channel: whatsapp.qrcode };
 
-  const messageSubscription = new MessageSubscription({ url }, criteria);
-  await createSubscriptionSafe(client, messageSubscription, `MESSAGE:${whatsapp.qrcode}`);
+  await createSubscriptionSafe(
+    client,
+    { criteria, webhook: { url } },
+    `MESSAGE:${whatsapp.qrcode}`
+  );
 
-  const statusSubscription = new MessageStatusSubscription({ url }, criteria);
-  await createSubscriptionSafe(client, statusSubscription, `MESSAGE_STATUS:${whatsapp.qrcode}`);
+  await createSubscriptionSafe(
+    client,
+    { criteria, webhook: { url } },
+    `MESSAGE_STATUS:${whatsapp.qrcode}`
+  );
 
   logger.info(`Webhook Hub registrado com sucesso para canal: ${whatsapp.qrcode}`);
 

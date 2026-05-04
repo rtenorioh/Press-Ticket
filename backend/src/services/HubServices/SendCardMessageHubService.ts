@@ -1,10 +1,10 @@
-import { showHubToken } from "../../helpers/showHubToken";
+import { createNotificameClient, resolveChannel, resolveContactId, NotificameMessagePayload } from "../../libs/notificameClient";
 import Contact from "../../models/Contact";
 import CreateMessageService from "./CreateHubMessageService";
+import { showHubToken } from "../../helpers/showHubToken";
 import { logger } from "../../utils/logger";
 
 require("dotenv").config();
-const { Client, CardContent } = require("notificamehubsdk");
 
 export interface HubCardButton {
   label: string;
@@ -25,50 +25,45 @@ export const SendCardMessageService = async (
     throw new Error("CardContent não é suportado em canais wwebjs.");
   }
 
-  const notificameHubToken = await showHubToken();
-  const client = new Client(notificameHubToken);
-
-  let channelClient;
-  let contactNumber;
-
-  if (contact.messengerId) {
-    contactNumber = contact.messengerId;
-    channelClient = client.setChannel("facebook");
-  } else if (contact.instagramId) {
-    contactNumber = contact.instagramId;
-    channelClient = client.setChannel("instagram");
-  } else if (contact.telegramId) {
-    contactNumber = contact.telegramId;
-    channelClient = client.setChannel("telegram");
-  } else {
-    logger.error("CardContent: nenhum canal compatível encontrado no contato. Requer facebook, instagram ou telegram.");
+  const channel = resolveChannel(contact);
+  if (!channel || channel === "webchat") {
+    logger.error("SendCardMessageService: CardContent requer canal facebook, instagram ou telegram.");
     throw new Error("CardContent requer canal facebook, instagram ou telegram. Nenhum desses IDs foi encontrado no contato.");
   }
 
-  const content = new CardContent(title, media, text, buttons, quickReplyButtons);
+  const contactId = resolveContactId(contact, channel);
+  if (!contactId) {
+    throw new Error(`SendCardMessageService: ID do destinatário não encontrado para canal ${channel}`);
+  }
+
+  const allButtons = [
+    ...buttons.map(b => ({ type: 'web_url', url: b.url || '#', title: b.label })),
+    ...quickReplyButtons.map(b => ({ type: 'web_url', url: b.url || '#', title: b.label }))
+  ];
+
+  const hubToken = await showHubToken();
+  const client = createNotificameClient(hubToken);
+
+  const payload: NotificameMessagePayload = {
+    from: connection.qrcode,
+    to: contactId,
+    contents: [{
+      type: 'template',
+      template: {
+        template_type: 'generic',
+        elements: [{
+          title,
+          image_url: media || undefined,
+          subtitle: text || undefined,
+          buttons: allButtons
+        }]
+      }
+    }]
+  };
 
   try {
-    channelClient.contentSupportValidation(content);
-
-    const response = await channelClient.sendMessage(
-      connection.qrcode,
-      contactNumber,
-      content
-    );
-
-    let data: any;
-    try {
-      if (typeof response === "object") {
-        data = response;
-      } else {
-        const jsonStart = response.indexOf("{");
-        const jsonResponse = response.substring(jsonStart);
-        data = JSON.parse(jsonResponse);
-      }
-    } catch (error) {
-      logger.error(`Erro ao parsear resposta Hub card: ${error} | Response: ${JSON.stringify(response)}`);
-      data = response;
-    }
+    const response = await client.post(`/v1/channels/${channel}/messages`, payload);
+    const data = response.data;
 
     const newMessage = await CreateMessageService({
       id: data.id,
@@ -80,10 +75,9 @@ export const SendCardMessageService = async (
 
     return newMessage;
   } catch (error: any) {
-    const errBody = error?.body || error?.response?.data || error?.response?.body;
-    logger.error(`Erro ao enviar card Hub: ${error?.message || String(error)}`);
+    const errBody = error?.response?.data || error?.response?.body;
+    logger.error(`SendCardMessageService: erro ao enviar card Hub: ${error?.message || String(error)}`);
     if (errBody) logger.error(`Hub API response body: ${JSON.stringify(errBody)}`);
-    logger.error(JSON.stringify(error, Object.getOwnPropertyNames(error)));
     throw error;
   }
 };

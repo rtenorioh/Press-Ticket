@@ -2,6 +2,8 @@ import { Request, Response } from "express";
 import { setChannelWebhook } from "../helpers/setChannelHubWebhook";
 import CreateChannelsService from "../services/HubServices/CreateHubChannelsService";
 import ListChannels from "../services/HubServices/ListHubChannels";
+import notificameTokenValidator from "../services/HubServices/NotificameTokenValidator";
+import { showHubToken } from "../helpers/showHubToken";
 import Whatsapp from "../models/Whatsapp";
 import { logger } from "../utils/logger";
 
@@ -16,6 +18,25 @@ export interface IChannel {
 }
 
 export const store = async (req: Request, res: Response): Promise<Response> => {
+  try {
+    const hubToken = await showHubToken();
+    const validation = await notificameTokenValidator.validate(hubToken);
+
+    if (!validation.isValid) {
+      return res.status(403).json({
+        error:
+          "Token inválido ou não autorizado. " +
+          "Este token não pertence a uma conta Press Ticket® válida."
+      });
+    }
+
+    logger.info(
+      `Canal Hub conectado: ${validation.info?.name || "—"} (${validation.info?.type || "—"})`
+    );
+  } catch (err) {
+    logger.warn(`ChannelHubController.store: validação de token falhou — continuando: ${err}`);
+  }
+
   const { whatsapps } = await CreateChannelsService(req.body);
 
   whatsapps.forEach(whatsapp => {

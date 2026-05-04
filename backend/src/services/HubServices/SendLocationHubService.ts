@@ -1,10 +1,10 @@
-import { showHubToken } from "../../helpers/showHubToken";
+import { createNotificameClient, resolveChannel, resolveContactId, NotificameMessagePayload } from "../../libs/notificameClient";
 import Contact from "../../models/Contact";
 import CreateMessageService from "./CreateHubMessageService";
+import { showHubToken } from "../../helpers/showHubToken";
 import { logger } from "../../utils/logger";
 
 require("dotenv").config();
-const { Client, LocationContent } = require("notificamehubsdk");
 
 export const SendLocationHubService = async (
   latitude: number,
@@ -25,57 +25,37 @@ export const SendLocationHubService = async (
     throw new Error("Latitude e longitude devem ser números válidos.");
   }
 
-  const notificameHubToken = await showHubToken();
-  const client = new Client(notificameHubToken);
-
-  let channelClient;
-  let contactNumber;
-
-  if (contact.messengerId) {
-    contactNumber = contact.messengerId;
-    channelClient = client.setChannel("facebook");
-  } else if (contact.instagramId) {
-    contactNumber = contact.instagramId;
-    channelClient = client.setChannel("instagram");
-  } else if (contact.telegramId) {
-    contactNumber = contact.telegramId;
-    channelClient = client.setChannel("telegram");
-  } else if (contact.webchatId) {
-    contactNumber = contact.webchatId;
-    channelClient = client.setChannel("webchat");
-  } else {
-    logger.error("LocationContent: nenhum canal Hub encontrado no contato.");
+  const channel = resolveChannel(contact);
+  if (!channel) {
+    logger.error("SendLocationHubService: nenhum canal Hub encontrado no contato.");
     throw new Error("Nenhum canal Hub encontrado no contato (facebook, instagram, telegram ou webchat).");
   }
 
-  const content = new LocationContent(latitude, longitude, name, "", address);
+  const contactId = resolveContactId(contact, channel);
+  if (!contactId) {
+    throw new Error(`SendLocationHubService: ID do destinatário não encontrado para canal ${channel}`);
+  }
+
+  const hubToken = await showHubToken();
+  const client = createNotificameClient(hubToken);
+
+  const payload: NotificameMessagePayload = {
+    from: connection.qrcode,
+    to: contactId,
+    contents: [{
+      type: 'location',
+      latitude,
+      longitude,
+      name: name || undefined,
+      address: address || undefined
+    }]
+  };
+
+  const body = name ? `📍 ${name}` : `📍 ${latitude}, ${longitude}`;
 
   try {
-    channelClient.contentSupportValidation(content);
-
-    const response = await channelClient.sendMessage(
-      connection.qrcode,
-      contactNumber,
-      content
-    );
-
-    let data: any;
-    try {
-      if (typeof response === "object") {
-        data = response;
-      } else {
-        const jsonStart = response.indexOf("{");
-        const jsonResponse = response.substring(jsonStart);
-        data = JSON.parse(jsonResponse);
-      }
-    } catch (error) {
-      logger.error(`Erro ao parsear resposta Hub location: ${error} | Response: ${JSON.stringify(response)}`);
-      data = response;
-    }
-
-    const body = name
-      ? `📍 ${name}`
-      : `📍 ${latitude}, ${longitude}`;
+    const response = await client.post(`/v1/channels/${channel}/messages`, payload);
+    const data = response.data;
 
     const newMessage = await CreateMessageService({
       id: data.id,
@@ -87,7 +67,7 @@ export const SendLocationHubService = async (
 
     return newMessage;
   } catch (error) {
-    logger.error(`Erro ao enviar location Hub: ${error}`);
+    logger.error(`SendLocationHubService: erro ao enviar location Hub: ${error}`);
     throw error;
   }
 };
