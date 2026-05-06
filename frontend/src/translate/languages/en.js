@@ -870,7 +870,9 @@ const messages = {
           endWork: "End",
           isTricked: "View Contacts",
           enabled: "Enabled",
-          disabled: "Disabled"
+          disabled: "Disabled",
+          whatsappNumber: "WhatsApp Number (notifications)",
+          whatsappNumberPlaceholder: "E.g.: 5511999999999"
         },
         buttons: {
           okAdd: "Add",

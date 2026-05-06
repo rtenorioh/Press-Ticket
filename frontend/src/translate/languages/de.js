@@ -819,6 +819,8 @@ const messages = {
           isTricked: "Kontakte anzeigen",
           enabled: "Aktiviert",
           disabled: "Deaktiviert",
+          whatsappNumber: "WhatsApp-Nummer (Benachrichtigungen)",
+          whatsappNumberPlaceholder: "Z.B.: 5511999999999",
         },
         buttons: {
           okAdd: "Hinzufügen",

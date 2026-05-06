@@ -432,7 +432,7 @@ openApiRouter.get("/queue", isApiToken('read:queue'), QueueController.index);
  * /v1/queue:
  *   post:
  *     summary: Criar Setor
- *     description: Cria um novo setor/fila
+ *     description: Cria um novo setor
  *     tags: [Setores]
  *     security:
  *       - apiToken: []

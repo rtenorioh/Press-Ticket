@@ -69,6 +69,9 @@ class User extends Model<InferAttributes<User>, InferCreationAttributes<User>> {
   endWork: CreationOptional<string>;
 
   @Column(DataType.STRING)
+  whatsappNumber: string | null;
+
+  @Column(DataType.STRING)
   passwordResetToken: string | null;
 
   @Column(DataType.DATE)

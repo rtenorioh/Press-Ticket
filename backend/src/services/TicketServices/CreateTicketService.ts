@@ -6,6 +6,7 @@ import User from "../../models/User";
 import Whatsapp from "../../models/Whatsapp";
 import ShowContactService from "../ContactServices/ShowContactService";
 import EmitTicketCounterService from "./EmitTicketCounterService";
+import { NotifyQueueUsersService } from "../WbotServices/NotifyQueueUsersService";
 import { logger } from "../../utils/logger";
 
 interface Request {
@@ -63,6 +64,12 @@ const CreateTicketService = async ({
     await EmitTicketCounterService();
   } catch (err) {
     logger.error(`Erro ao emitir contadores após criar ticket: ${err}`);
+  }
+
+  if (queueId && ticket.whatsappId) {
+    NotifyQueueUsersService(ticket).catch((err: any) => {
+      logger.error(`Erro ao notificar usuários do setor: ${err}`);
+    });
   }
 
   return ticket;

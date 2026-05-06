@@ -45,7 +45,8 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     whatsappIds,
     startWork,
     endWork,
-    active
+    active,
+    whatsappNumber
   } = req.body;
 
   if (
@@ -67,12 +68,13 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     whatsappIds,
     startWork,
     endWork,
-    active
+    active,
+    whatsappNumber
   });
 
   const logUserId = req.user?.id || 1;
   const clientIp = GetClientIp(req);
-  
+
   await createActivityLog({
     userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
     action: ActivityActions.CREATE,
@@ -125,7 +127,7 @@ export const update = async (
   const user = await UpdateUserService({ userData, userId });
   const logUserId = req.user?.id || 1;
   const clientIp = GetClientIp(req);
-  
+
   if (user) {
     await createActivityLog({
       userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
@@ -162,11 +164,11 @@ export const remove = async (
   }
 
   const userToDelete = await ShowUserService(userId);
-  
+
   await DeleteUserService(userId);
   const logUserId = req.user?.id || 1;
   const clientIp = GetClientIp(req);
-  
+
   await createActivityLog({
     userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
     action: ActivityActions.DELETE,

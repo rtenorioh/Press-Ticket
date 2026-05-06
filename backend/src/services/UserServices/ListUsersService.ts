@@ -50,7 +50,8 @@ const ListUsersService = async ({
       "createdAt",
       "startWork",
       "endWork",
-      "active"
+      "active",
+      "whatsappNumber"
     ],
     limit,
     offset,

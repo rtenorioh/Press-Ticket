@@ -16,6 +16,7 @@ interface Request {
   startWork?: string;
   endWork?: string;
   active?: boolean;
+  whatsappNumber?: string;
 }
 
 interface Response {
@@ -37,7 +38,8 @@ const CreateUserService = async ({
   startWork,
   endWork,
   online,
-  active
+  active,
+  whatsappNumber
 }: Request): Promise<Response> => {
   const schema = Yup.object().shape({
     name: Yup.string().required().min(2),
@@ -74,7 +76,8 @@ const CreateUserService = async ({
       isTricked,
       startWork,
       endWork,
-      active
+      active,
+      whatsappNumber
     },
     { include: ["queues", "whatsapps"] }
   );

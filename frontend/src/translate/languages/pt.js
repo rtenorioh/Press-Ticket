@@ -1553,6 +1553,13 @@ const messages = {
               "168": "7 dias",
             },
           },
+          notifyQueueUsersMessage: {
+            title: "Notificação WhatsApp para Atendentes",
+            name: "Mensagem de Notificação de Novo Ticket",
+            note: "Mensagem enviada via WhatsApp para os atendentes do setor quando um novo ticket é direcionado. Use variáveis Mustache para personalizar.",
+            placeholder: "Digite a mensagem de notificação...",
+            variables: "Variáveis disponíveis: {{user_name}} (atendente), {{ticket_id}} (nº ticket), {{queue}} (setor), {{contact}} (contato), {{connection}} (canal), {{ms}} (saudação), {{hour}} (hora), {{date}} (data), {{protocol}} (protocolo), {{status}} (status), {{link}} (link do ticket)",
+          },
         },
         personalize: {
           success: {
@@ -1906,7 +1913,9 @@ const messages = {
           endWork: "Termino",
           isTricked: "Ver Contatos",
           enabled: "Habilitado",
-          disabled: "Desabilitado"
+          disabled: "Desabilitado",
+          whatsappNumber: "Número WhatsApp (notificações)",
+          whatsappNumberPlaceholder: "Ex: 5511999999999"
         },
         buttons: {
           okAdd: "Adicionar",

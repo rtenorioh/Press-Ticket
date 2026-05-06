@@ -120,6 +120,9 @@ const UserSchema = Yup.object().shape({
 		.required("Required"),
 	password: Yup.string().min(5, "Too Short!").max(50, "Too Long!"),
 	email: Yup.string().email("Invalid email").required("Required"),
+	whatsappNumber: Yup.string()
+		.nullable()
+		.matches(/^$|^\d{10,15}$/, "Número inválido (apenas dígitos, 10 a 15 caracteres)"),
 });
 
 const UserModal = ({ open, onClose, userId }) => {
@@ -133,7 +136,8 @@ const UserModal = ({ open, onClose, userId }) => {
 		startWork: "00:00",
 		endWork: "23:59",
 		isTricked: "enabled",
-		active: "true"
+		active: "true",
+		whatsappNumber: ""
 	};
 	const { user: loggedInUser } = useContext(AuthContext);
 	const [user, setUser] = useState(initialState);
@@ -428,6 +432,20 @@ const UserModal = ({ open, onClose, userId }) => {
 										)}
 									/>
 								</StyledFormControl>
+								<Field
+									as={StyledTextField}
+									label={t("userModal.form.whatsappNumber")}
+									name="whatsappNumber"
+									error={touched.whatsappNumber && Boolean(errors.whatsappNumber)}
+									helperText={touched.whatsappNumber && errors.whatsappNumber}
+									variant="outlined"
+									margin="dense"
+									placeholder={t("userModal.form.whatsappNumberPlaceholder")}
+									InputProps={{
+										sx: { borderRadius: 8 }
+									}}
+									fullWidth
+								/>
 							</DialogContent>
 							<Divider />
 							<DialogActions sx={{ padding: 2, gap: 1, display: 'flex', justifyContent: 'flex-end' }}>

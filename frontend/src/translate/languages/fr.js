@@ -818,6 +818,8 @@ const messages = {
           isTricked: "Voir les contacts",
           enabled: "Activé",
           disabled: "Désactivé",
+          whatsappNumber: "Numéro WhatsApp (notifications)",
+          whatsappNumberPlaceholder: "Ex: 5511999999999",
         },
         buttons: {
           okAdd: "Ajouter",

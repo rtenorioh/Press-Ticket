@@ -28,11 +28,11 @@ export const defaultMessageVariables = [
         value: "{{ticket_id}} "
     },
     {
-        name: "Fila",
+        name: "Setor",
         value: "{{queue}} "
     },
     {
-        name: "Conexão",
+        name: "Canal",
         value: "{{connection}} "
     }
 ];

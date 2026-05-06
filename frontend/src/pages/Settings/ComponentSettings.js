@@ -204,6 +204,34 @@ const ComponentSettings = ({ settings, getSettingValue, handleChangeBooleanSetti
             </Grid>
 
             <Grid item xs={12}>
+                <SectionTitle variant="h6">{t("settings.general.notifyQueueUsersMessage.title")}</SectionTitle>
+                <SettingCard>
+                    <SettingItem>
+                        <Box sx={{ width: '100%' }}>
+                            <Tooltip title={t("settings.general.notifyQueueUsersMessage.note")} placement="top-start">
+                                <Typography variant="body1" sx={{ mb: 1 }}>
+                                    {t("settings.general.notifyQueueUsersMessage.name")}
+                                </Typography>
+                            </Tooltip>
+                            <TextField
+                                fullWidth
+                                multiline
+                                rows={5}
+                                variant="outlined"
+                                name="notifyQueueUsersMessage"
+                                defaultValue={settings && settings.length > 0 ? getSettingValue("notifyQueueUsersMessage") : ""}
+                                onBlur={handleChangeSetting}
+                                placeholder={t("settings.general.notifyQueueUsersMessage.placeholder")}
+                            />
+                            <FormHelperText sx={{ mt: 1 }}>
+                                {t("settings.general.notifyQueueUsersMessage.variables")}
+                            </FormHelperText>
+                        </Box>
+                    </SettingItem>
+                </SettingCard>
+            </Grid>
+
+            <Grid item xs={12}>
                 <SectionTitle variant="h6">{t("settings.general.timeSettings")}</SectionTitle>
                 <SettingCard>
                     <SettingItem>

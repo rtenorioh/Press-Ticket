@@ -849,7 +849,9 @@ const messages = {
             endWork: "Fin",
             isTricked: "Ver contactos",
             enabled: "Habilitado",
-            disabled: "Deshabilitado"
+            disabled: "Deshabilitado",
+            whatsappNumber: "Número de WhatsApp (notificaciones)",
+            whatsappNumberPlaceholder: "Ej: 5511999999999"
           },
           buttons: {
             okAdd: "Agregar",

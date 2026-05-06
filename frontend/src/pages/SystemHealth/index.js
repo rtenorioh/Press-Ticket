@@ -392,7 +392,7 @@ const SystemHealth = () => {
                       {healthData.whatsapp.pendingMessages}
                     </InfoValue>
                     <Typography variant="caption" sx={{ ml: 1, color: 'text.secondary' }}>
-                      (na fila)
+                      (no setor)
                     </Typography>
                   </InfoText>
                 </InfoItem>

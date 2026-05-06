@@ -424,7 +424,7 @@ export const getQueueMonitorData = async (): Promise<QueueMonitorData> => {
       whatsapps
     };
   } catch (error) {
-    logger.error("Erro ao obter dados de monitoramento de filas:", error);
+    logger.error("Erro ao obter dados de monitoramento dos setores:", error);
     
     return {
       queues: [],

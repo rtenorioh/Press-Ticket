@@ -4,6 +4,7 @@ import { getIO } from "../../libs/socket";
 import Ticket from "../../models/Ticket";
 import ShowTicketService from "./ShowTicketService";
 import EmitTicketCounterService from "./EmitTicketCounterService";
+import { NotifyQueueUsersService } from "../WbotServices/NotifyQueueUsersService";
 import { logger } from "../../utils/logger";
 
 interface TicketData {
@@ -41,6 +42,7 @@ const UpdateTicketService = async ({
 
   const oldStatus = ticket.status;
   const oldUserId = ticket.user?.id;
+  const oldQueueId = ticket.queueId;
 
   if (oldStatus === "closed") {
     await CheckContactOpenTickets(ticket.contact.id, ticket.whatsappId);
@@ -83,6 +85,13 @@ const UpdateTicketService = async ({
     await EmitTicketCounterService();
   } catch (err) {
     logger.error(`Erro ao emitir contadores após atualizar ticket: ${err}`);
+  }
+
+  // Notificar usuários do setor quando queueId é atribuído/alterado
+  if (ticket.queueId && ticket.queueId !== oldQueueId && ticket.whatsappId) {
+    NotifyQueueUsersService(ticket).catch((err: any) => {
+      logger.error(`Erro ao notificar usuários do setor: ${err}`);
+    });
   }
 
   return { ticket, oldStatus, oldUserId };
