@@ -796,6 +796,9 @@ DEMO=OFF
 # Permitir a rotação de tokens
 JWT_SECRET=$JWT_SECRET
 JWT_REFRESH_SECRET=$JWT_REFRESH_SECRET
+
+# Telemetria Anônima (true para habilitar, false para desabilitar)
+ALLOW_TELEMETRY=true
 EOF
 
 if [ $? -eq 0 ]; then

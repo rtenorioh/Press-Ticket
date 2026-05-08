@@ -94,6 +94,9 @@ DEMO=OFF
 #Permitir a rotação de tokens
 JWT_SECRET=JYszCWFNE0kmbbb0w/dvMl66zDd1GZozzaC27dKOCDY=
 JWT_REFRESH_SECRET=FwJXkGgXv7ARfxPRb7/6RdNmtXJlR4PsQvvw8VIbOho=
+
+#Telemetria Anônima (true para habilitar, false para desabilitar)
+ALLOW_TELEMETRY=true
 ```
 
 ---

@@ -688,6 +688,16 @@ if [ -f "$ENV_FILE" ]; then
         echo "A variável PM2_BACKEND=${NOME_EMPRESA}-back foi adicionada ao arquivo .env." | tee -a "$LOG_FILE"
     fi
 
+    # Verifica se a variável ALLOW_TELEMETRY existe no arquivo .env
+    if grep -q "ALLOW_TELEMETRY" "$ENV_FILE"; then
+        echo "A variável ALLOW_TELEMETRY já existe no arquivo .env. Nenhuma alteração necessária." | tee -a "$LOG_FILE"
+    else
+        echo "" >> "$ENV_FILE"
+        echo "# Telemetria Anônima (true para habilitar, false para desabilitar)" >> "$ENV_FILE"
+        echo "ALLOW_TELEMETRY=true" >> "$ENV_FILE"
+        echo "A variável ALLOW_TELEMETRY=true foi adicionada ao arquivo .env." | tee -a "$LOG_FILE"
+    fi
+
 else
     echo "Erro: O arquivo .env não foi encontrado no diretório backend."
     finalizar "Erro ao localizar o arquivo .env no backend." 1

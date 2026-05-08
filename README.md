@@ -132,6 +132,30 @@ Para ativar **Facebook**, **Instagram**, **Telegram** e **WebChat**:
 
 > Use o cupom de desconto oferece para 50% de desconto na compra dos canais!
 
+## Telemetria Anônima
+
+O Press Ticket® inclui um serviço opcional de telemetria que envia, a cada 12 horas, métricas básicas e anônimas da instalação para o servidor central do projeto. Os dados coletados são:
+
+- Total de mensagens, tickets e usuários cadastrados.
+- Quantidade de canais ativos por tipo (WhatsApp, WebChat, Facebook, Instagram, Telegram e E-mail).
+- Versão do sistema instalada.
+
+**Nenhum dado pessoal, conteúdo de mensagens ou informações de clientes é coletado.** O único identificador enviado é um token único gerado automaticamente na instalação, sem vínculo com dados pessoais.
+
+O objetivo dessa coleta é gerar estatísticas agregadas de uso e prova social para a landing page do projeto.
+
+### Como desativar
+
+Para desabilitar a telemetria, edite o arquivo `backend/.env` e altere:
+
+```
+ALLOW_TELEMETRY=false
+```
+
+Se a variável não existir ou estiver definida como qualquer valor diferente de `true`, a telemetria **não será executada**.
+
+---
+
 ## Caso queira ajudar a manter o projeto, pode contribuir com uma das opções abaixo:
 
 - Mensais:

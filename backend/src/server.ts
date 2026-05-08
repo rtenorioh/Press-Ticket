@@ -4,6 +4,7 @@ import { initIO } from "./libs/socket";
 import { logger } from "./utils/logger";
 import { StartAllWhatsAppsSessions } from "./services/WbotServices/StartAllWhatsAppsSessions";
 import { StartUpdateCheckJob } from "./jobs/StartUpdateCheckJob";
+import { StartTelemetryJob } from "./jobs/StartTelemetryJob";
 
 process.on("uncaughtException", (err: Error) => {
   logger.error(`uncaughtException: ${err.message}`);
@@ -22,4 +23,5 @@ const server = app.listen(process.env.PORT, () => {
 initIO(server);
 StartAllWhatsAppsSessions();
 StartUpdateCheckJob();
+StartTelemetryJob();
 gracefulShutdown(server);
