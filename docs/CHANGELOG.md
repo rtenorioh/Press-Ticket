@@ -1,5 +1,68 @@
 # Changelog
 
+### v1.16.0 (08/05/2026)
+
+- [feat: atualizar versão do sistema para v1.16.0](https://github.com/rtenorioh/Press-Ticket/commit/e00b50ada91574338efb6b704a5132df5bc42c76);
+-[fix: adicionar URLs WebSocket ao CSP em modo desenvolvimento](https://github.com/rtenorioh/Press-Ticket/commit/0c557c7386265b4b94a6f65bc5179519979f4a5d)
+- [feat: adicionar suporte para anexos de email e upload de arquivos](https://github.com/rtenorioh/Press-Ticket/commit/831d95da3067c6244c1833a0848efae458e1eb58);
+- [feat: adicionar telemetria anônima opcional com heartbeat a cada 12 horas](https://github.com/rtenorioh/Press-Ticket/commit/3c372e9d8274ee43e98acae2cfa72ef51f1bc6cf);
+- [feat: adicionar notificação automática de atualizações para masteradmins a cada 3 horas](https://github.com/rtenorioh/Press-Ticket/commit/c57bb1f181b1e92f0b802295b4640e0035e400a4);
+- [feat: adicionar notificação WhatsApp para usuários ao atribuir ticket a setor](https://github.com/rtenorioh/Press-Ticket/commit/d424ce2b86a5c8013cc244191d8bf4c17fae67a1);
+- [chore: remover terminologia SDK dos services Hub](https://github.com/rtenorioh/Press-Ticket/commit/0f4eb82a3f933febfd6a0140a6b33d753bdbfb0d);
+- [chore: limpeza pós-migração SDK — remover código morto](https://github.com/rtenorioh/Press-Ticket/commit/52dcec87bb757ab23a9fcfb1e0199824035c3daf);
+- [refactor: remover componente Chip e ajustar layout da integração](https://github.com/rtenorioh/Press-Ticket/commit/6fc7a791175b60b8d3d76e9b09cd15b6cafb5f8d);
+- [fix: tratamento silencioso de CORS/rede em validateHubToken](https://github.com/rtenorioh/Press-Ticket/commit/3bee9e7fa6749a99eca1acc8d3082bf741304822);
+- [feat: exibir info da conta NotificaMe Hub na tela de Integrações](https://github.com/rtenorioh/Press-Ticket/commit/f1f4d6fd7451ce7a4a4c9cb334748aa190b8878c);
+- [fix(backend): npm audit fix — 17 vulnerabilidades → 3 residuais](https://github.com/rtenorioh/Press-Ticket/commit/e0df025fc39bbaa276496fc11ee4688bd80642a9);
+- [refactor: migrar notificamehubsdk para chamadas diretas à API Notificame](https://github.com/rtenorioh/Press-Ticket/commit/adfc56193a7868af7add0bc57c6b019168f3df91);
+- [chore: recharts v3 + limpeza propTypes/defaultProps (Fase 0)](https://github.com/rtenorioh/Press-Ticket/commit/7089921dde296b2c8373b1b7c743d076b2fdc0c7);
+- [chore: atualizar dependências Categoria B médio prazo — Grupo 2 (backend)](https://github.com/rtenorioh/Press-Ticket/commit/5af9159f8971c8201916df6b222629e6ab1f2212);
+- [chore: atualizar dependências Categoria B médio prazo — Grupo 1 (frontend)](https://github.com/rtenorioh/Press-Ticket/commit/61491477be0b51c14c90a75087da7d1ffbf3a344);
+- [chore: atualizar dependências Categoria B — curto prazo](https://github.com/rtenorioh/Press-Ticket/commit/b05368a7a6d64e72f9ec8409eae30101a8bdefe6);
+- [chore: atualizar dependências Categoria A (patches e minors)](https://github.com/rtenorioh/Press-Ticket/commit/e9d3397d1a7fa4e8287a380c852a41cb8bfd88a6);
+- [fix(backend): atualizar nodemailer 6.x → 8.0.7 corrigindo 2 CVEs](https://github.com/rtenorioh/Press-Ticket/commit/bf37e4c44f4974966cf8a10840d6318c6f2fd1ac);
+- [fix(backend): atualizar openai 4.0.0 → 4.104.0 corrigindo CVE crítica](https://github.com/rtenorioh/Press-Ticket/commit/d358031199621ab15cb995314adfdad929563afb);
+- [fix(backend): atualizar express 4.21.2 → 4.22.1 corrigindo CVEs](https://github.com/rtenorioh/Press-Ticket/commit/73148264d7b21439af788f4c1741bb31e27f612a);
+- [fix(backend): migrar whatsapp-web.js de github:main para npm registry 1.34.7](https://github.com/rtenorioh/Press-Ticket/commit/522b0848e15c6958fa1cff63fbae2bb72654a588);
+- [refactor: remover react-color e uuid, substituindo por alternativas nativas](https://github.com/rtenorioh/Press-Ticket/commit/ca3afa52bac41b1fbb64874bef0d78becaf6b89b);
+- [fix(frontend): atualizar vite 6.0.0 → 6.4.2 corrigindo 9 CVEs](https://github.com/rtenorioh/Press-Ticket/commit/c77751f2991cf25e64c133fe1b569be2cb36ba7c);
+- [fix: atualizar dependências com vulnerabilidades de segurança (sem breaking changes)](https://github.com/rtenorioh/Press-Ticket/commit/191d8d3b9693be39122a73f5cfc16326dd388822);
+- [feat: adicionar funcionalidade para remover tags de contatos e atualizar documentação da API](https://github.com/rtenorioh/Press-Ticket/commit/0a65f79eb04b9c312b3ee8abbe603d476556ca48);
+- [feat: adicionar novas permissões e atualizar traduções para gerenciamento de WhatsApp e configurações](https://github.com/rtenorioh/Press-Ticket/commit/46d29dacda4a907056021a6b6876520e64474ff7);
+- [feat: adicionar endpoints para gerenciamento de mensagens e configurações, incluindo permissões no frontend](https://github.com/rtenorioh/Press-Ticket/commit/28a64fd88968f3d9a8019f6038190512fa606a0e);
+- [feat: add pairing code request functionality and update WhatsApp connection methods](https://github.com/rtenorioh/Press-Ticket/commit/6112d216fb716a615638c9f1693fa2b8cf2e66a1);
+- [feat: enhance message handling and email services](https://github.com/rtenorioh/Press-Ticket/commit/243650b17ffcdcd571f1614fc6c28c915950a12e);
+- [feat: add email functionality with compose, view, and manage emails](https://github.com/rtenorioh/Press-Ticket/commit/9fce030d28c9020014eb17a477859ced7279968c);
+- [feat: adicionar funcionalidade de envio de localização com novo endpoint e serviço dedicado](https://github.com/rtenorioh/Press-Ticket/commit/a4ee70c070949f42f1d66aeaeafb30ab7717cdd4);
+- [feat: adicionar funcionalidade de envio de mensagens com respostas rápidas](https://github.com/rtenorioh/Press-Ticket/commit/ffbe6e14abff94397b437caa58e9c600d21f8ca5);
+- [feat: adicionar funcionalidade de envio de carrossel com múltiplos cards e modal de edição](https://github.com/rtenorioh/Press-Ticket/commit/42438cc00eec0344933d6a965dcf8d7b2ce0816f);
+- [feat: adicionar funcionalidade de envio de mensagens em card com modal e serviço dedicado](https://github.com/rtenorioh/Press-Ticket/commit/ad59b6684f9636aa31ebf81350075454035609af);
+- [feat: adicionar serviço de envio em lote e melhorar tratamento de erros em serviços de mensagem](https://github.com/rtenorioh/Press-Ticket/commit/87db5e51f90de31e378f9072c12434dcf3a8dacb);
+- [refactor: otimizar tratamento de erros e simplificar lógica de resposta nos serviços de mensagem](https://github.com/rtenorioh/Press-Ticket/commit/47aa06edc4b50c51754d9ec510f13ad4566f6131);
+- [chore: atualizar versão do notificamehubsdk para 0.0.27 e express para 4.21.2](https://github.com/rtenorioh/Press-Ticket/commit/93d19ea4fd4907417ed38338d1a36aac6c5f5708);
+- [feat: adicionar componente ContactsAutocomplete para seleção de contatos em modais de grupo](https://github.com/rtenorioh/Press-Ticket/commit/5129384ac7965336b51c43fa09a1aa222cf5bff1);
+- [feat: add TicketListItemMenu component for ticket actions and update TicketsList to support sorting by pinned status](https://github.com/rtenorioh/Press-Ticket/commit/136527225a6f901cbd27a16dcd47def58de25520);
+- [feat: adicionar keepalive e health check para sessões WhatsApp](https://github.com/rtenorioh/Press-Ticket/commit/16a2accbe7c070102f0c802c250971788b16b48a);
+- [refactor: remover console.log desnecessários e otimizar componentes no frontend](https://github.com/rtenorioh/Press-Ticket/commit/bcce2d7a444b2a2d52b2c8538e01b38fa5af35f7);
+- [refactor: remover integração n8n global e manter apenas por setor](https://github.com/rtenorioh/Press-Ticket/commit/5b81637c824784ea8b04ba41340c47ad31f218f3);
+- [refactor: substituir console.log/error/warn por logger em controllers e config](https://github.com/rtenorioh/Press-Ticket/commit/24d1b13781936cf2c22ede22f541a5131ecb4cee);
+- [feat: adicionar integração n8n por setor e corrigir formatação de número em ApiController](https://github.com/rtenorioh/Press-Ticket/commit/3f85c0b7ad33b72d651256a0069098d157df9c43);
+- [fix: adicionar validação para mensagens vazias antes de enviar no listener de mensagens do WhatsApp](https://github.com/rtenorioh/Press-Ticket/commit/bd1a9c1e0bbd8539d4fe64a49efad5941271f92b);
+- [refactor: remover imports de React desnecessários e padronizar imports de hooks](https://github.com/rtenorioh/Press-Ticket/commit/55d13807fb2e9af860a30fe84c54e50cd0d02c5b);
+- [chore: substituir npm install por npm ci e adicionar flag --no-deprecation ao PM2](https://github.com/rtenorioh/Press-Ticket/commit/5274c4493c323fe269bbfca5d355031d5a9b3610);
+- [chore: otimizar configuração Docker para WhatsApp Web.js e atualizar dependências do Material-UI v5 para v6](https://github.com/rtenorioh/Press-Ticket/commit/707d31b5933cf8383bb4e124c33434a60c68ca0a);
+- [chore: migrar frontend de Create React App para Vite e atualizar Node.js para v22](https://github.com/rtenorioh/Press-Ticket/commit/ef5e174b7df39278109fbadd2939a2c767320115);
+- [refactor: remover componente Route customizado não utilizado do frontend](https://github.com/rtenorioh/Press-Ticket/commit/c248754961e8ad40afc8b586e1fcd804df73fd1b);
+- [chore: adicionar update_status.json ao .gitignore e remover arquivo rastreado](https://github.com/rtenorioh/Press-Ticket/commit/379cfb20c1c90cbc3c0bad306e305d022d2a5a6b);
+- [chore: atualizar OpenAI de v3 para v4 e migrar para nova API de chat completions](https://github.com/rtenorioh/Press-Ticket/commit/5e6f1aff514747a657200da8f3129833f6d2d204);
+- [chore: atualizar Sequelize de v5 para v6 e corrigir configuração do Sequelize CLI](https://github.com/rtenorioh/Press-Ticket/commit/e23caa56a96c6abc6a86e4440e6540ef03e8465a);
+- [chore: migrar ESLint de v7 para v9 com flat config e atualizar TypeScript para v5.9.3](https://github.com/rtenorioh/Press-Ticket/commit/54c51002cdaa97f1674898d532c28bff27b919fa);
+- [chore: atualizar yup de v0.32.8 para v1.7.1 e remover @types/yup desnecessário](https://github.com/rtenorioh/Press-Ticket/commit/c007ff0cecd6702e5c984fabd2b8fb7998d19c2e);
+- [refactor: compactar formatação do cabeçalho Permissions-Policy em uma única linha](https://github.com/rtenorioh/Press-Ticket/commit/817888d077d63c291a9fcd1e964b4ee4e17f08d6);
+- [chore: atualizar dependências de testes atualizando Jest de v26 para v29, ts-jest de v26 para v29, @types/jest de v26 para v29, substituindo faker por @faker-js/faker v10.4.0 e atualizando dependências do Babel](https://github.com/rtenorioh/Press-Ticket/commit/a6de79cac660f05e12cc1b3398808fa4806f24ee);
+- [refactor: melhorar formatação de código no SystemUpdateService com quebras de linha e tipagem explícita de Promise<void>](https://github.com/rtenorioh/Press-Ticket/commit/bce867e7b26dbf51788ece465199d98af40308f6); e
+- [chore: atualizar dependências de segurança removendo @sentry/node e atualizando jsonwebtoken para v9.0.2 e multer para v2.1.1](https://github.com/rtenorioh/Press-Ticket/commit/cd21002b15feeadc745bc6a90686e2321014457b).
+
 ### v1.15.0 (08/04/2026)
 
 - [chore: atualizar versão do sistema de v1.14.0 para v1.15.0](https://github.com/rtenorioh/Press-Ticket/commit/6f15127ebf53e50836eb82848064ae4690439aeb);
