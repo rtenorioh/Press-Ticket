@@ -142,15 +142,15 @@ export const sendHubLocation = async (req: Request, res: Response): Promise<Resp
 };
 
 export const sendReplyableText = async (req: Request, res: Response): Promise<Response> => {
-  const { text, quickReplyButtons = [] } = req.body;
+  const { text, quickReplyButtons = [], commentMessageId } = req.body;
   const { ticketId } = req.params;
 
   if (!text?.trim()) {
     return res.status(400).json({ error: "O campo 'text' é obrigatório." });
   }
 
-  if (!Array.isArray(quickReplyButtons) || quickReplyButtons.length === 0) {
-    return res.status(400).json({ error: "Pelo menos um botão de resposta rápida é obrigatório." });
+  if (!commentMessageId && (!Array.isArray(quickReplyButtons) || quickReplyButtons.length === 0)) {
+    return res.status(400).json({ error: "Pelo menos um botão de resposta rápida é obrigatório (ou informe commentMessageId para responder comentário)." });
   }
 
   const ticket = await Ticket.findByPk(ticketId, {
@@ -184,7 +184,8 @@ export const sendReplyableText = async (req: Request, res: Response): Promise<Re
       quickReplyButtons,
       ticket.id,
       ticket.contact,
-      ticket.whatsapp
+      ticket.whatsapp,
+      commentMessageId || undefined
     );
 
     return res.status(200).json(newMessage);

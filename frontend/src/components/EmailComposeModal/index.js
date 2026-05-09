@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Box,
   Button,
+  Chip,
   CircularProgress,
   Dialog,
   DialogActions,
@@ -13,6 +14,7 @@ import {
   TextField,
   Typography
 } from "@mui/material";
+import AttachFileIcon from "@mui/icons-material/AttachFile";
 import CloseIcon from "@mui/icons-material/Close";
 import SendIcon from "@mui/icons-material/Send";
 import api from "../../services/api";
@@ -33,6 +35,9 @@ const EmailComposeModal = ({
   const [accountId, setAccountId] = useState(null);
   const [loading, setLoading] = useState(false);
   const [toError, setToError] = useState(false);
+  const [attachments, setAttachments] = useState([]);
+  const [uploadingFile, setUploadingFile] = useState(false);
+  const fileInputRef = useRef(null);
 
   // Pre-fill when modal opens
   useEffect(() => {
@@ -42,8 +47,33 @@ const EmailComposeModal = ({
       setBody(defaultValues.body || "");
       setAccountId(selectedAccount?.id || accounts[0]?.id || null);
       setToError(false);
+      setAttachments([]);
     }
   }, [open, defaultValues, selectedAccount, accounts]);
+
+  const handleFileSelect = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    e.target.value = "";
+
+    setUploadingFile(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const { data } = await api.post("/emails/attachment", formData, {
+        headers: { "Content-Type": "multipart/form-data" }
+      });
+      setAttachments(prev => [...prev, { fileUrl: data.fileUrl, fileName: data.fileName }]);
+    } catch (err) {
+      toastError(err);
+    } finally {
+      setUploadingFile(false);
+    }
+  };
+
+  const handleRemoveAttachment = (index) => {
+    setAttachments(prev => prev.filter((_, i) => i !== index));
+  };
 
   const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
 
@@ -64,7 +94,8 @@ const EmailComposeModal = ({
         to: to.trim(),
         subject: subject.trim(),
         htmlBody: body,
-        textBody: body
+        textBody: body,
+        attachments: attachments.length > 0 ? attachments : undefined
       });
 
       toastSuccess("Email enviado com sucesso!");
@@ -82,6 +113,7 @@ const EmailComposeModal = ({
     setSubject("");
     setBody("");
     setToError(false);
+    setAttachments([]);
     onClose();
   };
 
@@ -161,6 +193,38 @@ const EmailComposeModal = ({
             disabled={loading}
             placeholder="Escreva sua mensagem..."
           />
+
+          {/* Attachments */}
+          <Box>
+            <input
+              type="file"
+              ref={fileInputRef}
+              style={{ display: "none" }}
+              onChange={handleFileSelect}
+            />
+            <Button
+              size="small"
+              startIcon={uploadingFile ? <CircularProgress size={14} /> : <AttachFileIcon />}
+              onClick={() => fileInputRef.current?.click()}
+              disabled={loading || uploadingFile}
+              sx={{ textTransform: "none" }}
+            >
+              {uploadingFile ? "Enviando..." : "Anexar arquivo"}
+            </Button>
+            {attachments.length > 0 && (
+              <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5, mt: 1 }}>
+                {attachments.map((att, idx) => (
+                  <Chip
+                    key={idx}
+                    label={att.fileName}
+                    size="small"
+                    onDelete={() => handleRemoveAttachment(idx)}
+                    icon={<AttachFileIcon />}
+                  />
+                ))}
+              </Box>
+            )}
+          </Box>
         </Box>
       </DialogContent>
 

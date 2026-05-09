@@ -15,6 +15,8 @@ export interface IContent {
   fileUrl?: string;
   latitude?: number;
   longitude?: number;
+  name?: string;
+  address?: string;
   filename?: string;
   fileSize?: number;
   fileMimeType?: string;
@@ -253,6 +255,21 @@ const HubMessageListener = async (
           originalName: media.originalname
         });
       }
+    } else if (contents[0]?.type === "location") {
+      const loc = contents[0];
+      const parts: string[] = ["📍 Localização"];
+      if (loc.name) parts.push(loc.name);
+      if (loc.address) parts.push(loc.address);
+      if (loc.latitude != null && loc.longitude != null) {
+        parts.push(`https://maps.google.com/?q=${loc.latitude},${loc.longitude}`);
+      }
+      await CreateMessageService({
+        id,
+        contactId: contact.id,
+        body: parts.join("\n"),
+        ticketId: ticket.id,
+        fromMe: false
+      });
     }
   } catch (error: any) {
     logger.error(`HubMessageListener erro: ${error}`);

@@ -23,8 +23,6 @@ export const SendTextMessageService = async (
     throw new Error(`SendTextMessageService: ID do destinatário não encontrado para canal ${channel}`);
   }
 
-  message = message.replace(/\n/g, " ");
-
   const hubToken = await showHubToken();
   const client = createNotificameClient(hubToken);
 

@@ -15,7 +15,8 @@ export const SendReplyableTextService = async (
   quickReplyButtons: HubQuickReplyButton[],
   ticketId: number,
   contact: Contact,
-  connection: any
+  connection: any,
+  commentMessageId?: string
 ): Promise<any> => {
   if (connection.type === "wwebjs") {
     throw new Error("Envio de respostas rápidas não suportado neste canal.");
@@ -23,10 +24,6 @@ export const SendReplyableTextService = async (
 
   if (!text?.trim()) {
     throw new Error("O texto da mensagem é obrigatório.");
-  }
-
-  if (!quickReplyButtons?.length) {
-    throw new Error("Informe pelo menos um botão de resposta rápida.");
   }
 
   const channel = resolveChannel(contact);
@@ -43,21 +40,32 @@ export const SendReplyableTextService = async (
   const hubToken = await showHubToken();
   const client = createNotificameClient(hubToken);
 
+  // Instagram comment reply: use reply_text with messsageId (3 "s" — typo intencional da API)
+  const isInstagramCommentReply = channel === 'instagram' && !!commentMessageId;
+
+  const contents = isInstagramCommentReply
+    ? [{ type: 'reply_text' as const, messsageId: commentMessageId, text }]
+    : [{
+        type: 'template' as const,
+        template: {
+          template_type: 'button',
+          text,
+          buttons: quickReplyButtons.map(b => ({
+            type: 'postback',
+            payload: b.label,
+            title: b.label
+          }))
+        }
+      }];
+
+  if (!isInstagramCommentReply && !quickReplyButtons?.length) {
+    throw new Error("Informe pelo menos um botão de resposta rápida.");
+  }
+
   const payload: NotificameMessagePayload = {
     from: connection.qrcode,
     to: contactId,
-    contents: [{
-      type: 'template',
-      template: {
-        template_type: 'button',
-        text,
-        buttons: quickReplyButtons.map(b => ({
-          type: 'web_url',
-          url: '#',
-          title: b.label
-        }))
-      }
-    }]
+    contents
   };
 
   try {

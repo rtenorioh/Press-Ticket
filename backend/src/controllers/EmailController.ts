@@ -125,9 +125,23 @@ export const show = async (req: Request, res: Response): Promise<Response> => {
   }
 };
 
+// POST /emails/attachment — upload de arquivo para anexo de email
+export const uploadAttachment = async (req: Request, res: Response): Promise<Response> => {
+  const file = req.file;
+  if (!file) {
+    return res.status(400).json({ error: "Nenhum arquivo enviado." });
+  }
+  const backendUrl = process.env.WEBHOOK;
+  const filename = encodeURIComponent(file.filename);
+  return res.status(200).json({
+    fileUrl: `${backendUrl}/public/${filename}`,
+    fileName: file.originalname
+  });
+};
+
 // POST /emails
 export const store = async (req: Request, res: Response): Promise<Response> => {
-  const { whatsappId, to, subject, htmlBody, textBody } = req.body;
+  const { whatsappId, to, subject, htmlBody, textBody, attachments } = req.body;
 
   if (!whatsappId) {
     return res.status(400).json({ error: "whatsappId é obrigatório." });
@@ -145,7 +159,8 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
       to,
       subject: subject || "",
       htmlBody,
-      textBody
+      textBody,
+      attachments: Array.isArray(attachments) ? attachments : undefined
     });
 
     return res.status(201).json(email);

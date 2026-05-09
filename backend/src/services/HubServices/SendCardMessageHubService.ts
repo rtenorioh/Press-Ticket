@@ -36,9 +36,14 @@ export const SendCardMessageService = async (
     throw new Error(`SendCardMessageService: ID do destinatário não encontrado para canal ${channel}`);
   }
 
+  const mapButton = (b: HubCardButton) =>
+    b.url && b.url !== '#'
+      ? { type: 'web_url', url: b.url, title: b.label }
+      : { type: 'postback', payload: b.label, title: b.label };
+
   const allButtons = [
-    ...buttons.map(b => ({ type: 'web_url', url: b.url || '#', title: b.label })),
-    ...quickReplyButtons.map(b => ({ type: 'web_url', url: b.url || '#', title: b.label }))
+    ...buttons.map(mapButton),
+    ...quickReplyButtons.map(mapButton)
   ];
 
   const hubToken = await showHubToken();

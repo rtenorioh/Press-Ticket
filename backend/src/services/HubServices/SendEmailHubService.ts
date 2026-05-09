@@ -7,12 +7,18 @@ import { logger } from "../../utils/logger";
 
 require("dotenv").config();
 
+interface EmailAttachmentInput {
+  fileUrl: string;
+  fileName: string;
+}
+
 interface SendEmailParams {
   whatsappId: number;
   to: string;
   subject: string;
   htmlBody?: string;
   textBody?: string;
+  attachments?: EmailAttachmentInput[];
 }
 
 export const SendEmailHubService = async ({
@@ -20,7 +26,8 @@ export const SendEmailHubService = async ({
   to,
   subject,
   htmlBody,
-  textBody
+  textBody,
+  attachments
 }: SendEmailParams): Promise<Email> => {
   const connection = await Whatsapp.findByPk(whatsappId);
 
@@ -54,7 +61,7 @@ export const SendEmailHubService = async ({
       type: 'email',
       subject: subject || '',
       html: cleanHtml,
-      attachments: []
+      attachments: attachments && attachments.length > 0 ? attachments : []
     }]
   };
 

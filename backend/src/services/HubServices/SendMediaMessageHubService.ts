@@ -25,23 +25,20 @@ export const SendMediaMessageService = async (
     throw new Error(`SendMediaMessageService: ID do destinatário não encontrado para canal ${channel}`);
   }
 
-  message = message.replace(/\n/g, " ");
-
   const backendUrl = process.env.WEBHOOK;
   const filename = encodeURIComponent(media.filename);
   let mediaUrl = `${backendUrl}/public/${filename}`;
 
-  // Normalizar mimetype para o padrão da API Notificame
-  let fileMimeType: string = media.mimetype;
-
+  // Normalizar mimetype para o formato aceito pela API (tipos simples, não MIME completo)
+  let fileMimeType: string;
   if (media.mimetype.includes("image")) {
     fileMimeType = channel === "telegram" ? "photo" : "image";
-  } else if ((channel === "telegram" || channel === "facebook") && media.mimetype.includes("audio")) {
+  } else if (media.mimetype.includes("audio")) {
     fileMimeType = "audio";
-  } else if ((channel === "telegram" || channel === "facebook") && media.mimetype.includes("video")) {
+  } else if (media.mimetype.includes("video")) {
     fileMimeType = "video";
-  } else if (channel === "telegram" || channel === "facebook") {
-    fileMimeType = "file";
+  } else {
+    fileMimeType = (channel === "telegram" || channel === "webchat") ? "document" : "file";
   }
 
   // Converter MP3 para MP4 no Instagram (não suporta audio direto)
@@ -68,15 +65,21 @@ export const SendMediaMessageService = async (
   const hubToken = await showHubToken();
   const client = createNotificameClient(hubToken);
 
+  const fileContent: Record<string, unknown> = {
+    type: 'file',
+    fileMimeType,
+    fileUrl: mediaUrl,
+  };
+  if (channel === "webchat") {
+    fileContent.fileName = media.originalname || media.filename;
+  } else {
+    fileContent.fileCaption = message || undefined;
+  }
+
   const payload: NotificameMessagePayload = {
     from: connection.qrcode,
     to: contactId,
-    contents: [{
-      type: 'file',
-      fileMimeType,
-      fileUrl: mediaUrl,
-      fileCaption: message || undefined
-    }]
+    contents: [fileContent as any]
   };
 
   try {
