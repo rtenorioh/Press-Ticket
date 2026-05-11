@@ -124,27 +124,58 @@ export const checkVersion = async (_req: Request, res: Response): Promise<Respon
   });
 };
 
-export const runSystemUpdate = async (_req: Request, res: Response): Promise<Response> => {
+export const runSystemUpdate = async (req: Request, res: Response): Promise<Response> => {
   try {
     const io = getIO();
+    const { updateOS = false, updateBrowser = false } = req.body;
 
-    const child = spawn("bash", ["-c", "curl -sSL https://update.pressticket.com.br | sudo bash -s"]);
+    // stdin answers in script question order:
+    // 1. Update OS packages? (always asked)
+    // 2. Update Node.js to 22.x? (conditional: only if Node < 22) — hardcoded "n"
+    // 3. Update/Install Chrome? (always asked)
+    const stdinAnswers = [
+      updateOS ? "s" : "n",
+      "n",
+      updateBrowser ? "s" : "n",
+    ].join("\n") + "\n";
 
-    child.stdout.on("data", (data: Buffer) => {
-      io.emit("systemUpdateLog", { type: "stdout", message: data.toString() });
-    });
+    setImmediate(async () => {
+      try {
+        const tmpScript = `/tmp/pt-update-${Date.now()}.sh`;
+        io.emit("systemUpdateLog", { type: "stdout", message: "Baixando script de atualização...\n" });
+        await execAsync(`curl -sSL https://update.pressticket.com.br -o ${tmpScript} && chmod 700 ${tmpScript}`);
+        io.emit("systemUpdateLog", { type: "stdout", message: "Script baixado. Iniciando...\n" });
 
-    child.stderr.on("data", (data: Buffer) => {
-      io.emit("systemUpdateLog", { type: "stderr", message: data.toString() });
-    });
+        const child = spawn("sudo", ["bash", tmpScript], {
+          env: { ...process.env, DEBIAN_FRONTEND: "noninteractive" },
+        });
 
-    child.on("close", (code: number | null) => {
-      io.emit("systemUpdateLog", {
-        type: code === 0 ? "success" : "error",
-        message: code === 0
-          ? "✅ Atualização concluída com sucesso!"
-          : `❌ Processo encerrado com código ${code}`,
-      });
+        child.stdin.write(stdinAnswers);
+        child.stdin.end();
+
+        child.stdout.on("data", (data: Buffer) => {
+          io.emit("systemUpdateLog", { type: "stdout", message: data.toString() });
+        });
+
+        child.stderr.on("data", (data: Buffer) => {
+          io.emit("systemUpdateLog", { type: "stderr", message: data.toString() });
+        });
+
+        child.on("close", (code: number | null) => {
+          execAsync(`rm -f ${tmpScript}`).catch(() => {});
+          io.emit("systemUpdateLog", {
+            type: code === 0 ? "success" : "error",
+            message: code === 0
+              ? "✅ Atualização concluída com sucesso!"
+              : `❌ Processo encerrado com código ${code}`,
+          });
+        });
+      } catch (downloadErr: any) {
+        io.emit("systemUpdateLog", {
+          type: "error",
+          message: `❌ Erro ao baixar o script: ${downloadErr.message}`,
+        });
+      }
     });
 
     return res.status(202).json({ success: true, message: "Atualização iniciada" });

@@ -16,6 +16,7 @@ import Grid from "@mui/material/Grid";
 import Link from "@mui/material/Link";
 import Paper from "@mui/material/Paper";
 import { alpha, styled } from "@mui/material/styles";
+import Switch from "@mui/material/Switch";
 import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -203,7 +204,9 @@ const SystemUpdate = () => {
   const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [updating, setUpdating] = useState(false);
-  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [updateDialogOpen, setUpdateDialogOpen] = useState(false);
+  const [updateOS, setUpdateOS] = useState(true);
+  const [updateBrowser, setUpdateBrowser] = useState(false);
   const [versionData, setVersionData] = useState(null);
   const [logs, setLogs] = useState([]);
   const [fetchError, setFetchError] = useState(null);
@@ -234,7 +237,7 @@ const SystemUpdate = () => {
   }, [logs]);
 
   const handleUpdate = async () => {
-    setConfirmOpen(false);
+    setUpdateDialogOpen(false);
     setUpdating(true);
     setLogs([]);
 
@@ -257,7 +260,7 @@ const SystemUpdate = () => {
     }
 
     try {
-      await api.post("/system-update", {});
+      await api.post("/system-update", { updateOS, updateBrowser });
     } catch (err) {
       const isDisconnect =
         err?.code === "ECONNABORTED" ||
@@ -592,7 +595,7 @@ const SystemUpdate = () => {
                           <SystemUpdateAltIcon />
                         )
                       }
-                      onClick={() => setConfirmOpen(true)}
+                      onClick={() => setUpdateDialogOpen(true)}
                       disabled={updating || versionData.upToDate || !versionData.isLinux}
                       sx={{
                         borderRadius: 3,
@@ -691,64 +694,67 @@ const SystemUpdate = () => {
         )}
       </Box>
 
-      {/* Diálogo de confirmação */}
+      {/* Diálogo de configuração de atualização */}
       <Dialog
-        open={confirmOpen}
-        onClose={() => setConfirmOpen(false)}
+        open={updateDialogOpen}
+        onClose={() => setUpdateDialogOpen(false)}
         maxWidth="sm"
         fullWidth
       >
         <DialogTitle sx={{ fontWeight: 700 }}>
-          Confirmar Atualização via Git
+          {t("systemUpdate.dialogTitle")}
         </DialogTitle>
         <DialogContent>
-          <DialogContentText component="div">
-            <Typography variant="body2" paragraph>
-              Esta ação executará o script <strong>UPDATE.sh</strong> que irá:
-            </Typography>
-            <Box
-              component="ul"
-              sx={{ pl: 2, m: 0, "& li": { mb: 0.5 } }}
-            >
-              <li>
-                <Typography variant="body2">
-                  Fazer <em>pull</em> das últimas alterações do Git
-                </Typography>
-              </li>
-              <li>
-                <Typography variant="body2">
-                  Instalar dependências npm (<code>npm ci</code>)
-                </Typography>
-              </li>
-              <li>
-                <Typography variant="body2">
-                  Realizar o build do backend e frontend
-                </Typography>
-              </li>
-              <li>
-                <Typography variant="body2">
-                  Executar migrações do banco de dados
-                </Typography>
-              </li>
-              <li>
-                <Typography variant="body2">
-                  Reiniciar os serviços via PM2
-                </Typography>
-              </li>
-            </Box>
-            <Alert severity="warning" sx={{ mt: 2, borderRadius: 2 }}>
-              O processo pode levar <strong>10 a 30 minutos</strong> e o
-              sistema ficará temporariamente indisponível durante o reinício.
-            </Alert>
+          <DialogContentText sx={{ mb: 2 }}>
+            {t("systemUpdate.dialogDescription")}
           </DialogContentText>
+
+          <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 2 }}>
+            <Box>
+              <Typography variant="body1" fontWeight="bold">
+                {t("systemUpdate.dialogUpdateOS")}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                {t("systemUpdate.dialogUpdateOSDesc")}
+              </Typography>
+            </Box>
+            <Switch
+              checked={updateOS}
+              onChange={(e) => setUpdateOS(e.target.checked)}
+              color="primary"
+            />
+          </Box>
+
+          <Divider />
+
+          <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mt: 2 }}>
+            <Box>
+              <Typography variant="body1" fontWeight="bold">
+                {t("systemUpdate.dialogUpdateBrowser")}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                {t("systemUpdate.dialogUpdateBrowserDesc")}
+              </Typography>
+            </Box>
+            <Switch
+              checked={updateBrowser}
+              onChange={(e) => setUpdateBrowser(e.target.checked)}
+              color="primary"
+            />
+          </Box>
+
+          <Alert severity="warning" sx={{ mt: 3, borderRadius: 2 }}>
+            O processo pode levar <strong>10 a 30 minutos</strong> e o
+            sistema ficará temporariamente indisponível durante o reinício.
+          </Alert>
         </DialogContent>
         <DialogActions sx={{ p: 3, gap: 1 }}>
           <Button
-            onClick={() => setConfirmOpen(false)}
+            onClick={() => setUpdateDialogOpen(false)}
             variant="outlined"
             sx={{ borderRadius: 2, textTransform: "none" }}
           >
-            Cancelar
+            {t("systemUpdate.dialogCancel")}
           </Button>
           <Button
             onClick={handleUpdate}
@@ -756,7 +762,7 @@ const SystemUpdate = () => {
             startIcon={<SystemUpdateAltIcon />}
             sx={{ borderRadius: 2, textTransform: "none", fontWeight: 700 }}
           >
-            Confirmar Atualização
+            {t("systemUpdate.dialogConfirm")}
           </Button>
         </DialogActions>
       </Dialog>
