@@ -127,13 +127,15 @@ export const checkVersion = async (_req: Request, res: Response): Promise<Respon
 export const runSystemUpdate = async (req: Request, res: Response): Promise<Response> => {
   try {
     const io = getIO();
-    const { updateOS = false, updateBrowser = false } = req.body;
+    const { updateOS = false, updateBrowser = false, sudoPassword = "" } = req.body;
 
-    // stdin answers in script question order:
-    // 1. Update OS packages? (always asked)
-    // 2. Update Node.js to 22.x? (conditional: only if Node < 22) — hardcoded "n"
-    // 3. Update/Install Chrome? (always asked)
-    const stdinAnswers = [
+    // stdin input for sudo -S and script questions:
+    // 1. sudo password (read by sudo -S before the script starts)
+    // 2. Update OS packages? (always asked)
+    // 3. Update Node.js to 22.x? (conditional: only if Node < 22) — hardcoded "n"
+    // 4. Update/Install Chrome? (always asked)
+    const stdinInput = [
+      sudoPassword,
       updateOS ? "s" : "n",
       "n",
       updateBrowser ? "s" : "n",
@@ -146,11 +148,11 @@ export const runSystemUpdate = async (req: Request, res: Response): Promise<Resp
         await execAsync(`curl -sSL https://update.pressticket.com.br -o ${tmpScript} && chmod 700 ${tmpScript}`);
         io.emit("systemUpdateLog", { type: "stdout", message: "Script baixado. Iniciando...\n" });
 
-        const child = spawn("sudo", ["bash", tmpScript], {
+        const child = spawn("sudo", ["-S", "bash", tmpScript], {
           env: { ...process.env, DEBIAN_FRONTEND: "noninteractive" },
         });
 
-        child.stdin.write(stdinAnswers);
+        child.stdin.write(stdinInput);
         child.stdin.end();
 
         child.stdout.on("data", (data: Buffer) => {
@@ -158,7 +160,14 @@ export const runSystemUpdate = async (req: Request, res: Response): Promise<Resp
         });
 
         child.stderr.on("data", (data: Buffer) => {
-          io.emit("systemUpdateLog", { type: "stderr", message: data.toString() });
+          const filtered = data.toString()
+            .split("\n")
+            .filter((line) => !line.includes("[sudo] password") && !line.includes("password for"))
+            .join("\n")
+            .trim();
+          if (filtered) {
+            io.emit("systemUpdateLog", { type: "stderr", message: filtered });
+          }
         });
 
         child.on("close", (code: number | null) => {

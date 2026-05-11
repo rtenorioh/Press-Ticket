@@ -114,6 +114,8 @@ const messages = {
                 dialogUpdateBrowserDesc: "WhatsApp Web JS が使用する Chromium を更新します。",
                 dialogCancel: "キャンセル",
                 dialogConfirm: "アップデートを開始",
+                dialogPasswordLabel: "サーバーパスワード (sudo)",
+                dialogPasswordHelper: "サーバーで PM2 を実行しているユーザーのパスワードを入力してください。",
             },
             backendErrors: {
                 ERR_CONNECTION_CREATION_COUNT: "接続の上限に達しました。変更についてはサポートにお問い合わせください。",

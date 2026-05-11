@@ -13,8 +13,11 @@ import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import Divider from "@mui/material/Divider";
 import Grid from "@mui/material/Grid";
+import IconButton from "@mui/material/IconButton";
+import InputAdornment from "@mui/material/InputAdornment";
 import Link from "@mui/material/Link";
 import Paper from "@mui/material/Paper";
+import TextField from "@mui/material/TextField";
 import { alpha, styled } from "@mui/material/styles";
 import Switch from "@mui/material/Switch";
 import Tooltip from "@mui/material/Tooltip";
@@ -31,6 +34,8 @@ import RefreshIcon from "@mui/icons-material/Refresh";
 import RocketLaunchIcon from "@mui/icons-material/RocketLaunch";
 import StorageIcon from "@mui/icons-material/Storage";
 import SystemUpdateAltIcon from "@mui/icons-material/SystemUpdateAlt";
+import Visibility from "@mui/icons-material/Visibility";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 
 import { useTranslation } from "react-i18next";
@@ -207,6 +212,8 @@ const SystemUpdate = () => {
   const [updateDialogOpen, setUpdateDialogOpen] = useState(false);
   const [updateOS, setUpdateOS] = useState(true);
   const [updateBrowser, setUpdateBrowser] = useState(false);
+  const [sudoPassword, setSudoPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [versionData, setVersionData] = useState(null);
   const [logs, setLogs] = useState([]);
   const [fetchError, setFetchError] = useState(null);
@@ -236,8 +243,16 @@ const SystemUpdate = () => {
     }
   }, [logs]);
 
+  const handleDialogClose = () => {
+    setUpdateDialogOpen(false);
+    setSudoPassword("");
+    setShowPassword(false);
+  };
+
   const handleUpdate = async () => {
     setUpdateDialogOpen(false);
+    setSudoPassword("");
+    setShowPassword(false);
     setUpdating(true);
     setLogs([]);
 
@@ -260,7 +275,7 @@ const SystemUpdate = () => {
     }
 
     try {
-      await api.post("/system-update", { updateOS, updateBrowser });
+      await api.post("/system-update", { updateOS, updateBrowser, sudoPassword });
     } catch (err) {
       const isDisconnect =
         err?.code === "ECONNABORTED" ||
@@ -697,7 +712,7 @@ const SystemUpdate = () => {
       {/* Diálogo de configuração de atualização */}
       <Dialog
         open={updateDialogOpen}
-        onClose={() => setUpdateDialogOpen(false)}
+        onClose={handleDialogClose}
         maxWidth="sm"
         fullWidth
       >
@@ -708,6 +723,28 @@ const SystemUpdate = () => {
           <DialogContentText sx={{ mb: 2 }}>
             {t("systemUpdate.dialogDescription")}
           </DialogContentText>
+
+          <TextField
+            fullWidth
+            label={t("systemUpdate.dialogPasswordLabel")}
+            type={showPassword ? "text" : "password"}
+            value={sudoPassword}
+            onChange={(e) => setSudoPassword(e.target.value)}
+            sx={{ mb: 3 }}
+            helperText={t("systemUpdate.dialogPasswordHelper")}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    onClick={() => setShowPassword((prev) => !prev)}
+                    edge="end"
+                  >
+                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
+          />
 
           <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 2 }}>
             <Box>
@@ -750,7 +787,7 @@ const SystemUpdate = () => {
         </DialogContent>
         <DialogActions sx={{ p: 3, gap: 1 }}>
           <Button
-            onClick={() => setUpdateDialogOpen(false)}
+            onClick={handleDialogClose}
             variant="outlined"
             sx={{ borderRadius: 2, textTransform: "none" }}
           >
@@ -760,6 +797,7 @@ const SystemUpdate = () => {
             onClick={handleUpdate}
             variant="contained"
             startIcon={<SystemUpdateAltIcon />}
+            disabled={!sudoPassword.trim()}
             sx={{ borderRadius: 2, textTransform: "none", fontWeight: 700 }}
           >
             {t("systemUpdate.dialogConfirm")}

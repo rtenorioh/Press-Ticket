@@ -117,6 +117,8 @@ const messages = {
                 dialogUpdateBrowserDesc: "Aggiorna il Chromium usato da WhatsApp Web JS.",
                 dialogCancel: "Annulla",
                 dialogConfirm: "Avvia Aggiornamento",
+                dialogPasswordLabel: "Password del server (sudo)",
+                dialogPasswordHelper: "Inserisci la password dell'utente che esegue PM2 sul server.",
             },
             backendErrors: {
                 ERR_CONNECTION_CREATION_COUNT: "Limite di connessioni raggiunto. Contatta il supporto per modifiche.",

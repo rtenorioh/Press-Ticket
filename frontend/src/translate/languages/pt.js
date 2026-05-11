@@ -2315,6 +2315,8 @@ const messages = {
         dialogUpdateBrowserDesc: "Atualiza o Chromium usado pelo WhatsApp Web JS.",
         dialogCancel: "Cancelar",
         dialogConfirm: "Iniciar Atualização",
+        dialogPasswordLabel: "Senha do servidor (sudo)",
+        dialogPasswordHelper: "Informe a senha do usuário que executa o PM2 no servidor.",
       },
       versionCheck: {
         title: "Verificação de Versão",

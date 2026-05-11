@@ -206,6 +206,8 @@ const messages = {
                 dialogUpdateBrowserDesc: "更新 WhatsApp Web JS 使用的 Chromium。",
                 dialogCancel: "取消",
                 dialogConfirm: "开始更新",
+                dialogPasswordLabel: "服务器密码 (sudo)",
+                dialogPasswordHelper: "输入在服务器上运行 PM2 的用户密码。",
             },
             backendErrors: {
                 ERR_CONNECTION_CREATION_COUNT: "已达到连接限制。请联系支持更改。",

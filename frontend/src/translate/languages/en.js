@@ -917,6 +917,8 @@ const messages = {
         dialogUpdateBrowserDesc: "Updates the Chromium used by WhatsApp Web JS.",
         dialogCancel: "Cancel",
         dialogConfirm: "Start Update",
+        dialogPasswordLabel: "Server password (sudo)",
+        dialogPasswordHelper: "Enter the password of the user running PM2 on the server.",
       },
       backendErrors: {
         ERR_CREATING_MESSAGE: "Error creating message in the database.",

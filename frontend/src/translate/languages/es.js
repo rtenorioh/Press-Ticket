@@ -896,6 +896,8 @@ const messages = {
           dialogUpdateBrowserDesc: "Actualiza el Chromium utilizado por WhatsApp Web JS.",
           dialogCancel: "Cancelar",
           dialogConfirm: "Iniciar Actualización",
+          dialogPasswordLabel: "Contraseña del servidor (sudo)",
+          dialogPasswordHelper: "Ingrese la contraseña del usuario que ejecuta PM2 en el servidor.",
         },
         backendErrors: {
           ERR_CREATING_MESSAGE: "Error al crear el mensaje en la base de datos.",

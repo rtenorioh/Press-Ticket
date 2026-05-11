@@ -116,6 +116,8 @@ const messages = {
                 dialogUpdateBrowserDesc: "يحدث Chromium المستخدم بواسطة WhatsApp Web JS.",
                 dialogCancel: "إلغاء",
                 dialogConfirm: "بدء التحديث",
+                dialogPasswordLabel: "كلمة مرور الخادم (sudo)",
+                dialogPasswordHelper: "أدخل كلمة مرور المستخدم الذي يشغّل PM2 على الخادم.",
             },
             backendErrors: {
                 ERR_CONNECTION_CREATION_COUNT: "تم الوصول إلى الحد الأقصى للاتصالات، يرجى التواصل مع الدعم لتعديله.",

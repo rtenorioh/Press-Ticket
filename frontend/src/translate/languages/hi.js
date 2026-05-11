@@ -103,6 +103,8 @@ const messages = {
                 dialogUpdateBrowserDesc: "WhatsApp Web JS द्वारा उपयोग किए जाने वाले Chromium को अपडेट करता है।",
                 dialogCancel: "रद्द करें",
                 dialogConfirm: "अपडेट शुरू करें",
+                dialogPasswordLabel: "सर्वर पासवर्ड (sudo)",
+                dialogPasswordHelper: "सर्वर पर PM2 चलाने वाले उपयोगकर्ता का पासवर्ड दर्ज करें।",
             },
             backendErrors: {
                 ERR_CONNECTION_CREATION_COUNT: "अधिकतम कनेक्शन सीमा तक पहुँचा गया। कृपया संशोधन के लिए समर्थन से संपर्क करें।",

@@ -117,6 +117,8 @@ const messages = {
                 dialogUpdateBrowserDesc: "Memperbarui Chromium yang digunakan oleh WhatsApp Web JS.",
                 dialogCancel: "Batal",
                 dialogConfirm: "Mulai Pembaruan",
+                dialogPasswordLabel: "Kata sandi server (sudo)",
+                dialogPasswordHelper: "Masukkan kata sandi pengguna yang menjalankan PM2 di server.",
             },
             backendErrors: {
                 ERR_CONNECTION_CREATION_COUNT: "Batas koneksi tercapai. Hubungi dukungan untuk perubahan.",
