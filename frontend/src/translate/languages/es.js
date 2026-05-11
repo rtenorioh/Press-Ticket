@@ -881,6 +881,11 @@ const messages = {
         whatsappSelect: {
           inputLabel: "Canales",
         },
+        systemUpdate: {
+          updateViaGit: "Actualizar vía Git",
+          updateUnavailableWindows: "Actualización disponible solo en servidores Linux (VPS). Entorno actual: Windows.",
+          warningWindowsEnvironment: "La actualización automática solo está disponible en entornos Linux (VPS).",
+        },
         backendErrors: {
           ERR_CREATING_MESSAGE: "Error al crear el mensaje en la base de datos.",
           ERR_CREATING_TICKET: "Error al crear el ticket en la base de datos.",
@@ -918,4 +923,4 @@ const messages = {
     },
   };
   
-  export { messages };  
+  export { messages };

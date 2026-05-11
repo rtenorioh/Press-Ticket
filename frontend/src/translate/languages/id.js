@@ -102,6 +102,11 @@ const messages = {
                     "deleteMessage": "Apakah Anda yakin ingin menghapus kontak ini? Semua tiket terkait akan hilang."
                 }
             },
+            systemUpdate: {
+                updateViaGit: "Perbarui via Git",
+                updateUnavailableWindows: "Pembaruan hanya tersedia di server Linux (VPS). Lingkungan saat ini: Windows.",
+                warningWindowsEnvironment: "Pembaruan otomatis hanya tersedia di lingkungan Linux (VPS). Untuk memperbarui secara lokal, jalankan skrip UPDATE.sh secara manual.",
+            },
             backendErrors: {
                 ERR_CONNECTION_CREATION_COUNT: "Batas koneksi tercapai. Hubungi dukungan untuk perubahan.",
                 ERR_CREATING_MESSAGE: "Kesalahan saat membuat pesan dalam basis data.",

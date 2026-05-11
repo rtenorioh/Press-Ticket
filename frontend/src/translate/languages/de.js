@@ -850,6 +850,11 @@ const messages = {
       whatsappSelect: {
         inputLabel: "Kanäle",
       },
+      systemUpdate: {
+        updateViaGit: "Über Git aktualisieren",
+        updateUnavailableWindows: "Update nur auf Linux-Servern (VPS) verfügbar. Aktuelle Umgebung: Windows.",
+        warningWindowsEnvironment: "Das automatische Update ist nur in Linux-Umgebungen (VPS) verfügbar. Um lokal zu aktualisieren, führen Sie das Skript UPDATE.sh manuell aus.",
+      },
       backendErrors: {
         ERR_CREATING_MESSAGE: "Fehler beim Erstellen der Nachricht in der Datenbank.",
         ERR_CREATING_TICKET: "Fehler beim Erstellen des Tickets in der Datenbank.",

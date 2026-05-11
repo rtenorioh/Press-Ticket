@@ -101,6 +101,11 @@ const messages = {
                     importTitle: "استيراد..."
                 }
             },
+            systemUpdate: {
+                updateViaGit: "التحديث عبر Git",
+                updateUnavailableWindows: "التحديث متاح فقط على خوادم Linux (VPS). البيئة الحالية: Windows.",
+                warningWindowsEnvironment: "التحديث التلقائي متاح فقط في بيئات Linux (VPS). للتحديث محليًا، قم بتشغيل سكريبت UPDATE.sh يدويًا.",
+            },
             backendErrors: {
                 ERR_CONNECTION_CREATION_COUNT: "تم الوصول إلى الحد الأقصى للاتصالات، يرجى التواصل مع الدعم لتعديله.",
                 ERR_CREATING_MESSAGE: "خطأ في إنشاء الرسالة في قاعدة البيانات.",

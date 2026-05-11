@@ -191,6 +191,11 @@ const messages = {
                     noTags: "На данный момент тегов нет!",
                 },
             },
+            systemUpdate: {
+                updateViaGit: "Обновить через Git",
+                updateUnavailableWindows: "Обновление доступно только на серверах Linux (VPS). Текущая среда: Windows.",
+                warningWindowsEnvironment: "Автоматическое обновление доступно только в средах Linux (VPS). Для локального обновления выполните скрипт UPDATE.sh вручную.",
+            },
             backendErrors: {
                 ERR_CONNECTION_CREATION_COUNT: "Достигнут лимит подключений. Обратитесь в поддержку для изменений.",
                 ERR_CREATING_MESSAGE: "Ошибка при создании сообщения в базе данных.",

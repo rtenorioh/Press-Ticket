@@ -43,6 +43,7 @@ import fileManagerRoutes from "./fileManagerRoutes";
 import whatsappFeaturesRoutes from "./whatsappFeaturesRoutes";
 import whatsappLabelRoutes from "./whatsappLabelRoutes";
 import emailRoutes from "./emailRoutes";
+import versionCheckRoutes from "./versionCheckRoutes";
 
 const routes = Router();
 
@@ -89,5 +90,6 @@ routes.use(fileManagerRoutes);
 routes.use(whatsappFeaturesRoutes);
 routes.use(whatsappLabelRoutes);
 routes.use(emailRoutes);
+routes.use(versionCheckRoutes);
 
 export default routes;

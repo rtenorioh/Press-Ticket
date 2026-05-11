@@ -2300,7 +2300,10 @@ const messages = {
         updateStarted: "Processo de atualização iniciado!",
         restoreStarted: "Processo de restauração iniciado!",
         updateCompleted: "Atualização concluída com sucesso!",
-        updateError: "Ocorreu um erro durante a atualização."
+        updateError: "Ocorreu um erro durante a atualização.",
+        updateViaGit: "Atualizar via Git",
+        updateUnavailableWindows: "Atualização disponível apenas em servidores Linux (VPS). Ambiente atual: Windows.",
+        warningWindowsEnvironment: "A atualização automática está disponível apenas em ambientes Linux (VPS)."
       },
       versionCheck: {
         title: "Verificação de Versão",

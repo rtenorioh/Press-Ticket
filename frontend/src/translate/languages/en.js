@@ -902,6 +902,11 @@ const messages = {
       whatsappSelect: {
         inputLabel: "Channels",
       },
+      systemUpdate: {
+        updateViaGit: "Update via Git",
+        updateUnavailableWindows: "Update only available on Linux servers (VPS). Current environment: Windows.",
+        warningWindowsEnvironment: "Automatic update is only available on Linux (VPS) environments.",
+      },
       backendErrors: {
         ERR_CREATING_MESSAGE: "Error creating message in the database.",
         ERR_CREATING_TICKET: "Error creating ticket in the database.",

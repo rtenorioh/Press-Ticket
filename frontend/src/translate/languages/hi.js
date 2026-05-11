@@ -88,6 +88,11 @@ const messages = {
                 },
                 success: "संपर्क सफलतापूर्वक सहेजा गया।"
             },
+            systemUpdate: {
+                updateViaGit: "Git के माध्यम से अपडेट करें",
+                updateUnavailableWindows: "अपडेट केवल Linux सर्वर (VPS) पर उपलब्ध है। वर्तमान वातावरण: Windows।",
+                warningWindowsEnvironment: "स्वचालित अपडेट केवल Linux (VPS) वातावरण में उपलब्ध है। स्थानीय रूप से अपडेट करने के लिए, UPDATE.sh स्क्रिप्ट को मैन्युअल रूप से चलाएं।",
+            },
             backendErrors: {
                 ERR_CONNECTION_CREATION_COUNT: "अधिकतम कनेक्शन सीमा तक पहुँचा गया। कृपया संशोधन के लिए समर्थन से संपर्क करें।",
                 ERR_CREATING_MESSAGE: "डेटाबेस में संदेश बनाते समय त्रुटि।",

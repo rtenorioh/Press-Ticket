@@ -102,6 +102,11 @@ const messages = {
                     "deleteMessage": "Sei sicuro di voler eliminare questo contatto? Tutti i ticket correlati saranno persi."
                 }
             },
+            systemUpdate: {
+                updateViaGit: "Aggiorna tramite Git",
+                updateUnavailableWindows: "Aggiornamento disponibile solo su server Linux (VPS). Ambiente attuale: Windows.",
+                warningWindowsEnvironment: "L'aggiornamento automatico è disponibile solo in ambienti Linux (VPS). Per aggiornare localmente, eseguire manualmente lo script UPDATE.sh.",
+            },
             backendErrors: {
                 ERR_CONNECTION_CREATION_COUNT: "Limite di connessioni raggiunto. Contatta il supporto per modifiche.",
                 ERR_CREATING_MESSAGE: "Errore durante la creazione del messaggio nel database.",
