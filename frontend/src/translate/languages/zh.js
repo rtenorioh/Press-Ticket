@@ -194,7 +194,10 @@ const messages = {
             systemUpdate: {
                 updateViaGit: "通过 Git 更新",
                 updateUnavailableWindows: "更新仅在 Linux 服务器 (VPS) 上可用。当前环境：Windows。",
-                warningWindowsEnvironment: "自动更新仅在 Linux (VPS) 环境中可用。若要本地更新，请手动运行 UPDATE.sh 脚本。",
+                warningWindowsEnvironment: "自动更新仅在 Linux (VPS) 环境中可用。若要本地更新，请运行：curl -sSL https://update.pressticket.com.br | sudo bash -s",
+                updating: "正在更新...",
+                terminalRunning: "▋ 执行中...",
+                githubApiError: "无法连接到 GitHub API。请检查服务器连接。若要增加请求限制，可在 .env 中选配 GITHUB_TOKEN。",
             },
             backendErrors: {
                 ERR_CONNECTION_CREATION_COUNT: "已达到连接限制。请联系支持更改。",

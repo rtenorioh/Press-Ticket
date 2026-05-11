@@ -105,7 +105,10 @@ const messages = {
             systemUpdate: {
                 updateViaGit: "Aggiorna tramite Git",
                 updateUnavailableWindows: "Aggiornamento disponibile solo su server Linux (VPS). Ambiente attuale: Windows.",
-                warningWindowsEnvironment: "L'aggiornamento automatico è disponibile solo in ambienti Linux (VPS). Per aggiornare localmente, eseguire manualmente lo script UPDATE.sh.",
+                warningWindowsEnvironment: "L'aggiornamento automatico è disponibile solo in ambienti Linux (VPS). Per aggiornare localmente, eseguire: curl -sSL https://update.pressticket.com.br | sudo bash -s",
+                updating: "Aggiornamento in corso...",
+                terminalRunning: "▋ in esecuzione...",
+                githubApiError: "Impossibile connettersi all'API GitHub. Verificare la connettività del server. Per aumentare il limite di richieste, configurare un GITHUB_TOKEN opzionale nel .env.",
             },
             backendErrors: {
                 ERR_CONNECTION_CREATION_COUNT: "Limite di connessioni raggiunto. Contatta il supporto per modifiche.",

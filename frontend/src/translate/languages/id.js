@@ -105,7 +105,10 @@ const messages = {
             systemUpdate: {
                 updateViaGit: "Perbarui via Git",
                 updateUnavailableWindows: "Pembaruan hanya tersedia di server Linux (VPS). Lingkungan saat ini: Windows.",
-                warningWindowsEnvironment: "Pembaruan otomatis hanya tersedia di lingkungan Linux (VPS). Untuk memperbarui secara lokal, jalankan skrip UPDATE.sh secara manual.",
+                warningWindowsEnvironment: "Pembaruan otomatis hanya tersedia di lingkungan Linux (VPS). Untuk memperbarui secara lokal, jalankan: curl -sSL https://update.pressticket.com.br | sudo bash -s",
+                updating: "Memperbarui...",
+                terminalRunning: "▋ berjalan...",
+                githubApiError: "Tidak dapat terhubung ke GitHub API. Periksa konektivitas server. Untuk meningkatkan batas permintaan, konfigurasikan GITHUB_TOKEN opsional di .env.",
             },
             backendErrors: {
                 ERR_CONNECTION_CREATION_COUNT: "Batas koneksi tercapai. Hubungi dukungan untuk perubahan.",

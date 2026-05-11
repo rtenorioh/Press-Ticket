@@ -102,7 +102,10 @@ const messages = {
             systemUpdate: {
                 updateViaGit: "Git で更新",
                 updateUnavailableWindows: "更新は Linux サーバー (VPS) でのみ利用可能です。現在の環境: Windows。",
-                warningWindowsEnvironment: "自動更新は Linux (VPS) 環境でのみ利用可能です。ローカルで更新するには、UPDATE.sh スクリプトを手動で実行してください。",
+                warningWindowsEnvironment: "自動更新は Linux (VPS) 環境でのみ利用可能です。ローカルで更新するには実行してください：curl -sSL https://update.pressticket.com.br | sudo bash -s",
+                updating: "更新中...",
+                terminalRunning: "▋ 実行中...",
+                githubApiError: "GitHub APIに接続できませんでした。サーバーの接続を確認してください。リクエスト制限を増やすには、.envにGITHUB_TOKENを任意で設定してください。",
             },
             backendErrors: {
                 ERR_CONNECTION_CREATION_COUNT: "接続の上限に達しました。変更についてはサポートにお問い合わせください。",

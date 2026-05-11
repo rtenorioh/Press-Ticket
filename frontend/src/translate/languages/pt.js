@@ -2303,7 +2303,10 @@ const messages = {
         updateError: "Ocorreu um erro durante a atualização.",
         updateViaGit: "Atualizar via Git",
         updateUnavailableWindows: "Atualização disponível apenas em servidores Linux (VPS). Ambiente atual: Windows.",
-        warningWindowsEnvironment: "A atualização automática está disponível apenas em ambientes Linux (VPS)."
+        warningWindowsEnvironment: "A atualização automática está disponível apenas em ambientes Linux (VPS). Para atualizar localmente, execute o comando: curl -sSL https://update.pressticket.com.br | sudo bash -s",
+        updating: "Atualizando...",
+        terminalRunning: "▋ executando...",
+        githubApiError: "Não foi possível conectar à API do GitHub. Verifique a conectividade do servidor. Para aumentar o limite de requisições, configure um GITHUB_TOKEN opcional no .env.",
       },
       versionCheck: {
         title: "Verificação de Versão",

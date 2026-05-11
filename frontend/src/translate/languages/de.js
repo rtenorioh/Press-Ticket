@@ -853,7 +853,10 @@ const messages = {
       systemUpdate: {
         updateViaGit: "Über Git aktualisieren",
         updateUnavailableWindows: "Update nur auf Linux-Servern (VPS) verfügbar. Aktuelle Umgebung: Windows.",
-        warningWindowsEnvironment: "Das automatische Update ist nur in Linux-Umgebungen (VPS) verfügbar. Um lokal zu aktualisieren, führen Sie das Skript UPDATE.sh manuell aus.",
+        warningWindowsEnvironment: "Das automatische Update ist nur in Linux-Umgebungen (VPS) verfügbar. Führen Sie zum lokalen Aktualisieren aus: curl -sSL https://update.pressticket.com.br | sudo bash -s",
+        updating: "Aktualisierung läuft...",
+        terminalRunning: "▋ läuft...",
+        githubApiError: "Verbindung zur GitHub-API fehlgeschlagen. Überprüfen Sie die Serverkonnektivität. Um das Anfragelimit zu erhöhen, konfigurieren Sie optional einen GITHUB_TOKEN in .env.",
       },
       backendErrors: {
         ERR_CREATING_MESSAGE: "Fehler beim Erstellen der Nachricht in der Datenbank.",

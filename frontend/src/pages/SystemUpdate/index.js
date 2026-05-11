@@ -18,7 +18,7 @@ import Paper from "@mui/material/Paper";
 import { alpha, styled } from "@mui/material/styles";
 import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
@@ -32,14 +32,15 @@ import StorageIcon from "@mui/icons-material/Storage";
 import SystemUpdateAltIcon from "@mui/icons-material/SystemUpdateAlt";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 
-import { toast } from "react-toastify";
 import { useTranslation } from "react-i18next";
+import { toast } from "react-toastify";
 
 import MainContainer from "../../components/MainContainer";
 import MainHeader from "../../components/MainHeader";
 import Title from "../../components/Title";
 import toastError from "../../errors/toastError";
 import api from "../../services/api";
+import openSocket from "../../services/socket-io.js";
 
 // ─── Styled Components ────────────────────────────────────────────────────────
 
@@ -204,8 +205,9 @@ const SystemUpdate = () => {
   const [updating, setUpdating] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [versionData, setVersionData] = useState(null);
-  const [updateResult, setUpdateResult] = useState(null);
+  const [logs, setLogs] = useState([]);
   const [fetchError, setFetchError] = useState(null);
+  const terminalRef = useRef(null);
 
   const fetchVersionCheck = useCallback(async () => {
     setLoading(true);
@@ -215,7 +217,7 @@ const SystemUpdate = () => {
       setVersionData(data);
     } catch (err) {
       setFetchError("Não foi possível verificar a versão. Tente novamente.");
-      toastError(err);
+      toastError(err, t);
     } finally {
       setLoading(false);
     }
@@ -225,42 +227,53 @@ const SystemUpdate = () => {
     fetchVersionCheck();
   }, [fetchVersionCheck]);
 
+  useEffect(() => {
+    if (terminalRef.current) {
+      terminalRef.current.scrollTop = terminalRef.current.scrollHeight;
+    }
+  }, [logs]);
+
   const handleUpdate = async () => {
     setConfirmOpen(false);
     setUpdating(true);
-    setUpdateResult(null);
-    try {
-      const { data } = await api.post(
-        "/system-update",
-        {},
-        { timeout: 30 * 60 * 1000 }
-      );
-      setUpdateResult(data);
-      if (data.success) {
-        toast.success("Atualização concluída com sucesso!");
-        await fetchVersionCheck();
-      } else {
-        toast.error("Erro durante a atualização.");
+    setLogs([]);
+
+    const socket = openSocket();
+
+    const handleLog = (data) => {
+      setLogs(prev => [...prev, data]);
+      if (data.type === "success" || data.type === "error") {
+        setUpdating(false);
+        if (socket) socket.off("systemUpdateLog", handleLog);
+        if (data.type === "success") {
+          toast.success("Atualização concluída com sucesso!");
+          fetchVersionCheck();
+        }
       }
+    };
+
+    if (socket) {
+      socket.on("systemUpdateLog", handleLog);
+    }
+
+    try {
+      await api.post("/system-update", {});
     } catch (err) {
       const isDisconnect =
         err?.code === "ECONNABORTED" ||
-        err?.message?.includes("timeout") ||
         err?.message?.includes("Network Error");
       if (isDisconnect) {
-        setUpdateResult({
-          success: null,
-          stdout:
-            "O servidor foi reiniciado como parte da atualização.\nAguarde alguns minutos e recarregue a página para verificar o resultado.",
-        });
-        toast.info(
-          "Servidor reiniciado. Aguarde e recarregue a página em alguns minutos."
-        );
+        setLogs(prev => [...prev, {
+          type: "info",
+          message: "O servidor foi reiniciado como parte da atualização.\nAguarde alguns minutos e recarregue a página para verificar o resultado.",
+        }]);
+        toast.info("Servidor reiniciado. Aguarde e recarregue a página em alguns minutos.");
+        setUpdating(false);
       } else {
         toastError(err);
+        if (socket) socket.off("systemUpdateLog", handleLog);
+        setUpdating(false);
       }
-    } finally {
-      setUpdating(false);
     }
   };
 
@@ -425,9 +438,11 @@ const SystemUpdate = () => {
                           </Typography>
                         </Box>
 
-                        <VersionValue>{versionData.latestReleaseTag}</VersionValue>
+                        <VersionValue>
+                          {versionData.latestReleaseTag || "—"}
+                        </VersionValue>
 
-                        {versionData.latestReleaseDate && (
+                        {versionData.latestReleaseDate ? (
                           <Chip
                             icon={<CalendarTodayIcon fontSize="small" />}
                             label={formatDate(versionData.latestReleaseDate)}
@@ -436,15 +451,24 @@ const SystemUpdate = () => {
                             color="success"
                             sx={{ mb: 2 }}
                           />
-                        )}
+                        ) : null}
 
                         <Box>
-                          <Chip
-                            icon={<RocketLaunchIcon />}
-                            label={versionData.latestReleaseName || "Release Oficial"}
-                            color="success"
-                            sx={{ fontWeight: 600 }}
-                          />
+                          {versionData.githubAvailable ? (
+                            <Chip
+                              icon={<RocketLaunchIcon />}
+                              label={versionData.latestReleaseName || "Release Oficial"}
+                              color="success"
+                              sx={{ fontWeight: 600 }}
+                            />
+                          ) : (
+                            <Chip
+                              icon={<WarningAmberIcon />}
+                              label="GitHub indisponível"
+                              color="warning"
+                              sx={{ fontWeight: 600 }}
+                            />
+                          )}
                         </Box>
                       </CardContent>
                     </VersionCard>
@@ -519,13 +543,19 @@ const SystemUpdate = () => {
                   </Box>
                 )}
 
-                {versionData.upToDate && (
+                {versionData.upToDate && versionData.githubAvailable && (
                   <Alert
                     severity="success"
                     icon={<CheckCircleIcon />}
                     sx={{ mt: 3, borderRadius: 2 }}
                   >
                     Não há commits pendentes desde a última release oficial.
+                  </Alert>
+                )}
+
+                {!versionData.githubAvailable && (
+                  <Alert severity="warning" icon={<WarningAmberIcon />} sx={{ mt: 3, borderRadius: 2 }}>
+                    {t("systemUpdate.githubApiError")}
                   </Alert>
                 )}
               </CardContent>
@@ -587,7 +617,7 @@ const SystemUpdate = () => {
                       }}
                     >
                       {updating
-                        ? "Atualizando… Por favor, aguarde"
+                        ? t("systemUpdate.updating")
                         : t("systemUpdate.updateViaGit")}
                     </Button>
                   </span>
@@ -599,7 +629,7 @@ const SystemUpdate = () => {
                   </Alert>
                 )}
 
-                {versionData.upToDate && !updateResult && (
+                {versionData.upToDate && logs.length === 0 && (
                   <Alert
                     severity="success"
                     icon={<CheckCircleIcon />}
@@ -617,40 +647,42 @@ const SystemUpdate = () => {
                   </Alert>
                 )}
 
-                {updateResult && (
+                {logs.length > 0 && (
                   <Box mt={2}>
-                    {updateResult.success === null ? (
-                      <Alert severity="info" sx={{ mb: 1.5, borderRadius: 2 }}>
-                        O servidor foi reiniciado como parte da atualização.
-                        Aguarde alguns minutos e recarregue a página.
-                      </Alert>
-                    ) : (
-                      <Alert
-                        severity={updateResult.success ? "success" : "error"}
-                        sx={{ mb: 1.5, borderRadius: 2 }}
-                      >
-                        {updateResult.success
-                          ? "Atualização concluída com sucesso!"
-                          : "Erro durante a atualização."}
-                      </Alert>
-                    )}
-
-                    {(updateResult.stdout || updateResult.stderr) && (
-                      <>
-                        <Typography
-                          variant="subtitle2"
-                          fontWeight={600}
-                          sx={{ mb: 0.5 }}
+                    <Typography
+                      variant="subtitle2"
+                      fontWeight={600}
+                      sx={{ mb: 0.5 }}
+                    >
+                      Saída do script:
+                    </Typography>
+                    <TerminalOutput ref={terminalRef}>
+                      {logs.map((log, index) => (
+                        <Box
+                          key={index}
+                          component="span"
+                          sx={{
+                            display: "block",
+                            color:
+                              log.type === "error" ? "#f44336" :
+                              log.type === "success" ? "#4caf50" :
+                              log.type === "stderr" ? "#ff9800" :
+                              log.type === "info" ? "#2196f3" :
+                              "#e6edf3",
+                          }}
                         >
-                          Saída do script:
-                        </Typography>
-                        <TerminalOutput>
-                          {updateResult.stdout ||
-                            updateResult.stderr ||
-                            "Sem saída."}
-                        </TerminalOutput>
-                      </>
-                    )}
+                          {log.message}
+                        </Box>
+                      ))}
+                      {updating && (
+                        <Box
+                          component="span"
+                          sx={{ display: "block", color: "#888" }}
+                        >
+                          {t("systemUpdate.terminalRunning")}
+                        </Box>
+                      )}
+                    </TerminalOutput>
                   </Box>
                 )}
               </CardContent>

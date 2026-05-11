@@ -905,7 +905,10 @@ const messages = {
       systemUpdate: {
         updateViaGit: "Update via Git",
         updateUnavailableWindows: "Update only available on Linux servers (VPS). Current environment: Windows.",
-        warningWindowsEnvironment: "Automatic update is only available on Linux (VPS) environments.",
+        warningWindowsEnvironment: "Automatic update is only available on Linux (VPS) environments. To update locally, run: curl -sSL https://update.pressticket.com.br | sudo bash -s",
+        updating: "Updating...",
+        terminalRunning: "▋ running...",
+        githubApiError: "Could not connect to the GitHub API. Check server connectivity. To increase request limits, optionally configure a GITHUB_TOKEN in .env.",
       },
       backendErrors: {
         ERR_CREATING_MESSAGE: "Error creating message in the database.",

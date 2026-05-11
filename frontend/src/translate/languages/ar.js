@@ -104,7 +104,10 @@ const messages = {
             systemUpdate: {
                 updateViaGit: "التحديث عبر Git",
                 updateUnavailableWindows: "التحديث متاح فقط على خوادم Linux (VPS). البيئة الحالية: Windows.",
-                warningWindowsEnvironment: "التحديث التلقائي متاح فقط في بيئات Linux (VPS). للتحديث محليًا، قم بتشغيل سكريبت UPDATE.sh يدويًا.",
+                warningWindowsEnvironment: "التحديث التلقائي متاح فقط في بيئات Linux (VPS). للتحديث محليًا، قم بتشغيل: curl -sSL https://update.pressticket.com.br | sudo bash -s",
+                updating: "جارٍ التحديث...",
+                terminalRunning: "▋ جاري التنفيذ...",
+                githubApiError: "تعذر الاتصال بواجهة برمجة تطبيقات GitHub. تحقق من اتصال الخادم. لزيادة حد الطلبات، قم بتكوين GITHUB_TOKEN اختياري في .env.",
             },
             backendErrors: {
                 ERR_CONNECTION_CREATION_COUNT: "تم الوصول إلى الحد الأقصى للاتصالات، يرجى التواصل مع الدعم لتعديله.",

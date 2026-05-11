@@ -91,7 +91,10 @@ const messages = {
             systemUpdate: {
                 updateViaGit: "Git के माध्यम से अपडेट करें",
                 updateUnavailableWindows: "अपडेट केवल Linux सर्वर (VPS) पर उपलब्ध है। वर्तमान वातावरण: Windows।",
-                warningWindowsEnvironment: "स्वचालित अपडेट केवल Linux (VPS) वातावरण में उपलब्ध है। स्थानीय रूप से अपडेट करने के लिए, UPDATE.sh स्क्रिप्ट को मैन्युअल रूप से चलाएं।",
+                warningWindowsEnvironment: "स्वचालित अपडेट केवल Linux (VPS) वातावरण में उपलब्ध है। स्थानीय रूप से अपडेट करने के लिए, चलाएं: curl -sSL https://update.pressticket.com.br | sudo bash -s",
+                updating: "अपडेट हो रहा है...",
+                terminalRunning: "▋ चल रहा है...",
+                githubApiError: "GitHub API से कनेक्ट नहीं हो सका। सर्वर कनेक्टिविटी जांचें। अनुरोध सीमा बढ़ाने के लिए, .env में वैकल्पिक GITHUB_TOKEN कॉन्फ़िगर करें।",
             },
             backendErrors: {
                 ERR_CONNECTION_CREATION_COUNT: "अधिकतम कनेक्शन सीमा तक पहुँचा गया। कृपया संशोधन के लिए समर्थन से संपर्क करें।",

@@ -194,7 +194,10 @@ const messages = {
             systemUpdate: {
                 updateViaGit: "Обновить через Git",
                 updateUnavailableWindows: "Обновление доступно только на серверах Linux (VPS). Текущая среда: Windows.",
-                warningWindowsEnvironment: "Автоматическое обновление доступно только в средах Linux (VPS). Для локального обновления выполните скрипт UPDATE.sh вручную.",
+                warningWindowsEnvironment: "Автоматическое обновление доступно только в средах Linux (VPS). Для локального обновления выполните: curl -sSL https://update.pressticket.com.br | sudo bash -s",
+                updating: "Обновление...",
+                terminalRunning: "▋ выполняется...",
+                githubApiError: "Не удалось подключиться к API GitHub. Проверьте подключение сервера. Для увеличения лимита запросов опционально настройте GITHUB_TOKEN в .env.",
             },
             backendErrors: {
                 ERR_CONNECTION_CREATION_COUNT: "Достигнут лимит подключений. Обратитесь в поддержку для изменений.",
