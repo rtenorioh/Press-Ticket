@@ -52,9 +52,6 @@ export const checkVersion = async (_req: Request, res: Response): Promise<Respon
   logger.info(`[version-check] SHA local: ${localGitSha ?? "indisponível"}`);
 
   const headers = buildGithubHeaders();
-  // [DIAG] remova estas 2 linhas após confirmar que funciona
-  console.log("[version-check] GITHUB_TOKEN presente:", !!process.env.GITHUB_TOKEN, "| Auth header presente:", !!headers.Authorization);
-  console.log("[version-check] Headers enviados:", { ...headers, Authorization: headers.Authorization ? "Bearer ***" : undefined });
 
   // 2. Última release do GitHub
   let latestReleaseTag: string | null = null;
@@ -73,9 +70,6 @@ export const checkVersion = async (_req: Request, res: Response): Promise<Respon
     logger.info(`[version-check] Release mais recente: ${latestReleaseTag}`);
   } catch (err: any) {
     const status = err?.response?.status;
-    const body = JSON.stringify(err?.response?.data)?.substring(0, 300);
-    // [DIAG] remova esta linha após confirmar que funciona
-    console.error("[version-check] GitHub releases falhou — status:", status, "| body:", body, "| mensagem:", err.message);
     logger.error(`[version-check] Falha ao obter release do GitHub (HTTP ${status ?? "sem resposta"}): ${err.message}`);
   }
 
