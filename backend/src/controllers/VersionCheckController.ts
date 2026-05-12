@@ -168,17 +168,40 @@ export const runSystemUpdate = async (req: Request, res: Response): Promise<Resp
           return;
         }
 
+        let scriptContent: string;
         try {
-          fs.chmodSync(scriptPath, "755");
+          scriptContent = fs.readFileSync(scriptPath, "utf-8");
         } catch {
-          io.emit("systemUpdateLog", {
-            type: "error",
-            message: "❌ Falha ao definir permissões do script.",
-          });
+          io.emit("systemUpdateLog", { type: "error", message: "❌ Falha ao ler o script baixado." });
           return;
         }
 
-        io.emit("systemUpdateLog", { type: "stdout", message: "Script baixado. Iniciando...\n" });
+        // Patch 1: redireciona /dev/tty → /dev/stdin para que stdin.write() funcione
+        scriptContent = scriptContent.replace(/\/dev\/tty/g, "/dev/stdin");
+
+        // Patch 2: corrige bug no PM2 — UPDATE.sh recalcula SCRIPT_DIR com /.., quebrando o path do .env
+        scriptContent = scriptContent.replace(
+          /SCRIPT_DIR=\$\(cd "\$\(dirname "\$0"\)\/\.\." && pwd\)/g,
+          'SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)'
+        );
+
+        // Patch 3: garante remoção de NODE_ENV do .env do frontend antes do build
+        // (Vite 6 não suporta NODE_ENV em .env — este patch reforça o comportamento
+        //  mesmo em versões do UPDATE.sh que ainda injetam NODE_ENV=production)
+        scriptContent = scriptContent.replace(
+          /(sudo rm -rf build 2>&1 \| tee -a "\$LOG_FILE"\n)npm run build/,
+          "$1if grep -q '^NODE_ENV=' .env 2>/dev/null; then sed -i '/^NODE_ENV=/d' .env; fi\nnpm run build"
+        );
+
+        try {
+          fs.writeFileSync(scriptPath, scriptContent);
+          fs.chmodSync(scriptPath, "755");
+        } catch {
+          io.emit("systemUpdateLog", { type: "error", message: "❌ Falha ao preparar o script." });
+          return;
+        }
+
+        io.emit("systemUpdateLog", { type: "stdout", message: "📝 Script preparado. Iniciando...\n" });
 
         // Nota: o UPDATE.sh usa /tmp/backend/ internamente para verificar a versão atual antes de
         // sobrescrever os arquivos. Isso é comportamento esperado do script, não erro do controller.

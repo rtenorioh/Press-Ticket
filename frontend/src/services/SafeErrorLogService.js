@@ -1,16 +1,7 @@
 import api from "./api";
+import ErrorLogService from "./ErrorLogService";
 
-let realService = null;
-
-try {
-  import('./ErrorLogService').then(module => {
-    realService = module.default;
-  }).catch(error => {
-    console.warn('Não foi possível carregar ErrorLogService:', error);
-  });
-} catch (error) {
-  console.warn('Erro ao importar ErrorLogService:', error);
-}
+const realService = ErrorLogService;
 
 const isMethodAvailable = (methodName) => {
   return realService && typeof realService[methodName] === 'function';

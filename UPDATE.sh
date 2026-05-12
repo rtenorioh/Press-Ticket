@@ -762,20 +762,12 @@ ENV_FILE=".env"
 
 # Verifica se o arquivo .env existe
 if [ -f "$ENV_FILE" ]; then
-# Verifica se NODE_ENV=production existe no arquivo .env
-    if grep -q "^NODE_ENV=production" "$ENV_FILE"; then
-        echo "A variável NODE_ENV já está configurada como production no arquivo .env." | tee -a "$LOG_FILE"
+# Verifica se NODE_ENV está presente no .env do frontend (incompatível com Vite 6)
+    if grep -q "^NODE_ENV=" "$ENV_FILE"; then
+        sed -i '/^NODE_ENV=/d' "$ENV_FILE"
+        echo "NODE_ENV removido do .env do frontend (Vite 6 não suporta esta variável em .env)." | tee -a "$LOG_FILE"
     else
-        # Verifica se existe NODE_ENV vazio ou se não existe
-        if grep -q "^NODE_ENV=" "$ENV_FILE"; then
-            # Substitui a linha existente
-            sed -i 's/^NODE_ENV=.*/NODE_ENV=production/' "$ENV_FILE"
-            echo "A variável NODE_ENV foi atualizada para production no arquivo .env." | tee -a "$LOG_FILE"
-        else
-            # Adiciona NODE_ENV=production no início do arquivo
-            sed -i '1iNODE_ENV=production' "$ENV_FILE"
-            echo "A variável NODE_ENV=production foi adicionada no início do arquivo .env." | tee -a "$LOG_FILE"
-        fi
+        echo "NODE_ENV não encontrado no .env do frontend. Prosseguindo..." | tee -a "$LOG_FILE"
     fi
     
     # Verifica e altera SERVER_PORT para PORT, se necessário
