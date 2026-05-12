@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { exec, spawn } from "child_process";
 import { promisify } from "util";
+import fs from "fs";
 import os from "os";
 import path from "path";
 import axios from "axios";
@@ -133,58 +134,74 @@ export const runSystemUpdate = async (req: Request, res: Response): Promise<Resp
     const backendPath = path.join(PROJECT_ROOT, "backend");
     const frontendPath = path.join(PROJECT_ROOT, "frontend");
 
-    // Respostas para perguntas interativas do script (que lê de /dev/tty via pseudo-TTY):
-    // 1. Atualizar pacotes do SO?
-    // 2. Atualizar Node.js para 22.x? — sempre "n" (hardcoded)
-    // 3. Atualizar/Instalar Chrome?
-    // A senha sudo é passada via echo pipe diretamente para sudo -S
-    const stdinAnswers = [
+    // senha sudo para `sudo -S` + respostas para os prompts interativos do script
+    const stdinInput = [
+      sudoPassword,
       updateOS ? "s" : "n",
-      "n",
+      "n",                       // Node.js: nunca atualiza (hardcoded)
       updateBrowser ? "s" : "n",
     ].join("\n") + "\n";
 
-    setImmediate(async () => {
-      try {
-        const tmpScript = `/tmp/pt-update-${Date.now()}.sh`;
+    setImmediate(() => {
+      // script salvo na raiz do projeto: dirname "$0" retornará PROJECT_ROOT,
+      // permitindo que o UPDATE.sh derive todos os caminhos internos corretamente
+      const scriptPath = path.join(PROJECT_ROOT, `pressticket-update-${Date.now()}.sh`);
 
-        io.emit("systemUpdateLog", {
-          type: "stdout",
-          message: `📁 Diretório do projeto: ${PROJECT_ROOT}\n`,
-        });
-        io.emit("systemUpdateLog", { type: "stdout", message: "Baixando script de atualização...\n" });
-        await execAsync(`curl -sSL https://update.pressticket.com.br -o ${tmpScript} && chmod 700 ${tmpScript}`);
+      io.emit("systemUpdateLog", {
+        type: "stdout",
+        message: `📁 Diretório detectado: ${PROJECT_ROOT} (${projectName})\n`,
+      });
+      io.emit("systemUpdateLog", { type: "stdout", message: "Baixando script de atualização...\n" });
+
+      const download = spawn(
+        "curl",
+        ["-sSL", "-o", scriptPath, "https://update.pressticket.com.br"],
+        { shell: false, cwd: PROJECT_ROOT }
+      );
+
+      download.on("close", (dlCode: number | null) => {
+        if (dlCode !== 0) {
+          io.emit("systemUpdateLog", {
+            type: "error",
+            message: "❌ Falha ao baixar o script de atualização.",
+          });
+          return;
+        }
+
+        try {
+          fs.chmodSync(scriptPath, "755");
+        } catch {
+          io.emit("systemUpdateLog", {
+            type: "error",
+            message: "❌ Falha ao definir permissões do script.",
+          });
+          return;
+        }
+
         io.emit("systemUpdateLog", { type: "stdout", message: "Script baixado. Iniciando...\n" });
 
-        // 'script -q -c' aloca um pseudo-TTY para que o script possa abrir /dev/tty.
-        // A senha sudo é injetada via echo pipe; as respostas interativas chegam via stdin do 'script',
-        // que as encaminha ao PTY master, tornando-as visíveis ao script como leituras de /dev/tty.
         // Nota: o UPDATE.sh usa /tmp/backend/ internamente para verificar a versão atual antes de
         // sobrescrever os arquivos. Isso é comportamento esperado do script, não erro do controller.
         let hasError = false;
 
-        const child = spawn(
-          "script",
-          ["-q", "-c", `echo '${sudoPassword}' | sudo -S bash ${tmpScript}`, "/dev/null"],
-          {
-            shell: false,
-            cwd: PROJECT_ROOT,
-            env: {
-              ...process.env,
-              DEBIAN_FRONTEND: "noninteractive",
-              CI: "true",
-              PROJECT_NAME: projectName,
-              APP_NAME: projectName,
-              BACKEND_PATH: backendPath,
-              FRONTEND_PATH: frontendPath,
-            },
-          }
-        );
+        const update = spawn("sudo", ["-S", "bash", scriptPath], {
+          shell: false,
+          cwd: PROJECT_ROOT,
+          env: {
+            ...process.env,
+            DEBIAN_FRONTEND: "noninteractive",
+            CI: "true",
+            PROJECT_NAME: projectName,
+            APP_NAME: projectName,
+            BACKEND_PATH: backendPath,
+            FRONTEND_PATH: frontendPath,
+          },
+        });
 
-        child.stdin.write(stdinAnswers);
-        child.stdin.end();
+        update.stdin.write(stdinInput);
+        update.stdin.end();
 
-        child.stdout.on("data", (data: Buffer) => {
+        update.stdout.on("data", (data: Buffer) => {
           const lines = data.toString().split("\n");
           const filtered = lines.filter((line: string) => {
             const trimmed = line.trim();
@@ -197,7 +214,7 @@ export const runSystemUpdate = async (req: Request, res: Response): Promise<Resp
           }
         });
 
-        child.stderr.on("data", (data: Buffer) => {
+        update.stderr.on("data", (data: Buffer) => {
           const message = data.toString();
           const lower = message.toLowerCase();
           if (lower.includes("erro:") || lower.includes("error:")) {
@@ -217,14 +234,14 @@ export const runSystemUpdate = async (req: Request, res: Response): Promise<Resp
           }
         });
 
-        child.on("close", (code: number | null) => {
-          execAsync(`rm -f ${tmpScript}`).catch(() => {});
-          if (code === 0 && !hasError) {
+        update.on("close", (exitCode: number | null) => {
+          try { fs.unlinkSync(scriptPath); } catch {}
+          if (exitCode === 0 && !hasError) {
             io.emit("systemUpdateLog", {
               type: "success",
               message: "✅ Atualização concluída com sucesso! Reinicie a página.",
             });
-          } else if (code === 0 && hasError) {
+          } else if (exitCode === 0 && hasError) {
             io.emit("systemUpdateLog", {
               type: "warning",
               message: "⚠️ Atualização concluída com avisos. Verifique os itens marcados em laranja acima.",
@@ -232,16 +249,11 @@ export const runSystemUpdate = async (req: Request, res: Response): Promise<Resp
           } else {
             io.emit("systemUpdateLog", {
               type: "error",
-              message: `❌ Processo encerrado com código ${code}`,
+              message: `❌ Processo encerrado com código ${exitCode}`,
             });
           }
         });
-      } catch (downloadErr: any) {
-        io.emit("systemUpdateLog", {
-          type: "error",
-          message: `❌ Erro ao baixar o script: ${downloadErr.message}`,
-        });
-      }
+      });
     });
 
     return res.status(202).json({ success: true, message: "Atualização iniciada" });
