@@ -220,6 +220,7 @@ const SystemUpdate = () => {
   const [logs, setLogs] = useState([]);
   const [fetchError, setFetchError] = useState(null);
   const terminalRef = useRef(null);
+  const countdownRef = useRef(null);
 
   const fetchVersionCheck = useCallback(async () => {
     setLoading(true);
@@ -245,40 +246,43 @@ const SystemUpdate = () => {
     }
   }, [logs]);
 
-  const createCountdownToast = (seconds, initialMessage, finalMessage) => {
-    let secondsRemaining = seconds;
-    let intervalId = null;
-    let toastId = null;
-
-    const showToast = () => {
-      const render = `${initialMessage} ${secondsRemaining}s...`;
-      if (toastId) {
-        toast.update(toastId, { render, type: "info", autoClose: false, closeButton: false });
-      } else {
-        toastId = toast.info(render, { autoClose: false, closeButton: false, draggable: false, position: "top-right" });
+  useEffect(() => {
+    return () => {
+      if (countdownRef.current) {
+        clearInterval(countdownRef.current);
+        countdownRef.current = null;
       }
     };
+  }, []);
 
-    const startCountdown = () => {
-      showToast();
-      intervalId = setInterval(() => {
-        secondsRemaining -= 1;
-        showToast();
-        if (secondsRemaining <= 0) {
-          clearInterval(intervalId);
-          if (toastId) toast.dismiss(toastId);
-          toast.success(finalMessage, { position: "top-right" });
-          setTimeout(() => navigate(0), 1000);
-        }
-      }, 1000);
-    };
+  const startReconnectCountdown = () => {
+    if (countdownRef.current) return;
 
-    const cancelCountdown = () => {
-      if (intervalId) clearInterval(intervalId);
-      if (toastId) toast.dismiss(toastId);
-    };
+    let seconds = 20;
 
-    return { startCountdown, cancelCountdown };
+    const toastId = toast.loading(
+      t("systemUpdate.toastReconnecting", { seconds }),
+      { autoClose: false, closeOnClick: false, draggable: false }
+    );
+
+    countdownRef.current = setInterval(() => {
+      seconds -= 1;
+      if (seconds > 0) {
+        toast.update(toastId, {
+          render: t("systemUpdate.toastReconnecting", { seconds }),
+        });
+      } else {
+        clearInterval(countdownRef.current);
+        countdownRef.current = null;
+        toast.update(toastId, {
+          render: t("systemUpdate.toastReloading"),
+          type: "success",
+          isLoading: false,
+          autoClose: 2000,
+        });
+        setTimeout(() => window.location.reload(), 2000);
+      }
+    }, 1000);
   };
 
   const handleDialogClose = () => {
@@ -298,19 +302,23 @@ const SystemUpdate = () => {
 
     const handleLog = (data) => {
       setLogs(prev => [...prev, data]);
-      if (data.type === "success" || data.type === "error" || data.type === "warning") {
+
+      if (
+        data.type === "warning" &&
+        (data.message.includes("PM2") || data.message.includes("Reiniciando os serviços"))
+      ) {
+        // backend vai reiniciar — inicia contagem regressiva e para de escutar
         setUpdating(false);
         if (socket) socket.off("systemUpdateLog", handleLog);
-        if (data.type === "success") {
-          const countdown = createCountdownToast(
-            15,
-            t("systemUpdate.toastReconnecting"),
-            t("systemUpdate.toastReloading")
-          );
-          countdown.startCountdown();
-        } else if (data.type === "warning") {
-          toast.warning("Atualização concluída com avisos. Verifique o terminal.");
-        }
+        startReconnectCountdown();
+      } else if (data.type === "success" || data.type === "error") {
+        setUpdating(false);
+        if (socket) socket.off("systemUpdateLog", handleLog);
+      } else if (data.type === "warning") {
+        // aviso final sem reinício (ex: "concluído com avisos")
+        setUpdating(false);
+        if (socket) socket.off("systemUpdateLog", handleLog);
+        toast.warning("Atualização concluída com avisos. Verifique o terminal.");
       }
     };
 
