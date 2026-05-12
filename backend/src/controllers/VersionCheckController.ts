@@ -138,7 +138,7 @@ export const runSystemUpdate = async (req: Request, res: Response): Promise<Resp
     const browserAnswer = updateBrowser ? "s" : "n";
 
     setImmediate(() => {
-      // verifica se expect está disponível antes de baixar o script
+      // verifica se expect está instalado; instala automaticamente se necessário
       let expectAvailable = false;
       try {
         execSync("which expect", { stdio: "ignore" });
@@ -149,10 +149,28 @@ export const runSystemUpdate = async (req: Request, res: Response): Promise<Resp
 
       if (!expectAvailable) {
         io.emit("systemUpdateLog", {
-          type: "error",
-          message: "❌ O utilitário 'expect' não está instalado. Execute no servidor: sudo apt-get install -y expect",
+          type: "warning",
+          message: "⚙️ Instalando dependência 'expect'... Aguarde.",
         });
-        return;
+
+        try {
+          execSync("sudo -S apt-get install -y expect", {
+            input: `${sudoPassword}\n`,
+            stdio: ["pipe", "pipe", "pipe"],
+            timeout: 60000,
+          });
+          io.emit("systemUpdateLog", {
+            type: "stdout",
+            message: "✅ 'expect' instalado com sucesso. Prosseguindo...",
+          });
+          expectAvailable = true;
+        } catch (installErr: any) {
+          io.emit("systemUpdateLog", {
+            type: "error",
+            message: `❌ Falha ao instalar 'expect': ${installErr.message}. Execute manualmente: sudo apt-get install -y expect`,
+          });
+          return;
+        }
       }
 
       const ts = Date.now();
