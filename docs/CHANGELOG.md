@@ -1,9 +1,25 @@
 # Changelog
 
+### v1.16.1 (12/05/2026)
+
+- [feat: atualizar versão do sistema para v1.16.1](https://github.com/rtenorioh/Press-Ticket/commit/f3efbd7b45afc2b8363477eeed9d7a2561033e0c);
+- [feat: remover logs de diagnóstico do controle de versão](https://github.com/rtenorioh/Press-Ticket/commit/8b2f7430eb79a54f4b7ebf0dd032bd3d6a3d30e4);
+- [feat: adicionar contagem regressiva e mensagens de reconexão durante a atualização do sistema](https://github.com/rtenorioh/Press-Ticket/commit/ee5983fd00c81d24b5daf86e555b976f60aa47f0);
+- [feat: implementar instalação automática da dependência 'expect' durante a atualização do sistema](https://github.com/rtenorioh/Press-Ticket/commit/f6c10e7212b0345e0b34d0cb46764b00e46a3ada);
+- [feat: verificar e instalar automaticamente a dependência 'expect' durante a atualização do sistema](https://github.com/rtenorioh/Press-Ticket/commit/50062892a50de828b344034a5723c464646212dd);
+- [feat: adicionar suporte a contagem regressiva e mensagens de reconexão durante a atualização do sistema](https://github.com/rtenorioh/Press-Ticket/commit/ffc7a1135e3282d9b6e128246233ed75483f79c8);
+- [feat: remover NODE_ENV do .env do frontend e corrigir script de atualização para compatibilidade com Vite 6](https://github.com/rtenorioh/Press-Ticket/commit/89e5b6607cbbca24043581101c8041cf8d83fb35);
+- [feat: melhorar o processo de atualização do sistema com download e execução de script](https://github.com/rtenorioh/Press-Ticket/commit/704d4b0185357fdf75658f1637ae55a1d5b466c6);
+- [feat: adicionar suporte a mensagens de aviso durante a atualização do sistema](https://github.com/rtenorioh/Press-Ticket/commit/be7bb2616986185b1fd7ec08709d0d0957004162);
+- [feat: atualizar lógica de execução do script de atualização do sistema com suporte a respostas interativas](https://github.com/rtenorioh/Press-Ticket/commit/9d2e498fea616aa5e66691d93364643c9cb0d707);
+- [feat: adicionar campo de senha sudo no diálogo de atualização do sistema](https://github.com/rtenorioh/Press-Ticket/commit/8aeadc3ce03c1e8533fe7bdd4606b62c093ae9a4);
+- [feat: adicionar opções de atualização de sistema no diálogo de confirmação](https://github.com/rtenorioh/Press-Ticket/commit/b5ba2a373680311228fee0eb48e1a2a54d4cbd07);
+- [feat: adicionar suporte para logs em tempo real durante a atualização do sistema](https://github.com/rtenorioh/Press-Ticket/commit/e48fcfa504c16874c2eaa1be6cfeae2c1e7e02d3); e
+- [feat: adicionar rotas para verificação de versão e atualização do sistema](https://github.com/rtenorioh/Press-Ticket/commit/23f95e1015c392ab7d589be252cfd9aad4699db7).
+
 ### v1.16.0 (08/05/2026)
 
-- [feat: atualizar versão do sistema para v1.16.0](https://github.com/rtenorioh/Press-Ticket/commit/e00b50ada91574338efb6b704a5132df5bc42c76);
--[fix: adicionar URLs WebSocket ao CSP em modo desenvolvimento](https://github.com/rtenorioh/Press-Ticket/commit/0c557c7386265b4b94a6f65bc5179519979f4a5d)
+- [feat: atualizar versão do sistema para v1.16.0](https://github.com/rtenorioh/Press-Ticket/commit/e00b50ada91574338efb6b704a5132df5bc42c76); -[fix: adicionar URLs WebSocket ao CSP em modo desenvolvimento](https://github.com/rtenorioh/Press-Ticket/commit/0c557c7386265b4b94a6f65bc5179519979f4a5d)
 - [feat: adicionar suporte para anexos de email e upload de arquivos](https://github.com/rtenorioh/Press-Ticket/commit/831d95da3067c6244c1833a0848efae458e1eb58);
 - [feat: adicionar telemetria anônima opcional com heartbeat a cada 12 horas](https://github.com/rtenorioh/Press-Ticket/commit/3c372e9d8274ee43e98acae2cfa72ef51f1bc6cf);
 - [feat: adicionar notificação automática de atualizações para masteradmins a cada 3 horas](https://github.com/rtenorioh/Press-Ticket/commit/c57bb1f181b1e92f0b802295b4640e0035e400a4);
@@ -157,7 +173,7 @@
 - [chore: remoção de console.log](https://github.com/rtenorioh/Press-Ticket/commit/2eb469205d9fa9a7c2847b09e60f43942b7e5f46);
 - [feat: adicionado funcionalidade de bloqueio de contato com controles de IU e indicadores de status](https://github.com/rtenorioh/Press-Ticket/commit/c223c335d81e7690e274a7794c7773fda27c9c4a);
 - [feat: adicionado indicação de gravando ao enviar audio](https://github.com/rtenorioh/Press-Ticket/commit/f2382d75047743a9ddb16b2b6ed4752e3af6a6cc);
-- [feat: adicionado  indicação de digitação antes de enviar mensagens](https://github.com/rtenorioh/Press-Ticket/commit/a4097fd13067b4b3ff53d872a5ed118706f5b9d5);
+- [feat: adicionado indicação de digitação antes de enviar mensagens](https://github.com/rtenorioh/Press-Ticket/commit/a4097fd13067b4b3ff53d872a5ed118706f5b9d5);
 - [feat: adicionar reações de mensagens do WhatsApp](https://github.com/rtenorioh/Press-Ticket/commit/416e43a0ecb8f8c6200294970e774d81f4ed61db);
 - [feat: adicionar transcodificação de áudio para OGG/Opus e visualização de forma de onda para mensagens de voz](https://github.com/rtenorioh/Press-Ticket/commit/f36900aa3f586d800c62c843865b6610edb8b914);
 - [fix: ajuste na edição dos contatos](https://github.com/rtenorioh/Press-Ticket/commit/f8d25fbdfa9bd8f582b724edde3a36e89da02c81);
