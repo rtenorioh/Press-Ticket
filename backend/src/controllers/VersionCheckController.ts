@@ -129,6 +129,10 @@ export const runSystemUpdate = async (req: Request, res: Response): Promise<Resp
     const io = getIO();
     const { updateOS = false, updateBrowser = false, sudoPassword = "" } = req.body;
 
+    const projectName = path.basename(PROJECT_ROOT);
+    const backendPath = path.join(PROJECT_ROOT, "backend");
+    const frontendPath = path.join(PROJECT_ROOT, "frontend");
+
     // Respostas para perguntas interativas do script (que lê de /dev/tty via pseudo-TTY):
     // 1. Atualizar pacotes do SO?
     // 2. Atualizar Node.js para 22.x? — sempre "n" (hardcoded)
@@ -155,6 +159,10 @@ export const runSystemUpdate = async (req: Request, res: Response): Promise<Resp
         // 'script -q -c' aloca um pseudo-TTY para que o script possa abrir /dev/tty.
         // A senha sudo é injetada via echo pipe; as respostas interativas chegam via stdin do 'script',
         // que as encaminha ao PTY master, tornando-as visíveis ao script como leituras de /dev/tty.
+        // Nota: o UPDATE.sh usa /tmp/backend/ internamente para verificar a versão atual antes de
+        // sobrescrever os arquivos. Isso é comportamento esperado do script, não erro do controller.
+        let hasError = false;
+
         const child = spawn(
           "script",
           ["-q", "-c", `echo '${sudoPassword}' | sudo -S bash ${tmpScript}`, "/dev/null"],
@@ -165,6 +173,10 @@ export const runSystemUpdate = async (req: Request, res: Response): Promise<Resp
               ...process.env,
               DEBIAN_FRONTEND: "noninteractive",
               CI: "true",
+              PROJECT_NAME: projectName,
+              APP_NAME: projectName,
+              BACKEND_PATH: backendPath,
+              FRONTEND_PATH: frontendPath,
             },
           }
         );
@@ -173,13 +185,31 @@ export const runSystemUpdate = async (req: Request, res: Response): Promise<Resp
         child.stdin.end();
 
         child.stdout.on("data", (data: Buffer) => {
-          io.emit("systemUpdateLog", { type: "stdout", message: data.toString() });
+          const lines = data.toString().split("\n");
+          const filtered = lines.filter((line: string) => {
+            const trimmed = line.trim();
+            if (trimmed === "s" || trimmed === "n" || trimmed === "^@") return false;
+            return true;
+          });
+          const message = filtered.join("\n").trim();
+          if (message) {
+            io.emit("systemUpdateLog", { type: "stdout", message });
+          }
         });
 
         child.stderr.on("data", (data: Buffer) => {
-          const filtered = data.toString()
+          const message = data.toString();
+          const lower = message.toLowerCase();
+          if (lower.includes("erro:") || lower.includes("error:")) {
+            hasError = true;
+          }
+          const filtered = message
             .split("\n")
-            .filter((line) => !line.includes("[sudo] password") && !line.includes("password for"))
+            .filter((line: string) =>
+              !line.includes("[sudo] password") &&
+              !line.includes("password for") &&
+              line.trim() !== ""
+            )
             .join("\n")
             .trim();
           if (filtered) {
@@ -189,12 +219,22 @@ export const runSystemUpdate = async (req: Request, res: Response): Promise<Resp
 
         child.on("close", (code: number | null) => {
           execAsync(`rm -f ${tmpScript}`).catch(() => {});
-          io.emit("systemUpdateLog", {
-            type: code === 0 ? "success" : "error",
-            message: code === 0
-              ? "✅ Atualização concluída com sucesso!"
-              : `❌ Processo encerrado com código ${code}`,
-          });
+          if (code === 0 && !hasError) {
+            io.emit("systemUpdateLog", {
+              type: "success",
+              message: "✅ Atualização concluída com sucesso! Reinicie a página.",
+            });
+          } else if (code === 0 && hasError) {
+            io.emit("systemUpdateLog", {
+              type: "warning",
+              message: "⚠️ Atualização concluída com avisos. Verifique os itens marcados em laranja acima.",
+            });
+          } else {
+            io.emit("systemUpdateLog", {
+              type: "error",
+              message: `❌ Processo encerrado com código ${code}`,
+            });
+          }
         });
       } catch (downloadErr: any) {
         io.emit("systemUpdateLog", {

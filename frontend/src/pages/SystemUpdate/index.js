@@ -260,12 +260,14 @@ const SystemUpdate = () => {
 
     const handleLog = (data) => {
       setLogs(prev => [...prev, data]);
-      if (data.type === "success" || data.type === "error") {
+      if (data.type === "success" || data.type === "error" || data.type === "warning") {
         setUpdating(false);
         if (socket) socket.off("systemUpdateLog", handleLog);
         if (data.type === "success") {
           toast.success("Atualização concluída com sucesso!");
           fetchVersionCheck();
+        } else if (data.type === "warning") {
+          toast.warning("Atualização concluída com avisos. Verifique o terminal.");
         }
       }
     };
@@ -682,11 +684,12 @@ const SystemUpdate = () => {
                           sx={{
                             display: "block",
                             color:
-                              log.type === "error" ? "#f44336" :
+                              log.type === "error"   ? "#f44336" :
                               log.type === "success" ? "#4caf50" :
-                              log.type === "stderr" ? "#ff9800" :
-                              log.type === "info" ? "#2196f3" :
-                              "#e6edf3",
+                              log.type === "warning" ? "#ff9800" :
+                              log.type === "stderr"  ? "#ff9800" :
+                              log.type === "info"    ? "#2196f3" :
+                              "#d4d4d4",
                           }}
                         >
                           {log.message}
