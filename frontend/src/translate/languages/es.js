@@ -898,6 +898,8 @@ const messages = {
           dialogConfirm: "Iniciar Actualización",
           dialogPasswordLabel: "Contraseña del servidor (sudo)",
           dialogPasswordHelper: "Ingrese la contraseña del usuario que ejecuta PM2 en el servidor.",
+          toastReconnecting: "♻️ Sistema reiniciando... Reconectando en",
+          toastReloading: "✅ ¡Reconectado! Recargando la página...",
         },
         backendErrors: {
           ERR_CREATING_MESSAGE: "Error al crear el mensaje en la base de datos.",

@@ -23,6 +23,7 @@ import Switch from "@mui/material/Switch";
 import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
@@ -207,6 +208,7 @@ const IconAvatar = styled(Box)(({ theme }) => ({
 
 const SystemUpdate = () => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [updating, setUpdating] = useState(false);
   const [updateDialogOpen, setUpdateDialogOpen] = useState(false);
@@ -243,6 +245,42 @@ const SystemUpdate = () => {
     }
   }, [logs]);
 
+  const createCountdownToast = (seconds, initialMessage, finalMessage) => {
+    let secondsRemaining = seconds;
+    let intervalId = null;
+    let toastId = null;
+
+    const showToast = () => {
+      const render = `${initialMessage} ${secondsRemaining}s...`;
+      if (toastId) {
+        toast.update(toastId, { render, type: "info", autoClose: false, closeButton: false });
+      } else {
+        toastId = toast.info(render, { autoClose: false, closeButton: false, draggable: false, position: "top-right" });
+      }
+    };
+
+    const startCountdown = () => {
+      showToast();
+      intervalId = setInterval(() => {
+        secondsRemaining -= 1;
+        showToast();
+        if (secondsRemaining <= 0) {
+          clearInterval(intervalId);
+          if (toastId) toast.dismiss(toastId);
+          toast.success(finalMessage, { position: "top-right" });
+          setTimeout(() => navigate(0), 1000);
+        }
+      }, 1000);
+    };
+
+    const cancelCountdown = () => {
+      if (intervalId) clearInterval(intervalId);
+      if (toastId) toast.dismiss(toastId);
+    };
+
+    return { startCountdown, cancelCountdown };
+  };
+
   const handleDialogClose = () => {
     setUpdateDialogOpen(false);
     setSudoPassword("");
@@ -264,8 +302,12 @@ const SystemUpdate = () => {
         setUpdating(false);
         if (socket) socket.off("systemUpdateLog", handleLog);
         if (data.type === "success") {
-          toast.success("Atualização concluída com sucesso!");
-          fetchVersionCheck();
+          const countdown = createCountdownToast(
+            15,
+            t("systemUpdate.toastReconnecting"),
+            t("systemUpdate.toastReloading")
+          );
+          countdown.startCountdown();
         } else if (data.type === "warning") {
           toast.warning("Atualização concluída com avisos. Verifique o terminal.");
         }

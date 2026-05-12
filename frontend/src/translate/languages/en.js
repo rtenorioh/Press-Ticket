@@ -919,6 +919,8 @@ const messages = {
         dialogConfirm: "Start Update",
         dialogPasswordLabel: "Server password (sudo)",
         dialogPasswordHelper: "Enter the password of the user running PM2 on the server.",
+        toastReconnecting: "♻️ System restarting... Reconnecting in",
+        toastReloading: "✅ Reconnected! Reloading page...",
       },
       backendErrors: {
         ERR_CREATING_MESSAGE: "Error creating message in the database.",

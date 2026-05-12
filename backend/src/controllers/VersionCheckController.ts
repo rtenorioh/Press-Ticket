@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { exec, spawn } from "child_process";
+import { exec, spawn, execSync } from "child_process";
 import { promisify } from "util";
 import fs from "fs";
 import os from "os";
@@ -134,18 +134,30 @@ export const runSystemUpdate = async (req: Request, res: Response): Promise<Resp
     const backendPath = path.join(PROJECT_ROOT, "backend");
     const frontendPath = path.join(PROJECT_ROOT, "frontend");
 
-    // senha sudo para `sudo -S` + respostas para os prompts interativos do script
-    const stdinInput = [
-      sudoPassword,
-      updateOS ? "s" : "n",
-      "n",                       // Node.js: nunca atualiza (hardcoded)
-      updateBrowser ? "s" : "n",
-    ].join("\n") + "\n";
+    const osAnswer      = updateOS      ? "s" : "n";
+    const browserAnswer = updateBrowser ? "s" : "n";
 
     setImmediate(() => {
-      // script salvo na raiz do projeto: dirname "$0" retornará PROJECT_ROOT,
-      // permitindo que o UPDATE.sh derive todos os caminhos internos corretamente
-      const scriptPath = path.join(PROJECT_ROOT, `pressticket-update-${Date.now()}.sh`);
+      // verifica se expect está disponível antes de baixar o script
+      let expectAvailable = false;
+      try {
+        execSync("which expect", { stdio: "ignore" });
+        expectAvailable = true;
+      } catch {
+        expectAvailable = false;
+      }
+
+      if (!expectAvailable) {
+        io.emit("systemUpdateLog", {
+          type: "error",
+          message: "❌ O utilitário 'expect' não está instalado. Execute no servidor: sudo apt-get install -y expect",
+        });
+        return;
+      }
+
+      const ts = Date.now();
+      const scriptPath = path.join(PROJECT_ROOT, `pressticket-update-${ts}.sh`);
+      const expectScriptPath = path.join(PROJECT_ROOT, `pressticket-expect-${ts}.exp`);
 
       io.emit("systemUpdateLog", {
         type: "stdout",
@@ -193,9 +205,45 @@ export const runSystemUpdate = async (req: Request, res: Response): Promise<Resp
           "$1if grep -q '^NODE_ENV=' .env 2>/dev/null; then sed -i '/^NODE_ENV=/d' .env; fi\nnpm run build"
         );
 
+        // gera script expect com as respostas para cada prompt interativo do UPDATE.sh
+        // os valores sensíveis são passados via variáveis de ambiente (não gravados no script)
+        const expectScript = [
+          "#!/usr/bin/expect -f",
+          "set timeout 600",
+          "",
+          "set scriptPath   $env(UPDATE_SCRIPT_PATH)",
+          "set sudoPass     $env(UPDATE_SUDO_PASSWORD)",
+          "set osAns        $env(UPDATE_OS_ANSWER)",
+          "set chromeAns    $env(UPDATE_BROWSER_ANSWER)",
+          "",
+          "spawn sudo bash $scriptPath",
+          "",
+          "expect {",
+          "    -re {[Pp]assword.*:} {",
+          "        send -- [format \"%s\\r\" $sudoPass]",
+          "        exp_continue",
+          "    }",
+          "    \"sistema operacional\" {",
+          "        send -- [format \"%s\\r\" $osAns]",
+          "        exp_continue",
+          "    }",
+          "    \"Node.js\" {",
+          "        send -- \"n\\r\"",
+          "        exp_continue",
+          "    }",
+          "    \"Chrome\" {",
+          "        send -- [format \"%s\\r\" $chromeAns]",
+          "        exp_continue",
+          "    }",
+          "    eof",
+          "}",
+        ].join("\n");
+
         try {
           fs.writeFileSync(scriptPath, scriptContent);
           fs.chmodSync(scriptPath, "755");
+          fs.writeFileSync(expectScriptPath, expectScript);
+          fs.chmodSync(expectScriptPath, "700");
         } catch {
           io.emit("systemUpdateLog", { type: "error", message: "❌ Falha ao preparar o script." });
           return;
@@ -203,11 +251,9 @@ export const runSystemUpdate = async (req: Request, res: Response): Promise<Resp
 
         io.emit("systemUpdateLog", { type: "stdout", message: "📝 Script preparado. Iniciando...\n" });
 
-        // Nota: o UPDATE.sh usa /tmp/backend/ internamente para verificar a versão atual antes de
-        // sobrescrever os arquivos. Isso é comportamento esperado do script, não erro do controller.
         let hasError = false;
 
-        const update = spawn("sudo", ["-S", "bash", scriptPath], {
+        const update = spawn("expect", [expectScriptPath], {
           shell: false,
           cwd: PROJECT_ROOT,
           env: {
@@ -218,23 +264,26 @@ export const runSystemUpdate = async (req: Request, res: Response): Promise<Resp
             APP_NAME: projectName,
             BACKEND_PATH: backendPath,
             FRONTEND_PATH: frontendPath,
+            UPDATE_SCRIPT_PATH: scriptPath,
+            UPDATE_SUDO_PASSWORD: sudoPassword,
+            UPDATE_OS_ANSWER: osAnswer,
+            UPDATE_BROWSER_ANSWER: browserAnswer,
           },
         });
 
-        update.stdin.write(stdinInput);
-        update.stdin.end();
-
         update.stdout.on("data", (data: Buffer) => {
           const lines = data.toString().split("\n");
-          const filtered = lines.filter((line: string) => {
+          lines.forEach((line: string) => {
             const trimmed = line.trim();
-            if (trimmed === "s" || trimmed === "n" || trimmed === "^@") return false;
-            return true;
+            if (!trimmed || trimmed === "s" || trimmed === "n" || trimmed === "^@") return;
+            if (trimmed.includes("RESTART PM2")) {
+              io.emit("systemUpdateLog", {
+                type: "warning",
+                message: "⏳ Reiniciando os serviços PM2... O sistema ficará indisponível por alguns instantes. Aguarde.",
+              });
+            }
+            io.emit("systemUpdateLog", { type: "stdout", message: trimmed });
           });
-          const message = filtered.join("\n").trim();
-          if (message) {
-            io.emit("systemUpdateLog", { type: "stdout", message });
-          }
         });
 
         update.stderr.on("data", (data: Buffer) => {
@@ -259,6 +308,7 @@ export const runSystemUpdate = async (req: Request, res: Response): Promise<Resp
 
         update.on("close", (exitCode: number | null) => {
           try { fs.unlinkSync(scriptPath); } catch {}
+          try { fs.unlinkSync(expectScriptPath); } catch {}
           if (exitCode === 0 && !hasError) {
             io.emit("systemUpdateLog", {
               type: "success",

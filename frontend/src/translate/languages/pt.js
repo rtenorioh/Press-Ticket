@@ -2317,6 +2317,8 @@ const messages = {
         dialogConfirm: "Iniciar Atualização",
         dialogPasswordLabel: "Senha do servidor (sudo)",
         dialogPasswordHelper: "Informe a senha do usuário que executa o PM2 no servidor.",
+        toastReconnecting: "♻️ Sistema reiniciando... Reconectando em",
+        toastReloading: "✅ Reconectado! Recarregando a página...",
       },
       versionCheck: {
         title: "Verificação de Versão",
