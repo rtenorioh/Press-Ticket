@@ -129,13 +129,12 @@ export const runSystemUpdate = async (req: Request, res: Response): Promise<Resp
     const io = getIO();
     const { updateOS = false, updateBrowser = false, sudoPassword = "" } = req.body;
 
-    // stdin input for sudo -S and script questions:
-    // 1. sudo password (read by sudo -S before the script starts)
-    // 2. Update OS packages? (always asked)
-    // 3. Update Node.js to 22.x? (conditional: only if Node < 22) — hardcoded "n"
-    // 4. Update/Install Chrome? (always asked)
-    const stdinInput = [
-      sudoPassword,
+    // Respostas para perguntas interativas do script (que lê de /dev/tty via pseudo-TTY):
+    // 1. Atualizar pacotes do SO?
+    // 2. Atualizar Node.js para 22.x? — sempre "n" (hardcoded)
+    // 3. Atualizar/Instalar Chrome?
+    // A senha sudo é passada via echo pipe diretamente para sudo -S
+    const stdinAnswers = [
       updateOS ? "s" : "n",
       "n",
       updateBrowser ? "s" : "n",
@@ -144,15 +143,33 @@ export const runSystemUpdate = async (req: Request, res: Response): Promise<Resp
     setImmediate(async () => {
       try {
         const tmpScript = `/tmp/pt-update-${Date.now()}.sh`;
+
+        io.emit("systemUpdateLog", {
+          type: "stdout",
+          message: `📁 Diretório do projeto: ${PROJECT_ROOT}\n`,
+        });
         io.emit("systemUpdateLog", { type: "stdout", message: "Baixando script de atualização...\n" });
         await execAsync(`curl -sSL https://update.pressticket.com.br -o ${tmpScript} && chmod 700 ${tmpScript}`);
         io.emit("systemUpdateLog", { type: "stdout", message: "Script baixado. Iniciando...\n" });
 
-        const child = spawn("sudo", ["-S", "bash", tmpScript], {
-          env: { ...process.env, DEBIAN_FRONTEND: "noninteractive" },
-        });
+        // 'script -q -c' aloca um pseudo-TTY para que o script possa abrir /dev/tty.
+        // A senha sudo é injetada via echo pipe; as respostas interativas chegam via stdin do 'script',
+        // que as encaminha ao PTY master, tornando-as visíveis ao script como leituras de /dev/tty.
+        const child = spawn(
+          "script",
+          ["-q", "-c", `echo '${sudoPassword}' | sudo -S bash ${tmpScript}`, "/dev/null"],
+          {
+            shell: false,
+            cwd: PROJECT_ROOT,
+            env: {
+              ...process.env,
+              DEBIAN_FRONTEND: "noninteractive",
+              CI: "true",
+            },
+          }
+        );
 
-        child.stdin.write(stdinInput);
+        child.stdin.write(stdinAnswers);
         child.stdin.end();
 
         child.stdout.on("data", (data: Buffer) => {
