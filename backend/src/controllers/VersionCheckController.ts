@@ -137,7 +137,7 @@ export const runSystemUpdate = async (req: Request, res: Response): Promise<Resp
     const osAnswer      = updateOS      ? "s" : "n";
     const browserAnswer = updateBrowser ? "s" : "n";
 
-    setImmediate(() => {
+    setImmediate(async () => {
       // verifica se expect está instalado; instala automaticamente se necessário
       let expectAvailable = false;
       try {
@@ -148,26 +148,59 @@ export const runSystemUpdate = async (req: Request, res: Response): Promise<Resp
       }
 
       if (!expectAvailable) {
-        io.emit("systemUpdateLog", {
-          type: "warning",
-          message: "⚙️ Instalando dependência 'expect'... Aguarde.",
-        });
+        const installExpect = (): Promise<void> =>
+          new Promise((resolve, reject) => {
+            io.emit("systemUpdateLog", {
+              type: "warning",
+              message: "⚙️ Instalando dependência 'expect'... Aguarde.",
+            });
+
+            const install = spawn("sudo", ["-S", "apt-get", "install", "-y", "expect"], {
+              shell: false,
+            });
+
+            install.stdin.write(`${sudoPassword}\n`);
+            install.stdin.end();
+
+            install.stdout.on("data", (data: Buffer) => {
+              const line = data.toString().trim();
+              if (line) io.emit("systemUpdateLog", { type: "stdout", message: line });
+            });
+
+            install.stderr.on("data", (data: Buffer) => {
+              const filtered = data.toString()
+                .split("\n")
+                .filter((l: string) =>
+                  !l.includes("[sudo] password") &&
+                  !l.includes("password for") &&
+                  l.trim() !== ""
+                )
+                .join("\n")
+                .trim();
+              if (filtered) io.emit("systemUpdateLog", { type: "stderr", message: filtered });
+            });
+
+            install.on("close", (code: number | null) => {
+              if (code === 0) {
+                io.emit("systemUpdateLog", {
+                  type: "stdout",
+                  message: "✅ 'expect' instalado com sucesso. Prosseguindo com a atualização...",
+                });
+                resolve();
+              } else {
+                reject(new Error(`Instalação do expect falhou com código ${code}`));
+              }
+            });
+
+            install.on("error", (err: Error) => reject(err));
+          });
 
         try {
-          execSync("sudo -S apt-get install -y expect", {
-            input: `${sudoPassword}\n`,
-            stdio: ["pipe", "pipe", "pipe"],
-            timeout: 60000,
-          });
-          io.emit("systemUpdateLog", {
-            type: "stdout",
-            message: "✅ 'expect' instalado com sucesso. Prosseguindo...",
-          });
-          expectAvailable = true;
-        } catch (installErr: any) {
+          await installExpect();
+        } catch (err: any) {
           io.emit("systemUpdateLog", {
             type: "error",
-            message: `❌ Falha ao instalar 'expect': ${installErr.message}. Execute manualmente: sudo apt-get install -y expect`,
+            message: `❌ Falha ao instalar 'expect': ${err.message}. Execute manualmente: sudo apt-get install -y expect`,
           });
           return;
         }
