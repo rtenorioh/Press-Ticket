@@ -8,76 +8,122 @@ on:
 jobs:
   create_release:
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
 
-      # Validar que a tag segue o padrão semântico de versão (vX.X.X)
-      - name: Validate tag format
-        if: startsWith(github.ref, 'refs/tags/v')
+    permissions:
+      contents: write # Necessário para criar releases
+
+    steps:
+      - name: 📥 Checkout do código
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # ✅ FIX 1: Busca TODO o histórico e tags anteriores
+
+      # Validar que a tag segue o padrão semântico (vX.X.X)
+      - name: 🏷️ Validar formato da tag
         run: |
           if ! [[ "${GITHUB_REF#refs/tags/}" =~ ^v[0-9]+(\.[0-9]+){2}$ ]]; then
-            echo "Tag format is invalid. Must follow vX.X.X"
+            echo "❌ Tag inválida. Use o formato vX.X.X (ex: v1.17.0)"
             exit 1
           fi
 
-      # Instalar GitHub CLI
-      - name: Install GitHub CLI
-        run: sudo apt-get install gh
+      # ✅ FIX 2: GitHub CLI já vem no ubuntu-latest, autenticar via env var
+      - name: 🔐 Autenticar GitHub CLI
+        env:
+          GH_TOKEN: ${{ secrets.TOKEN_GITHUB }}
+        run: gh auth status # Só confirma que está autenticado
 
-      # Autenticar GitHub CLI usando o token do GitHub Actions
-      - name: Authenticate GitHub CLI
-        run: gh auth login --with-token <<< "${{ secrets.TOKEN_GITHUB }}"
-
-      # Pegar a tag anterior corretamente
-      - name: Get previous tag
+      # Pegar a tag anterior
+      - name: 🔖 Buscar tag anterior
         id: prev_tag
         run: |
-          echo "Fetching the previous tag..."
-          previous_tag=$(git describe --tags $(git rev-list --tags --skip=1 --max-count=1))
-          echo "Previous tag: $previous_tag"
+          previous_tag=$(git describe --tags $(git rev-list --tags --skip=1 --max-count=1) 2>/dev/null || echo "")
+          echo "Tag anterior: $previous_tag"
           echo "previous_tag=$previous_tag" >> $GITHUB_OUTPUT
 
-      # Listar issues fechadas desde a tag anterior
-      - name: List closed issues
-        id: list_closed_issues
-        run: |
-          echo "Fetching closed issues since the previous tag..."
-          issues=$(gh issue list --state closed --search "closed:>${{ steps.prev_tag_date.outputs.prev_tag_date }}" --json title,number --jq '.[] | "- \(.title) (#\(.number))"')
-          if [ -z "$issues" ]; then
-            issues="No issues closed."
+          # Pegar a data da tag anterior para filtrar issues
+          if [ -n "$previous_tag" ]; then
+            prev_date=$(git log -1 --format=%aI "$previous_tag")
+          else
+            prev_date="2020-01-01T00:00:00Z"
           fi
-          echo "Issues: $issues"
-          echo "issues=$issues" >> $GITHUB_OUTPUT
+          echo "Data da tag anterior: $prev_date"
+          echo "prev_tag_date=$prev_date" >> $GITHUB_OUTPUT   # ✅ FIX 3: variável agora existe
 
-      # Atualizar o log de commits
-      - name: Get commit log
+      # Listar issues fechadas desde a tag anterior
+      - name: 📋 Listar issues fechadas
+        id: list_closed_issues
+        env:
+          GH_TOKEN: ${{ secrets.TOKEN_GITHUB }}
+        run: |
+          issues=$(gh issue list \
+            --state closed \
+            --search "closed:>${{ steps.prev_tag.outputs.prev_tag_date }}" \
+            --json title,number \
+            --jq '.[] | "- \(.title) (#\(.number))"' || echo "")
+
+          if [ -z "$issues" ]; then
+            issues="Nenhuma issue fechada neste período."
+          fi
+
+          echo "Issues encontradas:"
+          echo "$issues"
+
+          # ✅ FIX 4: sintaxe heredoc para outputs multiline
+          {
+            echo "issues<<EOF"
+            echo "$issues"
+            echo "EOF"
+          } >> $GITHUB_OUTPUT
+
+      # Gerar log de commits desde a tag anterior
+      - name: 📝 Gerar log de commits
         id: commit_log
         run: |
-          echo "Fetching commit log since the previous tag..."
-          log=$(git log --pretty=format:'- %s (%h)' --abbrev-commit ${{ steps.prev_tag.outputs.previous_tag }}..HEAD)
-          if [ -z "$log" ]; then
-            log="No commits."
+          if [ -n "${{ steps.prev_tag.outputs.previous_tag }}" ]; then
+            log=$(git log \
+              --pretty=format:'- %s (%h)' \
+              --abbrev-commit \
+              ${{ steps.prev_tag.outputs.previous_tag }}..HEAD)
+          else
+            log=$(git log --pretty=format:'- %s (%h)' --abbrev-commit)
           fi
-          echo "Log: $log"
-          echo "log=$log" >> $GITHUB_OUTPUT
 
-      # Criar a release com as informações coletadas
-      - name: Create Release
-        uses: softprops/action-gh-release@v1
+          if [ -z "$log" ]; then
+            log="Nenhum commit registrado."
+          fi
+
+          echo "Commits encontrados:"
+          echo "$log"
+
+          # ✅ FIX 4: sintaxe heredoc para outputs multiline
+          {
+            echo "log<<EOF"
+            echo "$log"
+            echo "EOF"
+          } >> $GITHUB_OUTPUT
+
+      # Criar a release
+      - name: 🚀 Criar Release
+        uses: softprops/action-gh-release@v2
         env:
           GITHUB_TOKEN: ${{ secrets.TOKEN_GITHUB }}
         with:
           tag_name: ${{ github.ref_name }}
           name: ${{ github.ref_name }}
           body: |
-            # O que mudou:
+            ## 🚀 O que mudou
 
             ${{ steps.commit_log.outputs.log }}
 
-            **Issues Fechadas:**
+            ---
+
+            ## 🐛 Issues Fechadas
+
             ${{ steps.list_closed_issues.outputs.issues }}
 
-            **Comparação de Alterações:**
-            [Comparar alterações](https://github.com/${{ github.repository }}/compare/${{ steps.prev_tag.outputs.previous_tag }}...${{ github.ref_name }})
+            ---
+
+            **🔍 Comparação completa:**
+            [Ver alterações](https://github.com/${{ github.repository }}/compare/${{ steps.prev_tag.outputs.previous_tag }}...${{ github.ref_name }})
           draft: false
           prerelease: false

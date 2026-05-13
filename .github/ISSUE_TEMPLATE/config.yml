@@ -1,0 +1,14 @@
+blank_issues_enabled: false
+
+contact_links:
+  - name: 💬 Discussões e dúvidas
+    url: https://github.com/rtenorioh/Press-Ticket/discussions
+    about: Para dúvidas de uso, configuração ou instalação, use as Discussões
+
+  - name: 📖 Documentação
+    url: https://github.com/rtenorioh/Press-Ticket/tree/main/docs
+    about: Consulte a documentação antes de abrir uma issue
+
+  - name: 🗺️ Roadmap
+    url: https://github.com/rtenorioh/Press-Ticket/blob/main/ROADMAP.md
+    about: Veja as funcionalidades planejadas antes de sugerir uma nova

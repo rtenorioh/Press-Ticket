@@ -1,0 +1,106 @@
+name: 🐛 Bug Report
+description: Reporte um comportamento inesperado ou erro no sistema
+title: "[Bug]: "
+labels: ["bug", "needs-triage"]
+assignees:
+  - rtenorioh
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Obrigado por reportar! Preencha com o máximo de detalhes possível para que possamos reproduzir e corrigir o problema.
+
+  - type: dropdown
+    id: canal
+    attributes:
+      label: Canal afetado
+      description: Em qual canal o bug ocorre?
+      multiple: true
+      options:
+        - WhatsApp
+        - Facebook
+        - Instagram
+        - Telegram
+        - WebChat
+        - Painel Web (frontend)
+        - API REST
+        - Todos os canais
+        - Não se aplica
+    validations:
+      required: true
+
+  - type: dropdown
+    id: perfil
+    attributes:
+      label: Perfil do usuário
+      description: Com qual perfil o bug ocorre?
+      options:
+        - user (atendente)
+        - admin
+        - masteradmin
+        - Todos os perfis
+    validations:
+      required: true
+
+  - type: textarea
+    id: descricao
+    attributes:
+      label: Descrição do bug
+      description: O que acontece? O que deveria acontecer?
+      placeholder: |
+        Ao clicar em X, o sistema faz Y.
+        O esperado é que o sistema fizesse Z.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproducao
+    attributes:
+      label: Passos para reproduzir
+      description: Como reproduzir o problema?
+      placeholder: |
+        1. Acesse a tela de...
+        2. Clique em...
+        3. Observe que...
+    validations:
+      required: true
+
+  - type: textarea
+    id: evidencia
+    attributes:
+      label: Evidência (prints / vídeo / logs)
+      description: Cole prints, GIFs ou logs de erro aqui
+      placeholder: Arraste imagens ou cole logs do console/PM2
+
+  - type: input
+    id: versao
+    attributes:
+      label: Versão do Press Ticket
+      placeholder: "Ex: v1.16.0"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: ambiente
+    attributes:
+      label: Ambiente onde ocorre
+      options:
+        - Produção (VPS)
+        - Local (localhost)
+        - Docker
+        - Ambos
+    validations:
+      required: true
+
+  - type: input
+    id: so
+    attributes:
+      label: Sistema operacional do servidor
+      placeholder: "Ex: Ubuntu 22.04"
+
+  - type: textarea
+    id: contexto
+    attributes:
+      label: Contexto adicional
+      description: Qualquer outra informação relevante

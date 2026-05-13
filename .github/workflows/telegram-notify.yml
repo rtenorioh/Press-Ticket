@@ -2,38 +2,75 @@ name: Notify Telegram on Release
 
 on:
   workflow_dispatch:
+    inputs:
+      tag_name:
+        description: "Tag da versão para notificar (ex: v1.17.0)"
+        required: true
+        default: "v0.0.0"
   release:
     types: [published]
 
 jobs:
   notify:
     runs-on: ubuntu-latest
-    steps:
-      - name: Format release date
-        id: format_date
-        run: |
-          RELEASE_DATE=$(date -d "${{ github.event.release.created_at }}" +"%d-%m-%Y")
-          echo "release_date=$RELEASE_DATE" >> $GITHUB_ENV
 
-      - name: Check release description
-        id: check_description
+    steps:
+      # ✅ FIX 1: Unifica fonte dos dados — release real ou manual
+      - name: 📦 Definir variáveis da release
+        id: vars
         run: |
-          if [ -z "${{ github.event.release.body }}" ]; then
-            echo "description=No description provided" >> $GITHUB_ENV
+          # Se veio de um release real, usa os dados do evento
+          # Se veio de workflow_dispatch, usa os inputs manuais
+          if [ "${{ github.event_name }}" = "release" ]; then
+            TAG="${{ github.event.release.tag_name }}"
+            RAW_DATE="${{ github.event.release.created_at }}"
+            BODY="${{ github.event.release.body }}"
           else
-            echo "description=${{ github.event.release.body }}" >> $GITHUB_ENV
+            TAG="${{ github.event.inputs.tag_name }}"
+            RAW_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+            BODY="Notificação disparada manualmente para $TAG"
           fi
 
-      - name: Send Telegram notification
-        uses: appleboy/telegram-action@master
+          # Formatar data
+          RELEASE_DATE=$(date -d "$RAW_DATE" +"%d/%m/%Y" 2>/dev/null || date +"%d/%m/%Y")
+
+          # Truncar descrição se for muito longa (Telegram tem limite de 4096 chars)
+          # A mensagem completa ocupa ~300 chars, sobram ~800 para a descrição
+          BODY_SHORT=$(echo "$BODY" | head -c 800)
+          if [ ${#BODY} -gt 800 ]; then
+            BODY_SHORT="${BODY_SHORT}... [ver release completa no GitHub]"
+          fi
+
+          # Sanitizar: remover caracteres especiais que quebram o shell
+          BODY_CLEAN=$(echo "$BODY_SHORT" | tr -d '`' | sed "s/'/\"/g")
+
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          echo "release_date=$RELEASE_DATE" >> $GITHUB_OUTPUT
+
+          # ✅ FIX 2: heredoc para outputs multiline
+          {
+            echo "description<<EOF"
+            echo "$BODY_CLEAN"
+            echo "EOF"
+          } >> $GITHUB_OUTPUT
+
+      # ✅ FIX 3: versão estável v0.1.1 em vez de @master
+      # ✅ FIX 4: hashtag dinâmica com a versão real
+      - name: 📬 Enviar notificação no Telegram
+        uses: appleboy/telegram-action@v0.1.1
         with:
           token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           to: ${{ secrets.TELEGRAM_CHAT_ID }}
           message: |
-            Nova atualização publicada!
-            Data: ${{ env.release_date }}
-            Versão: ${{ github.event.release.tag_name }}
-            Descrição: ${{ env.description }}
-            Link: https://github.com/${{ github.repository }}/releases/tag/${{ github.event.release.tag_name }}
-            Link do Source: https://api.github.com/repos/${{ github.repository }}/zipball/${{ github.event.release.tag_name }}
-            #CHANGELOG_V1.X
+            🚀 Nova atualização publicada!
+
+            📦 Versão: ${{ steps.vars.outputs.tag }}
+            📅 Data: ${{ steps.vars.outputs.release_date }}
+
+            📝 O que mudou:
+            ${{ steps.vars.outputs.description }}
+
+            🔗 Release: https://github.com/${{ github.repository }}/releases/tag/${{ steps.vars.outputs.tag }}
+            📥 Download: https://api.github.com/repos/${{ github.repository }}/zipball/${{ steps.vars.outputs.tag }}
+
+            #PressTicket #CHANGELOG_${{ steps.vars.outputs.tag }}

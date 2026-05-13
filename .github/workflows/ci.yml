@@ -3,20 +3,18 @@ name: CI — Press Ticket
 on:
   push:
     branches: [main]
+    tags:
+      - "v*.*.*" # Dispara em toda nova versão: v1.17.0, v2.0.0, etc.
   pull_request:
     branches: [main]
-  # ✅ Permite que este workflow seja chamado pelo deploy.yml
-  workflow_call:
-    secrets:
-      REACT_APP_BACKEND_URL:
-        required: false
 
 jobs:
-  # ─────────────────────────────────────────
-  # JOB 1 — Backend: TypeCheck + Lint + Build
-  # ─────────────────────────────────────────
+  # ─────────────────────────────────────────────────────────
+  # JOB 1 — Backend
+  # Simula uma instalação limpa e valida o código TypeScript
+  # ─────────────────────────────────────────────────────────
   backend:
-    name: Backend (TypeScript)
+    name: 🔧 Backend — Instalação e Build
     runs-on: ubuntu-latest
 
     defaults:
@@ -31,26 +29,25 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "22"
-          cache: "npm"
-          cache-dependency-path: backend/package-lock.json
 
-      - name: 📦 Instalar dependências
-        run: npm ci
+      - name: 📦 Instalação limpa das dependências
+        run: npm install # Simula exatamente o que o usuário faz ao instalar
 
-      - name: 🔍 TypeCheck (tsc --noEmit)
-        run: npx tsc --noEmit
+      - name: 🔍 Verificação de tipos (TypeScript)
+        run: npx tsc --noEmit # Garante que não há erros de tipo no código
 
-      - name: 🧹 Lint (ESLint)
+      - name: 🧹 Lint
         run: npm run lint --if-present
 
       - name: 🏗️ Build
-        run: npm run build
+        run: npm run build # Garante que o projeto compila sem erros
 
-  # ─────────────────────────────────────────
-  # JOB 2 — Frontend: Lint + Build
-  # ─────────────────────────────────────────
+  # ─────────────────────────────────────────────────────────
+  # JOB 2 — Frontend
+  # Simula uma instalação limpa e valida o build do Vite
+  # ─────────────────────────────────────────────────────────
   frontend:
-    name: Frontend (React + Vite)
+    name: 🎨 Frontend — Instalação e Build
     runs-on: ubuntu-latest
 
     defaults:
@@ -65,16 +62,39 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "22"
-          cache: "npm"
-          cache-dependency-path: frontend/package-lock.json
 
-      - name: 📦 Instalar dependências
-        run: npm ci
+      - name: 📦 Instalação limpa das dependências
+        run: npm install # Simula exatamente o que o usuário faz ao instalar
 
-      - name: 🧹 Lint (ESLint)
+      - name: 🧹 Lint
         run: npm run lint --if-present
 
       - name: 🏗️ Build
-        run: npm run build
+        run: npm run build # Garante que o Vite gera o bundle sem erros
         env:
-          REACT_APP_BACKEND_URL: ${{ secrets.REACT_APP_BACKEND_URL }}
+          REACT_APP_BACKEND_URL: http://localhost:8080 # Valor fictício apenas para o build passar
+
+  # ─────────────────────────────────────────────────────────
+  # JOB 3 — Sumário da versão (só roda quando é uma tag)
+  # Exibe um resumo no GitHub quando uma nova versão é tagueada
+  # ─────────────────────────────────────────────────────────
+  release-summary:
+    name: 🏷️ Sumário da versão
+    runs-on: ubuntu-latest
+    needs: [backend, frontend]
+    if: startsWith(github.ref, 'refs/tags/') # Só roda em tags como v1.17.0
+
+    steps:
+      - name: 📋 Gerar sumário da versão
+        run: |
+          echo "## ✅ Versão ${{ github.ref_name }} validada com sucesso!" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Item | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|---|---|" >> $GITHUB_STEP_SUMMARY
+          echo "| Backend — Instalação | ✅ OK |" >> $GITHUB_STEP_SUMMARY
+          echo "| Backend — TypeCheck  | ✅ OK |" >> $GITHUB_STEP_SUMMARY
+          echo "| Backend — Build      | ✅ OK |" >> $GITHUB_STEP_SUMMARY
+          echo "| Frontend — Instalação| ✅ OK |" >> $GITHUB_STEP_SUMMARY
+          echo "| Frontend — Build     | ✅ OK |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "🚀 Esta versão pode ser distribuída com segurança." >> $GITHUB_STEP_SUMMARY

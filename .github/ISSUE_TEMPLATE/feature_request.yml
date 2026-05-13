@@ -1,0 +1,82 @@
+name: ✨ Feature Request
+description: Sugira uma nova funcionalidade ou melhoria para o Press Ticket
+title: "[Feature]: "
+labels: ["feature-request", "needs-triage"]
+assignees:
+  - rtenorioh
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Sua sugestão é bem-vinda! Descreva com clareza a funcionalidade que você gostaria de ver no Press Ticket®.
+
+  - type: textarea
+    id: problema
+    attributes:
+      label: Qual problema esta funcionalidade resolve?
+      description: Descreva a dor ou limitação atual que motivou esta sugestão
+      placeholder: |
+        Atualmente não consigo fazer X, o que me obriga a...
+        Isso causa problema porque...
+    validations:
+      required: true
+
+  - type: textarea
+    id: solucao
+    attributes:
+      label: Solução proposta
+      description: Como você imagina que a funcionalidade deveria funcionar?
+      placeholder: |
+        Seria interessante ter um botão/tela/configuração que...
+        O comportamento esperado seria...
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Área do sistema
+      multiple: true
+      options:
+        - Painel de atendimento (frontend)
+        - Tickets
+        - Contatos
+        - Filas / Setores
+        - Conexões / Canais
+        - WhatsApp
+        - Facebook / Instagram / Telegram
+        - WebChat
+        - API REST
+        - Integrações (n8n / OpenAI)
+        - Relatórios / Métricas
+        - Configurações
+        - Deploy / Infra
+        - Outro
+    validations:
+      required: true
+
+  - type: dropdown
+    id: prioridade
+    attributes:
+      label: Qual a importância para você?
+      options:
+        - 🔴 Crítica — sem isso não consigo usar o sistema
+        - 🟡 Alta — melhora muito meu dia a dia
+        - 🟢 Média — seria um diferencial
+        - ⚪ Baixa — seria legal ter futuramente
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternativas
+    attributes:
+      label: Alternativas que você já considerou
+      description: Existe alguma forma de contornar o problema hoje?
+      placeholder: Atualmente uso X como alternativa, mas tem a limitação de...
+
+  - type: textarea
+    id: contexto
+    attributes:
+      label: Contexto adicional / Mockups
+      description: Prints, referências de outros sistemas, wireframes ou qualquer material que ajude a entender a ideia
