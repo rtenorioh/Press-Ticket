@@ -281,6 +281,8 @@ const messages = {
           delete: "Excluir Canal",
           start: "Iniciar Sessão",
         },
+        pairingCodeLabel: "Código de Pareamento",
+        pairingCodeInstructions: "Abra o WhatsApp no celular > Dispositivos conectados > Conectar dispositivo > Inserir código",
         toolTips: {
           disconnected: {
             title: "Falha ao iniciar sessão do WhatsApp",

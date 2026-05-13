@@ -37,6 +37,8 @@ const messages = {
           newQr: "New QR CODE",
           connecting: "Connecting",
         },
+        pairingCodeLabel: "Pairing Code",
+        pairingCodeInstructions: "Open WhatsApp on your phone > Linked devices > Link a device > Enter code",
         toolTips: {
           disconnected: {
             title: "Failed to start WhatsApp session",

@@ -89,6 +89,13 @@ const ConnectionMethodModal = ({ open, onClose, onSelectMethod, whatsAppId }) =>
 			const session = data.session;
 			if (!session || session.id !== whatsAppIdRef.current) return;
 
+			// Backend failed to generate the pairing code — go back to input step
+			if (session.pairingCodeError) {
+				setPhoneError(session.pairingCodeError);
+				setStep(STEP_SELECT);
+				return;
+			}
+
 			// New pairing code received
 			if (session.pairingCode) {
 				setPairingCode(session.pairingCode);
@@ -99,8 +106,10 @@ const ConnectionMethodModal = ({ open, onClose, onSelectMethod, whatsAppId }) =>
 				setStep(STEP_CODE);
 			}
 
-			// Connected — close modal
-			if (session.status === "CONNECTED" || session.number) {
+			// Connected — close modal (only on CONNECTED; session.number can be set
+			// from a previous connection before CONNECTED is reached, which would
+			// prematurely dismiss the pairing-code screen)
+			if (session.status === "CONNECTED") {
 				setTimeout(() => handleCloseRef.current?.(), 1500);
 			}
 		});

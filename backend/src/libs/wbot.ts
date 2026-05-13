@@ -100,6 +100,7 @@ const syncUnreadMessages = async (wbot: Session) => {
       /* eslint-disable no-await-in-loop */
       for (const chat of chats) {
         try {
+          if (!chat) continue;
           if (chat.unreadCount > 0) {
             const unreadMessages = await chat.fetchMessages({
               limit: Math.min(chat.unreadCount, 50)
@@ -227,6 +228,28 @@ export const initWbot = async (
 
       let isResolved = false;
       const isPairingMode = !!options?.phoneNumber;
+
+      // whatsapp-web.js calls requestPairingCode internally without await/catch,
+      // causing unhandledRejection when WhatsApp web rejects the number.
+      // Override the method on this instance to surface the error via socket.
+      if (isPairingMode) {
+        const origRequestPairingCode = (wbot as any).requestPairingCode.bind(wbot);
+        (wbot as any).requestPairingCode = async (...args: any[]) => {
+          try {
+            return await origRequestPairingCode(...args);
+          } catch (err: any) {
+            logger.error(`[WBOT] Pairing code failed for ${sessionName}: ${err?.message || err}`);
+            io.emit("whatsappSession", {
+              action: "update",
+              session: {
+                id: whatsapp.id,
+                pairingCodeError: "Erro ao gerar código. Verifique o número e tente novamente."
+              }
+            });
+            // Do not re-throw — prevents unhandledRejection propagation
+          }
+        };
+      }
 
       // Workaround: whatsapp-web.js tem uma race condition onde o evento
       // 'change:hasSynced' pode disparar ANTES do listener ser registrado
