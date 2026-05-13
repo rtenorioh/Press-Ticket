@@ -27,8 +27,11 @@ const checkForUpdates = async (): Promise<UpdateResult> => {
 };
 
 const buildMessage = (result: UpdateResult): string => {
+  const companyName = (
+    process.env.COMPANY_NAME || "Press Ticket"
+  ).toUpperCase();
   const lines: string[] = [];
-  lines.push("🚀 *Press Ticket — Atualização Disponível*\n");
+  lines.push(`🚀 *${companyName} — Atualização Disponível*\n`);
 
   if (result.systemNeedsUpdate) {
     lines.push(`*Sistema:* ${result.systemCurrent} ➜ ${result.systemLatest}`);
