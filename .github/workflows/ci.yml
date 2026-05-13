@@ -1,0 +1,80 @@
+name: CI — Press Ticket
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  # ✅ Permite que este workflow seja chamado pelo deploy.yml
+  workflow_call:
+    secrets:
+      REACT_APP_BACKEND_URL:
+        required: false
+
+jobs:
+  # ─────────────────────────────────────────
+  # JOB 1 — Backend: TypeCheck + Lint + Build
+  # ─────────────────────────────────────────
+  backend:
+    name: Backend (TypeScript)
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - name: 📥 Checkout do código
+        uses: actions/checkout@v4
+
+      - name: 🟢 Configurar Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+          cache-dependency-path: backend/package-lock.json
+
+      - name: 📦 Instalar dependências
+        run: npm ci
+
+      - name: 🔍 TypeCheck (tsc --noEmit)
+        run: npx tsc --noEmit
+
+      - name: 🧹 Lint (ESLint)
+        run: npm run lint --if-present
+
+      - name: 🏗️ Build
+        run: npm run build
+
+  # ─────────────────────────────────────────
+  # JOB 2 — Frontend: Lint + Build
+  # ─────────────────────────────────────────
+  frontend:
+    name: Frontend (React + Vite)
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - name: 📥 Checkout do código
+        uses: actions/checkout@v4
+
+      - name: 🟢 Configurar Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: 📦 Instalar dependências
+        run: npm ci
+
+      - name: 🧹 Lint (ESLint)
+        run: npm run lint --if-present
+
+      - name: 🏗️ Build
+        run: npm run build
+        env:
+          REACT_APP_BACKEND_URL: ${{ secrets.REACT_APP_BACKEND_URL }}

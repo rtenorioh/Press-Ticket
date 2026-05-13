@@ -63,12 +63,12 @@ jobs:
 
       # Criar a release com as informações coletadas
       - name: Create Release
-        uses: actions/create-release@v1
+        uses: softprops/action-gh-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.TOKEN_GITHUB }}
         with:
           tag_name: ${{ github.ref_name }}
-          release_name: ${{ github.ref_name }}
+          name: ${{ github.ref_name }}
           body: |
             # O que mudou:
 
@@ -79,3 +79,5 @@ jobs:
 
             **Comparação de Alterações:**
             [Comparar alterações](https://github.com/${{ github.repository }}/compare/${{ steps.prev_tag.outputs.previous_tag }}...${{ github.ref_name }})
+          draft: false
+          prerelease: false
