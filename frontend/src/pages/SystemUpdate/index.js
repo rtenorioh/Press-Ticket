@@ -29,6 +29,7 @@ import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CodeIcon from "@mui/icons-material/Code";
 import GitHubIcon from "@mui/icons-material/GitHub";
+import InfoIcon from "@mui/icons-material/Info";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import PersonIcon from "@mui/icons-material/Person";
 import RefreshIcon from "@mui/icons-material/Refresh";
@@ -69,33 +70,41 @@ const SectionCardHeader = styled(CardHeader)(({ theme }) => ({
   "& .MuiCardHeader-title": { fontWeight: 600, fontSize: "1.05rem" },
 }));
 
-const VersionCard = styled(Card)(({ theme, uptodate }) => ({
+const VersionCard = styled(Card)(({ theme, versionstatus }) => ({
   height: "100%",
   display: "flex",
   flexDirection: "column",
   borderRadius: theme.spacing(2),
   overflow: "hidden",
   border: `2px solid ${
-    uptodate === "true"
+    versionstatus === "updated"
       ? alpha(theme.palette.success.main, 0.35)
-      : alpha(theme.palette.warning.main, 0.35)
+      : versionstatus === "outdated"
+      ? alpha(theme.palette.warning.main, 0.35)
+      : alpha(theme.palette.info.main, 0.35)
   }`,
   background:
     theme.palette.mode === "dark"
-      ? uptodate === "true"
+      ? versionstatus === "updated"
         ? `linear-gradient(135deg, ${alpha(theme.palette.success.dark, 0.15)} 0%, ${alpha(theme.palette.background.paper, 0.95)} 100%)`
-        : `linear-gradient(135deg, ${alpha(theme.palette.warning.dark, 0.15)} 0%, ${alpha(theme.palette.background.paper, 0.95)} 100%)`
-      : uptodate === "true"
+        : versionstatus === "outdated"
+        ? `linear-gradient(135deg, ${alpha(theme.palette.warning.dark, 0.15)} 0%, ${alpha(theme.palette.background.paper, 0.95)} 100%)`
+        : `linear-gradient(135deg, ${alpha(theme.palette.info.dark, 0.15)} 0%, ${alpha(theme.palette.background.paper, 0.95)} 100%)`
+      : versionstatus === "updated"
       ? `linear-gradient(135deg, ${alpha(theme.palette.success.light, 0.1)} 0%, ${theme.palette.background.paper} 100%)`
-      : `linear-gradient(135deg, ${alpha(theme.palette.warning.light, 0.12)} 0%, ${theme.palette.background.paper} 100%)`,
+      : versionstatus === "outdated"
+      ? `linear-gradient(135deg, ${alpha(theme.palette.warning.light, 0.12)} 0%, ${theme.palette.background.paper} 100%)`
+      : `linear-gradient(135deg, ${alpha(theme.palette.info.light, 0.1)} 0%, ${theme.palette.background.paper} 100%)`,
   "&::before": {
     content: '""',
     display: "block",
     height: "5px",
     background:
-      uptodate === "true"
+      versionstatus === "updated"
         ? `linear-gradient(90deg, ${theme.palette.success.main}, ${theme.palette.success.light})`
-        : `linear-gradient(90deg, ${theme.palette.warning.main}, ${theme.palette.warning.light})`,
+        : versionstatus === "outdated"
+        ? `linear-gradient(90deg, ${theme.palette.warning.main}, ${theme.palette.warning.light})`
+        : `linear-gradient(90deg, ${theme.palette.info.main}, ${theme.palette.info.light})`,
   },
   transition: "transform 0.25s ease, box-shadow 0.25s ease",
   "&:hover": {
@@ -347,6 +356,9 @@ const SystemUpdate = () => {
     }
   };
 
+  const needsUpdate =
+    versionData?.versionStatus === "outdated" || versionData?.commitsBehind > 0;
+
   const formatDate = (dateStr) => {
     if (!dateStr) return "";
     return new Intl.DateTimeFormat("pt-BR", {
@@ -437,7 +449,7 @@ const SystemUpdate = () => {
                 <Grid container spacing={3}>
                   {/* Card: Versão Atual */}
                   <Grid item xs={12} md={6}>
-                    <VersionCard uptodate={String(versionData.upToDate)}>
+                    <VersionCard versionstatus={versionData.versionStatus || "unknown"}>
                       <CardContent sx={{ pt: 2 }}>
                         <Box display="flex" alignItems="center" gap={1} mb={0.5}>
                           <StorageIcon
@@ -468,22 +480,30 @@ const SystemUpdate = () => {
                         )}
 
                         <Box>
-                          <Chip
-                            icon={
-                              versionData.upToDate ? (
-                                <CheckCircleIcon />
-                              ) : (
-                                <WarningAmberIcon />
-                              )
-                            }
-                            label={
-                              versionData.upToDate
-                                ? "Sistema Atualizado"
-                                : `${versionData.commitsBehind} commit(s) desde a última release`
-                            }
-                            color={versionData.upToDate ? "success" : "warning"}
-                            sx={{ fontWeight: 600 }}
-                          />
+                          {versionData.versionStatus === "updated" && (
+                            <Chip
+                              icon={<CheckCircleIcon />}
+                              label={t("systemUpdate.statusUpdated")}
+                              color="success"
+                              sx={{ fontWeight: 600 }}
+                            />
+                          )}
+                          {versionData.versionStatus === "outdated" && (
+                            <Chip
+                              icon={<WarningAmberIcon />}
+                              label={t("systemUpdate.statusOutdated", { version: versionData.latestReleaseTag })}
+                              color="warning"
+                              sx={{ fontWeight: 600 }}
+                            />
+                          )}
+                          {(versionData.versionStatus === "ahead" || versionData.versionStatus === "unknown") && (
+                            <Chip
+                              icon={<InfoIcon />}
+                              label={t("systemUpdate.statusAhead")}
+                              color="info"
+                              sx={{ fontWeight: 600 }}
+                            />
+                          )}
                         </Box>
                       </CardContent>
                     </VersionCard>
@@ -491,7 +511,7 @@ const SystemUpdate = () => {
 
                   {/* Card: Última Versão no GitHub */}
                   <Grid item xs={12} md={6}>
-                    <VersionCard uptodate="true">
+                    <VersionCard versionstatus="updated">
                       <CardContent sx={{ pt: 2 }}>
                         <Box display="flex" alignItems="center" gap={1} mb={0.5}>
                           <GitHubIcon
@@ -613,13 +633,32 @@ const SystemUpdate = () => {
                   </Box>
                 )}
 
-                {versionData.upToDate && versionData.githubAvailable && (
+                {versionData.versionStatus === "updated" && versionData.commitsBehind === 0 && versionData.githubAvailable && (
                   <Alert
                     severity="success"
                     icon={<CheckCircleIcon />}
                     sx={{ mt: 3, borderRadius: 2 }}
                   >
-                    Não há commits pendentes desde a última release oficial.
+                    {t("systemUpdate.fullyUpdated")}
+                  </Alert>
+                )}
+
+                {versionData.versionStatus === "outdated" && versionData.githubAvailable && (
+                  <Alert
+                    severity="warning"
+                    icon={<WarningAmberIcon />}
+                    sx={{ mt: 3, borderRadius: 2 }}
+                  >
+                    {t("systemUpdate.newVersionAvailable", { version: versionData.latestReleaseTag })}
+                  </Alert>
+                )}
+
+                {versionData.versionStatus === "updated" && versionData.commitsBehind > 0 && versionData.githubAvailable && (
+                  <Alert
+                    severity="info"
+                    sx={{ mt: 3, borderRadius: 2 }}
+                  >
+                    {t("systemUpdate.commitsAheadOfRelease", { count: versionData.commitsBehind })}
                   </Alert>
                 )}
 
@@ -663,7 +702,7 @@ const SystemUpdate = () => {
                         )
                       }
                       onClick={() => setUpdateDialogOpen(true)}
-                      disabled={updating || versionData.upToDate || !versionData.isLinux}
+                      disabled={updating || !needsUpdate || !versionData.isLinux}
                       sx={{
                         borderRadius: 3,
                         py: 1.5,
@@ -671,16 +710,16 @@ const SystemUpdate = () => {
                         fontWeight: 700,
                         fontSize: "1rem",
                         background: (theme) =>
-                          !updating && !versionData.upToDate && versionData.isLinux
+                          !updating && needsUpdate && versionData.isLinux
                             ? `linear-gradient(45deg, ${theme.palette.primary.main} 30%, ${theme.palette.primary.light} 90%)`
                             : undefined,
                         boxShadow: (theme) =>
-                          !updating && !versionData.upToDate && versionData.isLinux
+                          !updating && needsUpdate && versionData.isLinux
                             ? `0 4px 20px ${alpha(theme.palette.primary.main, 0.4)}`
                             : undefined,
                         "&:hover": {
                           transform:
-                            !updating && !versionData.upToDate && versionData.isLinux
+                            !updating && needsUpdate && versionData.isLinux
                               ? "translateY(-2px)"
                               : undefined,
                         },
@@ -699,14 +738,13 @@ const SystemUpdate = () => {
                   </Alert>
                 )}
 
-                {versionData.upToDate && logs.length === 0 && (
+                {!needsUpdate && logs.length === 0 && (
                   <Alert
                     severity="success"
                     icon={<CheckCircleIcon />}
                     sx={{ mt: 2, borderRadius: 2 }}
                   >
-                    O sistema já está na versão mais recente. Nenhuma
-                    atualização necessária.
+                    {t("systemUpdate.fullyUpdated")}
                   </Alert>
                 )}
 

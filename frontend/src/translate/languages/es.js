@@ -902,6 +902,12 @@ const messages = {
           dialogPasswordHelper: "Ingrese la contraseña del usuario que ejecuta PM2 en el servidor.",
           toastReconnecting: "♻️ Sistema reiniciando... Recargando en {{seconds}}s",
           toastReloading: "✅ Recargando la página...",
+          statusUpdated: "Sistema Actualizado",
+          statusOutdated: "Actualización disponible: {{version}}",
+          statusAhead: "Versión adelantada al repositorio",
+          fullyUpdated: "Su sistema está actualizado con la última versión del repositorio.",
+          newVersionAvailable: "Nueva versión {{version}} disponible en GitHub. Haga clic en 'Actualizar vía Git' para actualizar.",
+          commitsAheadOfRelease: "Su sistema tiene {{count}} commit(s) más allá de la última release oficial.",
         },
         backendErrors: {
           ERR_CREATING_MESSAGE: "Error al crear el mensaje en la base de datos.",

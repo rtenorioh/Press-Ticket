@@ -2321,6 +2321,12 @@ const messages = {
         dialogPasswordHelper: "Informe a senha do usuário que executa o PM2 no servidor.",
         toastReconnecting: "♻️ Sistema reiniciando... Recarregando em {{seconds}}s",
         toastReloading: "✅ Recarregando a página...",
+        statusUpdated: "Sistema Atualizado",
+        statusOutdated: "Atualização disponível: {{version}}",
+        statusAhead: "Versão à frente do repositório",
+        fullyUpdated: "Seu sistema está atualizado com a versão mais recente do repositório.",
+        newVersionAvailable: "Nova versão {{version}} disponível no GitHub. Clique em 'Atualizar via Git' para atualizar.",
+        commitsAheadOfRelease: "Seu sistema possui {{count}} commit(s) além da última release oficial.",
       },
       versionCheck: {
         title: "Verificação de Versão",

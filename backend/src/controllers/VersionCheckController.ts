@@ -44,6 +44,16 @@ const buildGithubHeaders = (): Record<string, string> => {
   return headers;
 };
 
+const compareVersions = (versionA: string, versionB: string): number => {
+  const normalize = (v: string) => v.replace(/^v/, "").split(".").map(Number);
+  const [aMajor, aMinor, aPatch] = normalize(versionA);
+  const [bMajor, bMinor, bPatch] = normalize(versionB);
+  if (aMajor !== bMajor) return aMajor < bMajor ? -1 : 1;
+  if (aMinor !== bMinor) return aMinor < bMinor ? -1 : 1;
+  if (aPatch !== bPatch) return aPatch < bPatch ? -1 : 1;
+  return 0;
+};
+
 export const checkVersion = async (_req: Request, res: Response): Promise<Response> => {
   logger.info("[version-check] Iniciando verificação de versão...");
 
@@ -104,6 +114,20 @@ export const checkVersion = async (_req: Request, res: Response): Promise<Respon
 
   logger.info("[version-check] Respondendo com dados disponíveis.");
 
+  const versionComparison =
+    systemVersion && latestReleaseTag
+      ? compareVersions(systemVersion, latestReleaseTag)
+      : null;
+
+  const versionStatus =
+    versionComparison === null
+      ? "unknown"
+      : versionComparison < 0
+      ? "outdated"
+      : versionComparison === 0
+      ? "updated"
+      : "ahead";
+
   return res.status(200).json({
     localVersion: systemVersion,
     localGitSha: localGitSha ? localGitSha.substring(0, 7) : null,
@@ -113,6 +137,7 @@ export const checkVersion = async (_req: Request, res: Response): Promise<Respon
     commitsBehind,
     pendingCommits,
     upToDate: commitsBehind === 0,
+    versionStatus,
     isLinux: os.platform() === "linux",
     platform: os.platform(),
     githubAvailable: latestReleaseTag !== null,
