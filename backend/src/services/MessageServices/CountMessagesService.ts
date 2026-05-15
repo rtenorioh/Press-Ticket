@@ -20,7 +20,7 @@ const CountMessagesService = async ({
   startDate,
   endDate
 }: Request = {}): Promise<MessageCount[]> => {
-  let dateFilter: any = {};
+  const dateFilter: any = {};
 
   if (startDate && endDate) {
     dateFilter.createdAt = {

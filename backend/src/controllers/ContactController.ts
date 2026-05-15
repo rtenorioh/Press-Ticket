@@ -6,25 +6,29 @@ import CreateContactService from "../services/ContactServices/CreateContactServi
 import DeleteAllContactService from "../services/ContactServices/DeleteAllContactService";
 import DeleteContactService from "../services/ContactServices/DeleteContactService";
 import ExportContactsService from "../services/ContactServices/ExportContactsService";
-import ListContactsService from "../services/ContactServices/ListContactsService";
-import ShowContactService from "../services/ContactServices/ShowContactService";
-import UpdateContactService from "../services/ContactServices/UpdateContactService";
 import GetAboutService from "../services/ContactServices/GetAboutService";
 import GetCommonGroupsService from "../services/ContactServices/GetCommonGroupsService";
 import ListBlockedContactsService from "../services/ContactServices/ListBlockedContactsService";
+import ListContactsService from "../services/ContactServices/ListContactsService";
+import ShowContactService from "../services/ContactServices/ShowContactService";
+import UpdateContactService from "../services/ContactServices/UpdateContactService";
 import UpdateGroupProfilePicService from "../services/ContactServices/UpdateGroupProfilePicService";
 
 import AppError from "../errors/AppError";
+import GetClientIp from "../helpers/GetClientIp";
+import { getWbot } from "../libs/wbot";
+import Whatsapp from "../models/Whatsapp";
+import {
+  ActivityActions,
+  createActivityLog,
+  EntityTypes
+} from "../services/ActivityLogService";
 import GetContactService from "../services/ContactServices/GetContactService";
+import RemoveTagFromContactService from "../services/TagServices/RemoveTagFromContactService";
+import SyncTagsService from "../services/TagServices/SyncTagsService";
 import CheckIsValidContact from "../services/WbotServices/CheckIsValidContact";
 import CheckContactNumber from "../services/WbotServices/CheckNumber";
 import GetProfilePicUrl from "../services/WbotServices/GetProfilePicUrl";
-import SyncTagsService from "../services/TagServices/SyncTagsService";
-import RemoveTagFromContactService from "../services/TagServices/RemoveTagFromContactService";
-import { createActivityLog, ActivityActions, EntityTypes } from "../services/ActivityLogService";
-import Whatsapp from "../models/Whatsapp";
-import { getWbot } from "../libs/wbot";
-import GetClientIp from "../helpers/GetClientIp";
 import { logger } from "../utils/logger";
 
 type IndexQuery = {
@@ -45,12 +49,18 @@ export const getBlockStatus = async (
   const contact = await ShowContactService(contactId);
 
   if (contact.isGroup) {
-    return res.status(400).json({ error: "BLOCK_STATUS_NOT_SUPPORTED_FOR_GROUP" });
+    return res
+      .status(400)
+      .json({ error: "BLOCK_STATUS_NOT_SUPPORTED_FOR_GROUP" });
   }
 
-  let sessionId: number | null = whatsappId ? parseInt(whatsappId as string, 10) : null;
+  let sessionId: number | null = whatsappId
+    ? parseInt(whatsappId as string, 10)
+    : null;
   if (!sessionId || Number.isNaN(sessionId)) {
-    const connected = await Whatsapp.findOne({ where: { status: "CONNECTED", type: "wwebjs" } });
+    const connected = await Whatsapp.findOne({
+      where: { status: "CONNECTED", type: "wwebjs" }
+    });
     sessionId = connected?.id || null;
   }
   if (!sessionId) {
@@ -69,7 +79,9 @@ export const getBlockStatus = async (
 
   try {
     const wContact = await wbot.getContactById(numberId._serialized);
-    return res.status(200).json({ isBlocked: Boolean((wContact as any).isBlocked) });
+    return res
+      .status(200)
+      .json({ isBlocked: Boolean((wContact as any).isBlocked) });
   } catch (err) {
     logger.warn(`Erro ao obter contato do WhatsApp: ${err.message || err}`);
     return res.status(200).json({ isBlocked: false });
@@ -86,12 +98,17 @@ export const blockContact = async (
   const contact = await ShowContactService(contactId);
 
   if (contact.isGroup) {
-    return res.status(400).json({ error: "BLOCK_ACTION_NOT_SUPPORTED_FOR_GROUP" });
+    return res
+      .status(400)
+      .json({ error: "BLOCK_ACTION_NOT_SUPPORTED_FOR_GROUP" });
   }
 
-  let sessionId: number | null = whatsappId && Number.isInteger(whatsappId) ? Number(whatsappId) : null;
+  let sessionId: number | null =
+    whatsappId && Number.isInteger(whatsappId) ? Number(whatsappId) : null;
   if (!sessionId) {
-    const connected = await Whatsapp.findOne({ where: { status: "CONNECTED", type: "wwebjs" } });
+    const connected = await Whatsapp.findOne({
+      where: { status: "CONNECTED", type: "wwebjs" }
+    });
     sessionId = connected?.id || null;
   }
   if (!sessionId) {
@@ -99,7 +116,9 @@ export const blockContact = async (
   }
 
   if (!contact.number) {
-    return res.status(400).json({ error: "Este contato não possui número de telefone" });
+    return res
+      .status(400)
+      .json({ error: "Este contato não possui número de telefone" });
   }
 
   const wbot = getWbot(sessionId);
@@ -114,13 +133,15 @@ export const blockContact = async (
     result = await (wContact as any).block();
   } catch (err) {
     logger.warn(`Erro ao bloquear contato: ${err.message || err}`);
-    return res.status(500).json({ error: "Erro ao bloquear contato no WhatsApp" });
+    return res
+      .status(500)
+      .json({ error: "Erro ao bloquear contato no WhatsApp" });
   }
 
   const logUserId = req.user?.id || 1;
   const clientIp = GetClientIp(req);
   await createActivityLog({
-    userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
+    userId: typeof logUserId === "string" ? parseInt(logUserId) : logUserId,
     action: ActivityActions.UPDATE,
     description: `Contato ${contact.name} (${contact.number}) bloqueado no WhatsApp (sessão ${sessionId})`,
     entityType: EntityTypes.CONTACT,
@@ -142,12 +163,17 @@ export const unblockContact = async (
   const contact = await ShowContactService(contactId);
 
   if (contact.isGroup) {
-    return res.status(400).json({ error: "BLOCK_ACTION_NOT_SUPPORTED_FOR_GROUP" });
+    return res
+      .status(400)
+      .json({ error: "BLOCK_ACTION_NOT_SUPPORTED_FOR_GROUP" });
   }
 
-  let sessionId: number | null = whatsappId && Number.isInteger(whatsappId) ? Number(whatsappId) : null;
+  let sessionId: number | null =
+    whatsappId && Number.isInteger(whatsappId) ? Number(whatsappId) : null;
   if (!sessionId) {
-    const connected = await Whatsapp.findOne({ where: { status: "CONNECTED", type: "wwebjs" } });
+    const connected = await Whatsapp.findOne({
+      where: { status: "CONNECTED", type: "wwebjs" }
+    });
     sessionId = connected?.id || null;
   }
   if (!sessionId) {
@@ -155,7 +181,9 @@ export const unblockContact = async (
   }
 
   if (!contact.number) {
-    return res.status(400).json({ error: "Este contato não possui número de telefone" });
+    return res
+      .status(400)
+      .json({ error: "Este contato não possui número de telefone" });
   }
 
   const wbot = getWbot(sessionId);
@@ -170,12 +198,14 @@ export const unblockContact = async (
     result = await (wContact as any).unblock();
   } catch (err) {
     logger.warn(`Erro ao desbloquear contato: ${err.message || err}`);
-    return res.status(500).json({ error: "Erro ao desbloquear contato no WhatsApp" });
+    return res
+      .status(500)
+      .json({ error: "Erro ao desbloquear contato no WhatsApp" });
   }
 
   const logUserId = req.user?.id || 1;
   await createActivityLog({
-    userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
+    userId: typeof logUserId === "string" ? parseInt(logUserId) : logUserId,
     action: ActivityActions.UPDATE,
     description: `Contato ${contact.name} (${contact.number}) desbloqueado no WhatsApp (sessão ${sessionId})`,
     entityType: EntityTypes.CONTACT,
@@ -221,7 +251,8 @@ interface ContactData {
 }
 
 export const index = async (req: Request, res: Response): Promise<Response> => {
-  const { searchParam, pageNumber, tags, isGroup, status } = req.query as IndexQuery;
+  const { searchParam, pageNumber, tags, isGroup, status } =
+    req.query as IndexQuery;
 
   const tagIds = tags ? tags.split(",").map(tag => Number(tag)) : [];
 
@@ -243,7 +274,9 @@ export const getContact = async (
   const { name, number, address, email } = req.body as IndexGetContactQuery;
 
   if (!name && !number && !address && !email) {
-    return res.status(400).json({ error: "Pelo menos um parâmetro de busca deve ser fornecido" });
+    return res
+      .status(400)
+      .json({ error: "Pelo menos um parâmetro de busca deve ser fornecido" });
   }
 
   try {
@@ -280,7 +313,7 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     throw new AppError(err.message);
   }
 
-  const isApiRequest = req.originalUrl.includes('/v1/');
+  const isApiRequest = req.originalUrl.includes("/v1/");
   let validNumber: string = newContact.number;
   let validNumberLid: string | null = null;
   let profilePicUrl: string | undefined = undefined;
@@ -306,11 +339,11 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     }
   }
 
-  let { name } = newContact;
-  let number = validNumber;
-  let { address } = newContact;
-  let { email } = newContact;
-  let { extraInfo } = newContact;
+  const { name } = newContact;
+  const number = validNumber;
+  const { address } = newContact;
+  const { email } = newContact;
+  const { extraInfo } = newContact;
   const {
     birthdate,
     gender,
@@ -351,7 +384,7 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
   const logUserId = req.user?.id || 1;
 
   await createActivityLog({
-    userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
+    userId: typeof logUserId === "string" ? parseInt(logUserId) : logUserId,
     action: ActivityActions.CREATE,
     description: `Contato ${contact.name} (${contact.number}) criado`,
     entityType: EntityTypes.CONTACT,
@@ -408,7 +441,7 @@ export const update = async (
   const logUserId = req.user?.id || 1;
 
   await createActivityLog({
-    userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
+    userId: typeof logUserId === "string" ? parseInt(logUserId) : logUserId,
     action: ActivityActions.UPDATE,
     description: `Contato ${contact.name} (${contact.number}) atualizado`,
     entityType: EntityTypes.CONTACT,
@@ -437,7 +470,7 @@ export const remove = async (
   const logUserId = req.user?.id || 1;
 
   await createActivityLog({
-    userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
+    userId: typeof logUserId === "string" ? parseInt(logUserId) : logUserId,
     action: ActivityActions.DELETE,
     description: `Contato ${contactToDelete.name} (${contactToDelete.number}) excluído`,
     entityType: EntityTypes.CONTACT,
@@ -467,7 +500,7 @@ export const removeAll = async (
   const clientIp = GetClientIp(req);
 
   await createActivityLog({
-    userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
+    userId: typeof logUserId === "string" ? parseInt(logUserId) : logUserId,
     action: ActivityActions.DELETE,
     description: `Todos os contatos foram excluídos`,
     entityType: EntityTypes.CONTACT,
@@ -489,11 +522,13 @@ export const updateTags = async (
   const { tags } = req.body;
 
   const schema = Yup.object().shape({
-    tags: Yup.array().of(
-      Yup.object().shape({
-        id: Yup.number().required()
-      })
-    ).required()
+    tags: Yup.array()
+      .of(
+        Yup.object().shape({
+          id: Yup.number().required()
+        })
+      )
+      .required()
   });
 
   try {
@@ -511,7 +546,7 @@ export const updateTags = async (
 
   if (contact) {
     await createActivityLog({
-      userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
+      userId: typeof logUserId === "string" ? parseInt(logUserId) : logUserId,
       action: ActivityActions.UPDATE,
       description: `Tags do contato ${contact.name} atualizadas`,
       entityType: EntityTypes.CONTACT,
@@ -546,7 +581,7 @@ export const removeTag = async (
   const logUserId = req.user?.id || 1;
 
   await createActivityLog({
-    userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
+    userId: typeof logUserId === "string" ? parseInt(logUserId) : logUserId,
     action: ActivityActions.UPDATE,
     description: `Tag ${tagId} removida do contato ${contact.name}`,
     entityType: EntityTypes.CONTACT,
@@ -587,7 +622,11 @@ export const exportContacts = async (
 
     const exportData = contacts.map(contact => {
       let extraInfoFormatted = "";
-      if (contact.extraInfo && Array.isArray(contact.extraInfo) && contact.extraInfo.length > 0) {
+      if (
+        contact.extraInfo &&
+        Array.isArray(contact.extraInfo) &&
+        contact.extraInfo.length > 0
+      ) {
         extraInfoFormatted = contact.extraInfo
           .map(field => `${field.name}: ${field.value}`)
           .join(" | ");
@@ -599,7 +638,9 @@ export const exportContacts = async (
         number: contact.number || "",
         email: contact.email || "",
         cpf: contact.cpf || "",
-        birthdate: contact.birthdate ? new Date(contact.birthdate).toLocaleDateString('pt-BR') : "",
+        birthdate: contact.birthdate
+          ? new Date(contact.birthdate).toLocaleDateString("pt-BR")
+          : "",
         gender: contact.gender || "",
         status: contact.status || "",
         address: contact.address || "",
@@ -614,16 +655,22 @@ export const exportContacts = async (
         profilePicUrl: contact.profilePicUrl || "",
         extraInfo: extraInfoFormatted,
         tags: contact.tags ? contact.tags.map(tag => tag.name).join(", ") : "",
-        createdAt: contact.createdAt ? new Date(contact.createdAt).toLocaleDateString('pt-BR') : "",
-        updatedAt: contact.updatedAt ? new Date(contact.updatedAt).toLocaleDateString('pt-BR') : "",
-        lastContactAt: contact.lastContactAt ? new Date(contact.lastContactAt).toLocaleDateString('pt-BR') : ""
+        createdAt: contact.createdAt
+          ? new Date(contact.createdAt).toLocaleDateString("pt-BR")
+          : "",
+        updatedAt: contact.updatedAt
+          ? new Date(contact.updatedAt).toLocaleDateString("pt-BR")
+          : "",
+        lastContactAt: contact.lastContactAt
+          ? new Date(contact.lastContactAt).toLocaleDateString("pt-BR")
+          : ""
       };
     });
 
     // LOG: Exportar contatos
     try {
       await createActivityLog({
-        userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
+        userId: typeof logUserId === "string" ? parseInt(logUserId) : logUserId,
         action: ActivityActions.EXPORT,
         description: `${contacts.length} contato(s) exportado(s)`,
         entityType: EntityTypes.CONTACT,
@@ -633,8 +680,8 @@ export const exportContacts = async (
           contactCount: contacts.length,
           hasSearchParam: !!searchParam,
           hasTags: tagIds.length > 0,
-          isGroup: isGroup === 'true',
-          status: status || 'all'
+          isGroup: isGroup === "true",
+          status: status || "all"
         }
       });
     } catch (error) {

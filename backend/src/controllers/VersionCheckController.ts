@@ -280,6 +280,7 @@ export const runSystemUpdate = async (req: Request, res: Response): Promise<Resp
         const expectScript = [
           "#!/usr/bin/expect -f",
           "set timeout 600",
+          "log_user 1",
           "",
           "set scriptPath   $env(UPDATE_SCRIPT_PATH)",
           "set sudoPass     $env(UPDATE_SUDO_PASSWORD)",
@@ -293,15 +294,19 @@ export const runSystemUpdate = async (req: Request, res: Response): Promise<Resp
           "        send -- [format \"%s\\r\" $sudoPass]",
           "        exp_continue",
           "    }",
-          "    \"sistema operacional\" {",
+          "    -re {sistema operacional antes de continuar} {",
           "        send -- [format \"%s\\r\" $osAns]",
           "        exp_continue",
           "    }",
-          "    \"Node.js\" {",
+          "    -re {Deseja atualizar o Node} {",
           "        send -- \"n\\r\"",
           "        exp_continue",
           "    }",
-          "    \"Chrome\" {",
+          "    -re {Deseja atualizar o Google Chrome} {",
+          "        send -- [format \"%s\\r\" $chromeAns]",
+          "        exp_continue",
+          "    }",
+          "    -re {Deseja instalar o Google Chrome} {",
           "        send -- [format \"%s\\r\" $chromeAns]",
           "        exp_continue",
           "    }",
@@ -320,6 +325,10 @@ export const runSystemUpdate = async (req: Request, res: Response): Promise<Resp
         }
 
         io.emit("systemUpdateLog", { type: "stdout", message: "📝 Script preparado. Iniciando...\n" });
+        io.emit("systemUpdateLog", {
+          type: "stdout",
+          message: `🔧 Respostas configuradas — SO: ${osAnswer} | Chrome: ${browserAnswer}`,
+        });
 
         let hasError = false;
 

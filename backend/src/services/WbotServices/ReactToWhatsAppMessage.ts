@@ -88,7 +88,7 @@ const ReactToWhatsAppMessage = async ({ messageId, emoji }: ReactParams): Promis
 
   let result: any = null;
   try {
-    result = await wbot.pupPage.evaluate((msgId: string, serialized: string | null, altSerialized: string | null, reaction: string, remote: string | null) => {
+    result = await wbot.pupPage.evaluate((msgId: string, serialized: string | null, altSerialized: string | null, reaction: string, remote?: string | null) => {
     const logs: string[] = [];
     try {
       const Store = (window as any).Store;

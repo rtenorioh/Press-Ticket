@@ -147,7 +147,7 @@ const HubMessageListener = async (
   } = message as HubInMessage;
 
   try {
-    let contact = await FindOrCreateContactService({
+    const contact = await FindOrCreateContactService({
       ...visitor,
       from,
       group,
@@ -200,7 +200,7 @@ const HubMessageListener = async (
 
     if (ticket) {
       let newStatus = ticket.status;
-      let newQueueId = ticket.queueId;
+      const newQueueId = ticket.queueId;
 
       if (ticket.status === "closed") {
         newStatus = "pending";

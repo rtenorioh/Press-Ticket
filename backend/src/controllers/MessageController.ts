@@ -1,35 +1,45 @@
 import { Request, Response } from "express";
-import SetTicketMessagesAsRead from "../helpers/SetTicketMessagesAsRead";
-import { getIO } from "../libs/socket";
-import Message from "../models/Message";
-import CountMessagesService from "../services/MessageServices/CountMessagesService";
-import ListMessagesService from "../services/MessageServices/ListMessagesService";
-import SearchMessagesInTicketService from "../services/MessageServices/SearchMessagesInTicketService";
-import MarkMessagesAsReadService from "../services/MessageServices/MarkMessagesAsReadService";
-import DeleteWhatsAppMessage from "../services/WbotServices/DeleteWhatsAppMessage";
-import EditWhatsAppMessage from "../services/WbotServices/EditWhatsAppMessage";
-import SendWhatsAppMedia from "../services/WbotServices/SendWhatsAppMedia";
-import SendWhatsAppMessage from "../services/WbotServices/SendWhatsAppMessage";
-import SendWhatsAppContacts from "../services/WbotServices/SendWhatsAppContacts";
-import SendPollService from "../services/WbotServices/SendPollService";
-import PresenceService from "../services/WbotServices/PresenceService";
-import ShowTicketService from "../services/TicketServices/ShowTicketService";
+import GetClientIp from "../helpers/GetClientIp";
 import GetTicketWbot from "../helpers/GetTicketWbot";
 import SerializeWbotMsgId from "../helpers/SerializeWbotMsgId";
+import SetTicketMessagesAsRead from "../helpers/SetTicketMessagesAsRead";
+import { getIO } from "../libs/socket";
 import Contact from "../models/Contact";
-import Ticket from "../models/Ticket";
+import Message from "../models/Message";
 import MessageReaction from "../models/MessageReaction";
+import Ticket from "../models/Ticket";
+import {
+  ActivityActions,
+  createActivityLog,
+  EntityTypes
+} from "../services/ActivityLogService";
+import CountMessagesService from "../services/MessageServices/CountMessagesService";
+import ListMessagesService from "../services/MessageServices/ListMessagesService";
+import MarkMessagesAsReadService from "../services/MessageServices/MarkMessagesAsReadService";
+import SearchMessagesInTicketService from "../services/MessageServices/SearchMessagesInTicketService";
+import ShowTicketService from "../services/TicketServices/ShowTicketService";
+import DeleteWhatsAppMessage from "../services/WbotServices/DeleteWhatsAppMessage";
+import EditWhatsAppMessage from "../services/WbotServices/EditWhatsAppMessage";
+import PresenceService from "../services/WbotServices/PresenceService";
 import ReactToWhatsAppMessage from "../services/WbotServices/ReactToWhatsAppMessage";
-import { createActivityLog, ActivityActions, EntityTypes } from "../services/ActivityLogService";
-import GetClientIp from "../helpers/GetClientIp";
+import SendPollService from "../services/WbotServices/SendPollService";
+import SendWhatsAppContacts from "../services/WbotServices/SendWhatsAppContacts";
+import SendWhatsAppMedia from "../services/WbotServices/SendWhatsAppMedia";
+import SendWhatsAppMessage from "../services/WbotServices/SendWhatsAppMessage";
 import { logger } from "../utils/logger";
 
 type IndexQuery = {
   pageNumber: string;
 };
-export const reactMessage = async (req: Request, res: Response): Promise<Response> => {
+export const reactMessage = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
   const { messageId } = req.params;
-  const { emoji, removeEmoji } = req.body as { emoji: string, removeEmoji?: string };
+  const { emoji, removeEmoji } = req.body as {
+    emoji: string;
+    removeEmoji?: string;
+  };
 
   if (typeof emoji !== "string") {
     return res.status(400).json({ error: "Campo 'emoji' é obrigatório" });
@@ -43,7 +53,7 @@ export const reactMessage = async (req: Request, res: Response): Promise<Respons
     io.to(ticketId.toString()).emit("messageReaction", {
       action,
       messageId,
-      emoji: action === "remove" ? (removeEmoji || "") : emoji
+      emoji: action === "remove" ? removeEmoji || "" : emoji
     });
 
     return res.status(200).json({ success: true });
@@ -53,7 +63,10 @@ export const reactMessage = async (req: Request, res: Response): Promise<Respons
   }
 };
 
-export const getReactions = async (req: Request, res: Response): Promise<Response> => {
+export const getReactions = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
   const { messageId } = req.params;
 
   try {
@@ -89,38 +102,50 @@ export const getReactions = async (req: Request, res: Response): Promise<Respons
           groupedReactions[reaction.emoji].hasReactionByMe = true;
         }
 
-        let contactName = isMyReaction ? 'Você' : 'Contato';
+        let contactName = isMyReaction ? "Você" : "Contato";
         let profilePicUrl = null;
         let phoneNumber = null;
 
         try {
-          if (reaction.senderId.includes('@lid')) {
+          if (reaction.senderId.includes("@lid")) {
             try {
-              const contact = await (wbot as any).getContactById(reaction.senderId);
+              const contact = await (wbot as any).getContactById(
+                reaction.senderId
+              );
               if (contact) {
                 phoneNumber = contact.number || contact.id?.user;
                 if (!isMyReaction) {
-                  contactName = contact.name || contact.pushname || contact.shortName || phoneNumber || 'Contato';
+                  contactName =
+                    contact.name ||
+                    contact.pushname ||
+                    contact.shortName ||
+                    phoneNumber ||
+                    "Contato";
                 }
 
                 try {
-                  profilePicUrl = await (wbot as any).getProfilePicUrl(reaction.senderId);
+                  profilePicUrl = await (wbot as any).getProfilePicUrl(
+                    reaction.senderId
+                  );
                 } catch (e) {
-                  logger.error(`[getReactions] Erro ao buscar foto do @lid: ${e}`);
+                  logger.error(
+                    `[getReactions] Erro ao buscar foto do @lid: ${e}`
+                  );
                 }
-
               }
             } catch (e) {
-              logger.error(`[getReactions] Erro ao buscar informações do @lid: ${e}`);
+              logger.error(
+                `[getReactions] Erro ao buscar informações do @lid: ${e}`
+              );
             }
           } else {
             phoneNumber = reaction.senderId
-              .replace('@c.us', '')
-              .replace('@s.whatsapp.net', '')
-              .replace('@g.us', '');
+              .replace("@c.us", "")
+              .replace("@s.whatsapp.net", "")
+              .replace("@g.us", "");
           }
 
-          if (phoneNumber && !isMyReaction && contactName === 'Contato') {
+          if (phoneNumber && !isMyReaction && contactName === "Contato") {
             const contact = await Contact.findOne({
               where: { number: phoneNumber }
             });
@@ -170,15 +195,21 @@ export const getReactions = async (req: Request, res: Response): Promise<Respons
     } catch {}
 
     const serializedId = (() => {
-      try { return SerializeWbotMsgId(ticket as any, message as any); } catch { return null; }
+      try {
+        return SerializeWbotMsgId(ticket as any, message as any);
+      } catch {
+        return null;
+      }
     })();
 
     const altSerializedId = (() => {
       try {
         if (!remoteJid) return null;
-        const from = message.fromMe ? 'true' : 'false';
+        const from = message.fromMe ? "true" : "false";
         return `${from}_${remoteJid}_${message.id}`;
-      } catch { return null; }
+      } catch {
+        return null;
+      }
     })();
 
     const tryGetReactionsNode = async (id?: string | null) => {
@@ -194,157 +225,200 @@ export const getReactions = async (req: Request, res: Response): Promise<Respons
     };
 
     let nodeReactions = await tryGetReactionsNode(serializedId);
-    if (!nodeReactions) nodeReactions = await tryGetReactionsNode(altSerializedId);
+    if (!nodeReactions)
+      nodeReactions = await tryGetReactionsNode(altSerializedId);
     if (!nodeReactions) nodeReactions = await tryGetReactionsNode(messageId);
     if (Array.isArray(nodeReactions) && nodeReactions.length > 0) {
       return res.status(200).json({ reactions: nodeReactions });
     }
 
-    const reactions = await wbot.pupPage.evaluate((innerId: string, sId: string | null, altId: string | null, isGroup: boolean, remote: string | null) => {
-      const logs: string[] = [];
-      try {
-        const Store = (window as any).Store;
-        const tryIds = [sId, altId, innerId].filter(Boolean) as string[];
+    const reactions = await wbot.pupPage.evaluate(
+      (
+        innerId: string,
+        sId: string | null,
+        altId: string | null,
+        _loadAll?: boolean | null,
+        remote?: string | null
+      ) => {
+        const logs: string[] = [];
+        try {
+          const Store = (window as any).Store;
+          const tryIds = [sId, altId, innerId].filter(Boolean) as string[];
 
-        const processReactions = (arr: any[]) => {
-          return arr.map((reaction: any) => {
-            const processed = { ...reaction };
-            if (processed.senders && Array.isArray(processed.senders)) {
-              processed.senders = processed.senders.map((sender: any) => {
-                const senderId = sender?.id?._serialized || sender?.id?.user || sender?.id;
-                let contactName = 'Contato';
+          const processReactions = (arr: any[]) => {
+            return arr.map((reaction: any) => {
+              const processed = { ...reaction };
+              if (processed.senders && Array.isArray(processed.senders)) {
+                processed.senders = processed.senders.map((sender: any) => {
+                  const senderId =
+                    sender?.id?._serialized || sender?.id?.user || sender?.id;
+                  let contactName = "Contato";
 
-                if (senderId) {
-                  try {
-                    const contact = Store?.Contact?.get?.(senderId);
-                    if (contact) {
-                      contactName = contact.name || contact.pushname || contact.verifiedName || senderId;
-                    }
-                  } catch (e) {}
-                }
-
-                return {
-                  ...sender,
-                  contactName
-                };
-              });
-            }
-            return processed;
-          });
-        };
-
-        const tryGetReactionsFromMsg = (id: string) => {
-          const msg = Store?.Msg?.get?.(id);
-          if (!msg) {
-            return null;
-          }
-          const col = msg?.reactions || msg?.reactionCollection;
-          if (!col) {
-            return null;
-          }
-          const arr = col.serialize ? col.serialize() : (col.getModelsArray ? col.getModelsArray() : (Array.isArray(col) ? col : []));
-          if (Array.isArray(arr) && arr.length > 0) {
-            return processReactions(arr);
-          }
-          return null;
-        };
-
-        for (const id of tryIds) {
-          const result = tryGetReactionsFromMsg(id);
-          if (result) {
-            return { reactions: result, logs };
-          }
-        }
-
-        if (remote && innerId) {
-          try {
-            const possibleIds = [
-              `true_${remote}_${innerId}`,
-              `false_${remote}_${innerId}`,
-              sId,
-              altId
-            ].filter(Boolean);
-
-            for (const fullId of possibleIds) {
-              const msg = Store?.Msg?.get?.(fullId);
-              if (msg) {
-                const col = msg?.reactions || msg?.reactionCollection;
-                if (col) {
-                  const arr = col.serialize ? col.serialize() : (col.getModelsArray ? col.getModelsArray() : (Array.isArray(col) ? col : []));
-
-                  if (Array.isArray(arr) && arr.length > 0) {
-                    const processed = processReactions(arr);
-                    return { reactions: processed, logs };
-                  }
-                } else {
-                  logs.push(`Mensagem encontrada mas sem reações`);
-                }
-              }
-            }
-
-            try {
-              const allMsgs = Store?.Msg?.models || [];
-
-              const partialMatches = allMsgs.filter((m: any) => {
-                const sid = m?.id?._serialized || '';
-                const iid = m?.id?.id || '';
-                return sid.includes(innerId) || iid.includes(innerId);
-              });
-
-              if (partialMatches.length > 0) {
-
-                const firstMatch = partialMatches[0];
-                const col = firstMatch?.reactions || firstMatch?.reactionCollection;
-                if (col) {
-                  const arr = col.serialize ? col.serialize() : (col.getModelsArray ? col.getModelsArray() : (Array.isArray(col) ? col : []));
-
-                  if (Array.isArray(arr) && arr.length > 0) {
-                    const processed = processReactions(arr);
-                    return { reactions: processed, logs };
-                  }
-                }
-              }
-
-              if (allMsgs.length === 0 && remote) {
-                const chat = Store?.Chat?.get?.(remote);
-                if (chat) {
-
-                  for (const tryId of possibleIds) {
+                  if (senderId) {
                     try {
+                      const contact = Store?.Contact?.get?.(senderId);
+                      if (contact) {
+                        contactName =
+                          contact.name ||
+                          contact.pushname ||
+                          contact.verifiedName ||
+                          senderId;
+                      }
+                    } catch (e) {}
+                  }
 
-                      const msgInChat = chat.msgs?.get?.(tryId);
-                      if (msgInChat) {
-                        const col = msgInChat?.reactions || msgInChat?.reactionCollection;
-                        if (col) {
-                          const arr = col.serialize ? col.serialize() : (col.getModelsArray ? col.getModelsArray() : (Array.isArray(col) ? col : []));
-                          if (Array.isArray(arr) && arr.length > 0) {
-                            const processed = processReactions(arr);
-                            return { reactions: processed, logs };
+                  return {
+                    ...sender,
+                    contactName
+                  };
+                });
+              }
+              return processed;
+            });
+          };
+
+          const tryGetReactionsFromMsg = (id: string) => {
+            const msg = Store?.Msg?.get?.(id);
+            if (!msg) {
+              return null;
+            }
+            const col = msg?.reactions || msg?.reactionCollection;
+            if (!col) {
+              return null;
+            }
+            const arr = col.serialize
+              ? col.serialize()
+              : col.getModelsArray
+                ? col.getModelsArray()
+                : Array.isArray(col)
+                  ? col
+                  : [];
+            if (Array.isArray(arr) && arr.length > 0) {
+              return processReactions(arr);
+            }
+            return null;
+          };
+
+          for (const id of tryIds) {
+            const result = tryGetReactionsFromMsg(id);
+            if (result) {
+              return { reactions: result, logs };
+            }
+          }
+
+          if (remote && innerId) {
+            try {
+              const possibleIds = [
+                `true_${remote}_${innerId}`,
+                `false_${remote}_${innerId}`,
+                sId,
+                altId
+              ].filter(Boolean);
+
+              for (const fullId of possibleIds) {
+                const msg = Store?.Msg?.get?.(fullId);
+                if (msg) {
+                  const col = msg?.reactions || msg?.reactionCollection;
+                  if (col) {
+                    const arr = col.serialize
+                      ? col.serialize()
+                      : col.getModelsArray
+                        ? col.getModelsArray()
+                        : Array.isArray(col)
+                          ? col
+                          : [];
+
+                    if (Array.isArray(arr) && arr.length > 0) {
+                      const processed = processReactions(arr);
+                      return { reactions: processed, logs };
+                    }
+                  } else {
+                    logs.push(`Mensagem encontrada mas sem reações`);
+                  }
+                }
+              }
+
+              try {
+                const allMsgs = Store?.Msg?.models || [];
+
+                const partialMatches = allMsgs.filter((m: any) => {
+                  const sid = m?.id?._serialized || "";
+                  const iid = m?.id?.id || "";
+                  return sid.includes(innerId) || iid.includes(innerId);
+                });
+
+                if (partialMatches.length > 0) {
+                  const firstMatch = partialMatches[0];
+                  const col =
+                    firstMatch?.reactions || firstMatch?.reactionCollection;
+                  if (col) {
+                    const arr = col.serialize
+                      ? col.serialize()
+                      : col.getModelsArray
+                        ? col.getModelsArray()
+                        : Array.isArray(col)
+                          ? col
+                          : [];
+
+                    if (Array.isArray(arr) && arr.length > 0) {
+                      const processed = processReactions(arr);
+                      return { reactions: processed, logs };
+                    }
+                  }
+                }
+
+                if (allMsgs.length === 0 && remote) {
+                  const chat = Store?.Chat?.get?.(remote);
+                  if (chat) {
+                    for (const tryId of possibleIds) {
+                      try {
+                        const msgInChat = chat.msgs?.get?.(tryId);
+                        if (msgInChat) {
+                          const col =
+                            msgInChat?.reactions ||
+                            msgInChat?.reactionCollection;
+                          if (col) {
+                            const arr = col.serialize
+                              ? col.serialize()
+                              : col.getModelsArray
+                                ? col.getModelsArray()
+                                : Array.isArray(col)
+                                  ? col
+                                  : [];
+                            if (Array.isArray(arr) && arr.length > 0) {
+                              const processed = processReactions(arr);
+                              return { reactions: processed, logs };
+                            }
                           }
                         }
+                      } catch (e) {
+                        logs.push(`Erro ao buscar ${tryId} no chat: ${e}`);
                       }
-                    } catch (e) {
-                      logs.push(`Erro ao buscar ${tryId} no chat: ${e}`);
                     }
                   }
                 }
+              } catch (e) {
+                logs.push(`Erro no debug de mensagens: ${e}`);
               }
             } catch (e) {
-              logs.push(`Erro no debug de mensagens: ${e}`);
+              logs.push(`Erro ao buscar com ID completo: ${e}`);
             }
-          } catch (e) {
-            logs.push(`Erro ao buscar com ID completo: ${e}`);
           }
+
+          return { reactions: [], logs };
+        } catch (e) {
+          logs.push(`Erro geral: ${e}`);
+          return { reactions: [], logs };
         }
+      },
+      messageId,
+      serializedId,
+      altSerializedId,
+      ticket.isGroup,
+      remoteJid
+    );
 
-        return { reactions: [], logs };
-      } catch (e) {
-        logs.push(`Erro geral: ${e}`);
-        return { reactions: [], logs };
-      }
-    }, messageId, serializedId, altSerializedId, ticket.isGroup, remoteJid);
-
-    const result = reactions as { reactions: any[], logs: string[] };
+    const result = reactions as { reactions: any[]; logs: string[] };
 
     return res.status(200).json({ reactions: result.reactions });
   } catch (error: any) {
@@ -373,23 +447,42 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
   return res.json({ count, messages, ticket, hasMore });
 };
 
-export const searchInTicket = async (req: Request, res: Response): Promise<Response> => {
+export const searchInTicket = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
   const { ticketId } = req.params;
-  const { query, pageNumber } = req.query as { query: string; pageNumber?: string };
+  const { query, pageNumber } = req.query as {
+    query: string;
+    pageNumber?: string;
+  };
 
   try {
-    const result = await SearchMessagesInTicketService({ ticketId, query, pageNumber });
+    const result = await SearchMessagesInTicketService({
+      ticketId,
+      query,
+      pageNumber
+    });
     return res.json(result);
   } catch (error: any) {
-    return res.status(400).json({ error: error.message || "Erro ao buscar mensagens" });
+    return res
+      .status(400)
+      .json({ error: error.message || "Erro ao buscar mensagens" });
   }
 };
 
-export const listStarred = async (req: Request, res: Response): Promise<Response> => {
+export const listStarred = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
   const { ticketId } = req.params;
 
   const messages = await Message.findAll({
-    where: { ticketId: parseInt(ticketId, 10), isStarred: true, isDeleted: false },
+    where: {
+      ticketId: parseInt(ticketId, 10),
+      isStarred: true,
+      isDeleted: false
+    },
     include: [{ model: Contact, as: "contact", attributes: ["name"] }],
     order: [["createdAt", "ASC"]]
   });
@@ -408,12 +501,13 @@ export const listStarred = async (req: Request, res: Response): Promise<Response
 
 export const store = async (req: Request, res: Response): Promise<Response> => {
   const { ticketId } = req.params;
-  let { body, quotedMsg, mentions, sendAsDocument, compressVideo }: any = req.body;
+  const { body, quotedMsg, sendAsDocument, compressVideo }: any = req.body;
+  let { mentions } = req.body;
   const medias = req.files as Express.Multer.File[];
   const logUserId = req.user?.id || 1;
   const clientIp = GetClientIp(req);
 
-  if (mentions && typeof mentions === 'string') {
+  if (mentions && typeof mentions === "string") {
     try {
       mentions = JSON.parse(mentions);
     } catch (e) {
@@ -422,15 +516,17 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     }
   }
 
-
-  const shouldSendAsDocument = sendAsDocument === 'true' || sendAsDocument === true;
-  const shouldCompressVideo = compressVideo === 'true' || compressVideo === true;
+  const shouldSendAsDocument =
+    sendAsDocument === "true" || sendAsDocument === true;
+  const shouldCompressVideo =
+    compressVideo === "true" || compressVideo === true;
 
   const ticket = await ShowTicketService(ticketId);
 
   if (ticket.whatsapp?.type && ticket.whatsapp.type !== "wwebjs") {
     return res.status(400).json({
-      error: "Este ticket pertence a um canal Hub. Use o endpoint /hub-message/:ticketId"
+      error:
+        "Este ticket pertence a um canal Hub. Use o endpoint /hub-message/:ticketId"
     });
   }
 
@@ -460,7 +556,7 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     // LOG: Mensagem com mídia enviada
     try {
       await createActivityLog({
-        userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
+        userId: typeof logUserId === "string" ? parseInt(logUserId) : logUserId,
         action: ActivityActions.SEND,
         description: `Mensagem com ${medias.length} mídia(s) enviada no ticket #${ticketId}`,
         entityType: EntityTypes.TICKET,
@@ -468,7 +564,7 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
         ip: clientIp,
         additionalData: {
           ticketId: parseInt(ticketId),
-          messageType: 'media',
+          messageType: "media",
           mediaCount: medias.length,
           mediaTypes: medias.map(m => m.mimetype),
           contactId: ticket.contactId,
@@ -480,7 +576,12 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
       logger.error(`Erro ao criar log de envio de mídia: ${error}`);
     }
   } else {
-    const sentMessage = await SendWhatsAppMessage({ body, ticket, quotedMsg, mentions });
+    const sentMessage = await SendWhatsAppMessage({
+      body,
+      ticket,
+      quotedMsg,
+      mentions
+    });
     if (sentMessage) {
       messageId = sentMessage.id.id;
     }
@@ -488,7 +589,7 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     // LOG: Mensagem de texto enviada
     try {
       await createActivityLog({
-        userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
+        userId: typeof logUserId === "string" ? parseInt(logUserId) : logUserId,
         action: ActivityActions.SEND,
         description: `Mensagem enviada no ticket #${ticketId}`,
         entityType: EntityTypes.TICKET,
@@ -496,10 +597,14 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
         ip: clientIp,
         additionalData: {
           ticketId: parseInt(ticketId),
-          messageType: 'text',
+          messageType: "text",
           messageLength: body?.length || 0,
           hasQuote: !!quotedMsg,
-          hasMentions: !!(mentions && Array.isArray(mentions) && mentions.length > 0),
+          hasMentions: !!(
+            mentions &&
+            Array.isArray(mentions) &&
+            mentions.length > 0
+          ),
           contactId: ticket.contactId
         }
       });
@@ -525,7 +630,7 @@ export const edit = async (req: Request, res: Response): Promise<Response> => {
   // LOG: Mensagem editada
   try {
     await createActivityLog({
-      userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
+      userId: typeof logUserId === "string" ? parseInt(logUserId) : logUserId,
       action: ActivityActions.EDIT,
       description: `Mensagem editada no ticket #${message.ticketId}`,
       entityType: EntityTypes.TICKET,
@@ -568,7 +673,7 @@ export const remove = async (
   // LOG: Mensagem excluída
   try {
     await createActivityLog({
-      userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
+      userId: typeof logUserId === "string" ? parseInt(logUserId) : logUserId,
       action: ActivityActions.DELETE,
       description: `Mensagem excluída do ticket #${message.ticketId}`,
       entityType: EntityTypes.TICKET,
@@ -594,7 +699,10 @@ export const remove = async (
   return res.send();
 };
 
-export const markAsRead = async (req: Request, res: Response): Promise<Response> => {
+export const markAsRead = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
   const { ticketId } = req.params;
 
   try {
@@ -602,20 +710,28 @@ export const markAsRead = async (req: Request, res: Response): Promise<Response>
 
     if (ticket.status === "open") {
       await MarkMessagesAsReadService({ ticketId });
-      return res.status(200).json({ message: "Mensagens marcadas como lidas com sucesso" });
+      return res
+        .status(200)
+        .json({ message: "Mensagens marcadas como lidas com sucesso" });
     } else {
       return res.status(400).json({
-        error: "Não é possível marcar mensagens como lidas. Ticket deve estar aceito (status 'open')",
+        error:
+          "Não é possível marcar mensagens como lidas. Ticket deve estar aceito (status 'open')",
         currentStatus: ticket.status
       });
     }
   } catch (error) {
     logger.error(`Erro ao marcar mensagens como lidas: ${error}`);
-    return res.status(500).json({ error: "Erro ao marcar mensagens como lidas" });
+    return res
+      .status(500)
+      .json({ error: "Erro ao marcar mensagens como lidas" });
   }
 };
 
-export const sendContacts = async (req: Request, res: Response): Promise<Response> => {
+export const sendContacts = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
   const { ticketId } = req.params;
   const { contacts } = req.body;
   const logUserId = req.user?.id || 1;
@@ -638,7 +754,7 @@ export const sendContacts = async (req: Request, res: Response): Promise<Respons
     // LOG: Contatos enviados
     try {
       await createActivityLog({
-        userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
+        userId: typeof logUserId === "string" ? parseInt(logUserId) : logUserId,
         action: ActivityActions.SEND,
         description: `${contacts.length} contato(s) enviado(s) no ticket #${ticketId}`,
         entityType: EntityTypes.TICKET,
@@ -646,7 +762,7 @@ export const sendContacts = async (req: Request, res: Response): Promise<Respons
         ip: clientIp,
         additionalData: {
           ticketId: parseInt(ticketId),
-          messageType: 'vcard',
+          messageType: "vcard",
           contactCount: contacts.length,
           contactIds: contacts.map((c: any) => c.id)
         }
@@ -677,11 +793,14 @@ export const forwardMessages = async (
     let ticket;
 
     if (contactId) {
-      const FindOrCreateTicketService = require("../services/TicketServices/FindOrCreateTicketService").default;
-      const ShowContactService = require("../services/ContactServices/ShowContactService").default;
+      const FindOrCreateTicketService =
+        require("../services/TicketServices/FindOrCreateTicketService").default;
+      const ShowContactService =
+        require("../services/ContactServices/ShowContactService").default;
 
       const contact = await ShowContactService(contactId);
-      const GetDefaultWhatsApp = require("../helpers/GetDefaultWhatsApp").default;
+      const GetDefaultWhatsApp =
+        require("../helpers/GetDefaultWhatsApp").default;
       const whatsapp = await GetDefaultWhatsApp();
 
       ticket = await FindOrCreateTicketService(contact, whatsapp.id, 0);
@@ -706,7 +825,10 @@ export const forwardMessages = async (
 
           if (sourceMessage && sourceMessage.ticket) {
             const wbot = await GetTicketWbot(sourceMessage.ticket);
-            const wbotMsg = await GetWbotMessage(sourceMessage.ticket, messageData.id);
+            const wbotMsg = await GetWbotMessage(
+              sourceMessage.ticket,
+              messageData.id
+            );
 
             let targetChatId = ticket.contact.number!;
             if (!targetChatId.includes("@")) {
@@ -717,7 +839,9 @@ export const forwardMessages = async (
             continue;
           }
         } catch (nativeErr) {
-          logger.warn(`[FORWARD] Forward nativo falhou, usando fallback manual: ${nativeErr}`);
+          logger.warn(
+            `[FORWARD] Forward nativo falhou, usando fallback manual: ${nativeErr}`
+          );
         }
       }
 
@@ -732,13 +856,13 @@ export const forwardMessages = async (
 
       if (messageData.mediaType && messageData.mediaUrl) {
         const mediaObject = {
-          fieldname: 'medias',
-          originalname: 'forwarded_media',
-          encoding: '7bit',
+          fieldname: "medias",
+          originalname: "forwarded_media",
+          encoding: "7bit",
           mimetype: messageData.mediaType,
-          buffer: Buffer.from(''),
+          buffer: Buffer.from(""),
           size: 0,
-          filename: 'forwarded_media',
+          filename: "forwarded_media",
           path: messageData.mediaUrl
         } as Express.Multer.File;
 
@@ -765,7 +889,8 @@ export const forwardMessages = async (
 
     if (error.message === "ERR_NO_DEF_WAPP_FOUND") {
       return res.status(400).json({
-        error: "Nenhuma conexão WhatsApp ativa encontrada. Por favor, conecte um WhatsApp antes de encaminhar mensagens."
+        error:
+          "Nenhuma conexão WhatsApp ativa encontrada. Por favor, conecte um WhatsApp antes de encaminhar mensagens."
       });
     }
 
@@ -787,13 +912,18 @@ export const count = async (req: Request, res: Response): Promise<Response> => {
   return res.json(counter);
 };
 
-export const sendPoll = async (req: Request, res: Response): Promise<Response> => {
+export const sendPoll = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
   const { ticketId } = req.params;
   const { pollName, options, allowMultipleAnswers } = req.body;
 
   try {
     if (!pollName || !options || !Array.isArray(options)) {
-      return res.status(400).json({ error: "Nome da enquete e opções são obrigatórios" });
+      return res
+        .status(400)
+        .json({ error: "Nome da enquete e opções são obrigatórios" });
     }
 
     const message = await SendPollService.execute({
@@ -806,11 +936,16 @@ export const sendPoll = async (req: Request, res: Response): Promise<Response> =
     return res.json(message);
   } catch (error: any) {
     logger.error(`Erro ao enviar enquete: ${error}`);
-    return res.status(500).json({ error: error.message || "Erro ao enviar enquete" });
+    return res
+      .status(500)
+      .json({ error: error.message || "Erro ao enviar enquete" });
   }
 };
 
-export const sendTypingIndicator = async (req: Request, res: Response): Promise<Response> => {
+export const sendTypingIndicator = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
   const { ticketId } = req.params;
   const { duration } = req.body;
 
@@ -824,14 +959,22 @@ export const sendTypingIndicator = async (req: Request, res: Response): Promise<
       duration || 3000
     );
 
-    return res.json({ success: true, message: "Indicador de digitação enviado" });
+    return res.json({
+      success: true,
+      message: "Indicador de digitação enviado"
+    });
   } catch (error: any) {
     logger.error(`Erro ao enviar indicador de digitação: ${error}`);
-    return res.status(500).json({ error: error.message || "Erro ao enviar indicador de digitação" });
+    return res.status(500).json({
+      error: error.message || "Erro ao enviar indicador de digitação"
+    });
   }
 };
 
-export const sendRecordingIndicator = async (req: Request, res: Response): Promise<Response> => {
+export const sendRecordingIndicator = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
   const { ticketId } = req.params;
   const { duration } = req.body;
 
@@ -845,28 +988,38 @@ export const sendRecordingIndicator = async (req: Request, res: Response): Promi
       duration || 5000
     );
 
-    return res.json({ success: true, message: "Indicador de gravação enviado" });
+    return res.json({
+      success: true,
+      message: "Indicador de gravação enviado"
+    });
   } catch (error: any) {
     logger.error(`Erro ao enviar indicador de gravação: ${error}`);
-    return res.status(500).json({ error: error.message || "Erro ao enviar indicador de gravação" });
+    return res
+      .status(500)
+      .json({ error: error.message || "Erro ao enviar indicador de gravação" });
   }
 };
 
-export const setAvailablePresence = async (req: Request, res: Response): Promise<Response> => {
+export const setAvailablePresence = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
   const { ticketId } = req.params;
 
   try {
     const ticket = await ShowTicketService(Number(ticketId));
     const chatId = `${ticket.contact.number}@c.us`;
 
-    await PresenceService.setAvailable(
-      ticket.whatsappId,
-      chatId
-    );
+    await PresenceService.setAvailable(ticket.whatsappId, chatId);
 
-    return res.json({ success: true, message: "Presença definida como disponível" });
+    return res.json({
+      success: true,
+      message: "Presença definida como disponível"
+    });
   } catch (error: any) {
     logger.error(`Erro ao definir presença: ${error}`);
-    return res.status(500).json({ error: error.message || "Erro ao definir presença" });
+    return res
+      .status(500)
+      .json({ error: error.message || "Erro ao definir presença" });
   }
 };

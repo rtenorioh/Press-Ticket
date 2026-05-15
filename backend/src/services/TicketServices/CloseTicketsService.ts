@@ -20,7 +20,7 @@ const CloseTicketsService = async ({
   const io = getIO();
   const promises = [];
 
-  for (let ticket of tickets) {
+  for (const ticket of tickets) {
     const oldStatus = ticket.status;
     
     promises.push(

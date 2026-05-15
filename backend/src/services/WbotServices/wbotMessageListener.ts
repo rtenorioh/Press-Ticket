@@ -1480,7 +1480,7 @@ const handleMsgAck = async (msg: WbotMessage, ack: MessageAck) => {
     }
 
     const currentAck = messageToUpdate.ack || 0;
-    let ackToUpdate = ack || 0;
+    const ackToUpdate = ack || 0;
 
     if (ackToUpdate > currentAck) {
       await messageToUpdate.update({ ack: ackToUpdate });
@@ -1526,7 +1526,7 @@ const handleMsgEdit = async (
   newBody: string,
   oldBody: string
 ): Promise<void> => {
-  let editedMsg = await Message.findByPk(msg.id.id, {
+  const editedMsg = await Message.findByPk(msg.id.id, {
     include: [
       {
         model: OldMessage,
