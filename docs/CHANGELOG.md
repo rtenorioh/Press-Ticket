@@ -1,5 +1,17 @@
 # Changelog
 
+### v1.16.2 (16/05/2026)
+
+- [feat: atualizar versão do sistema para v1.16.2](https://github.com/rtenorioh/Press-Ticket/commit/);
+- [feat: atualizar README.md com novas informações sobre CI, tecnologias e como contribuir](https://github.com/rtenorioh/Press-Ticket/commit/ba095aec4347065e8b6f8d2bf7524a19d91de1dc);
+- [fix: corrige 142 warnings no-unused-vars no backend](https://github.com/rtenorioh/Press-Ticket/commit/d6178e551805c48eb50126d1358758bd5cd393b1);
+- [refactor: improve code readability and consistency across multiple controllers and services](https://github.com/rtenorioh/Press-Ticket/commit/56997fd187119c785c174f39980556c53820e534);
+- [feat: adicionar comparação de versões e status na atualização do sistema](https://github.com/rtenorioh/Press-Ticket/commit/1550137a28139005d6066a10cfa6b996ff77516e);
+- [feat: Add issue templates for bug reports and feature requests](https://github.com/rtenorioh/Press-Ticket/commit/cc3d4f266aec8a3fddfa1b40829d497e30a6c465);
+- [feat: adicionar workflows de CI e deploy, e atualizar ação de criação de release](https://github.com/rtenorioh/Press-Ticket/commit/9024769dbbd2ac8a854d61c04f23b3a755bd92e5);
+- [feat: adicionar tratamento de erro para falha na geração do código de emparelhamento](https://github.com/rtenorioh/Press-Ticket/commit/109b641d8c410af06e7878791488b3a79ad017a9); e
+- [feat: tornar o nome da empresa dinâmico na mensagem de atualização](https://github.com/rtenorioh/Press-Ticket/commit/0d0192f1d88d01d104bb7efdf4dd06ee3f4823db).
+
 ### v1.16.1 (12/05/2026)
 
 - [feat: atualizar versão do sistema para v1.16.1](https://github.com/rtenorioh/Press-Ticket/commit/f3efbd7b45afc2b8363477eeed9d7a2561033e0c);
