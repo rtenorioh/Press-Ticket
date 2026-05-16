@@ -22,7 +22,14 @@ interface UpdateInfo {
 }
 
 interface UpdateStatus {
-  status: "idle" | "checking" | "downloading" | "installing" | "building" | "completed" | "error";
+  status:
+    | "idle"
+    | "checking"
+    | "downloading"
+    | "installing"
+    | "building"
+    | "completed"
+    | "error";
   progress: number;
   message: string;
   error?: string;
@@ -30,7 +37,8 @@ interface UpdateStatus {
   lastUpdateInstalled?: Date;
 }
 
-const REPO_URL = "https://api.github.com/repos/rtenorioh/Press-Ticket/releases/latest";
+const REPO_URL =
+  "https://api.github.com/repos/rtenorioh/Press-Ticket/releases/latest";
 const CONFIG_DIR = path.join(process.cwd(), "config");
 const UPDATE_STATUS_FILE = path.join(CONFIG_DIR, "update_status.json");
 const BACKUP_DIR = path.join(process.cwd(), "backups");
@@ -38,12 +46,11 @@ const BACKUP_DIR = path.join(process.cwd(), "backups");
 let updateStatus: UpdateStatus = {
   status: "idle",
   progress: 0,
-  message: "Sistema pronto para verificar atualizações",
+  message: "Sistema pronto para verificar atualizações"
 };
 
 const initUpdateStatus = async (): Promise<void> => {
   try {
-
     if (!fs.existsSync(CONFIG_DIR)) {
       await mkdir(CONFIG_DIR, { recursive: true });
     }
@@ -70,7 +77,9 @@ const saveUpdateStatus = async (): Promise<void> => {
 const getCurrentVersion = async (): Promise<string> => {
   try {
     const { systemVersion } = await import("../config/version");
-    return systemVersion.startsWith("v") ? systemVersion.substring(1) : systemVersion;
+    return systemVersion.startsWith("v")
+      ? systemVersion.substring(1)
+      : systemVersion;
   } catch (error: any) {
     logger.error(`Erro ao obter versão atual: ${error.message}`);
     return "0.0.0";
@@ -89,19 +98,20 @@ export const checkForUpdates = async (): Promise<UpdateInfo> => {
     const latestRelease = response.data;
     const latestVersion = latestRelease.tag_name.replace("v", "");
     const needsUpdate = latestVersion !== currentVersion;
-    
+
     const updateInfo: UpdateInfo = {
       currentVersion,
       latestVersion,
       needsUpdate,
-      releaseNotes: latestRelease.body || "Nenhuma nota de lançamento disponível",
+      releaseNotes:
+        latestRelease.body || "Nenhuma nota de lançamento disponível",
       downloadUrl: latestRelease.zipball_url,
       publishedAt: latestRelease.published_at
     };
 
     updateStatus.status = "idle";
-    updateStatus.message = needsUpdate 
-      ? `Atualização disponível: v${latestVersion}` 
+    updateStatus.message = needsUpdate
+      ? `Atualização disponível: v${latestVersion}`
       : "Sistema está atualizado";
     updateStatus.progress = 0;
     updateStatus.lastUpdateCheck = new Date();
@@ -115,7 +125,7 @@ export const checkForUpdates = async (): Promise<UpdateInfo> => {
     updateStatus.error = error.message;
     updateStatus.progress = 0;
     await saveUpdateStatus();
-    
+
     throw new Error(`Erro ao verificar atualizações: ${error.message}`);
   }
 };
@@ -146,7 +156,9 @@ const backupSystem = async (): Promise<string> => {
   }
 };
 
-export const downloadAndInstallUpdate = async (updateInfo: UpdateInfo): Promise<boolean> => {
+export const downloadAndInstallUpdate = async (
+  updateInfo: UpdateInfo
+): Promise<boolean> => {
   try {
     if (!updateInfo.needsUpdate) {
       return false;
@@ -164,21 +176,24 @@ export const downloadAndInstallUpdate = async (updateInfo: UpdateInfo): Promise<
     if (!fs.existsSync(tempDir)) {
       await mkdir(tempDir, { recursive: true });
     }
-    
-    const zipFilePath = path.join(tempDir, `update-${updateInfo.latestVersion}.zip`);
+
+    const zipFilePath = path.join(
+      tempDir,
+      `update-${updateInfo.latestVersion}.zip`
+    );
     const writer = fs.createWriteStream(zipFilePath);
-    
+
     const response = await axios({
       url: updateInfo.downloadUrl,
-      method: 'GET',
-      responseType: 'stream'
+      method: "GET",
+      responseType: "stream"
     });
 
     response.data.pipe(writer);
 
     await new Promise<void>((resolve, reject) => {
-      writer.on('finish', () => resolve());
-      writer.on('error', reject);
+      writer.on("finish", () => resolve());
+      writer.on("error", reject);
     });
 
     updateStatus.status = "installing";
@@ -199,54 +214,54 @@ export const downloadAndInstallUpdate = async (updateInfo: UpdateInfo): Promise<
     updateStatus.progress = 50;
     await saveUpdateStatus();
     await exec("npm install");
-    
+
     updateStatus.message = "Compilando backend...";
     updateStatus.progress = 60;
     await saveUpdateStatus();
     await exec("npm run build");
-    
+
     updateStatus.message = "Executando migrações...";
     updateStatus.progress = 65;
     await saveUpdateStatus();
     await exec("npx sequelize db:migrate");
-    
+
     updateStatus.message = "Executando seeders...";
     updateStatus.progress = 70;
     await saveUpdateStatus();
     await exec("npx sequelize db:seed:all");
-    
+
     updateStatus.status = "building";
     updateStatus.message = "Atualizando frontend...";
     updateStatus.progress = 75;
     await saveUpdateStatus();
-    
+
     const frontendDir = path.join(process.cwd(), "../frontend");
-    
+
     updateStatus.message = "Instalando dependências do frontend...";
     updateStatus.progress = 80;
     await saveUpdateStatus();
     await exec("npm install", { cwd: frontendDir });
-    
+
     updateStatus.message = "Compilando frontend...";
     updateStatus.progress = 85;
     await saveUpdateStatus();
     await exec("npm run build", { cwd: frontendDir });
-    
+
     updateStatus.message = "Reiniciando serviços...";
     updateStatus.progress = 90;
     await saveUpdateStatus();
-    
+
     dotenv.config();
     const pm2FrontendId = process.env.PM2_FRONTEND || "1";
     const pm2BackendId = process.env.PM2_BACKEND || "0";
-    
+
     try {
       await exec(`pm2 restart ${pm2BackendId} --update-env`);
       await exec(`pm2 restart ${pm2FrontendId} --update-env`);
     } catch (pmError: any) {
       logger.warn(`Aviso ao reiniciar serviços PM2: ${pmError.message}`);
     }
-    
+
     await exec(`rm -rf ${tempDir}`);
 
     updateStatus.status = "completed";
@@ -263,7 +278,7 @@ export const downloadAndInstallUpdate = async (updateInfo: UpdateInfo): Promise<
     updateStatus.error = error.message;
     updateStatus.progress = 0;
     await saveUpdateStatus();
-    
+
     throw new Error(`Erro ao instalar atualização: ${error.message}`);
   }
 };
@@ -271,10 +286,12 @@ export const downloadAndInstallUpdate = async (updateInfo: UpdateInfo): Promise<
 export const getUpdateStatus = async (): Promise<UpdateStatus> => {
   return updateStatus;
 };
-export const restoreBackup = async (backupFileName: string): Promise<boolean> => {
+export const restoreBackup = async (
+  backupFileName: string
+): Promise<boolean> => {
   try {
     const backupPath = path.join(BACKUP_DIR, backupFileName);
-    
+
     if (!fs.existsSync(backupPath)) {
       throw new Error(`Backup não encontrado: ${backupFileName}`);
     }
@@ -312,7 +329,7 @@ export const restoreBackup = async (backupFileName: string): Promise<boolean> =>
     updateStatus.error = error.message;
     updateStatus.progress = 0;
     await saveUpdateStatus();
-    
+
     throw new Error(`Erro ao restaurar backup: ${error.message}`);
   }
 };
@@ -325,7 +342,9 @@ export const listBackups = async (): Promise<string[]> => {
     }
 
     const files = fs.readdirSync(BACKUP_DIR);
-    return files.filter(file => file.startsWith("backup-") && file.endsWith(".tar.gz"));
+    return files.filter(
+      file => file.startsWith("backup-") && file.endsWith(".tar.gz")
+    );
   } catch (error: any) {
     logger.error(`Erro ao listar backups: ${error.message}`);
     throw new Error(`Erro ao listar backups: ${error.message}`);

@@ -4,6 +4,10 @@ import * as NetworkMonitorController from "../controllers/NetworkMonitorControll
 
 const networkMonitorRoutes = express.Router();
 
-networkMonitorRoutes.get("/network-status", isAuth, NetworkMonitorController.index);
+networkMonitorRoutes.get(
+  "/network-status",
+  isAuth,
+  NetworkMonitorController.index
+);
 
 export default networkMonitorRoutes;

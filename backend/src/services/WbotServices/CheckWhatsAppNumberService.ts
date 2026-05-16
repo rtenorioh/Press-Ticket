@@ -9,7 +9,9 @@ interface Response {
   message: string;
 }
 
-const CheckWhatsAppNumberService = async (number: string): Promise<Response> => {
+const CheckWhatsAppNumberService = async (
+  number: string
+): Promise<Response> => {
   try {
     const defaultWhatsapp = await GetDefaultWhatsApp();
     const wbot = getWbot(defaultWhatsapp.id);
@@ -23,17 +25,19 @@ const CheckWhatsAppNumberService = async (number: string): Promise<Response> => 
     }
 
     const isRegistered = await wbot.isRegisteredUser(`${number}@c.us`);
-    
+
     return {
       exists: isRegistered,
       number,
-      message: isRegistered 
-        ? "Número registrado no WhatsApp" 
+      message: isRegistered
+        ? "Número registrado no WhatsApp"
         : "Número não registrado no WhatsApp"
     };
   } catch (error) {
     logger.error(`Erro ao verificar número no WhatsApp: ${error}`);
-    throw new AppError("Erro ao verificar número no WhatsApp. Verifique se há uma conexão ativa.");
+    throw new AppError(
+      "Erro ao verificar número no WhatsApp. Verifique se há uma conexão ativa."
+    );
   }
 };
 

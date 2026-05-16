@@ -14,9 +14,9 @@ interface QueueStats {
   waitingTickets: number;
   pendingTickets: number;
   activeTickets: number;
-  avgWaitTime: number; 
-  avgHandleTime: number; 
-  oldestTicketTime: number; 
+  avgWaitTime: number;
+  avgHandleTime: number;
+  oldestTicketTime: number;
   oldestTicketId: number | null;
   messagesCount: {
     total: number;
@@ -38,8 +38,8 @@ interface QueueMonitorData {
     totalMessages: number;
     messagesLast24Hours: number;
     messagesLast7Days: number;
-    avgWaitTime: number; 
-    oldestTicketTime: number; 
+    avgWaitTime: number;
+    oldestTicketTime: number;
     oldestTicketQueueId: number | null;
     oldestTicketId: number | null;
   };
@@ -75,7 +75,7 @@ const calculateAvgWaitTime = async (queueId: number): Promise<number> => {
     const now = new Date();
     const totalWaitTime = tickets.reduce((sum, ticket) => {
       const createdAt = new Date(ticket.createdAt);
-      const waitTime = (now.getTime() - createdAt.getTime()) / (1000 * 60); 
+      const waitTime = (now.getTime() - createdAt.getTime()) / (1000 * 60);
       return sum + waitTime;
     }, 0);
 
@@ -93,7 +93,7 @@ const calculateAvgHandleTime = async (queueId: number): Promise<number> => {
         queueId,
         status: "closed",
         createdAt: {
-          [Op.gte]: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) 
+          [Op.gte]: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
         }
       },
       attributes: ["id", "createdAt", "updatedAt"]
@@ -104,7 +104,8 @@ const calculateAvgHandleTime = async (queueId: number): Promise<number> => {
     const totalHandleTime = closedTickets.reduce((sum, ticket) => {
       const createdAt = new Date(ticket.createdAt);
       const closedAt = new Date(ticket.updatedAt);
-      const handleTime = (closedAt.getTime() - createdAt.getTime()) / (1000 * 60); 
+      const handleTime =
+        (closedAt.getTime() - createdAt.getTime()) / (1000 * 60);
       return sum + handleTime;
     }, 0);
 
@@ -115,7 +116,9 @@ const calculateAvgHandleTime = async (queueId: number): Promise<number> => {
   }
 };
 
-const getOldestTicket = async (queueId: number): Promise<{ time: number; id: number | null }> => {
+const getOldestTicket = async (
+  queueId: number
+): Promise<{ time: number; id: number | null }> => {
   try {
     const oldestTicket = await Ticket.findOne({
       where: {
@@ -140,16 +143,20 @@ const getOldestTicket = async (queueId: number): Promise<{ time: number; id: num
   }
 };
 
-const countMessages = async (queueId: number): Promise<{ total: number; last24Hours: number; last7Days: number }> => {
+const countMessages = async (
+  queueId: number
+): Promise<{ total: number; last24Hours: number; last7Days: number }> => {
   try {
     const now = new Date();
     const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
     const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
 
-    const ticketIds = (await Ticket.findAll({
-      where: { queueId },
-      attributes: ["id"]
-    })).map(t => t.id);
+    const ticketIds = (
+      await Ticket.findAll({
+        where: { queueId },
+        attributes: ["id"]
+      })
+    ).map(t => t.id);
 
     if (ticketIds.length === 0) {
       return { total: 0, last24Hours: 0, last7Days: 0 };
@@ -192,7 +199,9 @@ const countMessages = async (queueId: number): Promise<{ total: number; last24Ho
   }
 };
 
-const countUsersOnline = async (queueId: number): Promise<{ online: number; total: number }> => {
+const countUsersOnline = async (
+  queueId: number
+): Promise<{ online: number; total: number }> => {
   try {
     const total = await User.count({
       include: [
@@ -224,16 +233,18 @@ const countUsersOnline = async (queueId: number): Promise<{ online: number; tota
   }
 };
 
-const getWhatsappStats = async (): Promise<{
-  id: number;
-  name: string;
-  status: string;
-  type: string;
-  queues: number[];
-  unreadMessages: number;
-  messagesToday: number;
-  messagesLast7Days: number;
-}[]> => {
+const getWhatsappStats = async (): Promise<
+  {
+    id: number;
+    name: string;
+    status: string;
+    type: string;
+    queues: number[];
+    unreadMessages: number;
+    messagesToday: number;
+    messagesLast7Days: number;
+  }[]
+> => {
   try {
     const whatsapps = await Whatsapp.findAll({
       include: [
@@ -266,7 +277,7 @@ const getWhatsappStats = async (): Promise<{
 
       const today = new Date();
       today.setHours(0, 0, 0, 0);
-      
+
       const messagesToday = await Message.count({
         where: {
           createdAt: {
@@ -287,7 +298,7 @@ const getWhatsappStats = async (): Promise<{
       const last7Days = new Date();
       last7Days.setDate(last7Days.getDate() - 7);
       last7Days.setHours(0, 0, 0, 0);
-      
+
       const messagesLast7Days = await Message.count({
         where: {
           createdAt: {
@@ -327,7 +338,7 @@ const getWhatsappStats = async (): Promise<{
 export const getQueueMonitorData = async (): Promise<QueueMonitorData> => {
   try {
     const queues = await Queue.findAll();
-    
+
     const queueStats: QueueStats[] = [];
     let totalTickets = 0;
     let waitingTickets = 0;
@@ -352,7 +363,13 @@ export const getQueueMonitorData = async (): Promise<QueueMonitorData> => {
         Ticket.count({ where: { queueId: queue.id } }),
         Ticket.count({ where: { queueId: queue.id, status: "open" } }),
         Ticket.count({ where: { queueId: queue.id, status: "pending" } }),
-        Ticket.count({ where: { queueId: queue.id, status: "open", userId: { [Op.ne]: null as any } } })
+        Ticket.count({
+          where: {
+            queueId: queue.id,
+            status: "open",
+            userId: { [Op.ne]: null as any }
+          }
+        })
       ]);
 
       const avgWaitTime = await calculateAvgWaitTime(queue.id);
@@ -372,7 +389,10 @@ export const getQueueMonitorData = async (): Promise<QueueMonitorData> => {
       messagesLast24Hours += messagesCount.last24Hours;
       messagesLast7Days += messagesCount.last7Days;
 
-      if (oldestTicket.time > 0 && (oldestTicket.time < oldestTicketTime || oldestTicketTime === 0)) {
+      if (
+        oldestTicket.time > 0 &&
+        (oldestTicket.time < oldestTicketTime || oldestTicketTime === 0)
+      ) {
         oldestTicketTime = oldestTicket.time;
         oldestTicketQueueId = queue.id;
         oldestTicketId = oldestTicket.id;
@@ -403,7 +423,8 @@ export const getQueueMonitorData = async (): Promise<QueueMonitorData> => {
 
     const whatsapps = await getWhatsappStats();
 
-    const avgWaitTime = queuesWithTickets > 0 ? Math.round(totalWaitTime / queuesWithTickets) : 0;
+    const avgWaitTime =
+      queuesWithTickets > 0 ? Math.round(totalWaitTime / queuesWithTickets) : 0;
 
     return {
       queues: queueStats,
@@ -425,7 +446,7 @@ export const getQueueMonitorData = async (): Promise<QueueMonitorData> => {
     };
   } catch (error) {
     logger.error("Erro ao obter dados de monitoramento dos setores:", error);
-    
+
     return {
       queues: [],
       summary: {

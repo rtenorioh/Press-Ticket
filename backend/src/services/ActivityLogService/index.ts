@@ -1,4 +1,3 @@
-import { Op } from "sequelize";
 import { startOfDay, endOfDay, parseISO } from "date-fns";
 import User from "../../models/User";
 import Ticket from "../../models/Ticket";
@@ -110,9 +109,8 @@ export const logActivity = async (
   details?: string
 ): Promise<ActivityLogModel> => {
   try {
-    
     const log = new ActivityLogModel({
-      id: Date.now(), 
+      id: Date.now(),
       userId,
       action,
       description,
@@ -122,13 +120,15 @@ export const logActivity = async (
       entityType,
       details
     });
-    
+
     logger.info(`Log de atividade: ${userId} - ${action} - ${description}`);
-    
+
     return log;
   } catch (error: any) {
     logger.error(`Erro ao registrar log de atividade: ${error.message}`);
-    throw new Error(`Não foi possível registrar o log de atividade: ${error.message}`);
+    throw new Error(
+      `Não foi possível registrar o log de atividade: ${error.message}`
+    );
   }
 };
 
@@ -136,9 +136,15 @@ export const listActivityLogs = async (
   filters: ActivityLogFilters
 ): Promise<{ logs: ActivityLog[]; count: number }> => {
   try {
-    
-    const { startDate, endDate, userId, action, limit = 10, offset = 0 } = filters;
-    
+    const {
+      startDate,
+      endDate,
+      userId,
+      action,
+      limit = 10,
+      offset = 0
+    } = filters;
+
     const mockLogs: ActivityLog[] = [
       {
         id: 1,
@@ -176,36 +182,38 @@ export const listActivityLogs = async (
         details: JSON.stringify({ from: "Suporte", to: "Vendas" })
       }
     ];
-    
+
     let filteredLogs = [...mockLogs];
-    
+
     if (startDate && endDate) {
       const start = startOfDay(parseISO(startDate));
       const end = endOfDay(parseISO(endDate));
-      filteredLogs = filteredLogs.filter(log => 
-        log.timestamp >= start && log.timestamp <= end
+      filteredLogs = filteredLogs.filter(
+        log => log.timestamp >= start && log.timestamp <= end
       );
     }
-    
+
     if (userId) {
       filteredLogs = filteredLogs.filter(log => log.userId === userId);
     }
-    
+
     if (action) {
       filteredLogs = filteredLogs.filter(log => log.action === action);
     }
-    
+
     const count = filteredLogs.length;
-    
+
     filteredLogs = filteredLogs.slice(offset, offset + limit);
-    
+
     return {
       logs: filteredLogs,
       count
     };
   } catch (error: any) {
     logger.error(`Erro ao listar logs de atividade: ${error.message}`);
-    throw new Error(`Não foi possível listar os logs de atividade: ${error.message}`);
+    throw new Error(
+      `Não foi possível listar os logs de atividade: ${error.message}`
+    );
   }
 };
 
@@ -219,7 +227,7 @@ export const getEntityDetails = async (
         return await User.findByPk(entityId, {
           attributes: ["id", "name", "email", "profile"]
         });
-        
+
       case EntityTypes.TICKET:
         return await Ticket.findByPk(entityId, {
           attributes: ["id", "status", "userId", "contactId", "queueId"],
@@ -228,17 +236,17 @@ export const getEntityDetails = async (
             { model: Queue, attributes: ["id", "name"] }
           ]
         });
-        
+
       case EntityTypes.WHATSAPP:
         return await Whatsapp.findByPk(entityId, {
           attributes: ["id", "name", "status", "queueId"]
         });
-        
+
       case EntityTypes.QUEUE:
         return await Queue.findByPk(entityId, {
           attributes: ["id", "name", "color"]
         });
-        
+
       default:
         return null;
     }

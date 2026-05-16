@@ -22,9 +22,7 @@ const ListVideosService = async ({
 
   if (searchParam) {
     whereCondition = {
-      [Op.or]: [
-        { title: { [Op.like]: `%${searchParam}%` } }
-      ]
+      [Op.or]: [{ title: { [Op.like]: `%${searchParam}%` } }]
     };
   }
 
@@ -43,7 +41,7 @@ const ListVideosService = async ({
   if (!isAdmin && userId) {
     const filteredVideos = videos.filter(video => {
       if (!video.users || video.users.length === 0) return true;
-      
+
       return video.users.some(u => u.id === userId);
     });
 

@@ -1,4 +1,9 @@
-import { createNotificameClient, resolveChannel, resolveContactId, NotificameMessagePayload } from "../../libs/notificameClient";
+import {
+  createNotificameClient,
+  resolveChannel,
+  resolveContactId,
+  NotificameMessagePayload
+} from "../../libs/notificameClient";
 import Contact from "../../models/Contact";
 import CreateMessageService from "./CreateHubMessageService";
 import { showHubToken } from "../../helpers/showHubToken";
@@ -27,13 +32,19 @@ export const SendLocationHubService = async (
 
   const channel = resolveChannel(contact);
   if (!channel) {
-    logger.error("SendLocationHubService: nenhum canal Hub encontrado no contato.");
-    throw new Error("Nenhum canal Hub encontrado no contato (facebook, instagram, telegram ou webchat).");
+    logger.error(
+      "SendLocationHubService: nenhum canal Hub encontrado no contato."
+    );
+    throw new Error(
+      "Nenhum canal Hub encontrado no contato (facebook, instagram, telegram ou webchat)."
+    );
   }
 
   const contactId = resolveContactId(contact, channel);
   if (!contactId) {
-    throw new Error(`SendLocationHubService: ID do destinatário não encontrado para canal ${channel}`);
+    throw new Error(
+      `SendLocationHubService: ID do destinatário não encontrado para canal ${channel}`
+    );
   }
 
   const hubToken = await showHubToken();
@@ -42,19 +53,24 @@ export const SendLocationHubService = async (
   const payload: NotificameMessagePayload = {
     from: connection.qrcode,
     to: contactId,
-    contents: [{
-      type: 'location',
-      latitude,
-      longitude,
-      name: name || undefined,
-      address: address || undefined
-    }]
+    contents: [
+      {
+        type: "location",
+        latitude,
+        longitude,
+        name: name || undefined,
+        address: address || undefined
+      }
+    ]
   };
 
   const body = name ? `📍 ${name}` : `📍 ${latitude}, ${longitude}`;
 
   try {
-    const response = await client.post(`/v1/channels/${channel}/messages`, payload);
+    const response = await client.post(
+      `/v1/channels/${channel}/messages`,
+      payload
+    );
     const data = response.data;
 
     const newMessage = await CreateMessageService({
@@ -67,7 +83,9 @@ export const SendLocationHubService = async (
 
     return newMessage;
   } catch (error) {
-    logger.error(`SendLocationHubService: erro ao enviar location Hub: ${error}`);
+    logger.error(
+      `SendLocationHubService: erro ao enviar location Hub: ${error}`
+    );
     throw error;
   }
 };

@@ -24,13 +24,18 @@ const mapStateToStatus = (state: string): string => {
     PROXYBLOCK: "DISCONNECTED",
     TOS_BLOCK: "DISCONNECTED",
     SMB_TOS_BLOCK: "DISCONNECTED",
-    DEPRECATED_VERSION: "DISCONNECTED",
+    DEPRECATED_VERSION: "DISCONNECTED"
   };
   return stateMap[state] || "OPENING";
 };
 
 // Estados que precisam de tentativa de recuperação
-const RECOVERY_STATES = ["CONFLICT", "UNPAIRED", "UNPAIRED_IDLE", "DEPRECATED_VERSION"];
+const RECOVERY_STATES = [
+  "CONFLICT",
+  "UNPAIRED",
+  "UNPAIRED_IDLE",
+  "DEPRECATED_VERSION"
+];
 
 const wbotMonitor = async (
   wbot: Session,
@@ -65,13 +70,17 @@ const wbotMonitor = async (
 
       // Tentar recuperar de estados problemáticos
       if (RECOVERY_STATES.includes(newState)) {
-        logger.warn(`[MONITOR] Sessão ${sessionName} em estado ${newState}. Tentando recuperar...`);
+        logger.warn(
+          `[MONITOR] Sessão ${sessionName} em estado ${newState}. Tentando recuperar...`
+        );
         try {
           await whatsapp.update({ status: "OPENING", session: "" });
           io.emit("whatsappSession", { action: "update", session: whatsapp });
           setTimeout(() => StartWhatsAppSession(whatsapp), 3000);
         } catch (err) {
-          logger.error(`[MONITOR] Erro ao recuperar sessão ${sessionName}: ${err}`);
+          logger.error(
+            `[MONITOR] Erro ao recuperar sessão ${sessionName}: ${err}`
+          );
         }
       }
     });
@@ -103,7 +112,9 @@ const wbotMonitor = async (
     const healthInterval = setInterval(async () => {
       try {
         if (!wbot.pupPage || wbot.pupPage.isClosed()) {
-          logger.warn(`[MONITOR] PupPage da sessão ${sessionName} não está disponível. Reconectando...`);
+          logger.warn(
+            `[MONITOR] PupPage da sessão ${sessionName} não está disponível. Reconectando...`
+          );
           clearInterval(healthInterval);
           monitorIntervals.delete(whatsapp.id);
 
@@ -112,7 +123,9 @@ const wbotMonitor = async (
             io.emit("whatsappSession", { action: "update", session: whatsapp });
             setTimeout(() => StartWhatsAppSession(whatsapp), 3000);
           } catch (err) {
-            logger.error(`[MONITOR] Erro ao reiniciar sessão ${sessionName}: ${err}`);
+            logger.error(
+              `[MONITOR] Erro ao reiniciar sessão ${sessionName}: ${err}`
+            );
           }
           return;
         }
@@ -129,10 +142,14 @@ const wbotMonitor = async (
           }
         } else if (state === null) {
           // Não conseguiu obter estado - possível crash do browser
-          logger.warn(`[MONITOR] Não foi possível obter estado da sessão ${sessionName}`);
+          logger.warn(
+            `[MONITOR] Não foi possível obter estado da sessão ${sessionName}`
+          );
         }
       } catch (err) {
-        logger.error(`[MONITOR] Erro no health check da sessão ${sessionName}: ${err}`);
+        logger.error(
+          `[MONITOR] Erro no health check da sessão ${sessionName}: ${err}`
+        );
       }
     }, 60000); // 60 segundos
 

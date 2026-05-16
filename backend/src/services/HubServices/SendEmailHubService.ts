@@ -57,16 +57,18 @@ export const SendEmailHubService = async ({
   const payload = {
     from: connection.qrcode,
     to,
-    contents: [{
-      type: 'email',
-      subject: subject || '',
-      html: cleanHtml,
-      attachments: attachments && attachments.length > 0 ? attachments : []
-    }]
+    contents: [
+      {
+        type: "email",
+        subject: subject || "",
+        html: cleanHtml,
+        attachments: attachments && attachments.length > 0 ? attachments : []
+      }
+    ]
   };
 
   try {
-    const response = await client.post('/v1/channels/email/messages', payload);
+    const response = await client.post("/v1/channels/email/messages", payload);
     const data = response.data;
 
     const email = await Email.create({
@@ -78,7 +80,9 @@ export const SendEmailHubService = async ({
       toAddress: to,
       subject: subject || undefined,
       bodyHtml: htmlBody || undefined,
-      bodyText: textBody || (htmlBody ? htmlBody.replace(/<[^>]+>/g, " ").trim() : undefined),
+      bodyText:
+        textBody ||
+        (htmlBody ? htmlBody.replace(/<[^>]+>/g, " ").trim() : undefined),
       folder: "sent",
       isRead: true
     });

@@ -5,8 +5,11 @@ import DeleteQueueService from "../services/QueueService/DeleteQueueService";
 import ListQueuesService from "../services/QueueService/ListQueuesService";
 import ShowQueueService from "../services/QueueService/ShowQueueService";
 import UpdateQueueService from "../services/QueueService/UpdateQueueService";
-import { createActivityLog, ActivityActions, EntityTypes } from "../services/ActivityLogService";
-import GetClientIp from "../helpers/GetClientIp";
+import {
+  createActivityLog,
+  ActivityActions,
+  EntityTypes
+} from "../services/ActivityLogService";
 
 export const index = async (req: Request, res: Response): Promise<Response> => {
   const queues = await ListQueuesService();
@@ -15,26 +18,34 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
 };
 
 export const store = async (req: Request, res: Response): Promise<Response> => {
-  const { name, color, greetingMessage, startWork, endWork, absenceMessage, startBreak, endBreak, breakMessage } = req.body;
+  const {
+    name,
+    color,
+    greetingMessage,
+    startWork,
+    endWork,
+    absenceMessage,
+    startBreak,
+    endBreak,
+    breakMessage
+  } = req.body;
 
-  const queue = await CreateQueueService({ 
-    name, 
-    color, 
-    greetingMessage, 
-    startWork, 
-    endWork, 
-    absenceMessage, 
-    startBreak, 
-    endBreak, 
-    breakMessage 
+  const queue = await CreateQueueService({
+    name,
+    color,
+    greetingMessage,
+    startWork,
+    endWork,
+    absenceMessage,
+    startBreak,
+    endBreak,
+    breakMessage
   });
 
   const logUserId = req.user?.id || 1;
-  
-  const clientIp = GetClientIp(req);
-  
+
   await createActivityLog({
-    userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
+    userId: typeof logUserId === "string" ? parseInt(logUserId) : logUserId,
     action: ActivityActions.CREATE,
     description: `Setor ${queue.name} criado`,
     entityType: EntityTypes.QUEUE,
@@ -72,11 +83,9 @@ export const update = async (
 
   const queue = await UpdateQueueService(queueId, req.body);
   const logUserId = req.user?.id || 1;
-  
-  const clientIp = GetClientIp(req);
-  
+
   await createActivityLog({
-    userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
+    userId: typeof logUserId === "string" ? parseInt(logUserId) : logUserId,
     action: ActivityActions.UPDATE,
     description: `Setor ${queue.name} atualizado`,
     entityType: EntityTypes.QUEUE,
@@ -100,14 +109,12 @@ export const remove = async (
   const { queueId } = req.params;
 
   const queueToDelete = await ShowQueueService(queueId);
-  
+
   await DeleteQueueService(queueId);
   const logUserId = req.user?.id || 1;
-  
-  const clientIp = GetClientIp(req);
-  
+
   await createActivityLog({
-    userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
+    userId: typeof logUserId === "string" ? parseInt(logUserId) : logUserId,
     action: ActivityActions.DELETE,
     description: `Setor ${queueToDelete.name} excluído`,
     entityType: EntityTypes.QUEUE,

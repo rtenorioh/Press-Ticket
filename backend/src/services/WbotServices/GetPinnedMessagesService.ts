@@ -29,7 +29,9 @@ const GetPinnedMessages = async (
     }));
   } catch (err) {
     const errMsg = err instanceof Error ? err.message : JSON.stringify(err);
-    logger.warn(`[PINNED_MESSAGES] Não foi possível buscar mensagens fixadas: ${errMsg}`);
+    logger.warn(
+      `[PINNED_MESSAGES] Não foi possível buscar mensagens fixadas: ${errMsg}`
+    );
     return [];
   }
 };
@@ -43,10 +45,11 @@ const CheckIfMessageIsPinned = async (
     const pinnedMessages = await GetPinnedMessages(whatsappId, chatId);
     return pinnedMessages.some(msg => msg.id === messageId);
   } catch (err) {
-    logger.error(`[PINNED_MESSAGES] Erro ao verificar se mensagem está fixada: ${err}`);
+    logger.error(
+      `[PINNED_MESSAGES] Erro ao verificar se mensagem está fixada: ${err}`
+    );
     return false;
   }
 };
 
 export { CheckIfMessageIsPinned, GetPinnedMessages };
-

@@ -1,5 +1,4 @@
 import ActivityLog from "../../models/ActivityLog";
-import User from "../../models/User";
 
 interface Request {
   userId: number;

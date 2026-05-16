@@ -24,11 +24,19 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
   // Trash: show soft-deleted. Others: exclude deleted.
   let whereClause: any;
   if (isStarredParam) {
-    whereClause = { whatsappId, isStarred: true, deletedAt: { [Op.is]: null as any } };
+    whereClause = {
+      whatsappId,
+      isStarred: true,
+      deletedAt: { [Op.is]: null as any }
+    };
   } else if (folder === "trash") {
     whereClause = { whatsappId, folder: "trash" };
   } else {
-    whereClause = { whatsappId, folder: folder || "inbox", deletedAt: { [Op.is]: null as any } };
+    whereClause = {
+      whatsappId,
+      folder: folder || "inbox",
+      deletedAt: { [Op.is]: null as any }
+    };
   }
 
   try {
@@ -47,11 +55,22 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
         }
       ],
       attributes: [
-        "id", "messageId", "whatsappId", "contactId",
-        "direction", "fromAddress", "toAddress",
-        "subject", "bodyHtml", "bodyText",
-        "folder", "isRead", "isStarred", "hubStatus",
-        "createdAt", "updatedAt"
+        "id",
+        "messageId",
+        "whatsappId",
+        "contactId",
+        "direction",
+        "fromAddress",
+        "toAddress",
+        "subject",
+        "bodyHtml",
+        "bodyText",
+        "folder",
+        "isRead",
+        "isStarred",
+        "hubStatus",
+        "createdAt",
+        "updatedAt"
       ],
       order: [["createdAt", "DESC"]],
       limit,
@@ -71,16 +90,38 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
 };
 
 // GET /emails/counts?whatsappId=
-export const countFolders = async (req: Request, res: Response): Promise<Response> => {
+export const countFolders = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
   const whatsappId = Number(req.query.whatsappId);
   if (!whatsappId) {
     return res.status(400).json({ error: "whatsappId é obrigatório." });
   }
   try {
     const [inbox, sent, starred, trash] = await Promise.all([
-      Email.count({ where: { whatsappId, folder: "inbox", isRead: false, deletedAt: { [Op.is]: null as any } } }),
-      Email.count({ where: { whatsappId, folder: "sent", deletedAt: { [Op.is]: null as any } } }),
-      Email.count({ where: { whatsappId, isStarred: true, deletedAt: { [Op.is]: null as any } } }),
+      Email.count({
+        where: {
+          whatsappId,
+          folder: "inbox",
+          isRead: false,
+          deletedAt: { [Op.is]: null as any }
+        }
+      }),
+      Email.count({
+        where: {
+          whatsappId,
+          folder: "sent",
+          deletedAt: { [Op.is]: null as any }
+        }
+      }),
+      Email.count({
+        where: {
+          whatsappId,
+          isStarred: true,
+          deletedAt: { [Op.is]: null as any }
+        }
+      }),
       Email.count({ where: { whatsappId, folder: "trash" } })
     ]);
     return res.status(200).json({ inbox, sent, starred, trash });
@@ -126,7 +167,10 @@ export const show = async (req: Request, res: Response): Promise<Response> => {
 };
 
 // POST /emails/attachment — upload de arquivo para anexo de email
-export const uploadAttachment = async (req: Request, res: Response): Promise<Response> => {
+export const uploadAttachment = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
   const file = req.file;
   if (!file) {
     return res.status(400).json({ error: "Nenhum arquivo enviado." });
@@ -150,7 +194,9 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     return res.status(400).json({ error: "Destinatário (to) é obrigatório." });
   }
   if (!subject?.trim() && !htmlBody?.trim() && !textBody?.trim()) {
-    return res.status(400).json({ error: "Assunto ou conteúdo são obrigatórios." });
+    return res
+      .status(400)
+      .json({ error: "Assunto ou conteúdo são obrigatórios." });
   }
 
   try {
@@ -171,7 +217,10 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
 };
 
 // PUT /emails/:id
-export const update = async (req: Request, res: Response): Promise<Response> => {
+export const update = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
   const { id } = req.params;
   const { isRead, isStarred, folder } = req.body;
 
@@ -200,7 +249,10 @@ export const update = async (req: Request, res: Response): Promise<Response> => 
 };
 
 // DELETE /emails/:id  — soft delete (move to trash)
-export const destroy = async (req: Request, res: Response): Promise<Response> => {
+export const destroy = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
   const { id } = req.params;
 
   try {
@@ -213,7 +265,9 @@ export const destroy = async (req: Request, res: Response): Promise<Response> =>
     if (email.folder === "trash") {
       // Already in trash — hard delete
       await email.destroy();
-      return res.status(200).json({ message: "Email excluído permanentemente." });
+      return res
+        .status(200)
+        .json({ message: "Email excluído permanentemente." });
     }
 
     await email.update({ folder: "trash", deletedAt: new Date() });

@@ -1,6 +1,5 @@
 import cron from "node-cron";
 import { TelemetryHeartbeatService } from "../services/SystemServices/TelemetryHeartbeatService";
-import { logger } from "../utils/logger";
 
 const CRON_SCHEDULE = "0 */12 * * *"; // A cada 12 horas
 

@@ -35,10 +35,14 @@ module.exports = {
       }
     });
 
-    await queryInterface.addIndex("TicketLabels", ["ticketId", "whatsappLabelId"], {
-      unique: true,
-      name: "idx_ticket_labels_unique"
-    });
+    await queryInterface.addIndex(
+      "TicketLabels",
+      ["ticketId", "whatsappLabelId"],
+      {
+        unique: true,
+        name: "idx_ticket_labels_unique"
+      }
+    );
   },
 
   down: async (queryInterface: QueryInterface) => {

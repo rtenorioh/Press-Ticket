@@ -63,7 +63,9 @@ const GetCommonGroupsService = async ({
     const wContact = await wbot.getContactById(numberId._serialized);
     commonGroups = await (wContact as any).getCommonGroups();
   } catch (error) {
-    logger.warn(`[FALLBACK] Erro ao obter contato/grupos comuns do WhatsApp: ${error.message || error}`);
+    logger.warn(
+      `[FALLBACK] Erro ao obter contato/grupos comuns do WhatsApp: ${error.message || error}`
+    );
     commonGroups = [];
   }
 
@@ -78,7 +80,7 @@ const GetCommonGroupsService = async ({
       let profilePicUrl: string | undefined;
       try {
         profilePicUrl = await wbot.getProfilePicUrl(groupId);
-      } catch (picError) {
+      } catch (_picError) {
         profilePicUrl = undefined;
       }
 
@@ -88,7 +90,7 @@ const GetCommonGroupsService = async ({
         participantsCount: (groupChat as any).participants?.length || 0,
         profilePicUrl
       });
-    } catch (error) {
+    } catch (_error) {
       groupsInfo.push({
         id: groupId,
         name: "Grupo (erro ao carregar)",

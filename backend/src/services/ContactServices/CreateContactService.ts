@@ -67,7 +67,8 @@ const CreateContactService = async ({
       birthdate: birthdate && birthdate !== "" ? new Date(birthdate) : null,
       gender,
       status,
-      lastContactAt: lastContactAt && lastContactAt !== "" ? new Date(lastContactAt) : null,
+      lastContactAt:
+        lastContactAt && lastContactAt !== "" ? new Date(lastContactAt) : null,
       country,
       zip,
       addressNumber,

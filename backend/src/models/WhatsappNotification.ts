@@ -1,4 +1,9 @@
-import { InferAttributes, InferCreationAttributes, CreationOptional, NonAttribute } from "sequelize";
+import {
+  InferAttributes,
+  InferCreationAttributes,
+  CreationOptional,
+  NonAttribute
+} from "sequelize";
 import {
   Table,
   Column,
@@ -14,7 +19,10 @@ import {
 import Whatsapp from "./Whatsapp";
 
 @Table
-class WhatsappNotification extends Model<InferAttributes<WhatsappNotification>, InferCreationAttributes<WhatsappNotification>> {
+class WhatsappNotification extends Model<
+  InferAttributes<WhatsappNotification>,
+  InferCreationAttributes<WhatsappNotification>
+> {
   @PrimaryKey
   @AutoIncrement
   @Column(DataType.INTEGER)

@@ -1,5 +1,10 @@
 import { convertMp3ToMp4 } from "../../helpers/ConvertMp3ToMp4";
-import { createNotificameClient, resolveChannel, resolveContactId, NotificameMessagePayload } from "../../libs/notificameClient";
+import {
+  createNotificameClient,
+  resolveChannel,
+  resolveContactId,
+  NotificameMessagePayload
+} from "../../libs/notificameClient";
 import Contact from "../../models/Contact";
 import CreateMessageService from "./CreateHubMessageService";
 import { showHubToken } from "../../helpers/showHubToken";
@@ -16,13 +21,17 @@ export const SendMediaMessageService = async (
 ) => {
   const channel = resolveChannel(contact);
   if (!channel) {
-    logger.error("SendMediaMessageService: nenhum canal disponível para este contato.");
+    logger.error(
+      "SendMediaMessageService: nenhum canal disponível para este contato."
+    );
     throw new Error("Nenhum canal disponível para este contato.");
   }
 
   const contactId = resolveContactId(contact, channel);
   if (!contactId) {
-    throw new Error(`SendMediaMessageService: ID do destinatário não encontrado para canal ${channel}`);
+    throw new Error(
+      `SendMediaMessageService: ID do destinatário não encontrado para canal ${channel}`
+    );
   }
 
   const backendUrl = process.env.WEBHOOK;
@@ -38,7 +47,8 @@ export const SendMediaMessageService = async (
   } else if (media.mimetype.includes("video")) {
     fileMimeType = "video";
   } else {
-    fileMimeType = (channel === "telegram" || channel === "webchat") ? "document" : "file";
+    fileMimeType =
+      channel === "telegram" || channel === "webchat" ? "document" : "file";
   }
 
   // Converter MP3 para MP4 no Instagram (não suporta audio direto)
@@ -51,8 +61,12 @@ export const SendMediaMessageService = async (
       media.originalname = media.filename;
       fileMimeType = "audio";
     } catch (e) {
-      logger.error(`SendMediaMessageService: erro ao converter MP3 para MP4 (Instagram): ${e}`);
-      logger.warn(`Enviando arquivo original sem conversão: ${media.originalname}`);
+      logger.error(
+        `SendMediaMessageService: erro ao converter MP3 para MP4 (Instagram): ${e}`
+      );
+      logger.warn(
+        `Enviando arquivo original sem conversão: ${media.originalname}`
+      );
     }
   }
 
@@ -66,9 +80,9 @@ export const SendMediaMessageService = async (
   const client = createNotificameClient(hubToken);
 
   const fileContent: Record<string, unknown> = {
-    type: 'file',
+    type: "file",
     fileMimeType,
-    fileUrl: mediaUrl,
+    fileUrl: mediaUrl
   };
   if (channel === "webchat") {
     fileContent.fileName = media.originalname || media.filename;
@@ -83,7 +97,10 @@ export const SendMediaMessageService = async (
   };
 
   try {
-    const response = await client.post(`/v1/channels/${channel}/messages`, payload);
+    const response = await client.post(
+      `/v1/channels/${channel}/messages`,
+      payload
+    );
     const data = response.data;
 
     const newMessage = await CreateMessageService({

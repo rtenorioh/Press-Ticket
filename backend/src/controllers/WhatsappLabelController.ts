@@ -34,9 +34,13 @@ export const sync = async (req: Request, res: Response): Promise<Response> => {
 
   try {
     await SyncLabelsService(Number(whatsappId));
-    return res.status(200).json({ message: "Labels sincronizadas com sucesso" });
+    return res
+      .status(200)
+      .json({ message: "Labels sincronizadas com sucesso" });
   } catch (err: any) {
-    logger.error(`[LABELS_CONTROLLER] Erro ao sincronizar labels: ${err.message}`);
+    logger.error(
+      `[LABELS_CONTROLLER] Erro ao sincronizar labels: ${err.message}`
+    );
     return res.status(500).json({ error: err.message });
   }
 };

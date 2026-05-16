@@ -1,4 +1,9 @@
-import { InferAttributes, InferCreationAttributes, CreationOptional, NonAttribute } from "sequelize";
+import {
+  InferAttributes,
+  InferCreationAttributes,
+  CreationOptional,
+  NonAttribute
+} from "sequelize";
 import {
   Table,
   Column,
@@ -19,7 +24,10 @@ import Whatsapp from "./Whatsapp";
 import WhatsappQueue from "./WhatsappQueue";
 
 @Table
-class Queue extends Model<InferAttributes<Queue>, InferCreationAttributes<Queue>> {
+class Queue extends Model<
+  InferAttributes<Queue>,
+  InferCreationAttributes<Queue>
+> {
   @PrimaryKey
   @AutoIncrement
   @Column(DataType.INTEGER)
@@ -69,7 +77,9 @@ class Queue extends Model<InferAttributes<Queue>, InferCreationAttributes<Queue>
   declare updatedAt: CreationOptional<Date>;
 
   @BelongsToMany(() => Whatsapp, () => WhatsappQueue)
-  declare whatsapps: NonAttribute<Array<Whatsapp & { WhatsappQueue: WhatsappQueue }>>;
+  declare whatsapps: NonAttribute<
+    Array<Whatsapp & { WhatsappQueue: WhatsappQueue }>
+  >;
 
   @BelongsToMany(() => User, () => UserQueue)
   declare users: NonAttribute<Array<User & { UserQueue: UserQueue }>>;

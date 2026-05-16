@@ -19,7 +19,6 @@ interface SerializedUser {
 }
 
 export const SerializeUser = async (user: User): Promise<SerializedUser> => {
-
   return {
     id: user.id,
     name: user.name,
@@ -33,6 +32,6 @@ export const SerializeUser = async (user: User): Promise<SerializedUser> => {
     whatsapps: user.whatsapps,
     queues: user.queues,
     active: user.active,
-    whatsappNumber: user.whatsappNumber || null,
+    whatsappNumber: user.whatsappNumber || null
   };
 };

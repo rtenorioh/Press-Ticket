@@ -2,7 +2,7 @@ import { QueryInterface, DataTypes } from "sequelize";
 
 module.exports = {
   up: (queryInterface: QueryInterface) => {
-    return queryInterface.sequelize.transaction(async (transaction) => {
+    return queryInterface.sequelize.transaction(async transaction => {
       await queryInterface.addColumn(
         "Users",
         "currentSessionId",
@@ -26,9 +26,13 @@ module.exports = {
   },
 
   down: (queryInterface: QueryInterface) => {
-    return queryInterface.sequelize.transaction(async (transaction) => {
-      await queryInterface.removeColumn("Users", "currentSessionId", { transaction });
-      await queryInterface.removeColumn("Users", "lastLoginAt", { transaction });
+    return queryInterface.sequelize.transaction(async transaction => {
+      await queryInterface.removeColumn("Users", "currentSessionId", {
+        transaction
+      });
+      await queryInterface.removeColumn("Users", "lastLoginAt", {
+        transaction
+      });
     });
   }
 };

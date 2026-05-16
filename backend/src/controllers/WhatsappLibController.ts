@@ -4,7 +4,10 @@ import { updateWhatsappLibFromGit } from "../services/WhatsappLibService/UpdateW
 import { restartBackend } from "../services/WhatsappLibService/RestartService";
 import { logger } from "../utils/logger";
 
-export const updateWhatsappLibrary = async (req: Request, res: Response): Promise<Response> => {
+export const updateWhatsappLibrary = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
   try {
     const updateResult = await updateWhatsappLib();
 
@@ -17,16 +20,17 @@ export const updateWhatsappLibrary = async (req: Request, res: Response): Promis
 
       return res.status(200).json({
         success: true,
-        message: `${updateResult.message} ${restartResult.success ? restartResult.message : 'O servidor precisará ser reiniciado manualmente.'}`,
+        message: `${updateResult.message} ${restartResult.success ? restartResult.message : "O servidor precisará ser reiniciado manualmente."}`,
         newVersion: updateResult.newVersion,
         restartSuccess: restartResult.success,
         restartMessage: restartResult.message
       });
-    } catch (restartErr) {
+    } catch (_restartErr) {
       return res.status(200).json({
         ...updateResult,
         restartSuccess: false,
-        restartMessage: "Não foi possível reiniciar o servidor automaticamente. Por favor, reinicie o servidor manualmente."
+        restartMessage:
+          "Não foi possível reiniciar o servidor automaticamente. Por favor, reinicie o servidor manualmente."
       });
     }
   } catch (err) {
@@ -39,7 +43,10 @@ export const updateWhatsappLibrary = async (req: Request, res: Response): Promis
   }
 };
 
-export const updateWhatsappLibraryFromGit = async (req: Request, res: Response): Promise<Response> => {
+export const updateWhatsappLibraryFromGit = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
   try {
     const updateResult = await updateWhatsappLibFromGit();
 
@@ -52,17 +59,18 @@ export const updateWhatsappLibraryFromGit = async (req: Request, res: Response):
 
       return res.status(200).json({
         success: true,
-        message: `${updateResult.message} ${restartResult.success ? restartResult.message : 'O servidor precisará ser reiniciado manualmente.'}`,
+        message: `${updateResult.message} ${restartResult.success ? restartResult.message : "O servidor precisará ser reiniciado manualmente."}`,
         newVersion: updateResult.newVersion,
         commitsInstalled: updateResult.commitsInstalled,
         restartSuccess: restartResult.success,
         restartMessage: restartResult.message
       });
-    } catch (restartErr) {
+    } catch (_restartErr) {
       return res.status(200).json({
         ...updateResult,
         restartSuccess: false,
-        restartMessage: "Não foi possível reiniciar o servidor automaticamente. Por favor, reinicie o servidor manualmente."
+        restartMessage:
+          "Não foi possível reiniciar o servidor automaticamente. Por favor, reinicie o servidor manualmente."
       });
     }
   } catch (err) {

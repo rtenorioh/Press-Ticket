@@ -99,12 +99,14 @@ export const createActivityLog = async ({
       description,
       entityType,
       entityId,
-      additionalData: additionalData ? JSON.parse(JSON.stringify(additionalData)) : null,
+      additionalData: additionalData
+        ? JSON.parse(JSON.stringify(additionalData))
+        : null,
       ip: ip || null,
       createdAt: new Date(),
       updatedAt: new Date()
     });
-    
+
     return log;
   } catch (error) {
     throw error;
@@ -201,7 +203,14 @@ export const getEntityDetails = async (
   switch (entityType.toLowerCase()) {
     case EntityTypes.TICKET:
       entityDetails = await Ticket.findByPk(entityId, {
-        attributes: ["id", "status", "unreadMessages", "queueId", "userId", "contactId"],
+        attributes: [
+          "id",
+          "status",
+          "unreadMessages",
+          "queueId",
+          "userId",
+          "contactId"
+        ],
         include: [
           {
             model: Contact,
@@ -219,12 +228,14 @@ export const getEntityDetails = async (
           queueId: plainTicket.queueId,
           userId: plainTicket.userId,
           contactId: plainTicket.contactId,
-          contact: plainTicket.contact ? {
-            id: plainTicket.contact.id,
-            name: plainTicket.contact.name,
-            number: plainTicket.contact.number,
-            email: plainTicket.contact.email
-          } : null
+          contact: plainTicket.contact
+            ? {
+                id: plainTicket.contact.id,
+                name: plainTicket.contact.name,
+                number: plainTicket.contact.number,
+                email: plainTicket.contact.email
+              }
+            : null
         };
       }
       break;
@@ -256,7 +267,15 @@ export const getEntityDetails = async (
     case EntityTypes.MESSAGE:
     case "message":
       entityDetails = await Message.findByPk(entityId, {
-        attributes: ["id", "body", "mediaType", "mediaUrl", "fromMe", "isDeleted", "createdAt"],
+        attributes: [
+          "id",
+          "body",
+          "mediaType",
+          "mediaUrl",
+          "fromMe",
+          "isDeleted",
+          "createdAt"
+        ],
         include: [
           {
             model: Ticket,
@@ -274,12 +293,16 @@ export const getEntityDetails = async (
         const plainMessage = entityDetails.get({ plain: true }) as any;
         entityDetails = {
           ...plainMessage,
-          bodyPreview: plainMessage.body ? plainMessage.body.substring(0, 100) : null,
-          ticket: plainMessage.ticket ? {
-            id: plainMessage.ticket.id,
-            status: plainMessage.ticket.status,
-            contact: plainMessage.ticket.contact
-          } : null
+          bodyPreview: plainMessage.body
+            ? plainMessage.body.substring(0, 100)
+            : null,
+          ticket: plainMessage.ticket
+            ? {
+                id: plainMessage.ticket.id,
+                status: plainMessage.ticket.status,
+                contact: plainMessage.ticket.contact
+              }
+            : null
         };
       }
       break;

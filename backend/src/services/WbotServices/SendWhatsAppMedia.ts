@@ -21,46 +21,54 @@ interface Request {
   sendAsDocument?: boolean;
 }
 
-const compressVideo = (inputPath: string, outputPath: string, ticketId: number, socketIo?: any): Promise<void> => {
+const compressVideo = (
+  inputPath: string,
+  outputPath: string,
+  ticketId: number,
+  socketIo?: any
+): Promise<void> => {
   return new Promise((resolve, reject) => {
-    const command = ffmpeg(inputPath)
-      .videoCodec('libx264')
-      .audioCodec('aac')
-      .size('480x?')
-      .videoBitrate('500k')
-      .audioBitrate('64k')
-      .format('mp4')
+    ffmpeg(inputPath)
+      .videoCodec("libx264")
+      .audioCodec("aac")
+      .size("480x?")
+      .videoBitrate("500k")
+      .audioBitrate("64k")
+      .format("mp4")
       .outputOptions([
-        '-movflags', 'faststart',
-        '-preset', 'fast',
-        '-crf', '28'
+        "-movflags",
+        "faststart",
+        "-preset",
+        "fast",
+        "-crf",
+        "28"
       ])
-      .on('progress', (progress) => {
+      .on("progress", progress => {
         if (socketIo && progress.percent) {
           const percent = Math.round(progress.percent);
           socketIo.emit(`video-compression-progress-${ticketId}`, {
             ticketId,
             progress: percent,
-            status: 'compressing'
+            status: "compressing"
           });
         }
       })
-      .on('end', () => {
+      .on("end", () => {
         if (socketIo) {
           socketIo.emit(`video-compression-progress-${ticketId}`, {
             ticketId,
             progress: 100,
-            status: 'completed'
+            status: "completed"
           });
         }
         resolve();
       })
-      .on('error', (err) => {
+      .on("error", err => {
         if (socketIo) {
           socketIo.emit(`video-compression-progress-${ticketId}`, {
             ticketId,
             progress: 0,
-            status: 'error',
+            status: "error",
             error: err.message
           });
         }
@@ -70,7 +78,10 @@ const compressVideo = (inputPath: string, outputPath: string, ticketId: number, 
   });
 };
 
-const transcodeAudioToOpus = (inputPath: string, outputPath: string): Promise<void> => {
+const transcodeAudioToOpus = (
+  inputPath: string,
+  outputPath: string
+): Promise<void> => {
   return new Promise((resolve, reject) => {
     ffmpeg(inputPath)
       .noVideo()
@@ -80,12 +91,15 @@ const transcodeAudioToOpus = (inputPath: string, outputPath: string): Promise<vo
       .audioFrequency(16000)
       .format("ogg")
       .outputOptions([
-        "-application", "voip",
-        "-frame_duration", "20",
-        "-map_metadata", "-1"
+        "-application",
+        "voip",
+        "-frame_duration",
+        "20",
+        "-map_metadata",
+        "-1"
       ])
       .on("end", () => resolve())
-      .on("error", (err) => reject(err))
+      .on("error", err => reject(err))
       .save(outputPath);
   });
 };
@@ -105,7 +119,7 @@ const SendWhatsAppMedia = async ({
 
     const getChatId = () => {
       let id = ticket.contact.number!;
-      if (!id.includes('@')) {
+      if (!id.includes("@")) {
         id = `${id}@${ticket.isGroup ? "g" : "c"}.us`;
       }
       return id;
@@ -115,50 +129,56 @@ const SendWhatsAppMedia = async ({
 
     const state = await wbot.getState();
 
-    if (state !== 'CONNECTED') {
-      throw new AppError('WhatsApp não está conectado. Por favor, reconecte o WhatsApp.');
+    if (state !== "CONNECTED") {
+      throw new AppError(
+        "WhatsApp não está conectado. Por favor, reconecte o WhatsApp."
+      );
     }
 
     const lidBase = (ticket.contact as any).numberLid || ticket.contact.number;
     const lidChatId = `${lidBase}@lid`;
 
-    const preFn = new Function('pnId', 'lidId', [
-      'return (async function() {',
-      '  var ids = [pnId, lidId];',
-      '  for (var i = 0; i < ids.length; i++) {',
-      '    try {',
-      '      var wid = window.require("WAWebWidFactory").createWid(ids[i]);',
-      '      var chatResult = await window.require("WAWebFindChatAction").findOrCreateLatestChat(wid);',
-      '      var chat = chatResult && chatResult.chat ? chatResult.chat : chatResult;',
-      '      if (chat) { await window.require("WAWebCmd").Cmd.openChatBottom({ chat: chat }); break; }',
-      '    } catch(_) {}',
-      '  }',
-      '})();'
-    ].join('\n'));
+    const preFn = new Function(
+      "pnId",
+      "lidId",
+      [
+        "return (async function() {",
+        "  var ids = [pnId, lidId];",
+        "  for (var i = 0; i < ids.length; i++) {",
+        "    try {",
+        '      var wid = window.require("WAWebWidFactory").createWid(ids[i]);',
+        '      var chatResult = await window.require("WAWebFindChatAction").findOrCreateLatestChat(wid);',
+        "      var chat = chatResult && chatResult.chat ? chatResult.chat : chatResult;",
+        '      if (chat) { await window.require("WAWebCmd").Cmd.openChatBottom({ chat: chat }); break; }',
+        "    } catch(_) {}",
+        "  }",
+        "})();"
+      ].join("\n")
+    );
 
     try {
       await (wbot as any).pupPage.evaluate(preFn, chatId, lidChatId);
       await new Promise(r => setTimeout(r, 2000));
-    } catch (_) {}
+    } catch (__) {}
 
     const sendWithLidFallback = async (media: any, opts: any): Promise<any> => {
       try {
         return await wbot.sendMessage(chatId, media, opts);
       } catch (e: any) {
-        const isLidErr = e?.message?.includes("No LID for user") || String(e).includes("No LID for user");
+        const isLidErr =
+          e?.message?.includes("No LID for user") ||
+          String(e).includes("No LID for user");
         if (!isLidErr) throw e;
         return await wbot.sendMessage(lidChatId, media, opts);
       }
     };
 
     const { getIO } = require("../../libs/socket");
-    const hasBody = body
-      ? formatBody(body as string, ticket)
-      : undefined;
+    const hasBody = body ? formatBody(body as string, ticket) : undefined;
 
-    const isVideo = media.mimetype.startsWith('video/');
-    const isAudio = media.mimetype.startsWith('audio/');
-    const isImage = media.mimetype.startsWith('image/');
+    const isVideo = media.mimetype.startsWith("video/");
+    const isAudio = media.mimetype.startsWith("audio/");
+    const isImage = media.mimetype.startsWith("image/");
     const fileSizeInMB = media.size / (1024 * 1024);
 
     let maxSizeForMedia, maxSizeForDocument;
@@ -186,7 +206,9 @@ const SendWhatsAppMedia = async ({
         finalMediaPath = oggOutput;
         shouldDeleteCompressed = true;
       } catch (audioErr) {
-        logger.warn(`Falha ao transcodificar áudio para Opus: ${audioErr?.message || audioErr}`);
+        logger.warn(
+          `Falha ao transcodificar áudio para Opus: ${audioErr?.message || audioErr}`
+        );
       }
     }
 
@@ -202,14 +224,16 @@ const SendWhatsAppMedia = async ({
         io.emit(`video-compression-progress-${ticket.id}`, {
           ticketId: ticket.id,
           progress: 0,
-          status: 'starting'
+          status: "starting"
         });
 
         await compressVideo(media.path, compressedPath, ticket.id, io);
         finalMediaPath = compressedPath;
         shouldDeleteCompressed = true;
       } catch (compressionError) {
-        logger.warn(`Erro na compressão, enviando original: ${compressionError}`);
+        logger.warn(
+          `Erro na compressão, enviando original: ${compressionError}`
+        );
       }
     }
 
@@ -217,23 +241,33 @@ const SendWhatsAppMedia = async ({
     const finalSizeInMB = finalStats.size / (1024 * 1024);
 
     if (finalSizeInMB > maxSizeForDocument) {
-      throw new AppError(`Arquivo muito grande (${finalSizeInMB.toFixed(2)}MB). Tamanho máximo: ${maxSizeForDocument}MB`);
+      throw new AppError(
+        `Arquivo muito grande (${finalSizeInMB.toFixed(2)}MB). Tamanho máximo: ${maxSizeForDocument}MB`
+      );
     }
     let mimeType = mime.lookup(finalMediaPath) || media.mimetype;
 
-    if (media.filename.toLowerCase().endsWith('.webm') && !mimeType.includes('webm')) {
-      mimeType = 'video/webm';
+    if (
+      media.filename.toLowerCase().endsWith(".webm") &&
+      !mimeType.includes("webm")
+    ) {
+      mimeType = "video/webm";
     }
 
-    if ((finalMediaPath.toLowerCase().endsWith('.ogg') || finalMediaPath.toLowerCase().endsWith('.opus')) && !mimeType.includes('ogg') && !mimeType.includes('opus')) {
-      mimeType = 'audio/ogg';
+    if (
+      (finalMediaPath.toLowerCase().endsWith(".ogg") ||
+        finalMediaPath.toLowerCase().endsWith(".opus")) &&
+      !mimeType.includes("ogg") &&
+      !mimeType.includes("opus")
+    ) {
+      mimeType = "audio/ogg";
     }
     let sentMessage;
     let sendAsDocument = false;
 
     if (forceSendAsDocument) {
       sendAsDocument = true;
-    } else if (media.mimetype.startsWith('text/')) {
+    } else if (media.mimetype.startsWith("text/")) {
       sendAsDocument = true;
     } else if (finalSizeInMB > maxSizeForMedia) {
       sendAsDocument = true;
@@ -242,15 +276,17 @@ const SendWhatsAppMedia = async ({
     }
 
     try {
-      const fileData = fs.readFileSync(finalMediaPath, { encoding: 'base64' });
+      const fileData = fs.readFileSync(finalMediaPath, { encoding: "base64" });
       const maxBase64Size = 140000000;
 
       if (fileData.length > maxBase64Size) {
-        throw new AppError(`Arquivo muito grande para processamento (${(fileData.length / 1000000).toFixed(1)}MB em base64). Tente comprimir o arquivo ou enviar um arquivo menor.`);
+        throw new AppError(
+          `Arquivo muito grande para processamento (${(fileData.length / 1000000).toFixed(1)}MB em base64). Tente comprimir o arquivo ou enviar um arquivo menor.`
+        );
       }
       const sanitizedFilename = media.filename
-        .replace(/[^\w\s.-]/g, '_')
-        .replace(/\s+/g, '_')
+        .replace(/[^\w\s.-]/g, "_")
+        .replace(/\s+/g, "_")
         .substring(0, 100);
 
       const newMedia = new MessageMedia(mimeType, fileData, sanitizedFilename);
@@ -259,7 +295,7 @@ const SendWhatsAppMedia = async ({
           const chat = await wbot.getChatById(chatId);
           await chat.sendStateTyping();
           await new Promise(resolve => setTimeout(resolve, 400));
-        } catch (e) {}
+        } catch (_e) {}
         const docOptions: any = {
           caption: hasBody,
           sendMediaAsDocument: true
@@ -270,7 +306,6 @@ const SendWhatsAppMedia = async ({
 
         try {
           sentMessage = await sendWithLidFallback(newMedia, docOptions);
-
         } catch (docError) {
           logger.error(`Erro ao enviar documento: ${docError.message}`);
           throw docError;
@@ -296,20 +331,19 @@ const SendWhatsAppMedia = async ({
               await chat.sendStateTyping();
             }
             await new Promise(resolve => setTimeout(resolve, 400));
-          } catch (e) {}
+          } catch (_e) {}
           sentMessage = await sendWithLidFallback(newMedia, options);
 
           try {
             const chat = await wbot.getChatById(chatId);
             await chat.clearState();
-          } catch (e) {}
-
-        } catch (mediaError) {
+          } catch (_e) {}
+        } catch (_mediaError) {
           try {
             const chat = await wbot.getChatById(chatId);
             await chat.sendStateTyping();
             await new Promise(resolve => setTimeout(resolve, 400));
-          } catch (e) {}
+          } catch (_e) {}
           const fallbackOptions: any = {
             caption: hasBody,
             sendMediaAsDocument: true
@@ -322,14 +356,15 @@ const SendWhatsAppMedia = async ({
           try {
             const chat = await wbot.getChatById(chatId);
             await chat.clearState();
-          } catch (e) {}
+          } catch (_e) {}
         }
       }
-
     } catch (error) {
       logger.error(`Erro no envio de mídia: ${error}`);
-      if (error.message && error.message.includes('base64')) {
-        throw new AppError("Arquivo muito grande para processamento. Tente um arquivo menor.");
+      if (error.message && error.message.includes("base64")) {
+        throw new AppError(
+          "Arquivo muito grande para processamento. Tente um arquivo menor."
+        );
       }
 
       throw new AppError("Erro ao processar arquivo para envio");
@@ -354,7 +389,14 @@ const SendWhatsAppMedia = async ({
           downloadedMedia.filename = `${shortTime}_${downloadedMedia.filename}`;
         }
 
-        const publicPath = path.join(__dirname, "..", "..", "..", "public", downloadedMedia.filename);
+        const publicPath = path.join(
+          __dirname,
+          "..",
+          "..",
+          "..",
+          "public",
+          downloadedMedia.filename
+        );
         await writeFileAsync(publicPath, downloadedMedia.data, "base64");
 
         if (fs.existsSync(publicPath)) {
@@ -374,11 +416,23 @@ const SendWhatsAppMedia = async ({
       try {
         const shortTime = new Date().getTime().toString().slice(-6);
         const ext = path.extname(media.originalname || media.filename);
-        const baseName = path.basename(media.originalname || media.filename, ext);
-        const sanitizedBaseName = baseName.replace(/[^\w\s.-]/g, '_').substring(0, 50);
+        const baseName = path.basename(
+          media.originalname || media.filename,
+          ext
+        );
+        const sanitizedBaseName = baseName
+          .replace(/[^\w\s.-]/g, "_")
+          .substring(0, 50);
         savedFilename = `${shortTime}_${sanitizedBaseName}${ext}`;
 
-        const publicPath = path.join(__dirname, "..", "..", "..", "public", savedFilename);
+        const publicPath = path.join(
+          __dirname,
+          "..",
+          "..",
+          "..",
+          "public",
+          savedFilename
+        );
         fs.copyFileSync(finalMediaPath, publicPath);
 
         if (fs.existsSync(publicPath)) {
@@ -393,10 +447,11 @@ const SendWhatsAppMedia = async ({
 
     let fileSize = null;
     try {
-      const stats = fs.statSync(path.join(__dirname, "..", "..", "..", "public", savedFilename));
+      const stats = fs.statSync(
+        path.join(__dirname, "..", "..", "..", "public", savedFilename)
+      );
       fileSize = stats.size;
-    } catch (err) {
-    }
+    } catch (_err) {}
 
     const messageData = {
       id: sentMessage.id.id,
@@ -411,7 +466,8 @@ const SendWhatsAppMedia = async ({
       fileSize: fileSize
     };
 
-    const CreateMessageService = require("../MessageServices/CreateMessageService").default;
+    const CreateMessageService =
+      require("../MessageServices/CreateMessageService").default;
 
     try {
       await CreateMessageService({ messageData });

@@ -17,12 +17,11 @@ const storage = multer.diskStorage({
   filename: (req: Request, file, cb) => {
     try {
       const { theme } = req.params;
-      if (!theme || (theme !== 'light' && theme !== 'dark')) {
+      if (!theme || (theme !== "light" && theme !== "dark")) {
         return cb(new Error("Theme parameter must be 'light' or 'dark'"), "");
       }
 
-      const timestamp = Date.now();
-      const ext = path.extname(file.originalname).toLowerCase() || '.jpg';
+      const ext = path.extname(file.originalname).toLowerCase() || ".jpg";
       let fileName = "";
 
       if (file.fieldname === "favico") {
@@ -30,7 +29,8 @@ const storage = multer.diskStorage({
       } else if (file.fieldname === "logo") {
         fileName = theme === "dark" ? `logoDark${ext}` : `logo${ext}`;
       } else if (file.fieldname === "logoTicket") {
-        fileName = theme === "dark" ? `logoTicketDark${ext}` : `logoTicket${ext}`;
+        fileName =
+          theme === "dark" ? `logoTicketDark${ext}` : `logoTicket${ext}`;
       } else {
         return cb(new Error(`Invalid field name: ${file.fieldname}`), "");
       }

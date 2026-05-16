@@ -1,6 +1,6 @@
-import tseslint from "typescript-eslint";
 import prettierConfig from "eslint-config-prettier";
 import prettierPlugin from "eslint-plugin-prettier";
+import tseslint from "typescript-eslint";
 
 export default tseslint.config([
   {
@@ -14,7 +14,14 @@ export default tseslint.config([
     rules: {
       "prettier/prettier": "warn",
       "@typescript-eslint/no-explicit-any": "warn",
-      "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_" }],
+      "@typescript-eslint/no-unused-vars": [
+        "warn",
+        {
+          argsIgnorePattern: "^_",
+          varsIgnorePattern: "^_",
+          caughtErrors: "none"
+        }
+      ],
       "@typescript-eslint/no-require-imports": "off"
     }
   },

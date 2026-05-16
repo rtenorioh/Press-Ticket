@@ -37,19 +37,46 @@ module.exports = {
       }
     });
 
-    await queryInterface.addIndex("MessageReactions", ["messageId"], { name: "idx_message_reactions_messageId" });
-    await queryInterface.addIndex("MessageReactions", ["emoji"], { name: "idx_message_reactions_emoji" });
-    await queryInterface.addIndex("MessageReactions", ["senderId"], { name: "idx_message_reactions_senderId" });
-    await queryInterface.addIndex("MessageReactions", ["messageId", "senderId"], { name: "uniq_message_reactions_message_sender", unique: true });
-    await queryInterface.addIndex("MessageReactions", ["messageId", "emoji"], { name: "idx_message_reactions_message_emoji" });
+    await queryInterface.addIndex("MessageReactions", ["messageId"], {
+      name: "idx_message_reactions_messageId"
+    });
+    await queryInterface.addIndex("MessageReactions", ["emoji"], {
+      name: "idx_message_reactions_emoji"
+    });
+    await queryInterface.addIndex("MessageReactions", ["senderId"], {
+      name: "idx_message_reactions_senderId"
+    });
+    await queryInterface.addIndex(
+      "MessageReactions",
+      ["messageId", "senderId"],
+      { name: "uniq_message_reactions_message_sender", unique: true }
+    );
+    await queryInterface.addIndex("MessageReactions", ["messageId", "emoji"], {
+      name: "idx_message_reactions_message_emoji"
+    });
   },
 
   down: async (queryInterface: QueryInterface) => {
-    await queryInterface.removeIndex("MessageReactions", "idx_message_reactions_message_emoji");
-    await queryInterface.removeIndex("MessageReactions", "uniq_message_reactions_message_sender");
-    await queryInterface.removeIndex("MessageReactions", "idx_message_reactions_senderId");
-    await queryInterface.removeIndex("MessageReactions", "idx_message_reactions_emoji");
-    await queryInterface.removeIndex("MessageReactions", "idx_message_reactions_messageId");
+    await queryInterface.removeIndex(
+      "MessageReactions",
+      "idx_message_reactions_message_emoji"
+    );
+    await queryInterface.removeIndex(
+      "MessageReactions",
+      "uniq_message_reactions_message_sender"
+    );
+    await queryInterface.removeIndex(
+      "MessageReactions",
+      "idx_message_reactions_senderId"
+    );
+    await queryInterface.removeIndex(
+      "MessageReactions",
+      "idx_message_reactions_emoji"
+    );
+    await queryInterface.removeIndex(
+      "MessageReactions",
+      "idx_message_reactions_messageId"
+    );
     await queryInterface.dropTable("MessageReactions");
   }
 };

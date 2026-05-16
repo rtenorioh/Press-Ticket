@@ -33,7 +33,10 @@ class ProfileManagementService {
     }
   }
 
-  async setProfilePicture(whatsappId: number, mediaPath: string): Promise<boolean> {
+  async setProfilePicture(
+    whatsappId: number,
+    mediaPath: string
+  ): Promise<boolean> {
     if (!mediaPath) {
       throw new AppError("Caminho da mídia é obrigatório");
     }

@@ -8,33 +8,39 @@ export const restartPm2 = async (
 ): Promise<Response> => {
   if (process.env.PM2_FRONTEND && process.env.PM2_BACKEND) {
     res.status(200).json({ status: "Reiniciando o Sistema" });
-    
+
     setTimeout(() => {
       const restartFrontend = () => {
         return new Promise((resolve, reject) => {
-          exec(`pm2 restart ${process.env.PM2_FRONTEND}`, (error, stdout, stderr) => {
-            if (error) {
-              logger.error(`Erro ao reiniciar frontend: ${error.message}`);
-              reject(error);
-              return;
+          exec(
+            `pm2 restart ${process.env.PM2_FRONTEND}`,
+            (error, stdout, _stderr) => {
+              if (error) {
+                logger.error(`Erro ao reiniciar frontend: ${error.message}`);
+                reject(error);
+                return;
+              }
+              logger.info(`Frontend reiniciado com sucesso: ${stdout}`);
+              resolve(stdout);
             }
-            logger.info(`Frontend reiniciado com sucesso: ${stdout}`);
-            resolve(stdout);
-          });
+          );
         });
       };
 
       const restartBackend = () => {
         return new Promise((resolve, reject) => {
-          exec(`pm2 restart ${process.env.PM2_BACKEND}`, (error, stdout, stderr) => {
-            if (error) {
-              logger.error(`Erro ao reiniciar backend: ${error.message}`);
-              reject(error);
-              return;
+          exec(
+            `pm2 restart ${process.env.PM2_BACKEND}`,
+            (error, stdout, _stderr) => {
+              if (error) {
+                logger.error(`Erro ao reiniciar backend: ${error.message}`);
+                reject(error);
+                return;
+              }
+              logger.info(`Backend reiniciado com sucesso: ${stdout}`);
+              resolve(stdout);
             }
-            logger.info(`Backend reiniciado com sucesso: ${stdout}`);
-            resolve(stdout);
-          });
+          );
         });
       };
 
@@ -44,10 +50,10 @@ export const restartPm2 = async (
           logger.error(`Erro ao reiniciar o sistema: ${err}`);
         });
     }, 100);
-    
+
     return res.end();
   }
-  
+
   return res
     .status(400)
     .json(

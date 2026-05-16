@@ -6,7 +6,9 @@ export interface NumberCheckResult {
   numberLid: string | null;
 }
 
-const CheckContactNumber = async (number: string): Promise<NumberCheckResult> => {
+const CheckContactNumber = async (
+  number: string
+): Promise<NumberCheckResult> => {
   const defaultWhatsapp = await GetDefaultWhatsApp();
 
   const wbot = await getWbot(defaultWhatsapp.id);

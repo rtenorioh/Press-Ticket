@@ -7,7 +7,12 @@ interface CreateGroupEventData {
   whatsappId: number;
   groupId: string;
   groupName?: string;
-  eventType: "join" | "leave" | "update" | "admin_changed" | "membership_request";
+  eventType:
+    | "join"
+    | "leave"
+    | "update"
+    | "admin_changed"
+    | "membership_request";
   participants?: string[];
   action?: string;
   metadata?: any;
@@ -47,14 +52,10 @@ class GroupEventService {
     }
   }
 
-  async listEvents(params: ListGroupEventsParams): Promise<{ events: GroupEvent[]; count: number }> {
-    const {
-      whatsappId,
-      groupId,
-      eventType,
-      limit = 50,
-      offset = 0
-    } = params;
+  async listEvents(
+    params: ListGroupEventsParams
+  ): Promise<{ events: GroupEvent[]; count: number }> {
+    const { whatsappId, groupId, eventType, limit = 50, offset = 0 } = params;
 
     const where: any = {};
 

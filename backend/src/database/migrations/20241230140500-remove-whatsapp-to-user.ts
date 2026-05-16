@@ -11,7 +11,7 @@ module.exports = {
       allowNull: true,
       references: { model: "Whatsapps", key: "id" },
       onUpdate: "CASCADE",
-      onDelete: "CASCADE",
+      onDelete: "CASCADE"
     });
-  },
+  }
 };

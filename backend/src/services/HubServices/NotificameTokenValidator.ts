@@ -1,7 +1,7 @@
-import axios from 'axios';
-import { logger } from '../../utils/logger';
+import axios from "axios";
+import { logger } from "../../utils/logger";
 
-const VALIDATION_URL = 'https://api.pressticket.com.br/validate-token';
+const VALIDATION_URL = "https://api.pressticket.com.br/validate-token";
 
 interface ValidationResult {
   isValid: boolean;
@@ -10,7 +10,7 @@ interface ValidationResult {
     email: string;
     channels: number;
     active: boolean;
-    type: 'principal' | 'subconta';
+    type: "principal" | "subconta";
   };
 }
 
@@ -22,12 +22,15 @@ class NotificameTokenValidator {
         { token },
         {
           timeout: 10000,
-          headers: { 'Content-Type': 'application/json' }
+          headers: { "Content-Type": "application/json" }
         }
       );
       return response.data;
     } catch (error: any) {
-      logger.error('NotificameTokenValidator: erro ao validar token:', error?.message);
+      logger.error(
+        "NotificameTokenValidator: erro ao validar token:",
+        error?.message
+      );
       // Em caso de falha no endpoint de validação, permite continuar
       return { isValid: true };
     }

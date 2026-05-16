@@ -1,5 +1,8 @@
 import { Request, Response } from "express";
-import { getHealthCheckService, getAllHealthChecks } from "../services/WbotServices/HealthCheckService";
+import {
+  getHealthCheckService,
+  getAllHealthChecks
+} from "../services/WbotServices/HealthCheckService";
 
 export const show = async (req: Request, res: Response): Promise<Response> => {
   const { whatsappId } = req.params;

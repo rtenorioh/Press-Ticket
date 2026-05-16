@@ -7,34 +7,34 @@ module.exports = {
         type: DataTypes.INTEGER,
         autoIncrement: true,
         primaryKey: true,
-        allowNull: false,
+        allowNull: false
       },
       userId: {
         type: DataTypes.INTEGER,
         allowNull: false,
         references: { model: "Users", key: "id" },
         onUpdate: "CASCADE",
-        onDelete: "CASCADE",
+        onDelete: "CASCADE"
       },
       whatsappId: {
         type: DataTypes.INTEGER,
         allowNull: false,
         references: { model: "Whatsapps", key: "id" },
         onUpdate: "CASCADE",
-        onDelete: "CASCADE",
+        onDelete: "CASCADE"
       },
       createdAt: {
         type: DataTypes.DATE,
-        allowNull: false,
+        allowNull: false
       },
       updatedAt: {
         type: DataTypes.DATE,
-        allowNull: false,
-      },
+        allowNull: false
+      }
     });
   },
 
   down: async (queryInterface: QueryInterface) => {
     await queryInterface.dropTable("UserWhatsapps");
-  },
+  }
 };

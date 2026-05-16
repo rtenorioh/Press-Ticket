@@ -13,7 +13,8 @@ module.exports = {
         },
         {
           key: "autoRejectCallsMessage",
-          value: "Desculpe, não atendemos chamadas no momento. Por favor, envie uma mensagem de texto que responderemos em breve.",
+          value:
+            "Desculpe, não atendemos chamadas no momento. Por favor, envie uma mensagem de texto que responderemos em breve.",
           createdAt: new Date(),
           updatedAt: new Date()
         }

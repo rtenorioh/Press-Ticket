@@ -38,7 +38,9 @@ export const GetWbotMessage = async (
         return directMessage;
       }
     } catch (directError: any) {
-      logger.error(`Falha ao buscar mensagem diretamente: ${directError.message}`);
+      logger.error(
+        `Falha ao buscar mensagem diretamente: ${directError.message}`
+      );
     }
 
     throw new AppError("ERR_CHAT_NOT_FOUND");
@@ -51,7 +53,9 @@ export const GetWbotMessage = async (
     try {
       const chatMessages = await wbotChat.fetchMessages({ limit });
 
-      const msgFound = chatMessages.find((msg: WbotMessage) => msg.id.id === messageId);
+      const msgFound = chatMessages.find(
+        (msg: WbotMessage) => msg.id.id === messageId
+      );
 
       if (!msgFound && limit < maxLimit) {
         limit += ticket.isGroup ? 50 : 20;
@@ -60,7 +64,9 @@ export const GetWbotMessage = async (
 
       return msgFound;
     } catch (fetchError) {
-      logger.warn(`[GetWbotMessage] fetchMessages indisponível, usando fallback: ${fetchError}`);
+      logger.warn(
+        `[GetWbotMessage] fetchMessages indisponível, usando fallback: ${fetchError}`
+      );
       return undefined;
     }
   };

@@ -15,10 +15,26 @@ hubMessageRoutes.post(
   MessageController.send
 );
 
-hubMessageRoutes.post("/hub-location/:ticketId", isAuth, MessageController.sendHubLocation);
-hubMessageRoutes.post("/hub-replyable/:ticketId", isAuth, MessageController.sendReplyableText);
-hubMessageRoutes.post("/hub-card/:ticketId", isAuth, MessageController.sendCard);
-hubMessageRoutes.post("/hub-carousel/:ticketId", isAuth, MessageController.sendCarousel);
+hubMessageRoutes.post(
+  "/hub-location/:ticketId",
+  isAuth,
+  MessageController.sendHubLocation
+);
+hubMessageRoutes.post(
+  "/hub-replyable/:ticketId",
+  isAuth,
+  MessageController.sendReplyableText
+);
+hubMessageRoutes.post(
+  "/hub-card/:ticketId",
+  isAuth,
+  MessageController.sendCard
+);
+hubMessageRoutes.post(
+  "/hub-carousel/:ticketId",
+  isAuth,
+  MessageController.sendCarousel
+);
 
 hubMessageRoutes.post("/hub-ticket", isAuth, MessageController.store);
 

@@ -1,4 +1,8 @@
-import { InferAttributes, InferCreationAttributes, CreationOptional } from "sequelize";
+import {
+  InferAttributes,
+  InferCreationAttributes,
+  CreationOptional
+} from "sequelize";
 import {
   Column,
   CreatedAt,
@@ -11,7 +15,10 @@ import User from "./User";
 import Whatsapp from "./Whatsapp";
 
 @Table
-class UserWhatsapp extends Model<InferAttributes<UserWhatsapp>, InferCreationAttributes<UserWhatsapp>> {
+class UserWhatsapp extends Model<
+  InferAttributes<UserWhatsapp>,
+  InferCreationAttributes<UserWhatsapp>
+> {
   @ForeignKey(() => User)
   @Column
   userId: number;

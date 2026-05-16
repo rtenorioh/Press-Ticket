@@ -15,11 +15,11 @@ const execCommand = async (command: string): Promise<string> => {
 };
 
 const formatBytes = (bytes: number): string => {
-  if (bytes === 0) return '0 B';
-  
-  const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+  if (bytes === 0) return "0 B";
+
+  const sizes = ["B", "KB", "MB", "GB", "TB"];
   const i = Math.floor(Math.log(bytes) / Math.log(1024));
-  
+
   return `${parseFloat((bytes / Math.pow(1024, i)).toFixed(2))} ${sizes[i]}`;
 };
 
@@ -31,11 +31,11 @@ export const getMemoryUsageInfo = async () => {
     let cachedMemBytes = 1 * 1024 * 1024 * 1024;
     let availableMemBytes = 4 * 1024 * 1024 * 1024;
     let usedPercentage = 50;
-    
+
     try {
       const freeOutput = await execCommand("free -b");
       logger.info(`Saída do comando free -b: ${freeOutput}`);
-      
+
       const lines = freeOutput.split("\n");
       if (lines.length >= 2) {
         const memLine = lines[1].split(/\s+/);
@@ -43,26 +43,31 @@ export const getMemoryUsageInfo = async () => {
           totalMemBytes = parseInt(memLine[1], 10) || totalMemBytes;
           usedMemBytes = parseInt(memLine[2], 10) || usedMemBytes;
           freeMemBytes = parseInt(memLine[3], 10) || freeMemBytes;
-          
-          cachedMemBytes = parseInt(memLine[5], 10) || parseInt(memLine[6], 10) || cachedMemBytes;
-          
+
+          cachedMemBytes =
+            parseInt(memLine[5], 10) ||
+            parseInt(memLine[6], 10) ||
+            cachedMemBytes;
+
           availableMemBytes = freeMemBytes + cachedMemBytes;
-          
+
           usedPercentage = Math.round((usedMemBytes / totalMemBytes) * 100);
         }
       }
     } catch (error) {
       logger.error(`Erro ao processar saída do free -b: ${error}`);
     }
-    
+
     const processes = [];
-    
+
     try {
-      const psOutput = await execCommand("ps -eo pid,pmem,rss,cmd --sort=-pmem | head -n 11");
+      const psOutput = await execCommand(
+        "ps -eo pid,pmem,rss,cmd --sort=-pmem | head -n 11"
+      );
       logger.info(`Saída do comando ps: ${psOutput}`);
-      
+
       const psLines = psOutput.split("\n");
-      
+
       for (let i = 1; i < psLines.length && i < 11; i++) {
         const line = psLines[i].trim();
         if (line) {
@@ -73,7 +78,7 @@ export const getMemoryUsageInfo = async () => {
             const rssKb = parseInt(parts[2], 10);
             const rssBytes = rssKb * 1024;
             const command = parts.slice(3).join(" ");
-            
+
             processes.push({
               pid,
               command,
@@ -98,7 +103,7 @@ export const getMemoryUsageInfo = async () => {
         memoryPercentage: 12.5
       });
     }
-    
+
     return {
       totalMemory: formatBytes(totalMemBytes),
       totalMemoryBytes: totalMemBytes,
@@ -115,7 +120,7 @@ export const getMemoryUsageInfo = async () => {
     };
   } catch (error) {
     logger.error(`Erro ao obter informações de memória: ${error}`);
-    
+
     return {
       totalMemory: "8 GB",
       totalMemoryBytes: 8589934592,

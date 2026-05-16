@@ -1,7 +1,7 @@
-import fs from 'fs';
-import path from 'path';
-import { promisify } from 'util';
-import { exec } from 'child_process';
+import fs from "fs";
+import path from "path";
+import { promisify } from "util";
+import { exec } from "child_process";
 
 import { logger } from "../../utils/logger";
 
@@ -16,31 +16,36 @@ interface WhatsappLibUpdateResult {
 
 export const updateWhatsappLib = async (): Promise<WhatsappLibUpdateResult> => {
   try {
-    const rootDir = path.resolve(__dirname, '../../../');
-    const packageJsonPath = path.resolve(rootDir, 'package.json');
-    const nodeModulesWhatsappPath = path.resolve(rootDir, 'node_modules/whatsapp-web.js/package.json');
+    const rootDir = path.resolve(__dirname, "../../../");
+    const packageJsonPath = path.resolve(rootDir, "package.json");
+    const nodeModulesWhatsappPath = path.resolve(
+      rootDir,
+      "node_modules/whatsapp-web.js/package.json"
+    );
 
     if (!fs.existsSync(nodeModulesWhatsappPath)) {
       return {
         success: false,
-        message: 'Biblioteca whatsapp-web.js não encontrada no node_modules',
-        error: 'Arquivo não encontrado'
+        message: "Biblioteca whatsapp-web.js não encontrada no node_modules",
+        error: "Arquivo não encontrado"
       };
     }
 
-    const packageJsonContent = fs.readFileSync(packageJsonPath, 'utf8');
+    const packageJsonContent = fs.readFileSync(packageJsonPath, "utf8");
     const packageJson = JSON.parse(packageJsonContent);
 
-    const whatsappPackageContent = fs.readFileSync(nodeModulesWhatsappPath, 'utf8');
+    const whatsappPackageContent = fs.readFileSync(
+      nodeModulesWhatsappPath,
+      "utf8"
+    );
     const whatsappPackage = JSON.parse(whatsappPackageContent);
     const currentInstalledVersion = whatsappPackage.version;
 
-    const declaredVersion = packageJson.dependencies['whatsapp-web.js']?.replace('^', '') || null;
 
-
-    const { stdout: npmViewOutput } = await execPromise('npm view whatsapp-web.js version');
+    const { stdout: npmViewOutput } = await execPromise(
+      "npm view whatsapp-web.js version"
+    );
     const latestVersion = npmViewOutput.trim();
-
 
     if (currentInstalledVersion === latestVersion) {
       return {
@@ -50,13 +55,13 @@ export const updateWhatsappLib = async (): Promise<WhatsappLibUpdateResult> => {
       };
     }
 
-    packageJson.dependencies['whatsapp-web.js'] = `^${latestVersion}`;
+    packageJson.dependencies["whatsapp-web.js"] = `^${latestVersion}`;
 
     fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2));
 
     const oldVersion = currentInstalledVersion;
 
-    const tempDir = path.resolve(rootDir, 'temp_whatsapp_update');
+    const tempDir = path.resolve(rootDir, "temp_whatsapp_update");
     if (!fs.existsSync(tempDir)) {
       fs.mkdirSync(tempDir, { recursive: true });
     }
@@ -69,13 +74,22 @@ export const updateWhatsappLib = async (): Promise<WhatsappLibUpdateResult> => {
       }
     };
 
-    fs.writeFileSync(path.resolve(tempDir, 'package.json'), JSON.stringify(tempPackageJson, null, 2));
+    fs.writeFileSync(
+      path.resolve(tempDir, "package.json"),
+      JSON.stringify(tempPackageJson, null, 2)
+    );
 
     try {
-      await execPromise('npm install --no-audit', { cwd: tempDir });
+      await execPromise("npm install --no-audit", { cwd: tempDir });
 
-      const whatsappLibDir = path.resolve(rootDir, 'node_modules/whatsapp-web.js');
-      const backupDir = path.resolve(rootDir, 'node_modules/whatsapp-web.js.backup');
+      const whatsappLibDir = path.resolve(
+        rootDir,
+        "node_modules/whatsapp-web.js"
+      );
+      const backupDir = path.resolve(
+        rootDir,
+        "node_modules/whatsapp-web.js.backup"
+      );
 
       // Criar backup da versão antiga antes de remover
       if (fs.existsSync(whatsappLibDir)) {
@@ -85,7 +99,10 @@ export const updateWhatsappLib = async (): Promise<WhatsappLibUpdateResult> => {
         fs.renameSync(whatsappLibDir, backupDir);
       }
 
-      const tempWhatsappDir = path.resolve(tempDir, 'node_modules/whatsapp-web.js');
+      const tempWhatsappDir = path.resolve(
+        tempDir,
+        "node_modules/whatsapp-web.js"
+      );
 
       const copyDirRecursive = (src: string, dest: string) => {
         if (!fs.existsSync(dest)) {
@@ -111,12 +128,17 @@ export const updateWhatsappLib = async (): Promise<WhatsappLibUpdateResult> => {
       fs.rmSync(tempDir, { recursive: true, force: true });
 
       if (fs.existsSync(nodeModulesWhatsappPath)) {
-        const newWhatsappPackageContent = fs.readFileSync(nodeModulesWhatsappPath, 'utf8');
+        const newWhatsappPackageContent = fs.readFileSync(
+          nodeModulesWhatsappPath,
+          "utf8"
+        );
         const newWhatsappPackage = JSON.parse(newWhatsappPackageContent);
         const newInstalledVersion = newWhatsappPackage.version;
 
         if (newInstalledVersion !== latestVersion) {
-          throw new Error(`Versão instalada (${newInstalledVersion}) não corresponde à versão esperada (${latestVersion})`);
+          throw new Error(
+            `Versão instalada (${newInstalledVersion}) não corresponde à versão esperada (${latestVersion})`
+          );
         }
 
         // Tudo OK, remover backup
@@ -124,14 +146,22 @@ export const updateWhatsappLib = async (): Promise<WhatsappLibUpdateResult> => {
           fs.rmSync(backupDir, { recursive: true, force: true });
         }
       } else {
-        throw new Error('Falha ao instalar a biblioteca: arquivo package.json não encontrado após instalação');
+        throw new Error(
+          "Falha ao instalar a biblioteca: arquivo package.json não encontrado após instalação"
+        );
       }
     } catch (installError) {
       logger.error(`Erro durante a instalação: ${installError}`);
 
       // Restaurar backup se existir
-      const whatsappLibDir = path.resolve(rootDir, 'node_modules/whatsapp-web.js');
-      const backupDir = path.resolve(rootDir, 'node_modules/whatsapp-web.js.backup');
+      const whatsappLibDir = path.resolve(
+        rootDir,
+        "node_modules/whatsapp-web.js"
+      );
+      const backupDir = path.resolve(
+        rootDir,
+        "node_modules/whatsapp-web.js.backup"
+      );
 
       if (fs.existsSync(backupDir)) {
         if (fs.existsSync(whatsappLibDir)) {
@@ -140,10 +170,12 @@ export const updateWhatsappLib = async (): Promise<WhatsappLibUpdateResult> => {
         fs.renameSync(backupDir, whatsappLibDir);
       }
 
-      packageJson.dependencies['whatsapp-web.js'] = `^${oldVersion}`;
+      packageJson.dependencies["whatsapp-web.js"] = `^${oldVersion}`;
       fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2));
 
-      throw new Error(`Falha ao instalar a biblioteca: ${installError.message}`);
+      throw new Error(
+        `Falha ao instalar a biblioteca: ${installError.message}`
+      );
     }
 
     return {
@@ -155,8 +187,8 @@ export const updateWhatsappLib = async (): Promise<WhatsappLibUpdateResult> => {
     logger.error(`Erro ao atualizar whatsapp-web.js: ${error}`);
     return {
       success: false,
-      message: 'Erro ao atualizar a biblioteca whatsapp-web.js',
-      error: error.message || 'Erro desconhecido'
+      message: "Erro ao atualizar a biblioteca whatsapp-web.js",
+      error: error.message || "Erro desconhecido"
     };
   }
 };

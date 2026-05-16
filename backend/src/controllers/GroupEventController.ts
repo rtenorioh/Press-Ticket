@@ -6,13 +6,7 @@ export const listEvents = async (
   req: Request,
   res: Response
 ): Promise<Response> => {
-  const {
-    whatsappId,
-    groupId,
-    eventType,
-    limit,
-    offset
-  } = req.query;
+  const { whatsappId, groupId, eventType, limit, offset } = req.query;
 
   const { events, count } = await GroupEventService.listEvents({
     whatsappId: whatsappId ? Number(whatsappId) : undefined,
@@ -61,9 +55,9 @@ export const deleteOldEvents = async (
     days ? Number(days) : 30
   );
 
-  return res.json({ 
+  return res.json({
     message: `${deleted} old events deleted successfully`,
-    deleted 
+    deleted
   });
 };
 

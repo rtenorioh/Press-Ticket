@@ -94,8 +94,7 @@ const ListMessagesService = async ({
         (m as any).setDataValue("reactionSenders", senders);
       }
     }
-  } catch (err) {
-  }
+  } catch (_err) {}
 
   return {
     messages: messages.reverse(),

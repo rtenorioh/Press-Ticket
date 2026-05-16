@@ -95,7 +95,9 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
   const medias = req.files as Express.Multer.File[];
   const newContact: ContactData = req.body;
 
-  const formattedNumber = String(newContact.number).replace("-", "").replace(" ", "");
+  const formattedNumber = String(newContact.number)
+    .replace("-", "")
+    .replace(" ", "");
 
   const schema = Yup.object().shape({
     number: Yup.string()
@@ -154,12 +156,23 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
   return res.send({ resp });
 };
 
-export const sendMessage = async (req: Request, res: Response): Promise<Response> => {
-  const { body, quotedMsg, userId, queueId, whatsappId }: MessageData & WhatsappData & { userId: number; queueId: number } =
+export const sendMessage = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  const {
+    body,
+    quotedMsg,
+    userId,
+    queueId,
+    whatsappId
+  }: MessageData & WhatsappData & { userId: number; queueId: number } =
     req.body;
 
   const newContact: ContactData = req.body;
-  const formattedNumber = String(newContact.number).replace("-", "").replace(" ", "");
+  const formattedNumber = String(newContact.number)
+    .replace("-", "")
+    .replace(" ", "");
 
   const schema = Yup.object().shape({
     number: Yup.string()
@@ -174,7 +187,12 @@ export const sendMessage = async (req: Request, res: Response): Promise<Response
     throw new AppError(err.message);
   }
 
-  const contactAndTicket = await createContact(whatsappId, formattedNumber, userId, queueId);
+  const contactAndTicket = await createContact(
+    whatsappId,
+    formattedNumber,
+    userId,
+    queueId
+  );
 
   const resp = await SendWhatsAppMessage({
     body,
@@ -199,13 +217,24 @@ export const sendMessage = async (req: Request, res: Response): Promise<Response
   return res.send({ resp });
 };
 
-export const sendMedia = async (req: Request, res: Response): Promise<Response> => {
-  const { body, quotedMsg, userId, queueId, whatsappId }: MessageData & WhatsappData & { userId: number; queueId: number } =
+export const sendMedia = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  const {
+    body,
+    quotedMsg,
+    userId,
+    queueId,
+    whatsappId
+  }: MessageData & WhatsappData & { userId: number; queueId: number } =
     req.body;
 
   const medias = req.files as Express.Multer.File[];
   const newContact: ContactData = req.body;
-  const formattedNumber = String(newContact.number).replace("-", "").replace(" ", "");
+  const formattedNumber = String(newContact.number)
+    .replace("-", "")
+    .replace(" ", "");
 
   const schema = Yup.object().shape({
     number: Yup.string()
@@ -220,7 +249,12 @@ export const sendMedia = async (req: Request, res: Response): Promise<Response> 
     throw new AppError(err.message);
   }
 
-  const contactAndTicket = await createContact(whatsappId, formattedNumber, userId, queueId);
+  const contactAndTicket = await createContact(
+    whatsappId,
+    formattedNumber,
+    userId,
+    queueId
+  );
 
   let resp: any;
   if (medias && medias.length > 0) {
@@ -258,10 +292,13 @@ export const sendMedia = async (req: Request, res: Response): Promise<Response> 
   return res.send({ resp });
 };
 
-export const getMediaBase64 = async (req: Request, res: Response): Promise<Response> => {
+export const getMediaBase64 = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
   const { messageId } = req.params;
-  const fs = require('fs');
-  const path = require('path');
+  const fs = require("fs");
+  const path = require("path");
 
   try {
     const message = await Message.findByPk(messageId);
@@ -274,7 +311,7 @@ export const getMediaBase64 = async (req: Request, res: Response): Promise<Respo
       throw new AppError("Esta mensagem não possui mídia", 400);
     }
 
-    const mediaUrlParts = message.mediaUrl.split('/');
+    const mediaUrlParts = message.mediaUrl.split("/");
     const filename = mediaUrlParts[mediaUrlParts.length - 1];
 
     const publicFolder = path.resolve(__dirname, "..", "..", "public");
@@ -285,24 +322,24 @@ export const getMediaBase64 = async (req: Request, res: Response): Promise<Respo
     }
 
     const fileBuffer = fs.readFileSync(filePath);
-    const base64Data = fileBuffer.toString('base64');
+    const base64Data = fileBuffer.toString("base64");
 
-    let mimeType = '';
+    let mimeType = "";
     switch (message.mediaType) {
-      case 'image':
-        mimeType = 'image/jpeg';
+      case "image":
+        mimeType = "image/jpeg";
         break;
-      case 'video':
-        mimeType = 'video/mp4';
+      case "video":
+        mimeType = "video/mp4";
         break;
-      case 'audio':
-        mimeType = 'audio/ogg';
+      case "audio":
+        mimeType = "audio/ogg";
         break;
-      case 'document':
-        mimeType = 'application/pdf';
+      case "document":
+        mimeType = "application/pdf";
         break;
       default:
-        mimeType = 'application/octet-stream';
+        mimeType = "application/octet-stream";
     }
 
     return res.json({

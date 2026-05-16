@@ -2,7 +2,8 @@ import { getWbot } from "../../libs/wbot";
 import AppError from "../../errors/AppError";
 import { logger } from "../../utils/logger";
 
-const errStr = (e: unknown) => e instanceof Error ? e.message : JSON.stringify(e);
+const errStr = (e: unknown) =>
+  e instanceof Error ? e.message : JSON.stringify(e);
 
 class ChatManagementService {
   async sendSeen(whatsappId: number, chatId: string): Promise<void> {
@@ -81,7 +82,9 @@ class ChatManagementService {
       const chat = await wbot.getChatById(chatId);
       await chat.unmute();
     } catch (err) {
-      logger.error(`[CHAT_MGMT] Erro ao ativar notificações do chat: ${errStr(err)}`);
+      logger.error(
+        `[CHAT_MGMT] Erro ao ativar notificações do chat: ${errStr(err)}`
+      );
       throw new AppError(`Erro ao ativar notificações do chat: ${errStr(err)}`);
     }
   }

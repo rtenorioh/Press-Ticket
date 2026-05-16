@@ -7,7 +7,8 @@ module.exports = {
       [
         {
           key: "notifyQueueUsersMessage",
-          value: "🔔 *Press Ticket - Novo Atendimento*\n\n{{ms}}, *{{user_name}}*!\nUm novo ticket foi direcionado para seu setor.\n\n*Ticket:* #{{ticket_id}}\n*Setor:* {{queue}}\n*Contato:* {{contact}}\n*Data:* {{date}} {{hour}}\n*Link:* {{link}}",
+          value:
+            "🔔 *Press Ticket - Novo Atendimento*\n\n{{ms}}, *{{user_name}}*!\nUm novo ticket foi direcionado para seu setor.\n\n*Ticket:* #{{ticket_id}}\n*Setor:* {{queue}}\n*Contato:* {{contact}}\n*Data:* {{date}} {{hour}}\n*Link:* {{link}}",
           createdAt: new Date(),
           updatedAt: new Date()
         }

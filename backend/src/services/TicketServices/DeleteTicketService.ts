@@ -14,8 +14,6 @@ const DeleteTicketService = async (id: string): Promise<Ticket> => {
 
   await ticket.destroy();
 
-  const timestamp = new Date().toISOString();
-
   try {
     await EmitTicketCounterService();
   } catch (err) {

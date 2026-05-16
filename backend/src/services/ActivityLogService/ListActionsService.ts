@@ -3,9 +3,7 @@ import ActivityLog from "../../models/ActivityLog";
 
 const ListActionsService = async (): Promise<string[]> => {
   const actions = await ActivityLog.findAll({
-    attributes: [
-      [Sequelize.fn("DISTINCT", Sequelize.col("action")), "action"]
-    ],
+    attributes: [[Sequelize.fn("DISTINCT", Sequelize.col("action")), "action"]],
     raw: true
   });
 

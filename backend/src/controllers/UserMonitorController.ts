@@ -6,7 +6,9 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
   try {
     const { userId } = req.query;
 
-    const data = await UserMonitorService(userId ? parseInt(userId as string) : undefined);
+    const data = await UserMonitorService(
+      userId ? parseInt(userId as string) : undefined
+    );
 
     return res.status(200).json(data);
   } catch (error: any) {

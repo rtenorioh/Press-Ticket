@@ -1,4 +1,8 @@
-import { InferAttributes, InferCreationAttributes, CreationOptional } from "sequelize";
+import {
+  InferAttributes,
+  InferCreationAttributes,
+  CreationOptional
+} from "sequelize";
 import {
   Table,
   Model,
@@ -10,7 +14,10 @@ import {
 } from "sequelize-typescript";
 
 @Table
-class MessageReaction extends Model<InferAttributes<MessageReaction>, InferCreationAttributes<MessageReaction>> {
+class MessageReaction extends Model<
+  InferAttributes<MessageReaction>,
+  InferCreationAttributes<MessageReaction>
+> {
   @PrimaryKey
   @AutoIncrement
   @Column(DataType.INTEGER)

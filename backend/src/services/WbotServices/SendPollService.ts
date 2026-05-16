@@ -36,9 +36,7 @@ class SendPollService {
       }
 
       const ticket = await Ticket.findByPk(ticketId, {
-        include: [
-          { model: Contact, as: "contact" }
-        ]
+        include: [{ model: Contact, as: "contact" }]
       });
 
       if (!ticket) {
@@ -48,13 +46,13 @@ class SendPollService {
       const wbot = getWbot(ticket.whatsappId);
 
       const state = await wbot.getState();
-      if (state !== 'CONNECTED') {
+      if (state !== "CONNECTED") {
         throw new AppError("WhatsApp não está conectado");
       }
 
       const pollOptions = options.map(opt => opt.name);
 
-      const chatId = ticket.contact.number!.includes('@')
+      const chatId = ticket.contact.number!.includes("@")
         ? ticket.contact.number!
         : `${ticket.contact.number!}@c.us`;
 
@@ -87,7 +85,10 @@ class SendPollService {
           { model: Contact, as: "contact" },
           { model: (await import("../../models/Queue")).default, as: "queue" },
           { model: (await import("../../models/User")).default, as: "user" },
-          { model: (await import("../../models/Whatsapp")).default, as: "whatsapp" }
+          {
+            model: (await import("../../models/Whatsapp")).default,
+            as: "whatsapp"
+          }
         ]
       });
 
@@ -103,12 +104,10 @@ class SendPollService {
           contact: ticket.contact
         });
 
-      io.to(ticket.status)
-        .to("notification")
-        .emit(`ticket`, {
-          action: "update",
-          ticket
-        });
+      io.to(ticket.status).to("notification").emit(`ticket`, {
+        action: "update",
+        ticket
+      });
 
       return message;
     } catch (error) {

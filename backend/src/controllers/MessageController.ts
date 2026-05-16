@@ -264,7 +264,7 @@ export const getReactions = async (
                           contact.verifiedName ||
                           senderId;
                       }
-                    } catch (e) {}
+                    } catch (_e) {}
                   }
 
                   return {
@@ -501,7 +501,7 @@ export const listStarred = async (
 
 export const store = async (req: Request, res: Response): Promise<Response> => {
   const { ticketId } = req.params;
-  const { body, quotedMsg, sendAsDocument, compressVideo }: any = req.body;
+  const { body, quotedMsg, sendAsDocument }: any = req.body;
   let { mentions } = req.body;
   const medias = req.files as Express.Multer.File[];
   const logUserId = req.user?.id || 1;
@@ -518,8 +518,6 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
 
   const shouldSendAsDocument =
     sendAsDocument === "true" || sendAsDocument === true;
-  const shouldCompressVideo =
-    compressVideo === "true" || compressVideo === true;
 
   const ticket = await ShowTicketService(ticketId);
 
@@ -816,7 +814,6 @@ export const forwardMessages = async (
       // Tentar forward nativo primeiro (preserva indicação "Encaminhada" do WhatsApp)
       if (messageData.id) {
         try {
-          const GetTicketWbot = require("../helpers/GetTicketWbot").default;
           const GetWbotMessage = require("../helpers/GetWbotMessage").default;
 
           const sourceMessage = await Message.findByPk(messageData.id, {
@@ -824,7 +821,6 @@ export const forwardMessages = async (
           });
 
           if (sourceMessage && sourceMessage.ticket) {
-            const wbot = await GetTicketWbot(sourceMessage.ticket);
             const wbotMsg = await GetWbotMessage(
               sourceMessage.ticket,
               messageData.id

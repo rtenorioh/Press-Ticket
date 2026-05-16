@@ -1,4 +1,8 @@
-import { InferAttributes, InferCreationAttributes, CreationOptional } from "sequelize";
+import {
+  InferAttributes,
+  InferCreationAttributes,
+  CreationOptional
+} from "sequelize";
 import {
   Table,
   Column,
@@ -14,7 +18,10 @@ import User from "./User";
 import Video from "./Video";
 
 @Table
-class VideoUser extends Model<InferAttributes<VideoUser>, InferCreationAttributes<VideoUser>> {
+class VideoUser extends Model<
+  InferAttributes<VideoUser>,
+  InferCreationAttributes<VideoUser>
+> {
   @PrimaryKey
   @AutoIncrement
   @Column(DataType.INTEGER)

@@ -4,7 +4,7 @@ module.exports = {
   up: (queryInterface: QueryInterface) => {
     return queryInterface.addColumn("Queues", "startWork", {
       type: DataTypes.STRING,
-      allowNull: true,
+      allowNull: true
     });
   },
 

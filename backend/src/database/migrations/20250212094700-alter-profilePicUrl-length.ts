@@ -4,14 +4,14 @@ module.exports = {
   up: (queryInterface: QueryInterface) => {
     return queryInterface.changeColumn("Contacts", "profilePicUrl", {
       type: DataTypes.STRING(500),
-      allowNull: true,
+      allowNull: true
     });
   },
 
   down: (queryInterface: QueryInterface) => {
     return queryInterface.changeColumn("Contacts", "profilePicUrl", {
       type: DataTypes.STRING,
-      allowNull: true,
+      allowNull: true
     });
   }
 };

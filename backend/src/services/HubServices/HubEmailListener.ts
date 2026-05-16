@@ -57,7 +57,9 @@ const decodeIfBase64 = (text: string, label: string): string => {
     try {
       return Buffer.from(text, "base64").toString("utf-8");
     } catch {
-      logger.warn(`HubEmailListener: falha ao decodificar base64 em ${label}, usando raw`);
+      logger.warn(
+        `HubEmailListener: falha ao decodificar base64 em ${label}, usando raw`
+      );
     }
   }
   return text;
@@ -108,11 +110,17 @@ const HubEmailListener = async (
     const fileContents: IEmailContent[] = [];
 
     if (message.contents && Array.isArray(message.contents)) {
-      const rawText = decodeIfBase64(message.contents[0]?.text || "", "contents[0]");
+      const rawText = decodeIfBase64(
+        message.contents[0]?.text || "",
+        "contents[0]"
+      );
       const htmlIndex = rawText.search(/<[a-z][^>]*>/i);
 
       if (htmlIndex > 0) {
-        bodyText = rawText.substring(0, htmlIndex).replace(/\r\n/g, "\n").trim();
+        bodyText = rawText
+          .substring(0, htmlIndex)
+          .replace(/\r\n/g, "\n")
+          .trim();
         bodyHtml = rawText.substring(htmlIndex).trim();
       } else if (htmlIndex === 0) {
         bodyHtml = rawText.trim();

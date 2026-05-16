@@ -15,7 +15,8 @@ interface PollVoteData {
 class PollVoteService {
   async createOrUpdate(data: PollVoteData): Promise<PollVote> {
     try {
-      const { pollMessageId, voterId, voterName, selectedOptions, timestamp } = data;
+      const { pollMessageId, voterId, voterName, selectedOptions, timestamp } =
+        data;
 
       const [vote, created] = await PollVote.findOrCreate({
         where: {
@@ -38,16 +39,20 @@ class PollVoteService {
         });
       }
 
-      logger.info(`[POLL_VOTE] Voto ${created ? 'criado' : 'atualizado'}: ${voterId} -> ${pollMessageId}`);
+      logger.info(
+        `[POLL_VOTE] Voto ${created ? "criado" : "atualizado"}: ${voterId} -> ${pollMessageId}`
+      );
 
       const message = await Message.findByPk(pollMessageId);
       if (message) {
         const io = getIO();
         const votes = await this.getVotesByPollId(pollMessageId);
-        
-        logger.info(`[POLL_VOTE] Emitindo pollVoteUpdate para ticket ${message.ticketId}`);
+
+        logger.info(
+          `[POLL_VOTE] Emitindo pollVoteUpdate para ticket ${message.ticketId}`
+        );
         logger.info(`[POLL_VOTE] Total de votos: ${votes.length}`);
-        
+
         io.to(message.ticketId.toString())
           .to(`ticket-${message.ticketId}`)
           .to("notification")
@@ -93,13 +98,13 @@ class PollVoteService {
       }
 
       const votes = await this.getVotesByPollId(pollMessageId);
-      
-      const bodyLines = message.body.split('\n');
-      const pollName = bodyLines[0].replace('📊 Enquete: ', '');
-      
+
+      const bodyLines = message.body.split("\n");
+      const pollName = bodyLines[0].replace("📊 Enquete: ", "");
+
       const optionsLines = bodyLines.slice(3);
       const pollOptions = optionsLines
-        .filter(line => line.trim() !== '')
+        .filter(line => line.trim() !== "")
         .map((line, index) => {
           const match = line.match(/^\d+\.\s+(.+)$/);
           if (match) {
@@ -110,51 +115,67 @@ class PollVoteService {
           }
           return null;
         })
-        .filter((option): option is { localId: number; name: string } => option !== null);
-
-      const optionVotes = await Promise.all(pollOptions.map(async option => {
-        const votersForOption = votes.filter(vote =>
-          vote.selectedOptions.some((selected: any) => selected.localId === option.localId)
+        .filter(
+          (option): option is { localId: number; name: string } =>
+            option !== null
         );
-        
-        const votersWithPhotos = await Promise.all(votersForOption.map(async v => {
-          let profilePicUrl = null;
-          
-          try {
-            const voterNumber = v.voterId.replace('@c.us', '').replace('@s.whatsapp.net', '');
-            
-            const contact = await Contact.findOne({
-              where: { number: voterNumber }
-            });
-            
-            if (contact && contact.profilePicUrl) {
-              // Se já for uma URL completa (http/https), usa diretamente
-              if (contact.profilePicUrl.startsWith('http://') || contact.profilePicUrl.startsWith('https://')) {
-                profilePicUrl = contact.profilePicUrl;
-              } else {
-                // Se for apenas o nome do arquivo, constrói a URL local
-                profilePicUrl = `${process.env.BACKEND_URL}:${process.env.PROXY_PORT}/public/${contact.profilePicUrl}`;
+
+      const optionVotes = await Promise.all(
+        pollOptions.map(async option => {
+          const votersForOption = votes.filter(vote =>
+            vote.selectedOptions.some(
+              (selected: any) => selected.localId === option.localId
+            )
+          );
+
+          const votersWithPhotos = await Promise.all(
+            votersForOption.map(async v => {
+              let profilePicUrl = null;
+
+              try {
+                const voterNumber = v.voterId
+                  .replace("@c.us", "")
+                  .replace("@s.whatsapp.net", "");
+
+                const contact = await Contact.findOne({
+                  where: { number: voterNumber }
+                });
+
+                if (contact && contact.profilePicUrl) {
+                  // Se já for uma URL completa (http/https), usa diretamente
+                  if (
+                    contact.profilePicUrl.startsWith("http://") ||
+                    contact.profilePicUrl.startsWith("https://")
+                  ) {
+                    profilePicUrl = contact.profilePicUrl;
+                  } else {
+                    // Se for apenas o nome do arquivo, constrói a URL local
+                    profilePicUrl = `${process.env.BACKEND_URL}:${process.env.PROXY_PORT}/public/${contact.profilePicUrl}`;
+                  }
+                }
+              } catch (err) {
+                logger.error(
+                  `[POLL_VOTE] Erro ao buscar foto do contato ${v.voterId}: ${err}`
+                );
               }
-            }
-          } catch (err) {
-            logger.error(`[POLL_VOTE] Erro ao buscar foto do contato ${v.voterId}: ${err}`);
-          }
-          
+
+              return {
+                id: v.voterId,
+                name: v.voterName,
+                timestamp: v.timestamp,
+                profilePicUrl
+              };
+            })
+          );
+
           return {
-            id: v.voterId,
-            name: v.voterName,
-            timestamp: v.timestamp,
-            profilePicUrl
+            localId: option.localId,
+            name: option.name,
+            count: votersForOption.length,
+            voters: votersWithPhotos
           };
-        }));
-        
-        return {
-          localId: option.localId,
-          name: option.name,
-          count: votersForOption.length,
-          voters: votersWithPhotos
-        };
-      }));
+        })
+      );
 
       return {
         pollName,

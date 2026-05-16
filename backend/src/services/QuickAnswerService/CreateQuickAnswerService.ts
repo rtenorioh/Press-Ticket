@@ -20,10 +20,10 @@ const CreateQuickAnswerService = async ({
     throw new AppError("ERR__SHORTCUT_DUPLICATED");
   }
 
-  const quickAnswer = await QuickAnswer.create({ 
-    shortcut, 
+  const quickAnswer = await QuickAnswer.create({
+    shortcut,
     message,
-    mediaPath 
+    mediaPath
   });
 
   return quickAnswer;

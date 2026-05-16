@@ -16,16 +16,20 @@ const CreateService = async ({
     name: Yup.string()
       .required()
       .min(3)
-      .test("Check-unique-name", "ERR_CLIENT_STATUS_NAME_ALREADY_EXISTS", async value => {
-        if (value) {
-          const statusWithSameName = await ClientStatus.findOne({
-            where: { name: value }
-          });
+      .test(
+        "Check-unique-name",
+        "ERR_CLIENT_STATUS_NAME_ALREADY_EXISTS",
+        async value => {
+          if (value) {
+            const statusWithSameName = await ClientStatus.findOne({
+              where: { name: value }
+            });
 
-          return !statusWithSameName;
+            return !statusWithSameName;
+          }
+          return false;
         }
-        return false;
-      })
+      )
   });
 
   try {

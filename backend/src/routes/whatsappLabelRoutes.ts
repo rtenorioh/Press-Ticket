@@ -4,7 +4,15 @@ import * as WhatsappLabelController from "../controllers/WhatsappLabelController
 
 const whatsappLabelRoutes = Router();
 
-whatsappLabelRoutes.get("/whatsapp-labels", isAuth, WhatsappLabelController.index);
-whatsappLabelRoutes.post("/whatsapp-labels/sync", isAuth, WhatsappLabelController.sync);
+whatsappLabelRoutes.get(
+  "/whatsapp-labels",
+  isAuth,
+  WhatsappLabelController.index
+);
+whatsappLabelRoutes.post(
+  "/whatsapp-labels/sync",
+  isAuth,
+  WhatsappLabelController.sync
+);
 
 export default whatsappLabelRoutes;

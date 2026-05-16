@@ -52,7 +52,7 @@ export const send = async (req: Request, res: Response): Promise<Response> => {
   }
 
   if (ticket.whatsapp?.type === "wwebjs") {
-    return res.status(400).json({ 
+    return res.status(400).json({
       error: "Este ticket é do tipo wwebjs. Use o endpoint /messages/:ticketId"
     });
   }
@@ -87,7 +87,10 @@ export const send = async (req: Request, res: Response): Promise<Response> => {
   }
 };
 
-export const sendHubLocation = async (req: Request, res: Response): Promise<Response> => {
+export const sendHubLocation = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
   const { latitude, longitude, name = "", address = "" } = req.body;
   const { ticketId } = req.params;
 
@@ -95,7 +98,9 @@ export const sendHubLocation = async (req: Request, res: Response): Promise<Resp
   const lng = Number(longitude);
 
   if (isNaN(lat) || isNaN(lng)) {
-    return res.status(400).json({ error: "Latitude e longitude devem ser números válidos." });
+    return res
+      .status(400)
+      .json({ error: "Latitude e longitude devem ser números válidos." });
   }
 
   const ticket = await Ticket.findByPk(ticketId, {
@@ -103,7 +108,14 @@ export const sendHubLocation = async (req: Request, res: Response): Promise<Resp
       {
         model: Contact,
         as: "contact",
-        attributes: ["number", "email", "messengerId", "instagramId", "telegramId", "webchatId"]
+        attributes: [
+          "number",
+          "email",
+          "messengerId",
+          "instagramId",
+          "telegramId",
+          "webchatId"
+        ]
       },
       {
         model: Whatsapp,
@@ -119,7 +131,8 @@ export const sendHubLocation = async (req: Request, res: Response): Promise<Resp
 
   if (ticket.whatsapp?.type === "wwebjs") {
     return res.status(400).json({
-      error: "Para canais wwebjs, use o endpoint /wa-features/:ticketId/location."
+      error:
+        "Para canais wwebjs, use o endpoint /wa-features/:ticketId/location."
     });
   }
 
@@ -141,7 +154,10 @@ export const sendHubLocation = async (req: Request, res: Response): Promise<Resp
   }
 };
 
-export const sendReplyableText = async (req: Request, res: Response): Promise<Response> => {
+export const sendReplyableText = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
   const { text, quickReplyButtons = [], commentMessageId } = req.body;
   const { ticketId } = req.params;
 
@@ -149,8 +165,14 @@ export const sendReplyableText = async (req: Request, res: Response): Promise<Re
     return res.status(400).json({ error: "O campo 'text' é obrigatório." });
   }
 
-  if (!commentMessageId && (!Array.isArray(quickReplyButtons) || quickReplyButtons.length === 0)) {
-    return res.status(400).json({ error: "Pelo menos um botão de resposta rápida é obrigatório (ou informe commentMessageId para responder comentário)." });
+  if (
+    !commentMessageId &&
+    (!Array.isArray(quickReplyButtons) || quickReplyButtons.length === 0)
+  ) {
+    return res.status(400).json({
+      error:
+        "Pelo menos um botão de resposta rápida é obrigatório (ou informe commentMessageId para responder comentário)."
+    });
   }
 
   const ticket = await Ticket.findByPk(ticketId, {
@@ -158,7 +180,14 @@ export const sendReplyableText = async (req: Request, res: Response): Promise<Re
       {
         model: Contact,
         as: "contact",
-        attributes: ["number", "email", "messengerId", "instagramId", "telegramId", "webchatId"]
+        attributes: [
+          "number",
+          "email",
+          "messengerId",
+          "instagramId",
+          "telegramId",
+          "webchatId"
+        ]
       },
       {
         model: Whatsapp,
@@ -195,8 +224,17 @@ export const sendReplyableText = async (req: Request, res: Response): Promise<Re
   }
 };
 
-export const sendCard = async (req: Request, res: Response): Promise<Response> => {
-  const { title, media = "", text = "", buttons = [], quickReplyButtons = [] } = req.body;
+export const sendCard = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  const {
+    title,
+    media = "",
+    text = "",
+    buttons = [],
+    quickReplyButtons = []
+  } = req.body;
   const { ticketId } = req.params;
 
   if (!title) {
@@ -208,7 +246,14 @@ export const sendCard = async (req: Request, res: Response): Promise<Response> =
       {
         model: Contact,
         as: "contact",
-        attributes: ["number", "email", "messengerId", "instagramId", "telegramId", "webchatId"]
+        attributes: [
+          "number",
+          "email",
+          "messengerId",
+          "instagramId",
+          "telegramId",
+          "webchatId"
+        ]
       },
       {
         model: Whatsapp,
@@ -247,12 +292,17 @@ export const sendCard = async (req: Request, res: Response): Promise<Response> =
   }
 };
 
-export const sendCarousel = async (req: Request, res: Response): Promise<Response> => {
+export const sendCarousel = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
   const { cards = [], cardWidth = "medium", quickReplyButtons = [] } = req.body;
   const { ticketId } = req.params;
 
   if (!Array.isArray(cards) || cards.length < 2) {
-    return res.status(400).json({ error: "O carrossel requer pelo menos 2 cards." });
+    return res
+      .status(400)
+      .json({ error: "O carrossel requer pelo menos 2 cards." });
   }
 
   const ticket = await Ticket.findByPk(ticketId, {
@@ -260,7 +310,14 @@ export const sendCarousel = async (req: Request, res: Response): Promise<Respons
       {
         model: Contact,
         as: "contact",
-        attributes: ["number", "email", "messengerId", "instagramId", "telegramId", "webchatId"]
+        attributes: [
+          "number",
+          "email",
+          "messengerId",
+          "instagramId",
+          "telegramId",
+          "webchatId"
+        ]
       },
       {
         model: Whatsapp,

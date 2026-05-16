@@ -27,17 +27,17 @@ const ListErrorLogsService = async ({
   order = [["id", "DESC"]]
 }: Request): Promise<Response> => {
   const { source, startDate, endDate, severity } = searchParams;
-  
+
   const where: any = {};
-  
+
   if (source) {
     where.source = source;
   }
-  
+
   if (severity) {
     where.severity = severity;
   }
-  
+
   if (startDate && endDate) {
     where.createdAt = {
       [Op.between]: [startDate, endDate]

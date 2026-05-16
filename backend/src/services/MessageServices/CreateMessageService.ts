@@ -27,7 +27,6 @@ const CreateMessageService = async ({
   messageData
 }: Request): Promise<Message> => {
   try {
-
     await Message.upsert(messageData);
 
     const message = await Message.findByPk(messageData.id, {
@@ -99,7 +98,11 @@ const CreateMessageService = async ({
       filename: messageData.filename
     });
 
-    const ticketPayload: any = message.ticket ? message.ticket.toJSON ? message.ticket.toJSON() : { ...message.ticket } : {};
+    const ticketPayload: any = message.ticket
+      ? message.ticket.toJSON
+        ? message.ticket.toJSON()
+        : { ...message.ticket }
+      : {};
     ticketPayload.lastMessage = composedLastMessage;
     ticketPayload.updatedAt = new Date();
 

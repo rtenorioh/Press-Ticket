@@ -76,10 +76,7 @@ class PresenceService {
   /**
    * Define presença como disponível
    */
-  public async setAvailable(
-    whatsappId: number,
-    chatId: string
-  ): Promise<void> {
+  public async setAvailable(whatsappId: number, chatId: string): Promise<void> {
     await this.sendPresence({
       whatsappId,
       chatId,
@@ -99,7 +96,10 @@ class PresenceService {
   ): Promise<void> {
     // Velocidade média: 40 palavras/min = ~200 caracteres/min = ~3.3 caracteres/segundo
     // Mínimo 1 segundo, máximo 10 segundos
-    const duration = Math.min(Math.max(messageLength / 3.3 * 1000, 1000), 10000);
+    const duration = Math.min(
+      Math.max((messageLength / 3.3) * 1000, 1000),
+      10000
+    );
 
     await this.simulateTyping(whatsappId, chatId, duration);
   }
@@ -108,7 +108,10 @@ class PresenceService {
    * Aguarda a duração da simulação de digitação
    */
   public async waitForTypingSimulation(messageLength: number): Promise<void> {
-    const duration = Math.min(Math.max(messageLength / 3.3 * 1000, 1000), 10000);
+    const duration = Math.min(
+      Math.max((messageLength / 3.3) * 1000, 1000),
+      10000
+    );
     await new Promise(resolve => setTimeout(resolve, duration));
   }
 }

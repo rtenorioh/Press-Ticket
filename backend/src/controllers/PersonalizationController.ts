@@ -68,7 +68,9 @@ export const createOrUpdateLogos = async (
         personalizationData.logo = path.basename(files.logo[0].path);
       }
       if (files.logoTicket && files.logoTicket.length > 0) {
-        personalizationData.logoTicket = path.basename(files.logoTicket[0].path);
+        personalizationData.logoTicket = path.basename(
+          files.logoTicket[0].path
+        );
       }
     }
 
@@ -130,9 +132,9 @@ export const deleteLogo = async (
 ): Promise<Response> => {
   try {
     const { theme } = req.params;
-    const logoType = req.params.logoType as 'favico' | 'logo' | 'logoTicket';
+    const logoType = req.params.logoType as "favico" | "logo" | "logoTicket";
 
-    if (!['favico', 'logo', 'logoTicket'].includes(logoType)) {
+    if (!["favico", "logo", "logoTicket"].includes(logoType)) {
       return res.status(400).json({ message: "Tipo de logo inválido" });
     }
 
@@ -146,7 +148,14 @@ export const deleteLogo = async (
     const currentFileName = currentTheme[logoType];
 
     if (currentFileName) {
-      const filePath = path.join(__dirname, "..", "..", "public", "logos", currentFileName);
+      const filePath = path.join(
+        __dirname,
+        "..",
+        "..",
+        "public",
+        "logos",
+        currentFileName
+      );
       try {
         if (fs.existsSync(filePath)) {
           fs.unlinkSync(filePath);

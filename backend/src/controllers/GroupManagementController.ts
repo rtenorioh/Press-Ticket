@@ -3,7 +3,11 @@ import GroupManagementService from "../services/WbotServices/GroupManagementServ
 import GroupEventsService from "../services/WbotServices/GroupEventsService";
 import AppError from "../errors/AppError";
 import { getWbot } from "../libs/wbot";
-import { createActivityLog, ActivityActions, EntityTypes } from "../services/ActivityLogService";
+import {
+  createActivityLog,
+  ActivityActions,
+  EntityTypes
+} from "../services/ActivityLogService";
 import GetClientIp from "../helpers/GetClientIp";
 import { logger } from "../utils/logger";
 
@@ -29,7 +33,7 @@ export const createGroup = async (
   // LOG: Grupo criado
   try {
     await createActivityLog({
-      userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
+      userId: typeof logUserId === "string" ? parseInt(logUserId) : logUserId,
       action: ActivityActions.CREATE,
       description: `Grupo "${name}" criado`,
       entityType: EntityTypes.GROUP,
@@ -116,7 +120,9 @@ export const addParticipants = async (
   const wbot = getWbot(Number(whatsappId));
   for (const participantId of participants) {
     try {
-      const contact = await wbot.getContactById(participantId.includes('@') ? participantId : `${participantId}@c.us`);
+      const contact = await wbot.getContactById(
+        participantId.includes("@") ? participantId : `${participantId}@c.us`
+      );
       await GroupEventsService.registerEvent({
         whatsappId: Number(whatsappId),
         groupId,
@@ -134,7 +140,7 @@ export const addParticipants = async (
   // LOG: Participantes adicionados
   try {
     await createActivityLog({
-      userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
+      userId: typeof logUserId === "string" ? parseInt(logUserId) : logUserId,
       action: ActivityActions.JOIN,
       description: `${participants.length} participante(s) adicionado(s) ao grupo ${groupId}`,
       entityType: EntityTypes.GROUP,
@@ -178,7 +184,9 @@ export const removeParticipants = async (
   const wbot = getWbot(Number(whatsappId));
   for (const participantId of participants) {
     try {
-      const contact = await wbot.getContactById(participantId.includes('@') ? participantId : `${participantId}@c.us`);
+      const contact = await wbot.getContactById(
+        participantId.includes("@") ? participantId : `${participantId}@c.us`
+      );
       await GroupEventsService.registerEvent({
         whatsappId: Number(whatsappId),
         groupId,
@@ -196,7 +204,7 @@ export const removeParticipants = async (
   // LOG: Participantes removidos
   try {
     await createActivityLog({
-      userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
+      userId: typeof logUserId === "string" ? parseInt(logUserId) : logUserId,
       action: ActivityActions.LEAVE,
       description: `${participants.length} participante(s) removido(s) do grupo ${groupId}`,
       entityType: EntityTypes.GROUP,
@@ -237,7 +245,9 @@ export const promoteParticipants = async (
   const wbot = getWbot(Number(whatsappId));
   for (const participantId of participants) {
     try {
-      const contact = await wbot.getContactById(participantId.includes('@') ? participantId : `${participantId}@c.us`);
+      const contact = await wbot.getContactById(
+        participantId.includes("@") ? participantId : `${participantId}@c.us`
+      );
       await GroupEventsService.registerEvent({
         whatsappId: Number(whatsappId),
         groupId,
@@ -255,7 +265,7 @@ export const promoteParticipants = async (
   // LOG: Participantes promovidos
   try {
     await createActivityLog({
-      userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
+      userId: typeof logUserId === "string" ? parseInt(logUserId) : logUserId,
       action: ActivityActions.PROMOTE,
       description: `${participants.length} participante(s) promovido(s) a admin no grupo ${groupId}`,
       entityType: EntityTypes.GROUP,
@@ -296,7 +306,9 @@ export const demoteParticipants = async (
   const wbot = getWbot(Number(whatsappId));
   for (const participantId of participants) {
     try {
-      const contact = await wbot.getContactById(participantId.includes('@') ? participantId : `${participantId}@c.us`);
+      const contact = await wbot.getContactById(
+        participantId.includes("@") ? participantId : `${participantId}@c.us`
+      );
       await GroupEventsService.registerEvent({
         whatsappId: Number(whatsappId),
         groupId,
@@ -314,7 +326,7 @@ export const demoteParticipants = async (
   // LOG: Participantes rebaixados
   try {
     await createActivityLog({
-      userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
+      userId: typeof logUserId === "string" ? parseInt(logUserId) : logUserId,
       action: ActivityActions.DEMOTE,
       description: `${participants.length} participante(s) rebaixado(s) no grupo ${groupId}`,
       entityType: EntityTypes.GROUP,
@@ -374,7 +386,7 @@ export const revokeGroupInviteLink = async (
   // LOG: Link de convite revogado
   try {
     await createActivityLog({
-      userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
+      userId: typeof logUserId === "string" ? parseInt(logUserId) : logUserId,
       action: ActivityActions.REVOKE,
       description: `Link de convite do grupo ${groupId} revogado`,
       entityType: EntityTypes.GROUP,
@@ -419,5 +431,7 @@ export const updateGroupSettings = async (
     }
   );
 
-  return res.json({ message: "Configurações do grupo atualizadas com sucesso" });
+  return res.json({
+    message: "Configurações do grupo atualizadas com sucesso"
+  });
 };

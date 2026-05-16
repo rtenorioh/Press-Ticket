@@ -1,5 +1,3 @@
-/* eslint-disable no-plusplus */
-/* eslint-disable no-nested-ternary */
 import axios from "axios";
 import { writeFile } from "fs";
 import { join } from "path";
@@ -51,7 +49,9 @@ const writeFileAsync = promisify(writeFile);
 const verifyContact = async (msgContact: WbotContact): Promise<Contact> => {
   const idUser: string = (msgContact.id as any).user || "";
   const idServer: string = (msgContact.id as any).server || "c.us";
-  const isLid = idServer === "lid" || String((msgContact.id as any)._serialized || "").endsWith("@lid");
+  const isLid =
+    idServer === "lid" ||
+    String((msgContact.id as any)._serialized || "").endsWith("@lid");
 
   const contactData: any = {
     name: msgContact.name || msgContact.pushname || idUser,
@@ -185,8 +185,7 @@ const verifyMediaMessage = async (
             });
         });
       })
-      .then(() => {
-      })
+      .then(() => {})
       .catch(err => {
         logger.error(`Erro na conversão: ${err}`);
       });
@@ -222,7 +221,8 @@ const verifyMediaMessage = async (
 
   const existingMessage = await Message.findByPk(messageData.id);
   if (existingMessage) {
-    const messageAge = Date.now() - new Date(existingMessage.createdAt).getTime();
+    const messageAge =
+      Date.now() - new Date(existingMessage.createdAt).getTime();
     if (messageAge < 5000) {
       return existingMessage;
     }
@@ -231,7 +231,8 @@ const verifyMediaMessage = async (
   try {
     const newMessage = await CreateMessageService({ messageData });
 
-    const FormatLastMessage = require("../../helpers/FormatLastMessage").default;
+    const FormatLastMessage =
+      require("../../helpers/FormatLastMessage").default;
     const formattedLastMessage = FormatLastMessage({
       body: messageData.body,
       mediaType: messageData.mediaType,
@@ -252,7 +253,8 @@ const verifyMediaMessage = async (
         try {
           const newMessage = await CreateMessageService({ messageData });
 
-          const FormatLastMessage = require("../../helpers/FormatLastMessage").default;
+          const FormatLastMessage =
+            require("../../helpers/FormatLastMessage").default;
           const formattedLastMessage = FormatLastMessage({
             body: messageData.body,
             mediaType: messageData.mediaType,
@@ -267,7 +269,9 @@ const verifyMediaMessage = async (
 
           resolve(newMessage);
         } catch (retryError) {
-          logger.error(`Erro ao salvar mensagem com mídia (retry): ${retryError}`);
+          logger.error(
+            `Erro ao salvar mensagem com mídia (retry): ${retryError}`
+          );
           reject(retryError);
         }
       }, 1000);
@@ -303,7 +307,9 @@ const getGeocode = async (
 
 const prepareLocation = async (msg: WbotMessage): Promise<WbotMessage> => {
   const safeLatitude = encodeURIComponent(String(msg.location.latitude).trim());
-  const safeLongitude = encodeURIComponent(String(msg.location.longitude).trim());
+  const safeLongitude = encodeURIComponent(
+    String(msg.location.longitude).trim()
+  );
 
   const gmapsUrl = `https://maps.google.com/maps?q=${safeLatitude}%2C${safeLongitude}&z=17`;
 
@@ -359,7 +365,11 @@ const verifyMessage = async (
 
     pollOptions.forEach((option: any, index: number) => {
       const optionName = option?.name || option?.localName || option;
-      if (optionName && typeof optionName === "string" && optionName.trim() !== "") {
+      if (
+        optionName &&
+        typeof optionName === "string" &&
+        optionName.trim() !== ""
+      ) {
         pollBody += `${index + 1}. ${optionName}\n`;
       }
     });
@@ -379,9 +389,7 @@ const verifyMessage = async (
   };
 
   if (msg.type === "multi_vcard") {
-
     if (!msg.body || msg.body === "") {
-
       if (msg.vCards && Array.isArray(msg.vCards) && msg.vCards.length > 0) {
         const extractedContacts = [];
 
@@ -418,7 +426,6 @@ const verifyMessage = async (
 
         for (const contact of extractedContacts) {
           try {
-
             try {
               const cont = await CreateContactService({
                 name: contact.name,
@@ -454,33 +461,37 @@ const verifyMessage = async (
           const jsonData = JSON.stringify(processedContacts);
 
           try {
-            const testParse = JSON.parse(jsonData);
-
             messageData.body = jsonData;
             msg.body = messageData.body;
           } catch (jsonError) {
             logger.error(`Erro ao parsear JSON vCard: ${jsonError}`);
-            messageData.body = JSON.stringify([{
-              id: 0,
-              name: "Contato do vCard",
-              number: "Número não disponível"
-            }]);
+            messageData.body = JSON.stringify([
+              {
+                id: 0,
+                name: "Contato do vCard",
+                number: "Número não disponível"
+              }
+            ]);
             msg.body = messageData.body;
           }
         } else {
-          messageData.body = JSON.stringify([{
-            id: 0,
-            name: "Contato do vCard",
-            number: "Número não disponível"
-          }]);
+          messageData.body = JSON.stringify([
+            {
+              id: 0,
+              name: "Contato do vCard",
+              number: "Número não disponível"
+            }
+          ]);
           msg.body = messageData.body;
         }
       } else {
-        messageData.body = JSON.stringify([{
-          id: 0,
-          name: "Contato do vCard",
-          number: "Número não disponível"
-        }]);
+        messageData.body = JSON.stringify([
+          {
+            id: 0,
+            name: "Contato do vCard",
+            number: "Número não disponível"
+          }
+        ]);
         msg.body = messageData.body;
       }
     } else {
@@ -492,11 +503,13 @@ const verifyMessage = async (
         }
       } catch (error) {
         logger.error(`Erro ao parsear multi_vcard: ${error}`);
-        messageData.body = JSON.stringify([{
-          id: 0,
-          name: "Contato do vCard",
-          number: "Número não disponível"
-        }]);
+        messageData.body = JSON.stringify([
+          {
+            id: 0,
+            name: "Contato do vCard",
+            number: "Número não disponível"
+          }
+        ]);
         msg.body = messageData.body;
       }
     }
@@ -504,7 +517,8 @@ const verifyMessage = async (
 
   const existingMessage = await Message.findByPk(messageData.id);
   if (existingMessage) {
-    const messageAge = Date.now() - new Date(existingMessage.createdAt).getTime();
+    const messageAge =
+      Date.now() - new Date(existingMessage.createdAt).getTime();
     if (messageAge < 5000) {
       return;
     }
@@ -513,7 +527,8 @@ const verifyMessage = async (
   try {
     await CreateMessageService({ messageData });
 
-    const FormatLastMessage = require("../../helpers/FormatLastMessage").default;
+    const FormatLastMessage =
+      require("../../helpers/FormatLastMessage").default;
     const formattedLastMessage = FormatLastMessage({
       body: messageData.body,
       mediaType: messageData.mediaType,
@@ -531,7 +546,8 @@ const verifyMessage = async (
       try {
         await CreateMessageService({ messageData });
 
-        const FormatLastMessage = require("../../helpers/FormatLastMessage").default;
+        const FormatLastMessage =
+          require("../../helpers/FormatLastMessage").default;
         const formattedLastMessage = FormatLastMessage({
           body: messageData.body,
           mediaType: messageData.mediaType,
@@ -551,7 +567,7 @@ const verifyMessage = async (
 };
 
 let greetingCounts: { [contactId: string]: number } = {};
-const greetingLimit = (5 * 2);
+const greetingLimit = 5 * 2;
 let resetGreetingCountTimeout: NodeJS.Timeout;
 
 const resetGreetingCounts = () => {
@@ -573,7 +589,9 @@ const verifyQueue = async (
     wbot.id!
   );
 
-  const queueLengthSetting = await ListSettingsServiceOne({ key: "queueLength" });
+  const queueLengthSetting = await ListSettingsServiceOne({
+    key: "queueLength"
+  });
   const queueLength = queueLengthSetting?.value;
   const queueValue = queueLength === "enabled" ? 0 : 1;
 
@@ -633,7 +651,10 @@ const verifyQueue = async (
         const endBreakMinute = parseInt(endBreakParts[1], 10);
         const endBreakInMinutes = endBreakHour * 60 + endBreakMinute;
 
-        if (currentTimeInMinutes >= startBreakInMinutes && currentTimeInMinutes <= endBreakInMinutes) {
+        if (
+          currentTimeInMinutes >= startBreakInMinutes &&
+          currentTimeInMinutes <= endBreakInMinutes
+        ) {
           isBreakTime = true;
         }
       } catch (error) {
@@ -641,23 +662,28 @@ const verifyQueue = async (
         isBreakTime = false;
       }
     }
-    const isOutsideWorkHours = currentTimeInMinutes < startWorkInMinutes || currentTimeInMinutes > endWorkInMinutes;
+    const isOutsideWorkHours =
+      currentTimeInMinutes < startWorkInMinutes ||
+      currentTimeInMinutes > endWorkInMinutes;
 
     if (isBreakTime || isOutsideWorkHours) {
-
       await UpdateTicketService({
         ticketData: { queueId: choosenQueue.id },
         ticketId: ticket.id
       });
 
-      const messageToSend = isBreakTime && choosenQueue.breakMessage
-        ? choosenQueue.breakMessage
-        : choosenQueue.absenceMessage;
+      const messageToSend =
+        isBreakTime && choosenQueue.breakMessage
+          ? choosenQueue.breakMessage
+          : choosenQueue.absenceMessage;
 
       if (messageToSend && messageToSend.trim()) {
         const chat = await msg.getChat();
         await chat.sendStateTyping();
-        const body = formatBody(`\u200e${messageToSend}\n\n*[ # ]* - Voltar ao Menu Principal`, ticket);
+        const body = formatBody(
+          `\u200e${messageToSend}\n\n*[ # ]* - Voltar ao Menu Principal`,
+          ticket
+        );
         const debouncedSentMessage = debounce(
           async () => {
             const sentMessage = await wbot.sendMessage(
@@ -681,7 +707,10 @@ const verifyQueue = async (
       if (choosenQueue.greetingMessage && choosenQueue.greetingMessage.trim()) {
         const chat = await msg.getChat();
         await chat.sendStateTyping();
-        const body = formatBody(`\u200e${choosenQueue.greetingMessage}`, ticket);
+        const body = formatBody(
+          `\u200e${choosenQueue.greetingMessage}`,
+          ticket
+        );
 
         const debouncedSentMessage = debounce(
           async () => {
@@ -708,8 +737,9 @@ const verifyQueue = async (
     queues.forEach((queue, index) => {
       if (queue.startWork && queue.endWork) {
         if (isDisplay) {
-          options += `*${index + 1}* - ${queue.name} das ${queue.startWork
-            } as ${queue.endWork}\n`;
+          options += `*${index + 1}* - ${queue.name} das ${
+            queue.startWork
+          } as ${queue.endWork}\n`;
         } else {
           options += `*${index + 1}* - ${queue.name}\n`;
         }
@@ -722,7 +752,10 @@ const verifyQueue = async (
       if (greetingCounts[contactId] < greetingLimit) {
         const chat = await msg.getChat();
         await chat.sendStateTyping();
-        const greeting = greetingMessage && greetingMessage.trim() ? `\u200e${greetingMessage}\n\n${options}` : `\u200e${options}`;
+        const greeting =
+          greetingMessage && greetingMessage.trim()
+            ? `\u200e${greetingMessage}\n\n${options}`
+            : `\u200e${options}`;
         const body = formatBody(greeting, ticket);
 
         const debouncedSentMessage = debounce(
@@ -786,7 +819,6 @@ const verifyQueue = async (
         }, 5000);
       }
     }
-
   }
 };
 
@@ -838,7 +870,9 @@ const getSafeContact = async (
 
     return await msg.getContact();
   } catch (err) {
-    logger.warn(`[FALLBACK] Usando contato alternativo devido a limitação da lib whatsapp-web.js: ${err.message || String(err)}`);
+    logger.warn(
+      `[FALLBACK] Usando contato alternativo devido a limitação da lib whatsapp-web.js: ${err.message || String(err)}`
+    );
     const jid = useRemoteJid || (msg.fromMe ? msg.to : msg.from);
     const user = jid ? jid.split("@")[0] : "";
     const isGroup = jid?.endsWith("@g.us") || false;
@@ -861,7 +895,6 @@ const handleMessage = async (
       incrementMessageCount(wbot.id);
       updateLastActivity(wbot.id);
     }
-
 
     // if (msg.type === "poll_creation" || (msg as any).pollName) {
     //   logger.info(`[MSG_IGNORADA] Mensagem de enquete ignorada (processada pelo SendPollService): ID=${msg.id?.id || "unknown"}`);
@@ -924,7 +957,9 @@ const handleMessage = async (
             { headers: { "Content-Type": "application/json" } }
           );
         } catch (error) {
-          logger.error(`[N8N] Erro ao enviar dados para o n8n (queue ${n8nTicket.queueId}): ${error}`);
+          logger.error(
+            `[N8N] Erro ao enviar dados para o n8n (queue ${n8nTicket.queueId}): ${error}`
+          );
         }
       }
     }
@@ -958,13 +993,12 @@ const handleMessage = async (
     if (msg.fromMe) {
       if (/\u200e/.test(msg.body[0])) return;
 
-
       if (
         !msg.hasMedia &&
         msg.type !== "location" &&
         msg.type !== "chat" &&
-        msg.type !== "vcard"
-        && msg.type !== "multi_vcard"
+        msg.type !== "vcard" &&
+        msg.type !== "multi_vcard"
       )
         return;
 
@@ -985,10 +1019,12 @@ const handleMessage = async (
       groupContact = await verifyContact(msgGroupContact);
 
       try {
-        const fullJid = (chat as any)?.id?._serialized
-          || (msgGroupContact as any)?.id?._serialized
-          || `${msgGroupContact.id.user}@g.us`;
-        const groupName = (chat as any)?.name || (chat as any)?.subject || groupContact.name;
+        const fullJid =
+          (chat as any)?.id?._serialized ||
+          (msgGroupContact as any)?.id?._serialized ||
+          `${msgGroupContact.id.user}@g.us`;
+        const groupName =
+          (chat as any)?.name || (chat as any)?.subject || groupContact.name;
 
         let profilePicUrl: string | undefined;
         let retries = 2;
@@ -999,12 +1035,14 @@ const handleMessage = async (
             if (profilePicUrl) {
               break;
             }
-          } catch (picErr) {
+          } catch (_picErr) {
             retries--;
             if (retries > 0) {
               await new Promise(resolve => setTimeout(resolve, 500));
             } else {
-              logger.warn(`[WBOT_LISTENER] Falha ao obter foto do grupo ${fullJid} após tentativas`);
+              logger.warn(
+                `[WBOT_LISTENER] Falha ao obter foto do grupo ${fullJid} após tentativas`
+              );
             }
           }
         }
@@ -1030,7 +1068,9 @@ const handleMessage = async (
           }
         }
       } catch (enrichErr) {
-        logger.warn(`Falha ao enriquecer contato de grupo: ${String(enrichErr)}`);
+        logger.warn(
+          `Falha ao enriquecer contato de grupo: ${String(enrichErr)}`
+        );
       }
     }
     const whatsapp = await ShowWhatsAppService(wbot.id!);
@@ -1045,7 +1085,9 @@ const handleMessage = async (
           lastContactAt: new Date()
         });
       } catch (error) {
-        logger.error(`[WBOT_LISTENER] Erro ao atualizar lastContactAt: ${error}`);
+        logger.error(
+          `[WBOT_LISTENER] Erro ao atualizar lastContactAt: ${error}`
+        );
       }
     }
 
@@ -1082,7 +1124,6 @@ const handleMessage = async (
 
     const backCommands = ["voltar", "menu", "inicio", "sair", "#"];
     if (backCommands.includes(msg.body.toLowerCase().trim())) {
-
       await UpdateTicketService({
         ticketData: { queueId: null },
         ticketId: ticket.id
@@ -1261,22 +1302,29 @@ const handleMessage = async (
       try {
         if (!msg.vCards) {
           logger.warn("vCards data is undefined");
-          msg.body = JSON.stringify([{
-            id: 0,
-            name: "Contato do vCard",
-            number: "Número não disponível"
-          }]);
+          msg.body = JSON.stringify([
+            {
+              id: 0,
+              name: "Contato do vCard",
+              number: "Número não disponível"
+            }
+          ]);
           return;
         }
 
-        if ((typeof msg.vCards === "string" && (msg.vCards as string).trim() === "") ||
-          (Array.isArray(msg.vCards) && msg.vCards.length === 0)) {
+        if (
+          (typeof msg.vCards === "string" &&
+            (msg.vCards as string).trim() === "") ||
+          (Array.isArray(msg.vCards) && msg.vCards.length === 0)
+        ) {
           logger.warn("vCards data is empty");
-          msg.body = JSON.stringify([{
-            id: 0,
-            name: "Contato do vCard",
-            number: "Número não disponível"
-          }]);
+          msg.body = JSON.stringify([
+            {
+              id: 0,
+              name: "Contato do vCard",
+              number: "Número não disponível"
+            }
+          ]);
           return;
         }
 
@@ -1296,7 +1344,11 @@ const handleMessage = async (
             if (values[ind] && values[ind].indexOf("+") !== -1) {
               number = values[ind];
             }
-            if (values[ind] && values[ind].indexOf("FN") !== -1 && values[ind + 1]) {
+            if (
+              values[ind] &&
+              values[ind].indexOf("FN") !== -1 &&
+              values[ind + 1]
+            ) {
               name = values[ind + 1];
             }
             if (name !== "" && number !== "") {
@@ -1311,7 +1363,6 @@ const handleMessage = async (
         }
 
         if (obj.length === 0) {
-
           if (msg.vCards && typeof msg.vCards === "object") {
             try {
               if (Array.isArray(msg.vCards)) {
@@ -1355,7 +1406,6 @@ const handleMessage = async (
           }
         }
 
-        // eslint-disable-next-line no-restricted-syntax
         for await (const ob of obj) {
           try {
             const cont = await CreateContactService({
@@ -1402,12 +1452,13 @@ const handleMessage = async (
 
           msg.body = jsonData;
         } else {
-
-          msg.body = JSON.stringify([{
-            id: 0,
-            name: "Contato do vCard",
-            number: "Número não disponível"
-          }]);
+          msg.body = JSON.stringify([
+            {
+              id: 0,
+              name: "Contato do vCard",
+              number: "Número não disponível"
+            }
+          ]);
         }
       } catch (error) {
         logger.error(`Erro ao processar multi_vcard: ${error}`);
@@ -1431,29 +1482,36 @@ const handleMessage = async (
     };
     await CreateOrUpdateContactService(contactData);
   } catch (err) {
-    logger.error(`[MSG_ERRO] Erro ao processar mensagem do WhatsApp. ID=${msg?.id?.id || "unknown"}, Erro: ${err}`);
+    logger.error(
+      `[MSG_ERRO] Erro ao processar mensagem do WhatsApp. ID=${msg?.id?.id || "unknown"}, Erro: ${err}`
+    );
 
-    logger.error(`[MSG_ERRO_DETALHES] Stack trace: ${err.stack || "Sem stack trace"}`);
+    logger.error(
+      `[MSG_ERRO_DETALHES] Stack trace: ${err.stack || "Sem stack trace"}`
+    );
 
     try {
-      logger.error(`[MSG_ERRO_CONTEXTO] Contexto da mensagem com erro: ${JSON.stringify({
-        id: msg?.id?.id || "unknown",
-        fromMe: msg?.fromMe,
-        from: msg?.from,
-        to: msg?.to,
-        body: msg?.body?.substring(0, 100) || "Sem corpo",
-        type: msg?.type,
-        timestamp: msg?.timestamp,
-        hasMedia: msg?.hasMedia
-      })}`);
+      logger.error(
+        `[MSG_ERRO_CONTEXTO] Contexto da mensagem com erro: ${JSON.stringify({
+          id: msg?.id?.id || "unknown",
+          fromMe: msg?.fromMe,
+          from: msg?.from,
+          to: msg?.to,
+          body: msg?.body?.substring(0, 100) || "Sem corpo",
+          type: msg?.type,
+          timestamp: msg?.timestamp,
+          hasMedia: msg?.hasMedia
+        })}`
+      );
     } catch (logErr) {
-      logger.error(`[MSG_ERRO_LOG] Erro ao tentar registrar detalhes do erro: ${logErr}`);
+      logger.error(
+        `[MSG_ERRO_LOG] Erro ao tentar registrar detalhes do erro: ${logErr}`
+      );
     }
   } finally {
   }
 };
 
-// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 const handleMsgAck = async (msg: WbotMessage, ack: MessageAck) => {
   await new Promise(r => setTimeout(r, 500));
 
@@ -1513,11 +1571,15 @@ const handleMsgAck = async (msg: WbotMessage, ack: MessageAck) => {
           }
         }
       } catch (batchErr) {
-        logger.error(`[ACK_BATCH_ERROR] Erro ao processar atualização em lote: ${batchErr}`);
+        logger.error(
+          `[ACK_BATCH_ERROR] Erro ao processar atualização em lote: ${batchErr}`
+        );
       }
     }
   } catch (err) {
-    logger.error(`[ACK_ERRO] Erro ao processar ACK da mensagem. ID=${msg?.id?.id || "unknown"}, ACK=${ack}, Erro: ${err}`);
+    logger.error(
+      `[ACK_ERRO] Erro ao processar ACK da mensagem. ID=${msg?.id?.id || "unknown"}, ACK=${ack}, Erro: ${err}`
+    );
   }
 };
 
@@ -1540,9 +1602,7 @@ const handleMsgEdit = async (
   const io = getIO();
 
   try {
-
     if (oldBody && newBody && oldBody !== newBody) {
-
       const existingHistory = await OldMessage.findOne({
         where: {
           messageId: msg.id.id,
@@ -1594,13 +1654,15 @@ const updatePendingMessages = async (whatsappId: number): Promise<void> => {
       where: {
         fromMe: true,
         ack: { [Op.in]: [0, 1] },
-        createdAt: { [Op.lt]: oneHourAgo },
+        createdAt: { [Op.lt]: oneHourAgo }
       },
-      include: [{
-        model: Ticket,
-        where: { whatsappId },
-        required: true
-      }],
+      include: [
+        {
+          model: Ticket,
+          where: { whatsappId },
+          required: true
+        }
+      ],
       limit: 100
     });
 
@@ -1646,13 +1708,19 @@ const wbotMessageListener = async (wbot: Session): Promise<void> => {
   });
 
   if (wbot.id) {
-    setInterval(() => {
-      updatePendingMessages(wbot.id!);
-    }, 30 * 60 * 1000);
+    setInterval(
+      () => {
+        updatePendingMessages(wbot.id!);
+      },
+      30 * 60 * 1000
+    );
 
-    setTimeout(() => {
-      updatePendingMessages(wbot.id!);
-    }, 5 * 60 * 1000);
+    setTimeout(
+      () => {
+        updatePendingMessages(wbot.id!);
+      },
+      5 * 60 * 1000
+    );
   }
 };
 

@@ -5,7 +5,17 @@ import * as VersionCheckController from "../controllers/VersionCheckController";
 
 const versionCheckRoutes = express.Router();
 
-versionCheckRoutes.get("/version-check", isAuth, isMasterAdmin, VersionCheckController.checkVersion);
-versionCheckRoutes.post("/system-update", isAuth, isMasterAdmin, VersionCheckController.runSystemUpdate);
+versionCheckRoutes.get(
+  "/version-check",
+  isAuth,
+  isMasterAdmin,
+  VersionCheckController.checkVersion
+);
+versionCheckRoutes.post(
+  "/system-update",
+  isAuth,
+  isMasterAdmin,
+  VersionCheckController.runSystemUpdate
+);
 
 export default versionCheckRoutes;

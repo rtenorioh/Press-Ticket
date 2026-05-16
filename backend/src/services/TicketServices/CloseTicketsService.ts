@@ -1,6 +1,5 @@
 import { getIO } from "../../libs/socket";
 import Ticket from "../../models/Ticket";
-import ShowTicketService from "./ShowTicketService";
 import SendWhatsAppMessage from "../WbotServices/SendWhatsAppMessage";
 import ShowWhatsAppService from "../WhatsappService/ShowWhatsAppService";
 import formatBody from "../../helpers/Mustache";
@@ -13,16 +12,16 @@ interface Request {
 }
 
 const CloseTicketsService = async ({
-  status,
+  status: _status,
   userId,
-  tickets,
-  }: Request): Promise<void> => {
+  tickets
+}: Request): Promise<void> => {
   const io = getIO();
   const promises = [];
 
   for (const ticket of tickets) {
     const oldStatus = ticket.status;
-    
+
     promises.push(
       (async () => {
         await ticket.update({

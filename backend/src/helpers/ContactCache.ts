@@ -86,7 +86,6 @@ class ContactCacheHelper {
   }
 
   async warmupCache(contactIds: number[]): Promise<void> {
-
     const contacts = await Contact.findAll({
       where: { id: contactIds }
     });
@@ -107,7 +106,9 @@ class ContactCacheHelper {
 
   getCacheStats() {
     const allKeys = CacheService.keys();
-    const contactKeys = allKeys.filter(key => key.startsWith(this.CACHE_PREFIX));
+    const contactKeys = allKeys.filter(key =>
+      key.startsWith(this.CACHE_PREFIX)
+    );
 
     return {
       totalCached: contactKeys.length,

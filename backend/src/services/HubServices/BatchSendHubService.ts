@@ -63,12 +63,14 @@ export const BatchSendHubService = async (
     form.append("message", JSON.stringify(batch.message));
 
     const client = createNotificameClient(notificameHubToken);
-    const response = await client.post('/v1/messages/batch', form, {
+    const response = await client.post("/v1/messages/batch", form, {
       headers: form.getHeaders()
     });
 
     const data: HubBatchResult =
-      typeof response.data === "object" ? response.data : JSON.parse(response.data);
+      typeof response.data === "object"
+        ? response.data
+        : JSON.parse(response.data);
 
     logger.info(`Envio em lote aceito pela API Hub: ${JSON.stringify(data)}`);
     return data;

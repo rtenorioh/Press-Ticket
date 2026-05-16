@@ -23,7 +23,7 @@ const FormatLastMessage = ({
 
   if (mediaType && mediaType !== "chat" && mediaType !== "text") {
     let fileIcon: string;
-    
+
     const mimeTypePrefix = mimetype ? mimetype.split("/")[0] : mediaType;
 
     switch (mimeTypePrefix) {
@@ -49,7 +49,7 @@ const FormatLastMessage = ({
 
       case "poll_creation":
         fileIcon = "📊 Enquete";
-        break;  
+        break;
 
       case "ciphertext":
         fileIcon = "⚠️ Notificação";

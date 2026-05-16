@@ -34,15 +34,22 @@ const UpdateGroupProfilePicService = async ({
 
     try {
       profilePicUrl = await wbot.getProfilePicUrl(groupJid);
-      logger.info(`[UpdateGroupProfilePic] Foto obtida para grupo ${groupJid}: ${profilePicUrl ? 'SIM' : 'NÃO'}`);
+      logger.info(
+        `[UpdateGroupProfilePic] Foto obtida para grupo ${groupJid}: ${profilePicUrl ? "SIM" : "NÃO"}`
+      );
     } catch (picError) {
-      logger.warn(`[UpdateGroupProfilePic] Erro ao obter foto do grupo ${groupJid}:`, picError);
+      logger.warn(
+        `[UpdateGroupProfilePic] Erro ao obter foto do grupo ${groupJid}:`,
+        picError
+      );
       profilePicUrl = undefined;
     }
 
     if (profilePicUrl && profilePicUrl !== contact.profilePicUrl) {
       await contact.update({ profilePicUrl });
-      logger.info(`[UpdateGroupProfilePic] Foto do grupo ${groupJid} atualizada no banco`);
+      logger.info(
+        `[UpdateGroupProfilePic] Foto do grupo ${groupJid} atualizada no banco`
+      );
 
       try {
         const { getIO } = require("../../libs/socket");
@@ -52,7 +59,10 @@ const UpdateGroupProfilePicService = async ({
           contact: contact.toJSON()
         });
       } catch (socketErr) {
-        logger.warn(`[UpdateGroupProfilePic] Erro ao emitir socket:`, socketErr);
+        logger.warn(
+          `[UpdateGroupProfilePic] Erro ao emitir socket:`,
+          socketErr
+        );
       }
     }
 

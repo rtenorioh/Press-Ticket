@@ -40,7 +40,10 @@ class ContactActionsService {
     }
   }
 
-  async getContactInfo(whatsappId: number, contactId: string): Promise<ContactInfo> {
+  async getContactInfo(
+    whatsappId: number,
+    contactId: string
+  ): Promise<ContactInfo> {
     try {
       const wbot = getWbot(whatsappId);
 
@@ -55,7 +58,7 @@ class ContactActionsService {
 
       try {
         profilePicUrl = await contact.getProfilePicUrl();
-      } catch (e) {
+      } catch (_e) {
         profilePicUrl = undefined;
       }
 
@@ -93,7 +96,10 @@ class ContactActionsService {
     }
   }
 
-  async unblockContact(whatsappId: number, contactId: string): Promise<boolean> {
+  async unblockContact(
+    whatsappId: number,
+    contactId: string
+  ): Promise<boolean> {
     try {
       const wbot = getWbot(whatsappId);
 

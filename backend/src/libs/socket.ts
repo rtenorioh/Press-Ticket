@@ -32,8 +32,8 @@ interface GetTicketsData {
 
 let io: SocketIO;
 
-export const setIO = (io: SocketIO): void => {
-  io = io;
+export const setIO = (_io: SocketIO): void => {
+  io = _io;
 };
 
 export const initIO = (httpServer: Server): void => {
@@ -51,20 +51,23 @@ export const initIO = (httpServer: Server): void => {
         }
 
         // Permitir localhost em desenvolvimento
-        if (process.env.NODE_ENV !== 'production' && origin.includes('localhost')) {
+        if (
+          process.env.NODE_ENV !== "production" &&
+          origin.includes("localhost")
+        ) {
           return callback(null, true);
         }
 
         // Bloquear outras origens
         logger.warn(`Socket.IO CORS bloqueou origem: ${origin}`);
-        callback(new Error('Not allowed by CORS'));
+        callback(new Error("Not allowed by CORS"));
       },
       methods: ["GET", "POST"],
       allowedHeaders: ["Authorization", "Content-Type"],
       credentials: true
     },
-    transports: ['websocket', 'polling'],
-    path: '/socket.io',
+    transports: ["websocket", "polling"],
+    path: "/socket.io",
     pingTimeout: 60000,
     pingInterval: 25000,
     upgradeTimeout: 30000,
@@ -73,14 +76,16 @@ export const initIO = (httpServer: Server): void => {
 
   logger.info("Servidor Socket.IO iniciado", {
     corsOrigin: process.env.FRONTEND_URL || "http://localhost:3000",
-    transports: ['websocket', 'polling']
+    transports: ["websocket", "polling"]
   });
 
   io.on("connection", async socket => {
     const token = socket.handshake.auth?.token || socket.handshake.query?.token;
 
     if (!token || typeof token !== "string") {
-      logger.warn("Conexão rejeitada: Token não fornecido ou inválido", { socketId: socket.id });
+      logger.warn("Conexão rejeitada: Token não fornecido ou inválido", {
+        socketId: socket.id
+      });
       socket.disconnect();
       return;
     }
@@ -90,7 +95,9 @@ export const initIO = (httpServer: Server): void => {
       const { id: userId } = decoded;
 
       if (!userId) {
-        logger.warn("Conexão rejeitada: Token sem userId", { socketId: socket.id });
+        logger.warn("Conexão rejeitada: Token sem userId", {
+          socketId: socket.id
+        });
         socket.disconnect();
         return;
       }
@@ -114,7 +121,6 @@ export const initIO = (httpServer: Server): void => {
         }
 
         socket.join(userId.toString());
-
       } catch (err) {
         logger.error("Erro ao processar usuário do socket", {
           error: err.message,
@@ -157,7 +163,10 @@ export const initIO = (httpServer: Server): void => {
 
     socket.on("disconnect", async () => {
       try {
-        const { id: userId } = verify(token as string, authConfig.secret) as TokenPayload;
+        const { id: userId } = verify(
+          token as string,
+          authConfig.secret
+        ) as TokenPayload;
         const userRoom = io.sockets.adapter.rooms.get(userId.toString());
         const hasConnectedSockets = userRoom && userRoom.size > 0;
 
@@ -174,11 +183,11 @@ export const initIO = (httpServer: Server): void => {
 
     socket.on("logout", async () => {
       try {
-        const { id: userId } = verify(token as string, authConfig.secret) as TokenPayload;
-        await User.update(
-          { online: false },
-          { where: { id: userId } }
-        );
+        const { id: userId } = verify(
+          token as string,
+          authConfig.secret
+        ) as TokenPayload;
+        await User.update({ online: false }, { where: { id: userId } });
 
         socket.leave(userId.toString());
       } catch (err) {
@@ -207,7 +216,10 @@ export const initIO = (httpServer: Server): void => {
 
     socket.on("getTickets", async (data: GetTicketsData) => {
       try {
-        const { id: userId } = verify(token as string, authConfig.secret) as TokenPayload;
+        const { id: userId } = verify(
+          token as string,
+          authConfig.secret
+        ) as TokenPayload;
 
         if (userId !== data.userId && data.userId) {
           logger.warn("Tentativa de acesso a tickets de outro usuário", {
@@ -241,7 +253,8 @@ export const initIO = (httpServer: Server): void => {
           whereCondition.status = data.status;
         }
 
-        const isAdmin = user.profile === "admin" || user.profile === "masteradmin";
+        const isAdmin =
+          user.profile === "admin" || user.profile === "masteradmin";
         const userQueueIds = user.queues?.map((q: any) => q.id) || [];
 
         if (data.status === "open") {
@@ -273,10 +286,7 @@ export const initIO = (httpServer: Server): void => {
                 { queueId: null }
               ];
             } else {
-              whereCondition[Op.or] = [
-                { userId: userId },
-                { queueId: null }
-              ];
+              whereCondition[Op.or] = [{ userId: userId }, { queueId: null }];
             }
           } else {
             if (!data.showAll) {
@@ -287,10 +297,7 @@ export const initIO = (httpServer: Server): void => {
                   { queueId: null }
                 ];
               } else {
-                whereCondition[Op.or] = [
-                  { userId: userId },
-                  { queueId: null }
-                ];
+                whereCondition[Op.or] = [{ userId: userId }, { queueId: null }];
               }
             }
           }
@@ -325,7 +332,6 @@ export const initIO = (httpServer: Server): void => {
         });
 
         socket.emit("ticketList", { tickets });
-
       } catch (err) {
         logger.error("Erro ao sincronizar tickets", {
           error: err.message,

@@ -9,7 +9,11 @@ import User from "../models/User";
 import UserSession from "../models/UserSession";
 import { RefreshTokenService } from "../services/AuthServices/RefreshTokenService";
 import AuthUserService from "../services/UserServices/AuthUserService";
-import { createActivityLog, ActivityActions, EntityTypes } from "../services/ActivityLogService";
+import {
+  createActivityLog,
+  ActivityActions,
+  EntityTypes
+} from "../services/ActivityLogService";
 import GetClientIp from "../helpers/GetClientIp";
 import authConfig from "../config/auth";
 import { logger } from "../utils/logger";
@@ -75,7 +79,7 @@ export const remove = async (
       const [, token] = authHeader.split(" ");
       const decoded = verify(token, authConfig.secret) as { id: string };
       userId = decoded.id;
-    } catch (err) {
+    } catch (_err) {
       // Token inválido ou expirado — prossegue com o logout mesmo assim
     }
   }
@@ -118,7 +122,10 @@ export const remove = async (
   return res.send();
 };
 
-export const forgotPassword = async (req: Request, res: Response): Promise<Response> => {
+export const forgotPassword = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
   const { email } = req.body;
 
   const user = await User.findOne({ where: { email } });
@@ -159,7 +166,10 @@ export const forgotPassword = async (req: Request, res: Response): Promise<Respo
   });
 
   if (!sent) {
-    throw new AppError("Erro ao enviar e-mail de redefinição de senha. Tente novamente mais tarde.", 500);
+    throw new AppError(
+      "Erro ao enviar e-mail de redefinição de senha. Tente novamente mais tarde.",
+      500
+    );
   }
 
   // LOG: Solicitação de redefinição de senha
@@ -174,7 +184,7 @@ export const forgotPassword = async (req: Request, res: Response): Promise<Respo
       ip: clientIp,
       additionalData: {
         email: user.email,
-        action: 'forgot_password'
+        action: "forgot_password"
       }
     });
   } catch (error) {
@@ -184,14 +194,17 @@ export const forgotPassword = async (req: Request, res: Response): Promise<Respo
   return res.status(200).json({ message: "E-mail enviado com sucesso." });
 };
 
-export const resetPassword = async (req: Request, res: Response): Promise<Response> => {
+export const resetPassword = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
   const { token, newPassword } = req.body;
 
   const user = await User.findOne({
     where: {
       passwordResetToken: token,
-      passwordResetExpires: { [Op.gt]: new Date() },
-    },
+      passwordResetExpires: { [Op.gt]: new Date() }
+    }
   });
 
   if (!user) {
@@ -215,7 +228,7 @@ export const resetPassword = async (req: Request, res: Response): Promise<Respon
       ip: clientIp,
       additionalData: {
         email: user.email,
-        action: 'reset_password'
+        action: "reset_password"
       }
     });
   } catch (error) {

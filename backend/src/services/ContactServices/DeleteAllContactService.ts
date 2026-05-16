@@ -8,7 +8,7 @@ const DeleteAllContactService = async (): Promise<void> => {
     throw new AppError("ERR_NO_CONTACT_FOUND", 404);
   }
 
-  await Contact.destroy({ where: {} })
+  await Contact.destroy({ where: {} });
 };
 
 export default DeleteAllContactService;

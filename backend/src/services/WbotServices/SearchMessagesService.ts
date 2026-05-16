@@ -39,15 +39,23 @@ const SearchMessagesService = async ({
   try {
     const wbot = getWbot(whatsappId);
 
-    logger.info(`[SEARCH] Buscando mensagens: query="${query}", chatId=${chatId || "global"}, page=${page}, limit=${limit}`);
+    logger.info(
+      `[SEARCH] Buscando mensagens: query="${query}", chatId=${chatId || "global"}, page=${page}, limit=${limit}`
+    );
 
-    const results: any = await wbot.searchMessages(query, { page, limit, chatId: chatId || undefined });
+    const results: any = await wbot.searchMessages(query, {
+      page,
+      limit,
+      chatId: chatId || undefined
+    });
 
     if (!results || (Array.isArray(results) && results.length === 0)) {
       return { messages: [], totalCount: 0 };
     }
 
-    const messageList = Array.isArray(results) ? results : (results.messages || []);
+    const messageList = Array.isArray(results)
+      ? results
+      : results.messages || [];
 
     return {
       messages: messageList.map((msg: any) => ({
@@ -61,11 +69,17 @@ const SearchMessagesService = async ({
         type: msg.type,
         chatName: msg.chat?.name
       })),
-      totalCount: Array.isArray(results) ? results.length : (results.totalCount || messageList.length)
+      totalCount: Array.isArray(results)
+        ? results.length
+        : results.totalCount || messageList.length
     };
   } catch (err: any) {
-    logger.error(`[SEARCH] Erro ao buscar mensagens: ${err?.message || JSON.stringify(err)}`);
-    throw new AppError(`Erro ao buscar mensagens: ${err?.message || "Erro desconhecido"}`);
+    logger.error(
+      `[SEARCH] Erro ao buscar mensagens: ${err?.message || JSON.stringify(err)}`
+    );
+    throw new AppError(
+      `Erro ao buscar mensagens: ${err?.message || "Erro desconhecido"}`
+    );
   }
 };
 

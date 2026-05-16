@@ -7,7 +7,7 @@ const GetProfilePicUrl = async (number: string): Promise<string> => {
     const wbot = await getWbot(defaultWhatsapp.id);
     const profilePicUrl = await wbot.getProfilePicUrl(`${number}@c.us`);
     return profilePicUrl || "";
-  } catch (err) {
+  } catch (_err) {
     return "";
   }
 };

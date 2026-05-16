@@ -43,7 +43,7 @@ const UpdateUserService = async ({
     email: Yup.string().email(),
     profile: Yup.string(),
     password: Yup.string(),
-    online: Yup.boolean(),
+    online: Yup.boolean()
   });
 
   const {

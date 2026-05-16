@@ -51,11 +51,7 @@ class MessageCacheHelper {
     CacheService.set(cacheKey, messages, this.TICKET_MESSAGES_TTL);
 
     messages.forEach(message => {
-      CacheService.set(
-        this.getCacheKey(message.id),
-        message,
-        this.DEFAULT_TTL
-      );
+      CacheService.set(this.getCacheKey(message.id), message, this.DEFAULT_TTL);
     });
 
     logger.debug(`Cached ${messages.length} messages for ticket ${ticketId}`);
@@ -66,7 +62,9 @@ class MessageCacheHelper {
     const cached = CacheService.get<Message[]>(cacheKey);
 
     if (cached) {
-      logger.debug(`Retrieved ${cached.length} messages for ticket ${ticketId} from cache`);
+      logger.debug(
+        `Retrieved ${cached.length} messages for ticket ${ticketId} from cache`
+      );
     }
 
     return cached;
@@ -85,18 +83,20 @@ class MessageCacheHelper {
   }
 
   invalidateAll(): void {
-    const keys = CacheService.keys().filter(key =>
-      key.startsWith(this.CACHE_PREFIX) ||
-      key.startsWith(this.TICKET_MESSAGES_PREFIX)
+    const keys = CacheService.keys().filter(
+      key =>
+        key.startsWith(this.CACHE_PREFIX) ||
+        key.startsWith(this.TICKET_MESSAGES_PREFIX)
     );
     CacheService.del(keys);
   }
 
   getCacheStats() {
     const allKeys = CacheService.keys();
-    const messageKeys = allKeys.filter(key =>
-      key.startsWith(this.CACHE_PREFIX) ||
-      key.startsWith(this.TICKET_MESSAGES_PREFIX)
+    const messageKeys = allKeys.filter(
+      key =>
+        key.startsWith(this.CACHE_PREFIX) ||
+        key.startsWith(this.TICKET_MESSAGES_PREFIX)
     );
 
     return {

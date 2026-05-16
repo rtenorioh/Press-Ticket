@@ -12,9 +12,9 @@ const ListChannels = async () => {
     }
 
     const client = createNotificameClient(notificameHubToken);
-    const response = await client.get('/v1/channels');
+    const response = await client.get("/v1/channels");
     return response.data;
-  } catch (error) {
+  } catch (_error) {
     throw new Error("Error");
   }
 };

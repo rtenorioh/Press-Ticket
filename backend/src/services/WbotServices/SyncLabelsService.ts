@@ -49,9 +49,7 @@ const fetchBusinessLabels = async (wbot: any): Promise<RawLabel[]> => {
 
     return businessLabels;
   } catch (err: any) {
-    logger.error(
-      `[SYNC_LABELS] Erro ao buscar labels: ${err.message}`
-    );
+    logger.error(`[SYNC_LABELS] Erro ao buscar labels: ${err.message}`);
     return [];
   }
 };
@@ -59,7 +57,9 @@ const fetchBusinessLabels = async (wbot: any): Promise<RawLabel[]> => {
 const SyncLabelsService = async (whatsappId: number): Promise<void> => {
   // Guard contra execuções simultâneas
   if (syncInProgress.has(whatsappId)) {
-    logger.info(`[SYNC_LABELS] Sync já em andamento para WhatsApp ${whatsappId}, ignorando`);
+    logger.info(
+      `[SYNC_LABELS] Sync já em andamento para WhatsApp ${whatsappId}, ignorando`
+    );
     return;
   }
 
@@ -70,9 +70,13 @@ const SyncLabelsService = async (whatsappId: number): Promise<void> => {
 
     // 1. Buscar labels do WhatsApp Business
     const waLabels = await fetchBusinessLabels(wbot);
-    logger.info(`[SYNC_LABELS] WhatsApp ${whatsappId}: ${waLabels.length} labels de negócio encontradas`);
+    logger.info(
+      `[SYNC_LABELS] WhatsApp ${whatsappId}: ${waLabels.length} labels de negócio encontradas`
+    );
     waLabels.forEach(l => {
-      logger.info(`[SYNC_LABELS] Label: id=${l.id} name="${l.name}" hexColor=${l.hexColor}`);
+      logger.info(
+        `[SYNC_LABELS] Label: id=${l.id} name="${l.name}" hexColor=${l.hexColor}`
+      );
     });
 
     // 2. Sincronizar labels na tabela WhatsappLabels
@@ -84,16 +88,22 @@ const SyncLabelsService = async (whatsappId: number): Promise<void> => {
     const waLabelIds = waLabels.map(l => String(l.id));
 
     // Remover labels que não existem mais no WhatsApp
-    const removedLabelIds = existingLabelIds.filter(id => !waLabelIds.includes(id));
+    const removedLabelIds = existingLabelIds.filter(
+      id => !waLabelIds.includes(id)
+    );
     if (removedLabelIds.length > 0) {
-      const removedLabels = existingLabels.filter(l => removedLabelIds.includes(l.labelId));
+      const removedLabels = existingLabels.filter(l =>
+        removedLabelIds.includes(l.labelId)
+      );
       await TicketLabel.destroy({
         where: { whatsappLabelId: removedLabels.map(l => l.id) }
       });
       await WhatsappLabel.destroy({
         where: { whatsappId, labelId: removedLabelIds }
       });
-      logger.info(`[SYNC_LABELS] Removidas ${removedLabelIds.length} labels obsoletas`);
+      logger.info(
+        `[SYNC_LABELS] Removidas ${removedLabelIds.length} labels obsoletas`
+      );
     }
 
     // Upsert das labels atuais
@@ -109,7 +119,10 @@ const SyncLabelsService = async (whatsappId: number): Promise<void> => {
         }
       });
 
-      if (label.name !== waLabel.name || label.hexColor !== (waLabel.hexColor || null)) {
+      if (
+        label.name !== waLabel.name ||
+        label.hexColor !== (waLabel.hexColor || null)
+      ) {
         await label.update({
           name: waLabel.name,
           hexColor: waLabel.hexColor || null
@@ -177,9 +190,13 @@ const SyncLabelsService = async (whatsappId: number): Promise<void> => {
           });
         }
 
-        logger.info(`[SYNC_LABELS] Label "${label.name}": ${chats.length} chats → ${ticketIds.length} tickets`);
+        logger.info(
+          `[SYNC_LABELS] Label "${label.name}": ${chats.length} chats → ${ticketIds.length} tickets`
+        );
       } catch (labelErr: any) {
-        logger.warn(`[SYNC_LABELS] Erro ao sincronizar label "${label.name}": ${labelErr.message}`);
+        logger.warn(
+          `[SYNC_LABELS] Erro ao sincronizar label "${label.name}": ${labelErr.message}`
+        );
       }
     }
 
@@ -202,9 +219,13 @@ const SyncLabelsService = async (whatsappId: number): Promise<void> => {
       }))
     });
 
-    logger.info(`[SYNC_LABELS] Sincronização completa para WhatsApp ${whatsappId}`);
+    logger.info(
+      `[SYNC_LABELS] Sincronização completa para WhatsApp ${whatsappId}`
+    );
   } catch (err: any) {
-    logger.error(`[SYNC_LABELS] Erro geral ao sincronizar labels: ${err.message}`);
+    logger.error(
+      `[SYNC_LABELS] Erro geral ao sincronizar labels: ${err.message}`
+    );
   } finally {
     syncInProgress.delete(whatsappId);
   }

@@ -10,10 +10,32 @@ const upload = multer(uploadConfig);
 
 quickAnswerRoutes.get("/quickAnswers", isAuth, QuickAnswerController.index);
 
-quickAnswerRoutes.get("/quickAnswers/:quickAnswerId", isAuth, QuickAnswerController.show);
-quickAnswerRoutes.post("/quickAnswers", isAuth, upload.single("media"), QuickAnswerController.store);
-quickAnswerRoutes.put("/quickAnswers/:quickAnswerId", isAuth, upload.single("media"), QuickAnswerController.update);
-quickAnswerRoutes.delete("/quickAnswers/:quickAnswerId", isAuth, QuickAnswerController.remove);
-quickAnswerRoutes.delete("/quickAnswers", isAuth, QuickAnswerController.removeAll);
+quickAnswerRoutes.get(
+  "/quickAnswers/:quickAnswerId",
+  isAuth,
+  QuickAnswerController.show
+);
+quickAnswerRoutes.post(
+  "/quickAnswers",
+  isAuth,
+  upload.single("media"),
+  QuickAnswerController.store
+);
+quickAnswerRoutes.put(
+  "/quickAnswers/:quickAnswerId",
+  isAuth,
+  upload.single("media"),
+  QuickAnswerController.update
+);
+quickAnswerRoutes.delete(
+  "/quickAnswers/:quickAnswerId",
+  isAuth,
+  QuickAnswerController.remove
+);
+quickAnswerRoutes.delete(
+  "/quickAnswers",
+  isAuth,
+  QuickAnswerController.removeAll
+);
 
 export default quickAnswerRoutes;

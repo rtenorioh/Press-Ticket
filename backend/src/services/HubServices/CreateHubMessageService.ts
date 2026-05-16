@@ -19,7 +19,6 @@ interface MessageData {
 const CreateMessageService = async (
   messageData: MessageData
 ): Promise<Message | any> => {
-
   const {
     id,
     contactId,
@@ -28,8 +27,7 @@ const CreateMessageService = async (
     read,
     fromMe,
     fileName,
-    mediaType,
-    originalName
+    mediaType
   } = messageData;
 
   if ((!body || body === "") && (!fileName || fileName === "")) {
@@ -58,12 +56,15 @@ const CreateMessageService = async (
   if (!fileName) {
     lastMessage = body || "";
   } else {
-    const mt = mediaType === "photo" ? "image" : (mediaType || "");
+    const mt = mediaType === "photo" ? "image" : mediaType || "";
     lastMessage =
-      mt === "image"  ? "📷 Imagem"  :
-      mt === "video"  ? "🎥 Vídeo"   :
-      mt === "audio"  ? "🎵 Áudio"   :
-      "📎 Arquivo";
+      mt === "image"
+        ? "📷 Imagem"
+        : mt === "video"
+          ? "🎥 Vídeo"
+          : mt === "audio"
+            ? "🎵 Áudio"
+            : "📎 Arquivo";
   }
 
   try {
@@ -120,7 +121,6 @@ const CreateMessageService = async (
         });
     }
 
-    // eslint-disable-next-line consistent-return
     return newMessage;
   } catch (error) {
     logger.error(`Erro: ${error}`);

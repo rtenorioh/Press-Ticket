@@ -1,6 +1,5 @@
 import { Op, Sequelize } from "sequelize";
 import ClientStatus from "../../models/ClientStatus";
-import Contact from "../../models/Contact";
 
 interface Request {
   searchParam?: string;

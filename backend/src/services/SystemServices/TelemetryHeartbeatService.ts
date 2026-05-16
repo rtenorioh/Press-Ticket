@@ -42,13 +42,27 @@ export const TelemetryHeartbeatService = async (): Promise<void> => {
 
   const totalMessages: number = await Message.count();
   const totalTickets: number = await Ticket.count();
-  const activeUsers: number = await User.count({ where: { profile: { [Op.ne]: "masteradmin" }} });
-  const wwebjsChannels: number = await Whatsapp.count({ where: { type: "wwebjs" } });
-  const webchatChannels: number = await Whatsapp.count({ where: { type: "webchat" } });
-  const facebookChannels: number = await Whatsapp.count({ where: { type: "facebook" } });
-  const instagramChannels: number = await Whatsapp.count({ where: { type: "instagram" } });
-  const telegramChannels: number = await Whatsapp.count({ where: { type: "telegram" } });
-  const emailChannels: number = await Whatsapp.count({ where: { type: "email" } });
+  const activeUsers: number = await User.count({
+    where: { profile: { [Op.ne]: "masteradmin" } }
+  });
+  const wwebjsChannels: number = await Whatsapp.count({
+    where: { type: "wwebjs" }
+  });
+  const webchatChannels: number = await Whatsapp.count({
+    where: { type: "webchat" }
+  });
+  const facebookChannels: number = await Whatsapp.count({
+    where: { type: "facebook" }
+  });
+  const instagramChannels: number = await Whatsapp.count({
+    where: { type: "instagram" }
+  });
+  const telegramChannels: number = await Whatsapp.count({
+    where: { type: "telegram" }
+  });
+  const emailChannels: number = await Whatsapp.count({
+    where: { type: "email" }
+  });
 
   const payload: TelemetryPayload = {
     installation_id: installationId,

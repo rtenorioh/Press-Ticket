@@ -69,7 +69,9 @@ const FindOrCreateTicketService = async (
       : 60;
 
     if (isNaN(timeCreateNewTicket)) {
-      logger.error(`Valor inválido para timeCreateNewTicket: ${listSettingsService?.value}`);
+      logger.error(
+        `Valor inválido para timeCreateNewTicket: ${listSettingsService?.value}`
+      );
     }
 
     ticket = await Ticket.findOne({

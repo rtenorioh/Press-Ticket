@@ -10,8 +10,11 @@ import ListWhatsAppsService from "../services/WhatsappService/ListWhatsAppsServi
 import RestartWhatsAppService from "../services/WhatsappService/RestartWhatsAppService";
 import ShowWhatsAppService from "../services/WhatsappService/ShowWhatsAppService";
 import UpdateWhatsAppService from "../services/WhatsappService/UpdateWhatsAppService";
-import { createActivityLog, ActivityActions, EntityTypes } from "../services/ActivityLogService";
-import GetClientIp from "../helpers/GetClientIp";
+import {
+  createActivityLog,
+  ActivityActions,
+  EntityTypes
+} from "../services/ActivityLogService";
 
 interface WhatsappData {
   name: string;
@@ -60,10 +63,8 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
 
   const logUserId = req.user?.id || 1;
 
-  const clientIp = GetClientIp(req);
-
   await createActivityLog({
-    userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
+    userId: typeof logUserId === "string" ? parseInt(logUserId) : logUserId,
     action: ActivityActions.CREATE,
     description: `Conexão WhatsApp ${whatsapp.name} criada`,
     entityType: EntityTypes.WHATSAPP,
@@ -113,10 +114,8 @@ export const update = async (
 
   const logUserId = req.user?.id || 1;
 
-  const clientIp = GetClientIp(req);
-
   await createActivityLog({
-    userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
+    userId: typeof logUserId === "string" ? parseInt(logUserId) : logUserId,
     action: ActivityActions.UPDATE,
     description: `Conexão WhatsApp ${whatsapp.name} atualizada`,
     entityType: EntityTypes.WHATSAPP,
@@ -153,10 +152,8 @@ export const remove = async (
 
   const logUserId = req.user?.id || 1;
 
-  const clientIp = GetClientIp(req);
-
   await createActivityLog({
-    userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
+    userId: typeof logUserId === "string" ? parseInt(logUserId) : logUserId,
     action: ActivityActions.DELETE,
     description: `Conexão WhatsApp ${whatsappToDelete.name} excluída`,
     entityType: EntityTypes.WHATSAPP,
@@ -200,7 +197,10 @@ export const restart = async (
   }
 };
 
-export const shutdown = async (req: Request, res: Response): Promise<Response> => {
+export const shutdown = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
   const { whatsappId } = req.params;
 
   try {
@@ -211,7 +211,10 @@ export const shutdown = async (req: Request, res: Response): Promise<Response> =
   }
 };
 
-export const getQrCode = async (req: Request, res: Response): Promise<Response> => {
+export const getQrCode = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
   const { whatsappId } = req.params;
 
   try {
@@ -222,7 +225,10 @@ export const getQrCode = async (req: Request, res: Response): Promise<Response> 
     }
 
     if (!whatsapp.qrcode) {
-      throw new AppError("ERR_WHATSAPP_NOT_INITIALIZED_OR_ALREADY_CONNECTED", 404);
+      throw new AppError(
+        "ERR_WHATSAPP_NOT_INITIALIZED_OR_ALREADY_CONNECTED",
+        404
+      );
     }
 
     return res.status(200).json({ qrcode: whatsapp.qrcode });
@@ -254,7 +260,9 @@ export const requestPairingCode = async (
 
   // Fire-and-forget: pairing code arrives via socket event "code"
   // Do NOT await — initWbot only resolves on "ready" (fully connected)
-  initWbot(whatsapp, { method: "pairing", phoneNumber: cleaned }).catch(() => {});
+  initWbot(whatsapp, { method: "pairing", phoneNumber: cleaned }).catch(
+    () => {}
+  );
 
   return res.status(200).json({ message: "Pairing code requested." });
 };

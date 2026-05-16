@@ -5,7 +5,11 @@ import { getIO } from "../libs/socket";
 
 import ListSettingsService from "../services/SettingServices/ListSettingsService";
 import UpdateSettingService from "../services/SettingServices/UpdateSettingService";
-import { createActivityLog, ActivityActions, EntityTypes } from "../services/ActivityLogService";
+import {
+  createActivityLog,
+  ActivityActions,
+  EntityTypes
+} from "../services/ActivityLogService";
 import GetClientIp from "../helpers/GetClientIp";
 import EmailService from "../services/EmailService";
 
@@ -36,10 +40,10 @@ export const update = async (
 
   const logUserId = req.user?.id || 1;
   const clientIp = GetClientIp(req);
-  
+
   if (setting) {
     await createActivityLog({
-      userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
+      userId: typeof logUserId === "string" ? parseInt(logUserId) : logUserId,
       action: ActivityActions.UPDATE,
       description: `Configuração "${key}" atualizada`,
       entityType: EntityTypes.SETTING,
@@ -51,7 +55,13 @@ export const update = async (
       }
     });
 
-    const emailSettings = ["emailUser", "emailPass", "emailHost", "emailPort", "smtpSecure"];
+    const emailSettings = [
+      "emailUser",
+      "emailPass",
+      "emailHost",
+      "emailPort",
+      "smtpSecure"
+    ];
     if (emailSettings.includes(key)) {
       const emailService = EmailService.getInstance();
       await emailService.reloadTransporter();

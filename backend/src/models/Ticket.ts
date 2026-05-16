@@ -1,4 +1,9 @@
-import { InferAttributes, InferCreationAttributes, CreationOptional, NonAttribute } from "sequelize";
+import {
+  InferAttributes,
+  InferCreationAttributes,
+  CreationOptional,
+  NonAttribute
+} from "sequelize";
 import {
   AutoIncrement,
   BelongsTo,
@@ -22,7 +27,10 @@ import User from "./User";
 import Whatsapp from "./Whatsapp";
 
 @Table
-class Ticket extends Model<InferAttributes<Ticket>, InferCreationAttributes<Ticket>> {
+class Ticket extends Model<
+  InferAttributes<Ticket>,
+  InferCreationAttributes<Ticket>
+> {
   @PrimaryKey
   @AutoIncrement
   @Column(DataType.INTEGER)

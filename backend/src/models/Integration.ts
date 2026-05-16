@@ -1,4 +1,8 @@
-import { InferAttributes, InferCreationAttributes, CreationOptional } from "sequelize";
+import {
+  InferAttributes,
+  InferCreationAttributes,
+  CreationOptional
+} from "sequelize";
 import {
   Table,
   Column,
@@ -9,7 +13,10 @@ import {
 } from "sequelize-typescript";
 
 @Table
-class Integration extends Model<InferAttributes<Integration>, InferCreationAttributes<Integration>> {
+class Integration extends Model<
+  InferAttributes<Integration>,
+  InferCreationAttributes<Integration>
+> {
   @PrimaryKey
   @Column
   key: string;

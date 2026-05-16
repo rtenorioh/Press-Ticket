@@ -1,4 +1,8 @@
-import { InferAttributes, InferCreationAttributes, CreationOptional } from "sequelize";
+import {
+  InferAttributes,
+  InferCreationAttributes,
+  CreationOptional
+} from "sequelize";
 import {
   Table,
   Column,
@@ -13,7 +17,10 @@ import Contact from "./Contact";
 @Table({
   tableName: "ContactTags"
 })
-class ContactTag extends Model<InferAttributes<ContactTag>, InferCreationAttributes<ContactTag>> {
+class ContactTag extends Model<
+  InferAttributes<ContactTag>,
+  InferCreationAttributes<ContactTag>
+> {
   @ForeignKey(() => Contact)
   @Column
   contactId: number;

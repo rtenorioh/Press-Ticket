@@ -1,4 +1,9 @@
-import { createNotificameClient, resolveChannel, resolveContactId, NotificameMessagePayload } from "../../libs/notificameClient";
+import {
+  createNotificameClient,
+  resolveChannel,
+  resolveContactId,
+  NotificameMessagePayload
+} from "../../libs/notificameClient";
 import Contact from "../../models/Contact";
 import CreateMessageService from "./CreateHubMessageService";
 import { showHubToken } from "../../helpers/showHubToken";
@@ -27,19 +32,23 @@ export const SendCardMessageService = async (
 
   const channel = resolveChannel(contact);
   if (!channel || channel === "webchat") {
-    logger.error("SendCardMessageService: canal incompatível para envio de card.");
+    logger.error(
+      "SendCardMessageService: canal incompatível para envio de card."
+    );
     throw new Error("Envio de card não suportado neste canal.");
   }
 
   const contactId = resolveContactId(contact, channel);
   if (!contactId) {
-    throw new Error(`SendCardMessageService: ID do destinatário não encontrado para canal ${channel}`);
+    throw new Error(
+      `SendCardMessageService: ID do destinatário não encontrado para canal ${channel}`
+    );
   }
 
   const mapButton = (b: HubCardButton) =>
-    b.url && b.url !== '#'
-      ? { type: 'web_url', url: b.url, title: b.label }
-      : { type: 'postback', payload: b.label, title: b.label };
+    b.url && b.url !== "#"
+      ? { type: "web_url", url: b.url, title: b.label }
+      : { type: "postback", payload: b.label, title: b.label };
 
   const allButtons = [
     ...buttons.map(mapButton),
@@ -52,22 +61,29 @@ export const SendCardMessageService = async (
   const payload: NotificameMessagePayload = {
     from: connection.qrcode,
     to: contactId,
-    contents: [{
-      type: 'template',
-      template: {
-        template_type: 'generic',
-        elements: [{
-          title,
-          image_url: media || undefined,
-          subtitle: text || undefined,
-          buttons: allButtons
-        }]
+    contents: [
+      {
+        type: "template",
+        template: {
+          template_type: "generic",
+          elements: [
+            {
+              title,
+              image_url: media || undefined,
+              subtitle: text || undefined,
+              buttons: allButtons
+            }
+          ]
+        }
       }
-    }]
+    ]
   };
 
   try {
-    const response = await client.post(`/v1/channels/${channel}/messages`, payload);
+    const response = await client.post(
+      `/v1/channels/${channel}/messages`,
+      payload
+    );
     const data = response.data;
 
     const newMessage = await CreateMessageService({
@@ -81,8 +97,11 @@ export const SendCardMessageService = async (
     return newMessage;
   } catch (error: any) {
     const errBody = error?.response?.data || error?.response?.body;
-    logger.error(`SendCardMessageService: erro ao enviar card Hub: ${error?.message || String(error)}`);
-    if (errBody) logger.error(`Hub API response body: ${JSON.stringify(errBody)}`);
+    logger.error(
+      `SendCardMessageService: erro ao enviar card Hub: ${error?.message || String(error)}`
+    );
+    if (errBody)
+      logger.error(`Hub API response body: ${JSON.stringify(errBody)}`);
     throw error;
   }
 };

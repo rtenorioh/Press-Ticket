@@ -10,5 +10,7 @@ export const StartUpdateCheckJob = (): void => {
     await CheckUpdatesNotifyService();
   });
 
-  logger.info(`[Cron] Job de verificação de atualizações agendado: ${CRON_SCHEDULE}`);
+  logger.info(
+    `[Cron] Job de verificação de atualizações agendado: ${CRON_SCHEDULE}`
+  );
 };

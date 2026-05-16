@@ -1,4 +1,9 @@
-import { InferAttributes, InferCreationAttributes, CreationOptional, NonAttribute } from "sequelize";
+import {
+  InferAttributes,
+  InferCreationAttributes,
+  CreationOptional,
+  NonAttribute
+} from "sequelize";
 import {
   Table,
   Column,
@@ -14,7 +19,10 @@ import {
 import Whatsapp from "./Whatsapp";
 
 @Table
-class GroupEvent extends Model<InferAttributes<GroupEvent>, InferCreationAttributes<GroupEvent>> {
+class GroupEvent extends Model<
+  InferAttributes<GroupEvent>,
+  InferCreationAttributes<GroupEvent>
+> {
   @PrimaryKey
   @AutoIncrement
   @Column(DataType.INTEGER)

@@ -9,7 +9,11 @@ import DeleteUserService from "../services/UserServices/DeleteUserService";
 import ListUsersService from "../services/UserServices/ListUsersService";
 import ShowUserService from "../services/UserServices/ShowUserService";
 import UpdateUserService from "../services/UserServices/UpdateUserService";
-import { createActivityLog, ActivityActions, EntityTypes } from "../services/ActivityLogService";
+import {
+  createActivityLog,
+  ActivityActions,
+  EntityTypes
+} from "../services/ActivityLogService";
 import GetClientIp from "../helpers/GetClientIp";
 
 type IndexQuery = {
@@ -76,7 +80,7 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
   const clientIp = GetClientIp(req);
 
   await createActivityLog({
-    userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
+    userId: typeof logUserId === "string" ? parseInt(logUserId) : logUserId,
     action: ActivityActions.CREATE,
     description: `Usuário ${user.name} (${user.email}) criado com perfil ${user.profile}`,
     entityType: EntityTypes.USER,
@@ -130,7 +134,7 @@ export const update = async (
 
   if (user) {
     await createActivityLog({
-      userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
+      userId: typeof logUserId === "string" ? parseInt(logUserId) : logUserId,
       action: ActivityActions.UPDATE,
       description: `Usuário ${user.name} (${user.email}) atualizado`,
       entityType: EntityTypes.USER,
@@ -170,7 +174,7 @@ export const remove = async (
   const clientIp = GetClientIp(req);
 
   await createActivityLog({
-    userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
+    userId: typeof logUserId === "string" ? parseInt(logUserId) : logUserId,
     action: ActivityActions.DELETE,
     description: `Usuário ${userToDelete.name} (${userToDelete.email}) excluído`,
     entityType: EntityTypes.USER,

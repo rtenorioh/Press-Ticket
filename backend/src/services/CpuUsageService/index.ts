@@ -1,5 +1,5 @@
-import { exec } from 'child_process';
-import util from 'util';
+import { exec } from "child_process";
+import util from "util";
 
 const execAsync = util.promisify(exec);
 
@@ -24,22 +24,21 @@ export interface CpuUsageInfo {
 }
 
 function parseLoadAverage(loadavg: string): number[] {
-  return loadavg.split(' ').slice(0, 3).map(Number);
+  return loadavg.split(" ").slice(0, 3).map(Number);
 }
 
 function extractFrequencyFromModel(cpuModel: string): string | null {
-  
   const ghzMatch = cpuModel.match(/@\s*(\d+\.?\d*)\s*GHz/i);
   if (ghzMatch) {
     const ghz = parseFloat(ghzMatch[1]);
     return `${(ghz * 1000).toFixed(0)} MHz`;
   }
-  
+
   const mhzMatch = cpuModel.match(/@\s*(\d+)\s*MHz/i);
   if (mhzMatch) {
     return `${mhzMatch[1]} MHz`;
   }
-  
+
   return null;
 }
 
@@ -55,7 +54,17 @@ export async function getCpuUsageInfo(): Promise<CpuUsageInfo> {
   const topProcCmd = `ps -eo pid,comm,pcpu,user,time --sort=-pcpu | head -n 11`;
 
   try {
-    const [cpuModel, cores, threads, freqMax, uptimeRaw, loadAvg, cpuUsage, topProcessesRaw, freqCurrent] = await Promise.all([
+    const [
+      cpuModel,
+      cores,
+      threads,
+      freqMax,
+      uptimeRaw,
+      loadAvg,
+      cpuUsage,
+      topProcessesRaw,
+      freqCurrent
+    ] = await Promise.all([
       execAsync(cpuModelCmd).then(r => r.stdout.trim()),
       execAsync(coresCmd).then(r => r.stdout.trim()),
       execAsync(threadsCmd).then(r => r.stdout.trim()),
@@ -64,34 +73,36 @@ export async function getCpuUsageInfo(): Promise<CpuUsageInfo> {
       execAsync(loadAvgCmd).then(r => r.stdout.trim()),
       execAsync(cpuUsageCmd).then(r => r.stdout.trim()),
       execAsync(topProcCmd).then(r => r.stdout.trim()),
-      execAsync(freqCurrentCmd).then(r => r.stdout.trim()),
+      execAsync(freqCurrentCmd).then(r => r.stdout.trim())
     ]);
 
     function traduzirUptime(uptime: string): string {
       return uptime
-        .replace(/weeks?/g, 'semanas')
-        .replace(/days?/g, 'dias')
-        .replace(/hours?/g, 'horas')
-        .replace(/minutes?/g, 'minutos')
-        .replace(/up /g, '');
+        .replace(/weeks?/g, "semanas")
+        .replace(/days?/g, "dias")
+        .replace(/hours?/g, "horas")
+        .replace(/minutes?/g, "minutos")
+        .replace(/up /g, "");
     }
     const uptime = traduzirUptime(uptimeRaw);
 
     const topProcesses: CpuProcessInfo[] = topProcessesRaw
-      .split('\n')
+      .split("\n")
       .slice(1)
-      .map((line) => {
-        const [pid, command, cpuPercentage, user, cpuTime] = line.trim().split(/\s+/, 5);
+      .map(line => {
+        const [pid, command, cpuPercentage, user, cpuTime] = line
+          .trim()
+          .split(/\s+/, 5);
         return {
           pid: Number(pid),
           command,
-          cpuPercentage: Number(cpuPercentage.replace(',', '.')),
+          cpuPercentage: Number(cpuPercentage.replace(",", ".")),
           user,
-          cpuTime,
+          cpuTime
         };
       });
 
-    let frequency = 'N/A';
+    let frequency = "N/A";
     if (freqCurrent && !isNaN(Number(freqCurrent))) {
       frequency = `${Number(freqCurrent).toFixed(0)} MHz`;
     } else if (freqMax && !isNaN(Number(freqMax))) {
@@ -109,22 +120,22 @@ export async function getCpuUsageInfo(): Promise<CpuUsageInfo> {
       threads: Number(threads),
       cpuUsage: Number(Number(cpuUsage).toFixed(2)),
       frequency,
-      maxFrequency: freqMax ? `${Number(freqMax).toFixed(0)} MHz` : '',
+      maxFrequency: freqMax ? `${Number(freqMax).toFixed(0)} MHz` : "",
       uptime,
       loadAverage: parseLoadAverage(loadAvg),
-      topProcesses,
+      topProcesses
     };
-  } catch (err) {
+  } catch (_err) {
     return {
-      cpuModel: 'N/A',
+      cpuModel: "N/A",
       cores: 0,
       threads: 0,
       cpuUsage: 0,
-      frequency: '',
-      maxFrequency: '',
-      uptime: '',
-      loadAverage: [0,0,0],
-      topProcesses: [],
+      frequency: "",
+      maxFrequency: "",
+      uptime: "",
+      loadAverage: [0, 0, 0],
+      topProcesses: []
     };
   }
 }

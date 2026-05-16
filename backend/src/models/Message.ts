@@ -1,4 +1,9 @@
-import { InferAttributes, InferCreationAttributes, CreationOptional, NonAttribute } from "sequelize";
+import {
+  InferAttributes,
+  InferCreationAttributes,
+  CreationOptional,
+  NonAttribute
+} from "sequelize";
 import {
   BelongsTo,
   Column,
@@ -17,7 +22,10 @@ import OldMessage from "./OldMessage";
 import Ticket from "./Ticket";
 
 @Table
-class Message extends Model<InferAttributes<Message>, InferCreationAttributes<Message>> {
+class Message extends Model<
+  InferAttributes<Message>,
+  InferCreationAttributes<Message>
+> {
   @PrimaryKey
   @Column
   id: string;

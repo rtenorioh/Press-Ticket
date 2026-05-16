@@ -34,9 +34,7 @@ const AcceptGroupInvite = async ({
     throw new AppError("Código de convite é obrigatório");
   }
 
-  const cleanCode = inviteCode
-    .replace("https://chat.whatsapp.com/", "")
-    .trim();
+  const cleanCode = inviteCode.replace("https://chat.whatsapp.com/", "").trim();
 
   try {
     const wbot = getWbot(whatsappId);
@@ -56,9 +54,7 @@ const GetGroupInviteInfo = async ({
     throw new AppError("Código de convite é obrigatório");
   }
 
-  const cleanCode = inviteCode
-    .replace("https://chat.whatsapp.com/", "")
-    .trim();
+  const cleanCode = inviteCode.replace("https://chat.whatsapp.com/", "").trim();
 
   try {
     const wbot = getWbot(whatsappId);

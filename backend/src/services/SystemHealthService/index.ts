@@ -6,7 +6,6 @@ import { Op } from "sequelize";
 import Ticket from "../../models/Ticket";
 import Message from "../../models/Message";
 import Whatsapp from "../../models/Whatsapp";
-import Queue from "../../models/Queue";
 import User from "../../models/User";
 import sequelize from "../../database";
 
@@ -68,26 +67,29 @@ const getCpuUsage = async (): Promise<number> => {
     const startMeasure = os.cpus().map(cpu => {
       return Object.values(cpu.times).reduce((acc, tv) => acc + tv, 0);
     });
-    
+
     const startIdle = os.cpus().map(cpu => cpu.times.idle);
-    
+
     await new Promise(resolve => setTimeout(resolve, 1000));
-    
+
     const endMeasure = os.cpus().map(cpu => {
       return Object.values(cpu.times).reduce((acc, tv) => acc + tv, 0);
     });
-    
+
     const endIdle = os.cpus().map(cpu => cpu.times.idle);
-    
+
     const idleDifferences = endIdle.map((idle, i) => idle - startIdle[i]);
-    const totalDifferences = endMeasure.map((measure, i) => measure - startMeasure[i]);
-    
-    const averageUsage = idleDifferences.reduce((acc, idle, i) => {
-      const total = totalDifferences[i];
-      const usage = 1 - idle / total;
-      return acc + usage;
-    }, 0) / os.cpus().length;
-    
+    const totalDifferences = endMeasure.map(
+      (measure, i) => measure - startMeasure[i]
+    );
+
+    const averageUsage =
+      idleDifferences.reduce((acc, idle, i) => {
+        const total = totalDifferences[i];
+        const usage = 1 - idle / total;
+        return acc + usage;
+      }, 0) / os.cpus().length;
+
     return Math.round(averageUsage * 100);
   } catch (error) {
     logger.error("Erro ao obter uso de CPU:", error);
@@ -95,16 +97,21 @@ const getCpuUsage = async (): Promise<number> => {
   }
 };
 
-const getDiskInfo = async (): Promise<{ total: number; free: number; used: number; percentUsed: number }> => {
+const getDiskInfo = async (): Promise<{
+  total: number;
+  free: number;
+  used: number;
+  percentUsed: number;
+}> => {
   try {
     const { stdout } = await execPromise("df -k / | tail -1");
     const values = stdout.trim().split(/\s+/);
-    
+
     const total = parseInt(values[1], 10) / 1024 / 1024;
     const used = parseInt(values[2], 10) / 1024 / 1024;
     const free = parseInt(values[3], 10) / 1024 / 1024;
     const percentUsed = Math.round((used / total) * 100);
-    
+
     return {
       total: parseFloat(total.toFixed(2)),
       free: parseFloat(free.toFixed(2)),
@@ -131,37 +138,48 @@ const getDatabaseInfo = async (): Promise<{
 }> => {
   try {
     const startTime = Date.now();
-    
+
     await sequelize.authenticate();
-    
+
     const responseTime = Date.now() - startTime;
-    
+
     const [versionResult] = await sequelize.query("SELECT version();");
-    const version = Array.isArray(versionResult) && versionResult.length > 0 
-      ? (versionResult[0] as any).version || "Unknown"
-      : "Unknown";
-    
+    const version =
+      Array.isArray(versionResult) && versionResult.length > 0
+        ? (versionResult[0] as any).version || "Unknown"
+        : "Unknown";
+
     let connectionsResult;
     let activeConnections = 0;
-    
+
     try {
-      if (sequelize.getDialect() === 'postgres') {
-        [connectionsResult] = await sequelize.query("SELECT count(*) as count FROM pg_stat_activity;");
-      } else if (sequelize.getDialect() === 'mysql' || sequelize.getDialect() === 'mariadb') {
-        [connectionsResult] = await sequelize.query("SELECT COUNT(*) as count FROM information_schema.processlist WHERE command != 'Sleep';");
+      if (sequelize.getDialect() === "postgres") {
+        [connectionsResult] = await sequelize.query(
+          "SELECT count(*) as count FROM pg_stat_activity;"
+        );
+      } else if (
+        sequelize.getDialect() === "mysql" ||
+        sequelize.getDialect() === "mariadb"
+      ) {
+        [connectionsResult] = await sequelize.query(
+          "SELECT COUNT(*) as count FROM information_schema.processlist WHERE command != 'Sleep';"
+        );
       } else {
         [connectionsResult] = await sequelize.query("SELECT 1 as count;");
-        logger.info(`Contagem de conexões não implementada para o dialeto: ${sequelize.getDialect()}`);
+        logger.info(
+          `Contagem de conexões não implementada para o dialeto: ${sequelize.getDialect()}`
+        );
       }
-      
-      activeConnections = Array.isArray(connectionsResult) && connectionsResult.length > 0 
-        ? parseInt((connectionsResult[0] as any).count, 10) || 0
-        : 0;
+
+      activeConnections =
+        Array.isArray(connectionsResult) && connectionsResult.length > 0
+          ? parseInt((connectionsResult[0] as any).count, 10) || 0
+          : 0;
     } catch (error) {
       logger.error("Erro ao contar conexões ativas:", error);
       activeConnections = 0;
     }
-    
+
     return {
       status: "connected",
       responseTime,
@@ -188,18 +206,18 @@ const getWhatsappInfo = async (): Promise<{
 }> => {
   try {
     const whatsapps = await Whatsapp.findAll();
-    
+
     const total = whatsapps.length;
     const connected = whatsapps.filter(w => w.status === "CONNECTED").length;
     const disconnected = total - connected;
-    
+
     const pendingMessages = await Message.count({
       where: {
         ack: 0,
         fromMe: true
       }
     });
-    
+
     return {
       total,
       connected,
@@ -230,28 +248,28 @@ const getApplicationInfo = async (): Promise<{
     const packageJsonPath = `${process.cwd()}/package.json`;
     const packageJson = require(packageJsonPath);
     const version = packageJson.version || "Unknown";
-    
+
     const activeUsers = await User.count({
       where: {
         online: true
       }
     });
-    
+
     const openTickets = await Ticket.count({
       where: {
         status: "open"
       }
     });
-    
+
     const pendingTickets = await Ticket.count({
       where: {
         status: "pending"
       }
     });
-    
+
     const oneDayAgo = new Date();
     oneDayAgo.setDate(oneDayAgo.getDate() - 1);
-    
+
     const messagesLast24h = await Message.count({
       where: {
         createdAt: {
@@ -259,9 +277,9 @@ const getApplicationInfo = async (): Promise<{
         }
       }
     });
-    
-    const errors = 0; 
-    
+
+    const errors = 0;
+
     return {
       version,
       nodeVersion: process.version,
@@ -285,7 +303,9 @@ const getApplicationInfo = async (): Promise<{
   }
 };
 
-const generateAlerts = (healthData: Partial<SystemHealth>): {
+const generateAlerts = (
+  healthData: Partial<SystemHealth>
+): {
   level: "info" | "warning" | "critical";
   message: string;
   component: string;
@@ -295,7 +315,7 @@ const generateAlerts = (healthData: Partial<SystemHealth>): {
     message: string;
     component: string;
   }[] = [];
-  
+
   if (healthData.cpu && healthData.cpu.usage > 90) {
     alerts.push({
       level: "critical",
@@ -309,7 +329,7 @@ const generateAlerts = (healthData: Partial<SystemHealth>): {
       component: "cpu"
     });
   }
-  
+
   if (healthData.memory && healthData.memory.percentUsed > 90) {
     alerts.push({
       level: "critical",
@@ -323,7 +343,7 @@ const generateAlerts = (healthData: Partial<SystemHealth>): {
       component: "memory"
     });
   }
-  
+
   if (healthData.disk && healthData.disk.percentUsed > 90) {
     alerts.push({
       level: "critical",
@@ -337,7 +357,7 @@ const generateAlerts = (healthData: Partial<SystemHealth>): {
       component: "disk"
     });
   }
-  
+
   if (healthData.database && healthData.database.status === "error") {
     alerts.push({
       level: "critical",
@@ -351,16 +371,19 @@ const generateAlerts = (healthData: Partial<SystemHealth>): {
       component: "database"
     });
   }
-  
+
   if (healthData.whatsapp && healthData.whatsapp.disconnected > 0) {
-    const level = healthData.whatsapp.disconnected === healthData.whatsapp.total ? "critical" : "warning";
+    const level =
+      healthData.whatsapp.disconnected === healthData.whatsapp.total
+        ? "critical"
+        : "warning";
     alerts.push({
       level,
       message: `${healthData.whatsapp.disconnected} conexão(ões) WhatsApp desconectada(s)`,
       component: "whatsapp"
     });
   }
-  
+
   if (healthData.whatsapp && healthData.whatsapp.pendingMessages > 100) {
     alerts.push({
       level: "warning",
@@ -368,47 +391,44 @@ const generateAlerts = (healthData: Partial<SystemHealth>): {
       component: "whatsapp"
     });
   }
-  
+
   return alerts;
 };
 
-const determineSystemStatus = (alerts: {
-  level: "info" | "warning" | "critical";
-  message: string;
-  component: string;
-}[]): "healthy" | "warning" | "critical" => {
+const determineSystemStatus = (
+  alerts: {
+    level: "info" | "warning" | "critical";
+    message: string;
+    component: string;
+  }[]
+): "healthy" | "warning" | "critical" => {
   if (alerts.some(alert => alert.level === "critical")) {
     return "critical";
   }
-  
+
   if (alerts.some(alert => alert.level === "warning")) {
     return "warning";
   }
-  
+
   return "healthy";
 };
 
 export const getSystemHealth = async (): Promise<SystemHealth> => {
   try {
-    const [
-      cpuUsage,
-      diskInfo,
-      databaseInfo,
-      whatsappInfo,
-      applicationInfo
-    ] = await Promise.all([
-      getCpuUsage(),
-      getDiskInfo(),
-      getDatabaseInfo(),
-      getWhatsappInfo(),
-      getApplicationInfo()
-    ]);
-    
+    const [cpuUsage, diskInfo, databaseInfo, whatsappInfo, applicationInfo] =
+      await Promise.all([
+        getCpuUsage(),
+        getDiskInfo(),
+        getDatabaseInfo(),
+        getWhatsappInfo(),
+        getApplicationInfo()
+      ]);
+
     const totalMemory = os.totalmem();
     const freeMemory = os.freemem();
     const usedMemory = totalMemory - freeMemory;
     const percentMemoryUsed = Math.round((usedMemory / totalMemory) * 100);
-    
+
     const healthData: Partial<SystemHealth> = {
       timestamp: Date.now(),
       uptime: os.uptime(),
@@ -419,9 +439,9 @@ export const getSystemHealth = async (): Promise<SystemHealth> => {
         loadAvg: os.loadavg()
       },
       memory: {
-        total: Math.round(totalMemory / 1024 / 1024 / 1024 * 100) / 100, 
-        free: Math.round(freeMemory / 1024 / 1024 / 1024 * 100) / 100, 
-        used: Math.round(usedMemory / 1024 / 1024 / 1024 * 100) / 100, 
+        total: Math.round((totalMemory / 1024 / 1024 / 1024) * 100) / 100,
+        free: Math.round((freeMemory / 1024 / 1024 / 1024) * 100) / 100,
+        used: Math.round((usedMemory / 1024 / 1024 / 1024) * 100) / 100,
         percentUsed: percentMemoryUsed
       },
       disk: diskInfo,
@@ -429,11 +449,11 @@ export const getSystemHealth = async (): Promise<SystemHealth> => {
       whatsapp: whatsappInfo,
       application: applicationInfo
     };
-    
+
     const alerts = generateAlerts(healthData);
-    
+
     const status = determineSystemStatus(alerts);
-    
+
     return {
       ...healthData,
       status,
@@ -441,7 +461,7 @@ export const getSystemHealth = async (): Promise<SystemHealth> => {
     } as SystemHealth;
   } catch (error) {
     logger.error("Erro ao obter saúde do sistema:", error);
-    
+
     return {
       status: "critical",
       timestamp: Date.now(),

@@ -30,24 +30,24 @@ const NotifyAdminsService = async ({ whatsappId }: Request): Promise<void> => {
   const emailService = EmailService.getInstance();
 
   const subject = `Alerta: Canal ${whatsapp.name} com status ${whatsapp.status}`;
-  
+
   let statusColor = "#FFA500";
   if (whatsapp.status === "DISCONNECTED") {
     statusColor = "#FF0000";
   } else if (whatsapp.status === "qrcode") {
     statusColor = "#3498db";
   }
-  
-  const updatedDate = new Date(whatsapp.updatedAt).toLocaleString('pt-BR', { 
-    day: '2-digit', 
-    month: '2-digit', 
-    year: 'numeric', 
-    hour: '2-digit', 
-    minute: '2-digit', 
-    second: '2-digit',
-    timeZone: 'America/Sao_Paulo'
+
+  const updatedDate = new Date(whatsapp.updatedAt).toLocaleString("pt-BR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    timeZone: "America/Sao_Paulo"
   });
-  
+
   const text = `
     Olá,
     
@@ -64,7 +64,7 @@ const NotifyAdminsService = async ({ whatsappId }: Request): Promise<void> => {
     
     Este é um e-mail automático, não responda.
   `;
-  
+
   const html = `
     <!DOCTYPE html>
     <html>
@@ -200,7 +200,7 @@ const NotifyAdminsService = async ({ whatsappId }: Request): Promise<void> => {
         
         <div class="footer">
           <p>Este é um e-mail automático, não responda.</p>
-          <p>&copy; ${new Date().getFullYear()} ${process.env.COMPANY_NAME || 'Press Ticket'}</p>
+          <p>&copy; ${new Date().getFullYear()} ${process.env.COMPANY_NAME || "Press Ticket"}</p>
         </div>
       </div>
     </body>
@@ -215,7 +215,7 @@ const NotifyAdminsService = async ({ whatsappId }: Request): Promise<void> => {
         text,
         html
       });
-      
+
       if (!sent) {
         logger.error(`Falha ao enviar e-mail para ${user.email}`);
       }

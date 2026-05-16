@@ -26,7 +26,7 @@ const ListBlockedContactsService = async ({
   whatsappId
 }: Request): Promise<Response> => {
   let sessionId: number | null = whatsappId || null;
-  
+
   if (!sessionId) {
     const connected = await Whatsapp.findOne({
       where: { status: "CONNECTED", type: "wwebjs" }
@@ -39,22 +39,23 @@ const ListBlockedContactsService = async ({
   }
 
   const wbot = await getWbot(sessionId);
-  
+
   const allContacts = await wbot.getContacts();
   // Filtrar apenas contatos bloqueados com @c.us (excluir @lid)
-  const blockedContacts = allContacts.filter((contact: any) => 
-    contact.isBlocked && contact.id._serialized.includes('@c.us')
+  const blockedContacts = allContacts.filter(
+    (contact: any) =>
+      contact.isBlocked && contact.id._serialized.includes("@c.us")
   );
 
   const blockedContactsInfo: BlockedContact[] = [];
 
   for (const wContact of blockedContacts) {
     const number = wContact.id.user;
-    
+
     let profilePicUrl: string | undefined;
     try {
       profilePicUrl = await wbot.getProfilePicUrl(wContact.id._serialized);
-    } catch (error) {
+    } catch (_error) {
       profilePicUrl = undefined;
     }
 

@@ -42,16 +42,15 @@ const EditWhatsAppMessage = async (
     const res = await messageToEdit.edit(newBody);
 
     if (res === null) {
-      throw new Error("Não foi possível editar a mensagem. Ela pode ser muito antiga (mais de 15 minutos) ou não ser editável.");
+      throw new Error(
+        "Não foi possível editar a mensagem. Ela pode ser muito antiga (mais de 15 minutos) ou não ser editável."
+      );
     }
-
-  } catch (err: any) {
+  } catch (_err: any) {
     throw new AppError("ERR_EDITING_WAPP_MSG");
   }
 
-
   if (typeof oldBody === "string" && oldBody !== newBody) {
-
     const existingHistory = await OldMessage.findOne({
       where: {
         messageId: message.id,
@@ -60,11 +59,10 @@ const EditWhatsAppMessage = async (
     });
 
     if (!existingHistory) {
-      const newHistory = await OldMessage.create({
+      await OldMessage.create({
         messageId: message.id,
         body: oldBody
       });
-
     } else {
     }
   } else {
@@ -101,7 +99,6 @@ const EditWhatsAppMessage = async (
       }
     ]
   });
-
 
   return message;
 };

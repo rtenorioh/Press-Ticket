@@ -1,5 +1,4 @@
 import { Request, Response } from "express";
-import isAuth from "../middleware/isAuth";
 import AppError from "../errors/AppError";
 import { getWbotByGroupId } from "../libs/wbot";
 import { MessageMedia } from "whatsapp-web.js";
@@ -29,7 +28,11 @@ export const addParticipants = async (req: Request, res: Response) => {
   const { groupId } = req.params;
   const { participantIds, options } = req.body;
 
-  if (!participantIds || !Array.isArray(participantIds) || !participantIds.length) {
+  if (
+    !participantIds ||
+    !Array.isArray(participantIds) ||
+    !participantIds.length
+  ) {
     throw new AppError("ERR_NO_PARTICIPANTS");
   }
 
@@ -71,11 +74,19 @@ export const removeParticipants = async (req: Request, res: Response) => {
   const whatsappId = wbot.id as number;
   for (const pId of participantIds) {
     let pName = pId;
-    try { const c = await wbot.getContactById(pId); pName = c?.name || c?.pushname || pId; } catch (_) {}
-    groupEventsService.registerEvent({
-      whatsappId, groupId, eventType: "PARTICIPANT_REMOVED",
-      participantId: pId, participantName: pName
-    }).catch(() => {});
+    try {
+      const c = await wbot.getContactById(pId);
+      pName = c?.name || c?.pushname || pId;
+    } catch (__) {}
+    groupEventsService
+      .registerEvent({
+        whatsappId,
+        groupId,
+        eventType: "PARTICIPANT_REMOVED",
+        participantId: pId,
+        participantName: pName
+      })
+      .catch(() => {});
   }
 
   return res.json(result);
@@ -90,11 +101,19 @@ export const promoteParticipants = async (req: Request, res: Response) => {
   const whatsappId = wbot.id as number;
   for (const pId of participantIds) {
     let pName = pId;
-    try { const c = await wbot.getContactById(pId); pName = c?.name || c?.pushname || pId; } catch (_) {}
-    groupEventsService.registerEvent({
-      whatsappId, groupId, eventType: "PARTICIPANT_PROMOTED",
-      participantId: pId, participantName: pName
-    }).catch(() => {});
+    try {
+      const c = await wbot.getContactById(pId);
+      pName = c?.name || c?.pushname || pId;
+    } catch (__) {}
+    groupEventsService
+      .registerEvent({
+        whatsappId,
+        groupId,
+        eventType: "PARTICIPANT_PROMOTED",
+        participantId: pId,
+        participantName: pName
+      })
+      .catch(() => {});
   }
 
   return res.json(result);
@@ -109,11 +128,19 @@ export const demoteParticipants = async (req: Request, res: Response) => {
   const whatsappId = wbot.id as number;
   for (const pId of participantIds) {
     let pName = pId;
-    try { const c = await wbot.getContactById(pId); pName = c?.name || c?.pushname || pId; } catch (_) {}
-    groupEventsService.registerEvent({
-      whatsappId, groupId, eventType: "PARTICIPANT_DEMOTED",
-      participantId: pId, participantName: pName
-    }).catch(() => {});
+    try {
+      const c = await wbot.getContactById(pId);
+      pName = c?.name || c?.pushname || pId;
+    } catch (__) {}
+    groupEventsService
+      .registerEvent({
+        whatsappId,
+        groupId,
+        eventType: "PARTICIPANT_DEMOTED",
+        participantId: pId,
+        participantName: pName
+      })
+      .catch(() => {});
   }
 
   return res.json(result);
@@ -123,7 +150,10 @@ export const getInvite = async (req: Request, res: Response) => {
   const { groupId } = req.params;
   const { chat } = await getGroupChatOrFail(groupId);
   const code = await chat.getInviteCode();
-  return res.json({ code, link: code ? `https://chat.whatsapp.com/${code}` : null });
+  return res.json({
+    code,
+    link: code ? `https://chat.whatsapp.com/${code}` : null
+  });
 };
 
 export const revokeInvite = async (req: Request, res: Response) => {
@@ -263,11 +293,17 @@ export const listMembershipRequests = async (req: Request, res: Response) => {
   return res.json(list || []);
 };
 
-export const approveMembershipRequests = async (req: Request, res: Response) => {
+export const approveMembershipRequests = async (
+  req: Request,
+  res: Response
+) => {
   const { groupId } = req.params;
   const { options } = req.body;
   const { wbot } = await getGroupChatOrFail(groupId);
-  const result = await wbot.approveGroupMembershipRequests(groupId, options || {});
+  const result = await wbot.approveGroupMembershipRequests(
+    groupId,
+    options || {}
+  );
   return res.json(result || []);
 };
 
@@ -275,7 +311,10 @@ export const rejectMembershipRequests = async (req: Request, res: Response) => {
   const { groupId } = req.params;
   const { options } = req.body;
   const { wbot } = await getGroupChatOrFail(groupId);
-  const result = await wbot.rejectGroupMembershipRequests(groupId, options || {});
+  const result = await wbot.rejectGroupMembershipRequests(
+    groupId,
+    options || {}
+  );
   return res.json(result || []);
 };
 
@@ -289,17 +328,18 @@ export const leaveGroup = async (req: Request, res: Response) => {
 export const listParticipants = async (req: Request, res: Response) => {
   const { groupId } = req.params;
   const { wbot, chat } = await getGroupChatOrFail(groupId);
-  let participants: any[] = Array.isArray((chat as any).participants) ? (chat as any).participants : [];
+  let participants: any[] = Array.isArray((chat as any).participants)
+    ? (chat as any).participants
+    : [];
   try {
     if (!participants.length) {
-      if (typeof (chat as any).getParticipants === 'function') {
+      if (typeof (chat as any).getParticipants === "function") {
         participants = await (chat as any).getParticipants();
-      } else if (typeof (chat as any).fetchParticipants === 'function') {
+      } else if (typeof (chat as any).fetchParticipants === "function") {
         participants = await (chat as any).fetchParticipants();
       }
     }
-  } catch (_) {
-  }
+  } catch (__) {}
 
   const result = await Promise.all(
     participants.map(async (p: any) => {
@@ -307,9 +347,17 @@ export const listParticipants = async (req: Request, res: Response) => {
       try {
         const c = await wbot.getContactById(serialized);
         let avatar: string | null = null;
-        try { avatar = await wbot.getProfilePicUrl(serialized); } catch { avatar = null; }
+        try {
+          avatar = await wbot.getProfilePicUrl(serialized);
+        } catch {
+          avatar = null;
+        }
         let about: string | null = null;
-        try { about = typeof c.getAbout === 'function' ? await c.getAbout() : null; } catch { about = null; }
+        try {
+          about = typeof c.getAbout === "function" ? await c.getAbout() : null;
+        } catch {
+          about = null;
+        }
 
         return {
           id: serialized,
@@ -318,7 +366,7 @@ export const listParticipants = async (req: Request, res: Response) => {
           avatar,
           about,
           isAdmin: !!p?.isAdmin,
-          isSuperAdmin: !!p?.isSuperAdmin,
+          isSuperAdmin: !!p?.isSuperAdmin
         };
       } catch {
         return {
@@ -328,7 +376,7 @@ export const listParticipants = async (req: Request, res: Response) => {
           avatar: null,
           about: null,
           isAdmin: !!p?.isAdmin,
-          isSuperAdmin: !!p?.isSuperAdmin,
+          isSuperAdmin: !!p?.isSuperAdmin
         };
       }
     })

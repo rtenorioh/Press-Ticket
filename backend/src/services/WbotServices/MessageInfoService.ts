@@ -24,7 +24,9 @@ interface PollVoteResult {
   timestamp: number;
 }
 
-const GetMessageInfo = async (messageId: string): Promise<MessageInfoResult> => {
+const GetMessageInfo = async (
+  messageId: string
+): Promise<MessageInfoResult> => {
   const message = await Message.findByPk(messageId, {
     include: [
       {
@@ -67,7 +69,9 @@ const GetMessageInfo = async (messageId: string): Promise<MessageInfoResult> => 
   }
 };
 
-const GetMessageReactions = async (messageId: string): Promise<ReactionResult[]> => {
+const GetMessageReactions = async (
+  messageId: string
+): Promise<ReactionResult[]> => {
   const message = await Message.findByPk(messageId, {
     include: [
       {

@@ -1,4 +1,9 @@
-import { InferAttributes, InferCreationAttributes, CreationOptional, NonAttribute } from "sequelize";
+import {
+  InferAttributes,
+  InferCreationAttributes,
+  CreationOptional,
+  NonAttribute
+} from "sequelize";
 import {
   AutoIncrement,
   BelongsTo,
@@ -15,7 +20,10 @@ import {
 import Message from "./Message";
 
 @Table
-class OldMessage extends Model<InferAttributes<OldMessage>, InferCreationAttributes<OldMessage>> {
+class OldMessage extends Model<
+  InferAttributes<OldMessage>,
+  InferCreationAttributes<OldMessage>
+> {
   @PrimaryKey
   @AutoIncrement
   @Column(DataType.INTEGER)

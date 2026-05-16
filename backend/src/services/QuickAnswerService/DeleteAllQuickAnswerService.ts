@@ -9,7 +9,7 @@ const DeleteAllQuickAnswerService = async (): Promise<void> => {
   }
 
   await QuickAnswer.destroy({
-    where: { }
+    where: {}
   });
 };
 

@@ -6,8 +6,23 @@ import isMasterAdmin from "../middleware/isMasterAdmin";
 
 const versionRoutes = express.Router();
 
-versionRoutes.get("/version", isAuth, isMasterAdmin, VersionController.getVersion);
-versionRoutes.post("/whatsapp-lib/update", isAuth, isMasterAdmin, WhatsappLibController.updateWhatsappLibrary);
-versionRoutes.post("/whatsapp-lib/update-git", isAuth, isMasterAdmin, WhatsappLibController.updateWhatsappLibraryFromGit);
+versionRoutes.get(
+  "/version",
+  isAuth,
+  isMasterAdmin,
+  VersionController.getVersion
+);
+versionRoutes.post(
+  "/whatsapp-lib/update",
+  isAuth,
+  isMasterAdmin,
+  WhatsappLibController.updateWhatsappLibrary
+);
+versionRoutes.post(
+  "/whatsapp-lib/update-git",
+  isAuth,
+  isMasterAdmin,
+  WhatsappLibController.updateWhatsappLibraryFromGit
+);
 
 export default versionRoutes;

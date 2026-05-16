@@ -1,4 +1,8 @@
-import { InferAttributes, InferCreationAttributes, CreationOptional } from "sequelize";
+import {
+  InferAttributes,
+  InferCreationAttributes,
+  CreationOptional
+} from "sequelize";
 import {
   Table,
   Column,
@@ -11,7 +15,10 @@ import {
 } from "sequelize-typescript";
 
 @Table
-class QuickAnswer extends Model<InferAttributes<QuickAnswer>, InferCreationAttributes<QuickAnswer>> {
+class QuickAnswer extends Model<
+  InferAttributes<QuickAnswer>,
+  InferCreationAttributes<QuickAnswer>
+> {
   @PrimaryKey
   @AutoIncrement
   @Column(DataType.INTEGER)

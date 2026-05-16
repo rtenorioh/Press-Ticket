@@ -1,10 +1,14 @@
 import { Request, Response } from "express";
 import { Op, fn, literal } from "sequelize";
 import { startOfDay } from "date-fns";
-import { getIO } from "../libs/socket";
 import { logger } from "../utils/logger";
 import ActivityLog from "../models/ActivityLog";
-import { listActivityLogs, getEntityDetails, ActivityActions, EntityTypes } from "../services/ActivityLogService";
+import {
+  listActivityLogs,
+  getEntityDetails,
+  ActivityActions,
+  EntityTypes
+} from "../services/ActivityLogService";
 
 interface ActivityLogRequest {
   startDate?: string;
@@ -47,7 +51,8 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
     return res.status(200).json({
       logs,
       count,
-      hasMore: count > (offset ? Number(offset) : 0) + (limit ? Number(limit) : 10)
+      hasMore:
+        count > (offset ? Number(offset) : 0) + (limit ? Number(limit) : 10)
     });
   } catch (err: any) {
     logger.error(`Erro ao listar logs de atividade: ${err.message}`);
@@ -57,11 +62,12 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
 
 export const show = async (req: Request, res: Response): Promise<Response> => {
   try {
-    const { id } = req.params;
     const { entityType, entityId } = req.query;
 
     if (!entityType || !entityId) {
-      return res.status(400).json({ error: "Tipo de entidade e ID são obrigatórios" });
+      return res
+        .status(400)
+        .json({ error: "Tipo de entidade e ID são obrigatórios" });
     }
 
     const details = await getEntityDetails(
@@ -70,7 +76,9 @@ export const show = async (req: Request, res: Response): Promise<Response> => {
     );
 
     if (!details) {
-      return res.status(404).json({ error: "Detalhes da entidade não encontrados" });
+      return res
+        .status(404)
+        .json({ error: "Detalhes da entidade não encontrados" });
     }
 
     return res.status(200).json(details);
@@ -80,7 +88,10 @@ export const show = async (req: Request, res: Response): Promise<Response> => {
   }
 };
 
-export const actions = async (req: Request, res: Response): Promise<Response> => {
+export const actions = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
   try {
     const actionTypes = Object.values(ActivityActions);
 
@@ -91,7 +102,10 @@ export const actions = async (req: Request, res: Response): Promise<Response> =>
   }
 };
 
-export const entities = async (req: Request, res: Response): Promise<Response> => {
+export const entities = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
   try {
     const entityTypes = Object.values(EntityTypes);
 
@@ -110,20 +124,18 @@ export const stats = async (req: Request, res: Response): Promise<Response> => {
     // Usuários únicos que geraram logs
     const uniqueUsers = await ActivityLog.count({
       distinct: true,
-      col: 'userId'
+      col: "userId"
     });
 
     // Ação mais comum
     const topActionResult = await ActivityLog.findAll({
-      attributes: [
-        'action',
-        [fn('COUNT', 'action'), 'count']
-      ],
-      group: ['action'],
-      order: [[literal('count'), 'DESC']],
+      attributes: ["action", [fn("COUNT", "action"), "count"]],
+      group: ["action"],
+      order: [[literal("count"), "DESC"]],
       limit: 1
     });
-    const topAction = topActionResult.length > 0 ? topActionResult[0].action : 'N/A';
+    const topAction =
+      topActionResult.length > 0 ? topActionResult[0].action : "N/A";
 
     // Logs de hoje
     const todayLogs = await ActivityLog.count({

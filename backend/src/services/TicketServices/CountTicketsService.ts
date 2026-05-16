@@ -105,26 +105,31 @@ const CountTicketsService = async ({
       openGroupsConditions.queueId = { [Op.in]: queueIds };
     }
 
-    const [openCount, pendingCount, closedCount, openGroupsCount] = await Promise.all([
-      Ticket.count({
-        where: openConditions,
-        include: [{
-          model: require("../../models/Contact").default,
-          as: "contact",
-          attributes: []
-        }]
-      }),
-      Ticket.count({ where: pendingConditions }),
-      Ticket.count({ where: closedConditions }),
-      Ticket.count({
-        where: openGroupsConditions,
-        include: [{
-          model: require("../../models/Contact").default,
-          as: "contact",
-          attributes: []
-        }]
-      })
-    ]);
+    const [openCount, pendingCount, closedCount, openGroupsCount] =
+      await Promise.all([
+        Ticket.count({
+          where: openConditions,
+          include: [
+            {
+              model: require("../../models/Contact").default,
+              as: "contact",
+              attributes: []
+            }
+          ]
+        }),
+        Ticket.count({ where: pendingConditions }),
+        Ticket.count({ where: closedConditions }),
+        Ticket.count({
+          where: openGroupsConditions,
+          include: [
+            {
+              model: require("../../models/Contact").default,
+              as: "contact",
+              attributes: []
+            }
+          ]
+        })
+      ]);
 
     return {
       open: openCount,

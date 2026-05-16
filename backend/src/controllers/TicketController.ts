@@ -14,7 +14,11 @@ import ShowTicketService from "../services/TicketServices/ShowTicketService";
 import UpdateTicketService from "../services/TicketServices/UpdateTicketService";
 import SendWhatsAppMessage from "../services/WbotServices/SendWhatsAppMessage";
 import ShowWhatsAppService from "../services/WhatsappService/ShowWhatsAppService";
-import { createActivityLog, ActivityActions, EntityTypes } from "../services/ActivityLogService";
+import {
+  createActivityLog,
+  ActivityActions,
+  EntityTypes
+} from "../services/ActivityLogService";
 import CountTicketsService from "../services/TicketServices/CountTicketsService";
 import GetClientIp from "../helpers/GetClientIp";
 import { logger } from "../utils/logger";
@@ -52,17 +56,14 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
     let userId = "0";
     let isAdmin = false;
 
-    const isApiRequest = req.path.startsWith('/v1/');
-    if (isApiRequest || 'apiToken' in req) {
+    const isApiRequest = req.path.startsWith("/v1/");
+    if (isApiRequest || "apiToken" in req) {
       isAdmin = true;
-    }
-
-    else if (req.user) {
+    } else if (req.user) {
       userId = req.user.id.toString();
-      isAdmin = req.user.profile === "admin" || req.user.profile === "masteradmin";
-    }
-
-    else {
+      isAdmin =
+        req.user.profile === "admin" || req.user.profile === "masteradmin";
+    } else {
       return res.status(401).json({ error: "Não autorizado" });
     }
 
@@ -76,7 +77,9 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
           : JSON.parse(queueIdsStringified);
       } catch (error) {
         logger.error(`Erro ao parsear queueIds: ${error.message}`);
-        return res.status(400).json({ error: "Formato JSON inválido para queueIds" });
+        return res
+          .status(400)
+          .json({ error: "Formato JSON inválido para queueIds" });
       }
     }
 
@@ -87,18 +90,24 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
           : JSON.parse(channelIdsStringified);
       } catch (error) {
         logger.error(`Erro ao parsear channelIds: ${error.message}`);
-        return res.status(400).json({ error: "Formato JSON inválido para channelIds" });
+        return res
+          .status(400)
+          .json({ error: "Formato JSON inválido para channelIds" });
       }
     }
 
     if ((startDate && !endDate) || (!startDate && endDate)) {
-      return res.status(400).json({ error: "Ambas as datas de início e fim devem ser fornecidas" });
+      return res
+        .status(400)
+        .json({ error: "Ambas as datas de início e fim devem ser fornecidas" });
     }
 
     if (startDate && endDate) {
       const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
       if (!dateRegex.test(startDate) || !dateRegex.test(endDate)) {
-        return res.status(400).json({ error: "Formato de data inválido. Use YYYY-MM-DD" });
+        return res
+          .status(400)
+          .json({ error: "Formato de data inválido. Use YYYY-MM-DD" });
       }
     }
 
@@ -124,7 +133,9 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
       return res.status(200).json({ tickets, count, hasMore });
     } catch (serviceError) {
       logger.error(`Erro no serviço de listagem de tickets: ${serviceError}`);
-      return res.status(500).json({ error: "Erro ao processar a listagem de tickets" });
+      return res
+        .status(500)
+        .json({ error: "Erro ao processar a listagem de tickets" });
     }
   } catch (error) {
     logger.error(`Erro ao listar tickets: ${error}`);
@@ -133,7 +144,8 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
 };
 
 export const store = async (req: Request, res: Response): Promise<Response> => {
-  const { contactId, status, userId, queueId, whatsappId }: TicketData = req.body;
+  const { contactId, status, userId, queueId, whatsappId }: TicketData =
+    req.body;
 
   const ticket = await CreateTicketService({
     contactId,
@@ -147,7 +159,7 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
   const contact = await Contact.findByPk(contactId);
 
   await createActivityLog({
-    userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
+    userId: typeof logUserId === "string" ? parseInt(logUserId) : logUserId,
     action: ActivityActions.CREATE,
     description: `Ticket #${ticket.id} criado para o contato ${contact?.name || contactId}`,
     entityType: EntityTypes.TICKET,
@@ -195,10 +207,14 @@ export const update = async (
   });
 
   // LOG: Aceitar ticket (pending → open)
-  if (ticketBefore && ticketBefore.status === 'pending' && ticketData.status === 'open') {
+  if (
+    ticketBefore &&
+    ticketBefore.status === "pending" &&
+    ticketData.status === "open"
+  ) {
     try {
       await createActivityLog({
-        userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
+        userId: typeof logUserId === "string" ? parseInt(logUserId) : logUserId,
         action: ActivityActions.ACCEPT,
         description: `Ticket #${ticketId} aceito`,
         entityType: EntityTypes.TICKET,
@@ -216,17 +232,21 @@ export const update = async (
   }
 
   // LOG: Transferência de usuário
-  if (ticketBefore && ticketBefore.userId && ticketData.userId &&
-      ticketBefore.userId !== ticketData.userId) {
+  if (
+    ticketBefore &&
+    ticketBefore.userId &&
+    ticketData.userId &&
+    ticketBefore.userId !== ticketData.userId
+  ) {
     try {
       const User = require("../models/User").default;
       const oldUser = await User.findByPk(ticketBefore.userId);
       const newUser = await User.findByPk(ticketData.userId);
 
       await createActivityLog({
-        userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
+        userId: typeof logUserId === "string" ? parseInt(logUserId) : logUserId,
         action: ActivityActions.TRANSFER,
-        description: `Ticket #${ticketId} transferido de ${oldUser?.name || 'N/A'} para ${newUser?.name || 'N/A'}`,
+        description: `Ticket #${ticketId} transferido de ${oldUser?.name || "N/A"} para ${newUser?.name || "N/A"}`,
         entityType: EntityTypes.TICKET,
         entityId: parseInt(ticketId),
         ip: clientIp,
@@ -244,16 +264,24 @@ export const update = async (
   }
 
   // LOG: Transferência de setor
-  if (ticketBefore && ticketBefore.queueId !== undefined &&
-      ticketData.queueId !== undefined && ticketBefore.queueId !== ticketData.queueId) {
+  if (
+    ticketBefore &&
+    ticketBefore.queueId !== undefined &&
+    ticketData.queueId !== undefined &&
+    ticketBefore.queueId !== ticketData.queueId
+  ) {
     try {
-      const oldQueue = ticketBefore.queueId ? await ShowQueueService(ticketBefore.queueId) : null;
-      const newQueue = ticketData.queueId ? await ShowQueueService(ticketData.queueId) : null;
+      const oldQueue = ticketBefore.queueId
+        ? await ShowQueueService(ticketBefore.queueId)
+        : null;
+      const newQueue = ticketData.queueId
+        ? await ShowQueueService(ticketData.queueId)
+        : null;
 
       await createActivityLog({
-        userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
+        userId: typeof logUserId === "string" ? parseInt(logUserId) : logUserId,
         action: ActivityActions.TRANSFER,
-        description: `Ticket #${ticketId} transferido de ${oldQueue?.name || 'Sem setor'} para ${newQueue?.name || 'Sem setor'}`,
+        description: `Ticket #${ticketId} transferido de ${oldQueue?.name || "Sem setor"} para ${newQueue?.name || "Sem setor"}`,
         entityType: EntityTypes.TICKET,
         entityId: parseInt(ticketId),
         ip: clientIp,
@@ -271,10 +299,14 @@ export const update = async (
   }
 
   // LOG: Mover para aguardando
-  if (ticketBefore && ticketBefore.status !== 'pending' && ticketData.status === 'pending') {
+  if (
+    ticketBefore &&
+    ticketBefore.status !== "pending" &&
+    ticketData.status === "pending"
+  ) {
     try {
       await createActivityLog({
-        userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
+        userId: typeof logUserId === "string" ? parseInt(logUserId) : logUserId,
         action: ActivityActions.UPDATE,
         description: `Ticket #${ticketId} movido para aguardando`,
         entityType: EntityTypes.TICKET,
@@ -292,10 +324,13 @@ export const update = async (
   }
 
   // LOG: Fechar ticket
-  if (ticket.status === "closed" && (!ticketBefore || ticketBefore.status !== "closed")) {
+  if (
+    ticket.status === "closed" &&
+    (!ticketBefore || ticketBefore.status !== "closed")
+  ) {
     try {
       await createActivityLog({
-        userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
+        userId: typeof logUserId === "string" ? parseInt(logUserId) : logUserId,
         action: ActivityActions.CLOSE,
         description: `Ticket #${ticketId} fechado`,
         entityType: EntityTypes.TICKET,
@@ -312,10 +347,14 @@ export const update = async (
   }
 
   // LOG: Reabrir ticket
-  if (ticketBefore && ticketBefore.status === "closed" && ticketData.status === "open") {
+  if (
+    ticketBefore &&
+    ticketBefore.status === "closed" &&
+    ticketData.status === "open"
+  ) {
     try {
       await createActivityLog({
-        userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
+        userId: typeof logUserId === "string" ? parseInt(logUserId) : logUserId,
         action: ActivityActions.REOPEN,
         description: `Ticket #${ticketId} reaberto`,
         entityType: EntityTypes.TICKET,
@@ -367,7 +406,7 @@ export const remove = async (
   const clientIp = GetClientIp(req);
 
   await createActivityLog({
-    userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
+    userId: typeof logUserId === "string" ? parseInt(logUserId) : logUserId,
     action: ActivityActions.DELETE,
     description: `Ticket #${ticketId} excluído`,
     entityType: EntityTypes.TICKET,
@@ -444,14 +483,12 @@ export const closeTickets = async (
 
   let userId: number;
 
-  const isApiRequest = req.path.startsWith('/v1/');
-  if (isApiRequest || 'apiToken' in req) {
+  const isApiRequest = req.path.startsWith("/v1/");
+  if (isApiRequest || "apiToken" in req) {
     userId = 1;
-  }
-  else if (req.user) {
+  } else if (req.user) {
     userId = parseInt(req.user.id);
-  }
-  else {
+  } else {
     return res.status(401).json({ error: "Não autorizado" });
   }
 
@@ -489,7 +526,7 @@ export const closeTickets = async (
     if (!tickets || !tickets.length) {
       return res.status(404).json({
         error: "ERR_NO_TICKET_FOUND",
-        message: `Nenhum ticket ${status ? `com status ${status}` : ''} encontrado para fechar`
+        message: `Nenhum ticket ${status ? `com status ${status}` : ""} encontrado para fechar`
       });
     }
 
@@ -511,7 +548,7 @@ export const closeTickets = async (
         ip: clientIp,
         additionalData: {
           ticketCount: tickets.length,
-          statusFilter: status || 'all',
+          statusFilter: status || "all",
           ticketIds: tickets.slice(0, 10).map(t => t.id)
         }
       });
@@ -535,32 +572,40 @@ export const closeTickets = async (
   }
 };
 
-export const count = async (req: AuthenticatedRequest, res: Response): Promise<Response> => {
+export const count = async (
+  req: AuthenticatedRequest,
+  res: Response
+): Promise<Response> => {
   try {
     const { queueIds, showAll } = req.query;
 
     let userId: number | null = null;
     let isAdmin = false;
 
-    const isApiRequest = req.path.startsWith('/v1/');
-    if (isApiRequest || 'apiToken' in req) {
+    const isApiRequest = req.path.startsWith("/v1/");
+    if (isApiRequest || "apiToken" in req) {
       isAdmin = true;
     } else {
       userId = parseInt(req.user.id);
-      isAdmin = req.user.profile === "admin" || req.user.profile === "masteradmin";
+      isAdmin =
+        req.user.profile === "admin" || req.user.profile === "masteradmin";
     }
 
     let queueIdsArray: number[] = [];
     if (queueIds) {
-      if (typeof queueIds === 'string') {
-        queueIdsArray = queueIds.split(',').map(id => parseInt(id.trim())).filter(id => !isNaN(id));
+      if (typeof queueIds === "string") {
+        queueIdsArray = queueIds
+          .split(",")
+          .map(id => parseInt(id.trim()))
+          .filter(id => !isNaN(id));
       } else if (Array.isArray(queueIds)) {
-        queueIdsArray = queueIds.map(id => parseInt(id as string)).filter(id => !isNaN(id));
+        queueIdsArray = queueIds
+          .map(id => parseInt(id as string))
+          .filter(id => !isNaN(id));
       }
     }
 
     const showAllTickets = showAll === "true" || isAdmin;
-
 
     const counts = await CountTicketsService({
       queueIds: queueIdsArray,

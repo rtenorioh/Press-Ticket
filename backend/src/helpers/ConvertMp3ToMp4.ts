@@ -17,12 +17,11 @@ const convertMp3ToMp4 = (input: string, outputMP4: string): Promise<void> => {
       .inputFormat("mp3")
       .output(outputMP4)
       .outputFormat("mp4")
-      .on("start", commandLine => { })
+      .on("start", _commandLine => {})
       .on("error", (error: Error) => {
         reject(error);
       })
-      .on("progress", progress => {
-      })
+      .on("progress", _progress => {})
       .on("end", () => {
         resolve();
       })

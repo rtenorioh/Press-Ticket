@@ -79,8 +79,6 @@ const UpdateTicketService = async ({
       ticket
     });
 
-  const timestamp = new Date().toISOString();
-
   try {
     await EmitTicketCounterService();
   } catch (err) {

@@ -1,4 +1,3 @@
-/* eslint-disable prefer-template */
 /* eslint-disable prettier/prettier */
 /* eslint-disable @typescript-eslint/no-array-constructor */
 import Mustache from "mustache";

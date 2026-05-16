@@ -1,5 +1,9 @@
 import { Request, Response } from "express";
-import { cleanupSystem, getCleanupSettings, saveCleanupSettings } from "../services/SystemCleanupService";
+import {
+  cleanupSystem,
+  getCleanupSettings,
+  saveCleanupSettings
+} from "../services/SystemCleanupService";
 import { logger } from "../utils/logger";
 import { getIO } from "../libs/socket";
 
@@ -24,7 +28,7 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
       cleanMedia,
       cleanClosedTickets
     } = req.body;
-    
+
     await saveCleanupSettings({
       autoCleanup,
       scheduleTime,
@@ -34,21 +38,26 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
       cleanMedia,
       cleanClosedTickets
     });
-    
+
     const io = getIO();
     io.emit("settings", {
       action: "update",
       setting: "cleanup"
     });
-    
-    return res.status(200).json({ message: "Configurações de limpeza salvas com sucesso" });
+
+    return res
+      .status(200)
+      .json({ message: "Configurações de limpeza salvas com sucesso" });
   } catch (err: any) {
     logger.error(`Erro ao salvar configurações de limpeza: ${err.message}`);
     return res.status(500).json({ error: err.message });
   }
 };
 
-export const execute = async (req: Request, res: Response): Promise<Response> => {
+export const execute = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
   try {
     const {
       olderThan,
@@ -60,7 +69,7 @@ export const execute = async (req: Request, res: Response): Promise<Response> =>
       cleanMedia,
       cleanClosedTickets
     } = req.body;
-    
+
     const result = await cleanupSystem({
       olderThan,
       messageTypes,
@@ -71,13 +80,13 @@ export const execute = async (req: Request, res: Response): Promise<Response> =>
       cleanMedia,
       cleanClosedTickets
     });
-    
+
     const io = getIO();
     io.emit("systemCleanup", {
       action: "complete",
       result
     });
-    
+
     return res.status(200).json(result);
   } catch (err: any) {
     logger.error(`Erro ao executar limpeza do sistema: ${err.message}`);

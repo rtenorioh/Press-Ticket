@@ -66,14 +66,16 @@ const calculateLatency = async (wbot: any): Promise<number> => {
     const startTime = Date.now();
     await wbot.pupPage.evaluate(() => (window as any).Store.AppState.state);
     return Date.now() - startTime;
-  } catch (error) {
+  } catch (_error) {
     return -1;
   }
 };
 
-const getHealthCheckService = async (whatsappId: number): Promise<HealthCheckData> => {
+const getHealthCheckService = async (
+  whatsappId: number
+): Promise<HealthCheckData> => {
   const whatsapp = await Whatsapp.findByPk(whatsappId);
-  
+
   if (!whatsapp) {
     throw new Error("Whatsapp não encontrado");
   }
@@ -83,7 +85,7 @@ const getHealthCheckService = async (whatsappId: number): Promise<HealthCheckDat
 
   try {
     const wbot = getWbot(whatsappId);
-    
+
     const [state, info, wwebVersion, latency] = await Promise.all([
       wbot.getState().catch(() => null),
       wbot.info ? Promise.resolve(wbot.info) : Promise.resolve(null),
@@ -91,7 +93,7 @@ const getHealthCheckService = async (whatsappId: number): Promise<HealthCheckDat
       calculateLatency(wbot)
     ]);
 
-    const uptime = health.startTime 
+    const uptime = health.startTime
       ? Math.floor((Date.now() - health.startTime.getTime()) / 1000)
       : 0;
 
@@ -112,7 +114,7 @@ const getHealthCheckService = async (whatsappId: number): Promise<HealthCheckDat
       wwebVersion,
       isConnected
     };
-  } catch (error) {
+  } catch (_error) {
     return {
       whatsappId: whatsapp.id,
       name: whatsapp.name,
@@ -138,13 +140,13 @@ const getAllHealthChecks = async (): Promise<HealthCheckData[]> => {
   });
 
   const healthChecks = await Promise.all(
-    whatsapps.map(async (whatsapp) => {
+    whatsapps.map(async whatsapp => {
       try {
         return await getHealthCheckService(whatsapp.id);
-      } catch (error) {
+      } catch (_error) {
         initializeHealthTracking(whatsapp.id);
         const health = whatsappHealthData.get(whatsapp.id)!;
-        
+
         return {
           whatsappId: whatsapp.id,
           name: whatsapp.name,

@@ -1,4 +1,8 @@
-import { InferAttributes, InferCreationAttributes, CreationOptional } from "sequelize";
+import {
+  InferAttributes,
+  InferCreationAttributes,
+  CreationOptional
+} from "sequelize";
 import {
   AutoIncrement,
   Column,
@@ -11,7 +15,10 @@ import {
 } from "sequelize-typescript";
 
 @Table
-class Personalization extends Model<InferAttributes<Personalization>, InferCreationAttributes<Personalization>> {
+class Personalization extends Model<
+  InferAttributes<Personalization>,
+  InferCreationAttributes<Personalization>
+> {
   @PrimaryKey
   @AutoIncrement
   @Column(DataType.INTEGER)

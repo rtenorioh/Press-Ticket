@@ -1,4 +1,4 @@
-import { Op, fn, col, literal } from "sequelize";
+import { Op, fn, col } from "sequelize";
 import User from "../../models/User";
 import Ticket from "../../models/Ticket";
 import Message from "../../models/Message";
@@ -49,7 +49,9 @@ interface UserMonitorResponse {
   };
 }
 
-const UserMonitorService = async (userId?: number): Promise<UserMonitorResponse> => {
+const UserMonitorService = async (
+  userId?: number
+): Promise<UserMonitorResponse> => {
   try {
     const whereCondition: any = {
       profile: { [Op.ne]: "masteradmin" }
@@ -90,13 +92,10 @@ const UserMonitorService = async (userId?: number): Promise<UserMonitorResponse>
     const last7Days = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
 
     const userStats: UserStats[] = await Promise.all(
-      users.map(async (user) => {
+      users.map(async user => {
         const ticketStats = await Ticket.findAll({
           where: { userId: user.id },
-          attributes: [
-            "status",
-            [fn("COUNT", col("id")), "count"]
-          ],
+          attributes: ["status", [fn("COUNT", col("id")), "count"]],
           group: ["status"],
           raw: true
         });
@@ -114,7 +113,10 @@ const UserMonitorService = async (userId?: number): Promise<UserMonitorResponse>
           }
         });
 
-        const totalTickets: number = ticketStatusCounts.open + ticketStatusCounts.pending + ticketStatusCounts.closed;
+        const totalTickets: number =
+          ticketStatusCounts.open +
+          ticketStatusCounts.pending +
+          ticketStatusCounts.closed;
 
         const messageSent = await Message.count({
           where: {
@@ -159,14 +161,15 @@ const UserMonitorService = async (userId?: number): Promise<UserMonitorResponse>
 
         userTickets.forEach((ticket: any) => {
           const messages = ticket.messages || [];
-          
+
           if (messages.length > 0) {
             const firstCustomerMessage = messages.find((m: any) => !m.fromMe);
             const firstAgentMessage = messages.find((m: any) => m.fromMe);
 
             if (firstCustomerMessage && firstAgentMessage) {
-              const responseTime = new Date(firstAgentMessage.createdAt).getTime() - 
-                                  new Date(firstCustomerMessage.createdAt).getTime();
+              const responseTime =
+                new Date(firstAgentMessage.createdAt).getTime() -
+                new Date(firstCustomerMessage.createdAt).getTime();
               if (responseTime > 0) {
                 totalFirstResponseTime += responseTime;
                 firstResponseCount++;
@@ -176,8 +179,9 @@ const UserMonitorService = async (userId?: number): Promise<UserMonitorResponse>
             const agentMessages = messages.filter((m: any) => m.fromMe);
             if (agentMessages.length > 1) {
               for (let i = 1; i < agentMessages.length; i++) {
-                const timeDiff = new Date(agentMessages[i].createdAt).getTime() - 
-                               new Date(agentMessages[i - 1].createdAt).getTime();
+                const timeDiff =
+                  new Date(agentMessages[i].createdAt).getTime() -
+                  new Date(agentMessages[i - 1].createdAt).getTime();
                 if (timeDiff > 0) {
                   totalResponseTime += timeDiff;
                   responseCount++;
@@ -186,9 +190,14 @@ const UserMonitorService = async (userId?: number): Promise<UserMonitorResponse>
             }
           }
 
-          if (ticket.status === "closed" && ticket.createdAt && ticket.updatedAt) {
-            const handleTime = new Date(ticket.updatedAt).getTime() - 
-                              new Date(ticket.createdAt).getTime();
+          if (
+            ticket.status === "closed" &&
+            ticket.createdAt &&
+            ticket.updatedAt
+          ) {
+            const handleTime =
+              new Date(ticket.updatedAt).getTime() -
+              new Date(ticket.createdAt).getTime();
             if (handleTime > 0) {
               totalHandleTime += handleTime;
               handleCount++;
@@ -196,21 +205,39 @@ const UserMonitorService = async (userId?: number): Promise<UserMonitorResponse>
           }
         });
 
-        const avgResponseTime = responseCount > 0 
-          ? Math.max(0, Math.round(totalResponseTime / responseCount / 1000 / 60))
-          : 0;
+        const avgResponseTime =
+          responseCount > 0
+            ? Math.max(
+                0,
+                Math.round(totalResponseTime / responseCount / 1000 / 60)
+              )
+            : 0;
 
-        const avgHandleTime = handleCount > 0 
-          ? Math.max(0, Math.round(totalHandleTime / handleCount / 1000 / 60))
-          : 0;
+        const avgHandleTime =
+          handleCount > 0
+            ? Math.max(0, Math.round(totalHandleTime / handleCount / 1000 / 60))
+            : 0;
 
-        const firstResponseTime = firstResponseCount > 0 
-          ? Math.max(0, Math.round(totalFirstResponseTime / firstResponseCount / 1000 / 60))
-          : 0;
+        const firstResponseTime =
+          firstResponseCount > 0
+            ? Math.max(
+                0,
+                Math.round(
+                  totalFirstResponseTime / firstResponseCount / 1000 / 60
+                )
+              )
+            : 0;
 
-        const resolutionRate = totalTickets > 0 
-          ? Math.max(0, Math.min(100, Math.round((ticketStatusCounts.closed / totalTickets) * 100)))
-          : 0;
+        const resolutionRate =
+          totalTickets > 0
+            ? Math.max(
+                0,
+                Math.min(
+                  100,
+                  Math.round((ticketStatusCounts.closed / totalTickets) * 100)
+                )
+              )
+            : 0;
 
         const lastMessage = await Message.findOne({
           where: {
@@ -259,12 +286,33 @@ const UserMonitorService = async (userId?: number): Promise<UserMonitorResponse>
       usersOnline: userStats.filter(u => u.online).length,
       totalTickets: userStats.reduce((sum, u) => sum + u.ticketStats.total, 0),
       totalMessages: userStats.reduce((sum, u) => sum + u.messageStats.sent, 0),
-      avgResponseTime: userStats.length > 0
-        ? Math.max(0, Math.round(userStats.reduce((sum, u) => sum + u.performanceStats.avgResponseTime, 0) / userStats.length))
-        : 0,
-      avgResolutionRate: userStats.length > 0
-        ? Math.max(0, Math.min(100, Math.round(userStats.reduce((sum, u) => sum + u.performanceStats.resolutionRate, 0) / userStats.length)))
-        : 0
+      avgResponseTime:
+        userStats.length > 0
+          ? Math.max(
+              0,
+              Math.round(
+                userStats.reduce(
+                  (sum, u) => sum + u.performanceStats.avgResponseTime,
+                  0
+                ) / userStats.length
+              )
+            )
+          : 0,
+      avgResolutionRate:
+        userStats.length > 0
+          ? Math.max(
+              0,
+              Math.min(
+                100,
+                Math.round(
+                  userStats.reduce(
+                    (sum, u) => sum + u.performanceStats.resolutionRate,
+                    0
+                  ) / userStats.length
+                )
+              )
+            )
+          : 0
     };
 
     return {

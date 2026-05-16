@@ -25,11 +25,10 @@ const SetTicketMessagesAsRead = async (ticket: Ticket): Promise<void> => {
   );
 
   await ticket.update({ unreadMessages: 0 });
-  
+
   if (unreadMessages.length > 0) {
-    
     const io = getIO();
-    
+
     unreadMessages.forEach(message => {
       io.to(ticket.id.toString()).emit("appMessage", {
         action: "update",

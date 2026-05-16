@@ -19,12 +19,16 @@ ticketRoutes.put("/tickets/:ticketId", isAuth, TicketController.update);
 
 ticketRoutes.delete("/tickets/:ticketId", isAuth, TicketController.remove);
 
-ticketRoutes.put("/tickets/:ticketId/toggle-state", isAuth, TicketController.toggleState);
+ticketRoutes.put(
+  "/tickets/:ticketId/toggle-state",
+  isAuth,
+  TicketController.toggleState
+);
 
 ticketRoutes.get(
-    "/tickets/contact/:contactId/open",
-    isAuth,
-    TicketController.checkOpenTickets
+  "/tickets/contact/:contactId/open",
+  isAuth,
+  TicketController.checkOpenTickets
 );
 
 export default ticketRoutes;

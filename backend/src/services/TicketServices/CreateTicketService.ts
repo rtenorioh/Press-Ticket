@@ -13,7 +13,7 @@ interface Request {
   contactId: number;
   status: string;
   userId: number;
-  queueId ?: number;
+  queueId?: number;
   whatsappId?: number;
 }
 
@@ -39,8 +39,8 @@ const CreateTicketService = async ({
 
   const { isGroup } = await ShowContactService(contactId);
 
-  if(queueId === undefined) {
-    const user = await User.findByPk(userId, { include: ["queues"]});
+  if (queueId === undefined) {
+    const user = await User.findByPk(userId, { include: ["queues"] });
     queueId = user?.queues.length === 1 ? user.queues[0].id : undefined;
   }
 
@@ -57,8 +57,6 @@ const CreateTicketService = async ({
   if (!ticket) {
     throw new AppError("ERR_CREATING_TICKET");
   }
-
-  const timestamp = new Date().toISOString();
 
   try {
     await EmitTicketCounterService();

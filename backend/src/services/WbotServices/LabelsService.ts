@@ -2,7 +2,8 @@ import { getWbot } from "../../libs/wbot";
 import AppError from "../../errors/AppError";
 import { logger } from "../../utils/logger";
 
-const errStr = (e: unknown) => e instanceof Error ? e.message : JSON.stringify(e);
+const errStr = (e: unknown) =>
+  e instanceof Error ? e.message : JSON.stringify(e);
 
 interface LabelData {
   id: string;
@@ -47,7 +48,10 @@ class LabelsService {
     }
   }
 
-  async getChatLabels(whatsappId: number, chatId: string): Promise<LabelData[]> {
+  async getChatLabels(
+    whatsappId: number,
+    chatId: string
+  ): Promise<LabelData[]> {
     try {
       const wbot = getWbot(whatsappId);
       const labels: any[] = await wbot.getChatLabels(chatId);
@@ -76,7 +80,9 @@ class LabelsService {
         timestamp: chat.timestamp
       }));
     } catch (err) {
-      logger.error(`[LABELS] Erro ao buscar chats por etiqueta: ${errStr(err)}`);
+      logger.error(
+        `[LABELS] Erro ao buscar chats por etiqueta: ${errStr(err)}`
+      );
       throw new AppError(`Erro ao buscar chats por etiqueta: ${errStr(err)}`);
     }
   }
@@ -91,7 +97,9 @@ class LabelsService {
       const chat = await wbot.getChatById(chatId);
       await (chat as any).changeLabels(labelIds);
     } catch (err) {
-      logger.error(`[LABELS] Erro ao alterar etiquetas do chat: ${errStr(err)}`);
+      logger.error(
+        `[LABELS] Erro ao alterar etiquetas do chat: ${errStr(err)}`
+      );
       throw new AppError(`Erro ao alterar etiquetas do chat: ${errStr(err)}`);
     }
   }

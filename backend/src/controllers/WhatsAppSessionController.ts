@@ -3,7 +3,11 @@ import { getWbot, removeWbot } from "../libs/wbot";
 import { StartWhatsAppSession } from "../services/WbotServices/StartWhatsAppSession";
 import ShowWhatsAppService from "../services/WhatsappService/ShowWhatsAppService";
 import UpdateWhatsAppService from "../services/WhatsappService/UpdateWhatsAppService";
-import { createActivityLog, ActivityActions, EntityTypes } from "../services/ActivityLogService";
+import {
+  createActivityLog,
+  ActivityActions,
+  EntityTypes
+} from "../services/ActivityLogService";
 import GetClientIp from "../helpers/GetClientIp";
 import { logger } from "../utils/logger";
 
@@ -18,7 +22,7 @@ const store = async (req: Request, res: Response): Promise<Response> => {
   // LOG: Sessão iniciada
   try {
     await createActivityLog({
-      userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
+      userId: typeof logUserId === "string" ? parseInt(logUserId) : logUserId,
       action: ActivityActions.START,
       description: `Sessão do WhatsApp "${whatsapp.name}" iniciada`,
       entityType: EntityTypes.WHATSAPP,
@@ -51,7 +55,7 @@ const update = async (req: Request, res: Response): Promise<Response> => {
   // LOG: Sessão reconectada
   try {
     await createActivityLog({
-      userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
+      userId: typeof logUserId === "string" ? parseInt(logUserId) : logUserId,
       action: ActivityActions.CONNECT,
       description: `Sessão do WhatsApp "${whatsapp.name}" reconectada`,
       entityType: EntityTypes.WHATSAPP,
@@ -59,7 +63,7 @@ const update = async (req: Request, res: Response): Promise<Response> => {
       ip: clientIp,
       additionalData: {
         whatsappName: whatsapp.name,
-        action: 'reconnect'
+        action: "reconnect"
       }
     });
   } catch (error) {
@@ -81,8 +85,7 @@ const remove = async (req: Request, res: Response): Promise<Response> => {
       if (wbot && typeof wbot.logout === "function") {
         await wbot.logout();
       }
-    } catch (wbotError) {
-    }
+    } catch (_wbotError) {}
 
     await removeWbot(whatsapp.id);
 
@@ -99,7 +102,7 @@ const remove = async (req: Request, res: Response): Promise<Response> => {
     // LOG: Sessão desconectada
     try {
       await createActivityLog({
-        userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
+        userId: typeof logUserId === "string" ? parseInt(logUserId) : logUserId,
         action: ActivityActions.DISCONNECT,
         description: `Sessão do WhatsApp "${whatsapp.name}" desconectada`,
         entityType: EntityTypes.WHATSAPP,

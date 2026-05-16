@@ -91,7 +91,11 @@ const openApiRouter = express.Router();
  *       500:
  *         description: Erro interno
  */
-openApiRouter.post("/messages/send", isApiToken('create:messages'), ApiController.sendMessage);
+openApiRouter.post(
+  "/messages/send",
+  isApiToken("create:messages"),
+  ApiController.sendMessage
+);
 
 /**
  * @swagger
@@ -144,7 +148,12 @@ openApiRouter.post("/messages/send", isApiToken('create:messages'), ApiControlle
  *       403:
  *         description: Sem permissão
  */
-openApiRouter.post("/messages/send-media", isApiToken('create:messages'), upload.array("medias"), ApiController.sendMedia);
+openApiRouter.post(
+  "/messages/send-media",
+  isApiToken("create:messages"),
+  upload.array("medias"),
+  ApiController.sendMedia
+);
 
 /**
  * @swagger
@@ -168,7 +177,11 @@ openApiRouter.post("/messages/send-media", isApiToken('create:messages'), upload
  *       404:
  *         description: Mensagem ou mídia não encontrada
  */
-openApiRouter.get("/messages/:messageId/media", isApiToken('read:messages'), ApiController.getMediaBase64);
+openApiRouter.get(
+  "/messages/:messageId/media",
+  isApiToken("read:messages"),
+  ApiController.getMediaBase64
+);
 
 // Rotas de contatos
 
@@ -189,7 +202,11 @@ openApiRouter.get("/messages/:messageId/media", isApiToken('read:messages'), Api
  *       403:
  *         description: Sem permissão read:contacts
  */
-openApiRouter.get("/contacts", isApiToken('read:contacts'), ContactController.index);
+openApiRouter.get(
+  "/contacts",
+  isApiToken("read:contacts"),
+  ContactController.index
+);
 
 /**
  * @swagger
@@ -225,7 +242,11 @@ openApiRouter.get("/contacts", isApiToken('read:contacts'), ContactController.in
  *       400:
  *         description: Dados inválidos
  */
-openApiRouter.post("/contacts", isApiToken('create:contacts'), ContactController.store);
+openApiRouter.post(
+  "/contacts",
+  isApiToken("create:contacts"),
+  ContactController.store
+);
 
 /**
  * @swagger
@@ -248,7 +269,11 @@ openApiRouter.post("/contacts", isApiToken('create:contacts'), ContactController
  *       404:
  *         description: Contato não encontrado
  */
-openApiRouter.get("/contacts/:contactId", isApiToken('read:contacts'), ContactController.show);
+openApiRouter.get(
+  "/contacts/:contactId",
+  isApiToken("read:contacts"),
+  ContactController.show
+);
 
 /**
  * @swagger
@@ -279,7 +304,11 @@ openApiRouter.get("/contacts/:contactId", isApiToken('read:contacts'), ContactCo
  *       200:
  *         description: Contato atualizado
  */
-openApiRouter.put("/contacts/:contactId", isApiToken('update:contacts'), ContactController.update);
+openApiRouter.put(
+  "/contacts/:contactId",
+  isApiToken("update:contacts"),
+  ContactController.update
+);
 
 /**
  * @swagger
@@ -300,7 +329,11 @@ openApiRouter.put("/contacts/:contactId", isApiToken('update:contacts'), Contact
  *       200:
  *         description: Contato excluído
  */
-openApiRouter.delete("/contacts/:contactId", isApiToken('delete:contacts'), ContactController.remove);
+openApiRouter.delete(
+  "/contacts/:contactId",
+  isApiToken("delete:contacts"),
+  ContactController.remove
+);
 
 /**
  * @swagger
@@ -325,7 +358,11 @@ openApiRouter.delete("/contacts/:contactId", isApiToken('delete:contacts'), Cont
  *       200:
  *         description: Contato encontrado
  */
-openApiRouter.post("/contact", isApiToken('read:contacts'), ContactController.getContact);
+openApiRouter.post(
+  "/contact",
+  isApiToken("read:contacts"),
+  ContactController.getContact
+);
 
 /**
  * @swagger
@@ -368,7 +405,11 @@ openApiRouter.post("/contact", isApiToken('read:contacts'), ContactController.ge
  *       200:
  *         description: Tags atualizadas
  */
-openApiRouter.put("/contacts/:contactId/tags", isApiToken('update:contacts'), ContactController.updateTags);
+openApiRouter.put(
+  "/contacts/:contactId/tags",
+  isApiToken("update:contacts"),
+  ContactController.updateTags
+);
 
 /**
  * @swagger
@@ -408,7 +449,11 @@ openApiRouter.put("/contacts/:contactId/tags", isApiToken('update:contacts'), Co
  *       404:
  *         description: Contato ou tag não encontrada
  */
-openApiRouter.delete("/contacts/:contactId/tags/:tagId", isApiToken('update:contacts'), ContactController.removeTag);
+openApiRouter.delete(
+  "/contacts/:contactId/tags/:tagId",
+  isApiToken("update:contacts"),
+  ContactController.removeTag
+);
 
 // Rotas de setores
 
@@ -425,7 +470,7 @@ openApiRouter.delete("/contacts/:contactId/tags/:tagId", isApiToken('update:cont
  *       200:
  *         description: Lista de setores
  */
-openApiRouter.get("/queue", isApiToken('read:queue'), QueueController.index);
+openApiRouter.get("/queue", isApiToken("read:queue"), QueueController.index);
 
 /**
  * @swagger
@@ -453,7 +498,7 @@ openApiRouter.get("/queue", isApiToken('read:queue'), QueueController.index);
  *       200:
  *         description: Setor criado
  */
-openApiRouter.post("/queue", isApiToken('create:queue'), QueueController.store);
+openApiRouter.post("/queue", isApiToken("create:queue"), QueueController.store);
 
 /**
  * @swagger
@@ -474,7 +519,11 @@ openApiRouter.post("/queue", isApiToken('create:queue'), QueueController.store);
  *       200:
  *         description: Setor encontrado
  */
-openApiRouter.get("/queue/:queueId", isApiToken('read:queue'), QueueController.show);
+openApiRouter.get(
+  "/queue/:queueId",
+  isApiToken("read:queue"),
+  QueueController.show
+);
 
 /**
  * @swagger
@@ -495,7 +544,11 @@ openApiRouter.get("/queue/:queueId", isApiToken('read:queue'), QueueController.s
  *       200:
  *         description: Setor atualizado
  */
-openApiRouter.put("/queue/:queueId", isApiToken('update:queue'), QueueController.update);
+openApiRouter.put(
+  "/queue/:queueId",
+  isApiToken("update:queue"),
+  QueueController.update
+);
 
 /**
  * @swagger
@@ -516,7 +569,11 @@ openApiRouter.put("/queue/:queueId", isApiToken('update:queue'), QueueController
  *       200:
  *         description: Setor excluído
  */
-openApiRouter.delete("/queue/:queueId", isApiToken('delete:queue'), QueueController.remove);
+openApiRouter.delete(
+  "/queue/:queueId",
+  isApiToken("delete:queue"),
+  QueueController.remove
+);
 
 // Rotas de tags
 
@@ -533,7 +590,7 @@ openApiRouter.delete("/queue/:queueId", isApiToken('delete:queue'), QueueControl
  *       200:
  *         description: Lista de tags
  */
-openApiRouter.get("/tags", isApiToken('read:tags'), TagController.index);
+openApiRouter.get("/tags", isApiToken("read:tags"), TagController.index);
 
 /**
  * @swagger
@@ -548,7 +605,7 @@ openApiRouter.get("/tags", isApiToken('read:tags'), TagController.index);
  *       200:
  *         description: Lista de tags
  */
-openApiRouter.get("/tags/list", isApiToken('read:tags'), TagController.list);
+openApiRouter.get("/tags/list", isApiToken("read:tags"), TagController.list);
 
 /**
  * @swagger
@@ -576,7 +633,7 @@ openApiRouter.get("/tags/list", isApiToken('read:tags'), TagController.list);
  *       200:
  *         description: Tag criada
  */
-openApiRouter.post("/tags", isApiToken('create:tags'), TagController.store);
+openApiRouter.post("/tags", isApiToken("create:tags"), TagController.store);
 
 /**
  * @swagger
@@ -597,7 +654,7 @@ openApiRouter.post("/tags", isApiToken('create:tags'), TagController.store);
  *       200:
  *         description: Tag encontrada
  */
-openApiRouter.get("/tags/:tagId", isApiToken('read:tags'), TagController.show);
+openApiRouter.get("/tags/:tagId", isApiToken("read:tags"), TagController.show);
 
 /**
  * @swagger
@@ -618,7 +675,11 @@ openApiRouter.get("/tags/:tagId", isApiToken('read:tags'), TagController.show);
  *       200:
  *         description: Tag atualizada
  */
-openApiRouter.put("/tags/:tagId", isApiToken('update:tags'), TagController.update);
+openApiRouter.put(
+  "/tags/:tagId",
+  isApiToken("update:tags"),
+  TagController.update
+);
 
 /**
  * @swagger
@@ -639,7 +700,11 @@ openApiRouter.put("/tags/:tagId", isApiToken('update:tags'), TagController.updat
  *       200:
  *         description: Tag excluída
  */
-openApiRouter.delete("/tags/:tagId", isApiToken('delete:tags'), TagController.remove);
+openApiRouter.delete(
+  "/tags/:tagId",
+  isApiToken("delete:tags"),
+  TagController.remove
+);
 
 /**
  * @swagger
@@ -654,7 +719,11 @@ openApiRouter.delete("/tags/:tagId", isApiToken('delete:tags'), TagController.re
  *       200:
  *         description: Tags sincronizadas
  */
-openApiRouter.post("/tags/sync", isApiToken('create:tags'), TagController.syncTags);
+openApiRouter.post(
+  "/tags/sync",
+  isApiToken("create:tags"),
+  TagController.syncTags
+);
 
 // Rotas de tickets
 
@@ -671,7 +740,11 @@ openApiRouter.post("/tags/sync", isApiToken('create:tags'), TagController.syncTa
  *       200:
  *         description: Lista de tickets
  */
-openApiRouter.get("/tickets", isApiToken('read:tickets'), TicketController.index);
+openApiRouter.get(
+  "/tickets",
+  isApiToken("read:tickets"),
+  TicketController.index
+);
 
 /**
  * @swagger
@@ -686,7 +759,11 @@ openApiRouter.get("/tickets", isApiToken('read:tickets'), TicketController.index
  *       200:
  *         description: Contagem de tickets
  */
-openApiRouter.get("/tickets/count", isApiToken('read:tickets'), TicketController.count);
+openApiRouter.get(
+  "/tickets/count",
+  isApiToken("read:tickets"),
+  TicketController.count
+);
 
 /**
  * @swagger
@@ -717,7 +794,11 @@ openApiRouter.get("/tickets/count", isApiToken('read:tickets'), TicketController
  *       200:
  *         description: Ticket criado
  */
-openApiRouter.post("/tickets", isApiToken('create:tickets'), TicketController.store);
+openApiRouter.post(
+  "/tickets",
+  isApiToken("create:tickets"),
+  TicketController.store
+);
 
 /**
  * @swagger
@@ -738,7 +819,11 @@ openApiRouter.post("/tickets", isApiToken('create:tickets'), TicketController.st
  *       200:
  *         description: Ticket encontrado
  */
-openApiRouter.get("/tickets/:ticketId", isApiToken('read:tickets'), TicketController.show);
+openApiRouter.get(
+  "/tickets/:ticketId",
+  isApiToken("read:tickets"),
+  TicketController.show
+);
 
 /**
  * @swagger
@@ -759,7 +844,11 @@ openApiRouter.get("/tickets/:ticketId", isApiToken('read:tickets'), TicketContro
  *       200:
  *         description: Ticket atualizado
  */
-openApiRouter.put("/tickets/:ticketId", isApiToken('update:tickets'), TicketController.update);
+openApiRouter.put(
+  "/tickets/:ticketId",
+  isApiToken("update:tickets"),
+  TicketController.update
+);
 
 /**
  * @swagger
@@ -780,7 +869,11 @@ openApiRouter.put("/tickets/:ticketId", isApiToken('update:tickets'), TicketCont
  *       200:
  *         description: Ticket excluído
  */
-openApiRouter.delete("/tickets/:ticketId", isApiToken('delete:tickets'), TicketController.remove);
+openApiRouter.delete(
+  "/tickets/:ticketId",
+  isApiToken("delete:tickets"),
+  TicketController.remove
+);
 
 /**
  * @swagger
@@ -801,7 +894,11 @@ openApiRouter.delete("/tickets/:ticketId", isApiToken('delete:tickets'), TicketC
  *       200:
  *         description: Status dos tickets
  */
-openApiRouter.get("/tickets/contact/:contactId/open", isApiToken('read:tickets'), TicketController.checkOpenTickets);
+openApiRouter.get(
+  "/tickets/contact/:contactId/open",
+  isApiToken("read:tickets"),
+  TicketController.checkOpenTickets
+);
 
 /**
  * @swagger
@@ -816,7 +913,11 @@ openApiRouter.get("/tickets/contact/:contactId/open", isApiToken('read:tickets')
  *       200:
  *         description: Tickets fechados
  */
-openApiRouter.put("/tickets/close-all", isApiToken('update:tickets'), TicketController.closeTickets);
+openApiRouter.put(
+  "/tickets/close-all",
+  isApiToken("update:tickets"),
+  TicketController.closeTickets
+);
 
 // Rotas de WhatsApp
 
@@ -833,7 +934,11 @@ openApiRouter.put("/tickets/close-all", isApiToken('update:tickets'), TicketCont
  *       200:
  *         description: Lista de conexões
  */
-openApiRouter.get("/whatsapp", isApiToken('read:whatsapp'), WhatsAppController.index);
+openApiRouter.get(
+  "/whatsapp",
+  isApiToken("read:whatsapp"),
+  WhatsAppController.index
+);
 
 /**
  * @swagger
@@ -858,7 +963,11 @@ openApiRouter.get("/whatsapp", isApiToken('read:whatsapp'), WhatsAppController.i
  *       200:
  *         description: Conexão criada
  */
-openApiRouter.post("/whatsapp", isApiToken('create:whatsapp'), WhatsAppController.store);
+openApiRouter.post(
+  "/whatsapp",
+  isApiToken("create:whatsapp"),
+  WhatsAppController.store
+);
 
 /**
  * @swagger
@@ -879,7 +988,11 @@ openApiRouter.post("/whatsapp", isApiToken('create:whatsapp'), WhatsAppControlle
  *       200:
  *         description: Conexão encontrada
  */
-openApiRouter.get("/whatsapp/:whatsappId", isApiToken('read:whatsapp'), WhatsAppController.show);
+openApiRouter.get(
+  "/whatsapp/:whatsappId",
+  isApiToken("read:whatsapp"),
+  WhatsAppController.show
+);
 
 /**
  * @swagger
@@ -900,7 +1013,11 @@ openApiRouter.get("/whatsapp/:whatsappId", isApiToken('read:whatsapp'), WhatsApp
  *       200:
  *         description: Conexão atualizada
  */
-openApiRouter.put("/whatsapp/:whatsappId", isApiToken('update:whatsapp'), WhatsAppController.update);
+openApiRouter.put(
+  "/whatsapp/:whatsappId",
+  isApiToken("update:whatsapp"),
+  WhatsAppController.update
+);
 
 /**
  * @swagger
@@ -921,7 +1038,11 @@ openApiRouter.put("/whatsapp/:whatsappId", isApiToken('update:whatsapp'), WhatsA
  *       200:
  *         description: Conexão excluída
  */
-openApiRouter.delete("/whatsapp/:whatsappId", isApiToken('delete:whatsapp'), WhatsAppController.remove);
+openApiRouter.delete(
+  "/whatsapp/:whatsappId",
+  isApiToken("delete:whatsapp"),
+  WhatsAppController.remove
+);
 
 /**
  * @swagger
@@ -942,7 +1063,11 @@ openApiRouter.delete("/whatsapp/:whatsappId", isApiToken('delete:whatsapp'), Wha
  *       200:
  *         description: Conexão reiniciada
  */
-openApiRouter.post("/whatsapp/:whatsappId/restart", isApiToken('update:whatsapp'), WhatsAppController.restart);
+openApiRouter.post(
+  "/whatsapp/:whatsappId/restart",
+  isApiToken("update:whatsapp"),
+  WhatsAppController.restart
+);
 
 /**
  * @swagger
@@ -963,7 +1088,11 @@ openApiRouter.post("/whatsapp/:whatsappId/restart", isApiToken('update:whatsapp'
  *       200:
  *         description: Conexão desligada
  */
-openApiRouter.post("/whatsapp/:whatsappId/shutdown", isApiToken('update:whatsapp'), WhatsAppController.shutdown);
+openApiRouter.post(
+  "/whatsapp/:whatsappId/shutdown",
+  isApiToken("update:whatsapp"),
+  WhatsAppController.shutdown
+);
 
 /**
  * @swagger
@@ -984,7 +1113,11 @@ openApiRouter.post("/whatsapp/:whatsappId/shutdown", isApiToken('update:whatsapp
  *       200:
  *         description: QR Code retornado
  */
-openApiRouter.get("/whatsapp/:whatsappId/qrcode", isApiToken('read:whatsapp'), WhatsAppController.getQrCode);
+openApiRouter.get(
+  "/whatsapp/:whatsappId/qrcode",
+  isApiToken("read:whatsapp"),
+  WhatsAppController.getQrCode
+);
 
 /**
  * @swagger
@@ -1009,7 +1142,11 @@ openApiRouter.get("/whatsapp/:whatsappId/qrcode", isApiToken('read:whatsapp'), W
  *       200:
  *         description: Número verificado
  */
-openApiRouter.post("/whatsapp/check-number", isApiToken('read:whatsapp'), WhatsAppNumberController.checkNumber);
+openApiRouter.post(
+  "/whatsapp/check-number",
+  isApiToken("read:whatsapp"),
+  WhatsAppNumberController.checkNumber
+);
 
 // Rotas de Sessão do WhatsApp
 
@@ -1032,7 +1169,11 @@ openApiRouter.post("/whatsapp/check-number", isApiToken('read:whatsapp'), WhatsA
  *       200:
  *         description: Sessão criada
  */
-openApiRouter.post("/whatsappsession/:whatsappId", isApiToken('create:whatsappsession'), WhatsAppSessionController.store);
+openApiRouter.post(
+  "/whatsappsession/:whatsappId",
+  isApiToken("create:whatsappsession"),
+  WhatsAppSessionController.store
+);
 
 /**
  * @swagger
@@ -1053,7 +1194,11 @@ openApiRouter.post("/whatsappsession/:whatsappId", isApiToken('create:whatsappse
  *       200:
  *         description: Sessão atualizada
  */
-openApiRouter.put("/whatsappsession/:whatsappId", isApiToken('update:whatsappsession'), WhatsAppSessionController.update);
+openApiRouter.put(
+  "/whatsappsession/:whatsappId",
+  isApiToken("update:whatsappsession"),
+  WhatsAppSessionController.update
+);
 
 /**
  * @swagger
@@ -1074,7 +1219,11 @@ openApiRouter.put("/whatsappsession/:whatsappId", isApiToken('update:whatsappses
  *       200:
  *         description: Sessão excluída
  */
-openApiRouter.delete("/whatsappsession/:whatsappId", isApiToken('delete:whatsappsession'), WhatsAppSessionController.remove);
+openApiRouter.delete(
+  "/whatsappsession/:whatsappId",
+  isApiToken("delete:whatsappsession"),
+  WhatsAppSessionController.remove
+);
 
 // Rotas de Logs de Atividade
 
@@ -1091,7 +1240,11 @@ openApiRouter.delete("/whatsappsession/:whatsappId", isApiToken('delete:whatsapp
  *       200:
  *         description: Lista de logs
  */
-openApiRouter.get("/activity-logs", isApiToken('read:activity-logs'), ActivityLogController.index);
+openApiRouter.get(
+  "/activity-logs",
+  isApiToken("read:activity-logs"),
+  ActivityLogController.index
+);
 
 /**
  * @swagger
@@ -1106,7 +1259,11 @@ openApiRouter.get("/activity-logs", isApiToken('read:activity-logs'), ActivityLo
  *       200:
  *         description: Lista de ações
  */
-openApiRouter.get("/activity-logs/actions", isApiToken('read:activity-logs'), ActivityLogController.actions);
+openApiRouter.get(
+  "/activity-logs/actions",
+  isApiToken("read:activity-logs"),
+  ActivityLogController.actions
+);
 
 /**
  * @swagger
@@ -1121,7 +1278,11 @@ openApiRouter.get("/activity-logs/actions", isApiToken('read:activity-logs'), Ac
  *       200:
  *         description: Lista de entidades
  */
-openApiRouter.get("/activity-logs/entities", isApiToken('read:activity-logs'), ActivityLogController.entities);
+openApiRouter.get(
+  "/activity-logs/entities",
+  isApiToken("read:activity-logs"),
+  ActivityLogController.entities
+);
 
 /**
  * @swagger
@@ -1142,7 +1303,11 @@ openApiRouter.get("/activity-logs/entities", isApiToken('read:activity-logs'), A
  *       200:
  *         description: Detalhes do log
  */
-openApiRouter.get("/activity-logs/:id/details", isApiToken('read:activity-logs'), ActivityLogController.show);
+openApiRouter.get(
+  "/activity-logs/:id/details",
+  isApiToken("read:activity-logs"),
+  ActivityLogController.show
+);
 
 // Rotas de Backup
 
@@ -1159,7 +1324,11 @@ openApiRouter.get("/activity-logs/:id/details", isApiToken('read:activity-logs')
  *       200:
  *         description: Lista de backups
  */
-openApiRouter.get("/backups", isApiToken('read:backups'), BackupController.index);
+openApiRouter.get(
+  "/backups",
+  isApiToken("read:backups"),
+  BackupController.index
+);
 
 /**
  * @swagger
@@ -1174,7 +1343,11 @@ openApiRouter.get("/backups", isApiToken('read:backups'), BackupController.index
  *       200:
  *         description: Backup criado
  */
-openApiRouter.post("/backups", isApiToken('create:backups'), BackupController.store);
+openApiRouter.post(
+  "/backups",
+  isApiToken("create:backups"),
+  BackupController.store
+);
 
 /**
  * @swagger
@@ -1195,7 +1368,11 @@ openApiRouter.post("/backups", isApiToken('create:backups'), BackupController.st
  *       200:
  *         description: Backup encontrado
  */
-openApiRouter.get("/backups/:filename", isApiToken('read:backups'), BackupController.show);
+openApiRouter.get(
+  "/backups/:filename",
+  isApiToken("read:backups"),
+  BackupController.show
+);
 
 /**
  * @swagger
@@ -1216,7 +1393,11 @@ openApiRouter.get("/backups/:filename", isApiToken('read:backups'), BackupContro
  *       200:
  *         description: Backup restaurado
  */
-openApiRouter.post("/backups/:filename/restore", isApiToken('update:backups'), BackupController.update);
+openApiRouter.post(
+  "/backups/:filename/restore",
+  isApiToken("update:backups"),
+  BackupController.update
+);
 
 /**
  * @swagger
@@ -1237,7 +1418,11 @@ openApiRouter.post("/backups/:filename/restore", isApiToken('update:backups'), B
  *       200:
  *         description: Backup excluído
  */
-openApiRouter.delete("/backups/:filename", isApiToken('delete:backups'), BackupController.remove);
+openApiRouter.delete(
+  "/backups/:filename",
+  isApiToken("delete:backups"),
+  BackupController.remove
+);
 
 // Rotas de Logs de Erro
 
@@ -1254,7 +1439,11 @@ openApiRouter.delete("/backups/:filename", isApiToken('delete:backups'), BackupC
  *       200:
  *         description: Log criado
  */
-openApiRouter.post("/error-logs", isApiToken('create:error-logs'), ErrorLogController.store);
+openApiRouter.post(
+  "/error-logs",
+  isApiToken("create:error-logs"),
+  ErrorLogController.store
+);
 
 /**
  * @swagger
@@ -1269,7 +1458,11 @@ openApiRouter.post("/error-logs", isApiToken('create:error-logs'), ErrorLogContr
  *       200:
  *         description: Lista de logs
  */
-openApiRouter.get("/error-logs", isApiToken('read:error-logs'), ErrorLogController.index);
+openApiRouter.get(
+  "/error-logs",
+  isApiToken("read:error-logs"),
+  ErrorLogController.index
+);
 
 /**
  * @swagger
@@ -1290,7 +1483,11 @@ openApiRouter.get("/error-logs", isApiToken('read:error-logs'), ErrorLogControll
  *       200:
  *         description: Log encontrado
  */
-openApiRouter.get("/error-logs/:id", isApiToken('read:error-logs'), ErrorLogController.show);
+openApiRouter.get(
+  "/error-logs/:id",
+  isApiToken("read:error-logs"),
+  ErrorLogController.show
+);
 
 /**
  * @swagger
@@ -1305,7 +1502,11 @@ openApiRouter.get("/error-logs/:id", isApiToken('read:error-logs'), ErrorLogCont
  *       200:
  *         description: Logs limpos
  */
-openApiRouter.delete("/error-logs/cleanup", isApiToken('delete:error-logs'), ErrorLogController.cleanupOldLogs);
+openApiRouter.delete(
+  "/error-logs/cleanup",
+  isApiToken("delete:error-logs"),
+  ErrorLogController.cleanupOldLogs
+);
 
 // Rotas de Monitoramento de Rede
 
@@ -1322,7 +1523,11 @@ openApiRouter.delete("/error-logs/cleanup", isApiToken('delete:error-logs'), Err
  *       200:
  *         description: Status da rede
  */
-openApiRouter.get("/network-status", isApiToken('read:network-status'), NetworkMonitorController.index);
+openApiRouter.get(
+  "/network-status",
+  isApiToken("read:network-status"),
+  NetworkMonitorController.index
+);
 
 // Rotas de Monitoramento de Setores
 
@@ -1339,7 +1544,11 @@ openApiRouter.get("/network-status", isApiToken('read:network-status'), NetworkM
  *       200:
  *         description: Status dos setores
  */
-openApiRouter.get("/queue-monitor", isApiToken('read:queue-monitor'), QueueMonitorController.index);
+openApiRouter.get(
+  "/queue-monitor",
+  isApiToken("read:queue-monitor"),
+  QueueMonitorController.index
+);
 
 // Rotas de Atualização do Sistema
 
@@ -1356,7 +1565,11 @@ openApiRouter.get("/queue-monitor", isApiToken('read:queue-monitor'), QueueMonit
  *       200:
  *         description: Status de atualizações
  */
-openApiRouter.get("/system-update/check", isApiToken('read:system-update'), SystemUpdateController.checkUpdates);
+openApiRouter.get(
+  "/system-update/check",
+  isApiToken("read:system-update"),
+  SystemUpdateController.checkUpdates
+);
 
 /**
  * @swagger
@@ -1371,7 +1584,11 @@ openApiRouter.get("/system-update/check", isApiToken('read:system-update'), Syst
  *       200:
  *         description: Atualização instalada
  */
-openApiRouter.post("/system-update/install", isApiToken('write:system-update'), SystemUpdateController.installUpdate);
+openApiRouter.post(
+  "/system-update/install",
+  isApiToken("write:system-update"),
+  SystemUpdateController.installUpdate
+);
 
 /**
  * @swagger
@@ -1386,7 +1603,11 @@ openApiRouter.post("/system-update/install", isApiToken('write:system-update'), 
  *       200:
  *         description: Status da atualização
  */
-openApiRouter.get("/system-update/status", isApiToken('read:system-update'), SystemUpdateController.getStatus);
+openApiRouter.get(
+  "/system-update/status",
+  isApiToken("read:system-update"),
+  SystemUpdateController.getStatus
+);
 
 /**
  * @swagger
@@ -1401,7 +1622,11 @@ openApiRouter.get("/system-update/status", isApiToken('read:system-update'), Sys
  *       200:
  *         description: Lista de backups
  */
-openApiRouter.get("/system-update/backups", isApiToken('read:system-update'), SystemUpdateController.getBackups);
+openApiRouter.get(
+  "/system-update/backups",
+  isApiToken("read:system-update"),
+  SystemUpdateController.getBackups
+);
 
 /**
  * @swagger
@@ -1422,7 +1647,11 @@ openApiRouter.get("/system-update/backups", isApiToken('read:system-update'), Sy
  *       200:
  *         description: Backup restaurado
  */
-openApiRouter.post("/system-update/restore/:backupFileName", isApiToken('write:system-update'), SystemUpdateController.restoreFromBackup);
+openApiRouter.post(
+  "/system-update/restore/:backupFileName",
+  isApiToken("write:system-update"),
+  SystemUpdateController.restoreFromBackup
+);
 
 // Rotas de Versão e Biblioteca WhatsApp
 
@@ -1439,7 +1668,11 @@ openApiRouter.post("/system-update/restore/:backupFileName", isApiToken('write:s
  *       200:
  *         description: Versão do sistema
  */
-openApiRouter.get("/version", isApiToken('read:version'), VersionController.getVersion);
+openApiRouter.get(
+  "/version",
+  isApiToken("read:version"),
+  VersionController.getVersion
+);
 
 /**
  * @swagger
@@ -1454,7 +1687,11 @@ openApiRouter.get("/version", isApiToken('read:version'), VersionController.getV
  *       200:
  *         description: Biblioteca atualizada
  */
-openApiRouter.post("/whatsapp-lib/update", isApiToken('write:whatsapp-lib'), WhatsappLibController.updateWhatsappLibrary);
+openApiRouter.post(
+  "/whatsapp-lib/update",
+  isApiToken("write:whatsapp-lib"),
+  WhatsappLibController.updateWhatsappLibrary
+);
 
 // Rotas de Sistema
 
@@ -1471,7 +1708,11 @@ openApiRouter.post("/whatsapp-lib/update", isApiToken('write:whatsapp-lib'), Wha
  *       200:
  *         description: PM2 reiniciado
  */
-openApiRouter.post("/restartpm2", isApiToken('write:system'), SystemController.restartPm2);
+openApiRouter.post(
+  "/restartpm2",
+  isApiToken("write:system"),
+  SystemController.restartPm2
+);
 
 /**
  * @swagger
@@ -1486,7 +1727,11 @@ openApiRouter.post("/restartpm2", isApiToken('write:system'), SystemController.r
  *       200:
  *         description: Espaço em disco
  */
-openApiRouter.get("/disk-space", isApiToken('read:system-resources'), DiskSpaceController.getDiskSpace);
+openApiRouter.get(
+  "/disk-space",
+  isApiToken("read:system-resources"),
+  DiskSpaceController.getDiskSpace
+);
 
 /**
  * @swagger
@@ -1501,7 +1746,11 @@ openApiRouter.get("/disk-space", isApiToken('read:system-resources'), DiskSpaceC
  *       200:
  *         description: Uso de memória
  */
-openApiRouter.get("/memory-usage", isApiToken('read:system-resources'), MemoryUsageController.getMemoryUsage);
+openApiRouter.get(
+  "/memory-usage",
+  isApiToken("read:system-resources"),
+  MemoryUsageController.getMemoryUsage
+);
 
 /**
  * @swagger
@@ -1516,7 +1765,11 @@ openApiRouter.get("/memory-usage", isApiToken('read:system-resources'), MemoryUs
  *       200:
  *         description: Uso de CPU
  */
-openApiRouter.get("/cpu-usage", isApiToken('read:system-resources'), CpuUsageController.cpuUsage);
+openApiRouter.get(
+  "/cpu-usage",
+  isApiToken("read:system-resources"),
+  CpuUsageController.cpuUsage
+);
 
 /**
  * @swagger
@@ -1531,7 +1784,11 @@ openApiRouter.get("/cpu-usage", isApiToken('read:system-resources'), CpuUsageCon
  *       200:
  *         description: Status do banco
  */
-openApiRouter.get("/database-status", isApiToken('read:system-resources'), DatabaseMonitorController.getDatabaseStatus);
+openApiRouter.get(
+  "/database-status",
+  isApiToken("read:system-resources"),
+  DatabaseMonitorController.getDatabaseStatus
+);
 
 // Rotas de Vídeo
 
@@ -1548,7 +1805,7 @@ openApiRouter.get("/database-status", isApiToken('read:system-resources'), Datab
  *       200:
  *         description: Lista de vídeos
  */
-openApiRouter.get("/videos", isApiToken('read:videos'), VideoController.index);
+openApiRouter.get("/videos", isApiToken("read:videos"), VideoController.index);
 
 /**
  * @swagger
@@ -1569,7 +1826,11 @@ openApiRouter.get("/videos", isApiToken('read:videos'), VideoController.index);
  *       200:
  *         description: Vídeo encontrado
  */
-openApiRouter.get("/videos/:id", isApiToken('read:videos'), VideoController.show);
+openApiRouter.get(
+  "/videos/:id",
+  isApiToken("read:videos"),
+  VideoController.show
+);
 
 /**
  * @swagger
@@ -1584,7 +1845,11 @@ openApiRouter.get("/videos/:id", isApiToken('read:videos'), VideoController.show
  *       200:
  *         description: Vídeo criado
  */
-openApiRouter.post("/videos", isApiToken('write:videos'), VideoController.store);
+openApiRouter.post(
+  "/videos",
+  isApiToken("write:videos"),
+  VideoController.store
+);
 
 /**
  * @swagger
@@ -1605,7 +1870,11 @@ openApiRouter.post("/videos", isApiToken('write:videos'), VideoController.store)
  *       200:
  *         description: Vídeo atualizado
  */
-openApiRouter.put("/videos/:id", isApiToken('write:videos'), VideoController.update);
+openApiRouter.put(
+  "/videos/:id",
+  isApiToken("write:videos"),
+  VideoController.update
+);
 
 /**
  * @swagger
@@ -1626,7 +1895,11 @@ openApiRouter.put("/videos/:id", isApiToken('write:videos'), VideoController.upd
  *       200:
  *         description: Vídeo excluído
  */
-openApiRouter.delete("/videos/:id", isApiToken('write:videos'), VideoController.remove);
+openApiRouter.delete(
+  "/videos/:id",
+  isApiToken("write:videos"),
+  VideoController.remove
+);
 
 // Rotas de Usuários
 
@@ -1669,7 +1942,7 @@ openApiRouter.delete("/videos/:id", isApiToken('write:videos'), VideoController.
  *       500:
  *         description: Erro interno
  */
-openApiRouter.get("/users", isApiToken('read:users'), UserController.index);
+openApiRouter.get("/users", isApiToken("read:users"), UserController.index);
 
 /**
  * @swagger
@@ -1727,7 +2000,7 @@ openApiRouter.get("/users", isApiToken('read:users'), UserController.index);
  *       500:
  *         description: Erro interno
  */
-openApiRouter.post("/users", isApiToken('create:users'), UserController.store);
+openApiRouter.post("/users", isApiToken("create:users"), UserController.store);
 
 /**
  * @swagger
@@ -1784,7 +2057,11 @@ openApiRouter.post("/users", isApiToken('create:users'), UserController.store);
  *       500:
  *         description: Erro interno
  */
-openApiRouter.get("/users/:userId", isApiToken('read:users'), UserController.show);
+openApiRouter.get(
+  "/users/:userId",
+  isApiToken("read:users"),
+  UserController.show
+);
 
 /**
  * @swagger
@@ -1847,7 +2124,11 @@ openApiRouter.get("/users/:userId", isApiToken('read:users'), UserController.sho
  *       500:
  *         description: Erro interno
  */
-openApiRouter.put("/users/:userId", isApiToken('update:users'), UserController.update);
+openApiRouter.put(
+  "/users/:userId",
+  isApiToken("update:users"),
+  UserController.update
+);
 
 /**
  * @swagger
@@ -1878,7 +2159,11 @@ openApiRouter.put("/users/:userId", isApiToken('update:users'), UserController.u
  *       500:
  *         description: Erro interno
  */
-openApiRouter.delete("/users/:userId", isApiToken('delete:users'), UserController.remove);
+openApiRouter.delete(
+  "/users/:userId",
+  isApiToken("delete:users"),
+  UserController.remove
+);
 
 // Rotas de Respostas Rápidas
 
@@ -1895,7 +2180,11 @@ openApiRouter.delete("/users/:userId", isApiToken('delete:users'), UserControlle
  *       200:
  *         description: Lista de respostas rápidas
  */
-openApiRouter.get("/quickAnswers", isApiToken('read:quickAnswers'), QuickAnswerController.index);
+openApiRouter.get(
+  "/quickAnswers",
+  isApiToken("read:quickAnswers"),
+  QuickAnswerController.index
+);
 
 /**
  * @swagger
@@ -1923,7 +2212,11 @@ openApiRouter.get("/quickAnswers", isApiToken('read:quickAnswers'), QuickAnswerC
  *       200:
  *         description: Resposta rápida criada
  */
-openApiRouter.post("/quickAnswers", isApiToken('create:quickAnswers'), QuickAnswerController.store);
+openApiRouter.post(
+  "/quickAnswers",
+  isApiToken("create:quickAnswers"),
+  QuickAnswerController.store
+);
 
 /**
  * @swagger
@@ -1944,7 +2237,11 @@ openApiRouter.post("/quickAnswers", isApiToken('create:quickAnswers'), QuickAnsw
  *       200:
  *         description: Resposta rápida encontrada
  */
-openApiRouter.get("/quickAnswers/:quickAnswerId", isApiToken('read:quickAnswers'), QuickAnswerController.show);
+openApiRouter.get(
+  "/quickAnswers/:quickAnswerId",
+  isApiToken("read:quickAnswers"),
+  QuickAnswerController.show
+);
 
 /**
  * @swagger
@@ -1965,7 +2262,11 @@ openApiRouter.get("/quickAnswers/:quickAnswerId", isApiToken('read:quickAnswers'
  *       200:
  *         description: Resposta rápida atualizada
  */
-openApiRouter.put("/quickAnswers/:quickAnswerId", isApiToken('update:quickAnswers'), QuickAnswerController.update);
+openApiRouter.put(
+  "/quickAnswers/:quickAnswerId",
+  isApiToken("update:quickAnswers"),
+  QuickAnswerController.update
+);
 
 /**
  * @swagger
@@ -1986,7 +2287,11 @@ openApiRouter.put("/quickAnswers/:quickAnswerId", isApiToken('update:quickAnswer
  *       200:
  *         description: Resposta rápida excluída
  */
-openApiRouter.delete("/quickAnswers/:quickAnswerId", isApiToken('delete:quickAnswers'), QuickAnswerController.remove);
+openApiRouter.delete(
+  "/quickAnswers/:quickAnswerId",
+  isApiToken("delete:quickAnswers"),
+  QuickAnswerController.remove
+);
 
 /**
  * @swagger
@@ -2001,7 +2306,11 @@ openApiRouter.delete("/quickAnswers/:quickAnswerId", isApiToken('delete:quickAns
  *       200:
  *         description: Todas as respostas rápidas excluídas
  */
-openApiRouter.delete("/quickAnswers", isApiToken('delete:quickAnswers'), QuickAnswerController.removeAll);
+openApiRouter.delete(
+  "/quickAnswers",
+  isApiToken("delete:quickAnswers"),
+  QuickAnswerController.removeAll
+);
 
 // Rotas de Grupos do WhatsApp - Participantes
 
@@ -2037,7 +2346,11 @@ openApiRouter.delete("/quickAnswers", isApiToken('delete:quickAnswers'), QuickAn
  *       200:
  *         description: Participantes adicionados
  */
-openApiRouter.post("/groups/:groupId/participants/add", isApiToken('write:groups'), GroupController.addParticipants);
+openApiRouter.post(
+  "/groups/:groupId/participants/add",
+  isApiToken("write:groups"),
+  GroupController.addParticipants
+);
 
 /**
  * @swagger
@@ -2070,7 +2383,11 @@ openApiRouter.post("/groups/:groupId/participants/add", isApiToken('write:groups
  *       200:
  *         description: Participantes removidos
  */
-openApiRouter.post("/groups/:groupId/participants/remove", isApiToken('write:groups'), GroupController.removeParticipants);
+openApiRouter.post(
+  "/groups/:groupId/participants/remove",
+  isApiToken("write:groups"),
+  GroupController.removeParticipants
+);
 
 /**
  * @swagger
@@ -2103,7 +2420,11 @@ openApiRouter.post("/groups/:groupId/participants/remove", isApiToken('write:gro
  *       200:
  *         description: Participantes promovidos
  */
-openApiRouter.post("/groups/:groupId/participants/promote", isApiToken('write:groups'), GroupController.promoteParticipants);
+openApiRouter.post(
+  "/groups/:groupId/participants/promote",
+  isApiToken("write:groups"),
+  GroupController.promoteParticipants
+);
 
 /**
  * @swagger
@@ -2136,7 +2457,11 @@ openApiRouter.post("/groups/:groupId/participants/promote", isApiToken('write:gr
  *       200:
  *         description: Participantes rebaixados
  */
-openApiRouter.post("/groups/:groupId/participants/demote", isApiToken('write:groups'), GroupController.demoteParticipants);
+openApiRouter.post(
+  "/groups/:groupId/participants/demote",
+  isApiToken("write:groups"),
+  GroupController.demoteParticipants
+);
 
 /**
  * @swagger
@@ -2157,7 +2482,11 @@ openApiRouter.post("/groups/:groupId/participants/demote", isApiToken('write:gro
  *       200:
  *         description: Lista de participantes
  */
-openApiRouter.get("/groups/:groupId/participants", isApiToken('read:groups'), GroupController.listParticipants);
+openApiRouter.get(
+  "/groups/:groupId/participants",
+  isApiToken("read:groups"),
+  GroupController.listParticipants
+);
 
 // Rotas de Grupos do WhatsApp - Convites
 
@@ -2180,7 +2509,11 @@ openApiRouter.get("/groups/:groupId/participants", isApiToken('read:groups'), Gr
  *       200:
  *         description: Link de convite
  */
-openApiRouter.get("/groups/:groupId/invite", isApiToken('read:groups'), GroupController.getInvite);
+openApiRouter.get(
+  "/groups/:groupId/invite",
+  isApiToken("read:groups"),
+  GroupController.getInvite
+);
 
 /**
  * @swagger
@@ -2201,7 +2534,11 @@ openApiRouter.get("/groups/:groupId/invite", isApiToken('read:groups'), GroupCon
  *       200:
  *         description: Link revogado
  */
-openApiRouter.post("/groups/:groupId/invite/revoke", isApiToken('write:groups'), GroupController.revokeInvite);
+openApiRouter.post(
+  "/groups/:groupId/invite/revoke",
+  isApiToken("write:groups"),
+  GroupController.revokeInvite
+);
 
 // Rotas de Grupos do WhatsApp - Permissões
 
@@ -2235,7 +2572,11 @@ openApiRouter.post("/groups/:groupId/invite/revoke", isApiToken('write:groups'),
  *       200:
  *         description: Configuração atualizada
  */
-openApiRouter.post("/groups/:groupId/settings/memberAddMode", isApiToken('write:groups'), GroupController.setMemberAddMode);
+openApiRouter.post(
+  "/groups/:groupId/settings/memberAddMode",
+  isApiToken("write:groups"),
+  GroupController.setMemberAddMode
+);
 
 /**
  * @swagger
@@ -2266,7 +2607,11 @@ openApiRouter.post("/groups/:groupId/settings/memberAddMode", isApiToken('write:
  *       200:
  *         description: Modo anúncio configurado
  */
-openApiRouter.post("/groups/:groupId/settings/announcement", isApiToken('write:groups'), GroupController.setAnnouncement);
+openApiRouter.post(
+  "/groups/:groupId/settings/announcement",
+  isApiToken("write:groups"),
+  GroupController.setAnnouncement
+);
 
 /**
  * @swagger
@@ -2297,7 +2642,11 @@ openApiRouter.post("/groups/:groupId/settings/announcement", isApiToken('write:g
  *       200:
  *         description: Restrição configurada
  */
-openApiRouter.post("/groups/:groupId/settings/restrict", isApiToken('write:groups'), GroupController.setRestrict);
+openApiRouter.post(
+  "/groups/:groupId/settings/restrict",
+  isApiToken("write:groups"),
+  GroupController.setRestrict
+);
 
 // Rotas de Grupos do WhatsApp - Informações
 
@@ -2330,7 +2679,11 @@ openApiRouter.post("/groups/:groupId/settings/restrict", isApiToken('write:group
  *       200:
  *         description: Nome alterado
  */
-openApiRouter.post("/groups/:groupId/subject", isApiToken('write:groups'), GroupController.setSubject);
+openApiRouter.post(
+  "/groups/:groupId/subject",
+  isApiToken("write:groups"),
+  GroupController.setSubject
+);
 
 /**
  * @swagger
@@ -2361,7 +2714,11 @@ openApiRouter.post("/groups/:groupId/subject", isApiToken('write:groups'), Group
  *       200:
  *         description: Descrição alterada
  */
-openApiRouter.post("/groups/:groupId/description", isApiToken('write:groups'), GroupController.setDescription);
+openApiRouter.post(
+  "/groups/:groupId/description",
+  isApiToken("write:groups"),
+  GroupController.setDescription
+);
 
 /**
  * @swagger
@@ -2392,7 +2749,11 @@ openApiRouter.post("/groups/:groupId/description", isApiToken('write:groups'), G
  *       200:
  *         description: Foto alterada
  */
-openApiRouter.post("/groups/:groupId/picture", isApiToken('write:groups'), GroupController.setPicture);
+openApiRouter.post(
+  "/groups/:groupId/picture",
+  isApiToken("write:groups"),
+  GroupController.setPicture
+);
 
 /**
  * @swagger
@@ -2413,7 +2774,11 @@ openApiRouter.post("/groups/:groupId/picture", isApiToken('write:groups'), Group
  *       200:
  *         description: Foto removida
  */
-openApiRouter.delete("/groups/:groupId/picture", isApiToken('write:groups'), GroupController.deletePicture);
+openApiRouter.delete(
+  "/groups/:groupId/picture",
+  isApiToken("write:groups"),
+  GroupController.deletePicture
+);
 
 // Rotas de Grupos do WhatsApp - Solicitações de Entrada
 
@@ -2436,7 +2801,11 @@ openApiRouter.delete("/groups/:groupId/picture", isApiToken('write:groups'), Gro
  *       200:
  *         description: Lista de solicitações
  */
-openApiRouter.get("/groups/:groupId/membership/requests", isApiToken('read:groups'), GroupController.listMembershipRequests);
+openApiRouter.get(
+  "/groups/:groupId/membership/requests",
+  isApiToken("read:groups"),
+  GroupController.listMembershipRequests
+);
 
 /**
  * @swagger
@@ -2469,7 +2838,11 @@ openApiRouter.get("/groups/:groupId/membership/requests", isApiToken('read:group
  *       200:
  *         description: Solicitações aprovadas
  */
-openApiRouter.post("/groups/:groupId/membership/approve", isApiToken('write:groups'), GroupController.approveMembershipRequests);
+openApiRouter.post(
+  "/groups/:groupId/membership/approve",
+  isApiToken("write:groups"),
+  GroupController.approveMembershipRequests
+);
 
 /**
  * @swagger
@@ -2502,7 +2875,11 @@ openApiRouter.post("/groups/:groupId/membership/approve", isApiToken('write:grou
  *       200:
  *         description: Solicitações rejeitadas
  */
-openApiRouter.post("/groups/:groupId/membership/reject", isApiToken('write:groups'), GroupController.rejectMembershipRequests);
+openApiRouter.post(
+  "/groups/:groupId/membership/reject",
+  isApiToken("write:groups"),
+  GroupController.rejectMembershipRequests
+);
 
 // Rotas de Grupos do WhatsApp - Outros
 
@@ -2525,7 +2902,11 @@ openApiRouter.post("/groups/:groupId/membership/reject", isApiToken('write:group
  *       200:
  *         description: Saiu do grupo
  */
-openApiRouter.post("/groups/:groupId/leave", isApiToken('write:groups'), GroupController.leaveGroup);
+openApiRouter.post(
+  "/groups/:groupId/leave",
+  isApiToken("write:groups"),
+  GroupController.leaveGroup
+);
 
 // Rotas de Status de Clientes
 
@@ -2542,7 +2923,11 @@ openApiRouter.post("/groups/:groupId/leave", isApiToken('write:groups'), GroupCo
  *       200:
  *         description: Lista de status
  */
-openApiRouter.get("/client-status", isApiToken('read:client-status'), ClientStatusController.index);
+openApiRouter.get(
+  "/client-status",
+  isApiToken("read:client-status"),
+  ClientStatusController.index
+);
 
 /**
  * @swagger
@@ -2570,7 +2955,11 @@ openApiRouter.get("/client-status", isApiToken('read:client-status'), ClientStat
  *       200:
  *         description: Status criado
  */
-openApiRouter.post("/client-status", isApiToken('create:client-status'), ClientStatusController.store);
+openApiRouter.post(
+  "/client-status",
+  isApiToken("create:client-status"),
+  ClientStatusController.store
+);
 
 /**
  * @swagger
@@ -2607,7 +2996,11 @@ openApiRouter.post("/client-status", isApiToken('create:client-status'), ClientS
  *                 total:
  *                   type: integer
  */
-openApiRouter.get("/client-status/statistics", isApiToken('read:client-status'), ClientStatusController.statistics);
+openApiRouter.get(
+  "/client-status/statistics",
+  isApiToken("read:client-status"),
+  ClientStatusController.statistics
+);
 
 /**
  * @swagger
@@ -2628,7 +3021,11 @@ openApiRouter.get("/client-status/statistics", isApiToken('read:client-status'),
  *       200:
  *         description: Status encontrado
  */
-openApiRouter.get("/client-status/:clientStatusId", isApiToken('read:client-status'), ClientStatusController.show);
+openApiRouter.get(
+  "/client-status/:clientStatusId",
+  isApiToken("read:client-status"),
+  ClientStatusController.show
+);
 
 /**
  * @swagger
@@ -2649,7 +3046,11 @@ openApiRouter.get("/client-status/:clientStatusId", isApiToken('read:client-stat
  *       200:
  *         description: Status atualizado
  */
-openApiRouter.put("/client-status/:clientStatusId", isApiToken('update:client-status'), ClientStatusController.update);
+openApiRouter.put(
+  "/client-status/:clientStatusId",
+  isApiToken("update:client-status"),
+  ClientStatusController.update
+);
 
 /**
  * @swagger
@@ -2670,7 +3071,11 @@ openApiRouter.put("/client-status/:clientStatusId", isApiToken('update:client-st
  *       200:
  *         description: Status excluído
  */
-openApiRouter.delete("/client-status/:clientStatusId", isApiToken('delete:client-status'), ClientStatusController.remove);
+openApiRouter.delete(
+  "/client-status/:clientStatusId",
+  isApiToken("delete:client-status"),
+  ClientStatusController.remove
+);
 
 /**
  * @swagger
@@ -2685,7 +3090,11 @@ openApiRouter.delete("/client-status/:clientStatusId", isApiToken('delete:client
  *       200:
  *         description: Todos os status excluídos
  */
-openApiRouter.delete("/client-status", isApiToken('delete:client-status'), ClientStatusController.removeAll);
+openApiRouter.delete(
+  "/client-status",
+  isApiToken("delete:client-status"),
+  ClientStatusController.removeAll
+);
 
 // Rotas de Presença (Indicadores de Digitação/Gravação)
 
@@ -2734,7 +3143,11 @@ openApiRouter.delete("/client-status", isApiToken('delete:client-status'), Clien
  *       500:
  *         description: Erro ao enviar indicador
  */
-openApiRouter.post("/presence/typing/:ticketId", isApiToken('write:presence'), MessageController.sendTypingIndicator);
+openApiRouter.post(
+  "/presence/typing/:ticketId",
+  isApiToken("write:presence"),
+  MessageController.sendTypingIndicator
+);
 
 /**
  * @swagger
@@ -2781,7 +3194,11 @@ openApiRouter.post("/presence/typing/:ticketId", isApiToken('write:presence'), M
  *       500:
  *         description: Erro ao enviar indicador
  */
-openApiRouter.post("/presence/recording/:ticketId", isApiToken('write:presence'), MessageController.sendRecordingIndicator);
+openApiRouter.post(
+  "/presence/recording/:ticketId",
+  isApiToken("write:presence"),
+  MessageController.sendRecordingIndicator
+);
 
 /**
  * @swagger
@@ -2818,7 +3235,11 @@ openApiRouter.post("/presence/recording/:ticketId", isApiToken('write:presence')
  *       500:
  *         description: Erro ao definir presença
  */
-openApiRouter.post("/presence/available/:ticketId", isApiToken('write:presence'), MessageController.setAvailablePresence);
+openApiRouter.post(
+  "/presence/available/:ticketId",
+  isApiToken("write:presence"),
+  MessageController.setAvailablePresence
+);
 
 /**
  * @swagger
@@ -2859,7 +3280,11 @@ openApiRouter.post("/presence/available/:ticketId", isApiToken('write:presence')
  *       404:
  *         description: Mensagem não encontrada
  */
-openApiRouter.put("/messages/:messageId/edit", isApiToken('update:messages'), MessageController.edit);
+openApiRouter.put(
+  "/messages/:messageId/edit",
+  isApiToken("update:messages"),
+  MessageController.edit
+);
 
 /**
  * @swagger
@@ -2887,7 +3312,11 @@ openApiRouter.put("/messages/:messageId/edit", isApiToken('update:messages'), Me
  *       404:
  *         description: Mensagem não encontrada
  */
-openApiRouter.delete("/messages/:messageId", isApiToken('delete:messages'), MessageController.remove);
+openApiRouter.delete(
+  "/messages/:messageId",
+  isApiToken("delete:messages"),
+  MessageController.remove
+);
 
 /**
  * @swagger
@@ -2927,7 +3356,11 @@ openApiRouter.delete("/messages/:messageId", isApiToken('delete:messages'), Mess
  *       403:
  *         description: Sem permissão create:messages
  */
-openApiRouter.post("/messages/:messageId/react", isApiToken('create:messages'), MessageController.reactMessage);
+openApiRouter.post(
+  "/messages/:messageId/react",
+  isApiToken("create:messages"),
+  MessageController.reactMessage
+);
 
 /**
  * @swagger
@@ -2953,7 +3386,11 @@ openApiRouter.post("/messages/:messageId/react", isApiToken('create:messages'), 
  *       403:
  *         description: Sem permissão read:messages
  */
-openApiRouter.get("/messages/:messageId/reactions", isApiToken('read:messages'), MessageController.getReactions);
+openApiRouter.get(
+  "/messages/:messageId/reactions",
+  isApiToken("read:messages"),
+  MessageController.getReactions
+);
 
 /**
  * @swagger
@@ -2994,7 +3431,11 @@ openApiRouter.get("/messages/:messageId/reactions", isApiToken('read:messages'),
  *       403:
  *         description: Sem permissão create:messages
  */
-openApiRouter.post("/messages/forward", isApiToken('create:messages'), MessageController.forwardMessages);
+openApiRouter.post(
+  "/messages/forward",
+  isApiToken("create:messages"),
+  MessageController.forwardMessages
+);
 
 /**
  * @swagger
@@ -3044,7 +3485,11 @@ openApiRouter.post("/messages/forward", isApiToken('create:messages'), MessageCo
  *       403:
  *         description: Sem permissão create:messages
  */
-openApiRouter.post("/messages/:ticketId/poll", isApiToken('create:messages'), MessageController.sendPoll);
+openApiRouter.post(
+  "/messages/:ticketId/poll",
+  isApiToken("create:messages"),
+  MessageController.sendPoll
+);
 
 /**
  * @swagger
@@ -3070,7 +3515,11 @@ openApiRouter.post("/messages/:ticketId/poll", isApiToken('create:messages'), Me
  *       403:
  *         description: Sem permissão update:messages
  */
-openApiRouter.post("/messages/:ticketId/read", isApiToken('update:messages'), MessageController.markAsRead);
+openApiRouter.post(
+  "/messages/:ticketId/read",
+  isApiToken("update:messages"),
+  MessageController.markAsRead
+);
 
 /**
  * @swagger
@@ -3111,7 +3560,11 @@ openApiRouter.post("/messages/:ticketId/read", isApiToken('update:messages'), Me
  *       404:
  *         description: Contato não encontrado
  */
-openApiRouter.post("/contacts/:contactId/block", isApiToken('update:contacts'), ContactController.blockContact);
+openApiRouter.post(
+  "/contacts/:contactId/block",
+  isApiToken("update:contacts"),
+  ContactController.blockContact
+);
 
 /**
  * @swagger
@@ -3152,7 +3605,11 @@ openApiRouter.post("/contacts/:contactId/block", isApiToken('update:contacts'), 
  *       404:
  *         description: Contato não encontrado
  */
-openApiRouter.post("/contacts/:contactId/unblock", isApiToken('update:contacts'), ContactController.unblockContact);
+openApiRouter.post(
+  "/contacts/:contactId/unblock",
+  isApiToken("update:contacts"),
+  ContactController.unblockContact
+);
 
 /**
  * @swagger
@@ -3191,7 +3648,11 @@ openApiRouter.post("/contacts/:contactId/unblock", isApiToken('update:contacts')
  *       403:
  *         description: Sem permissão read:contacts
  */
-openApiRouter.get("/contacts/:contactId/block-status", isApiToken('read:contacts'), ContactController.getBlockStatus);
+openApiRouter.get(
+  "/contacts/:contactId/block-status",
+  isApiToken("read:contacts"),
+  ContactController.getBlockStatus
+);
 
 /**
  * @swagger
@@ -3217,7 +3678,11 @@ openApiRouter.get("/contacts/:contactId/block-status", isApiToken('read:contacts
  *       403:
  *         description: Sem permissão read:contacts
  */
-openApiRouter.get("/contacts/blocked", isApiToken('read:contacts'), ContactController.listBlockedContacts);
+openApiRouter.get(
+  "/contacts/blocked",
+  isApiToken("read:contacts"),
+  ContactController.listBlockedContacts
+);
 
 /**
  * @swagger
@@ -3256,7 +3721,11 @@ openApiRouter.get("/contacts/blocked", isApiToken('read:contacts'), ContactContr
  *       403:
  *         description: Sem permissão read:contacts
  */
-openApiRouter.get("/contacts/:contactId/about", isApiToken('read:contacts'), ContactController.getAbout);
+openApiRouter.get(
+  "/contacts/:contactId/about",
+  isApiToken("read:contacts"),
+  ContactController.getAbout
+);
 
 /**
  * @swagger
@@ -3302,7 +3771,11 @@ openApiRouter.get("/contacts/:contactId/about", isApiToken('read:contacts'), Con
  *       403:
  *         description: Sem permissão read:contacts
  */
-openApiRouter.get("/contacts/:contactId/common-groups", isApiToken('read:contacts'), ContactController.getCommonGroups);
+openApiRouter.get(
+  "/contacts/:contactId/common-groups",
+  isApiToken("read:contacts"),
+  ContactController.getCommonGroups
+);
 
 /**
  * @swagger
@@ -3325,7 +3798,11 @@ openApiRouter.get("/contacts/:contactId/common-groups", isApiToken('read:contact
  *       403:
  *         description: Sem permissão read:contacts
  */
-openApiRouter.get("/contacts/export", isApiToken('read:contacts'), ContactController.exportContacts);
+openApiRouter.get(
+  "/contacts/export",
+  isApiToken("read:contacts"),
+  ContactController.exportContacts
+);
 
 /**
  * @swagger
@@ -3351,7 +3828,11 @@ openApiRouter.get("/contacts/export", isApiToken('read:contacts'), ContactContro
  *       403:
  *         description: Sem permissão read:groups
  */
-openApiRouter.get("/whatsapp/:whatsappId/groups", isApiToken('read:groups'), GroupManagementController.listGroups);
+openApiRouter.get(
+  "/whatsapp/:whatsappId/groups",
+  isApiToken("read:groups"),
+  GroupManagementController.listGroups
+);
 
 /**
  * @swagger
@@ -3405,7 +3886,11 @@ openApiRouter.get("/whatsapp/:whatsappId/groups", isApiToken('read:groups'), Gro
  *       403:
  *         description: Sem permissão write:groups
  */
-openApiRouter.post("/whatsapp/:whatsappId/groups", isApiToken('write:groups'), GroupManagementController.createGroup);
+openApiRouter.post(
+  "/whatsapp/:whatsappId/groups",
+  isApiToken("write:groups"),
+  GroupManagementController.createGroup
+);
 
 /**
  * @swagger
@@ -3454,7 +3939,11 @@ openApiRouter.post("/whatsapp/:whatsappId/groups", isApiToken('write:groups'), G
  *       403:
  *         description: Sem permissão read:groups
  */
-openApiRouter.get("/whatsapp/:whatsappId/groups/:groupId", isApiToken('read:groups'), GroupManagementController.getGroupInfo);
+openApiRouter.get(
+  "/whatsapp/:whatsappId/groups/:groupId",
+  isApiToken("read:groups"),
+  GroupManagementController.getGroupInfo
+);
 
 /**
  * @swagger
@@ -3496,7 +3985,11 @@ openApiRouter.get("/whatsapp/:whatsappId/groups/:groupId", isApiToken('read:grou
  *       403:
  *         description: Sem permissão write:groups
  */
-openApiRouter.put("/whatsapp/:whatsappId/groups/:groupId/name", isApiToken('write:groups'), GroupManagementController.updateGroupName);
+openApiRouter.put(
+  "/whatsapp/:whatsappId/groups/:groupId/name",
+  isApiToken("write:groups"),
+  GroupManagementController.updateGroupName
+);
 
 /**
  * @swagger
@@ -3538,7 +4031,11 @@ openApiRouter.put("/whatsapp/:whatsappId/groups/:groupId/name", isApiToken('writ
  *       403:
  *         description: Sem permissão write:groups
  */
-openApiRouter.put("/whatsapp/:whatsappId/groups/:groupId/description", isApiToken('write:groups'), GroupManagementController.updateGroupDescription);
+openApiRouter.put(
+  "/whatsapp/:whatsappId/groups/:groupId/description",
+  isApiToken("write:groups"),
+  GroupManagementController.updateGroupDescription
+);
 
 /**
  * @swagger
@@ -3582,7 +4079,11 @@ openApiRouter.put("/whatsapp/:whatsappId/groups/:groupId/description", isApiToke
  *       403:
  *         description: Sem permissão write:groups
  */
-openApiRouter.post("/whatsapp/:whatsappId/groups/:groupId/participants/add", isApiToken('write:groups'), GroupManagementController.addParticipants);
+openApiRouter.post(
+  "/whatsapp/:whatsappId/groups/:groupId/participants/add",
+  isApiToken("write:groups"),
+  GroupManagementController.addParticipants
+);
 
 /**
  * @swagger
@@ -3626,7 +4127,11 @@ openApiRouter.post("/whatsapp/:whatsappId/groups/:groupId/participants/add", isA
  *       403:
  *         description: Sem permissão write:groups
  */
-openApiRouter.post("/whatsapp/:whatsappId/groups/:groupId/participants/remove", isApiToken('write:groups'), GroupManagementController.removeParticipants);
+openApiRouter.post(
+  "/whatsapp/:whatsappId/groups/:groupId/participants/remove",
+  isApiToken("write:groups"),
+  GroupManagementController.removeParticipants
+);
 
 /**
  * @swagger
@@ -3670,7 +4175,11 @@ openApiRouter.post("/whatsapp/:whatsappId/groups/:groupId/participants/remove", 
  *       403:
  *         description: Sem permissão write:groups
  */
-openApiRouter.post("/whatsapp/:whatsappId/groups/:groupId/participants/promote", isApiToken('write:groups'), GroupManagementController.promoteParticipants);
+openApiRouter.post(
+  "/whatsapp/:whatsappId/groups/:groupId/participants/promote",
+  isApiToken("write:groups"),
+  GroupManagementController.promoteParticipants
+);
 
 /**
  * @swagger
@@ -3714,7 +4223,11 @@ openApiRouter.post("/whatsapp/:whatsappId/groups/:groupId/participants/promote",
  *       403:
  *         description: Sem permissão write:groups
  */
-openApiRouter.post("/whatsapp/:whatsappId/groups/:groupId/participants/demote", isApiToken('write:groups'), GroupManagementController.demoteParticipants);
+openApiRouter.post(
+  "/whatsapp/:whatsappId/groups/:groupId/participants/demote",
+  isApiToken("write:groups"),
+  GroupManagementController.demoteParticipants
+);
 
 /**
  * @swagger
@@ -3744,7 +4257,11 @@ openApiRouter.post("/whatsapp/:whatsappId/groups/:groupId/participants/demote", 
  *       403:
  *         description: Sem permissão write:groups
  */
-openApiRouter.post("/whatsapp/:whatsappId/groups/:groupId/leave", isApiToken('write:groups'), GroupManagementController.leaveGroup);
+openApiRouter.post(
+  "/whatsapp/:whatsappId/groups/:groupId/leave",
+  isApiToken("write:groups"),
+  GroupManagementController.leaveGroup
+);
 
 /**
  * @swagger
@@ -3781,7 +4298,11 @@ openApiRouter.post("/whatsapp/:whatsappId/groups/:groupId/leave", isApiToken('wr
  *       403:
  *         description: Sem permissão read:groups
  */
-openApiRouter.get("/whatsapp/:whatsappId/groups/:groupId/invite-link", isApiToken('read:groups'), GroupManagementController.getGroupInviteLink);
+openApiRouter.get(
+  "/whatsapp/:whatsappId/groups/:groupId/invite-link",
+  isApiToken("read:groups"),
+  GroupManagementController.getGroupInviteLink
+);
 
 /**
  * @swagger
@@ -3818,7 +4339,11 @@ openApiRouter.get("/whatsapp/:whatsappId/groups/:groupId/invite-link", isApiToke
  *       403:
  *         description: Sem permissão write:groups
  */
-openApiRouter.post("/whatsapp/:whatsappId/groups/:groupId/invite-link/revoke", isApiToken('write:groups'), GroupManagementController.revokeGroupInviteLink);
+openApiRouter.post(
+  "/whatsapp/:whatsappId/groups/:groupId/invite-link/revoke",
+  isApiToken("write:groups"),
+  GroupManagementController.revokeGroupInviteLink
+);
 
 /**
  * @swagger
@@ -3863,7 +4388,11 @@ openApiRouter.post("/whatsapp/:whatsappId/groups/:groupId/invite-link/revoke", i
  *       403:
  *         description: Sem permissão write:groups
  */
-openApiRouter.put("/whatsapp/:whatsappId/groups/:groupId/settings", isApiToken('write:groups'), GroupManagementController.updateGroupSettings);
+openApiRouter.put(
+  "/whatsapp/:whatsappId/groups/:groupId/settings",
+  isApiToken("write:groups"),
+  GroupManagementController.updateGroupSettings
+);
 
 /**
  * @swagger
@@ -3963,7 +4492,11 @@ openApiRouter.put("/auth/refresh", SessionController.update);
  *       401:
  *         description: Token inválido ou sessão expirada
  */
-openApiRouter.delete("/auth/logout", isApiToken('read:profile'), SessionController.remove);
+openApiRouter.delete(
+  "/auth/logout",
+  isApiToken("read:profile"),
+  SessionController.remove
+);
 
 /**
  * @swagger
@@ -4100,7 +4633,11 @@ openApiRouter.post("/auth/reset-password", SessionController.resetPassword);
  *       404:
  *         description: Ticket não encontrado
  */
-openApiRouter.get("/messages/:ticketId", isApiToken("read:messages"), MessageController.index);
+openApiRouter.get(
+  "/messages/:ticketId",
+  isApiToken("read:messages"),
+  MessageController.index
+);
 
 /**
  * @swagger
@@ -4154,7 +4691,11 @@ openApiRouter.get("/messages/:ticketId", isApiToken("read:messages"), MessageCon
  *       404:
  *         description: Ticket não encontrado
  */
-openApiRouter.put("/tickets/:ticketId/toggle-state", isApiToken("update:tickets"), TicketController.toggleState);
+openApiRouter.put(
+  "/tickets/:ticketId/toggle-state",
+  isApiToken("update:tickets"),
+  TicketController.toggleState
+);
 
 /**
  * @swagger
@@ -4204,7 +4745,11 @@ openApiRouter.put("/tickets/:ticketId/toggle-state", isApiToken("update:tickets"
  *       404:
  *         description: Conexão WhatsApp não encontrada
  */
-openApiRouter.post("/whatsapp/:whatsappId/request-pairing-code", isApiToken("update:whatsapp"), WhatsAppController.requestPairingCode);
+openApiRouter.post(
+  "/whatsapp/:whatsappId/request-pairing-code",
+  isApiToken("update:whatsapp"),
+  WhatsAppController.requestPairingCode
+);
 
 const SENSITIVE_KEYS = /^(pass|password|secret|emailPass|smtpPass)/i;
 
@@ -4236,11 +4781,15 @@ const SENSITIVE_KEYS = /^(pass|password|secret|emailPass|smtpPass)/i;
  *       401:
  *         description: Token inválido ou sem permissão
  */
-openApiRouter.get("/settings", isApiToken("read:settings"), async (req, res) => {
-  const settings = await ListSettingsService();
-  const safe = (settings || []).filter(s => !SENSITIVE_KEYS.test(s.key));
-  return res.status(200).json(safe);
-});
+openApiRouter.get(
+  "/settings",
+  isApiToken("read:settings"),
+  async (req, res) => {
+    const settings = await ListSettingsService();
+    const safe = (settings || []).filter(s => !SENSITIVE_KEYS.test(s.key));
+    return res.status(200).json(safe);
+  }
+);
 
 /**
  * @swagger
@@ -4291,14 +4840,18 @@ openApiRouter.get("/settings", isApiToken("read:settings"), async (req, res) => 
  *       401:
  *         description: Token inválido ou sem permissão
  */
-openApiRouter.put("/settings/:settingKey", isApiToken("write:settings"), async (req, res) => {
-  const { settingKey } = req.params;
-  const { value } = req.body;
-  if (SENSITIVE_KEYS.test(settingKey)) {
-    return res.status(400).json({ error: "ERR_SENSITIVE_SETTING" });
+openApiRouter.put(
+  "/settings/:settingKey",
+  isApiToken("write:settings"),
+  async (req, res) => {
+    const { settingKey } = req.params;
+    const { value } = req.body;
+    if (SENSITIVE_KEYS.test(settingKey)) {
+      return res.status(400).json({ error: "ERR_SENSITIVE_SETTING" });
+    }
+    const setting = await UpdateSettingService({ key: settingKey, value });
+    return res.status(200).json(setting);
   }
-  const setting = await UpdateSettingService({ key: settingKey, value });
-  return res.status(200).json(setting);
-});
+);
 
 export default openApiRouter;

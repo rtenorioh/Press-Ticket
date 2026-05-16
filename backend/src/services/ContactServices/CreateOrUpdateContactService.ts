@@ -30,7 +30,8 @@ const CreateOrUpdateContactService = async ({
 }: Request): Promise<Contact> => {
   const io = getIO();
   const digits = String(rawNumber || "").replace(/\D/g, "");
-  const groupJid = rawNumber && rawNumber.includes("@g.us") ? rawNumber : `${digits}@g.us`;
+  const groupJid =
+    rawNumber && rawNumber.includes("@g.us") ? rawNumber : `${digits}@g.us`;
 
   if (isGroup) {
     const candidates = await Contact.findAll({
@@ -39,18 +40,30 @@ const CreateOrUpdateContactService = async ({
 
     let primary: Contact | null = null;
     if (candidates.length) {
-      candidates.sort((a, b) => Number(b.number?.includes("@g.us") ?? false) - Number(a.number?.includes("@g.us") ?? false) || Number(b.isGroup) - Number(a.isGroup));
+      candidates.sort(
+        (a, b) =>
+          Number(b.number?.includes("@g.us") ?? false) -
+            Number(a.number?.includes("@g.us") ?? false) ||
+          Number(b.isGroup) - Number(a.isGroup)
+      );
       primary = candidates[0];
       for (const dup of candidates.slice(1)) {
         if (dup.id !== primary.id) {
-          try { await dup.destroy(); } catch {}
+          try {
+            await dup.destroy();
+          } catch {}
         }
       }
     }
 
     if (primary) {
       const updatedData: Partial<Contact> = {} as any;
-      if (name && name.trim() && primary.name !== name.trim() && !primary.nameManuallyEdited) {
+      if (
+        name &&
+        name.trim() &&
+        primary.name !== name.trim() &&
+        !primary.nameManuallyEdited
+      ) {
         (updatedData as any).name = name.trim();
       }
       if (!primary.isGroup) {
@@ -98,7 +111,12 @@ const CreateOrUpdateContactService = async ({
 
   if (contact) {
     const updatedData: Partial<Contact> = {} as any;
-    if (name && name.trim() && contact.name !== name.trim() && !contact.nameManuallyEdited) {
+    if (
+      name &&
+      name.trim() &&
+      contact.name !== name.trim() &&
+      !contact.nameManuallyEdited
+    ) {
       (updatedData as any).name = name.trim();
     }
     if (profilePicUrl && contact.profilePicUrl !== profilePicUrl) {

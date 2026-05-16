@@ -1,4 +1,8 @@
-import { InferAttributes, InferCreationAttributes, CreationOptional } from "sequelize";
+import {
+  InferAttributes,
+  InferCreationAttributes,
+  CreationOptional
+} from "sequelize";
 import {
   Column,
   CreatedAt,
@@ -11,7 +15,10 @@ import {
 } from "sequelize-typescript";
 
 @Table
-class ErrorLog extends Model<InferAttributes<ErrorLog>, InferCreationAttributes<ErrorLog>> {
+class ErrorLog extends Model<
+  InferAttributes<ErrorLog>,
+  InferCreationAttributes<ErrorLog>
+> {
   @PrimaryKey
   @AutoIncrement
   @Column(DataType.INTEGER)

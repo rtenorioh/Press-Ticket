@@ -1,10 +1,7 @@
 import { logger } from "../../utils/logger";
-import { exec } from "child_process";
-import { promisify } from "util";
 import { Sequelize } from "sequelize";
 import { QueryTypes } from "sequelize";
 
-const execAsync = promisify(exec);
 
 const dbConfig = require("../../config/database");
 
@@ -15,7 +12,7 @@ const sequelize = new Sequelize(
   {
     host: dbConfig.host,
     dialect: dbConfig.dialect,
-    logging: false,
+    logging: false
   }
 );
 
@@ -78,11 +75,11 @@ interface DatabaseInfo {
 }
 
 const formatBytes = (bytes: number): string => {
-  if (bytes === 0) return '0 B';
-  
-  const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+  if (bytes === 0) return "0 B";
+
+  const sizes = ["B", "KB", "MB", "GB", "TB"];
   const i = Math.floor(Math.log(bytes) / Math.log(1024));
-  
+
   return `${parseFloat((bytes / Math.pow(1024, i)).toFixed(2))} ${sizes[i]}`;
 };
 
@@ -116,7 +113,8 @@ export const getDatabaseInfo = async (): Promise<DatabaseInfo> => {
     };
 
     try {
-      const dbSizeResults: any = await sequelize.query(`
+      const dbSizeResults: any = await sequelize.query(
+        `
         SELECT 
           table_schema as 'database',
           SUM(data_length + index_length) as 'size_bytes',
@@ -124,18 +122,21 @@ export const getDatabaseInfo = async (): Promise<DatabaseInfo> => {
         FROM information_schema.tables
         WHERE table_schema = :dbName
         GROUP BY table_schema
-      `, {
-        replacements: { dbName: dbConfig.database },
-        type: QueryTypes.SELECT,
-        plain: true
-      });
+      `,
+        {
+          replacements: { dbName: dbConfig.database },
+          type: QueryTypes.SELECT,
+          plain: true
+        }
+      );
 
       if (dbSizeResults) {
         dbInfo.size.totalBytes = parseInt(dbSizeResults.size_bytes || "0", 10);
         dbInfo.size.total = formatBytes(dbInfo.size.totalBytes);
       }
 
-      const tableSizes: any[] = await sequelize.query(`
+      const tableSizes: any[] = await sequelize.query(
+        `
         SELECT 
           table_name as 'name',
           data_length as 'data_bytes',
@@ -145,10 +146,12 @@ export const getDatabaseInfo = async (): Promise<DatabaseInfo> => {
         FROM information_schema.tables
         WHERE table_schema = :dbName
         ORDER BY (data_length + index_length) DESC
-      `, {
-        replacements: { dbName: dbConfig.database },
-        type: QueryTypes.SELECT
-      });
+      `,
+        {
+          replacements: { dbName: dbConfig.database },
+          type: QueryTypes.SELECT
+        }
+      );
 
       const tableInfos: TableInfo[] = tableSizes.map((table: any) => ({
         name: table.name,
@@ -164,7 +167,8 @@ export const getDatabaseInfo = async (): Promise<DatabaseInfo> => {
 
       let slowQueries: SlowQueryInfo[] = [];
       try {
-        const queryResult = await sequelize.query(`
+        const queryResult = await sequelize.query(
+          `
           SELECT 
             id, 
             start_time, 
@@ -179,28 +183,33 @@ export const getDatabaseInfo = async (): Promise<DatabaseInfo> => {
           WHERE start_time > DATE_SUB(NOW(), INTERVAL 24 HOUR)
           ORDER BY query_time DESC
           LIMIT 10
-        `, {
-          type: QueryTypes.SELECT
-        });
-        
+        `,
+          {
+            type: QueryTypes.SELECT
+          }
+        );
+
         slowQueries = (queryResult as any[]).map(row => ({
           id: Number(row.id || 0),
-          start_time: String(row.start_time || ''),
-          user_host: String(row.user_host || ''),
+          start_time: String(row.start_time || ""),
+          user_host: String(row.user_host || ""),
           query_time: Number(row.query_time || 0),
           lock_time: Number(row.lock_time || 0),
           rows_sent: Number(row.rows_sent || 0),
           rows_examined: Number(row.rows_examined || 0),
-          db: String(row.db || ''),
-          sql_text: String(row.sql_text || '')
+          db: String(row.db || ""),
+          sql_text: String(row.sql_text || "")
         }));
       } catch (error: any) {
-        logger.warn(`Não foi possível obter consultas lentas: ${error.message}`);
+        logger.warn(
+          `Não foi possível obter consultas lentas: ${error.message}`
+        );
       }
 
       dbInfo.performance.slowQueries = slowQueries;
 
-      const statusVariables: any[] = await sequelize.query(`
+      const statusVariables: any[] = await sequelize.query(
+        `
         SHOW GLOBAL STATUS WHERE Variable_name IN (
           'Uptime', 
           'Threads_connected', 
@@ -208,9 +217,11 @@ export const getDatabaseInfo = async (): Promise<DatabaseInfo> => {
           'Questions', 
           'Slow_queries'
         )
-      `, {
-        type: QueryTypes.SELECT
-      });
+      `,
+        {
+          type: QueryTypes.SELECT
+        }
+      );
 
       const statusMap = statusVariables.reduce((acc: any, row: any) => {
         acc[row.Variable_name] = row.Value;
@@ -222,15 +233,28 @@ export const getDatabaseInfo = async (): Promise<DatabaseInfo> => {
       const hours = Math.floor((uptimeSeconds % 86400) / 3600);
       const minutes = Math.floor((uptimeSeconds % 3600) / 60);
       const seconds = uptimeSeconds % 60;
-      
+
       dbInfo.performance.uptime = `${days}d ${hours}h ${minutes}m ${seconds}s`;
       dbInfo.performance.uptimeSeconds = uptimeSeconds;
-      dbInfo.performance.connectionCount = parseInt(statusMap.Threads_connected || "0", 10);
-      dbInfo.performance.totalConnections = parseInt(statusMap.Connections || "0", 10);
-      dbInfo.performance.totalQueries = parseInt(statusMap.Questions || "0", 10);
-      dbInfo.performance.slowQueryCount = parseInt(statusMap.Slow_queries || "0", 10);
+      dbInfo.performance.connectionCount = parseInt(
+        statusMap.Threads_connected || "0",
+        10
+      );
+      dbInfo.performance.totalConnections = parseInt(
+        statusMap.Connections || "0",
+        10
+      );
+      dbInfo.performance.totalQueries = parseInt(
+        statusMap.Questions || "0",
+        10
+      );
+      dbInfo.performance.slowQueryCount = parseInt(
+        statusMap.Slow_queries || "0",
+        10
+      );
 
-      const processlist: ProcessInfo[] = await sequelize.query(`
+      const processlist: ProcessInfo[] = await sequelize.query(
+        `
         SELECT 
           id, 
           user, 
@@ -244,14 +268,17 @@ export const getDatabaseInfo = async (): Promise<DatabaseInfo> => {
         WHERE command != 'Sleep'
         ORDER BY time DESC
         LIMIT 10
-      `, {
-        type: QueryTypes.SELECT
-      });
+      `,
+        {
+          type: QueryTypes.SELECT
+        }
+      );
 
       dbInfo.performance.activeProcesses = processlist;
-
     } catch (error) {
-      logger.error(`Erro ao obter informações detalhadas do banco de dados: ${error}`);
+      logger.error(
+        `Erro ao obter informações detalhadas do banco de dados: ${error}`
+      );
     }
 
     return dbInfo;

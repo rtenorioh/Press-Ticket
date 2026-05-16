@@ -1,4 +1,4 @@
-import { Filterable, Includeable, Op, Sequelize } from "sequelize";
+import { Includeable, Op, Sequelize } from "sequelize";
 import Contact from "../../models/Contact";
 import Tag from "../../models/Tag";
 
@@ -6,7 +6,7 @@ interface Request {
   searchParam?: string;
   pageNumber?: string;
   tags?: number[];
-  isGroup?: string; 
+  isGroup?: string;
   status?: string;
 }
 
@@ -49,10 +49,7 @@ const ListContactsService = async ({
   if (typeof isGroup !== "undefined" && isGroup !== null && isGroup !== "") {
     if (isGroup === "true") {
       whereCondition[Op.and].push({
-        [Op.or]: [
-          { isGroup: true },
-          { number: { [Op.like]: `%@g.us` } }
-        ]
+        [Op.or]: [{ isGroup: true }, { number: { [Op.like]: `%@g.us` } }]
       });
     } else if (isGroup === "false") {
       whereCondition[Op.and].push({
@@ -77,7 +74,7 @@ const ListContactsService = async ({
       attributes: ["id", "name", "color"]
     }
   ];
-  
+
   if (Array.isArray(tags) && tags.length > 0) {
     includeCondition[0] = {
       model: Tag,

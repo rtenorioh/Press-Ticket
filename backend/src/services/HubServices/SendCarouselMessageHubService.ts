@@ -1,4 +1,9 @@
-import { createNotificameClient, resolveChannel, resolveContactId, NotificameMessagePayload } from "../../libs/notificameClient";
+import {
+  createNotificameClient,
+  resolveChannel,
+  resolveContactId,
+  NotificameMessagePayload
+} from "../../libs/notificameClient";
 import Contact from "../../models/Contact";
 import CreateMessageService from "./CreateHubMessageService";
 import { showHubToken } from "../../helpers/showHubToken";
@@ -33,18 +38,24 @@ export const SendCarouselMessageService = async (
 
   const missingTitle = cards.findIndex(c => !c.title?.trim());
   if (missingTitle !== -1) {
-    throw new Error(`Card ${missingTitle + 1} está sem título. Todos os cards precisam de título.`);
+    throw new Error(
+      `Card ${missingTitle + 1} está sem título. Todos os cards precisam de título.`
+    );
   }
 
   const channel = resolveChannel(contact);
   if (!channel || channel === "webchat") {
-    logger.error("SendCarouselMessageService: canal incompatível para envio de carrossel.");
+    logger.error(
+      "SendCarouselMessageService: canal incompatível para envio de carrossel."
+    );
     throw new Error("Envio de carrossel não suportado neste canal.");
   }
 
   const contactId = resolveContactId(contact, channel);
   if (!contactId) {
-    throw new Error(`SendCarouselMessageService: ID do destinatário não encontrado para canal ${channel}`);
+    throw new Error(
+      `SendCarouselMessageService: ID do destinatário não encontrado para canal ${channel}`
+    );
   }
 
   const elements = cards.map(card => ({
@@ -52,8 +63,16 @@ export const SendCarouselMessageService = async (
     image_url: card.media || undefined,
     subtitle: card.text || undefined,
     buttons: [
-      ...(card.buttons ?? []).map(b => ({ type: 'web_url', url: b.url || '#', title: b.label })),
-      ...(card.quickReplyButtons ?? []).map(b => ({ type: 'web_url', url: b.url || '#', title: b.label }))
+      ...(card.buttons ?? []).map(b => ({
+        type: "web_url",
+        url: b.url || "#",
+        title: b.label
+      })),
+      ...(card.quickReplyButtons ?? []).map(b => ({
+        type: "web_url",
+        url: b.url || "#",
+        title: b.label
+      }))
     ]
   }));
 
@@ -63,17 +82,22 @@ export const SendCarouselMessageService = async (
   const payload: NotificameMessagePayload = {
     from: connection.qrcode,
     to: contactId,
-    contents: [{
-      type: 'template',
-      template: {
-        template_type: 'generic',
-        elements
+    contents: [
+      {
+        type: "template",
+        template: {
+          template_type: "generic",
+          elements
+        }
       }
-    }]
+    ]
   };
 
   try {
-    const response = await client.post(`/v1/channels/${channel}/messages`, payload);
+    const response = await client.post(
+      `/v1/channels/${channel}/messages`,
+      payload
+    );
     const data = response.data;
 
     const newMessage = await CreateMessageService({
@@ -86,7 +110,9 @@ export const SendCarouselMessageService = async (
 
     return newMessage;
   } catch (error) {
-    logger.error(`SendCarouselMessageService: erro ao enviar carousel Hub: ${error}`);
+    logger.error(
+      `SendCarouselMessageService: erro ao enviar carousel Hub: ${error}`
+    );
     throw error;
   }
 };

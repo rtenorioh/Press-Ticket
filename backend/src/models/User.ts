@@ -1,5 +1,10 @@
 import { compare, hash } from "bcryptjs";
-import { InferAttributes, InferCreationAttributes, CreationOptional, NonAttribute } from "sequelize";
+import {
+  InferAttributes,
+  InferCreationAttributes,
+  CreationOptional,
+  NonAttribute
+} from "sequelize";
 import {
   AutoIncrement,
   BeforeCreate,

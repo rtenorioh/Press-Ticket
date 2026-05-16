@@ -43,11 +43,15 @@ export const StartWhatsAppSession = async (
           await new Promise(resolve => setTimeout(resolve, RETRY_DELAY_MS));
         }
       } else {
-        logger.error(`[SESSION] Erro ao iniciar sessão ${whatsapp.name}: ${errMsg}`);
+        logger.error(
+          `[SESSION] Erro ao iniciar sessão ${whatsapp.name}: ${errMsg}`
+        );
         return;
       }
     }
   }
 
-  logger.error(`[SESSION] Sessão ${whatsapp.name} falhou após ${MAX_RETRIES} tentativas.`);
+  logger.error(
+    `[SESSION] Sessão ${whatsapp.name} falhou após ${MAX_RETRIES} tentativas.`
+  );
 };

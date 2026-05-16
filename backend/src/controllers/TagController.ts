@@ -12,9 +12,13 @@ import ShowService from "../services/TagServices/ShowService";
 import SimpleListService from "../services/TagServices/SimpleListService";
 import SyncTagService from "../services/TagServices/SyncTagsService";
 import UpdateService from "../services/TagServices/UpdateService";
-import { createActivityLog, ActivityActions, EntityTypes } from "../services/ActivityLogService";
-import GetClientIp from "../helpers/GetClientIp";
+import {
+  createActivityLog,
+  ActivityActions,
+  EntityTypes
+} from "../services/ActivityLogService";
 import { logger } from "../utils/logger";
+import GetClientIp from "../helpers/GetClientIp";
 
 type IndexQuery = {
   searchParam?: string;
@@ -56,10 +60,8 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
 
   const logUserId = req.user?.id || 1;
 
-  const clientIp = GetClientIp(req);
-
   await createActivityLog({
-    userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
+    userId: typeof logUserId === "string" ? parseInt(logUserId) : logUserId,
     action: ActivityActions.CREATE,
     description: `Tag ${tag.name} criada`,
     entityType: EntityTypes.TAG,
@@ -92,7 +94,7 @@ export const update = async (
   res: Response
 ): Promise<Response> => {
   try {
-    const isApiRequest = req.originalUrl.includes('/v1/');
+    const isApiRequest = req.originalUrl.includes("/v1/");
 
     if (!isApiRequest && req.user && req.user.profile !== "admin") {
       throw new AppError("ERR_NO_PERMISSION", 403);
@@ -102,17 +104,18 @@ export const update = async (
     const tagData = req.body;
 
     if (!tagData.name && !tagData.color) {
-      throw new AppError("É necessário fornecer pelo menos um campo para atualização (nome ou cor)", 400);
+      throw new AppError(
+        "É necessário fornecer pelo menos um campo para atualização (nome ou cor)",
+        400
+      );
     }
 
     const tag = await UpdateService({ tagData, id: tagId });
 
     const logUserId = req.user?.id || 1;
 
-    const clientIp = GetClientIp(req);
-
     await createActivityLog({
-      userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
+      userId: typeof logUserId === "string" ? parseInt(logUserId) : logUserId,
       action: ActivityActions.UPDATE,
       description: `Tag ${tag.name} atualizada`,
       entityType: EntityTypes.TAG,
@@ -148,10 +151,8 @@ export const remove = async (
 
   const logUserId = req.user?.id || 1;
 
-  const clientIp = GetClientIp(req);
-
   await createActivityLog({
-    userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
+    userId: typeof logUserId === "string" ? parseInt(logUserId) : logUserId,
     action: ActivityActions.DELETE,
     description: `Tag ${tagToDelete.name} excluída`,
     entityType: EntityTypes.TAG,
@@ -175,15 +176,13 @@ export const removeAll = async (
   req: Request,
   res: Response
 ): Promise<Response> => {
-
   await DeleteAllService();
 
   const logUserId = req.user?.id || 1;
-
   const clientIp = GetClientIp(req);
 
   await createActivityLog({
-    userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
+    userId: typeof logUserId === "string" ? parseInt(logUserId) : logUserId,
     action: ActivityActions.DELETE,
     description: `Todas as tags foram excluídas`,
     entityType: EntityTypes.TAG,
@@ -206,7 +205,10 @@ export const list = async (req: Request, res: Response): Promise<Response> => {
   return res.json(tags);
 };
 
-export const syncTags = async (req: Request, res: Response): Promise<Response> => {
+export const syncTags = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
   const data = req.body;
 
   try {

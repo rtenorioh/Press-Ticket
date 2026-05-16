@@ -4,7 +4,7 @@ module.exports = {
   up: (queryInterface: QueryInterface) => {
     return queryInterface.addColumn("Queues", "absenceMessage", {
       type: DataTypes.TEXT,
-      allowNull: true,
+      allowNull: true
     });
   },
 

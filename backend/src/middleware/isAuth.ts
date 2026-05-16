@@ -15,7 +15,11 @@ interface TokenPayload {
   exp: number;
 }
 
-const isAuth = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+const isAuth = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
   const authHeader = req.headers.authorization;
 
   if (!authHeader) {

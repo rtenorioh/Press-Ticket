@@ -11,7 +11,9 @@ import { msgsd, hour, date, control } from "../../helpers/Mustache";
 const DEFAULT_TEMPLATE =
   "🔔 *Press Ticket - Novo Atendimento*\n\n{{ms}}, *{{user_name}}*!\nUm novo ticket foi direcionado para seu setor.\n\n*Ticket:* #{{ticket_id}}\n*Setor:* {{queue}}\n*Contato:* {{contact}}\n*Data:* {{date}} {{hour}}\n*Link:* {{link}}";
 
-export const NotifyQueueUsersService = async (ticket: Ticket): Promise<void> => {
+export const NotifyQueueUsersService = async (
+  ticket: Ticket
+): Promise<void> => {
   try {
     const { queueId, whatsappId } = ticket;
 
@@ -33,7 +35,7 @@ export const NotifyQueueUsersService = async (ticket: Ticket): Promise<void> => 
           model: Queue,
           as: "queues",
           where: { id: queueId },
-          attributes: [],
+          attributes: []
         }
       ],
       attributes: ["id", "name", "whatsappNumber"]
@@ -43,7 +45,9 @@ export const NotifyQueueUsersService = async (ticket: Ticket): Promise<void> => 
 
     let template = DEFAULT_TEMPLATE;
     try {
-      const setting = await Setting.findOne({ where: { key: "notifyQueueUsersMessage" } });
+      const setting = await Setting.findOne({
+        where: { key: "notifyQueueUsersMessage" }
+      });
       if (setting && setting.value && setting.value.trim() !== "") {
         template = setting.value;
       }

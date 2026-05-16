@@ -1,6 +1,5 @@
 import AppError from "../../errors/AppError";
 import GetWbotMessage from "../../helpers/GetWbotMessage";
-import GetTicketWbot from "../../helpers/GetTicketWbot";
 import Message from "../../models/Message";
 import Ticket from "../../models/Ticket";
 import { logger } from "../../utils/logger";
@@ -14,7 +13,7 @@ interface ForwardMessageData {
 const ForwardWhatsAppMessage = async ({
   messageId,
   targetChatId,
-  ticket
+  ticket: _ticket
 }: ForwardMessageData): Promise<any> => {
   const message = await Message.findByPk(messageId, {
     include: [
@@ -30,8 +29,6 @@ const ForwardWhatsAppMessage = async ({
     throw new AppError("No message found with this ID.");
   }
 
-  const wbot = await GetTicketWbot(message.ticket);
-
   let formattedChatId = targetChatId;
   if (!formattedChatId.includes("@")) {
     formattedChatId = `${formattedChatId}@c.us`;
@@ -42,7 +39,9 @@ const ForwardWhatsAppMessage = async ({
     const forwardedMsg = await wbotMessage.forward(formattedChatId);
     return forwardedMsg;
   } catch (err) {
-    logger.error(`[FORWARD] Erro ao encaminhar mensagem via API nativa: ${err}`);
+    logger.error(
+      `[FORWARD] Erro ao encaminhar mensagem via API nativa: ${err}`
+    );
     throw new AppError("ERR_FORWARD_WAPP_MSG");
   }
 };

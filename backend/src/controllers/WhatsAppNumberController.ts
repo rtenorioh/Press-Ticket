@@ -16,7 +16,10 @@ export const checkNumber = async (
   const schema = Yup.object().shape({
     number: Yup.string()
       .required("Número é obrigatório")
-      .matches(/^\d+$/, "Formato de número inválido. Apenas números são permitidos.")
+      .matches(
+        /^\d+$/,
+        "Formato de número inválido. Apenas números são permitidos."
+      )
   });
 
   try {
@@ -29,7 +32,7 @@ export const checkNumber = async (
     const result = await CheckWhatsAppNumberService(number);
     return res.status(200).json(result);
   } catch (error) {
-    return res.status(500).json({ 
+    return res.status(500).json({
       error: true,
       message: error.message,
       number

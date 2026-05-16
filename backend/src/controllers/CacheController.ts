@@ -36,13 +36,13 @@ export const flushCache = async (
       CacheService.flush();
       break;
     default:
-      return res.status(400).json({ 
-        error: "Invalid cache type. Use: contacts, messages, or all" 
+      return res.status(400).json({
+        error: "Invalid cache type. Use: contacts, messages, or all"
       });
   }
 
-  return res.json({ 
-    message: `Cache ${type} flushed successfully` 
+  return res.json({
+    message: `Cache ${type} flushed successfully`
   });
 };
 
@@ -51,9 +51,9 @@ export const getCacheKeys = async (
   res: Response
 ): Promise<Response> => {
   const { prefix } = req.query;
-  
+
   let keys = CacheService.keys();
-  
+
   if (prefix) {
     keys = keys.filter(key => key.startsWith(prefix as string));
   }

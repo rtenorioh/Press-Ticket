@@ -32,7 +32,6 @@ import TicketLabel from "../models/TicketLabel";
 import Email from "../models/Email";
 import EmailAttachment from "../models/EmailAttachment";
 
-// eslint-disable-next-line
 const dbConfig = require("../config/database");
 
 const sequelize = new Sequelize(dbConfig);

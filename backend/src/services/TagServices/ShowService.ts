@@ -7,11 +7,11 @@ import { logger } from "../../utils/logger";
 const TagService = async (id: string | number): Promise<Tag> => {
   try {
     const tagExists = await Tag.findByPk(id);
-    
+
     if (!tagExists) {
       throw new AppError("ERR_NO_TAG_FOUND", 404);
     }
-    
+
     const tag = await Tag.findByPk(id, {
       include: [
         {
@@ -28,7 +28,7 @@ const TagService = async (id: string | number): Promise<Tag> => {
       },
       group: ["Tag.id"]
     });
-    
+
     return tag!;
   } catch (error) {
     if (error.message !== "ERR_NO_TAG_FOUND") {

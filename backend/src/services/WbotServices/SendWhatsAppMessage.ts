@@ -9,7 +9,11 @@ import Ticket from "../../models/Ticket";
 import formatBody from "../../helpers/Mustache";
 import { logger } from "../../utils/logger";
 
-async function findMessageDirectlyFromWA(wbot: any, ticket: Ticket, quotedMsgId: string): Promise<any | null> {
+async function findMessageDirectlyFromWA(
+  wbot: any,
+  ticket: Ticket,
+  quotedMsgId: string
+): Promise<any | null> {
   try {
     const groupId = ticket.contact.number!.includes("@")
       ? ticket.contact.number!
@@ -46,11 +50,19 @@ const SendWhatsAppMessage = async ({
 }: Request): Promise<WbotMessage> => {
   const wbot = await GetTicketWbot(ticket);
   const contactNumber = ticket.contact.number!;
-  const groupId = contactNumber.includes("@") ? contactNumber : `${contactNumber}@g.us`;
-  const userId = contactNumber.includes("@") ? contactNumber : `${contactNumber}@c.us`;
+  const groupId = contactNumber.includes("@")
+    ? contactNumber
+    : `${contactNumber}@g.us`;
+  const userId = contactNumber.includes("@")
+    ? contactNumber
+    : `${contactNumber}@c.us`;
 
   if (quotedMsg && ticket.isGroup) {
-    const originalMessage = await findMessageDirectlyFromWA(wbot, ticket, quotedMsg.id);
+    const originalMessage = await findMessageDirectlyFromWA(
+      wbot,
+      ticket,
+      quotedMsg.id
+    );
 
     if (originalMessage) {
       try {
@@ -58,13 +70,16 @@ const SendWhatsAppMessage = async ({
           const chat = await wbot.getChatById(groupId);
           await chat.sendStateTyping();
           await new Promise(resolve => setTimeout(resolve, 400));
-        } catch (e) {
-        }
+        } catch (_e) {}
         const replyOptions: any = {};
         if (mentions && mentions.length > 0) {
           replyOptions.mentions = mentions;
         }
-        const sentMessage = await originalMessage.reply(formatBody(body, ticket), undefined, replyOptions);
+        const sentMessage = await originalMessage.reply(
+          formatBody(body, ticket),
+          undefined,
+          replyOptions
+        );
 
         await ticket.update({ lastMessage: body });
         await ticket.reload();
@@ -77,16 +92,19 @@ const SendWhatsAppMessage = async ({
             const chat = await wbot.getChatById(groupId);
             await chat.sendStateTyping();
             await new Promise(resolve => setTimeout(resolve, 400));
-          } catch (e) {}
+          } catch (_e) {}
           const payload = formatBody(body, ticket);
           let sentMessage: any;
-          const sendOpts: any = { linkPreview: false, quotedMessageId: originalMessage.id._serialized };
+          const sendOpts: any = {
+            linkPreview: false,
+            quotedMessageId: originalMessage.id._serialized
+          };
           if (mentions && mentions.length > 0) {
             sendOpts.mentions = mentions;
           }
           try {
             sentMessage = await wbot.sendMessage(groupId, payload, sendOpts);
-          } catch (e1) {
+          } catch (_e1) {
             await new Promise(r => setTimeout(r, 500));
             sentMessage = await wbot.sendMessage(groupId, payload, sendOpts);
           }
@@ -104,7 +122,7 @@ const SendWhatsAppMessage = async ({
       const chat = await wbot.getChatById(groupId);
       await chat.sendStateTyping();
       await new Promise(resolve => setTimeout(resolve, 400));
-    } catch (e) {}
+    } catch (_e) {}
     const payload = formatBody(body, ticket);
     let sentMessage: any;
     const sendOpts: any = { linkPreview: false };
@@ -113,7 +131,7 @@ const SendWhatsAppMessage = async ({
     }
     try {
       sentMessage = await wbot.sendMessage(groupId, payload, sendOpts);
-    } catch (e1) {
+    } catch (_e1) {
       await new Promise(r => setTimeout(r, 500));
       sentMessage = await wbot.sendMessage(groupId, payload, sendOpts);
     }
@@ -129,7 +147,7 @@ const SendWhatsAppMessage = async ({
         const chat = await wbot.getChatById(groupId);
         await chat.sendStateTyping();
         await new Promise(resolve => setTimeout(resolve, 400));
-      } catch (e) {}
+      } catch (_e) {}
       const payload = formatBody(body, ticket);
       let sentMessage: any;
       const sendOpts: any = { linkPreview: false };
@@ -138,7 +156,7 @@ const SendWhatsAppMessage = async ({
       }
       try {
         sentMessage = await wbot.sendMessage(groupId, payload, sendOpts);
-      } catch (e1) {
+      } catch (_e1) {
         await new Promise(r => setTimeout(r, 500));
         sentMessage = await wbot.sendMessage(groupId, payload, sendOpts);
       }
@@ -158,7 +176,8 @@ const SendWhatsAppMessage = async ({
         userId: ticket.userId
       };
 
-      const CreateMessageService = require("../MessageServices/CreateMessageService").default;
+      const CreateMessageService =
+        require("../MessageServices/CreateMessageService").default;
 
       try {
         await CreateMessageService({ messageData });
@@ -201,19 +220,23 @@ const SendWhatsAppMessage = async ({
     let sentMessage: any;
     let lidError = false;
 
-    const preFn = new Function('pnId', 'lidId', [
-      'return (async function() {',
-      '  var ids = [pnId, lidId];',
-      '  for (var i = 0; i < ids.length; i++) {',
-      '    try {',
-      '      var wid = window.require("WAWebWidFactory").createWid(ids[i]);',
-      '      var chatResult = await window.require("WAWebFindChatAction").findOrCreateLatestChat(wid);',
-      '      var chat = chatResult && chatResult.chat ? chatResult.chat : chatResult;',
-      '      if (chat) { await window.require("WAWebCmd").Cmd.openChatBottom({ chat: chat }); break; }',
-      '    } catch(_) {}',
-      '  }',
-      '})();'
-    ].join('\n'));
+    const preFn = new Function(
+      "pnId",
+      "lidId",
+      [
+        "return (async function() {",
+        "  var ids = [pnId, lidId];",
+        "  for (var i = 0; i < ids.length; i++) {",
+        "    try {",
+        '      var wid = window.require("WAWebWidFactory").createWid(ids[i]);',
+        '      var chatResult = await window.require("WAWebFindChatAction").findOrCreateLatestChat(wid);',
+        "      var chat = chatResult && chatResult.chat ? chatResult.chat : chatResult;",
+        '      if (chat) { await window.require("WAWebCmd").Cmd.openChatBottom({ chat: chat }); break; }',
+        "    } catch(_) {}",
+        "  }",
+        "})();"
+      ].join("\n")
+    );
 
     const lidBase = (ticket.contact as any).numberLid || ticket.contact.number;
     const lidUserId = `${lidBase}@lid`;
@@ -221,12 +244,14 @@ const SendWhatsAppMessage = async ({
     try {
       await (wbot as any).pupPage.evaluate(preFn, userId, lidUserId);
       await new Promise(r => setTimeout(r, 2000));
-    } catch (_) {}
+    } catch (__) {}
 
     try {
       sentMessage = await wbot.sendMessage(userId, payload, sendOptions);
     } catch (e: any) {
-      lidError = e?.message?.includes("No LID for user") || String(e).includes("No LID for user");
+      lidError =
+        e?.message?.includes("No LID for user") ||
+        String(e).includes("No LID for user");
       if (!lidError) throw e;
     }
 
@@ -249,7 +274,8 @@ const SendWhatsAppMessage = async ({
       userId: ticket.userId
     };
 
-    const CreateMessageService = require("../MessageServices/CreateMessageService").default;
+    const CreateMessageService =
+      require("../MessageServices/CreateMessageService").default;
 
     try {
       await CreateMessageService({ messageData });

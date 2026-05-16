@@ -7,6 +7,10 @@ const hubChannelRoutes = express.Router();
 
 hubChannelRoutes.post("/hub-channel/", isAuth, ChannelController.store);
 hubChannelRoutes.get("/hub-channel/", isAuth, ChannelController.index);
-hubChannelRoutes.post("/hub-channel/resubscribe/:whatsappId", isAuth, ChannelController.resubscribe);
+hubChannelRoutes.post(
+  "/hub-channel/resubscribe/:whatsappId",
+  isAuth,
+  ChannelController.resubscribe
+);
 
 export default hubChannelRoutes;

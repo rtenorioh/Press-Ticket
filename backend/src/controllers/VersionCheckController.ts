@@ -24,7 +24,9 @@ interface GitCommit {
 
 const getLocalGitSha = async (): Promise<string | null> => {
   try {
-    const { stdout } = await execAsync("git rev-parse HEAD", { cwd: PROJECT_ROOT });
+    const { stdout } = await execAsync("git rev-parse HEAD", {
+      cwd: PROJECT_ROOT
+    });
     return stdout.trim();
   } catch {
     logger.warn("Não foi possível obter o SHA do git local");
@@ -35,7 +37,7 @@ const getLocalGitSha = async (): Promise<string | null> => {
 const buildGithubHeaders = (): Record<string, string> => {
   const headers: Record<string, string> = {
     Accept: "application/vnd.github.v3+json",
-    "User-Agent": "Press-Ticket",
+    "User-Agent": "Press-Ticket"
   };
   const token = (process.env.GITHUB_TOKEN ?? "").trim();
   if (token && token !== "undefined") {
@@ -54,7 +56,10 @@ const compareVersions = (versionA: string, versionB: string): number => {
   return 0;
 };
 
-export const checkVersion = async (_req: Request, res: Response): Promise<Response> => {
+export const checkVersion = async (
+  _req: Request,
+  res: Response
+): Promise<Response> => {
   logger.info("[version-check] Iniciando verificação de versão...");
 
   // 1. SHA local via git
@@ -80,7 +85,9 @@ export const checkVersion = async (_req: Request, res: Response): Promise<Respon
     logger.info(`[version-check] Release mais recente: ${latestReleaseTag}`);
   } catch (err: any) {
     const status = err?.response?.status;
-    logger.error(`[version-check] Falha ao obter release do GitHub (HTTP ${status ?? "sem resposta"}): ${err.message}`);
+    logger.error(
+      `[version-check] Falha ao obter release do GitHub (HTTP ${status ?? "sem resposta"}): ${err.message}`
+    );
   }
 
   // 3. Commits pendentes (compare tag...HEAD no GitHub)
@@ -89,7 +96,9 @@ export const checkVersion = async (_req: Request, res: Response): Promise<Respon
 
   if (latestReleaseTag) {
     try {
-      logger.info(`[version-check] Comparando ${latestReleaseTag}...HEAD no GitHub...`);
+      logger.info(
+        `[version-check] Comparando ${latestReleaseTag}...HEAD no GitHub...`
+      );
       const { data: comparison } = await axios.get(
         `https://api.github.com/repos/rtenorioh/Press-Ticket/compare/${latestReleaseTag}...HEAD`,
         { headers, timeout: 15000 }
@@ -103,12 +112,14 @@ export const checkVersion = async (_req: Request, res: Response): Promise<Respon
           message: commit.commit.message.split("\n")[0],
           author: commit.commit.author.name,
           date: commit.commit.author.date,
-          url: commit.html_url,
+          url: commit.html_url
         }));
       logger.info(`[version-check] Commits pendentes: ${commitsBehind}`);
     } catch (err: any) {
       const status = err?.response?.status;
-      logger.error(`[version-check] Falha ao comparar commits (HTTP ${status ?? "sem resposta"}): ${err.message}`);
+      logger.error(
+        `[version-check] Falha ao comparar commits (HTTP ${status ?? "sem resposta"}): ${err.message}`
+      );
     }
   }
 
@@ -123,10 +134,10 @@ export const checkVersion = async (_req: Request, res: Response): Promise<Respon
     versionComparison === null
       ? "unknown"
       : versionComparison < 0
-      ? "outdated"
-      : versionComparison === 0
-      ? "updated"
-      : "ahead";
+        ? "outdated"
+        : versionComparison === 0
+          ? "updated"
+          : "ahead";
 
   return res.status(200).json({
     localVersion: systemVersion,
@@ -140,20 +151,27 @@ export const checkVersion = async (_req: Request, res: Response): Promise<Respon
     versionStatus,
     isLinux: os.platform() === "linux",
     platform: os.platform(),
-    githubAvailable: latestReleaseTag !== null,
+    githubAvailable: latestReleaseTag !== null
   });
 };
 
-export const runSystemUpdate = async (req: Request, res: Response): Promise<Response> => {
+export const runSystemUpdate = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
   try {
     const io = getIO();
-    const { updateOS = false, updateBrowser = false, sudoPassword = "" } = req.body;
+    const {
+      updateOS = false,
+      updateBrowser = false,
+      sudoPassword = ""
+    } = req.body;
 
     const projectName = path.basename(PROJECT_ROOT);
     const backendPath = path.join(PROJECT_ROOT, "backend");
     const frontendPath = path.join(PROJECT_ROOT, "frontend");
 
-    const osAnswer      = updateOS      ? "s" : "n";
+    const osAnswer = updateOS ? "s" : "n";
     const browserAnswer = updateBrowser ? "s" : "n";
 
     setImmediate(async () => {
@@ -171,43 +189,57 @@ export const runSystemUpdate = async (req: Request, res: Response): Promise<Resp
           new Promise((resolve, reject) => {
             io.emit("systemUpdateLog", {
               type: "warning",
-              message: "⚙️ Instalando dependência 'expect'... Aguarde.",
+              message: "⚙️ Instalando dependência 'expect'... Aguarde."
             });
 
-            const install = spawn("sudo", ["-S", "apt-get", "install", "-y", "expect"], {
-              shell: false,
-            });
+            const install = spawn(
+              "sudo",
+              ["-S", "apt-get", "install", "-y", "expect"],
+              {
+                shell: false
+              }
+            );
 
             install.stdin.write(`${sudoPassword}\n`);
             install.stdin.end();
 
             install.stdout.on("data", (data: Buffer) => {
               const line = data.toString().trim();
-              if (line) io.emit("systemUpdateLog", { type: "stdout", message: line });
+              if (line)
+                io.emit("systemUpdateLog", { type: "stdout", message: line });
             });
 
             install.stderr.on("data", (data: Buffer) => {
-              const filtered = data.toString()
+              const filtered = data
+                .toString()
                 .split("\n")
-                .filter((l: string) =>
-                  !l.includes("[sudo] password") &&
-                  !l.includes("password for") &&
-                  l.trim() !== ""
+                .filter(
+                  (l: string) =>
+                    !l.includes("[sudo] password") &&
+                    !l.includes("password for") &&
+                    l.trim() !== ""
                 )
                 .join("\n")
                 .trim();
-              if (filtered) io.emit("systemUpdateLog", { type: "stderr", message: filtered });
+              if (filtered)
+                io.emit("systemUpdateLog", {
+                  type: "stderr",
+                  message: filtered
+                });
             });
 
             install.on("close", (code: number | null) => {
               if (code === 0) {
                 io.emit("systemUpdateLog", {
                   type: "stdout",
-                  message: "✅ 'expect' instalado com sucesso. Prosseguindo com a atualização...",
+                  message:
+                    "✅ 'expect' instalado com sucesso. Prosseguindo com a atualização..."
                 });
                 resolve();
               } else {
-                reject(new Error(`Instalação do expect falhou com código ${code}`));
+                reject(
+                  new Error(`Instalação do expect falhou com código ${code}`)
+                );
               }
             });
 
@@ -219,7 +251,7 @@ export const runSystemUpdate = async (req: Request, res: Response): Promise<Resp
         } catch (err: any) {
           io.emit("systemUpdateLog", {
             type: "error",
-            message: `❌ Falha ao instalar 'expect': ${err.message}. Execute manualmente: sudo apt-get install -y expect`,
+            message: `❌ Falha ao instalar 'expect': ${err.message}. Execute manualmente: sudo apt-get install -y expect`
           });
           return;
         }
@@ -227,13 +259,19 @@ export const runSystemUpdate = async (req: Request, res: Response): Promise<Resp
 
       const ts = Date.now();
       const scriptPath = path.join(PROJECT_ROOT, `pressticket-update-${ts}.sh`);
-      const expectScriptPath = path.join(PROJECT_ROOT, `pressticket-expect-${ts}.exp`);
+      const expectScriptPath = path.join(
+        PROJECT_ROOT,
+        `pressticket-expect-${ts}.exp`
+      );
 
       io.emit("systemUpdateLog", {
         type: "stdout",
-        message: `📁 Diretório detectado: ${PROJECT_ROOT} (${projectName})\n`,
+        message: `📁 Diretório detectado: ${PROJECT_ROOT} (${projectName})\n`
       });
-      io.emit("systemUpdateLog", { type: "stdout", message: "Baixando script de atualização...\n" });
+      io.emit("systemUpdateLog", {
+        type: "stdout",
+        message: "Baixando script de atualização...\n"
+      });
 
       const download = spawn(
         "curl",
@@ -245,7 +283,7 @@ export const runSystemUpdate = async (req: Request, res: Response): Promise<Resp
         if (dlCode !== 0) {
           io.emit("systemUpdateLog", {
             type: "error",
-            message: "❌ Falha ao baixar o script de atualização.",
+            message: "❌ Falha ao baixar o script de atualização."
           });
           return;
         }
@@ -254,7 +292,10 @@ export const runSystemUpdate = async (req: Request, res: Response): Promise<Resp
         try {
           scriptContent = fs.readFileSync(scriptPath, "utf-8");
         } catch {
-          io.emit("systemUpdateLog", { type: "error", message: "❌ Falha ao ler o script baixado." });
+          io.emit("systemUpdateLog", {
+            type: "error",
+            message: "❌ Falha ao ler o script baixado."
+          });
           return;
         }
 
@@ -291,27 +332,27 @@ export const runSystemUpdate = async (req: Request, res: Response): Promise<Resp
           "",
           "expect {",
           "    -re {[Pp]assword.*:} {",
-          "        send -- [format \"%s\\r\" $sudoPass]",
+          '        send -- [format "%s\\r" $sudoPass]',
           "        exp_continue",
           "    }",
           "    -re {sistema operacional antes de continuar} {",
-          "        send -- [format \"%s\\r\" $osAns]",
+          '        send -- [format "%s\\r" $osAns]',
           "        exp_continue",
           "    }",
           "    -re {Deseja atualizar o Node} {",
-          "        send -- \"n\\r\"",
+          '        send -- "n\\r"',
           "        exp_continue",
           "    }",
           "    -re {Deseja atualizar o Google Chrome} {",
-          "        send -- [format \"%s\\r\" $chromeAns]",
+          '        send -- [format "%s\\r" $chromeAns]',
           "        exp_continue",
           "    }",
           "    -re {Deseja instalar o Google Chrome} {",
-          "        send -- [format \"%s\\r\" $chromeAns]",
+          '        send -- [format "%s\\r" $chromeAns]',
           "        exp_continue",
           "    }",
           "    eof",
-          "}",
+          "}"
         ].join("\n");
 
         try {
@@ -320,14 +361,20 @@ export const runSystemUpdate = async (req: Request, res: Response): Promise<Resp
           fs.writeFileSync(expectScriptPath, expectScript);
           fs.chmodSync(expectScriptPath, "700");
         } catch {
-          io.emit("systemUpdateLog", { type: "error", message: "❌ Falha ao preparar o script." });
+          io.emit("systemUpdateLog", {
+            type: "error",
+            message: "❌ Falha ao preparar o script."
+          });
           return;
         }
 
-        io.emit("systemUpdateLog", { type: "stdout", message: "📝 Script preparado. Iniciando...\n" });
         io.emit("systemUpdateLog", {
           type: "stdout",
-          message: `🔧 Respostas configuradas — SO: ${osAnswer} | Chrome: ${browserAnswer}`,
+          message: "📝 Script preparado. Iniciando...\n"
+        });
+        io.emit("systemUpdateLog", {
+          type: "stdout",
+          message: `🔧 Respostas configuradas — SO: ${osAnswer} | Chrome: ${browserAnswer}`
         });
 
         let hasError = false;
@@ -346,19 +393,26 @@ export const runSystemUpdate = async (req: Request, res: Response): Promise<Resp
             UPDATE_SCRIPT_PATH: scriptPath,
             UPDATE_SUDO_PASSWORD: sudoPassword,
             UPDATE_OS_ANSWER: osAnswer,
-            UPDATE_BROWSER_ANSWER: browserAnswer,
-          },
+            UPDATE_BROWSER_ANSWER: browserAnswer
+          }
         });
 
         update.stdout.on("data", (data: Buffer) => {
           const lines = data.toString().split("\n");
           lines.forEach((line: string) => {
             const trimmed = line.trim();
-            if (!trimmed || trimmed === "s" || trimmed === "n" || trimmed === "^@") return;
+            if (
+              !trimmed ||
+              trimmed === "s" ||
+              trimmed === "n" ||
+              trimmed === "^@"
+            )
+              return;
             if (trimmed.includes("RESTART PM2")) {
               io.emit("systemUpdateLog", {
                 type: "warning",
-                message: "⏳ Reiniciando os serviços PM2... O sistema ficará indisponível por alguns instantes. Aguarde.",
+                message:
+                  "⏳ Reiniciando os serviços PM2... O sistema ficará indisponível por alguns instantes. Aguarde."
               });
             }
             io.emit("systemUpdateLog", { type: "stdout", message: trimmed });
@@ -373,10 +427,11 @@ export const runSystemUpdate = async (req: Request, res: Response): Promise<Resp
           }
           const filtered = message
             .split("\n")
-            .filter((line: string) =>
-              !line.includes("[sudo] password") &&
-              !line.includes("password for") &&
-              line.trim() !== ""
+            .filter(
+              (line: string) =>
+                !line.includes("[sudo] password") &&
+                !line.includes("password for") &&
+                line.trim() !== ""
             )
             .join("\n")
             .trim();
@@ -386,29 +441,37 @@ export const runSystemUpdate = async (req: Request, res: Response): Promise<Resp
         });
 
         update.on("close", (exitCode: number | null) => {
-          try { fs.unlinkSync(scriptPath); } catch {}
-          try { fs.unlinkSync(expectScriptPath); } catch {}
+          try {
+            fs.unlinkSync(scriptPath);
+          } catch {}
+          try {
+            fs.unlinkSync(expectScriptPath);
+          } catch {}
           if (exitCode === 0 && !hasError) {
             io.emit("systemUpdateLog", {
               type: "success",
-              message: "✅ Atualização concluída com sucesso! Reinicie a página.",
+              message:
+                "✅ Atualização concluída com sucesso! Reinicie a página."
             });
           } else if (exitCode === 0 && hasError) {
             io.emit("systemUpdateLog", {
               type: "warning",
-              message: "⚠️ Atualização concluída com avisos. Verifique os itens marcados em laranja acima.",
+              message:
+                "⚠️ Atualização concluída com avisos. Verifique os itens marcados em laranja acima."
             });
           } else {
             io.emit("systemUpdateLog", {
               type: "error",
-              message: `❌ Processo encerrado com código ${exitCode}`,
+              message: `❌ Processo encerrado com código ${exitCode}`
             });
           }
         });
       });
     });
 
-    return res.status(202).json({ success: true, message: "Atualização iniciada" });
+    return res
+      .status(202)
+      .json({ success: true, message: "Atualização iniciada" });
   } catch (err: any) {
     logger.error(`Erro ao executar atualização: ${err.message}`);
     return res.status(500).json({ success: false, error: err.message });

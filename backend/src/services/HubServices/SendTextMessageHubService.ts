@@ -1,4 +1,9 @@
-import { createNotificameClient, resolveChannel, resolveContactId, NotificameMessagePayload } from "../../libs/notificameClient";
+import {
+  createNotificameClient,
+  resolveChannel,
+  resolveContactId,
+  NotificameMessagePayload
+} from "../../libs/notificameClient";
 import Contact from "../../models/Contact";
 import CreateMessageService from "./CreateHubMessageService";
 import { showHubToken } from "../../helpers/showHubToken";
@@ -14,13 +19,17 @@ export const SendTextMessageService = async (
 ) => {
   const channel = resolveChannel(contact);
   if (!channel) {
-    logger.error("SendTextMessageService: nenhum canal disponível para este contato.");
+    logger.error(
+      "SendTextMessageService: nenhum canal disponível para este contato."
+    );
     throw new Error("Nenhum canal disponível para este contato.");
   }
 
   const contactId = resolveContactId(contact, channel);
   if (!contactId) {
-    throw new Error(`SendTextMessageService: ID do destinatário não encontrado para canal ${channel}`);
+    throw new Error(
+      `SendTextMessageService: ID do destinatário não encontrado para canal ${channel}`
+    );
   }
 
   const hubToken = await showHubToken();
@@ -29,11 +38,14 @@ export const SendTextMessageService = async (
   const payload: NotificameMessagePayload = {
     from: connection.qrcode,
     to: contactId,
-    contents: [{ type: 'text', text: message }]
+    contents: [{ type: "text", text: message }]
   };
 
   try {
-    const response = await client.post(`/v1/channels/${channel}/messages`, payload);
+    const response = await client.post(
+      `/v1/channels/${channel}/messages`,
+      payload
+    );
     const data = response.data;
 
     const newMessage = await CreateMessageService({
@@ -46,7 +58,9 @@ export const SendTextMessageService = async (
 
     return newMessage;
   } catch (error) {
-    logger.error(`SendTextMessageService: erro ao enviar mensagem Hub: ${error}`);
+    logger.error(
+      `SendTextMessageService: erro ao enviar mensagem Hub: ${error}`
+    );
     throw error;
   }
 };

@@ -2,7 +2,10 @@ import { Request, Response } from "express";
 import PollVoteService from "../services/PollVoteService";
 import AppError from "../errors/AppError";
 
-export const getVotesSummary = async (req: Request, res: Response): Promise<Response> => {
+export const getVotesSummary = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
   const { pollMessageId } = req.params;
 
   if (!pollMessageId) {
@@ -18,7 +21,10 @@ export const getVotesSummary = async (req: Request, res: Response): Promise<Resp
   return res.json(summary);
 };
 
-export const getVotes = async (req: Request, res: Response): Promise<Response> => {
+export const getVotes = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
   const { pollMessageId } = req.params;
 
   if (!pollMessageId) {

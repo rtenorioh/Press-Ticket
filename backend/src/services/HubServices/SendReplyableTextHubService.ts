@@ -1,4 +1,9 @@
-import { createNotificameClient, resolveChannel, resolveContactId, NotificameMessagePayload } from "../../libs/notificameClient";
+import {
+  createNotificameClient,
+  resolveChannel,
+  resolveContactId,
+  NotificameMessagePayload
+} from "../../libs/notificameClient";
 import Contact from "../../models/Contact";
 import CreateMessageService from "./CreateHubMessageService";
 import { showHubToken } from "../../helpers/showHubToken";
@@ -28,35 +33,41 @@ export const SendReplyableTextService = async (
 
   const channel = resolveChannel(contact);
   if (!channel || channel === "webchat") {
-    logger.error("SendReplyableTextService: requer canal facebook, instagram ou telegram.");
+    logger.error(
+      "SendReplyableTextService: requer canal facebook, instagram ou telegram."
+    );
     throw new Error("Envio de respostas rápidas não suportado neste canal.");
   }
 
   const contactId = resolveContactId(contact, channel);
   if (!contactId) {
-    throw new Error(`SendReplyableTextService: ID do destinatário não encontrado para canal ${channel}`);
+    throw new Error(
+      `SendReplyableTextService: ID do destinatário não encontrado para canal ${channel}`
+    );
   }
 
   const hubToken = await showHubToken();
   const client = createNotificameClient(hubToken);
 
   // Instagram comment reply: use reply_text with messsageId (3 "s" — typo intencional da API)
-  const isInstagramCommentReply = channel === 'instagram' && !!commentMessageId;
+  const isInstagramCommentReply = channel === "instagram" && !!commentMessageId;
 
   const contents = isInstagramCommentReply
-    ? [{ type: 'reply_text' as const, messsageId: commentMessageId, text }]
-    : [{
-        type: 'template' as const,
-        template: {
-          template_type: 'button',
-          text,
-          buttons: quickReplyButtons.map(b => ({
-            type: 'postback',
-            payload: b.label,
-            title: b.label
-          }))
+    ? [{ type: "reply_text" as const, messsageId: commentMessageId, text }]
+    : [
+        {
+          type: "template" as const,
+          template: {
+            template_type: "button",
+            text,
+            buttons: quickReplyButtons.map(b => ({
+              type: "postback",
+              payload: b.label,
+              title: b.label
+            }))
+          }
         }
-      }];
+      ];
 
   if (!isInstagramCommentReply && !quickReplyButtons?.length) {
     throw new Error("Informe pelo menos um botão de resposta rápida.");
@@ -69,7 +80,10 @@ export const SendReplyableTextService = async (
   };
 
   try {
-    const response = await client.post(`/v1/channels/${channel}/messages`, payload);
+    const response = await client.post(
+      `/v1/channels/${channel}/messages`,
+      payload
+    );
     const data = response.data;
 
     const newMessage = await CreateMessageService({
@@ -83,8 +97,11 @@ export const SendReplyableTextService = async (
     return newMessage;
   } catch (error: any) {
     const errBody = error?.response?.data || error?.response?.body;
-    logger.error(`SendReplyableTextService: erro ao enviar replyable-text Hub: ${error?.message || String(error)}`);
-    if (errBody) logger.error(`Hub API response body: ${JSON.stringify(errBody)}`);
+    logger.error(
+      `SendReplyableTextService: erro ao enviar replyable-text Hub: ${error?.message || String(error)}`
+    );
+    if (errBody)
+      logger.error(`Hub API response body: ${JSON.stringify(errBody)}`);
     throw error;
   }
 };

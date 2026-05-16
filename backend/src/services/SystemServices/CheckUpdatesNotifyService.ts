@@ -38,7 +38,9 @@ const buildMessage = (result: UpdateResult): string => {
   }
 
   if (result.wwjsNeedsUpdate) {
-    lines.push(`*whatsapp-web.js:* v${result.wwjsCurrent} ➜ v${result.wwjsLatest}`);
+    lines.push(
+      `*whatsapp-web.js:* v${result.wwjsCurrent} ➜ v${result.wwjsLatest}`
+    );
   }
 
   lines.push("\nAcesse o painel para aplicar as atualizações.");
@@ -79,7 +81,9 @@ export const CheckUpdatesNotifyService = async (): Promise<void> => {
 
     const whatsappId = await getActiveWhatsappId();
     if (!whatsappId) {
-      logger.warn("[CheckUpdates] Nenhuma conexão WhatsApp ativa para enviar notificações.");
+      logger.warn(
+        "[CheckUpdates] Nenhuma conexão WhatsApp ativa para enviar notificações."
+      );
       return;
     }
 
@@ -93,7 +97,9 @@ export const CheckUpdatesNotifyService = async (): Promise<void> => {
     );
 
     if (eligibleUsers.length === 0) {
-      logger.info("[CheckUpdates] Nenhum masteradmin com whatsappNumber para notificar.");
+      logger.info(
+        "[CheckUpdates] Nenhum masteradmin com whatsappNumber para notificar."
+      );
       return;
     }
 
@@ -111,7 +117,9 @@ export const CheckUpdatesNotifyService = async (): Promise<void> => {
       });
     }
 
-    logger.info(`[CheckUpdates] ${eligibleUsers.length} masteradmin(s) notificado(s).`);
+    logger.info(
+      `[CheckUpdates] ${eligibleUsers.length} masteradmin(s) notificado(s).`
+    );
   } catch (err: any) {
     logger.error(`[CheckUpdates] Erro no serviço: ${err.message || err}`);
   }

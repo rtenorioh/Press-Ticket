@@ -1,8 +1,6 @@
 import { getWbot } from "../../libs/wbot";
 import { logger } from "../../utils/logger";
 import AppError from "../../errors/AppError";
-import Contact from "../../models/Contact";
-import Ticket from "../../models/Ticket";
 
 interface CreateGroupData {
   whatsappId: number;
@@ -48,7 +46,9 @@ class GroupManagementService {
       const wbot = getWbot(whatsappId);
 
       if (participants.length < 1) {
-        throw new AppError("É necessário pelo menos 1 participante para criar um grupo");
+        throw new AppError(
+          "É necessário pelo menos 1 participante para criar um grupo"
+        );
       }
 
       const formattedParticipants = participants.map(p => {
@@ -86,7 +86,8 @@ class GroupManagementService {
         .filter((p: any) => p.isAdmin || p.isSuperAdmin)
         .map((p: any) => p.id._serialized);
 
-      const owner = participants.find((p: any) => p.isSuperAdmin)?.id._serialized || "";
+      const owner =
+        participants.find((p: any) => p.isSuperAdmin)?.id._serialized || "";
 
       return {
         id: groupChat.id._serialized,
@@ -99,7 +100,9 @@ class GroupManagementService {
         size: participants.length
       };
     } catch (err) {
-      logger.error(`[GROUP_MANAGEMENT] Erro ao obter informações do grupo: ${err}`);
+      logger.error(
+        `[GROUP_MANAGEMENT] Erro ao obter informações do grupo: ${err}`
+      );
       throw new AppError(`Erro ao obter informações do grupo: ${err}`);
     }
   }
@@ -121,7 +124,9 @@ class GroupManagementService {
 
       await chat.setSubject(name);
     } catch (err) {
-      logger.error(`[GROUP_MANAGEMENT] Erro ao atualizar nome do grupo: ${err}`);
+      logger.error(
+        `[GROUP_MANAGEMENT] Erro ao atualizar nome do grupo: ${err}`
+      );
       throw new AppError(`Erro ao atualizar nome do grupo: ${err}`);
     }
   }
@@ -143,7 +148,9 @@ class GroupManagementService {
 
       await chat.setDescription(description);
     } catch (err) {
-      logger.error(`[GROUP_MANAGEMENT] Erro ao atualizar descrição do grupo: ${err}`);
+      logger.error(
+        `[GROUP_MANAGEMENT] Erro ao atualizar descrição do grupo: ${err}`
+      );
       throw new AppError(`Erro ao atualizar descrição do grupo: ${err}`);
     }
   }
@@ -170,7 +177,9 @@ class GroupManagementService {
 
       return result;
     } catch (err) {
-      logger.error(`[GROUP_MANAGEMENT] Erro ao adicionar participantes: ${err}`);
+      logger.error(
+        `[GROUP_MANAGEMENT] Erro ao adicionar participantes: ${err}`
+      );
       throw new AppError(`Erro ao adicionar participantes: ${err}`);
     }
   }
@@ -266,7 +275,10 @@ class GroupManagementService {
     }
   }
 
-  async getGroupInviteLink(whatsappId: number, groupId: string): Promise<string> {
+  async getGroupInviteLink(
+    whatsappId: number,
+    groupId: string
+  ): Promise<string> {
     try {
       const wbot = getWbot(whatsappId);
       const chat: any = await wbot.getChatById(groupId);
@@ -285,7 +297,10 @@ class GroupManagementService {
     }
   }
 
-  async revokeGroupInviteLink(whatsappId: number, groupId: string): Promise<string> {
+  async revokeGroupInviteLink(
+    whatsappId: number,
+    groupId: string
+  ): Promise<string> {
     try {
       const wbot = getWbot(whatsappId);
       const chat: any = await wbot.getChatById(groupId);
@@ -299,7 +314,9 @@ class GroupManagementService {
 
       return newInviteLink;
     } catch (err) {
-      logger.error(`[GROUP_MANAGEMENT] Erro ao revogar link de convite: ${err}`);
+      logger.error(
+        `[GROUP_MANAGEMENT] Erro ao revogar link de convite: ${err}`
+      );
       throw new AppError(`Erro ao revogar link de convite: ${err}`);
     }
   }
@@ -326,34 +343,43 @@ class GroupManagementService {
 
             try {
               if (groupChat.participants) {
-                groupData.participantsCount = Array.isArray(groupChat.participants)
+                groupData.participantsCount = Array.isArray(
+                  groupChat.participants
+                )
                   ? groupChat.participants.length
                   : 0;
               }
-            } catch (e) {
-              logger.warn(`[GROUP_MANAGEMENT] Erro ao obter participantes do grupo ${groupData.id}`);
+            } catch (_e) {
+              logger.warn(
+                `[GROUP_MANAGEMENT] Erro ao obter participantes do grupo ${groupData.id}`
+              );
             }
 
             try {
               groupData.unreadCount = groupChat.unreadCount || 0;
-            } catch (e) {
-              logger.warn(`[GROUP_MANAGEMENT] Erro ao obter unreadCount do grupo ${groupData.id}`);
+            } catch (_e) {
+              logger.warn(
+                `[GROUP_MANAGEMENT] Erro ao obter unreadCount do grupo ${groupData.id}`
+              );
             }
 
             try {
               groupData.timestamp = groupChat.timestamp || null;
-            } catch (e) {
-              logger.warn(`[GROUP_MANAGEMENT] Erro ao obter timestamp do grupo ${groupData.id}`);
+            } catch (_e) {
+              logger.warn(
+                `[GROUP_MANAGEMENT] Erro ao obter timestamp do grupo ${groupData.id}`
+              );
             }
 
             groups.push(groupData);
           }
         } catch (chatErr) {
-          logger.warn(`[GROUP_MANAGEMENT] Erro ao processar chat individual: ${chatErr}`);
+          logger.warn(
+            `[GROUP_MANAGEMENT] Erro ao processar chat individual: ${chatErr}`
+          );
           continue;
         }
       }
-
 
       return groups;
     } catch (err) {
@@ -378,7 +404,6 @@ class GroupManagementService {
         throw new AppError("O ID fornecido não é de um grupo");
       }
 
-
       if (settings.messagesAdminsOnly !== undefined) {
         await chat.setMessagesAdminsOnly(settings.messagesAdminsOnly);
       }
@@ -386,9 +411,10 @@ class GroupManagementService {
       if (settings.editGroupInfoAdminsOnly !== undefined) {
         await chat.setInfoAdminsOnly(settings.editGroupInfoAdminsOnly);
       }
-
     } catch (err) {
-      logger.error(`[GROUP_MANAGEMENT] Erro ao atualizar configurações do grupo: ${err}`);
+      logger.error(
+        `[GROUP_MANAGEMENT] Erro ao atualizar configurações do grupo: ${err}`
+      );
       throw new AppError(`Erro ao atualizar configurações do grupo: ${err}`);
     }
   }

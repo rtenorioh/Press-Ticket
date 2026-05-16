@@ -6,11 +6,11 @@ import { logger } from "../../utils/logger";
 const ShowService = async (id: string | number): Promise<ClientStatus> => {
   try {
     const statusExists = await ClientStatus.findByPk(id);
-    
+
     if (!statusExists) {
       throw new AppError("ERR_NO_CLIENT_STATUS_FOUND", 404);
     }
-    
+
     const clientStatus = await ClientStatus.findByPk(id, {
       attributes: {
         include: [
@@ -25,7 +25,7 @@ const ShowService = async (id: string | number): Promise<ClientStatus> => {
         ]
       }
     });
-    
+
     return clientStatus!;
   } catch (error) {
     if (error.message !== "ERR_NO_CLIENT_STATUS_FOUND") {

@@ -9,7 +9,14 @@ import { logger } from "../../utils/logger";
 import { getIO } from "../../libs/socket";
 
 export interface IContent {
-  type: "text" | "image" | "audio" | "video" | "file" | "location" | "reply_text";
+  type:
+    | "text"
+    | "image"
+    | "audio"
+    | "video"
+    | "file"
+    | "location"
+    | "reply_text";
   text?: string;
   url?: string;
   fileUrl?: string;
@@ -29,20 +36,6 @@ export interface HubInMessage {
   timestamp: string;
   subscriptionId: string;
   channel:
-  | "telegram"
-  | "whatsapp"
-  | "facebook"
-  | "instagram"
-  | "sms"
-  | "email"
-  | "webchat";
-  direction: "IN";
-  message: {
-    id: string;
-    from: string;
-    to: string;
-    direction: "IN";
-    channel:
     | "telegram"
     | "whatsapp"
     | "facebook"
@@ -50,6 +43,20 @@ export interface HubInMessage {
     | "sms"
     | "email"
     | "webchat";
+  direction: "IN";
+  message: {
+    id: string;
+    from: string;
+    to: string;
+    direction: "IN";
+    channel:
+      | "telegram"
+      | "whatsapp"
+      | "facebook"
+      | "instagram"
+      | "sms"
+      | "email"
+      | "webchat";
     visitor: {
       name: string;
       firstName: string;
@@ -72,13 +79,13 @@ export interface HubConfirmationSentMessage {
   timestamp: string;
   subscriptionId: string;
   channel:
-  | "telegram"
-  | "whatsapp"
-  | "facebook"
-  | "instagram"
-  | "sms"
-  | "email"
-  | "webchat";
+    | "telegram"
+    | "whatsapp"
+    | "facebook"
+    | "instagram"
+    | "sms"
+    | "email"
+    | "webchat";
   messageId: string;
   contentIndex: number;
   messageStatus: {
@@ -102,14 +109,12 @@ const verifySentMessageStatus = (message: HubConfirmationSentMessage) => {
   return false;
 };
 
-// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 const HubMessageListener = async (
   message: any | HubInMessage | HubConfirmationSentMessage,
   whatsapp: Whatsapp,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   medias: Express.Multer.File[]
 ) => {
-
   if (message.direction === "IN") {
     message.fromMe = false;
   }
@@ -184,7 +189,11 @@ const HubMessageListener = async (
     const textCaption = contents.find(c => c.type === "text")?.text || "";
     const firstContent = contents[0];
     let caption: string;
-    if (!firstContent || firstContent.type === "text" || firstContent.type === "reply_text") {
+    if (
+      !firstContent ||
+      firstContent.type === "text" ||
+      firstContent.type === "reply_text"
+    ) {
       caption = textCaption;
     } else if (firstContent.type === "image") {
       caption = textCaption || "📷 Imagem";
@@ -231,7 +240,6 @@ const HubMessageListener = async (
         });
     }
 
-
     if (contents[0]?.type === "text" || contents[0]?.type === "reply_text") {
       await CreateMessageService({
         id,
@@ -261,7 +269,9 @@ const HubMessageListener = async (
       if (loc.name) parts.push(loc.name);
       if (loc.address) parts.push(loc.address);
       if (loc.latitude != null && loc.longitude != null) {
-        parts.push(`https://maps.google.com/?q=${loc.latitude},${loc.longitude}`);
+        parts.push(
+          `https://maps.google.com/?q=${loc.latitude},${loc.longitude}`
+        );
       }
       await CreateMessageService({
         id,

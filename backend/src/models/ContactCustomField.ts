@@ -1,4 +1,9 @@
-import { InferAttributes, InferCreationAttributes, CreationOptional, NonAttribute } from "sequelize";
+import {
+  InferAttributes,
+  InferCreationAttributes,
+  CreationOptional,
+  NonAttribute
+} from "sequelize";
 import {
   Table,
   Column,
@@ -14,7 +19,10 @@ import {
 import Contact from "./Contact";
 
 @Table
-class ContactCustomField extends Model<InferAttributes<ContactCustomField>, InferCreationAttributes<ContactCustomField>> {
+class ContactCustomField extends Model<
+  InferAttributes<ContactCustomField>,
+  InferCreationAttributes<ContactCustomField>
+> {
   @PrimaryKey
   @AutoIncrement
   @Column(DataType.INTEGER)

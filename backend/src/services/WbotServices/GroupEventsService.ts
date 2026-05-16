@@ -64,7 +64,6 @@ class GroupEventsService {
       };
 
       io.emit(`whatsapp-${data.whatsappId}:groupEvent`, eventPayload);
-
     } catch (error) {
       logger.error(`[GROUP_EVENT] Error registering event: ${error}`);
     }
@@ -130,7 +129,9 @@ class GroupEventsService {
       });
 
       if (existingMessage) {
-        logger.warn(`[GROUP_EVENT] Mensagem duplicada detectada e ignorada: "${messageBody}"`);
+        logger.warn(
+          `[GROUP_EVENT] Mensagem duplicada detectada e ignorada: "${messageBody}"`
+        );
         return;
       }
 
@@ -154,7 +155,10 @@ class GroupEventsService {
           { model: Contact, as: "contact" },
           { model: (await import("../../models/Queue")).default, as: "queue" },
           { model: (await import("../../models/User")).default, as: "user" },
-          { model: (await import("../../models/Whatsapp")).default, as: "whatsapp" }
+          {
+            model: (await import("../../models/Whatsapp")).default,
+            as: "whatsapp"
+          }
         ]
       });
 
@@ -170,20 +174,23 @@ class GroupEventsService {
           contact
         });
 
-      io.to(ticket.status)
-        .to("notification")
-        .emit(`ticket`, {
-          action: "update",
-          ticket
-        });
-
+      io.to(ticket.status).to("notification").emit(`ticket`, {
+        action: "update",
+        ticket
+      });
     } catch (error) {
       logger.error(`[GROUP_EVENT] Error creating system message: ${error}`);
     }
   }
 
   private formatEventMessage(data: GroupEventData): string {
-    const { eventType, participantName, newValue, performedByName, performedBy } = data;
+    const {
+      eventType,
+      participantName,
+      newValue,
+      performedByName,
+      performedBy
+    } = data;
 
     switch (eventType) {
       case "PARTICIPANT_ADDED":
@@ -252,7 +259,9 @@ class GroupEventsService {
 
   public setupGroupListeners(wbot: any, whatsappId: number): void {
     if (this.activeListeners.has(whatsappId)) {
-      logger.warn(`[GROUP_EVENT] Listeners already active for WhatsApp ${whatsappId}, skipping...`);
+      logger.warn(
+        `[GROUP_EVENT] Listeners already active for WhatsApp ${whatsappId}, skipping...`
+      );
       return;
     }
 
@@ -294,10 +303,11 @@ class GroupEventsService {
                 action: "update",
                 contact: groupContact
               });
-
             }
           } catch (err) {
-            logger.error(`[GROUP_EVENT] Erro ao atualizar nome do contato: ${err}`);
+            logger.error(
+              `[GROUP_EVENT] Erro ao atualizar nome do contato: ${err}`
+            );
           }
         } else if (notification.type === "description") {
           await this.registerEvent({
@@ -342,9 +352,12 @@ class GroupEventsService {
             let participantName = participantId;
             try {
               const contact = await wbot.getContactById(participantId);
-              participantName = contact?.name || contact?.pushname || participantId;
-            } catch (e) {
-              logger.warn(`[GROUP_EVENT] Could not get participant name: ${participantId}`);
+              participantName =
+                contact?.name || contact?.pushname || participantId;
+            } catch (_e) {
+              logger.warn(
+                `[GROUP_EVENT] Could not get participant name: ${participantId}`
+              );
             }
 
             await this.registerEvent({
@@ -362,9 +375,12 @@ class GroupEventsService {
             let participantName = participantId;
             try {
               const contact = await wbot.getContactById(participantId);
-              participantName = contact?.name || contact?.pushname || participantId;
-            } catch (e) {
-              logger.warn(`[GROUP_EVENT] Could not get participant name: ${participantId}`);
+              participantName =
+                contact?.name || contact?.pushname || participantId;
+            } catch (_e) {
+              logger.warn(
+                `[GROUP_EVENT] Could not get participant name: ${participantId}`
+              );
             }
 
             await this.registerEvent({
@@ -382,9 +398,12 @@ class GroupEventsService {
             let participantName = participantId;
             try {
               const contact = await wbot.getContactById(participantId);
-              participantName = contact?.name || contact?.pushname || participantId;
-            } catch (e) {
-              logger.warn(`[GROUP_EVENT] Could not get participant name: ${participantId}`);
+              participantName =
+                contact?.name || contact?.pushname || participantId;
+            } catch (_e) {
+              logger.warn(
+                `[GROUP_EVENT] Could not get participant name: ${participantId}`
+              );
             }
 
             await this.registerEvent({
@@ -402,9 +421,12 @@ class GroupEventsService {
             let participantName = participantId;
             try {
               const contact = await wbot.getContactById(participantId);
-              participantName = contact?.name || contact?.pushname || participantId;
-            } catch (e) {
-              logger.warn(`[GROUP_EVENT] Could not get participant name: ${participantId}`);
+              participantName =
+                contact?.name || contact?.pushname || participantId;
+            } catch (_e) {
+              logger.warn(
+                `[GROUP_EVENT] Could not get participant name: ${participantId}`
+              );
             }
 
             await this.registerEvent({
@@ -431,9 +453,12 @@ class GroupEventsService {
           let participantName = participantId;
           try {
             const contact = await wbot.getContactById(participantId);
-            participantName = contact?.name || contact?.pushname || participantId;
-          } catch (e) {
-            logger.warn(`[GROUP_EVENT] Could not get participant name: ${participantId}`);
+            participantName =
+              contact?.name || contact?.pushname || participantId;
+          } catch (_e) {
+            logger.warn(
+              `[GROUP_EVENT] Could not get participant name: ${participantId}`
+            );
           }
 
           await this.registerEvent({
@@ -459,9 +484,12 @@ class GroupEventsService {
           let participantName = participantId;
           try {
             const contact = await wbot.getContactById(participantId);
-            participantName = contact?.name || contact?.pushname || participantId;
-          } catch (e) {
-            logger.warn(`[GROUP_EVENT] Could not get participant name: ${participantId}`);
+            participantName =
+              contact?.name || contact?.pushname || participantId;
+          } catch (_e) {
+            logger.warn(
+              `[GROUP_EVENT] Could not get participant name: ${participantId}`
+            );
           }
 
           await this.registerEvent({
@@ -476,7 +504,6 @@ class GroupEventsService {
         logger.error(`[GROUP_EVENT] Error handling group_leave: ${error}`);
       }
     });
-
   }
 }
 

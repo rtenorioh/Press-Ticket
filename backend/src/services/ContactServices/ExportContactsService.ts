@@ -22,7 +22,7 @@ const ExportContactsService = async ({
   status
 }: Request): Promise<Response> => {
   const whereCondition: any = {};
-  
+
   if (searchParam) {
     whereCondition[Op.or] = [
       {
@@ -68,7 +68,7 @@ const ExportContactsService = async ({
       required: false
     }
   ];
-  
+
   if (Array.isArray(tags) && tags.length > 0) {
     const contactsWithTags = await ContactTag.findAll({
       where: {
@@ -77,13 +77,13 @@ const ExportContactsService = async ({
       attributes: ["contactId"],
       raw: true
     });
-    
+
     const contactIds = contactsWithTags.map(item => item.contactId);
-    
+
     if (contactIds.length > 0) {
       whereCondition.id = { [Op.in]: contactIds };
     }
-    
+
     includeCondition[0] = {
       model: Tag,
       as: "tags",
@@ -106,10 +106,10 @@ const ExportContactsService = async ({
       limit: batchSize,
       offset: offset,
       attributes: [
-        "id", 
-        "name", 
-        "number", 
-        "email", 
+        "id",
+        "name",
+        "number",
+        "email",
         "address",
         "birthdate",
         "gender",

@@ -24,7 +24,7 @@ const DeleteWhatsAppMessage = async (messageId: string): Promise<Message> => {
 
   try {
     await messageToDelete.delete(true);
-  } catch (err) {
+  } catch (_err) {
     throw new AppError("ERR_DELETE_WAPP_MSG");
   }
 

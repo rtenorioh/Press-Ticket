@@ -31,9 +31,9 @@ class ErrorLogService {
   }
 
   public async findAll(
-    searchParams: { 
-      source?: string; 
-      startDate?: Date; 
+    searchParams: {
+      source?: string;
+      startDate?: Date;
       endDate?: Date;
       severity?: string;
     } = {},
@@ -42,17 +42,17 @@ class ErrorLogService {
     order: any = [["id", "DESC"]]
   ): Promise<{ rows: ErrorLog[]; count: number }> {
     const { source, startDate, endDate, severity } = searchParams;
-    
+
     const where: any = {};
-    
+
     if (source) {
       where.source = source;
     }
-    
+
     if (severity) {
       where.severity = severity;
     }
-    
+
     if (startDate && endDate) {
       where.createdAt = {
         [Op.between]: [startDate, endDate]

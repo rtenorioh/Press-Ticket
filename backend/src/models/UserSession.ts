@@ -1,4 +1,9 @@
-import { InferAttributes, InferCreationAttributes, CreationOptional, NonAttribute } from "sequelize";
+import {
+  InferAttributes,
+  InferCreationAttributes,
+  CreationOptional,
+  NonAttribute
+} from "sequelize";
 import {
   Table,
   Column,
@@ -14,7 +19,10 @@ import {
 import User from "./User";
 
 @Table
-class UserSession extends Model<InferAttributes<UserSession>, InferCreationAttributes<UserSession>> {
+class UserSession extends Model<
+  InferAttributes<UserSession>,
+  InferCreationAttributes<UserSession>
+> {
   @PrimaryKey
   @AutoIncrement
   @Column(DataType.INTEGER)

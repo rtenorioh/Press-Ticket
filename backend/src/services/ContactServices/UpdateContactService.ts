@@ -36,7 +36,25 @@ const UpdateContactService = async ({
   contactData,
   contactId
 }: Request): Promise<Contact> => {
-  const { email, address, name, number, extraInfo, birthdate, gender, status, lastContactAt, country, zip, addressNumber, addressComplement, neighborhood, city, state, cpf } = contactData;
+  const {
+    email,
+    address,
+    name,
+    number,
+    extraInfo,
+    birthdate,
+    gender,
+    status,
+    lastContactAt,
+    country,
+    zip,
+    addressNumber,
+    addressComplement,
+    neighborhood,
+    city,
+    state,
+    cpf
+  } = contactData;
 
   const contact = await Contact.findOne({
     where: { id: contactId },
@@ -97,7 +115,8 @@ const UpdateContactService = async ({
     birthdate: birthdate && birthdate !== "" ? new Date(birthdate) : null,
     gender,
     status,
-    lastContactAt: lastContactAt && lastContactAt !== "" ? new Date(lastContactAt) : null,
+    lastContactAt:
+      lastContactAt && lastContactAt !== "" ? new Date(lastContactAt) : null,
     country,
     zip,
     addressNumber,
@@ -106,7 +125,10 @@ const UpdateContactService = async ({
     city,
     state,
     cpf,
-    nameManuallyEdited: name !== undefined && name !== contact.name ? true : contact.nameManuallyEdited
+    nameManuallyEdited:
+      name !== undefined && name !== contact.name
+        ? true
+        : contact.nameManuallyEdited
   });
 
   await contact.reload({

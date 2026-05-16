@@ -1,4 +1,9 @@
-import { InferAttributes, InferCreationAttributes, CreationOptional, NonAttribute } from "sequelize";
+import {
+  InferAttributes,
+  InferCreationAttributes,
+  CreationOptional,
+  NonAttribute
+} from "sequelize";
 import {
   Table,
   Column,
@@ -14,7 +19,10 @@ import {
 import Message from "./Message";
 
 @Table
-class PollVote extends Model<InferAttributes<PollVote>, InferCreationAttributes<PollVote>> {
+class PollVote extends Model<
+  InferAttributes<PollVote>,
+  InferCreationAttributes<PollVote>
+> {
   @PrimaryKey
   @AutoIncrement
   @Column(DataType.INTEGER)

@@ -34,7 +34,9 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
       `Canal Hub conectado: ${validation.info?.name || "—"} (${validation.info?.type || "—"})`
     );
   } catch (err) {
-    logger.warn(`ChannelHubController.store: validação de token falhou — continuando: ${err}`);
+    logger.warn(
+      `ChannelHubController.store: validação de token falhou — continuando: ${err}`
+    );
   }
 
   const { whatsapps } = await CreateChannelsService(req.body);
@@ -57,18 +59,27 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
   }
 };
 
-export const resubscribe = async (req: Request, res: Response): Promise<Response> => {
+export const resubscribe = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
   const { whatsappId } = req.params;
 
   const whatsapp = await Whatsapp.findByPk(whatsappId);
   if (!whatsapp || !whatsapp.qrcode) {
-    return res.status(404).json({ error: "Canal não encontrado ou sem qrcode." });
+    return res
+      .status(404)
+      .json({ error: "Canal não encontrado ou sem qrcode." });
   }
 
   try {
-    logger.info(`Resubscribe: re-registrando subscriptions para canal ${whatsapp.qrcode}`);
+    logger.info(
+      `Resubscribe: re-registrando subscriptions para canal ${whatsapp.qrcode}`
+    );
     await setChannelWebhook(whatsapp, whatsappId);
-    return res.status(200).json({ message: "Subscriptions re-registradas com sucesso." });
+    return res
+      .status(200)
+      .json({ message: "Subscriptions re-registradas com sucesso." });
   } catch (error) {
     logger.error(`Resubscribe: erro — ${error}`);
     return res.status(500).json({ error: String(error) });

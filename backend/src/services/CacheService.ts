@@ -11,7 +11,6 @@ class CacheService {
       useClones: false,
       deleteOnExpire: true
     });
-
   }
 
   set(key: string, value: any, ttl?: number): boolean {

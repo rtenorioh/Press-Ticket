@@ -9,9 +9,13 @@ import DeleteService from "../services/ClientStatusServices/DeleteService";
 import ListService from "../services/ClientStatusServices/ListService";
 import ShowService from "../services/ClientStatusServices/ShowService";
 import UpdateService from "../services/ClientStatusServices/UpdateService";
-import { createActivityLog, ActivityActions, EntityTypes } from "../services/ActivityLogService";
-import GetClientIp from "../helpers/GetClientIp";
+import {
+  createActivityLog,
+  ActivityActions,
+  EntityTypes
+} from "../services/ActivityLogService";
 import { logger } from "../utils/logger";
+import GetClientIp from "../helpers/GetClientIp";
 
 type IndexQuery = {
   searchParam?: string;
@@ -39,10 +43,9 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
 
   const logUserId = req.user?.id || 1;
 
-  const clientIp = GetClientIp(req);
 
   await createActivityLog({
-    userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
+    userId: typeof logUserId === "string" ? parseInt(logUserId) : logUserId,
     action: ActivityActions.CREATE,
     description: `Status de cliente ${clientStatus.name} criado`,
     entityType: EntityTypes.TAG,
@@ -75,7 +78,7 @@ export const update = async (
   res: Response
 ): Promise<Response> => {
   try {
-    const isApiRequest = req.originalUrl.includes('/v1/');
+    const isApiRequest = req.originalUrl.includes("/v1/");
 
     if (!isApiRequest && req.user && req.user.profile !== "admin") {
       throw new AppError("ERR_NO_PERMISSION", 403);
@@ -85,17 +88,22 @@ export const update = async (
     const clientStatusData = req.body;
 
     if (!clientStatusData.name && !clientStatusData.color) {
-      throw new AppError("É necessário fornecer pelo menos um campo para atualização (nome ou cor)", 400);
+      throw new AppError(
+        "É necessário fornecer pelo menos um campo para atualização (nome ou cor)",
+        400
+      );
     }
 
-    const clientStatus = await UpdateService({ clientStatusData, id: clientStatusId });
+    const clientStatus = await UpdateService({
+      clientStatusData,
+      id: clientStatusId
+    });
 
     const logUserId = req.user?.id || 1;
 
-    const clientIp = GetClientIp(req);
-
+  
     await createActivityLog({
-      userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
+      userId: typeof logUserId === "string" ? parseInt(logUserId) : logUserId,
       action: ActivityActions.UPDATE,
       description: `Status de cliente ${clientStatus.name} atualizado`,
       entityType: EntityTypes.TAG,
@@ -131,10 +139,9 @@ export const remove = async (
 
   const logUserId = req.user?.id || 1;
 
-  const clientIp = GetClientIp(req);
 
   await createActivityLog({
-    userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
+    userId: typeof logUserId === "string" ? parseInt(logUserId) : logUserId,
     action: ActivityActions.DELETE,
     description: `Status de cliente ${statusToDelete.name} excluído`,
     entityType: EntityTypes.TAG,
@@ -158,15 +165,13 @@ export const removeAll = async (
   req: Request,
   res: Response
 ): Promise<Response> => {
-
   await DeleteAllService();
 
   const logUserId = req.user?.id || 1;
-
   const clientIp = GetClientIp(req);
 
   await createActivityLog({
-    userId: typeof logUserId === 'string' ? parseInt(logUserId) : logUserId,
+    userId: typeof logUserId === "string" ? parseInt(logUserId) : logUserId,
     action: ActivityActions.DELETE,
     description: `Todos os status de clientes foram excluídos`,
     entityType: EntityTypes.TAG,
@@ -207,10 +212,7 @@ export const statistics = async (
 
   const contactsWithoutStatus = await Contact.count({
     where: {
-      [Op.or]: [
-        { status: { [Op.is]: null } },
-        { status: "" }
-      ]
+      [Op.or]: [{ status: { [Op.is]: null } }, { status: "" }]
     } as any
   });
 

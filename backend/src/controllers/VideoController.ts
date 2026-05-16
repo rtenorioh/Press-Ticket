@@ -18,10 +18,10 @@ import ShowVideoService from "../services/VideoServices/ShowVideoService";
 
 export const index = async (req: Request, res: Response): Promise<Response> => {
   const { searchParam } = req.query;
-  
-  let userId = "1"; 
-  let isAdmin = true; 
-  
+
+  let userId = "1";
+  let isAdmin = true;
+
   if (req.user) {
     userId = req.user.id;
     isAdmin = req.user.profile === "admin";

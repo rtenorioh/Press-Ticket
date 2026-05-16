@@ -11,8 +11,8 @@ export const getMemoryUsage = async (
     return res.status(200).json(memoryInfo);
   } catch (error) {
     logger.error(`Erro ao obter informações de uso de memória: ${error}`);
-    return res.status(500).json({ 
-      error: "Erro ao obter informações de uso de memória" 
+    return res.status(500).json({
+      error: "Erro ao obter informações de uso de memória"
     });
   }
 };
