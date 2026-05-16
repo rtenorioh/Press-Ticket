@@ -3,7 +3,9 @@
 <p align="center">
   <a href="https://www.codefactor.io/repository/github/rtenorioh/press-ticket"><img src="https://www.codefactor.io/repository/github/rtenorioh/press-ticket/badge" alt="CodeFactor" /></a>
 
-  <img alt="Swagger Validator" src="https://img.shields.io/swagger/valid/3.0?specUrl=https%3A%2F%2Fraw.githubusercontent.com%2Frtenorioh%2FPress-Ticket%2Fmain%2Fbackend%2Fsrc%2Fswagger.json">
+  <a href="https://github.com/rtenorioh/Press-Ticket/actions/workflows/ci.yml">
+    <img alt="CI" src="https://github.com/rtenorioh/Press-Ticket/actions/workflows/ci.yml/badge.svg">
+  </a>
 
   <img alt="Repository size" src="https://img.shields.io/github/repo-size/rtenorioh/Press-Ticket">
 
@@ -28,7 +30,7 @@
 
 ## Sobre
 
-### Descrição do Sistema Press Ticket®®
+### Descrição do Sistema Press Ticket®
 
 O sistema de multicanais "Press-Ticket" foi projetado para oferecer uma solução eficiente e integrada de suporte ao cliente, facilitando a comunicação e a gestão de tickets de atendimento diretamente pelos canais: WhatsApp (wwebjs), Facebook, Instagram, Telegram, e WebChat.
 
@@ -65,12 +67,25 @@ O sistema de multicanais "Press-Ticket" foi projetado para oferecer uma soluçã
 
 ## Tecnologias Utilizadas
 
-- Linguagem de Programação: JavaScprit e TypeScript
-- Banco de Dados: MySQL
-- Integração com WhatsApp: Utilização de APIs para comunicação bidirecional.
-- Integração com demais canais: Utilização de webhook para comunicação entre Press Ticket® e canais ativos, por meio da Notificame Hub.
+### Backend
 
-## 7. Benefícios
+- **Runtime:** Node.js 22 com TypeScript
+- **Framework:** Express
+- **ORM:** Sequelize + MySQL 8
+- **Realtime:** Socket.io
+- **WhatsApp:** whatsapp-web.js
+- **Demais canais:** Notificame Hub (via webhook)
+- **Integrações:** OpenAI, n8n, E-mail (SMTP/IMAP)
+- **Infraestrutura:** PM2 + Nginx + Ubuntu 22
+
+### Frontend
+
+- **Framework:** React + Vite
+- **UI:** Material UI v6
+- **Realtime:** Socket.io client
+- **Internacionalização:** i18next
+
+## 6. Benefícios
 
 - Melhoria na Eficiência do Atendimento: Com a automação e a organização de tickets, os atendentes podem responder de maneira mais rápida e eficiente.
 - Satisfação do Cliente: Respostas rápidas e precisas aumentam a satisfação do cliente.
@@ -120,13 +135,14 @@ Este sistema é ideal para empresas que buscam melhorar seu atendimento ao clien
 - WhatsApp (wwebjs);
 - Telegram;
 - Facebook;
-- Instagram; e
-- WebChat.
+- Instagram;
+- WebChat; e
+- E-mail.
 
-Para ativar **Facebook**, **Instagram**, **Telegram** e **WebChat**:
+Para ativar **Facebook**, **Instagram**, **Telegram**, **WebChat** e **E-mail**:
 
 1. [Realize seu cadastro aqui](https://hub.notificame.com.br/signup/registrar?from=@pressticket);
-2. Adquira a quantidade desejada de canais usando o cupom de desconto: **PRESS60**;
+2. Adquira a quantidade desejada de canais usando o cupom de desconto: **PRESS40**;
 3. Conecte aos canais que deseja ativar, seguindo as instruções ao conectar; e
 4. Insira o token da sua Account na página de Configurações para finalizar a integração.
 
@@ -156,6 +172,20 @@ Se a variável não existir ou estiver definida como qualquer valor diferente de
 
 ---
 
+## Como Contribuir
+
+Contribuições são bem-vindas! Para contribuir:
+
+1. Faça um **fork** do repositório
+2. Crie uma branch para sua feature: `git checkout -b feature/minha-feature`
+3. Faça commit das alterações: `git commit -m "feat: minha feature"`
+4. Envie para o seu fork: `git push origin feature/minha-feature`
+5. Abra um **Pull Request** descrevendo o que foi feito
+
+Consulte os templates de [Bug Report e Feature Request](https://github.com/rtenorioh/Press-Ticket/issues/new/choose) para reportar problemas ou sugerir melhorias.
+
+---
+
 ## Caso queira ajudar a manter o projeto, pode contribuir com uma das opções abaixo:
 
 - Mensais:
@@ -174,7 +204,7 @@ Se a variável não existir ou estiver definida como qualquer valor diferente de
 
 ```bash
 https://demo.pressticket.com.br
-```                                         
+```
 
 | User Type   | User                           | Password    |
 | ----------- | ------------------------------ | ----------- |
@@ -202,31 +232,31 @@ A **[Hosteg](https://painelcliente.com.br/aff.php?aff=55)** (Hosteg Hospedagem e
 
 ### 📊 Informações Corporativas
 
-* **Razão Social:** Hosteg Hospedagem e Servidores LTDA.
-* **CNPJ:** 15.527.432/0001-22.
-* **Sedes:** Bom Jesus do Itabapoana (RJ) e Içara (SC).
-* **Infraestrutura de Rede:** Possui Sistema Autônomo próprio sob o ASN AS213738.
+- **Razão Social:** Hosteg Hospedagem e Servidores LTDA.
+- **CNPJ:** 15.527.432/0001-22.
+- **Sedes:** Bom Jesus do Itabapoana (RJ) e Içara (SC).
+- **Infraestrutura de Rede:** Possui Sistema Autônomo próprio sob o ASN AS213738.
 
 ### 🚀 Diferenciais Técnicos
 
-* **Armazenamento:** Tecnologia 100% NVMe em todos os planos, garantindo velocidades de I/O superiores.
-* **Disponibilidade:** Uptime garantido de 99,99% em infraestrutura Tier 3.
-* **Processamento:** Servidores equipados com processadores Intel Xeon, AMD Ryzen e AMD EPYC.
-* **Software:** Utiliza LiteSpeed PRO (servidor web de alta eficiência) e painel de controle DirectAdmin.
-* **Latência:** Média de 1ms no Brasil, com datacenters em São Paulo (SP), Rio de Janeiro (RJ) e Paraíba (PB).
+- **Armazenamento:** Tecnologia 100% NVMe em todos os planos, garantindo velocidades de I/O superiores.
+- **Disponibilidade:** Uptime garantido de 99,99% em infraestrutura Tier 3.
+- **Processamento:** Servidores equipados com processadores Intel Xeon, AMD Ryzen e AMD EPYC.
+- **Software:** Utiliza LiteSpeed PRO (servidor web de alta eficiência) e painel de controle DirectAdmin.
+- **Latência:** Média de 1ms no Brasil, com datacenters em São Paulo (SP), Rio de Janeiro (RJ) e Paraíba (PB).
 
 ### 🛠 Principais Serviços
 
-| Serviço | Características |
-| :--- | :--- |
-| **Hospedagem WordPress** | Otimizada com LiteSpeed e inclui Elementor PRO Original gratuito. |
-| **Cloud VPS NVMe** | Opções com vCPU dedicada ou compartilhada e snapshots inclusos. |
-| **Cloud N8N** | Ambiente pré-configurado para automações de workflow. |
+| Serviço                  | Características                                                                   |
+| :----------------------- | :-------------------------------------------------------------------------------- |
+| **Hospedagem WordPress** | Otimizada com LiteSpeed e inclui Elementor PRO Original gratuito.                 |
+| **Cloud VPS NVMe**       | Opções com vCPU dedicada ou compartilhada e snapshots inclusos.                   |
+| **Cloud N8N**            | Ambiente pré-configurado para automações de workflow.                             |
 | **Servidores Dedicados** | Soluções Baremetal e servidores focados em Inteligência Artificial (IA) com GPUs. |
 
 ### 🛡 Segurança e Suporte
 
-* **Certificados:** SSL Gratuito para todos os domínios hospedados.
-* **Proteção:** Anti-DDoS de alto nível e Antispam profissional inclusos.
-* **Suporte:** Atendimento humanizado 24/7 com suporte via Anydesk para auxílio remoto em configurações críticas.
-* **Migração:** Serviço de migração gratuita e assistida para novos clientes.
+- **Certificados:** SSL Gratuito para todos os domínios hospedados.
+- **Proteção:** Anti-DDoS de alto nível e Antispam profissional inclusos.
+- **Suporte:** Atendimento humanizado 24/7 com suporte via Anydesk para auxílio remoto em configurações críticas.
+- **Migração:** Serviço de migração gratuita e assistida para novos clientes.
