@@ -1,0 +1,64 @@
+name: Stale Issues e PRs
+
+on:
+  schedule:
+    - cron: "0 8 * * *" # Roda todo dia às 08h UTC (05h BRT)
+  workflow_dispatch: # Permite rodar manualmente pela aba Actions
+
+jobs:
+  stale:
+    runs-on: ubuntu-latest
+
+    permissions:
+      issues: write
+      pull-requests: write
+
+    steps:
+      - name: 🗂️ Marcar e fechar issues/PRs sem atividade
+        uses: actions/stale@v9
+        with:
+          # ── Issues ────────────────────────────────────────────────
+          days-before-issue-stale: 20
+          days-before-issue-close: 7
+          stale-issue-label: stale
+          stale-issue-message: >
+            Essa issue foi marcada automaticamente como **inativa** por não ter
+            recebido atualizações nos últimos 20 dias.
+
+            Se o problema ainda for relevante, adicione um comentário ou
+            aguarde — ela será fechada automaticamente em 7 dias caso não haja
+            nova atividade.
+
+            Obrigado pela contribuição! 🙏
+          close-issue-message: >
+            Essa issue foi fechada automaticamente por inatividade.
+
+            Se o problema ainda existir, sinta-se à vontade para abrir uma
+            nova issue com informações atualizadas.
+
+          # ── Pull Requests ─────────────────────────────────────────
+          days-before-pr-stale: 20
+          days-before-pr-close: 7
+          stale-pr-label: stale
+          stale-pr-message: >
+            Esse Pull Request foi marcado automaticamente como **inativo** por
+            não ter recebido atualizações nos últimos 20 dias.
+
+            Se ainda pretende prosseguir com essa contribuição, adicione um
+            comentário ou faça um novo commit — o PR será fechado
+            automaticamente em 7 dias caso não haja nova atividade.
+
+            Obrigado pela contribuição! 🙏
+          close-pr-message: >
+            Esse Pull Request foi fechado automaticamente por inatividade.
+
+            Se ainda quiser contribuir, fique à vontade para reabrir ou abrir
+            um novo PR com as alterações atualizadas.
+
+          # ── Labels isentas (nunca viram stale) ───────────────────
+          exempt-issue-labels: "pinned,security,bug,enhancement"
+          exempt-pr-labels: "pinned,security,work-in-progress,WIP"
+
+          # ── Configurações gerais ──────────────────────────────────
+          remove-stale-when-updated: true # Remove o label 'stale' se houver nova atividade
+          operations-per-run: 100 # Limite de operações por execução

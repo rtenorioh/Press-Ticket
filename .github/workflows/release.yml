@@ -10,15 +10,14 @@ jobs:
     runs-on: ubuntu-latest
 
     permissions:
-      contents: write # Necessário para criar releases
+      contents: write
 
     steps:
       - name: 📥 Checkout do código
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # ✅ FIX 1: Busca TODO o histórico e tags anteriores
+          fetch-depth: 0
 
-      # Validar que a tag segue o padrão semântico (vX.X.X)
       - name: 🏷️ Validar formato da tag
         run: |
           if ! [[ "${GITHUB_REF#refs/tags/}" =~ ^v[0-9]+(\.[0-9]+){2}$ ]]; then
@@ -26,104 +25,108 @@ jobs:
             exit 1
           fi
 
-      # ✅ FIX 2: GitHub CLI já vem no ubuntu-latest, autenticar via env var
-      - name: 🔐 Autenticar GitHub CLI
-        env:
-          GH_TOKEN: ${{ secrets.TOKEN_GITHUB }}
-        run: gh auth status # Só confirma que está autenticado
-
-      # Pegar a tag anterior
-      - name: 🔖 Buscar tag anterior
-        id: prev_tag
+      - name: 🔖 Buscar tag anterior e gerar changelog
+        id: changelog
         run: |
-          previous_tag=$(git describe --tags $(git rev-list --tags --skip=1 --max-count=1) 2>/dev/null || echo "")
-          echo "Tag anterior: $previous_tag"
-          echo "previous_tag=$previous_tag" >> $GITHUB_OUTPUT
+          CURRENT_TAG="${GITHUB_REF#refs/tags/}"
+          echo "Tag atual: $CURRENT_TAG"
 
-          # Pegar a data da tag anterior para filtrar issues
-          if [ -n "$previous_tag" ]; then
-            prev_date=$(git log -1 --format=%aI "$previous_tag")
+          # Busca a tag imediatamente anterior à atual
+          PREV_TAG=$(git tag --sort=-version:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | grep -v "^${CURRENT_TAG}$" | head -1)
+          echo "Tag anterior: $PREV_TAG"
+
+          if [ -n "$PREV_TAG" ]; then
+            RANGE="${PREV_TAG}..${CURRENT_TAG}"
           else
-            prev_date="2020-01-01T00:00:00Z"
+            RANGE="${CURRENT_TAG}"
           fi
-          echo "Data da tag anterior: $prev_date"
-          echo "prev_tag_date=$prev_date" >> $GITHUB_OUTPUT   # ✅ FIX 3: variável agora existe
+          echo "Range: $RANGE"
 
-      # Listar issues fechadas desde a tag anterior
-      - name: 📋 Listar issues fechadas
-        id: list_closed_issues
-        env:
-          GH_TOKEN: ${{ secrets.TOKEN_GITHUB }}
-        run: |
-          issues=$(gh issue list \
-            --state closed \
-            --search "closed:>${{ steps.prev_tag.outputs.prev_tag_date }}" \
-            --json title,number \
-            --jq '.[] | "- \(.title) (#\(.number))"' || echo "")
+          # Gera o log de commits no intervalo, sem merges
+          LOG=$(git log "$RANGE" \
+            --pretty=format:'- %s (%h)' \
+            --abbrev-commit \
+            --no-merges)
 
-          if [ -z "$issues" ]; then
-            issues="Nenhuma issue fechada neste período."
+          if [ -z "$LOG" ]; then
+            LOG="Nenhum commit registrado neste intervalo."
           fi
 
-          echo "Issues encontradas:"
-          echo "$issues"
+          echo "Commits:"
+          echo "$LOG"
 
-          # ✅ FIX 4: sintaxe heredoc para outputs multiline
-          {
-            echo "issues<<EOF"
-            echo "$issues"
-            echo "EOF"
-          } >> $GITHUB_OUTPUT
-
-      # Gerar log de commits desde a tag anterior
-      - name: 📝 Gerar log de commits
-        id: commit_log
-        run: |
-          if [ -n "${{ steps.prev_tag.outputs.previous_tag }}" ]; then
-            log=$(git log \
-              --pretty=format:'- %s (%h)' \
-              --abbrev-commit \
-              ${{ steps.prev_tag.outputs.previous_tag }}..HEAD)
+          # URL de comparação
+          if [ -n "$PREV_TAG" ]; then
+            COMPARE_URL="https://github.com/${{ github.repository }}/compare/${PREV_TAG}...${CURRENT_TAG}"
           else
-            log=$(git log --pretty=format:'- %s (%h)' --abbrev-commit)
+            COMPARE_URL="https://github.com/${{ github.repository }}/releases/tag/${CURRENT_TAG}"
           fi
+          echo "Compare: $COMPARE_URL"
 
-          if [ -z "$log" ]; then
-            log="Nenhum commit registrado."
-          fi
-
-          echo "Commits encontrados:"
-          echo "$log"
-
-          # ✅ FIX 4: sintaxe heredoc para outputs multiline
+          # Exporta outputs (heredoc para multiline)
           {
             echo "log<<EOF"
-            echo "$log"
+            echo "$LOG"
             echo "EOF"
           } >> $GITHUB_OUTPUT
 
-      # Criar a release
+          echo "prev_tag=$PREV_TAG"        >> $GITHUB_OUTPUT
+          echo "current_tag=$CURRENT_TAG"  >> $GITHUB_OUTPUT
+          echo "compare_url=$COMPARE_URL"  >> $GITHUB_OUTPUT
+
+          # Data da tag anterior para busca de issues
+          if [ -n "$PREV_TAG" ]; then
+            PREV_DATE=$(git log -1 --format=%aI "$PREV_TAG")
+          else
+            PREV_DATE="2020-01-01T00:00:00Z"
+          fi
+          echo "prev_tag_date=$PREV_DATE" >> $GITHUB_OUTPUT
+
+      - name: 📋 Listar issues fechadas
+        id: issues
+        env:
+          GH_TOKEN: ${{ secrets.TOKEN_GITHUB }}
+        run: |
+          ISSUES=$(gh issue list \
+            --state closed \
+            --search "closed:>${{ steps.changelog.outputs.prev_tag_date }}" \
+            --json title,number \
+            --jq '.[] | "- \(.title) (#\(.number))"' 2>/dev/null || echo "")
+
+          if [ -z "$ISSUES" ]; then
+            ISSUES="Nenhuma issue fechada neste período."
+          fi
+
+          echo "Issues:"
+          echo "$ISSUES"
+
+          {
+            echo "list<<EOF"
+            echo "$ISSUES"
+            echo "EOF"
+          } >> $GITHUB_OUTPUT
+
       - name: 🚀 Criar Release
         uses: softprops/action-gh-release@v2
         env:
           GITHUB_TOKEN: ${{ secrets.TOKEN_GITHUB }}
         with:
-          tag_name: ${{ github.ref_name }}
-          name: ${{ github.ref_name }}
+          tag_name: ${{ steps.changelog.outputs.current_tag }}
+          name: ${{ steps.changelog.outputs.current_tag }}
           body: |
             ## 🚀 O que mudou
 
-            ${{ steps.commit_log.outputs.log }}
+            ${{ steps.changelog.outputs.log }}
 
             ---
 
             ## 🐛 Issues Fechadas
 
-            ${{ steps.list_closed_issues.outputs.issues }}
+            ${{ steps.issues.outputs.list }}
 
             ---
 
             **🔍 Comparação completa:**
-            [Ver alterações](https://github.com/${{ github.repository }}/compare/${{ steps.prev_tag.outputs.previous_tag }}...${{ github.ref_name }})
+            [Ver alterações](${{ steps.changelog.outputs.compare_url }})
           draft: false
           prerelease: false

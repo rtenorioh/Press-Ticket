@@ -1,0 +1,73 @@
+name: CodeQL — Análise de Segurança
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  schedule:
+    - cron: "0 6 * * 1" # Toda segunda às 06h UTC (03h BRT)
+  workflow_dispatch:
+
+jobs:
+  analyze:
+    name: Analisar (${{ matrix.language }})
+    runs-on: ubuntu-latest
+
+    permissions:
+      actions: read
+      contents: read
+      security-events: write # Necessário para publicar alertas de segurança
+
+    strategy:
+      fail-fast: false
+      matrix:
+        language:
+          - javascript-typescript # Cobre backend TS e frontend JS/TSX
+
+    steps:
+      - name: 📥 Checkout do código
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 🔍 Inicializar CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+          queries: security-and-quality # Inclui queries de qualidade além de segurança
+
+      - name: ⚙️ Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+          cache-dependency-path: |
+            backend/package-lock.json
+            frontend/package-lock.json
+
+      - name: 📦 Instalar dependências — Backend
+        working-directory: backend
+        run: npm ci
+
+      - name: 📦 Instalar dependências — Frontend
+        working-directory: frontend
+        run: npm ci
+
+      - name: 🏗️ Build — Backend
+        working-directory: backend
+        run: npm run build
+        continue-on-error: true # Build failure não bloqueia a análise
+
+      - name: 🏗️ Build — Frontend
+        working-directory: frontend
+        run: npm run build
+        continue-on-error: true
+
+      - name: 🔬 Executar análise CodeQL
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:${{ matrix.language }}"
+          upload: true # Envia resultados para a aba Security do GitHub
