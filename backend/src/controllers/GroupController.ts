@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import path from "path";
 import AppError from "../errors/AppError";
 import { getWbotByGroupId } from "../libs/wbot";
 import { MessageMedia } from "whatsapp-web.js";
@@ -6,6 +7,7 @@ import fs from "fs";
 import { getIO } from "../libs/socket";
 import groupEventsService from "../services/WbotServices/GroupEventsService";
 import { logger } from "../utils/logger";
+import uploadConfig from "../config/upload";
 
 async function getGroupChatOrFail(groupId: string) {
   const wbot = await getWbotByGroupId(groupId);
@@ -244,6 +246,12 @@ export const setPicture = async (req: Request, res: Response) => {
   const file = req.file as Express.Multer.File;
 
   if (!file) throw new AppError("ERR_FILE_REQUIRED");
+
+  const uploadsDir = path.resolve(uploadConfig.directory);
+  const resolvedFilePath = path.resolve(file.path);
+  if (!resolvedFilePath.startsWith(uploadsDir + path.sep)) {
+    throw new AppError("Caminho de arquivo inválido", 400);
+  }
 
   try {
     const { chat } = await getGroupChatOrFail(groupId);

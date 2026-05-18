@@ -33,3 +33,25 @@ export const apiLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false
 });
+
+// Rate limiter global — aplicado em todas as rotas antes do roteador principal
+export const rateLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutos
+  max: isDevelopment ? 10_000 : 300,
+  message: { error: "Muitas requisições. Tente novamente em 15 minutos." },
+  standardHeaders: true,
+  legacyHeaders: false,
+  skip: req => {
+    // Exclui rotas de health check do rate limiting global
+    return req.path === "/health" || req.path === "/healthcheck";
+  }
+});
+
+// Rate limiter permissivo para rotas de webhook (chamadas server-to-server)
+export const webhookLimiter = rateLimit({
+  windowMs: 1 * 60 * 1000, // 1 minuto
+  max: 500,
+  message: { error: "Rate limit excedido" },
+  standardHeaders: true,
+  legacyHeaders: false
+});

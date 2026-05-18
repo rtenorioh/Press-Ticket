@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import {
   Box,
   Typography,
-  LinearProgress,
   IconButton,
   Dialog,
   DialogTitle,
@@ -54,18 +53,6 @@ const PollOption = styled(Box)(({ theme, selected, hasVotes }) => ({
   transition: 'all 0.2s ease'
 }));
 
-const ProgressBar = styled(LinearProgress)(({ theme }) => ({
-  position: 'absolute',
-  bottom: 0,
-  left: 0,
-  right: 0,
-  height: 3,
-  backgroundColor: 'transparent',
-  '& .MuiLinearProgress-bar': {
-    backgroundColor: theme.palette.primary.main
-  }
-}));
-
 const VoteCount = styled(Typography)(({ theme }) => ({
   marginLeft: 'auto',
   fontWeight: 600,
@@ -77,7 +64,7 @@ const PollMessage = ({ message }) => {
   const theme = useTheme();
   const [votesSummary, setVotesSummary] = useState(null);
   const [showVotersModal, setShowVotersModal] = useState(false);
-  const [selectedOption, setSelectedOption] = useState(null);
+  const [, setSelectedOption] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

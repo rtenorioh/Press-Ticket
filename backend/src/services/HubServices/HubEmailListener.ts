@@ -37,10 +37,13 @@ interface IEmailWebhookPayload {
 }
 
 const extractTextFromHtml = (html: string): string => {
-  return html
-    .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")
-    .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, "")
-    .replace(/<[^>]+>/g, " ")
+  // Limit input to prevent catastrophic backtracking on malformed HTML
+  const limited = html.length > 500_000 ? html.substring(0, 500_000) : html;
+  // Use non-backtracking patterns: [^<]* instead of [\s\S]*? inside tags
+  return limited
+    .replace(/<style\b[^<]*(?:(?!<\/style)<[^<]*)*<\/style>/gi, "")
+    .replace(/<script\b[^<]*(?:(?!<\/script)<[^<]*)*<\/script>/gi, "")
+    .replace(/<[^>]{0,2000}>/g, " ")
     .replace(/\s+/g, " ")
     .trim();
 };
@@ -114,7 +117,8 @@ const HubEmailListener = async (
         message.contents[0]?.text || "",
         "contents[0]"
       );
-      const htmlIndex = rawText.search(/<[a-z][^>]*>/i);
+      // Limit tag attribute length to prevent ReDoS on malformed input
+      const htmlIndex = rawText.search(/<[a-z][^>]{0,500}>/i);
 
       if (htmlIndex > 0) {
         bodyText = rawText

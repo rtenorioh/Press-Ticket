@@ -117,7 +117,7 @@ const MultiVcardPreview = ({ contacts }) => {
         else if (Array.isArray(contacts)) {
           result = contacts;
         } 
-        else if (typeof contacts === 'object' && contacts !== null) {
+        else if (typeof contacts === 'object') {
           result = [contacts];
         }
         

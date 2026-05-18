@@ -435,9 +435,7 @@ const SendWhatsAppMedia = async ({
         );
         fs.copyFileSync(finalMediaPath, publicPath);
 
-        if (fs.existsSync(publicPath)) {
-          downloadSuccess = true;
-        } else {
+        if (!fs.existsSync(publicPath)) {
           logger.error("Fallback: falha ao copiar arquivo");
         }
       } catch (copyErr) {

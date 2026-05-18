@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import path from "path";
 import { getIO } from "../libs/socket";
 import { logger } from "../utils/logger";
 import {
@@ -66,8 +67,18 @@ export const show = async (req: Request, res: Response): Promise<void> => {
   try {
     const { filename } = req.params;
 
+    if (!filename || !/^[a-zA-Z0-9._-]+$/.test(filename)) {
+      res.status(400).json({ error: "Nome de arquivo inválido" });
+      return;
+    }
+
     const BACKUP_DIR = process.env.BACKUP_DIR || "./backups";
-    const filePath = `${BACKUP_DIR}/${filename}`;
+    const resolvedBase = path.resolve(BACKUP_DIR);
+    const filePath = path.join(resolvedBase, path.basename(filename));
+    if (!path.resolve(filePath).startsWith(resolvedBase + path.sep)) {
+      res.status(403).json({ error: "Acesso negado" });
+      return;
+    }
 
     const fs = require("fs");
     if (!fs.existsSync(filePath)) {

@@ -1,13 +1,12 @@
-import { exec as execCallback } from "child_process";
-import util from "util";
+import { execFile as execFileCb } from "child_process";
+import { promisify } from "util";
 import axios from "axios";
 import fs from "fs";
 import path from "path";
 import { logger } from "../utils/logger";
-import { promisify } from "util";
 import dotenv from "dotenv";
 
-const exec = util.promisify(execCallback);
+const execFile = promisify(execFileCb);
 const writeFile = promisify(fs.writeFile);
 const readFile = promisify(fs.readFile);
 const mkdir = promisify(fs.mkdir);
@@ -86,6 +85,18 @@ const getCurrentVersion = async (): Promise<string> => {
   }
 };
 
+// Validate PM2 process id/name — only alphanumeric, underscore, hyphen
+const validatePm2Id = (id: string): string | null =>
+  /^[a-zA-Z0-9_-]{1,50}$/.test(id) ? id : null;
+
+// Copy directory contents (replaces: cp -R extractDir/* .)
+const copyDirContents = async (src: string, dest: string): Promise<void> => {
+  const entries = fs.readdirSync(src);
+  for (const entry of entries) {
+    await execFile("cp", ["-R", path.join(src, entry), dest]);
+  }
+};
+
 export const checkForUpdates = async (): Promise<UpdateInfo> => {
   try {
     updateStatus.status = "checking";
@@ -145,9 +156,16 @@ const backupSystem = async (): Promise<string> => {
     updateStatus.progress = 30;
     await saveUpdateStatus();
 
-    await exec(
-      `tar --exclude='./node_modules' --exclude='./dist' --exclude='./build' --exclude='./backups' --exclude='./public/media' -czf ${backupPath} .`
-    );
+    await execFile("tar", [
+      "--exclude=./node_modules",
+      "--exclude=./dist",
+      "--exclude=./build",
+      "--exclude=./backups",
+      "--exclude=./public/media",
+      "-czf",
+      backupPath,
+      ".",
+    ]);
 
     return backupPath;
   } catch (error: any) {
@@ -177,9 +195,10 @@ export const downloadAndInstallUpdate = async (
       await mkdir(tempDir, { recursive: true });
     }
 
+    const safeVersion = updateInfo.latestVersion.replace(/[^a-zA-Z0-9._-]/g, "_");
     const zipFilePath = path.join(
       tempDir,
-      `update-${updateInfo.latestVersion}.zip`
+      `update-${safeVersion}.zip`
     );
     const writer = fs.createWriteStream(zipFilePath);
 
@@ -206,29 +225,28 @@ export const downloadAndInstallUpdate = async (
       await mkdir(extractDir, { recursive: true });
     }
 
-    await exec(`unzip -o ${zipFilePath} -d ${extractDir}`);
-
-    await exec(`cp -R ${extractDir}/* .`);
+    await execFile("unzip", ["-o", zipFilePath, "-d", extractDir]);
+    await copyDirContents(extractDir, ".");
 
     updateStatus.message = "Instalando dependências do backend...";
     updateStatus.progress = 50;
     await saveUpdateStatus();
-    await exec("npm install");
+    await execFile("npm", ["install"]);
 
     updateStatus.message = "Compilando backend...";
     updateStatus.progress = 60;
     await saveUpdateStatus();
-    await exec("npm run build");
+    await execFile("npm", ["run", "build"]);
 
     updateStatus.message = "Executando migrações...";
     updateStatus.progress = 65;
     await saveUpdateStatus();
-    await exec("npx sequelize db:migrate");
+    await execFile("npx", ["sequelize", "db:migrate"]);
 
     updateStatus.message = "Executando seeders...";
     updateStatus.progress = 70;
     await saveUpdateStatus();
-    await exec("npx sequelize db:seed:all");
+    await execFile("npx", ["sequelize", "db:seed:all"]);
 
     updateStatus.status = "building";
     updateStatus.message = "Atualizando frontend...";
@@ -240,29 +258,33 @@ export const downloadAndInstallUpdate = async (
     updateStatus.message = "Instalando dependências do frontend...";
     updateStatus.progress = 80;
     await saveUpdateStatus();
-    await exec("npm install", { cwd: frontendDir });
+    await execFile("npm", ["install"], { cwd: frontendDir });
 
     updateStatus.message = "Compilando frontend...";
     updateStatus.progress = 85;
     await saveUpdateStatus();
-    await exec("npm run build", { cwd: frontendDir });
+    await execFile("npm", ["run", "build"], { cwd: frontendDir });
 
     updateStatus.message = "Reiniciando serviços...";
     updateStatus.progress = 90;
     await saveUpdateStatus();
 
     dotenv.config();
-    const pm2FrontendId = process.env.PM2_FRONTEND || "1";
-    const pm2BackendId = process.env.PM2_BACKEND || "0";
+    const pm2BackendId = validatePm2Id(process.env.PM2_BACKEND || "0");
+    const pm2FrontendId = validatePm2Id(process.env.PM2_FRONTEND || "1");
 
     try {
-      await exec(`pm2 restart ${pm2BackendId} --update-env`);
-      await exec(`pm2 restart ${pm2FrontendId} --update-env`);
+      if (pm2BackendId) {
+        await execFile("pm2", ["restart", pm2BackendId, "--update-env"]);
+      }
+      if (pm2FrontendId) {
+        await execFile("pm2", ["restart", pm2FrontendId, "--update-env"]);
+      }
     } catch (pmError: any) {
       logger.warn(`Aviso ao reiniciar serviços PM2: ${pmError.message}`);
     }
 
-    await exec(`rm -rf ${tempDir}`);
+    await execFile("rm", ["-rf", tempDir]);
 
     updateStatus.status = "completed";
     updateStatus.message = `Atualização para v${updateInfo.latestVersion} concluída com sucesso`;
@@ -286,11 +308,22 @@ export const downloadAndInstallUpdate = async (
 export const getUpdateStatus = async (): Promise<UpdateStatus> => {
   return updateStatus;
 };
+
 export const restoreBackup = async (
   backupFileName: string
 ): Promise<boolean> => {
   try {
+    // Validate backupFileName to prevent path traversal or command injection
+    if (!/^backup-[a-zA-Z0-9._-]+\.tar\.gz$/.test(backupFileName)) {
+      throw new Error("Nome de backup inválido");
+    }
+
     const backupPath = path.join(BACKUP_DIR, backupFileName);
+    const resolvedPath = path.resolve(backupPath);
+    const resolvedBase = path.resolve(BACKUP_DIR);
+    if (!resolvedPath.startsWith(resolvedBase + path.sep)) {
+      throw new Error("Acesso negado: caminho inválido");
+    }
 
     if (!fs.existsSync(backupPath)) {
       throw new Error(`Backup não encontrado: ${backupFileName}`);
@@ -306,15 +339,14 @@ export const restoreBackup = async (
       await mkdir(tempDir, { recursive: true });
     }
 
-    await exec(`tar -xzf ${backupPath} -C ${tempDir}`);
-
-    await exec(`cp -R ${tempDir}/* .`);
+    await execFile("tar", ["-xzf", backupPath, "-C", tempDir]);
+    await copyDirContents(tempDir, ".");
 
     updateStatus.message = "Instalando dependências...";
     updateStatus.progress = 70;
     await saveUpdateStatus();
-    await exec("npm install");
-    await exec(`rm -rf ${tempDir}`);
+    await execFile("npm", ["install"]);
+    await execFile("rm", ["-rf", tempDir]);
 
     updateStatus.status = "completed";
     updateStatus.message = "Backup restaurado com sucesso";

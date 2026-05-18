@@ -80,14 +80,14 @@ const getNetworkInterfaces = async (): Promise<NetworkInterfaceInfo[]> => {
         speed = "Unknown";
       }
 
-      let status = "Unknown";
+      let status = "unknown";
       try {
         const { stdout: statusOutput } = await execPromise(
           `cat /sys/class/net/${name}/operstate 2>/dev/null || echo "unknown"`
         );
         status = statusOutput.trim();
-      } catch (_error) {
-        status = "unknown";
+      } catch {
+        // default "unknown" is used
       }
 
       interfaces.push({

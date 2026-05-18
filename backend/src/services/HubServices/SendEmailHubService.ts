@@ -82,7 +82,7 @@ export const SendEmailHubService = async ({
       bodyHtml: htmlBody || undefined,
       bodyText:
         textBody ||
-        (htmlBody ? htmlBody.replace(/<[^>]+>/g, " ").trim() : undefined),
+        (htmlBody ? htmlBody.slice(0, 500_000).replace(/<[^>]+>/g, " ").trim() : undefined),
       folder: "sent",
       isRead: true
     });

@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 
@@ -45,7 +45,6 @@ import {
 import { styled, keyframes } from "@mui/material/styles";
 import { green, blue } from "@mui/material/colors";
 
-import { AuthContext } from "../../context/Auth/AuthContext";
 import MainContainer from "../../components/MainContainer";
 import MainHeader from "../../components/MainHeader";
 import MainHeaderButtonsWrapper from "../../components/MainHeaderButtonsWrapper";
@@ -232,8 +231,6 @@ const Backup = () => {
   const { t } = useTranslation();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
-  const { user } = useContext(AuthContext);
-
   const [loading, setLoading] = useState(false);
   const [backups, setBackups] = useState([]);
   const [backupName, setBackupName] = useState("");

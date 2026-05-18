@@ -1,5 +1,5 @@
 import { useCallback, useContext, useEffect, useState } from "react";
-import { Box, Chip, CircularProgress } from "@mui/material";
+import { Box, Chip } from "@mui/material";
 import { styled, useTheme } from "@mui/material/styles";
 import { useTranslation } from "react-i18next";
 import { WhatsAppsContext } from "../../context/WhatsApp/WhatsAppsContext";

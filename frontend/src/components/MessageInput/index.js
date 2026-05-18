@@ -785,9 +785,6 @@ const MessageInput = ({ ticketStatus }) => {
     for (let i = 0; i < parts.length; i++) {
       const part = parts[i];
       
-      const textBeforePart = originalMessage.substring(0, originalMessage.indexOf(part));
-      const pipeCount = (textBeforePart.match(/\|/g) || []).length;
-      
       if (i > 0) {
         const previousPart = parts[i - 1];
         const textBetween = originalMessage.substring(

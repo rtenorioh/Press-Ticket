@@ -3,6 +3,7 @@ import { getWbot } from "../../libs/wbot";
 import AppError from "../../errors/AppError";
 import { logger } from "../../utils/logger";
 import fs from "fs";
+import path from "path";
 
 class ProfileManagementService {
   async setStatus(whatsappId: number, status: string): Promise<void> {
@@ -49,10 +50,15 @@ class ProfileManagementService {
       if (mediaPath.startsWith("http://") || mediaPath.startsWith("https://")) {
         media = await MessageMedia.fromUrl(mediaPath);
       } else {
-        if (!fs.existsSync(mediaPath)) {
+        const uploadsDir = path.resolve(__dirname, "..", "..", "..", "public");
+        const resolvedMediaPath = path.resolve(mediaPath);
+        if (!resolvedMediaPath.startsWith(uploadsDir + path.sep)) {
+          throw new AppError("Caminho de arquivo inválido", 400);
+        }
+        if (!fs.existsSync(resolvedMediaPath)) {
           throw new AppError("Arquivo não encontrado");
         }
-        media = MessageMedia.fromFilePath(mediaPath);
+        media = MessageMedia.fromFilePath(resolvedMediaPath);
       }
 
       return await wbot.setProfilePicture(media);

@@ -310,7 +310,6 @@ const VcardPreview = ({ contact, numbers }) => {
                         name: selectedContact.name,
                         number: selectedContact.number
                     });
-                    contactId = newContact.id;
                     setContact(prev => ({ ...prev, id: newContact.id }));
                     setContactTicket({ ...selectedContact, id: newContact.id });
                 }
@@ -362,7 +361,6 @@ const VcardPreview = ({ contact, numbers }) => {
                     name: selectedContact.name,
                     number: cleanNumber
                 });
-                contactId = newContact.id;
                 const contactWithSelectedNumber = {
                     ...selectedContact,
                     number: cleanNumber,

@@ -1,6 +1,7 @@
 import express from "express";
 import multer from "multer";
 import uploadConfig from "../config/upload";
+import { webhookLimiter } from "../config/rateLimiter";
 
 import * as WebhookController from "../controllers/WebhookHubController";
 
@@ -9,6 +10,7 @@ const upload = multer(uploadConfig);
 
 hubWebhookRoutes.post(
   "/hub-webhook/:channelId",
+  webhookLimiter,
   upload.array("medias"),
   WebhookController.listen
 );

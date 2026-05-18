@@ -182,7 +182,7 @@ const Contacts = () => {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [hasMore, setHasMore] = useState(false);
   const [newTicketModalOpen, setNewTicketModalOpen] = useState(false);
-  const [contactTicket, setContactTicket] = useState({});
+  const [contactTicket] = useState({});
   const [filteredTags, setFilteredTags] = useState([]);
   const [blockLoadingId, setBlockLoadingId] = useState(null);
   const [blockedStatus, setBlockedStatus] = useState({});
@@ -714,7 +714,7 @@ const Contacts = () => {
         onClose={setConfirmOpen}
         onConfirm={(e) =>
           deletingContact ? handleDeleteContact(deletingContact.id)
-            : deletingAllContact ? handleDeleteAllContact(deletingAllContact)
+            : deletingAllContact ? handleDeleteAllContact()
               : handleimportContact()
         }
       >

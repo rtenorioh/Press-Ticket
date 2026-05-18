@@ -10,9 +10,7 @@ import {
 } from "react";
 import { useTranslation } from "react-i18next";
 import { AuthContext } from "../../context/Auth/AuthContext";
-import toastError from "../../errors/toastError";
 import useTickets from "../../hooks/useTickets";
-import api from "../../services/api";
 import openSocket from "../../services/socket-io";
 import TagsFilter from "../TagsFilter";
 import TicketListItem from "../TicketListItem";
@@ -210,8 +208,7 @@ const TicketsList = (props) => {
 	const [pageNumber, setPageNumber] = useState(1);
 	const [ticketsList, dispatch] = useReducer(reducer, []);
 	const { user } = useContext(AuthContext);
-	const { profile, queues } = user || {};
-	const [settings, setSettings] = useState([]);
+	const { queues } = user || {};
 	const [filteredTags, setFilteredTags] = useState([]);
 	
 	const statusRef = useRef(status);
@@ -253,18 +250,6 @@ const TicketsList = (props) => {
 	});
 
 	useEffect(() => {
-		const fetchSession = async () => {
-			try {
-				const { data } = await api.get("/settings");
-				setSettings(data);
-			} catch (err) {
-				toastError(err);
-			}
-		};
-		fetchSession();
-	}, []);
-
-	useEffect(() => {
 		
 		dispatch({ type: "LOAD_TICKETS", payload: tickets });
 		// eslint-disable-next-line
@@ -282,8 +267,7 @@ const TicketsList = (props) => {
 			const currentUser = userRef.current;
 			const currentQueueIds = selectedQueueIdsRef.current;
 			const currentIsGroup = isGroupRef.current;
-			const currentShowAll = showAllRef.current;
-			
+
 			if (currentStatus !== ticket.status) {
 				return false;
 			}

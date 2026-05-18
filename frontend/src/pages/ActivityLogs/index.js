@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 import { format } from "date-fns";
@@ -51,7 +51,6 @@ import {
 import { useTheme } from "@mui/material/styles";
 import { green, red, blue, orange, grey } from "@mui/material/colors";
 
-import { AuthContext } from "../../context/Auth/AuthContext";
 import MainContainer from "../../components/MainContainer";
 import MainHeader from "../../components/MainHeader";
 import MainHeaderButtonsWrapper from "../../components/MainHeaderButtonsWrapper";
@@ -185,12 +184,10 @@ const ActivityLogs = () => {
   const { t } = useTranslation();
   const theme = useTheme();
   const classes = getStyles(theme);
-  const { user } = useContext(AuthContext);
-
   const [loading, setLoading] = useState(false);
   const [logs, setLogs] = useState([]);
   const [count, setCount] = useState(0);
-  const [hasMore, setHasMore] = useState(false);
+  const [, setHasMore] = useState(false);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [filters, setFilters] = useState({
@@ -216,7 +213,6 @@ const ActivityLogs = () => {
     todayLogs: 0
   });
   const [entityTypes, setEntityTypes] = useState([]);
-  const [expandedRow, setExpandedRow] = useState(null);
 
   useEffect(() => {
     loadLogs();
@@ -401,7 +397,7 @@ const ActivityLogs = () => {
         </Typography>
         
         {Object.entries(entityDetails).map(([key, value]) => {
-          if (typeof value === "object" || value === null) return null;
+          if (typeof value === "object") return null;
           
           return (
             <Box key={key} sx={classes.detailsItem}>

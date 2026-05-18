@@ -1,12 +1,9 @@
-import { exec } from "child_process";
-import { promisify } from "util";
+import { spawn } from "child_process";
 import fs from "fs";
 import path from "path";
 import { logger } from "../../utils/logger";
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
-
-const execAsync = promisify(exec);
 
 const BACKUP_DIR = process.env.BACKUP_DIR || "./backups";
 const DB_CONFIG = require("../../config/database");
@@ -30,6 +27,79 @@ const formatBytes = (bytes: number): string => {
   const i = Math.floor(Math.log(bytes) / Math.log(1024));
 
   return `${parseFloat((bytes / Math.pow(1024, i)).toFixed(2))} ${sizes[i]}`;
+};
+
+const dbArgs = (): string[] => [
+  `--host=${DB_CONFIG.host}`,
+  `--port=${String(DB_CONFIG.port)}`,
+  `--user=${DB_CONFIG.username}`,
+];
+
+// Password passed via env var to avoid exposure in process listings
+const dbEnv = (): NodeJS.ProcessEnv => ({
+  ...process.env,
+  MYSQL_PWD: DB_CONFIG.password,
+});
+
+const runMysqldump = (filePath: string): Promise<void> => {
+  return new Promise((resolve, reject) => {
+    const dump = spawn("mysqldump", [...dbArgs(), DB_CONFIG.database], {
+      env: dbEnv(),
+    });
+    const gzip = spawn("gzip", []);
+    const out = fs.createWriteStream(filePath);
+
+    dump.stdout.pipe(gzip.stdin);
+    gzip.stdout.pipe(out);
+
+    let settled = false;
+    const fail = (err: Error) => {
+      if (!settled) {
+        settled = true;
+        reject(err);
+      }
+    };
+
+    out.on("finish", () => {
+      if (!settled) {
+        settled = true;
+        resolve();
+      }
+    });
+    out.on("error", fail);
+    dump.on("error", fail);
+    gzip.on("error", fail);
+    dump.stderr.on("data", (d) => logger.warn(`mysqldump: ${d}`));
+  });
+};
+
+const runMysqlRestore = (filePath: string, isGzipped: boolean): Promise<void> => {
+  return new Promise((resolve, reject) => {
+    const mysql = spawn("mysql", [...dbArgs(), DB_CONFIG.database], {
+      env: dbEnv(),
+    });
+    const fileStream = fs.createReadStream(filePath);
+
+    if (isGzipped) {
+      const gunzip = spawn("gunzip", []);
+      fileStream.pipe(gunzip.stdin);
+      gunzip.stdout.pipe(mysql.stdin);
+      gunzip.on("error", reject);
+    } else {
+      fileStream.pipe(mysql.stdin);
+    }
+
+    let settled = false;
+    mysql.on("close", (code) => {
+      if (!settled) {
+        settled = true;
+        if (code === 0) resolve();
+        else reject(new Error(`mysql exited with code ${code}`));
+      }
+    });
+    mysql.on("error", reject);
+    mysql.stderr.on("data", (d) => logger.warn(`mysql: ${d}`));
+  });
 };
 
 export const listBackups = async (): Promise<BackupInfo[]> => {
@@ -76,10 +146,8 @@ export const createBackup = async (
 
     const filePath = path.join(BACKUP_DIR, filename);
 
-    const command = `mysqldump --host=${DB_CONFIG.host} --port=${DB_CONFIG.port} --user=${DB_CONFIG.username} --password=${DB_CONFIG.password} ${DB_CONFIG.database} | gzip > ${filePath}`;
-
     logger.info(`Iniciando backup do banco de dados para ${filePath}`);
-    await execAsync(command);
+    await runMysqldump(filePath);
 
     if (!fs.existsSync(filePath)) {
       throw new Error("Backup falhou: arquivo não foi criado");
@@ -110,7 +178,17 @@ export const restoreBackup = async (
   filename: string
 ): Promise<{ success: boolean; message: string }> => {
   try {
+    // Validate filename to prevent path traversal
+    if (!/^[a-zA-Z0-9._-]+$/.test(filename)) {
+      throw new Error("Nome de arquivo de backup inválido");
+    }
+
     const filePath = path.join(BACKUP_DIR, filename);
+    const resolvedPath = path.resolve(filePath);
+    const resolvedBase = path.resolve(BACKUP_DIR);
+    if (!resolvedPath.startsWith(resolvedBase + path.sep)) {
+      throw new Error("Acesso negado: caminho inválido");
+    }
 
     if (!fs.existsSync(filePath)) {
       throw new Error(`Arquivo de backup não encontrado: ${filename}`);
@@ -118,14 +196,8 @@ export const restoreBackup = async (
 
     logger.info(`Iniciando restauração do backup: ${filePath}`);
 
-    let command;
-    if (filename.endsWith(".sql.gz")) {
-      command = `gunzip < ${filePath} | mysql --host=${DB_CONFIG.host} --port=${DB_CONFIG.port} --user=${DB_CONFIG.username} --password=${DB_CONFIG.password} ${DB_CONFIG.database}`;
-    } else {
-      command = `mysql --host=${DB_CONFIG.host} --port=${DB_CONFIG.port} --user=${DB_CONFIG.username} --password=${DB_CONFIG.password} ${DB_CONFIG.database} < ${filePath}`;
-    }
-
-    await execAsync(command);
+    const isGzipped = filename.endsWith(".sql.gz");
+    await runMysqlRestore(filePath, isGzipped);
 
     logger.info(`Restauração do backup concluída com sucesso: ${filePath}`);
 
@@ -184,7 +256,17 @@ export const deleteBackup = async (
   filename: string
 ): Promise<{ success: boolean; message: string }> => {
   try {
+    // Validate filename to prevent path traversal
+    if (!/^[a-zA-Z0-9._-]+$/.test(filename)) {
+      throw new Error("Nome de arquivo de backup inválido");
+    }
+
     const filePath = path.join(BACKUP_DIR, filename);
+    const resolvedPath = path.resolve(filePath);
+    const resolvedBase = path.resolve(BACKUP_DIR);
+    if (!resolvedPath.startsWith(resolvedBase + path.sep)) {
+      throw new Error("Acesso negado: caminho inválido");
+    }
 
     if (!fs.existsSync(filePath)) {
       throw new Error(`Arquivo de backup não encontrado: ${filename}`);

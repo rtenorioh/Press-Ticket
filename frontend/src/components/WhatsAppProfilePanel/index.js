@@ -6,7 +6,6 @@ import {
   Button,
   Divider,
   CircularProgress,
-  Avatar,
   Chip,
   Paper,
   Select,

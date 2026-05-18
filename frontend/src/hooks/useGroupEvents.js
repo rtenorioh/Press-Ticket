@@ -41,7 +41,7 @@ const useGroupEvents = (whatsappId) => {
   }, [whatsappId]);
 
   const formatEventMessage = (event) => {
-    const { eventType, participantName, groupId, newValue, performedByName } = event;
+    const { eventType, participantName, newValue, performedByName } = event;
 
     switch (eventType) {
       case "PARTICIPANT_ADDED":

@@ -258,7 +258,7 @@ const QuickAnswers = () => {
         onClose={setConfirmModalOpen}
         onConfirm={() =>
           deletingQuickAnswers ? handleDeleteQuickAnswers(deletingQuickAnswers.id)
-            : handleDeleteAllQuickAnswers(deletingAllQuickAnswers)
+            : handleDeleteAllQuickAnswers()
         }
       >
         {

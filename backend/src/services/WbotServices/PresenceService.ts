@@ -33,7 +33,8 @@ class PresenceService {
 
       // Aguardar a duração especificada
       if (state !== "available" && duration > 0) {
-        await new Promise(resolve => setTimeout(resolve, duration));
+        const safeDuration = Math.min(duration, 30_000);
+        await new Promise(resolve => setTimeout(resolve, safeDuration));
       }
     } catch (error) {
       logger.error(`[PRESENCE] Erro ao enviar presença: ${error}`);

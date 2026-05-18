@@ -433,7 +433,7 @@ function ErrorLogs() {
 
   useEffect(() => {
     if (user) {
-      fetchLogs(false);
+      fetchLogs();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -517,7 +517,7 @@ function ErrorLogs() {
     setPage(0);
     setLogs([]);
     setHasMore(true);
-    fetchLogs(false);
+    fetchLogs();
   };
 
   const handleOpenFilterDialog = () => {

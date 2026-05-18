@@ -1,4 +1,4 @@
-import { Fragment, useContext, useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import {
   Paper,
   Typography,
@@ -26,7 +26,6 @@ import {
 import { toast } from "react-toastify";
 import api from "../../services/api";
 import toastError from "../../errors/toastError";
-import { AuthContext } from "../../context/Auth/AuthContext";
 import MainContainer from "../../components/MainContainer";
 import MainHeader from "../../components/MainHeader";
 import MainHeaderButtonsWrapper from "../../components/MainHeaderButtonsWrapper";
@@ -35,7 +34,6 @@ import { useTranslation } from "react-i18next";
 
 const BlockedContacts = () => {
   const { t } = useTranslation();
-  const { user } = useContext(AuthContext);
   const [loading, setLoading] = useState(false);
   const [blockedContacts, setBlockedContacts] = useState([]);
   const [whatsapps, setWhatsapps] = useState([]);

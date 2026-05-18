@@ -72,7 +72,7 @@ const FindOrCreateContactService = async (
         contact
       });
     } else {
-      grupoExists = await Contact.create({
+      await Contact.create({
         name: group.name,
         telegramId: group.id,
         isGroup: true,

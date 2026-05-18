@@ -1,6 +1,17 @@
+import { execFile as execFileCb } from "child_process";
+import { promisify } from "util";
 import { Request, Response } from "express";
-import { exec } from "child_process";
 import { logger } from "../utils/logger";
+import AppError from "../errors/AppError";
+
+const execFile = promisify(execFileCb);
+
+function validatePm2Id(id: string): string {
+  if (!/^[a-zA-Z0-9_-]{1,50}$/.test(id)) {
+    throw new AppError("Identificador PM2 inválido", 400);
+  }
+  return id;
+}
 
 export const restartPm2 = async (
   req: Request,
@@ -9,46 +20,19 @@ export const restartPm2 = async (
   if (process.env.PM2_FRONTEND && process.env.PM2_BACKEND) {
     res.status(200).json({ status: "Reiniciando o Sistema" });
 
-    setTimeout(() => {
-      const restartFrontend = () => {
-        return new Promise((resolve, reject) => {
-          exec(
-            `pm2 restart ${process.env.PM2_FRONTEND}`,
-            (error, stdout, _stderr) => {
-              if (error) {
-                logger.error(`Erro ao reiniciar frontend: ${error.message}`);
-                reject(error);
-                return;
-              }
-              logger.info(`Frontend reiniciado com sucesso: ${stdout}`);
-              resolve(stdout);
-            }
-          );
-        });
-      };
+    setTimeout(async () => {
+      try {
+        const frontendId = validatePm2Id(process.env.PM2_FRONTEND!);
+        const backendId = validatePm2Id(process.env.PM2_BACKEND!);
 
-      const restartBackend = () => {
-        return new Promise((resolve, reject) => {
-          exec(
-            `pm2 restart ${process.env.PM2_BACKEND}`,
-            (error, stdout, _stderr) => {
-              if (error) {
-                logger.error(`Erro ao reiniciar backend: ${error.message}`);
-                reject(error);
-                return;
-              }
-              logger.info(`Backend reiniciado com sucesso: ${stdout}`);
-              resolve(stdout);
-            }
-          );
-        });
-      };
+        const { stdout: frontStdout } = await execFile("pm2", ["restart", frontendId]);
+        logger.info(`Frontend reiniciado com sucesso: ${frontStdout}`);
 
-      restartFrontend()
-        .then(() => restartBackend())
-        .catch(err => {
-          logger.error(`Erro ao reiniciar o sistema: ${err}`);
-        });
+        const { stdout: backStdout } = await execFile("pm2", ["restart", backendId]);
+        logger.info(`Backend reiniciado com sucesso: ${backStdout}`);
+      } catch (err: any) {
+        logger.error(`Erro ao reiniciar o sistema: ${err.message}`);
+      }
     }, 100);
 
     return res.end();

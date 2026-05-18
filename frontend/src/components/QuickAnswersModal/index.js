@@ -177,7 +177,7 @@ const QuickAnswersModal = ({
       }
 
       if (quickAnswerId) {
-        const response = await api.put(`/quickAnswers/${quickAnswerId}`, formData, {
+        await api.put(`/quickAnswers/${quickAnswerId}`, formData, {
           headers: {
             "Content-Type": "multipart/form-data",
           },

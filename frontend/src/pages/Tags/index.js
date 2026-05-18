@@ -243,7 +243,7 @@ const Tags = () => {
         onClose={setConfirmModalOpen}
         onConfirm={() =>
           deletingTag ? handleDeleteTag(deletingTag.id)
-            : handleDeleteAllTags(deletingAllTags)
+            : handleDeleteAllTags()
         }
       >
         {

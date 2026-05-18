@@ -11,7 +11,7 @@ import errorLogger from "./middleware/errorLogger";
 import updateLastActivity from "./middleware/updateLastActivity";
 import { logger } from "./utils/logger";
 
-import { apiLimiter } from "./config/rateLimiter";
+import { apiLimiter, rateLimiter } from "./config/rateLimiter";
 import swaggerSpec from "./config/swagger";
 import uploadConfig from "./config/upload";
 import "./database";
@@ -51,11 +51,28 @@ app.use((req, res, next) => {
     });
   } else {
     helmet({
-      contentSecurityPolicy: false,
+      contentSecurityPolicy: {
+        directives: {
+          defaultSrc: ["'self'"],
+          scriptSrc: ["'self'"],
+          styleSrc: ["'self'", "'unsafe-inline'"],
+          imgSrc: ["'self'", "data:", "blob:", "https:"],
+          connectSrc: ["'self'", "wss:", "ws:", "https:"],
+          fontSrc: ["'self'", "data:"],
+          objectSrc: ["'none'"],
+          mediaSrc: ["'self'", "blob:"],
+          frameSrc: ["'none'"],
+          upgradeInsecureRequests: []
+        }
+      },
       crossOriginEmbedderPolicy: false,
-      crossOriginResourcePolicy: false,
-      xContentTypeOptions: false,
-      permittedCrossDomainPolicies: { permittedPolicies: "none" }
+      crossOriginResourcePolicy: { policy: "cross-origin" },
+      hsts: {
+        maxAge: 31536000,
+        includeSubDomains: true,
+        preload: true
+      },
+      referrerPolicy: { policy: "strict-origin-when-cross-origin" }
     })(req, res, next);
   }
 });
@@ -73,7 +90,7 @@ app.use(compression());
 app.use(
   "/hub-webhook",
   cors({
-    origin: true,
+    origin: false, // server-to-server: bloqueia chamadas cross-origin de browsers
     credentials: false,
     methods: ["POST", "OPTIONS"],
     allowedHeaders: [
@@ -175,6 +192,7 @@ app.use(
   },
   express.static(uploadConfig.directory)
 );
+app.use(rateLimiter);
 app.use(routes);
 app.use(updateLastActivity);
 

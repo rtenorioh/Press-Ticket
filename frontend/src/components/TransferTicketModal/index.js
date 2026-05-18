@@ -98,7 +98,7 @@ const TransferTicketModal = ({ modalOpen, onClose, ticketid, ticketWhatsappId })
         data.userId = selectedUser.id
       }
 
-      if (selectedQueue && selectedQueue !== null) {
+      if (selectedQueue) {
         data.queueId = selectedQueue
 
         if (!selectedUser) {

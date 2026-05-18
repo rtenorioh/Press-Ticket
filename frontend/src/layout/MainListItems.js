@@ -167,7 +167,7 @@ function ListItemLink(props) {
 }
 
 function ListItemLinkWithDropdown(props) {
-  const { icon, primary, to, active, drawerClose, open, onToggle, children } = props;
+  const { icon, primary, to, active, open, onToggle, children } = props;
   const navigate = (e) => {
     // Navega para a página
     window.location.href = to;

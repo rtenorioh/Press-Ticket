@@ -243,7 +243,7 @@ const ClientStatus = () => {
         onClose={setConfirmModalOpen}
         onConfirm={() =>
           deletingClientStatus ? handleDeleteClientStatus(deletingClientStatus.id)
-            : handleDeleteAllClientStatus(deletingAllClientStatus)
+            : handleDeleteAllClientStatus()
         }
       >
         {

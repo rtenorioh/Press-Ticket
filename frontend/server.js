@@ -18,13 +18,17 @@ const isProduction = process.env.NODE_ENV === 'production';
 if (isProduction) {
 	app.use(
 		helmet({
-			contentSecurityPolicy: false,	
+			contentSecurityPolicy: false,
 			crossOriginEmbedderPolicy: false,
 			frameguard: false,
 			xContentTypeOptions: false,
 			xXssProtection: false,
 			referrerPolicy: false,
 			permissionsPolicy: false,
+			hsts: {
+				maxAge: 31536000,
+				includeSubDomains: true,
+			},
 		})
 	);
 	console.log('🔒 Modo Produção: Security headers gerenciados pelo Nginx');

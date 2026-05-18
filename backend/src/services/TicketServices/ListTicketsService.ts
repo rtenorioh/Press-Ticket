@@ -147,7 +147,7 @@ const ListTicketsService = async ({
     }
 
     if (status === "closed") {
-      if (!isAdmin || (isAdmin && showAll !== "true")) {
+      if (!isAdmin || showAll !== "true") {
         whereCondition = {
           ...whereCondition,
           userId: userId
@@ -211,7 +211,7 @@ const ListTicketsService = async ({
         }
       }
     } else if (status === "open") {
-      if (!isAdmin || (isAdmin && showAll !== "true")) {
+      if (!isAdmin || showAll !== "true") {
         if (queueIds && queueIds.length > 0) {
           whereCondition = {
             ...whereCondition,
@@ -228,7 +228,7 @@ const ListTicketsService = async ({
             [Op.or]: [{ userId: userId }]
           };
         }
-      } else if (isAdmin && showAll === "true") {
+      } else {
         whereCondition = {
           ...whereCondition
         };

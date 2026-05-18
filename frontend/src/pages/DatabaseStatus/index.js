@@ -170,13 +170,6 @@ const DatabaseStatus = () => {
     return 'error';
   };
 
-  const getStatusIcon = (status) => {
-    if (status === 'online') {
-      return <CheckCircleIcon className={classes.healthyIcon} />;
-    }
-    return <ErrorIcon className={classes.criticalIcon} />;
-  };
-
   if (loading) {
     return (
       <MainContainer>

@@ -196,7 +196,6 @@ const TicketsManager = () => {
   const [pendingCount, setPendingCount] = useState(0);
   const [closedCount, setClosedCount] = useState(0);
   const [openGroupsCount, setOpenGroupsCount] = useState(0);
-  const userQueueIds = user?.queues?.map((q) => q.id);
   const [settings, setSettings] = useState([]);
   const [selectedQueueIds, setSelectedQueueIds] = useState([]);
   const [selectedChannelIds, setSelectedChannelIds] = useState([]);

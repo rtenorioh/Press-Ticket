@@ -22,7 +22,7 @@ export const checkAndUpdateNotificationTime = async ({
   const thirtyMinutesAgo = new Date(now.getTime() - 30 * 60 * 1000);
 
   if (!notification) {
-    notification = await WhatsappNotification.create({
+    await WhatsappNotification.create({
       whatsappId,
       lastNotificationTime: now
     });

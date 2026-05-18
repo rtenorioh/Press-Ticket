@@ -414,41 +414,6 @@ const Channels = () => {
 		}
 	};
 
-	const handleStartWhatsAppSession = async whatsAppId => {
-		try {
-			setLoadingActions(prev => ({ ...prev, [whatsAppId]: 'startSession' }));
-			setActionMessages(prev => ({ ...prev, [whatsAppId]: 'Iniciando sessão...' }));
-			
-			const startSessionToastId = toast.info('Iniciando sessão do WhatsApp...', {
-				autoClose: false,
-				closeButton: false,
-				draggable: false,
-			});
-			
-			await api.post(`/whatsappsession/${whatsAppId}`);
-			
-			toast.update(startSessionToastId, {
-				render: 'Sessão iniciada com sucesso! Aguarde...',
-				type: toast.TYPE.SUCCESS,
-			});
-			
-			setTimeout(() => {
-				setLoadingActions(prev => ({ ...prev, [whatsAppId]: undefined }));
-				setActionMessages(prev => ({ ...prev, [whatsAppId]: undefined }));
-				
-				toast.dismiss(startSessionToastId);
-				
-				toast.success('Sessão iniciada com sucesso!');
-				
-				fetchWhatsApps();
-			}, 3000);
-		} catch (err) {
-			toastError(err, t);
-			setLoadingActions(prev => ({ ...prev, [whatsAppId]: undefined }));
-			setActionMessages(prev => ({ ...prev, [whatsAppId]: undefined }));
-		}
-	};
-
 	const handleRequestNewQrCode = async whatsAppId => {
 		try {
 			setLoadingActions(prev => ({ ...prev, [whatsAppId]: 'newQrCode' }));

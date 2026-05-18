@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import GetClientIp from "../helpers/GetClientIp";
+import { validateId } from "../helpers/validateId";
 import GetTicketWbot from "../helpers/GetTicketWbot";
 import SerializeWbotMsgId from "../helpers/SerializeWbotMsgId";
 import SetTicketMessagesAsRead from "../helpers/SetTicketMessagesAsRead";
@@ -155,7 +156,7 @@ export const getReactions = async (
               if (!profilePicUrl) {
                 profilePicUrl = contact.profilePicUrl;
               }
-            } else if (phoneNumber) {
+            } else {
               contactName = phoneNumber;
             }
           }
@@ -500,7 +501,7 @@ export const listStarred = async (
 };
 
 export const store = async (req: Request, res: Response): Promise<Response> => {
-  const { ticketId } = req.params;
+  const ticketId = String(validateId(req.params.ticketId, "ticketId"));
   const { body, quotedMsg, sendAsDocument }: any = req.body;
   let { mentions } = req.body;
   const medias = req.files as Express.Multer.File[];
@@ -561,7 +562,7 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
         entityId: ticket.id,
         ip: clientIp,
         additionalData: {
-          ticketId: parseInt(ticketId),
+          ticketId: Number(ticketId),
           messageType: "media",
           mediaCount: medias.length,
           mediaTypes: medias.map(m => m.mimetype),
@@ -594,7 +595,7 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
         entityId: ticket.id,
         ip: clientIp,
         additionalData: {
-          ticketId: parseInt(ticketId),
+          ticketId: Number(ticketId),
           messageType: "text",
           messageLength: body?.length || 0,
           hasQuote: !!quotedMsg,
@@ -759,7 +760,7 @@ export const sendContacts = async (
         entityId: ticket.id,
         ip: clientIp,
         additionalData: {
-          ticketId: parseInt(ticketId),
+          ticketId: Number(ticketId),
           messageType: "vcard",
           contactCount: contacts.length,
           contactIds: contacts.map((c: any) => c.id)

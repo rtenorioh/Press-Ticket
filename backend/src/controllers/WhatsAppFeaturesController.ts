@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { logger } from "../utils/logger";
+import { validateId } from "../helpers/validateId";
 
 import Ticket from "../models/Ticket";
 import ShowTicketService from "../services/TicketServices/ShowTicketService";
@@ -67,7 +68,7 @@ export const searchMessages = async (
 
   try {
     const result = await SearchMessagesService({
-      whatsappId: Number(whatsappId),
+      whatsappId: validateId(whatsappId, "whatsappId"),
       query: query as string,
       chatId: chatId as string,
       page: page ? Number(page) : 1,
@@ -93,7 +94,7 @@ export const acceptInvite = async (
 
   try {
     const groupId = await AcceptGroupInvite({
-      whatsappId: Number(whatsappId),
+      whatsappId: validateId(whatsappId, "whatsappId"),
       inviteCode
     });
     return res
@@ -115,7 +116,7 @@ export const getInviteInfo = async (
 
   try {
     const info = await GetGroupInviteInfo({
-      whatsappId: Number(whatsappId),
+      whatsappId: validateId(whatsappId, "whatsappId"),
       inviteCode: inviteCode as string
     });
     return res.status(200).json(info);
@@ -163,7 +164,7 @@ export const sendSeen = async (
   const { whatsappId, chatId } = req.body;
 
   try {
-    await ChatManagementService.sendSeen(Number(whatsappId), chatId);
+    await ChatManagementService.sendSeen(validateId(whatsappId, "whatsappId"), chatId);
     return res.status(200).json({ message: "Chat marcado como visto" });
   } catch (error: any) {
     return res.status(500).json({ error: error.message });
@@ -177,7 +178,7 @@ export const archiveChat = async (
   const { whatsappId, chatId } = req.body;
 
   try {
-    await ChatManagementService.archiveChat(Number(whatsappId), chatId);
+    await ChatManagementService.archiveChat(validateId(whatsappId, "whatsappId"), chatId);
     return res.status(200).json({ message: "Chat arquivado" });
   } catch (error: any) {
     return res.status(500).json({ error: error.message });
@@ -191,7 +192,7 @@ export const unarchiveChat = async (
   const { whatsappId, chatId } = req.body;
 
   try {
-    await ChatManagementService.unarchiveChat(Number(whatsappId), chatId);
+    await ChatManagementService.unarchiveChat(validateId(whatsappId, "whatsappId"), chatId);
     return res.status(200).json({ message: "Chat desarquivado" });
   } catch (error: any) {
     return res.status(500).json({ error: error.message });
@@ -206,7 +207,7 @@ export const pinChat = async (
 
   try {
     const result = await ChatManagementService.pinChat(
-      Number(whatsappId),
+      validateId(whatsappId, "whatsappId"),
       chatId
     );
     if (ticketId) {
@@ -226,7 +227,7 @@ export const unpinChat = async (
 
   try {
     const result = await ChatManagementService.unpinChat(
-      Number(whatsappId),
+      validateId(whatsappId, "whatsappId"),
       chatId
     );
     if (ticketId) {
@@ -246,7 +247,7 @@ export const muteChat = async (
 
   try {
     await ChatManagementService.muteChat(
-      Number(whatsappId),
+      validateId(whatsappId, "whatsappId"),
       chatId,
       new Date(unmuteDate)
     );
@@ -266,7 +267,7 @@ export const unmuteChat = async (
   const { whatsappId, chatId, ticketId } = req.body;
 
   try {
-    await ChatManagementService.unmuteChat(Number(whatsappId), chatId);
+    await ChatManagementService.unmuteChat(validateId(whatsappId, "whatsappId"), chatId);
     if (ticketId) {
       await Ticket.update({ mutedChat: false }, { where: { id: ticketId } });
     }
@@ -283,7 +284,7 @@ export const markUnread = async (
   const { whatsappId, chatId } = req.body;
 
   try {
-    await ChatManagementService.markUnread(Number(whatsappId), chatId);
+    await ChatManagementService.markUnread(validateId(whatsappId, "whatsappId"), chatId);
     return res.status(200).json({ message: "Chat marcado como não lido" });
   } catch (error: any) {
     return res.status(500).json({ error: error.message });
@@ -298,7 +299,7 @@ export const fetchMessages = async (
 
   try {
     const messages = await ChatManagementService.fetchMessages(
-      Number(whatsappId),
+      validateId(whatsappId, "whatsappId"),
       chatId as string,
       limit ? Number(limit) : 50
     );
@@ -316,7 +317,7 @@ export const clearMessages = async (
 
   try {
     const result = await ChatManagementService.clearMessages(
-      Number(whatsappId),
+      validateId(whatsappId, "whatsappId"),
       chatId
     );
     return res
@@ -335,7 +336,7 @@ export const getChatInfo = async (
 
   try {
     const info = await ChatManagementService.getChatInfo(
-      Number(whatsappId),
+      validateId(whatsappId, "whatsappId"),
       chatId as string
     );
     if (ticketId) {
@@ -357,7 +358,7 @@ export const getChats = async (
   const { whatsappId } = req.query;
 
   try {
-    const chats = await ChatManagementService.getChats(Number(whatsappId));
+    const chats = await ChatManagementService.getChats(validateId(whatsappId, "whatsappId"));
     return res.status(200).json(chats);
   } catch (error: any) {
     return res.status(500).json({ error: error.message });
@@ -372,7 +373,7 @@ export const getLabels = async (
   const { whatsappId } = req.query;
 
   try {
-    const labels = await LabelsService.getLabels(Number(whatsappId));
+    const labels = await LabelsService.getLabels(validateId(whatsappId, "whatsappId"));
     return res.status(200).json(labels);
   } catch (error: any) {
     return res.status(500).json({ error: error.message });
@@ -387,7 +388,7 @@ export const getLabelById = async (
 
   try {
     const label = await LabelsService.getLabelById(
-      Number(whatsappId),
+      validateId(whatsappId, "whatsappId"),
       labelId as string
     );
     return res.status(200).json(label);
@@ -404,7 +405,7 @@ export const getChatLabels = async (
 
   try {
     const labels = await LabelsService.getChatLabels(
-      Number(whatsappId),
+      validateId(whatsappId, "whatsappId"),
       chatId as string
     );
     return res.status(200).json(labels);
@@ -421,7 +422,7 @@ export const getChatsByLabel = async (
 
   try {
     const chats = await LabelsService.getChatsByLabelId(
-      Number(whatsappId),
+      validateId(whatsappId, "whatsappId"),
       labelId as string
     );
     return res.status(200).json(chats);
@@ -438,7 +439,7 @@ export const changeChatLabels = async (
 
   try {
     await LabelsService.addOrRemoveChatLabels(
-      Number(whatsappId),
+      validateId(whatsappId, "whatsappId"),
       chatId,
       labelIds
     );
@@ -456,7 +457,7 @@ export const setStatus = async (
   const { whatsappId, status } = req.body;
 
   try {
-    await ProfileManagementService.setStatus(Number(whatsappId), status);
+    await ProfileManagementService.setStatus(validateId(whatsappId, "whatsappId"), status);
     return res.status(200).json({ message: "Status atualizado" });
   } catch (error: any) {
     return res.status(500).json({ error: error.message });
@@ -471,7 +472,7 @@ export const setDisplayName = async (
 
   try {
     const result = await ProfileManagementService.setDisplayName(
-      Number(whatsappId),
+      validateId(whatsappId, "whatsappId"),
       name
     );
     return res
@@ -490,7 +491,7 @@ export const setProfilePicture = async (
 
   try {
     const result = await ProfileManagementService.setProfilePicture(
-      Number(whatsappId),
+      validateId(whatsappId, "whatsappId"),
       mediaPath
     );
     return res
@@ -509,7 +510,7 @@ export const removeProfilePicture = async (
 
   try {
     const result = await ProfileManagementService.removeProfilePicture(
-      Number(whatsappId)
+      validateId(whatsappId, "whatsappId")
     );
     return res
       .status(200)
@@ -527,7 +528,7 @@ export const getWWebVersion = async (
 
   try {
     const version = await ProfileManagementService.getWWebVersion(
-      Number(whatsappId)
+      validateId(whatsappId, "whatsappId")
     );
     return res.status(200).json({ version });
   } catch (error: any) {
@@ -542,7 +543,7 @@ export const setPresenceUnavailable = async (
   const { whatsappId } = req.body;
 
   try {
-    await ProfileManagementService.sendPresenceUnavailable(Number(whatsappId));
+    await ProfileManagementService.sendPresenceUnavailable(validateId(whatsappId, "whatsappId"));
     return res
       .status(200)
       .json({ message: "Presença definida como indisponível" });
@@ -558,7 +559,7 @@ export const setPresenceAvailable = async (
   const { whatsappId } = req.body;
 
   try {
-    await ProfileManagementService.sendPresenceAvailable(Number(whatsappId));
+    await ProfileManagementService.sendPresenceAvailable(validateId(whatsappId, "whatsappId"));
     return res
       .status(200)
       .json({ message: "Presença definida como disponível" });
@@ -576,7 +577,7 @@ export const getContactAbout = async (
 
   try {
     const about = await ContactActionsService.getAbout(
-      Number(whatsappId),
+      validateId(whatsappId, "whatsappId"),
       contactId as string
     );
     return res.status(200).json({ about });
@@ -593,7 +594,7 @@ export const getContactInfo = async (
 
   try {
     const info = await ContactActionsService.getContactInfo(
-      Number(whatsappId),
+      validateId(whatsappId, "whatsappId"),
       contactId as string
     );
     return res.status(200).json(info);
@@ -610,7 +611,7 @@ export const blockContact = async (
 
   try {
     const result = await ContactActionsService.blockContact(
-      Number(whatsappId),
+      validateId(whatsappId, "whatsappId"),
       contactId
     );
     return res
@@ -629,7 +630,7 @@ export const unblockContact = async (
 
   try {
     const result = await ContactActionsService.unblockContact(
-      Number(whatsappId),
+      validateId(whatsappId, "whatsappId"),
       contactId
     );
     return res
@@ -648,7 +649,7 @@ export const getBlockedContacts = async (
 
   try {
     const contacts = await ContactActionsService.getBlockedContacts(
-      Number(whatsappId)
+      validateId(whatsappId, "whatsappId")
     );
     return res.status(200).json(contacts);
   } catch (error: any) {
@@ -664,7 +665,7 @@ export const getCommonGroups = async (
 
   try {
     const groups = await ContactActionsService.getCommonGroups(
-      Number(whatsappId),
+      validateId(whatsappId, "whatsappId"),
       contactId as string
     );
     return res.status(200).json(groups);
@@ -682,7 +683,7 @@ export const getGroupMembershipRequests = async (
 
   try {
     const requests = await GroupMembershipRequestsService.getRequests(
-      Number(whatsappId),
+      validateId(whatsappId, "whatsappId"),
       groupId as string
     );
     return res.status(200).json(requests);
@@ -699,7 +700,7 @@ export const approveGroupMembershipRequests = async (
 
   try {
     const results = await GroupMembershipRequestsService.approveRequests(
-      Number(whatsappId),
+      validateId(whatsappId, "whatsappId"),
       groupId,
       requesterIds
     );
@@ -717,7 +718,7 @@ export const rejectGroupMembershipRequests = async (
 
   try {
     const results = await GroupMembershipRequestsService.rejectRequests(
-      Number(whatsappId),
+      validateId(whatsappId, "whatsappId"),
       groupId,
       requesterIds
     );
@@ -848,7 +849,7 @@ export const getPinnedMessages = async (
     const { GetPinnedMessages } =
       await import("../services/WbotServices/GetPinnedMessagesService");
     const pinnedMessages = await GetPinnedMessages(
-      Number(whatsappId),
+      validateId(whatsappId, "whatsappId"),
       chatId as string
     );
     return res.status(200).json(pinnedMessages);
@@ -868,7 +869,7 @@ export const checkMessagePinned = async (
     const { CheckIfMessageIsPinned } =
       await import("../services/WbotServices/GetPinnedMessagesService");
     const isPinned = await CheckIfMessageIsPinned(
-      Number(whatsappId),
+      validateId(whatsappId, "whatsappId"),
       chatId as string,
       messageId as string
     );
