@@ -86,7 +86,12 @@ export const getReactions = async (
 
       const myNumber = wbot.info?.wid?._serialized || null;
 
-      type ReactionGroup = { id: string; aggregateEmoji: string; hasReactionByMe: boolean; senders: unknown[] };
+      type ReactionGroup = {
+        id: string;
+        aggregateEmoji: string;
+        hasReactionByMe: boolean;
+        senders: unknown[];
+      };
       const groupedReactions: Record<string, ReactionGroup> = {};
 
       for (const reaction of dbReactions) {
@@ -111,10 +116,18 @@ export const getReactions = async (
         try {
           if (reaction.senderId.includes("@lid")) {
             try {
-              const wbotDyn = wbot as unknown as Record<string, (...args: unknown[]) => unknown>;
-              const contact = await wbotDyn.getContactById(reaction.senderId) as Record<string, unknown> | null;
+              const wbotDyn = wbot as unknown as Record<
+                string,
+                (...args: unknown[]) => unknown
+              >;
+              const contact = (await wbotDyn.getContactById(
+                reaction.senderId
+              )) as Record<string, unknown> | null;
               if (contact) {
-                phoneNumber = (contact.number || (contact.id as Record<string, unknown>)?.user) as string | null;
+                phoneNumber = (contact.number ||
+                  (contact.id as Record<string, unknown>)?.user) as
+                  | string
+                  | null;
                 if (!isMyReaction) {
                   contactName =
                     (contact.name as string) ||
@@ -125,7 +138,9 @@ export const getReactions = async (
                 }
 
                 try {
-                  profilePicUrl = await wbotDyn.getProfilePicUrl(reaction.senderId) as string | null;
+                  profilePicUrl = (await wbotDyn.getProfilePicUrl(
+                    reaction.senderId
+                  )) as string | null;
                 } catch (e) {
                   logger.error(
                     `[getReactions] Erro ao buscar foto do @lid: ${e}`
@@ -195,7 +210,10 @@ export const getReactions = async (
 
     const serializedId = (() => {
       try {
-        return SerializeWbotMsgId(ticket as unknown as Parameters<typeof SerializeWbotMsgId>[0], message as unknown as Parameters<typeof SerializeWbotMsgId>[1]);
+        return SerializeWbotMsgId(
+          ticket as unknown as Parameters<typeof SerializeWbotMsgId>[0],
+          message as unknown as Parameters<typeof SerializeWbotMsgId>[1]
+        );
       } catch {
         return null;
       }
@@ -214,8 +232,14 @@ export const getReactions = async (
     const tryGetReactionsNode = async (id?: string | null) => {
       if (!id) return null;
       try {
-        const wbotDyn2 = wbot as unknown as Record<string, ((...args: unknown[]) => unknown) | undefined>;
-        const msg = await wbotDyn2.getMessageById?.(id) as Record<string, unknown> | null | undefined;
+        const wbotDyn2 = wbot as unknown as Record<
+          string,
+          ((...args: unknown[]) => unknown) | undefined
+        >;
+        const msg = (await wbotDyn2.getMessageById?.(id)) as
+          | Record<string, unknown>
+          | null
+          | undefined;
         if (msg && typeof msg.getReactions === "function") {
           const r = await msg.getReactions();
           if (Array.isArray(r)) return r;
@@ -260,7 +284,8 @@ export const getReactions = async (
             get?: (id: string) => WWebMsg | undefined;
             models?: WWebMsg[];
           };
-          const Store = (window as unknown as Record<string, unknown>).Store as Record<string, unknown> & {
+          const Store = (window as unknown as Record<string, unknown>)
+            .Store as Record<string, unknown> & {
             Contact?: { get?: (id: string) => WWebContactEntry | undefined };
             Msg?: WWebMsgCol;
             Chat?: { get?: (id: string) => WWebMsg | undefined };
@@ -274,7 +299,9 @@ export const getReactions = async (
                 processed.senders = processed.senders.map((sender: unknown) => {
                   const s = sender as Record<string, Record<string, string>>;
                   const senderId =
-                    s?.id?._serialized || s?.id?.user || s?.id as unknown as string;
+                    s?.id?._serialized ||
+                    s?.id?.user ||
+                    (s?.id as unknown as string);
                   let contactName = "Contato";
 
                   if (senderId) {
@@ -489,10 +516,9 @@ export const searchInTicket = async (
     });
     return res.json(result);
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Erro ao buscar mensagens";
-    return res
-      .status(400)
-      .json({ error: message });
+    const message =
+      error instanceof Error ? error.message : "Erro ao buscar mensagens";
+    return res.status(400).json({ error: message });
   }
 };
 
@@ -519,14 +545,19 @@ export const listStarred = async (
       fromMe: msg.fromMe,
       mediaType: msg.mediaType,
       createdAt: msg.createdAt,
-      contactName: (msg as Message & { contact?: { name?: string } }).contact?.name || null
+      contactName:
+        (msg as Message & { contact?: { name?: string } }).contact?.name || null
     }))
   });
 };
 
 export const store = async (req: Request, res: Response): Promise<Response> => {
   const ticketId = String(validateId(req.params.ticketId, "ticketId"));
-  const { body, quotedMsg, sendAsDocument } = req.body as { body: string; quotedMsg?: Message; sendAsDocument?: boolean | string };
+  const { body, quotedMsg, sendAsDocument } = req.body as {
+    body: string;
+    quotedMsg?: Message;
+    sendAsDocument?: boolean | string;
+  };
   let { mentions } = req.body;
   const medias = req.files as Express.Multer.File[];
   const logUserId = req.user?.id || 1;
@@ -907,7 +938,8 @@ export const forwardMessages = async (
     });
   } catch (error: unknown) {
     logger.error(`Erro ao encaminhar mensagens: ${error}`);
-    const message = error instanceof Error ? error.message : "Erro ao encaminhar mensagens";
+    const message =
+      error instanceof Error ? error.message : "Erro ao encaminhar mensagens";
 
     if (message === "ERR_NO_DEF_WAPP_FOUND") {
       return res.status(400).json({
@@ -958,10 +990,9 @@ export const sendPoll = async (
     return res.json(message);
   } catch (error: unknown) {
     logger.error(`Erro ao enviar enquete: ${error}`);
-    const message = error instanceof Error ? error.message : "Erro ao enviar enquete";
-    return res
-      .status(500)
-      .json({ error: message });
+    const message =
+      error instanceof Error ? error.message : "Erro ao enviar enquete";
+    return res.status(500).json({ error: message });
   }
 };
 
@@ -988,7 +1019,10 @@ export const sendTypingIndicator = async (
     });
   } catch (error: unknown) {
     logger.error(`Erro ao enviar indicador de digitação: ${error}`);
-    const message = error instanceof Error ? error.message : "Erro ao enviar indicador de digitação";
+    const message =
+      error instanceof Error
+        ? error.message
+        : "Erro ao enviar indicador de digitação";
     return res.status(500).json({
       error: message
     });
@@ -1018,10 +1052,11 @@ export const sendRecordingIndicator = async (
     });
   } catch (error: unknown) {
     logger.error(`Erro ao enviar indicador de gravação: ${error}`);
-    const message = error instanceof Error ? error.message : "Erro ao enviar indicador de gravação";
-    return res
-      .status(500)
-      .json({ error: message });
+    const message =
+      error instanceof Error
+        ? error.message
+        : "Erro ao enviar indicador de gravação";
+    return res.status(500).json({ error: message });
   }
 };
 
@@ -1043,9 +1078,8 @@ export const setAvailablePresence = async (
     });
   } catch (error: unknown) {
     logger.error(`Erro ao definir presença: ${error}`);
-    const message = error instanceof Error ? error.message : "Erro ao definir presença";
-    return res
-      .status(500)
-      .json({ error: message });
+    const message =
+      error instanceof Error ? error.message : "Erro ao definir presença";
+    return res.status(500).json({ error: message });
   }
 };

@@ -153,11 +153,14 @@ class ContactActionsService {
   async getBlockedContacts(whatsappId: number): Promise<BlockedContact[]> {
     try {
       const wbot = getWbot(whatsappId);
-      const blocked = await (wbot as unknown as ClientWithBlocked).getBlockedContacts();
+      const blocked = await (
+        wbot as unknown as ClientWithBlocked
+      ).getBlockedContacts();
 
       return blocked.map(contact => {
         const rawId = contact.id;
-        const resolvedId = (typeof rawId === "object" ? rawId?._serialized : rawId) || "";
+        const resolvedId =
+          (typeof rawId === "object" ? rawId?._serialized : rawId) || "";
         return {
           id: resolvedId,
           name: contact.name || contact.pushname || "",
@@ -170,7 +173,10 @@ class ContactActionsService {
     }
   }
 
-  async getCommonGroups(whatsappId: number, contactId: string): Promise<{ id: string; name: string; participantsCount: number }[]> {
+  async getCommonGroups(
+    whatsappId: number,
+    contactId: string
+  ): Promise<{ id: string; name: string; participantsCount: number }[]> {
     try {
       const wbot = getWbot(whatsappId);
 
@@ -180,11 +186,14 @@ class ContactActionsService {
       }
 
       const contact = await wbot.getContactById(formattedId);
-      const groups = await (contact as unknown as ContactWithGroups).getCommonGroups();
+      const groups = await (
+        contact as unknown as ContactWithGroups
+      ).getCommonGroups();
 
       return groups.map(group => {
         const rawId = group.id;
-        const resolvedId = (typeof rawId === "object" ? rawId?._serialized : rawId) || "";
+        const resolvedId =
+          (typeof rawId === "object" ? rawId?._serialized : rawId) || "";
         return {
           id: resolvedId,
           name: group.name || "",

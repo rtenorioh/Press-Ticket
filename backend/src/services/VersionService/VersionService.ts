@@ -74,7 +74,9 @@ const fetchLatestVersion = async (): Promise<string | null> => {
         `Erro na API do GitHub: ${error.response.status} - ${(error.response.data as { message?: string })?.message}`
       );
     } else {
-      logger.error(`Erro ao buscar versão no GitHub: ${error instanceof Error ? error.message : String(error)}`);
+      logger.error(
+        `Erro ao buscar versão no GitHub: ${error instanceof Error ? error.message : String(error)}`
+      );
     }
     return null;
   }
@@ -171,12 +173,14 @@ const fetchWhatsappLibGitCommits = async (
     }
 
     const releaseDate = new Date(currentRelease.published_at);
-    const commitsAfterRelease = (commitsResponse.data as GitHubCommit[]).filter(commit => {
-      const commitDate = new Date(commit.commit.author.date);
-      return commitDate > releaseDate;
-    });
+    const commitsAfterRelease = (commitsResponse.data as GitHubCommit[]).filter(
+      commit => {
+        const commitDate = new Date(commit.commit.author.date);
+        return commitDate > releaseDate;
+      }
+    );
 
-    return commitsAfterRelease.map((commit) => ({
+    return commitsAfterRelease.map(commit => ({
       sha: commit.sha.substring(0, 7),
       message: commit.commit.message.split("\n")[0],
       author: commit.commit.author.name,

@@ -61,8 +61,14 @@ const GetCommonGroupsService = async ({
   let commonGroups: Array<{ _serialized?: string; user?: string }> = [];
   try {
     const wContact = await wbot.getContactById(numberId._serialized);
-    const wContactExtended = wContact as unknown as { getCommonGroups?: () => Promise<Array<{ _serialized?: string; user?: string }>> };
-    commonGroups = wContactExtended.getCommonGroups ? await wContactExtended.getCommonGroups() : [];
+    const wContactExtended = wContact as unknown as {
+      getCommonGroups?: () => Promise<
+        Array<{ _serialized?: string; user?: string }>
+      >;
+    };
+    commonGroups = wContactExtended.getCommonGroups
+      ? await wContactExtended.getCommonGroups()
+      : [];
   } catch (error: unknown) {
     const err = error as { message?: string };
     logger.warn(
@@ -86,7 +92,9 @@ const GetCommonGroupsService = async ({
         profilePicUrl = undefined;
       }
 
-      const groupChatExtended = groupChat as unknown as { participants?: unknown[] };
+      const groupChatExtended = groupChat as unknown as {
+        participants?: unknown[];
+      };
       groupsInfo.push({
         id: groupId,
         name: groupChat.name || "Sem nome",

@@ -99,9 +99,22 @@ export const countFolders = async (
     return res.status(400).json({ error: "whatsappId é obrigatório." });
   }
   try {
-    const inboxWhere: WhereOptions = { whatsappId, folder: "inbox", isRead: false, deletedAt: { [Op.is]: null } };
-    const sentWhere: WhereOptions = { whatsappId, folder: "sent", deletedAt: { [Op.is]: null } };
-    const starredWhere: WhereOptions = { whatsappId, isStarred: true, deletedAt: { [Op.is]: null } };
+    const inboxWhere: WhereOptions = {
+      whatsappId,
+      folder: "inbox",
+      isRead: false,
+      deletedAt: { [Op.is]: null }
+    };
+    const sentWhere: WhereOptions = {
+      whatsappId,
+      folder: "sent",
+      deletedAt: { [Op.is]: null }
+    };
+    const starredWhere: WhereOptions = {
+      whatsappId,
+      isStarred: true,
+      deletedAt: { [Op.is]: null }
+    };
     const [inbox, sent, starred, trash] = await Promise.all([
       Email.count({ where: inboxWhere }),
       Email.count({ where: sentWhere }),

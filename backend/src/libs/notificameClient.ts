@@ -59,7 +59,9 @@ interface NotificameContactInfo {
   webchatId?: string | null;
 }
 
-export function resolveChannel(contact: NotificameContactInfo): NotificameChannel | null {
+export function resolveChannel(
+  contact: NotificameContactInfo
+): NotificameChannel | null {
   if (contact.messengerId) return "facebook";
   if (contact.instagramId) return "instagram";
   if (contact.telegramId) return "telegram";

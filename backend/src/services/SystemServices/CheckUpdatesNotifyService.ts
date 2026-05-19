@@ -121,6 +121,8 @@ export const CheckUpdatesNotifyService = async (): Promise<void> => {
       `[CheckUpdates] ${eligibleUsers.length} masteradmin(s) notificado(s).`
     );
   } catch (err: unknown) {
-    logger.error(`[CheckUpdates] Erro no serviço: ${err instanceof Error ? err.message : String(err)}`);
+    logger.error(
+      `[CheckUpdates] Erro no serviço: ${err instanceof Error ? err.message : String(err)}`
+    );
   }
 };

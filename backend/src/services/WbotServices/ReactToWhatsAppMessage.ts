@@ -61,7 +61,11 @@ const ReactToWhatsAppMessage = async ({
   if (!ticket.isGroup) {
     try {
       // wwebjs missing type definition for getMessageById
-      const wbotExt = wbot as unknown as { getMessageById?: (id: string) => Promise<{ react: (e: string) => Promise<void> } | null> };
+      const wbotExt = wbot as unknown as {
+        getMessageById?: (
+          id: string
+        ) => Promise<{ react: (e: string) => Promise<void> } | null>;
+      };
       if (serializedId) {
         const bySerialized = await wbotExt.getMessageById?.(serializedId);
         if (bySerialized && typeof bySerialized.react === "function") {

@@ -27,7 +27,6 @@ const EmitTicketCounterService = async (): Promise<void> => {
       action: "updateCounter",
       counters
     });
-
   } catch (error) {
     logger.error(`Erro ao emitir atualização de contadores: ${error}`);
     throw error;

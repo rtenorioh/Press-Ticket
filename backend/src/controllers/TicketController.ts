@@ -639,7 +639,9 @@ export const toggleState = async (
       return res.status(404).json({ error: "Ticket não encontrado" });
     }
 
-    const currentValue = !!(ticket as unknown as Record<string, unknown>)[field];
+    const currentValue = !!(ticket as unknown as Record<string, unknown>)[
+      field
+    ];
     const newValue = !currentValue;
 
     if (field === "pinnedChat" && newValue === true) {

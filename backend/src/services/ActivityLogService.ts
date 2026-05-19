@@ -181,7 +181,9 @@ export const listActivityLogs = async ({
   });
 
   const formattedLogs = logs.map(log => {
-    const plainLog = log.get({ plain: true }) as Record<string, unknown> & { user?: { name?: string } };
+    const plainLog = log.get({ plain: true }) as Record<string, unknown> & {
+      user?: { name?: string };
+    };
     return {
       ...plainLog,
       username: plainLog.user ? plainLog.user.name : "Sistema"
@@ -220,7 +222,10 @@ export const getEntityDetails = async (
         ]
       });
       if (entityDetails) {
-        const plainTicket = entityDetails.get({ plain: true }) as Record<string, unknown> & { contact?: Record<string, unknown> };
+        const plainTicket = entityDetails.get({ plain: true }) as Record<
+          string,
+          unknown
+        > & { contact?: Record<string, unknown> };
         entityDetails = {
           id: plainTicket.id,
           status: plainTicket.status,
@@ -290,7 +295,10 @@ export const getEntityDetails = async (
         ]
       });
       if (entityDetails) {
-        const plainMessage = entityDetails.get({ plain: true }) as Record<string, unknown> & { body?: string; ticket?: Record<string, unknown> };
+        const plainMessage = entityDetails.get({ plain: true }) as Record<
+          string,
+          unknown
+        > & { body?: string; ticket?: Record<string, unknown> };
         entityDetails = {
           ...plainMessage,
           bodyPreview: plainMessage.body

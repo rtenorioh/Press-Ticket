@@ -80,11 +80,11 @@ export const getBlockStatus = async (
   try {
     const wContact = await wbot.getContactById(numberId._serialized);
     const wContactExt = wContact as unknown as { isBlocked: boolean };
-    return res
-      .status(200)
-      .json({ isBlocked: Boolean(wContactExt.isBlocked) });
+    return res.status(200).json({ isBlocked: Boolean(wContactExt.isBlocked) });
   } catch (err: unknown) {
-    logger.warn(`Erro ao obter contato do WhatsApp: ${err instanceof Error ? err.message : err}`);
+    logger.warn(
+      `Erro ao obter contato do WhatsApp: ${err instanceof Error ? err.message : err}`
+    );
     return res.status(200).json({ isBlocked: false });
   }
 };
@@ -134,7 +134,9 @@ export const blockContact = async (
     const wContactExt = wContact as unknown as { block(): Promise<boolean> };
     result = await wContactExt.block();
   } catch (err: unknown) {
-    logger.warn(`Erro ao bloquear contato: ${err instanceof Error ? err.message : err}`);
+    logger.warn(
+      `Erro ao bloquear contato: ${err instanceof Error ? err.message : err}`
+    );
     return res
       .status(500)
       .json({ error: "Erro ao bloquear contato no WhatsApp" });
@@ -200,7 +202,9 @@ export const unblockContact = async (
     const wContactExt = wContact as unknown as { unblock(): Promise<boolean> };
     result = await wContactExt.unblock();
   } catch (err: unknown) {
-    logger.warn(`Erro ao desbloquear contato: ${err instanceof Error ? err.message : err}`);
+    logger.warn(
+      `Erro ao desbloquear contato: ${err instanceof Error ? err.message : err}`
+    );
     return res
       .status(500)
       .json({ error: "Erro ao desbloquear contato no WhatsApp" });

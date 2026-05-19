@@ -76,7 +76,9 @@ class ProfileManagementService {
   async removeProfilePicture(whatsappId: number): Promise<boolean> {
     try {
       const wbot = getWbot(whatsappId);
-      return await (wbot as unknown as ClientWithRemoveProfilePic).removeProfilePicture();
+      return await (
+        wbot as unknown as ClientWithRemoveProfilePic
+      ).removeProfilePicture();
     } catch (err) {
       logger.error(`[PROFILE] Erro ao remover foto de perfil: ${err}`);
       throw new AppError(`Erro ao remover foto de perfil: ${err}`);

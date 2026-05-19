@@ -54,7 +54,9 @@ const GetAboutService = async ({
 
   try {
     const wContact = await wbot.getContactById(numberId._serialized);
-    const wContactExtended = wContact as unknown as { getAbout?: () => Promise<string | null> };
+    const wContactExtended = wContact as unknown as {
+      getAbout?: () => Promise<string | null>;
+    };
     if (typeof wContactExtended.getAbout === "function") {
       about = await wContactExtended.getAbout();
     }

@@ -12,7 +12,9 @@ process.on("uncaughtException", (err: Error) => {
 });
 
 process.on("unhandledRejection", (reason: unknown) => {
-  logger.error(`unhandledRejection: ${reason instanceof Error ? reason.message : String(reason)}`);
+  logger.error(
+    `unhandledRejection: ${reason instanceof Error ? reason.message : String(reason)}`
+  );
   if (reason instanceof Error && reason.stack) logger.error(reason.stack);
 });
 

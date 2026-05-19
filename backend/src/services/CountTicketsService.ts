@@ -23,8 +23,12 @@ const CountTicketsService = {
       );
 
       const openCondition: Record<PropertyKey, unknown> = { status: "open" };
-      const pendingCondition: Record<PropertyKey, unknown> = { status: "pending" };
-      const closedCondition: Record<PropertyKey, unknown> = { status: "closed" };
+      const pendingCondition: Record<PropertyKey, unknown> = {
+        status: "pending"
+      };
+      const closedCondition: Record<PropertyKey, unknown> = {
+        status: "closed"
+      };
 
       if (!isAdmin && userId) {
         openCondition.userId = userId;

@@ -29,7 +29,9 @@ export const GetWbotMessage = async (
       throw new Error("Chat não encontrado");
     }
   } catch (getChatError: unknown) {
-    logger.error(`Erro ao buscar chat ${chatId}: ${getChatError instanceof Error ? getChatError.message : getChatError}`);
+    logger.error(
+      `Erro ao buscar chat ${chatId}: ${getChatError instanceof Error ? getChatError.message : getChatError}`
+    );
 
     try {
       const directMessage = await wbot.getMessageById(messageId);

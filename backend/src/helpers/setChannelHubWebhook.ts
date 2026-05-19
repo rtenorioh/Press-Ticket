@@ -15,8 +15,13 @@ const createSubscriptionSafe = async (
     await client.post("/v1/subscriptions/", payload);
     logger.info(`Webhook Hub: subscription "${label}" registrada com sucesso`);
   } catch (err: unknown) {
-    const errObj = err as { response?: { status?: number }; status?: number; statusCode?: number };
-    const status = errObj?.response?.status || errObj?.status || errObj?.statusCode;
+    const errObj = err as {
+      response?: { status?: number };
+      status?: number;
+      statusCode?: number;
+    };
+    const status =
+      errObj?.response?.status || errObj?.status || errObj?.statusCode;
     if (status === 409) {
       logger.warn(
         `Webhook Hub: subscription "${label}" já existe (409) — ignorando`

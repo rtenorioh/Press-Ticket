@@ -35,7 +35,8 @@ const GetClientIp = (req: Request): string => {
   const socketIp =
     req.socket?.remoteAddress ||
     req.connection?.remoteAddress ||
-    (req as unknown as { connection?: { socket?: { remoteAddress?: string } } }).connection?.socket?.remoteAddress;
+    (req as unknown as { connection?: { socket?: { remoteAddress?: string } } })
+      .connection?.socket?.remoteAddress;
 
   if (socketIp) {
     // Remove prefixo IPv6 se for localhost

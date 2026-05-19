@@ -139,8 +139,12 @@ const SendWhatsAppMedia = async ({
       );
     }
 
-    interface ContactWithLid { numberLid?: string | null }
-    const lidBase = (ticket.contact as unknown as ContactWithLid).numberLid || ticket.contact.number;
+    interface ContactWithLid {
+      numberLid?: string | null;
+    }
+    const lidBase =
+      (ticket.contact as unknown as ContactWithLid).numberLid ||
+      ticket.contact.number;
     const lidChatId = `${lidBase}@lid`;
 
     const preFn = new Function(
@@ -161,13 +165,27 @@ const SendWhatsAppMedia = async ({
       ].join("\n")
     );
 
-    interface ClientWithPupPage { pupPage?: { evaluate(fn: (...args: unknown[]) => unknown, ...args: unknown[]): Promise<unknown> } }
+    interface ClientWithPupPage {
+      pupPage?: {
+        evaluate(
+          fn: (...args: unknown[]) => unknown,
+          ...args: unknown[]
+        ): Promise<unknown>;
+      };
+    }
     try {
-      await (wbot as unknown as ClientWithPupPage).pupPage?.evaluate(preFn as (...args: unknown[]) => unknown, chatId, lidChatId);
+      await (wbot as unknown as ClientWithPupPage).pupPage?.evaluate(
+        preFn as (...args: unknown[]) => unknown,
+        chatId,
+        lidChatId
+      );
       await new Promise(r => setTimeout(r, 2000));
     } catch (__) {}
 
-    const sendWithLidFallback = async (media: MessageMedia, opts: Record<string, unknown>): Promise<WbotMessage> => {
+    const sendWithLidFallback = async (
+      media: MessageMedia,
+      opts: Record<string, unknown>
+    ): Promise<WbotMessage> => {
       try {
         return await wbot.sendMessage(chatId, media, opts);
       } catch (e: unknown) {

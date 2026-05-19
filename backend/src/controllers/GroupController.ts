@@ -52,7 +52,13 @@ export const addParticipants = async (req: Request, res: Response) => {
     throw new AppError(result, 400);
   }
 
-  type ParticipantResult = { id: string; code: number; message: string; isInviteV4Sent: boolean; success: boolean };
+  type ParticipantResult = {
+    id: string;
+    code: number;
+    message: string;
+    isInviteV4Sent: boolean;
+    success: boolean;
+  };
   const summary: ParticipantResult[] = [];
   let successCount = 0;
   let failCount = 0;
@@ -216,7 +222,9 @@ export const setDescription = async (req: Request, res: Response) => {
   try {
     const chatId = JSON.stringify(chat.id._serialized);
     const desc = JSON.stringify(description);
-    const wbotPage = (wbot as unknown as Record<string, unknown>).pupPage as { evaluate: (script: string) => Promise<unknown> };
+    const wbotPage = (wbot as unknown as Record<string, unknown>).pupPage as {
+      evaluate: (script: string) => Promise<unknown>;
+    };
     const success = await wbotPage.evaluate(`
       (async () => {
         var chatWid = window.Store.WidFactory.createWid(${chatId});
@@ -345,17 +353,27 @@ export const leaveGroup = async (req: Request, res: Response) => {
 export const listParticipants = async (req: Request, res: Response) => {
   const { groupId } = req.params;
   const { wbot, chat } = await getGroupChatOrFail(groupId);
-  type GroupParticipant = { id?: { _serialized?: string; user?: string }; isAdmin?: boolean; isSuperAdmin?: boolean };
+  type GroupParticipant = {
+    id?: { _serialized?: string; user?: string };
+    isAdmin?: boolean;
+    isSuperAdmin?: boolean;
+  };
   const chatAsRecord = chat as unknown as Record<string, unknown>;
-  let participants: GroupParticipant[] = Array.isArray(chatAsRecord.participants)
+  let participants: GroupParticipant[] = Array.isArray(
+    chatAsRecord.participants
+  )
     ? (chatAsRecord.participants as GroupParticipant[])
     : [];
   try {
     if (!participants.length) {
       if (typeof chatAsRecord.getParticipants === "function") {
-        participants = await (chatAsRecord.getParticipants as () => Promise<GroupParticipant[]>)();
+        participants = await (
+          chatAsRecord.getParticipants as () => Promise<GroupParticipant[]>
+        )();
       } else if (typeof chatAsRecord.fetchParticipants === "function") {
-        participants = await (chatAsRecord.fetchParticipants as () => Promise<GroupParticipant[]>)();
+        participants = await (
+          chatAsRecord.fetchParticipants as () => Promise<GroupParticipant[]>
+        )();
       }
     }
   } catch (__) {}

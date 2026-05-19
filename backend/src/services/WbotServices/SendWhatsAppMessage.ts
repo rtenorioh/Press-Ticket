@@ -18,7 +18,9 @@ interface ContactWithLid {
 // wwebjs missing type definition for pupPage
 type ClientWithPupPage = Client & {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  pupPage?: { evaluate(fn: (...args: any[]) => any, ...args: unknown[]): Promise<unknown> };
+  pupPage?: {
+    evaluate(fn: (...args: any[]) => any, ...args: unknown[]): Promise<unknown>;
+  };
 };
 
 // Options passed to wbot.sendMessage — wwebjs types are incomplete here
@@ -122,10 +124,18 @@ const SendWhatsAppMessage = async ({
             sendOpts.mentions = mentions;
           }
           try {
-            sentMessage = await wbot.sendMessage(groupId, payload, sendOpts as Record<string, unknown>);
+            sentMessage = await wbot.sendMessage(
+              groupId,
+              payload,
+              sendOpts as Record<string, unknown>
+            );
           } catch (_e1) {
             await new Promise(r => setTimeout(r, 500));
-            sentMessage = await wbot.sendMessage(groupId, payload, sendOpts as Record<string, unknown>);
+            sentMessage = await wbot.sendMessage(
+              groupId,
+              payload,
+              sendOpts as Record<string, unknown>
+            );
           }
 
           await ticket.update({ lastMessage: body });
@@ -149,10 +159,18 @@ const SendWhatsAppMessage = async ({
       sendOpts.mentions = mentions;
     }
     try {
-      sentMessage = await wbot.sendMessage(groupId, payload, sendOpts as Record<string, unknown>);
+      sentMessage = await wbot.sendMessage(
+        groupId,
+        payload,
+        sendOpts as Record<string, unknown>
+      );
     } catch (_e1) {
       await new Promise(r => setTimeout(r, 500));
-      sentMessage = await wbot.sendMessage(groupId, payload, sendOpts as Record<string, unknown>);
+      sentMessage = await wbot.sendMessage(
+        groupId,
+        payload,
+        sendOpts as Record<string, unknown>
+      );
     }
 
     await ticket.update({ lastMessage: body });
@@ -174,10 +192,18 @@ const SendWhatsAppMessage = async ({
         sendOpts.mentions = mentions;
       }
       try {
-        sentMessage = await wbot.sendMessage(groupId, payload, sendOpts as Record<string, unknown>);
+        sentMessage = await wbot.sendMessage(
+          groupId,
+          payload,
+          sendOpts as Record<string, unknown>
+        );
       } catch (_e1) {
         await new Promise(r => setTimeout(r, 500));
-        sentMessage = await wbot.sendMessage(groupId, payload, sendOpts as Record<string, unknown>);
+        sentMessage = await wbot.sendMessage(
+          groupId,
+          payload,
+          sendOpts as Record<string, unknown>
+        );
       }
 
       await ticket.update({ lastMessage: body });
@@ -259,12 +285,20 @@ const SendWhatsAppMessage = async ({
     const lidUserId = `${lidBase}@lid`;
 
     try {
-      await (wbot as unknown as ClientWithPupPage).pupPage?.evaluate(preFn as (...args: unknown[]) => unknown, userId, lidUserId);
+      await (wbot as unknown as ClientWithPupPage).pupPage?.evaluate(
+        preFn as (...args: unknown[]) => unknown,
+        userId,
+        lidUserId
+      );
       await new Promise(r => setTimeout(r, 2000));
     } catch (__) {}
 
     try {
-      sentMessage = await wbot.sendMessage(userId, payload, sendOptions as Record<string, unknown>);
+      sentMessage = await wbot.sendMessage(
+        userId,
+        payload,
+        sendOptions as Record<string, unknown>
+      );
     } catch (e: unknown) {
       const errMsg = e instanceof Error ? e.message : String(e);
       lidError =
@@ -274,7 +308,11 @@ const SendWhatsAppMessage = async ({
     }
 
     if (lidError) {
-      sentMessage = await wbot.sendMessage(lidUserId, payload, sendOptions as Record<string, unknown>);
+      sentMessage = await wbot.sendMessage(
+        lidUserId,
+        payload,
+        sendOptions as Record<string, unknown>
+      );
     }
 
     await ticket.update({ lastMessage: body });

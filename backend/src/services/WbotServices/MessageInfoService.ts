@@ -44,16 +44,27 @@ const GetMessageInfo = async (
   try {
     const wbotMessage = await GetWbotMessage(message.ticket, messageId);
     // wwebjs missing type definition for getInfo return type
-    interface MessageInfoEntry { id?: { _serialized?: string } | string; t?: number }
-    interface MessageInfoData { delivery?: MessageInfoEntry[]; read?: MessageInfoEntry[]; played?: MessageInfoEntry[] }
-    const info = await wbotMessage.getInfo() as unknown as MessageInfoData | null;
+    interface MessageInfoEntry {
+      id?: { _serialized?: string } | string;
+      t?: number;
+    }
+    interface MessageInfoData {
+      delivery?: MessageInfoEntry[];
+      read?: MessageInfoEntry[];
+      played?: MessageInfoEntry[];
+    }
+    const info =
+      (await wbotMessage.getInfo()) as unknown as MessageInfoData | null;
 
     if (!info) {
       return { delivery: [], read: [], played: [] };
     }
 
     const mapEntry = (e: MessageInfoEntry) => ({
-      id: (typeof e.id === "object" ? (e.id as { _serialized?: string })?._serialized : e.id) || "",
+      id:
+        (typeof e.id === "object"
+          ? (e.id as { _serialized?: string })?._serialized
+          : e.id) || "",
       timestamp: e.t || 0
     });
 
@@ -88,9 +99,17 @@ const GetMessageReactions = async (
   try {
     const wbotMessage = await GetWbotMessage(message.ticket, messageId);
     // wwebjs missing type definition for getReactions return type
-    interface ReactionSender { id?: string; senderId?: { _serialized?: string } | string; timestamp?: number }
-    interface ReactionGroup { aggregateEmoji?: string; senders?: ReactionSender[] }
-    const reactions = await wbotMessage.getReactions() as unknown as ReactionGroup[];
+    interface ReactionSender {
+      id?: string;
+      senderId?: { _serialized?: string } | string;
+      timestamp?: number;
+    }
+    interface ReactionGroup {
+      aggregateEmoji?: string;
+      senders?: ReactionSender[];
+    }
+    const reactions =
+      (await wbotMessage.getReactions()) as unknown as ReactionGroup[];
 
     if (!reactions || reactions.length === 0) {
       return [];
@@ -104,7 +123,10 @@ const GetMessageReactions = async (
           result.push({
             id: sender.id || "",
             msgId: messageId,
-            senderId: (typeof sender.senderId === "object" ? (sender.senderId as { _serialized?: string })?._serialized : sender.senderId) || "",
+            senderId:
+              (typeof sender.senderId === "object"
+                ? (sender.senderId as { _serialized?: string })?._serialized
+                : sender.senderId) || "",
             reaction: reactionGroup.aggregateEmoji,
             timestamp: sender.timestamp || 0
           });
@@ -137,16 +159,27 @@ const GetPollVotes = async (messageId: string): Promise<PollVoteResult[]> => {
   try {
     const wbotMessage = await GetWbotMessage(message.ticket, messageId);
     // wwebjs missing type definition for getPollVotes return type
-    interface PollVoteOption { name?: string; localId?: number }
-    interface PollVoteEntry { voter?: { _serialized?: string } | string; selectedOptions?: PollVoteOption[]; interactedAtTs?: number }
-    const votes = await wbotMessage.getPollVotes() as unknown as PollVoteEntry[];
+    interface PollVoteOption {
+      name?: string;
+      localId?: number;
+    }
+    interface PollVoteEntry {
+      voter?: { _serialized?: string } | string;
+      selectedOptions?: PollVoteOption[];
+      interactedAtTs?: number;
+    }
+    const votes =
+      (await wbotMessage.getPollVotes()) as unknown as PollVoteEntry[];
 
     if (!votes || votes.length === 0) {
       return [];
     }
 
     return votes.map(vote => ({
-      voter: (typeof vote.voter === "object" ? (vote.voter as { _serialized?: string })?._serialized : vote.voter) || "",
+      voter:
+        (typeof vote.voter === "object"
+          ? (vote.voter as { _serialized?: string })?._serialized
+          : vote.voter) || "",
       selectedOptions: (vote.selectedOptions || []).map(opt => ({
         name: opt.name || "",
         localId: opt.localId || 0

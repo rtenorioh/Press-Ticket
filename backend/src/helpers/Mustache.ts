@@ -4,15 +4,22 @@ import Mustache from "mustache";
 import Ticket from "../models/Ticket";
 
 export const msgsd = (): string => {
-
   let ms = "";
 
   const hh = new Date().getHours();
 
-  if (hh >= 6) { ms = "Bom Dia"; }
-  if (hh > 11) { ms = "Boa Tarde"; }
-  if (hh > 17) { ms = "Boa Noite"; }
-  if (hh > 23 || hh < 6) { ms = "Boa Madrugada"; }
+  if (hh >= 6) {
+    ms = "Bom Dia";
+  }
+  if (hh > 11) {
+    ms = "Boa Tarde";
+  }
+  if (hh > 17) {
+    ms = "Boa Noite";
+  }
+  if (hh > 23 || hh < 6) {
+    ms = "Boa Madrugada";
+  }
 
   return ms;
 };
@@ -60,10 +67,7 @@ export default (body: string, ticket?: Ticket): string => {
     date: date(),
     queue: ticket ? ticket?.queue?.name : "",
     connection: ticket ? ticket.whatsapp.name : "",
-    protocol: new Array(
-      control(),
-      ticket ? ticket.id.toString() : ""
-    ).join(""),
+    protocol: new Array(control(), ticket ? ticket.id.toString() : "").join("")
   };
 
   return Mustache.render(body, view);

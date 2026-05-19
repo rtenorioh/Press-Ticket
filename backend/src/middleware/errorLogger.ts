@@ -10,9 +10,15 @@ const errorLogger = async (
 ): Promise<void> => {
   try {
     const errorData: {
-      source: string; message: string; stack: string; component: string;
-      url: string; userAgent: string; severity: string;
-      userId?: number; username?: string;
+      source: string;
+      message: string;
+      stack: string;
+      component: string;
+      url: string;
+      userAgent: string;
+      severity: string;
+      userId?: number;
+      username?: string;
     } = {
       source: "backend",
       message: err.message || "Erro desconhecido",

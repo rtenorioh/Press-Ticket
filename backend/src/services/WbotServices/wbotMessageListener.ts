@@ -57,8 +57,7 @@ const verifyContact = async (msgContact: WbotContact): Promise<Contact> => {
   const idUser: string = contactId.user || "";
   const idServer: string = contactId.server || "c.us";
   const isLid =
-    idServer === "lid" ||
-    String(contactId._serialized || "").endsWith("@lid");
+    idServer === "lid" || String(contactId._serialized || "").endsWith("@lid");
 
   const contactData = {
     name: msgContact.name || msgContact.pushname || idUser,
@@ -1034,9 +1033,17 @@ const handleMessage = async (
 
       try {
         // wwebjs missing type definition for id._serialized, subject, getProfilePicUrl on chat/contact
-        interface ChatWithMeta { id?: { _serialized?: string }; name?: string; subject?: string }
-        interface ContactWithMeta { id?: { _serialized?: string } }
-        interface WbotWithProfilePic { getProfilePicUrl(jid: string): Promise<string> }
+        interface ChatWithMeta {
+          id?: { _serialized?: string };
+          name?: string;
+          subject?: string;
+        }
+        interface ContactWithMeta {
+          id?: { _serialized?: string };
+        }
+        interface WbotWithProfilePic {
+          getProfilePicUrl(jid: string): Promise<string>;
+        }
         const chatMeta = chat as unknown as ChatWithMeta;
         const contactMeta = msgGroupContact as unknown as ContactWithMeta;
         const fullJid =
@@ -1051,7 +1058,9 @@ const handleMessage = async (
 
         while (retries > 0) {
           try {
-            profilePicUrl = await (wbot as unknown as WbotWithProfilePic).getProfilePicUrl(fullJid);
+            profilePicUrl = await (
+              wbot as unknown as WbotWithProfilePic
+            ).getProfilePicUrl(fullJid);
             if (profilePicUrl) {
               break;
             }

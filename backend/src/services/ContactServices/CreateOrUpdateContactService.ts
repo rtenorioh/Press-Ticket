@@ -9,7 +9,9 @@ interface ExtraInfo {
   value: string;
 }
 
-type ContactCreateInput = InferCreationAttributes<Contact> & { extraInfo?: ExtraInfo[] };
+type ContactCreateInput = InferCreationAttributes<Contact> & {
+  extraInfo?: ExtraInfo[];
+};
 
 interface Request {
   name: string;

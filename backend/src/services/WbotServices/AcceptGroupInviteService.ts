@@ -80,9 +80,12 @@ const GetGroupInviteInfo = async ({
     const info = await wbot.getInviteInfo(cleanCode);
 
     const rawId = info.id;
-    const resolvedId = (typeof rawId === "object" ? rawId?._serialized : rawId) || "";
+    const resolvedId =
+      (typeof rawId === "object" ? rawId?._serialized : rawId) || "";
     const rawOwner = info.owner;
-    const resolvedOwner = (typeof rawOwner === "object" ? rawOwner?._serialized : rawOwner) || undefined;
+    const resolvedOwner =
+      (typeof rawOwner === "object" ? rawOwner?._serialized : rawOwner) ||
+      undefined;
 
     return {
       groupId: resolvedId,

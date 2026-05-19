@@ -34,7 +34,11 @@ class GroupEventService {
         groupId: data.groupId,
         groupName: data.groupName,
         eventType: data.eventType,
-        metadata: { ...(data.metadata || {}), participants: data.participants || [], action: data.action }
+        metadata: {
+          ...(data.metadata || {}),
+          participants: data.participants || [],
+          action: data.action
+        }
       });
 
       const io = getIO();

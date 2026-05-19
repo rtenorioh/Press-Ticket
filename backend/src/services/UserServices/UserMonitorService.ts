@@ -160,7 +160,12 @@ const UserMonitorService = async (
         let firstResponseCount = 0;
 
         userTickets.forEach(ticket => {
-          const messages = (ticket as unknown as { messages?: { fromMe: boolean; createdAt: Date }[] }).messages || [];
+          const messages =
+            (
+              ticket as unknown as {
+                messages?: { fromMe: boolean; createdAt: Date }[];
+              }
+            ).messages || [];
 
           if (messages.length > 0) {
             const firstCustomerMessage = messages.find(m => !m.fromMe);

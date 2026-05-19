@@ -109,7 +109,19 @@ class ChatManagementService {
     whatsappId: number,
     chatId: string,
     limit: number = 50
-  ): Promise<{ id: string; body: string; from: string; to: string; timestamp: number; fromMe: boolean; hasMedia: boolean; type: string; ack: number }[]> {
+  ): Promise<
+    {
+      id: string;
+      body: string;
+      from: string;
+      to: string;
+      timestamp: number;
+      fromMe: boolean;
+      hasMedia: boolean;
+      type: string;
+      ack: number;
+    }[]
+  > {
     try {
       const wbot = getWbot(whatsappId);
       const chat = await wbot.getChatById(chatId);
@@ -143,13 +155,26 @@ class ChatManagementService {
     }
   }
 
-  async getChatInfo(whatsappId: number, chatId: string): Promise<{ id: string; name: string; isGroup: boolean; unreadCount: number; archived: boolean; pinned: boolean; isMuted: boolean; muteExpiration: number }> {
+  async getChatInfo(
+    whatsappId: number,
+    chatId: string
+  ): Promise<{
+    id: string;
+    name: string;
+    isGroup: boolean;
+    unreadCount: number;
+    archived: boolean;
+    pinned: boolean;
+    isMuted: boolean;
+    muteExpiration: number;
+  }> {
     try {
       const wbot = getWbot(whatsappId);
       const chat = await wbot.getChatById(chatId);
       const chatMeta = chat as unknown as ChatWithSerializedId;
       const rawId = chatMeta.id;
-      const resolvedId = (typeof rawId === "object" ? rawId?._serialized : rawId) || "";
+      const resolvedId =
+        (typeof rawId === "object" ? rawId?._serialized : rawId) || "";
       return {
         id: resolvedId,
         name: chat.name,
@@ -166,7 +191,19 @@ class ChatManagementService {
     }
   }
 
-  async getChats(whatsappId: number): Promise<{ id: string; name: string; isGroup: boolean; unreadCount: number; timestamp: number; archived: boolean; pinned: boolean; isMuted: boolean; muteExpiration: number }[]> {
+  async getChats(whatsappId: number): Promise<
+    {
+      id: string;
+      name: string;
+      isGroup: boolean;
+      unreadCount: number;
+      timestamp: number;
+      archived: boolean;
+      pinned: boolean;
+      isMuted: boolean;
+      muteExpiration: number;
+    }[]
+  > {
     try {
       const wbot = getWbot(whatsappId);
       const chats = await wbot.getChats();
@@ -174,7 +211,8 @@ class ChatManagementService {
       return chats.map(chat => {
         const chatMeta = chat as unknown as ChatWithSerializedId;
         const rawId = chatMeta.id;
-        const resolvedId = (typeof rawId === "object" ? rawId?._serialized : rawId) || "";
+        const resolvedId =
+          (typeof rawId === "object" ? rawId?._serialized : rawId) || "";
         return {
           id: resolvedId,
           name: chat.name,

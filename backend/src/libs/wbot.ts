@@ -270,7 +270,9 @@ export const initWbot = async (
             const syncState = await wbot.pupPage.evaluate(() => {
               try {
                 type WAWin = {
-                  require: (m: string) => { Socket: { state: string; hasSynced: boolean } };
+                  require: (m: string) => {
+                    Socket: { state: string; hasSynced: boolean };
+                  };
                   onAppStateHasSyncedEvent?: () => void;
                 };
                 const wa = window as unknown as WAWin;
@@ -278,7 +280,8 @@ export const initWbot = async (
                 return {
                   state: Socket.state,
                   hasSynced: Socket.hasSynced,
-                  hasEventHandler: typeof wa.onAppStateHasSyncedEvent === "function"
+                  hasEventHandler:
+                    typeof wa.onAppStateHasSyncedEvent === "function"
                 };
               } catch {
                 return null;
@@ -294,7 +297,11 @@ export const initWbot = async (
                   `[WBOT] Sessão ${sessionName}: sync já completou mas ready não disparou. Forçando via onAppStateHasSyncedEvent...`
                 );
                 await wbot.pupPage.evaluate(() => {
-                  (window as unknown as { onAppStateHasSyncedEvent?: () => void }).onAppStateHasSyncedEvent?.();
+                  (
+                    window as unknown as {
+                      onAppStateHasSyncedEvent?: () => void;
+                    }
+                  ).onAppStateHasSyncedEvent?.();
                 });
               } else {
                 logger.info(
@@ -438,12 +445,17 @@ export const initWbot = async (
         const deviceName = process.env.DEVICE_NAME || "Press Ticket®";
         const browserName = "Chrome";
         try {
-          await (wbot as unknown as SessionWithExtras).setDeviceName?.(deviceName, browserName);
+          await (wbot as unknown as SessionWithExtras).setDeviceName?.(
+            deviceName,
+            browserName
+          );
           logger.info(
             `Session: ${sessionName} deviceName="${deviceName}" aplicado`
           );
         } catch (dnErr: unknown) {
-          logger.warn(`[WBOT] Falha ao definir deviceName: ${dnErr instanceof Error ? dnErr.message : String(dnErr)}`);
+          logger.warn(
+            `[WBOT] Falha ao definir deviceName: ${dnErr instanceof Error ? dnErr.message : String(dnErr)}`
+          );
         }
 
         const platform = wbot.info?.platform || "";
@@ -671,21 +683,24 @@ export const initWbot = async (
         }
       });
 
-      wbot.on("group_membership_request", async (notification: WbotGroupMembershipRequest) => {
-        try {
-          logger.info(
-            `Session: ${sessionName} GROUP_MEMBERSHIP_REQUEST - Group: ${notification.chatId}`
-          );
-          io.emit("groupMembershipRequest", {
-            whatsappId: whatsapp.id,
-            groupId: notification.chatId,
-            requesterId: notification.author,
-            timestamp: new Date()
-          });
-        } catch (err) {
-          logger.error(`[GROUP_MEMBERSHIP_REQUEST] Erro: ${err}`);
+      wbot.on(
+        "group_membership_request",
+        async (notification: WbotGroupMembershipRequest) => {
+          try {
+            logger.info(
+              `Session: ${sessionName} GROUP_MEMBERSHIP_REQUEST - Group: ${notification.chatId}`
+            );
+            io.emit("groupMembershipRequest", {
+              whatsappId: whatsapp.id,
+              groupId: notification.chatId,
+              requesterId: notification.author,
+              timestamp: new Date()
+            });
+          } catch (err) {
+            logger.error(`[GROUP_MEMBERSHIP_REQUEST] Erro: ${err}`);
+          }
         }
-      });
+      );
 
       wbot.on("vote_update", async (vote: WbotPollVote) => {
         try {
@@ -766,7 +781,9 @@ export const initWbot = async (
                       document.dispatchEvent(escEvent);
                       results.push("✅ Tecla ESC enviada");
                     } catch (err) {
-                      results.push(`❌ Tecla ESC falhou: ${(err as Error).message}`);
+                      results.push(
+                        `❌ Tecla ESC falhou: ${(err as Error).message}`
+                      );
                     }
 
                     results.push("Método 2: Procurando botão vermelho...");
@@ -774,7 +791,7 @@ export const initWbot = async (
                       const allButtons = Array.from(
                         document.querySelectorAll('button, div[role="button"]')
                       );
-                      const redButton = allButtons.find((btn) => {
+                      const redButton = allButtons.find(btn => {
                         const style = window.getComputedStyle(btn);
                         const bgColor = style.backgroundColor;
                         return (
@@ -832,7 +849,11 @@ export const initWbot = async (
 
                     results.push("Método 4: Tentando WWebJS.rejectCall...");
                     try {
-                      const WWebJS = (window as unknown as { WWebJS?: { rejectCall?: (id: string) => void } }).WWebJS;
+                      const WWebJS = (
+                        window as unknown as {
+                          WWebJS?: { rejectCall?: (id: string) => void };
+                        }
+                      ).WWebJS;
                       if (WWebJS && typeof WWebJS.rejectCall === "function") {
                         WWebJS.rejectCall(callId);
                         results.push("✅ WWebJS.rejectCall executado");
@@ -960,7 +981,9 @@ export const initWbot = async (
         }
       });
     } catch (err: unknown) {
-      logger.error(`[WBOT] ${err instanceof Error ? err.message : String(err)}`);
+      logger.error(
+        `[WBOT] ${err instanceof Error ? err.message : String(err)}`
+      );
     }
   });
 };

@@ -11,7 +11,10 @@ interface GroupNotification {
   author?: string;
   chatId?: string;
   recipientIds?: string[];
-  getChat(): Promise<{ id: { _serialized: string }; groupMetadata?: { memberAddMode?: string } }>;
+  getChat(): Promise<{
+    id: { _serialized: string };
+    groupMetadata?: { memberAddMode?: string };
+  }>;
 }
 
 interface GroupEventData {

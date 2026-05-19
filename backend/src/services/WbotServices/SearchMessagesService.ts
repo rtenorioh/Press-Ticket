@@ -5,9 +5,11 @@ import { logger } from "../../utils/logger";
 
 // wwebjs missing type definition for searchMessages
 type ClientWithSearch = Client & {
-  searchMessages(query: string, opts: { page: number; limit: number; chatId?: string }): Promise<
-    | SearchMsgEntry[]
-    | { messages?: SearchMsgEntry[]; totalCount?: number }
+  searchMessages(
+    query: string,
+    opts: { page: number; limit: number; chatId?: string }
+  ): Promise<
+    SearchMsgEntry[] | { messages?: SearchMsgEntry[]; totalCount?: number }
   >;
 };
 
@@ -81,9 +83,12 @@ const SearchMessagesService = async ({
     return {
       messages: messageList.map(msg => {
         const rawId = msg.id;
-        const resolvedId = typeof rawId === "object"
-          ? (rawId as { id?: string; _serialized?: string })?.id || (rawId as { _serialized?: string })?._serialized || ""
-          : String(rawId || "");
+        const resolvedId =
+          typeof rawId === "object"
+            ? (rawId as { id?: string; _serialized?: string })?.id ||
+              (rawId as { _serialized?: string })?._serialized ||
+              ""
+            : String(rawId || "");
         return {
           id: resolvedId,
           body: msg.body || "",
@@ -98,12 +103,15 @@ const SearchMessagesService = async ({
       }),
       totalCount: Array.isArray(results)
         ? results.length
-        : (results as { totalCount?: number; messages?: SearchMsgEntry[] }).totalCount || messageList.length
+        : (results as { totalCount?: number; messages?: SearchMsgEntry[] })
+            .totalCount || messageList.length
     };
   } catch (err: unknown) {
     const errMsg = err instanceof Error ? err.message : JSON.stringify(err);
     logger.error(`[SEARCH] Erro ao buscar mensagens: ${errMsg}`);
-    throw new AppError(`Erro ao buscar mensagens: ${errMsg || "Erro desconhecido"}`);
+    throw new AppError(
+      `Erro ao buscar mensagens: ${errMsg || "Erro desconhecido"}`
+    );
   }
 };
 

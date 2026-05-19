@@ -91,14 +91,26 @@ class LabelsService {
     }
   }
 
-  async getChatsByLabelId(whatsappId: number, labelId: string): Promise<{ id: string; name: string | undefined; isGroup: boolean | undefined; unreadCount: number | undefined; timestamp: number | undefined }[]> {
+  async getChatsByLabelId(
+    whatsappId: number,
+    labelId: string
+  ): Promise<
+    {
+      id: string;
+      name: string | undefined;
+      isGroup: boolean | undefined;
+      unreadCount: number | undefined;
+      timestamp: number | undefined;
+    }[]
+  > {
     try {
       const wbot = getWbot(whatsappId) as unknown as ClientWithLabels;
       const chats = await wbot.getChatsByLabelId(labelId);
 
       return chats.map(chat => {
         const rawId = chat.id;
-        const resolvedId = (typeof rawId === "object" ? rawId?._serialized : rawId) || "";
+        const resolvedId =
+          (typeof rawId === "object" ? rawId?._serialized : rawId) || "";
         return {
           id: resolvedId,
           name: chat.name,

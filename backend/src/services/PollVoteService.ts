@@ -124,7 +124,8 @@ class PollVoteService {
         pollOptions.map(async option => {
           const votersForOption = votes.filter(vote =>
             vote.selectedOptions.some(
-              (selected: { localId: number; name: string }) => selected.localId === option.localId
+              (selected: { localId: number; name: string }) =>
+                selected.localId === option.localId
             )
           );
 

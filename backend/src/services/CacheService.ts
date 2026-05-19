@@ -60,7 +60,9 @@ class CacheService {
     return this.cache.getStats();
   }
 
-  setMultiple(items: Array<{ key: string; value: unknown; ttl?: number }>): void {
+  setMultiple(
+    items: Array<{ key: string; value: unknown; ttl?: number }>
+  ): void {
     items.forEach(item => {
       this.set(item.key, item.value, item.ttl);
     });

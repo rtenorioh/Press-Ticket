@@ -10,7 +10,15 @@ import { getIO } from "../../libs/socket";
 
 // wwebjs missing type definition for getChatsByLabelId and pupPage
 type WbotWithLabels = Client & {
-  getChatsByLabelId(labelId: string): Promise<Array<{ id?: { _serialized?: string }; name?: string; isGroup?: boolean; unreadCount?: number; timestamp?: number }>>;
+  getChatsByLabelId(labelId: string): Promise<
+    Array<{
+      id?: { _serialized?: string };
+      name?: string;
+      isGroup?: boolean;
+      unreadCount?: number;
+      timestamp?: number;
+    }>
+  >;
   pupPage?: {
     evaluate<T>(fn: () => T): Promise<T>;
   };
@@ -36,7 +44,9 @@ interface RawLabel {
  * Filtra tipos de sistema (1=Não lidas, 2=Grupos, 3=Favoritos).
  * Nota: "Listas personalizadas" do WhatsApp não são acessíveis via whatsapp-web.js.
  */
-const fetchBusinessLabels = async (wbot: WbotWithLabels): Promise<RawLabel[]> => {
+const fetchBusinessLabels = async (
+  wbot: WbotWithLabels
+): Promise<RawLabel[]> => {
   try {
     // Buscar labels diretamente do store para ter acesso ao campo 'type'
     /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -216,7 +226,8 @@ const SyncLabelsService = async (whatsappId: number): Promise<void> => {
           `[SYNC_LABELS] Label "${label.name}": ${chats.length} chats → ${ticketIds.length} tickets`
         );
       } catch (labelErr: unknown) {
-        const labelErrMsg = labelErr instanceof Error ? labelErr.message : String(labelErr);
+        const labelErrMsg =
+          labelErr instanceof Error ? labelErr.message : String(labelErr);
         logger.warn(
           `[SYNC_LABELS] Erro ao sincronizar label "${label.name}": ${labelErrMsg}`
         );
@@ -247,9 +258,7 @@ const SyncLabelsService = async (whatsappId: number): Promise<void> => {
     );
   } catch (err: unknown) {
     const errMsg = err instanceof Error ? err.message : String(err);
-    logger.error(
-      `[SYNC_LABELS] Erro geral ao sincronizar labels: ${errMsg}`
-    );
+    logger.error(`[SYNC_LABELS] Erro geral ao sincronizar labels: ${errMsg}`);
   } finally {
     syncInProgress.delete(whatsappId);
   }

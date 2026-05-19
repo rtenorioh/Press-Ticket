@@ -43,7 +43,10 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
 
   whatsapps.forEach(whatsapp => {
     setTimeout(() => {
-      setChannelWebhook(whatsapp as unknown as IChannel, whatsapp.id.toString());
+      setChannelWebhook(
+        whatsapp as unknown as IChannel,
+        whatsapp.id.toString()
+      );
     }, 2000);
   });
 

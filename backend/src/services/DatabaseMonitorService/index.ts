@@ -112,8 +112,9 @@ export const getDatabaseInfo = async (): Promise<DatabaseInfo> => {
     };
 
     try {
-      const dbSizeResults: Record<string, unknown> | null = await sequelize.query(
-        `
+      const dbSizeResults: Record<string, unknown> | null =
+        await sequelize.query(
+          `
         SELECT 
           table_schema as 'database',
           SUM(data_length + index_length) as 'size_bytes',
@@ -122,15 +123,18 @@ export const getDatabaseInfo = async (): Promise<DatabaseInfo> => {
         WHERE table_schema = :dbName
         GROUP BY table_schema
       `,
-        {
-          replacements: { dbName: dbConfig.database },
-          type: QueryTypes.SELECT,
-          plain: true
-        }
-      );
+          {
+            replacements: { dbName: dbConfig.database },
+            type: QueryTypes.SELECT,
+            plain: true
+          }
+        );
 
       if (dbSizeResults) {
-        dbInfo.size.totalBytes = parseInt(String(dbSizeResults.size_bytes ?? "0"), 10);
+        dbInfo.size.totalBytes = parseInt(
+          String(dbSizeResults.size_bytes ?? "0"),
+          10
+        );
         dbInfo.size.total = formatBytes(dbInfo.size.totalBytes);
       }
 
@@ -152,14 +156,20 @@ export const getDatabaseInfo = async (): Promise<DatabaseInfo> => {
         }
       );
 
-      const tableInfos: TableInfo[] = tableSizes.map((table: Record<string, unknown>) => ({
-        name: String(table.name ?? ""),
-        rows: parseInt(String(table.rows ?? "0"), 10),
-        dataSize: formatBytes(parseInt(String(table.data_bytes ?? "0"), 10)),
-        indexSize: formatBytes(parseInt(String(table.index_bytes ?? "0"), 10)),
-        totalSize: formatBytes(parseInt(String(table.total_bytes ?? "0"), 10)),
-        sizeBytes: parseInt(String(table.total_bytes ?? "0"), 10)
-      }));
+      const tableInfos: TableInfo[] = tableSizes.map(
+        (table: Record<string, unknown>) => ({
+          name: String(table.name ?? ""),
+          rows: parseInt(String(table.rows ?? "0"), 10),
+          dataSize: formatBytes(parseInt(String(table.data_bytes ?? "0"), 10)),
+          indexSize: formatBytes(
+            parseInt(String(table.index_bytes ?? "0"), 10)
+          ),
+          totalSize: formatBytes(
+            parseInt(String(table.total_bytes ?? "0"), 10)
+          ),
+          sizeBytes: parseInt(String(table.total_bytes ?? "0"), 10)
+        })
+      );
 
       dbInfo.tables = tableInfos;
       dbInfo.size.byTable = tableInfos;
@@ -201,9 +211,7 @@ export const getDatabaseInfo = async (): Promise<DatabaseInfo> => {
         }));
       } catch (error: unknown) {
         const err = error as { message?: string };
-        logger.warn(
-          `Não foi possível obter consultas lentas: ${err.message}`
-        );
+        logger.warn(`Não foi possível obter consultas lentas: ${err.message}`);
       }
 
       dbInfo.performance.slowQueries = slowQueries;
@@ -223,10 +231,13 @@ export const getDatabaseInfo = async (): Promise<DatabaseInfo> => {
         }
       );
 
-      const statusMap = statusVariables.reduce((acc: Record<string, unknown>, row: Record<string, unknown>) => {
-        acc[row.Variable_name as string] = row.Value;
-        return acc;
-      }, {});
+      const statusMap = statusVariables.reduce(
+        (acc: Record<string, unknown>, row: Record<string, unknown>) => {
+          acc[row.Variable_name as string] = row.Value;
+          return acc;
+        },
+        {}
+      );
 
       const uptimeSeconds = parseInt(String(statusMap.Uptime ?? "0"), 10);
       const days = Math.floor(uptimeSeconds / 86400);
@@ -236,10 +247,22 @@ export const getDatabaseInfo = async (): Promise<DatabaseInfo> => {
 
       dbInfo.performance.uptime = `${days}d ${hours}h ${minutes}m ${seconds}s`;
       dbInfo.performance.uptimeSeconds = uptimeSeconds;
-      dbInfo.performance.connectionCount = parseInt(String(statusMap.Threads_connected ?? "0"), 10);
-      dbInfo.performance.totalConnections = parseInt(String(statusMap.Connections ?? "0"), 10);
-      dbInfo.performance.totalQueries = parseInt(String(statusMap.Questions ?? "0"), 10);
-      dbInfo.performance.slowQueryCount = parseInt(String(statusMap.Slow_queries ?? "0"), 10);
+      dbInfo.performance.connectionCount = parseInt(
+        String(statusMap.Threads_connected ?? "0"),
+        10
+      );
+      dbInfo.performance.totalConnections = parseInt(
+        String(statusMap.Connections ?? "0"),
+        10
+      );
+      dbInfo.performance.totalQueries = parseInt(
+        String(statusMap.Questions ?? "0"),
+        10
+      );
+      dbInfo.performance.slowQueryCount = parseInt(
+        String(statusMap.Slow_queries ?? "0"),
+        10
+      );
 
       const processlist: ProcessInfo[] = await sequelize.query(
         `

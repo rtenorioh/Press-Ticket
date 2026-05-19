@@ -32,7 +32,10 @@ const UpdateUserService = async ({ tagData, id }: Request): Promise<Tag> => {
       try {
         await schema.validate({ name });
       } catch (err: unknown) {
-        throw new AppError(err instanceof Error ? err.message : String(err), 400);
+        throw new AppError(
+          err instanceof Error ? err.message : String(err),
+          400
+        );
       }
     }
 

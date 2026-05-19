@@ -71,7 +71,9 @@ const calculateLatency = async (wbot: Client): Promise<number> => {
     const startTime = Date.now();
     // wwebjs pupPage.evaluate runs in browser context — Store is untyped
     await (wbot as unknown as ClientWithPupPage).pupPage?.evaluate(
-      () => (window as unknown as { Store: { AppState: { state: string } } }).Store.AppState.state
+      () =>
+        (window as unknown as { Store: { AppState: { state: string } } }).Store
+          .AppState.state
     );
     return Date.now() - startTime;
   } catch (_error) {

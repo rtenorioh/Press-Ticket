@@ -57,7 +57,9 @@ type ExtendedGroupChat = GroupChat & {
 };
 
 class GroupManagementService {
-  async createGroup(data: CreateGroupData): Promise<{ id: string; name: string; participants: string[] }> {
+  async createGroup(
+    data: CreateGroupData
+  ): Promise<{ id: string; name: string; participants: string[] }> {
     const { whatsappId, name, participants } = data;
 
     try {
@@ -77,7 +79,10 @@ class GroupManagementService {
       });
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const group = await wbot.createGroup(name, formattedParticipants) as any as CreateGroupResult;
+      const group = (await wbot.createGroup(
+        name,
+        formattedParticipants
+      )) as any as CreateGroupResult;
 
       return {
         id: group.gid._serialized,
@@ -106,7 +111,8 @@ class GroupManagementService {
         .map((p: GroupParticipant) => p.id._serialized);
 
       const owner =
-        participants.find((p: GroupParticipant) => p.isSuperAdmin)?.id._serialized || "";
+        participants.find((p: GroupParticipant) => p.isSuperAdmin)?.id
+          ._serialized || "";
 
       return {
         id: groupChat.id._serialized,
@@ -135,7 +141,7 @@ class GroupManagementService {
 
     try {
       const wbot = getWbot(whatsappId);
-      const chat = await wbot.getChatById(groupId) as unknown as GroupChat;
+      const chat = (await wbot.getChatById(groupId)) as unknown as GroupChat;
 
       if (!chat.isGroup) {
         throw new AppError("O ID fornecido não é de um grupo");
@@ -159,7 +165,7 @@ class GroupManagementService {
 
     try {
       const wbot = getWbot(whatsappId);
-      const chat = await wbot.getChatById(groupId) as unknown as GroupChat;
+      const chat = (await wbot.getChatById(groupId)) as unknown as GroupChat;
 
       if (!chat.isGroup) {
         throw new AppError("O ID fornecido não é de um grupo");
@@ -179,7 +185,7 @@ class GroupManagementService {
 
     try {
       const wbot = getWbot(whatsappId);
-      const chat = await wbot.getChatById(groupId) as unknown as GroupChat;
+      const chat = (await wbot.getChatById(groupId)) as unknown as GroupChat;
 
       if (!chat.isGroup) {
         throw new AppError("O ID fornecido não é de um grupo");
@@ -208,7 +214,7 @@ class GroupManagementService {
 
     try {
       const wbot = getWbot(whatsappId);
-      const chat = await wbot.getChatById(groupId) as unknown as GroupChat;
+      const chat = (await wbot.getChatById(groupId)) as unknown as GroupChat;
 
       if (!chat.isGroup) {
         throw new AppError("O ID fornecido não é de um grupo");
@@ -233,7 +239,7 @@ class GroupManagementService {
 
     try {
       const wbot = getWbot(whatsappId);
-      const chat = await wbot.getChatById(groupId) as unknown as GroupChat;
+      const chat = (await wbot.getChatById(groupId)) as unknown as GroupChat;
 
       if (!chat.isGroup) {
         throw new AppError("O ID fornecido não é de um grupo");
@@ -258,7 +264,7 @@ class GroupManagementService {
 
     try {
       const wbot = getWbot(whatsappId);
-      const chat = await wbot.getChatById(groupId) as unknown as GroupChat;
+      const chat = (await wbot.getChatById(groupId)) as unknown as GroupChat;
 
       if (!chat.isGroup) {
         throw new AppError("O ID fornecido não é de um grupo");
@@ -281,7 +287,7 @@ class GroupManagementService {
   async leaveGroup(whatsappId: number, groupId: string): Promise<void> {
     try {
       const wbot = getWbot(whatsappId);
-      const chat = await wbot.getChatById(groupId) as unknown as GroupChat;
+      const chat = (await wbot.getChatById(groupId)) as unknown as GroupChat;
 
       if (!chat.isGroup) {
         throw new AppError("O ID fornecido não é de um grupo");
@@ -300,7 +306,7 @@ class GroupManagementService {
   ): Promise<string> {
     try {
       const wbot = getWbot(whatsappId);
-      const chat = await wbot.getChatById(groupId) as unknown as GroupChat;
+      const chat = (await wbot.getChatById(groupId)) as unknown as GroupChat;
 
       if (!chat.isGroup) {
         throw new AppError("O ID fornecido não é de um grupo");
@@ -322,7 +328,7 @@ class GroupManagementService {
   ): Promise<string> {
     try {
       const wbot = getWbot(whatsappId);
-      const chat = await wbot.getChatById(groupId) as unknown as GroupChat;
+      const chat = (await wbot.getChatById(groupId)) as unknown as GroupChat;
 
       if (!chat.isGroup) {
         throw new AppError("O ID fornecido não é de um grupo");
@@ -340,13 +346,15 @@ class GroupManagementService {
     }
   }
 
-  async listGroups(whatsappId: number): Promise<{
-    id: string;
-    name: string;
-    participantsCount: number;
-    unreadCount: number;
-    timestamp: number | null;
-  }[]> {
+  async listGroups(whatsappId: number): Promise<
+    {
+      id: string;
+      name: string;
+      participantsCount: number;
+      unreadCount: number;
+      timestamp: number | null;
+    }[]
+  > {
     try {
       const wbot = getWbot(whatsappId);
       const chats = await wbot.getChats();
@@ -427,7 +435,7 @@ class GroupManagementService {
   ): Promise<void> {
     try {
       const wbot = getWbot(whatsappId);
-      const chat = await wbot.getChatById(groupId) as unknown as GroupChat;
+      const chat = (await wbot.getChatById(groupId)) as unknown as GroupChat;
 
       if (!chat.isGroup) {
         throw new AppError("O ID fornecido não é de um grupo");

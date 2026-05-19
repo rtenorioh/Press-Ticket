@@ -49,9 +49,10 @@ export const forwardNative = async (
       .json({ message: "Mensagem encaminhada com sucesso", result });
   } catch (error: unknown) {
     logger.error(`[FEATURES] Erro ao encaminhar mensagem: ${error}`);
-    return res
-      .status(500)
-      .json({ error: error instanceof Error ? error.message : "Erro ao encaminhar mensagem" });
+    return res.status(500).json({
+      error:
+        error instanceof Error ? error.message : "Erro ao encaminhar mensagem"
+    });
   }
 };
 
@@ -79,9 +80,9 @@ export const searchMessages = async (
     logger.error(
       `[FEATURES] Erro ao buscar mensagens: ${error instanceof Error ? error.message : JSON.stringify(error)}`
     );
-    return res
-      .status(500)
-      .json({ error: error instanceof Error ? error.message : "Erro ao buscar mensagens" });
+    return res.status(500).json({
+      error: error instanceof Error ? error.message : "Erro ao buscar mensagens"
+    });
   }
 };
 
@@ -102,9 +103,9 @@ export const acceptInvite = async (
       .json({ message: "Convite aceito com sucesso", groupId });
   } catch (error: unknown) {
     logger.error(`[FEATURES] Erro ao aceitar convite: ${error}`);
-    return res
-      .status(500)
-      .json({ error: error instanceof Error ? error.message : "Erro ao aceitar convite" });
+    return res.status(500).json({
+      error: error instanceof Error ? error.message : "Erro ao aceitar convite"
+    });
   }
 };
 
@@ -122,9 +123,12 @@ export const getInviteInfo = async (
     return res.status(200).json(info);
   } catch (error: unknown) {
     logger.error(`[FEATURES] Erro ao obter info do convite: ${error}`);
-    return res
-      .status(500)
-      .json({ error: error instanceof Error ? error.message : "Erro ao obter informações do convite" });
+    return res.status(500).json({
+      error:
+        error instanceof Error
+          ? error.message
+          : "Erro ao obter informações do convite"
+    });
   }
 };
 
@@ -150,9 +154,10 @@ export const sendLocation = async (
       .json({ message: "Localização enviada", id: sentMessage.id.id });
   } catch (error: unknown) {
     logger.error(`[FEATURES] Erro ao enviar localização: ${error}`);
-    return res
-      .status(500)
-      .json({ error: error instanceof Error ? error.message : "Erro ao enviar localização" });
+    return res.status(500).json({
+      error:
+        error instanceof Error ? error.message : "Erro ao enviar localização"
+    });
   }
 };
 
@@ -170,7 +175,9 @@ export const sendSeen = async (
     );
     return res.status(200).json({ message: "Chat marcado como visto" });
   } catch (error: unknown) {
-    return res.status(500).json({ error: error instanceof Error ? error.message : "Erro interno" });
+    return res
+      .status(500)
+      .json({ error: error instanceof Error ? error.message : "Erro interno" });
   }
 };
 
@@ -187,7 +194,9 @@ export const archiveChat = async (
     );
     return res.status(200).json({ message: "Chat arquivado" });
   } catch (error: unknown) {
-    return res.status(500).json({ error: error instanceof Error ? error.message : "Erro interno" });
+    return res
+      .status(500)
+      .json({ error: error instanceof Error ? error.message : "Erro interno" });
   }
 };
 
@@ -204,7 +213,9 @@ export const unarchiveChat = async (
     );
     return res.status(200).json({ message: "Chat desarquivado" });
   } catch (error: unknown) {
-    return res.status(500).json({ error: error instanceof Error ? error.message : "Erro interno" });
+    return res
+      .status(500)
+      .json({ error: error instanceof Error ? error.message : "Erro interno" });
   }
 };
 
@@ -224,7 +235,9 @@ export const pinChat = async (
     }
     return res.status(200).json({ message: "Chat fixado", success: result });
   } catch (error: unknown) {
-    return res.status(500).json({ error: error instanceof Error ? error.message : "Erro interno" });
+    return res
+      .status(500)
+      .json({ error: error instanceof Error ? error.message : "Erro interno" });
   }
 };
 
@@ -244,7 +257,9 @@ export const unpinChat = async (
     }
     return res.status(200).json({ message: "Chat desfixado", success: result });
   } catch (error: unknown) {
-    return res.status(500).json({ error: error instanceof Error ? error.message : "Erro interno" });
+    return res
+      .status(500)
+      .json({ error: error instanceof Error ? error.message : "Erro interno" });
   }
 };
 
@@ -265,7 +280,9 @@ export const muteChat = async (
     }
     return res.status(200).json({ message: "Chat silenciado" });
   } catch (error: unknown) {
-    return res.status(500).json({ error: error instanceof Error ? error.message : "Erro interno" });
+    return res
+      .status(500)
+      .json({ error: error instanceof Error ? error.message : "Erro interno" });
   }
 };
 
@@ -285,7 +302,9 @@ export const unmuteChat = async (
     }
     return res.status(200).json({ message: "Notificações do chat ativadas" });
   } catch (error: unknown) {
-    return res.status(500).json({ error: error instanceof Error ? error.message : "Erro interno" });
+    return res
+      .status(500)
+      .json({ error: error instanceof Error ? error.message : "Erro interno" });
   }
 };
 
@@ -302,7 +321,9 @@ export const markUnread = async (
     );
     return res.status(200).json({ message: "Chat marcado como não lido" });
   } catch (error: unknown) {
-    return res.status(500).json({ error: error instanceof Error ? error.message : "Erro interno" });
+    return res
+      .status(500)
+      .json({ error: error instanceof Error ? error.message : "Erro interno" });
   }
 };
 
@@ -320,7 +341,9 @@ export const fetchMessages = async (
     );
     return res.status(200).json(messages);
   } catch (error: unknown) {
-    return res.status(500).json({ error: error instanceof Error ? error.message : "Erro interno" });
+    return res
+      .status(500)
+      .json({ error: error instanceof Error ? error.message : "Erro interno" });
   }
 };
 
@@ -339,7 +362,9 @@ export const clearMessages = async (
       .status(200)
       .json({ message: "Mensagens limpas", success: result });
   } catch (error: unknown) {
-    return res.status(500).json({ error: error instanceof Error ? error.message : "Erro interno" });
+    return res
+      .status(500)
+      .json({ error: error instanceof Error ? error.message : "Erro interno" });
   }
 };
 
@@ -362,7 +387,9 @@ export const getChatInfo = async (
     }
     return res.status(200).json(info);
   } catch (error: unknown) {
-    return res.status(500).json({ error: error instanceof Error ? error.message : "Erro interno" });
+    return res
+      .status(500)
+      .json({ error: error instanceof Error ? error.message : "Erro interno" });
   }
 };
 
@@ -378,7 +405,9 @@ export const getChats = async (
     );
     return res.status(200).json(chats);
   } catch (error: unknown) {
-    return res.status(500).json({ error: error instanceof Error ? error.message : "Erro interno" });
+    return res
+      .status(500)
+      .json({ error: error instanceof Error ? error.message : "Erro interno" });
   }
 };
 
@@ -395,7 +424,9 @@ export const getLabels = async (
     );
     return res.status(200).json(labels);
   } catch (error: unknown) {
-    return res.status(500).json({ error: error instanceof Error ? error.message : "Erro interno" });
+    return res
+      .status(500)
+      .json({ error: error instanceof Error ? error.message : "Erro interno" });
   }
 };
 
@@ -412,7 +443,9 @@ export const getLabelById = async (
     );
     return res.status(200).json(label);
   } catch (error: unknown) {
-    return res.status(500).json({ error: error instanceof Error ? error.message : "Erro interno" });
+    return res
+      .status(500)
+      .json({ error: error instanceof Error ? error.message : "Erro interno" });
   }
 };
 
@@ -429,7 +462,9 @@ export const getChatLabels = async (
     );
     return res.status(200).json(labels);
   } catch (error: unknown) {
-    return res.status(500).json({ error: error instanceof Error ? error.message : "Erro interno" });
+    return res
+      .status(500)
+      .json({ error: error instanceof Error ? error.message : "Erro interno" });
   }
 };
 
@@ -446,7 +481,9 @@ export const getChatsByLabel = async (
     );
     return res.status(200).json(chats);
   } catch (error: unknown) {
-    return res.status(500).json({ error: error instanceof Error ? error.message : "Erro interno" });
+    return res
+      .status(500)
+      .json({ error: error instanceof Error ? error.message : "Erro interno" });
   }
 };
 
@@ -464,7 +501,9 @@ export const changeChatLabels = async (
     );
     return res.status(200).json({ message: "Etiquetas atualizadas" });
   } catch (error: unknown) {
-    return res.status(500).json({ error: error instanceof Error ? error.message : "Erro interno" });
+    return res
+      .status(500)
+      .json({ error: error instanceof Error ? error.message : "Erro interno" });
   }
 };
 
@@ -482,7 +521,9 @@ export const setStatus = async (
     );
     return res.status(200).json({ message: "Status atualizado" });
   } catch (error: unknown) {
-    return res.status(500).json({ error: error instanceof Error ? error.message : "Erro interno" });
+    return res
+      .status(500)
+      .json({ error: error instanceof Error ? error.message : "Erro interno" });
   }
 };
 
@@ -501,7 +542,9 @@ export const setDisplayName = async (
       .status(200)
       .json({ message: "Nome atualizado", success: result });
   } catch (error: unknown) {
-    return res.status(500).json({ error: error instanceof Error ? error.message : "Erro interno" });
+    return res
+      .status(500)
+      .json({ error: error instanceof Error ? error.message : "Erro interno" });
   }
 };
 
@@ -520,7 +563,9 @@ export const setProfilePicture = async (
       .status(200)
       .json({ message: "Foto de perfil atualizada", success: result });
   } catch (error: unknown) {
-    return res.status(500).json({ error: error instanceof Error ? error.message : "Erro interno" });
+    return res
+      .status(500)
+      .json({ error: error instanceof Error ? error.message : "Erro interno" });
   }
 };
 
@@ -538,7 +583,9 @@ export const removeProfilePicture = async (
       .status(200)
       .json({ message: "Foto de perfil removida", success: result });
   } catch (error: unknown) {
-    return res.status(500).json({ error: error instanceof Error ? error.message : "Erro interno" });
+    return res
+      .status(500)
+      .json({ error: error instanceof Error ? error.message : "Erro interno" });
   }
 };
 
@@ -554,7 +601,9 @@ export const getWWebVersion = async (
     );
     return res.status(200).json({ version });
   } catch (error: unknown) {
-    return res.status(500).json({ error: error instanceof Error ? error.message : "Erro interno" });
+    return res
+      .status(500)
+      .json({ error: error instanceof Error ? error.message : "Erro interno" });
   }
 };
 
@@ -572,7 +621,9 @@ export const setPresenceUnavailable = async (
       .status(200)
       .json({ message: "Presença definida como indisponível" });
   } catch (error: unknown) {
-    return res.status(500).json({ error: error instanceof Error ? error.message : "Erro interno" });
+    return res
+      .status(500)
+      .json({ error: error instanceof Error ? error.message : "Erro interno" });
   }
 };
 
@@ -590,7 +641,9 @@ export const setPresenceAvailable = async (
       .status(200)
       .json({ message: "Presença definida como disponível" });
   } catch (error: unknown) {
-    return res.status(500).json({ error: error instanceof Error ? error.message : "Erro interno" });
+    return res
+      .status(500)
+      .json({ error: error instanceof Error ? error.message : "Erro interno" });
   }
 };
 
@@ -608,7 +661,9 @@ export const getContactAbout = async (
     );
     return res.status(200).json({ about });
   } catch (error: unknown) {
-    return res.status(500).json({ error: error instanceof Error ? error.message : "Erro interno" });
+    return res
+      .status(500)
+      .json({ error: error instanceof Error ? error.message : "Erro interno" });
   }
 };
 
@@ -625,7 +680,9 @@ export const getContactInfo = async (
     );
     return res.status(200).json(info);
   } catch (error: unknown) {
-    return res.status(500).json({ error: error instanceof Error ? error.message : "Erro interno" });
+    return res
+      .status(500)
+      .json({ error: error instanceof Error ? error.message : "Erro interno" });
   }
 };
 
@@ -644,7 +701,9 @@ export const blockContact = async (
       .status(200)
       .json({ message: "Contato bloqueado", success: result });
   } catch (error: unknown) {
-    return res.status(500).json({ error: error instanceof Error ? error.message : "Erro interno" });
+    return res
+      .status(500)
+      .json({ error: error instanceof Error ? error.message : "Erro interno" });
   }
 };
 
@@ -663,7 +722,9 @@ export const unblockContact = async (
       .status(200)
       .json({ message: "Contato desbloqueado", success: result });
   } catch (error: unknown) {
-    return res.status(500).json({ error: error instanceof Error ? error.message : "Erro interno" });
+    return res
+      .status(500)
+      .json({ error: error instanceof Error ? error.message : "Erro interno" });
   }
 };
 
@@ -679,7 +740,9 @@ export const getBlockedContacts = async (
     );
     return res.status(200).json(contacts);
   } catch (error: unknown) {
-    return res.status(500).json({ error: error instanceof Error ? error.message : "Erro interno" });
+    return res
+      .status(500)
+      .json({ error: error instanceof Error ? error.message : "Erro interno" });
   }
 };
 
@@ -696,7 +759,9 @@ export const getCommonGroups = async (
     );
     return res.status(200).json(groups);
   } catch (error: unknown) {
-    return res.status(500).json({ error: error instanceof Error ? error.message : "Erro interno" });
+    return res
+      .status(500)
+      .json({ error: error instanceof Error ? error.message : "Erro interno" });
   }
 };
 
@@ -714,7 +779,9 @@ export const getGroupMembershipRequests = async (
     );
     return res.status(200).json(requests);
   } catch (error: unknown) {
-    return res.status(500).json({ error: error instanceof Error ? error.message : "Erro interno" });
+    return res
+      .status(500)
+      .json({ error: error instanceof Error ? error.message : "Erro interno" });
   }
 };
 
@@ -732,7 +799,9 @@ export const approveGroupMembershipRequests = async (
     );
     return res.status(200).json({ message: "Solicitações aprovadas", results });
   } catch (error: unknown) {
-    return res.status(500).json({ error: error instanceof Error ? error.message : "Erro interno" });
+    return res
+      .status(500)
+      .json({ error: error instanceof Error ? error.message : "Erro interno" });
   }
 };
 
@@ -752,7 +821,9 @@ export const rejectGroupMembershipRequests = async (
       .status(200)
       .json({ message: "Solicitações rejeitadas", results });
   } catch (error: unknown) {
-    return res.status(500).json({ error: error instanceof Error ? error.message : "Erro interno" });
+    return res
+      .status(500)
+      .json({ error: error instanceof Error ? error.message : "Erro interno" });
   }
 };
 
@@ -772,7 +843,9 @@ export const pinMessage = async (
       .status(200)
       .json({ message: "Mensagem fixada", success: result });
   } catch (error: unknown) {
-    return res.status(500).json({ error: error instanceof Error ? error.message : "Erro interno" });
+    return res
+      .status(500)
+      .json({ error: error instanceof Error ? error.message : "Erro interno" });
   }
 };
 
@@ -788,7 +861,9 @@ export const unpinMessage = async (
       .status(200)
       .json({ message: "Mensagem desfixada", success: result });
   } catch (error: unknown) {
-    return res.status(500).json({ error: error instanceof Error ? error.message : "Erro interno" });
+    return res
+      .status(500)
+      .json({ error: error instanceof Error ? error.message : "Erro interno" });
   }
 };
 
@@ -803,7 +878,9 @@ export const getMessageInfo = async (
     const info = await GetMessageInfo(messageId);
     return res.status(200).json(info);
   } catch (error: unknown) {
-    return res.status(500).json({ error: error instanceof Error ? error.message : "Erro interno" });
+    return res
+      .status(500)
+      .json({ error: error instanceof Error ? error.message : "Erro interno" });
   }
 };
 
@@ -817,7 +894,9 @@ export const getMessageReactions = async (
     const reactions = await GetMessageReactions(messageId);
     return res.status(200).json(reactions);
   } catch (error: unknown) {
-    return res.status(500).json({ error: error instanceof Error ? error.message : "Erro interno" });
+    return res
+      .status(500)
+      .json({ error: error instanceof Error ? error.message : "Erro interno" });
   }
 };
 
@@ -831,7 +910,9 @@ export const getPollVotes = async (
     const votes = await GetPollVotes(messageId);
     return res.status(200).json(votes);
   } catch (error: unknown) {
-    return res.status(500).json({ error: error instanceof Error ? error.message : "Erro interno" });
+    return res
+      .status(500)
+      .json({ error: error instanceof Error ? error.message : "Erro interno" });
   }
 };
 
@@ -846,7 +927,9 @@ export const starMessage = async (
     await StarWhatsAppMessage(messageId);
     return res.status(200).json({ message: "Mensagem favoritada" });
   } catch (error: unknown) {
-    return res.status(500).json({ error: error instanceof Error ? error.message : "Erro interno" });
+    return res
+      .status(500)
+      .json({ error: error instanceof Error ? error.message : "Erro interno" });
   }
 };
 
@@ -860,7 +943,9 @@ export const unstarMessage = async (
     await UnstarWhatsAppMessage(messageId);
     return res.status(200).json({ message: "Mensagem desfavoritada" });
   } catch (error: unknown) {
-    return res.status(500).json({ error: error instanceof Error ? error.message : "Erro interno" });
+    return res
+      .status(500)
+      .json({ error: error instanceof Error ? error.message : "Erro interno" });
   }
 };
 
@@ -881,7 +966,9 @@ export const getPinnedMessages = async (
     return res.status(200).json(pinnedMessages);
   } catch (error: unknown) {
     logger.error(`[FEATURES] Erro ao buscar mensagens fixadas: ${error}`);
-    return res.status(500).json({ error: error instanceof Error ? error.message : "Erro interno" });
+    return res
+      .status(500)
+      .json({ error: error instanceof Error ? error.message : "Erro interno" });
   }
 };
 
@@ -904,6 +991,9 @@ export const checkMessagePinned = async (
     logger.error(
       `[FEATURES] Erro ao verificar se mensagem está fixada: ${error}`
     );
-    return res.status(500).json({ error: error instanceof Error ? error.message : "Erro interno", isPinned: false });
+    return res.status(500).json({
+      error: error instanceof Error ? error.message : "Erro interno",
+      isPinned: false
+    });
   }
 };

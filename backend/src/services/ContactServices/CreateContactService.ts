@@ -9,7 +9,9 @@ interface ExtraInfo {
 }
 
 // Extends Contact creation attrs to include nested extraInfo for Contact.create({ include })
-type ContactCreateInput = InferCreationAttributes<Contact> & { extraInfo?: ExtraInfo[] };
+type ContactCreateInput = InferCreationAttributes<Contact> & {
+  extraInfo?: ExtraInfo[];
+};
 
 interface Request {
   name: string;
