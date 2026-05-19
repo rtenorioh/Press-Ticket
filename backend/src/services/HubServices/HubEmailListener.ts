@@ -140,8 +140,8 @@ const HubEmailListener = async (
 
     // Fallback for alternative payload shapes
     if (!bodyHtml && !bodyText) {
-      bodyHtml = (message as any).htmlBody || "";
-      bodyText = (message as any).textBody || "";
+      bodyHtml = message.htmlBody || "";
+      bodyText = message.textBody || "";
       if (!bodyText && bodyHtml) {
         bodyText = extractTextFromHtml(bodyHtml);
       }

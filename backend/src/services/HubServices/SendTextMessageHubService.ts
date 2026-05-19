@@ -5,6 +5,7 @@ import {
   NotificameMessagePayload
 } from "../../libs/notificameClient";
 import Contact from "../../models/Contact";
+import Whatsapp from "../../models/Whatsapp";
 import CreateMessageService from "./CreateHubMessageService";
 import { showHubToken } from "../../helpers/showHubToken";
 import { logger } from "../../utils/logger";
@@ -15,7 +16,7 @@ export const SendTextMessageService = async (
   message: string,
   ticketId: number,
   contact: Contact,
-  connection: any
+  connection: Whatsapp
 ) => {
   const channel = resolveChannel(contact);
   if (!channel) {

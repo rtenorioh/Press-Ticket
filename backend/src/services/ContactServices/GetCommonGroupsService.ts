@@ -58,13 +58,15 @@ const GetCommonGroupsService = async ({
     throw new AppError("ERR_NUMBER_NOT_REGISTERED", 404);
   }
 
-  let commonGroups = [];
+  let commonGroups: Array<{ _serialized?: string; user?: string }> = [];
   try {
     const wContact = await wbot.getContactById(numberId._serialized);
-    commonGroups = await (wContact as any).getCommonGroups();
-  } catch (error) {
+    const wContactExtended = wContact as unknown as { getCommonGroups?: () => Promise<Array<{ _serialized?: string; user?: string }>> };
+    commonGroups = wContactExtended.getCommonGroups ? await wContactExtended.getCommonGroups() : [];
+  } catch (error: unknown) {
+    const err = error as { message?: string };
     logger.warn(
-      `[FALLBACK] Erro ao obter contato/grupos comuns do WhatsApp: ${error.message || error}`
+      `[FALLBACK] Erro ao obter contato/grupos comuns do WhatsApp: ${err.message || error}`
     );
     commonGroups = [];
   }
@@ -84,10 +86,11 @@ const GetCommonGroupsService = async ({
         profilePicUrl = undefined;
       }
 
+      const groupChatExtended = groupChat as unknown as { participants?: unknown[] };
       groupsInfo.push({
         id: groupId,
         name: groupChat.name || "Sem nome",
-        participantsCount: (groupChat as any).participants?.length || 0,
+        participantsCount: groupChatExtended.participants?.length || 0,
         profilePicUrl
       });
     } catch (_error) {

@@ -108,8 +108,8 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
 
   try {
     await schema.validate({ number: formattedNumber, userId });
-  } catch (err: any) {
-    throw new AppError(err.message);
+  } catch (err: unknown) {
+    throw new AppError(err instanceof Error ? err.message : "Validation error");
   }
 
   const contactAndTicket = await createContact(
@@ -119,7 +119,7 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
     queueId
   );
 
-  let resp: any;
+  let resp: unknown;
 
   if (medias) {
     await Promise.all(
@@ -183,8 +183,8 @@ export const sendMessage = async (
 
   try {
     await schema.validate({ number: formattedNumber, userId });
-  } catch (err: any) {
-    throw new AppError(err.message);
+  } catch (err: unknown) {
+    throw new AppError(err instanceof Error ? err.message : "Validation error");
   }
 
   const contactAndTicket = await createContact(
@@ -245,8 +245,8 @@ export const sendMedia = async (
 
   try {
     await schema.validate({ number: formattedNumber, userId });
-  } catch (err: any) {
-    throw new AppError(err.message);
+  } catch (err: unknown) {
+    throw new AppError(err instanceof Error ? err.message : "Validation error");
   }
 
   const contactAndTicket = await createContact(
@@ -256,7 +256,7 @@ export const sendMedia = async (
     queueId
   );
 
-  let resp: any;
+  let resp: unknown;
   if (medias && medias.length > 0) {
     await Promise.all(
       medias.map(async (media: Express.Multer.File) => {
@@ -351,7 +351,7 @@ export const getMediaBase64 = async (
         base64Data: `data:${mimeType};base64,${base64Data}`
       }
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
     if (err instanceof AppError) {
       return res.status(err.statusCode).json({ error: err.message });
     }

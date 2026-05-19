@@ -1,9 +1,14 @@
-import { MessageMedia } from "whatsapp-web.js";
+import { Client, MessageMedia } from "whatsapp-web.js";
 import { getWbot } from "../../libs/wbot";
 import AppError from "../../errors/AppError";
 import { logger } from "../../utils/logger";
 import fs from "fs";
 import path from "path";
+
+// wwebjs missing type definition for removeProfilePicture
+interface ClientWithRemoveProfilePic extends Client {
+  removeProfilePicture(): Promise<boolean>;
+}
 
 class ProfileManagementService {
   async setStatus(whatsappId: number, status: string): Promise<void> {
@@ -71,7 +76,7 @@ class ProfileManagementService {
   async removeProfilePicture(whatsappId: number): Promise<boolean> {
     try {
       const wbot = getWbot(whatsappId);
-      return await (wbot as any).removeProfilePicture();
+      return await (wbot as unknown as ClientWithRemoveProfilePic).removeProfilePicture();
     } catch (err) {
       logger.error(`[PROFILE] Erro ao remover foto de perfil: ${err}`);
       throw new AppError(`Erro ao remover foto de perfil: ${err}`);

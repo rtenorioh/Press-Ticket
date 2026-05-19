@@ -1,6 +1,40 @@
+import { Client } from "whatsapp-web.js";
 import { getWbot } from "../../libs/wbot";
 import AppError from "../../errors/AppError";
 import { logger } from "../../utils/logger";
+
+// wwebjs missing type definition for getBlockedContacts and getCommonGroups
+interface BlockedContactEntry {
+  id?: { _serialized?: string } | string;
+  name?: string;
+  pushname?: string;
+  number?: string;
+}
+
+interface CommonGroupEntry {
+  id?: { _serialized?: string } | string;
+  name?: string;
+  participants?: unknown[];
+}
+
+type ClientWithBlocked = Client & {
+  getBlockedContacts(): Promise<BlockedContactEntry[]>;
+};
+
+interface ContactWithGroups {
+  getCommonGroups(): Promise<CommonGroupEntry[]>;
+  getAbout(): Promise<string | null>;
+  id: { _serialized: string };
+  name: string;
+  pushname: string;
+  number: string;
+  isBlocked: boolean;
+  isBusiness: boolean;
+  isEnterprise: boolean;
+  block(): Promise<boolean>;
+  unblock(): Promise<boolean>;
+  getProfilePicUrl(): Promise<string>;
+}
 
 interface ContactInfo {
   id: string;
@@ -119,20 +153,24 @@ class ContactActionsService {
   async getBlockedContacts(whatsappId: number): Promise<BlockedContact[]> {
     try {
       const wbot = getWbot(whatsappId);
-      const blocked: any[] = await wbot.getBlockedContacts();
+      const blocked = await (wbot as unknown as ClientWithBlocked).getBlockedContacts();
 
-      return blocked.map(contact => ({
-        id: contact.id?._serialized || contact.id,
-        name: contact.name || contact.pushname || "",
-        number: contact.number || contact.id?.user || ""
-      }));
+      return blocked.map(contact => {
+        const rawId = contact.id;
+        const resolvedId = (typeof rawId === "object" ? rawId?._serialized : rawId) || "";
+        return {
+          id: resolvedId,
+          name: contact.name || contact.pushname || "",
+          number: contact.number || ""
+        };
+      });
     } catch (err) {
       logger.error(`[CONTACT] Erro ao listar contatos bloqueados: ${err}`);
       throw new AppError(`Erro ao listar contatos bloqueados: ${err}`);
     }
   }
 
-  async getCommonGroups(whatsappId: number, contactId: string): Promise<any[]> {
+  async getCommonGroups(whatsappId: number, contactId: string): Promise<{ id: string; name: string; participantsCount: number }[]> {
     try {
       const wbot = getWbot(whatsappId);
 
@@ -142,13 +180,17 @@ class ContactActionsService {
       }
 
       const contact = await wbot.getContactById(formattedId);
-      const groups: any[] = await contact.getCommonGroups();
+      const groups = await (contact as unknown as ContactWithGroups).getCommonGroups();
 
-      return groups.map(group => ({
-        id: group.id?._serialized || group.id,
-        name: group.name || "",
-        participantsCount: group.participants?.length || 0
-      }));
+      return groups.map(group => {
+        const rawId = group.id;
+        const resolvedId = (typeof rawId === "object" ? rawId?._serialized : rawId) || "";
+        return {
+          id: resolvedId,
+          name: group.name || "",
+          participantsCount: group.participants?.length || 0
+        };
+      });
     } catch (err) {
       logger.error(`[CONTACT] Erro ao buscar grupos em comum: ${err}`);
       throw new AppError(`Erro ao buscar grupos em comum: ${err}`);

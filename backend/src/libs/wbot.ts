@@ -18,6 +18,47 @@ interface Session extends Client {
   id?: number;
 }
 
+type SessionWithExtras = Session & {
+  requestPairingCode: (...args: unknown[]) => Promise<unknown>;
+  setDeviceName?: (name: string, browser: string) => Promise<void>;
+};
+
+interface WbotReaction {
+  msgId?: { id?: string; _serialized?: string };
+  id?: { id?: string; _serialized?: string; participant?: string };
+  senderId?: string;
+  author?: string;
+  participant?: string;
+  from?: string;
+  reaction?: string;
+}
+
+interface WbotPollVote {
+  voter: string;
+  parentMsgKey?: { id?: string };
+  parentMessage?: { id?: { id?: string } };
+  selectedOptions: { localId: number; name: string }[];
+  interractedAtTs: number;
+}
+
+interface WbotCallEvent {
+  from: string;
+  peerJid?: string;
+  id: string;
+  isVideo: boolean;
+  reject(): Promise<void>;
+}
+
+interface WbotUnreadCountEvent {
+  id?: { _serialized?: string };
+  unreadCount?: number;
+}
+
+interface WbotGroupMembershipRequest {
+  chatId?: string;
+  author?: string;
+}
+
 const sessions: Session[] = [];
 const keepAliveIntervals: Map<number, NodeJS.Timeout> = new Map();
 
@@ -99,9 +140,9 @@ export const initWbot = async (
       if (existingIndex !== -1) {
         try {
           await sessions[existingIndex].destroy();
-        } catch (e: any) {
+        } catch (e: unknown) {
           logger.warn(
-            `[WBOT] Falha ao destruir sessão existente ${whatsapp.id}: ${e.message}`
+            `[WBOT] Falha ao destruir sessão existente ${whatsapp.id}: ${e instanceof Error ? e.message : String(e)}`
           );
         }
         sessions.splice(existingIndex, 1);
@@ -190,15 +231,16 @@ export const initWbot = async (
       // causing unhandledRejection when WhatsApp web rejects the number.
       // Override the method on this instance to surface the error via socket.
       if (isPairingMode) {
-        const origRequestPairingCode = (wbot as any).requestPairingCode.bind(
-          wbot
-        );
-        (wbot as any).requestPairingCode = async (...args: any[]) => {
+        type PairingFn = (...args: unknown[]) => Promise<unknown>;
+        type WbotPairing = { requestPairingCode: PairingFn };
+        const wbotP = wbot as unknown as WbotPairing;
+        const origRequestPairingCode = wbotP.requestPairingCode.bind(wbot);
+        wbotP.requestPairingCode = async (...args: unknown[]) => {
           try {
             return await origRequestPairingCode(...args);
-          } catch (err: any) {
+          } catch (err: unknown) {
             logger.error(
-              `[WBOT] Pairing code failed for ${sessionName}: ${err?.message || err}`
+              `[WBOT] Pairing code failed for ${sessionName}: ${err instanceof Error ? err.message : String(err)}`
             );
             io.emit("whatsappSession", {
               action: "update",
@@ -227,15 +269,16 @@ export const initWbot = async (
           if (wbot.pupPage && !wbot.pupPage.isClosed()) {
             const syncState = await wbot.pupPage.evaluate(() => {
               try {
-                const Socket = (window as any).require(
-                  "WAWebSocketModel"
-                ).Socket;
+                type WAWin = {
+                  require: (m: string) => { Socket: { state: string; hasSynced: boolean } };
+                  onAppStateHasSyncedEvent?: () => void;
+                };
+                const wa = window as unknown as WAWin;
+                const Socket = wa.require("WAWebSocketModel").Socket;
                 return {
                   state: Socket.state,
                   hasSynced: Socket.hasSynced,
-                  hasEventHandler:
-                    typeof (window as any).onAppStateHasSyncedEvent ===
-                    "function"
+                  hasEventHandler: typeof wa.onAppStateHasSyncedEvent === "function"
                 };
               } catch {
                 return null;
@@ -251,7 +294,7 @@ export const initWbot = async (
                   `[WBOT] Sessão ${sessionName}: sync já completou mas ready não disparou. Forçando via onAppStateHasSyncedEvent...`
                 );
                 await wbot.pupPage.evaluate(() => {
-                  (window as any).onAppStateHasSyncedEvent();
+                  (window as unknown as { onAppStateHasSyncedEvent?: () => void }).onAppStateHasSyncedEvent?.();
                 });
               } else {
                 logger.info(
@@ -265,7 +308,7 @@ export const initWbot = async (
         }
       }, 3000);
 
-      wbot.initialize().catch((err: any) => {
+      wbot.initialize().catch((err: unknown) => {
         clearInterval(syncCheckInterval);
         logger.error(
           `[WBOT] Erro ao inicializar sessão ${sessionName}: ${err}`
@@ -395,12 +438,12 @@ export const initWbot = async (
         const deviceName = process.env.DEVICE_NAME || "Press Ticket®";
         const browserName = "Chrome";
         try {
-          await (wbot as any).setDeviceName(deviceName, browserName);
+          await (wbot as unknown as SessionWithExtras).setDeviceName?.(deviceName, browserName);
           logger.info(
             `Session: ${sessionName} deviceName="${deviceName}" aplicado`
           );
-        } catch (dnErr: any) {
-          logger.warn(`[WBOT] Falha ao definir deviceName: ${dnErr.message}`);
+        } catch (dnErr: unknown) {
+          logger.warn(`[WBOT] Falha ao definir deviceName: ${dnErr instanceof Error ? dnErr.message : String(dnErr)}`);
         }
 
         const platform = wbot.info?.platform || "";
@@ -446,9 +489,9 @@ export const initWbot = async (
           setTimeout(async () => {
             try {
               await SyncLabelsService(whatsapp.id);
-            } catch (syncErr: any) {
+            } catch (syncErr: unknown) {
               logger.warn(
-                `[WBOT] Falha ao sincronizar labels: ${syncErr.message}`
+                `[WBOT] Falha ao sincronizar labels: ${syncErr instanceof Error ? syncErr.message : String(syncErr)}`
               );
             }
           }, 5000);
@@ -487,12 +530,11 @@ export const initWbot = async (
         resolve(wbot);
       });
 
-      wbot.on("message_reaction", async (reaction: any) => {
+      wbot.on("message_reaction", async (reaction: WbotReaction) => {
         try {
           const parentId =
             reaction?.msgId?.id ||
             reaction?.msgId?._serialized ||
-            reaction?.msgId ||
             reaction?.id?.id ||
             reaction?.id?._serialized;
           if (!parentId) return;
@@ -589,7 +631,7 @@ export const initWbot = async (
 
       wbot.on(
         "contact_changed",
-        async (message: any, oldId: string, newId: string) => {
+        async (_message: unknown, oldId: string, newId: string) => {
           try {
             logger.info(
               `Session: ${sessionName} CONTACT_CHANGED - ${oldId} -> ${newId}`
@@ -615,7 +657,7 @@ export const initWbot = async (
         }
       );
 
-      wbot.on("unread_count", async (chat: any) => {
+      wbot.on("unread_count", async (chat: WbotUnreadCountEvent) => {
         try {
           io.emit("unreadCount", {
             whatsappId: whatsapp.id,
@@ -629,7 +671,7 @@ export const initWbot = async (
         }
       });
 
-      wbot.on("group_membership_request", async (notification: any) => {
+      wbot.on("group_membership_request", async (notification: WbotGroupMembershipRequest) => {
         try {
           logger.info(
             `Session: ${sessionName} GROUP_MEMBERSHIP_REQUEST - Group: ${notification.chatId}`
@@ -645,7 +687,7 @@ export const initWbot = async (
         }
       });
 
-      wbot.on("vote_update", async (vote: any) => {
+      wbot.on("vote_update", async (vote: WbotPollVote) => {
         try {
           const PollVoteService = (await import("../services/PollVoteService"))
             .default;
@@ -659,7 +701,7 @@ export const initWbot = async (
           }
 
           const pollMessageId =
-            vote.parentMsgKey?.id || vote.parentMessage?.id?.id;
+            (vote.parentMsgKey?.id || vote.parentMessage?.id?.id) ?? "";
           await PollVoteService.createOrUpdate({
             pollMessageId,
             voterId: vote.voter,
@@ -672,7 +714,7 @@ export const initWbot = async (
         }
       });
 
-      wbot.on("call", async (call: any) => {
+      wbot.on("call", async (call: WbotCallEvent) => {
         try {
           let realPhoneNumber = call.from;
 
@@ -723,8 +765,8 @@ export const initWbot = async (
                       });
                       document.dispatchEvent(escEvent);
                       results.push("✅ Tecla ESC enviada");
-                    } catch (err: any) {
-                      results.push(`❌ Tecla ESC falhou: ${err.message}`);
+                    } catch (err) {
+                      results.push(`❌ Tecla ESC falhou: ${(err as Error).message}`);
                     }
 
                     results.push("Método 2: Procurando botão vermelho...");
@@ -732,7 +774,7 @@ export const initWbot = async (
                       const allButtons = Array.from(
                         document.querySelectorAll('button, div[role="button"]')
                       );
-                      const redButton = allButtons.find((btn: any) => {
+                      const redButton = allButtons.find((btn) => {
                         const style = window.getComputedStyle(btn);
                         const bgColor = style.backgroundColor;
                         return (
@@ -756,9 +798,9 @@ export const initWbot = async (
                           `❌ Botão vermelho não encontrado (${allButtons.length} botões verificados)`
                         );
                       }
-                    } catch (err: any) {
+                    } catch (err) {
                       results.push(
-                        `❌ Busca por botão vermelho falhou: ${err.message}`
+                        `❌ Busca por botão vermelho falhou: ${(err as Error).message}`
                       );
                     }
 
@@ -782,15 +824,15 @@ export const initWbot = async (
                         }
                       }
                       results.push("❌ Ícone call-end não encontrado");
-                    } catch (err: any) {
+                    } catch (err) {
                       results.push(
-                        `❌ Busca por ícone call-end falhou: ${err.message}`
+                        `❌ Busca por ícone call-end falhou: ${(err as Error).message}`
                       );
                     }
 
                     results.push("Método 4: Tentando WWebJS.rejectCall...");
                     try {
-                      const WWebJS = (window as any).WWebJS;
+                      const WWebJS = (window as unknown as { WWebJS?: { rejectCall?: (id: string) => void } }).WWebJS;
                       if (WWebJS && typeof WWebJS.rejectCall === "function") {
                         WWebJS.rejectCall(callId);
                         results.push("✅ WWebJS.rejectCall executado");
@@ -802,9 +844,9 @@ export const initWbot = async (
                       } else {
                         results.push("❌ WWebJS.rejectCall não disponível");
                       }
-                    } catch (err: any) {
+                    } catch (err) {
                       results.push(
-                        `❌ WWebJS.rejectCall falhou: ${err.message}`
+                        `❌ WWebJS.rejectCall falhou: ${(err as Error).message}`
                       );
                     }
 
@@ -813,11 +855,11 @@ export const initWbot = async (
                       error: "Todos os métodos falharam",
                       results
                     };
-                  } catch (err: any) {
+                  } catch (err) {
                     return {
                       success: false,
-                      error: err.message,
-                      stack: err.stack,
+                      error: (err as Error).message,
+                      stack: (err as Error).stack,
                       results: []
                     };
                   }
@@ -917,8 +959,8 @@ export const initWbot = async (
           logger.error(`[CALL] Erro ao processar chamada: ${err}`);
         }
       });
-    } catch (err: any) {
-      logger.error(err);
+    } catch (err: unknown) {
+      logger.error(`[WBOT] ${err instanceof Error ? err.message : String(err)}`);
     }
   });
 };
@@ -944,15 +986,15 @@ export const removeWbot = async (whatsappId: number): Promise<void> => {
     if (sessionIndex !== -1) {
       try {
         await sessions[sessionIndex].destroy();
-      } catch (destroyErr: any) {
+      } catch (destroyErr: unknown) {
         logger.warn(
-          `[WBOT] Erro ao destruir sessão ${whatsappId}: ${destroyErr.message}`
+          `[WBOT] Erro ao destruir sessão ${whatsappId}: ${destroyErr instanceof Error ? destroyErr.message : String(destroyErr)}`
         );
       }
       sessions.splice(sessionIndex, 1);
     }
-  } catch (err: any) {
-    logger.error(err);
+  } catch (err: unknown) {
+    logger.error(`[WBOT] ${err instanceof Error ? err.message : String(err)}`);
   }
 };
 
@@ -965,9 +1007,9 @@ export const restartWbot = async (whatsappId: number): Promise<Session> => {
     }
     try {
       await sessions[sessionIndex].destroy();
-    } catch (destroyErr: any) {
+    } catch (destroyErr: unknown) {
       logger.warn(
-        `[WBOT] Erro ao destruir sessão ${whatsappId} no restart: ${destroyErr.message}`
+        `[WBOT] Erro ao destruir sessão ${whatsappId} no restart: ${destroyErr instanceof Error ? destroyErr.message : String(destroyErr)}`
       );
     }
     sessions.splice(sessionIndex, 1);
@@ -1033,7 +1075,7 @@ export const getWbotByGroupId = async (
     for (const s of [...sessions]) {
       try {
         const chat = await s.getChatById(groupId);
-        if (chat && (chat as any).isGroup) {
+        if (chat && chat.isGroup) {
           return s;
         }
       } catch (__) {}

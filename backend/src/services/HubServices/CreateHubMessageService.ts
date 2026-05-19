@@ -16,9 +16,21 @@ interface MessageData {
   originalName?: string;
 }
 
+interface MessageCreationAttributes {
+  id: string;
+  contactId: number;
+  body: string;
+  ticketId: number;
+  fromMe: boolean;
+  read?: boolean;
+  ack: number;
+  mediaUrl?: string;
+  mediaType?: string;
+}
+
 const CreateMessageService = async (
   messageData: MessageData
-): Promise<Message | any> => {
+): Promise<Message | undefined> => {
   const { id, contactId, body, ticketId, read, fromMe, fileName, mediaType } =
     messageData;
 
@@ -26,7 +38,7 @@ const CreateMessageService = async (
     return;
   }
 
-  const data: any = {
+  const data: MessageCreationAttributes = {
     id,
     contactId,
     body,

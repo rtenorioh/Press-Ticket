@@ -42,8 +42,8 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
 
   try {
     await schema.validate(req.body);
-  } catch (err: any) {
-    throw new AppError(err.message);
+  } catch (err: unknown) {
+    throw new AppError(err instanceof Error ? err.message : "Validation error");
   }
 
   const { name, permissions } = req.body;

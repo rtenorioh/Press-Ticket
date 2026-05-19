@@ -1,5 +1,5 @@
 import { endOfDay, parseISO, startOfDay } from "date-fns";
-import { col, fn, Includeable, Op, where } from "sequelize";
+import { col, fn, Includeable, Op, where, WhereOptions } from "sequelize";
 import Contact from "../../models/Contact";
 import Message from "../../models/Message";
 import Queue from "../../models/Queue";
@@ -47,7 +47,7 @@ const ListTicketsService = async ({
   isGroup
 }: Request): Promise<Response> => {
   try {
-    let whereCondition: any = {};
+    let whereCondition: Record<PropertyKey, unknown> = {};
 
     const allTickets = await ListSettingsServiceOne({ key: "allTicket" });
     const allTicketsEnabled = allTickets?.value === "enabled";
@@ -302,7 +302,7 @@ const ListTicketsService = async ({
       listSettingsService2?.value === "enabled" ? "createdAt" : "updatedAt";
 
     const { count, rows: tickets } = await Ticket.findAndCountAll({
-      where: whereCondition,
+      where: whereCondition as WhereOptions,
       include: includeCondition,
       distinct: true,
       limit,

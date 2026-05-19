@@ -1,5 +1,11 @@
+import { Client } from "whatsapp-web.js";
 import GetDefaultWhatsApp from "../../helpers/GetDefaultWhatsApp";
 import { getWbot } from "../../libs/wbot";
+
+// wwebjs missing type definition for getNumberId
+type ClientWithNumberId = Client & {
+  getNumberId(number: string): Promise<{ user?: string; _serialized?: string; server?: string } | null>;
+};
 
 export interface NumberCheckResult {
   number: string;
@@ -13,7 +19,7 @@ const CheckContactNumber = async (
 
   const wbot = await getWbot(defaultWhatsapp.id);
 
-  const validNumber: any = await (wbot as any).getNumberId(`${number}@c.us`);
+  const validNumber = await (wbot as unknown as ClientWithNumberId).getNumberId(`${number}@c.us`);
 
   if (!validNumber) {
     return { number, numberLid: null };

@@ -5,6 +5,8 @@ import {
   NotificameMessagePayload
 } from "../../libs/notificameClient";
 import Contact from "../../models/Contact";
+import Message from "../../models/Message";
+import Whatsapp from "../../models/Whatsapp";
 import CreateMessageService from "./CreateHubMessageService";
 import { showHubToken } from "../../helpers/showHubToken";
 import { HubCardButton } from "./SendCardMessageHubService";
@@ -26,8 +28,8 @@ export const SendCarouselMessageService = async (
   quickReplyButtons: HubCardButton[],
   ticketId: number,
   contact: Contact,
-  connection: any
-): Promise<any> => {
+  connection: Whatsapp
+): Promise<Message | undefined> => {
   if (connection.type === "wwebjs") {
     throw new Error("Envio de carrossel não suportado neste canal.");
   }

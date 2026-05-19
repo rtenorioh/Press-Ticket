@@ -63,7 +63,7 @@ class GroupEvent extends Model<
   timestamp: CreationOptional<Date>;
 
   @Column(DataType.JSON)
-  metadata: CreationOptional<any>;
+  metadata: CreationOptional<Record<string, unknown>>;
 
   @CreatedAt
   declare createdAt: CreationOptional<Date>;

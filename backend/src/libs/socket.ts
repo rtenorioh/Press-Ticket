@@ -247,7 +247,7 @@ export const initIO = (httpServer: Server): void => {
           return;
         }
 
-        const whereCondition: any = {};
+        const whereCondition: Record<PropertyKey, unknown> = {};
 
         if (data.status) {
           whereCondition.status = data.status;
@@ -255,7 +255,7 @@ export const initIO = (httpServer: Server): void => {
 
         const isAdmin =
           user.profile === "admin" || user.profile === "masteradmin";
-        const userQueueIds = user.queues?.map((q: any) => q.id) || [];
+        const userQueueIds = user.queues?.map((q: Queue) => q.id) || [];
 
         if (data.status === "open") {
           if (!isAdmin || (isAdmin && !data.showAll)) {
@@ -304,7 +304,7 @@ export const initIO = (httpServer: Server): void => {
         }
 
         const tickets = await Ticket.findAll({
-          where: whereCondition,
+          where: whereCondition as import("sequelize").WhereOptions,
           include: [
             {
               model: Contact,
@@ -342,7 +342,7 @@ export const initIO = (httpServer: Server): void => {
   });
 
   io.on("connect_error", (err: Error) => {
-    logger.error("Connection error:", err);
+    logger.error(`Connection error: ${err.message}`);
   });
 };
 

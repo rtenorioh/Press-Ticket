@@ -2,6 +2,11 @@ import { getWbot } from "../../libs/wbot";
 import AppError from "../../errors/AppError";
 import { logger } from "../../utils/logger";
 
+// wwebjs missing type definition for chat id._serialized
+interface ChatWithSerializedId {
+  id?: { _serialized?: string } | string;
+}
+
 const errStr = (e: unknown) =>
   e instanceof Error ? e.message : JSON.stringify(e);
 
@@ -104,7 +109,7 @@ class ChatManagementService {
     whatsappId: number,
     chatId: string,
     limit: number = 50
-  ): Promise<any[]> {
+  ): Promise<{ id: string; body: string; from: string; to: string; timestamp: number; fromMe: boolean; hasMedia: boolean; type: string; ack: number }[]> {
     try {
       const wbot = getWbot(whatsappId);
       const chat = await wbot.getChatById(chatId);
@@ -138,12 +143,15 @@ class ChatManagementService {
     }
   }
 
-  async getChatInfo(whatsappId: number, chatId: string): Promise<any> {
+  async getChatInfo(whatsappId: number, chatId: string): Promise<{ id: string; name: string; isGroup: boolean; unreadCount: number; archived: boolean; pinned: boolean; isMuted: boolean; muteExpiration: number }> {
     try {
       const wbot = getWbot(whatsappId);
       const chat = await wbot.getChatById(chatId);
+      const chatMeta = chat as unknown as ChatWithSerializedId;
+      const rawId = chatMeta.id;
+      const resolvedId = (typeof rawId === "object" ? rawId?._serialized : rawId) || "";
       return {
-        id: (chat as any).id?._serialized || (chat as any).id,
+        id: resolvedId,
         name: chat.name,
         isGroup: chat.isGroup,
         unreadCount: chat.unreadCount,
@@ -158,22 +166,27 @@ class ChatManagementService {
     }
   }
 
-  async getChats(whatsappId: number): Promise<any[]> {
+  async getChats(whatsappId: number): Promise<{ id: string; name: string; isGroup: boolean; unreadCount: number; timestamp: number; archived: boolean; pinned: boolean; isMuted: boolean; muteExpiration: number }[]> {
     try {
       const wbot = getWbot(whatsappId);
       const chats = await wbot.getChats();
 
-      return chats.map(chat => ({
-        id: (chat as any).id?._serialized || (chat as any).id,
-        name: chat.name,
-        isGroup: chat.isGroup,
-        unreadCount: chat.unreadCount,
-        timestamp: chat.timestamp,
-        archived: chat.archived,
-        pinned: chat.pinned,
-        isMuted: chat.isMuted,
-        muteExpiration: chat.muteExpiration
-      }));
+      return chats.map(chat => {
+        const chatMeta = chat as unknown as ChatWithSerializedId;
+        const rawId = chatMeta.id;
+        const resolvedId = (typeof rawId === "object" ? rawId?._serialized : rawId) || "";
+        return {
+          id: resolvedId,
+          name: chat.name,
+          isGroup: chat.isGroup,
+          unreadCount: chat.unreadCount,
+          timestamp: chat.timestamp,
+          archived: chat.archived,
+          pinned: chat.pinned,
+          isMuted: chat.isMuted,
+          muteExpiration: chat.muteExpiration
+        };
+      });
     } catch (err) {
       logger.error(`[CHAT_MGMT] Erro ao listar chats: ${errStr(err)}`);
       throw new AppError(`Erro ao listar chats: ${errStr(err)}`);

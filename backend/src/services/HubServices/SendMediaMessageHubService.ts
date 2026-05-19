@@ -3,9 +3,11 @@ import {
   createNotificameClient,
   resolveChannel,
   resolveContactId,
+  NotificameContent,
   NotificameMessagePayload
 } from "../../libs/notificameClient";
 import Contact from "../../models/Contact";
+import Whatsapp from "../../models/Whatsapp";
 import CreateMessageService from "./CreateHubMessageService";
 import { showHubToken } from "../../helpers/showHubToken";
 import { logger } from "../../utils/logger";
@@ -17,7 +19,7 @@ export const SendMediaMessageService = async (
   message: string,
   ticketId: number,
   contact: Contact,
-  connection: any
+  connection: Whatsapp
 ) => {
   const channel = resolveChannel(contact);
   if (!channel) {
@@ -79,7 +81,7 @@ export const SendMediaMessageService = async (
   const hubToken = await showHubToken();
   const client = createNotificameClient(hubToken);
 
-  const fileContent: Record<string, unknown> = {
+  const fileContent: NotificameContent & { fileName?: string } = {
     type: "file",
     fileMimeType,
     fileUrl: mediaUrl
@@ -93,7 +95,7 @@ export const SendMediaMessageService = async (
   const payload: NotificameMessagePayload = {
     from: connection.qrcode,
     to: contactId,
-    contents: [fileContent as any]
+    contents: [fileContent]
   };
 
   try {

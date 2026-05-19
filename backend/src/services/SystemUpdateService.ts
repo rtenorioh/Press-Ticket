@@ -60,16 +60,18 @@ const initUpdateStatus = async (): Promise<void> => {
     } else {
       await writeFile(UPDATE_STATUS_FILE, JSON.stringify(updateStatus), "utf8");
     }
-  } catch (error: any) {
-    logger.error(`Erro ao inicializar status de atualização: ${error.message}`);
+  } catch (error: unknown) {
+    const err = error as { message?: string };
+    logger.error(`Erro ao inicializar status de atualização: ${err.message}`);
   }
 };
 
 const saveUpdateStatus = async (): Promise<void> => {
   try {
     await writeFile(UPDATE_STATUS_FILE, JSON.stringify(updateStatus), "utf8");
-  } catch (error: any) {
-    logger.error(`Erro ao salvar status de atualização: ${error.message}`);
+  } catch (error: unknown) {
+    const err = error as { message?: string };
+    logger.error(`Erro ao salvar status de atualização: ${err.message}`);
   }
 };
 
@@ -79,8 +81,9 @@ const getCurrentVersion = async (): Promise<string> => {
     return systemVersion.startsWith("v")
       ? systemVersion.substring(1)
       : systemVersion;
-  } catch (error: any) {
-    logger.error(`Erro ao obter versão atual: ${error.message}`);
+  } catch (error: unknown) {
+    const err = error as { message?: string };
+    logger.error(`Erro ao obter versão atual: ${err.message}`);
     return "0.0.0";
   }
 };
@@ -129,15 +132,16 @@ export const checkForUpdates = async (): Promise<UpdateInfo> => {
     await saveUpdateStatus();
 
     return updateInfo;
-  } catch (error: any) {
-    logger.error(`Erro ao verificar atualizações: ${error.message}`);
+  } catch (error: unknown) {
+    const err = error as { message?: string };
+    logger.error(`Erro ao verificar atualizações: ${err.message}`);
     updateStatus.status = "error";
     updateStatus.message = "Erro ao verificar atualizações";
-    updateStatus.error = error.message;
+    updateStatus.error = err.message;
     updateStatus.progress = 0;
     await saveUpdateStatus();
 
-    throw new Error(`Erro ao verificar atualizações: ${error.message}`);
+    throw new Error(`Erro ao verificar atualizações: ${err.message}`);
   }
 };
 
@@ -168,9 +172,10 @@ const backupSystem = async (): Promise<string> => {
     ]);
 
     return backupPath;
-  } catch (error: any) {
-    logger.error(`Erro ao criar backup: ${error.message}`);
-    throw new Error(`Erro ao criar backup: ${error.message}`);
+  } catch (error: unknown) {
+    const err = error as { message?: string };
+    logger.error(`Erro ao criar backup: ${err.message}`);
+    throw new Error(`Erro ao criar backup: ${err.message}`);
   }
 };
 
@@ -280,8 +285,9 @@ export const downloadAndInstallUpdate = async (
       if (pm2FrontendId) {
         await execFile("pm2", ["restart", pm2FrontendId, "--update-env"]);
       }
-    } catch (pmError: any) {
-      logger.warn(`Aviso ao reiniciar serviços PM2: ${pmError.message}`);
+    } catch (pmError: unknown) {
+      const pmMsg = pmError instanceof Error ? pmError.message : "Erro interno";
+      logger.warn(`Aviso ao reiniciar serviços PM2: ${pmMsg}`);
     }
 
     await execFile("rm", ["-rf", tempDir]);
@@ -293,15 +299,16 @@ export const downloadAndInstallUpdate = async (
     await saveUpdateStatus();
 
     return true;
-  } catch (error: any) {
-    logger.error(`Erro ao instalar atualização: ${error.message}`);
+  } catch (error: unknown) {
+    const err = error as { message?: string };
+    logger.error(`Erro ao instalar atualização: ${err.message}`);
     updateStatus.status = "error";
     updateStatus.message = "Erro ao instalar atualização";
-    updateStatus.error = error.message;
+    updateStatus.error = err.message;
     updateStatus.progress = 0;
     await saveUpdateStatus();
 
-    throw new Error(`Erro ao instalar atualização: ${error.message}`);
+    throw new Error(`Erro ao instalar atualização: ${err.message}`);
   }
 };
 
@@ -354,15 +361,16 @@ export const restoreBackup = async (
     await saveUpdateStatus();
 
     return true;
-  } catch (error: any) {
-    logger.error(`Erro ao restaurar backup: ${error.message}`);
+  } catch (error: unknown) {
+    const err = error as { message?: string };
+    logger.error(`Erro ao restaurar backup: ${err.message}`);
     updateStatus.status = "error";
     updateStatus.message = "Erro ao restaurar backup";
-    updateStatus.error = error.message;
+    updateStatus.error = err.message;
     updateStatus.progress = 0;
     await saveUpdateStatus();
 
-    throw new Error(`Erro ao restaurar backup: ${error.message}`);
+    throw new Error(`Erro ao restaurar backup: ${err.message}`);
   }
 };
 
@@ -377,12 +385,14 @@ export const listBackups = async (): Promise<string[]> => {
     return files.filter(
       file => file.startsWith("backup-") && file.endsWith(".tar.gz")
     );
-  } catch (error: any) {
-    logger.error(`Erro ao listar backups: ${error.message}`);
-    throw new Error(`Erro ao listar backups: ${error.message}`);
+  } catch (error: unknown) {
+    const err = error as { message?: string };
+    logger.error(`Erro ao listar backups: ${err.message}`);
+    throw new Error(`Erro ao listar backups: ${err.message}`);
   }
 };
 
-initUpdateStatus().catch(error => {
-  logger.error(`Erro ao inicializar serviço de atualização: ${error.message}`);
+initUpdateStatus().catch((error: unknown) => {
+  const msg = error instanceof Error ? error.message : "Erro interno";
+  logger.error(`Erro ao inicializar serviço de atualização: ${msg}`);
 });

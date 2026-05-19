@@ -4,7 +4,7 @@ import { promisify } from "util";
 import fs from "fs";
 import os from "os";
 import path from "path";
-import axios from "axios";
+import axios, { isAxiosError } from "axios";
 import { logger } from "../utils/logger";
 import { systemVersion } from "../config/version";
 import { getIO } from "../libs/socket";
@@ -83,16 +83,23 @@ export const checkVersion = async (
     latestReleaseDate = release.published_at ?? null;
     latestReleaseName = release.name ?? null;
     logger.info(`[version-check] Release mais recente: ${latestReleaseTag}`);
-  } catch (err: any) {
-    const status = err?.response?.status;
+  } catch (err: unknown) {
+    const status = isAxiosError(err) ? err.response?.status : undefined;
+    const message = err instanceof Error ? err.message : "Erro desconhecido";
     logger.error(
-      `[version-check] Falha ao obter release do GitHub (HTTP ${status ?? "sem resposta"}): ${err.message}`
+      `[version-check] Falha ao obter release do GitHub (HTTP ${status ?? "sem resposta"}): ${message}`
     );
   }
 
   // 3. Commits pendentes (compare tag...HEAD no GitHub)
   let commitsBehind = 0;
   let pendingCommits: GitCommit[] = [];
+
+  interface GithubCommit {
+    sha: string;
+    commit: { message: string; author: { name: string; date: string } };
+    html_url: string;
+  }
 
   if (latestReleaseTag) {
     try {
@@ -106,7 +113,7 @@ export const checkVersion = async (
       commitsBehind = comparison.ahead_by ?? 0;
       pendingCommits = [...(comparison.commits ?? [])]
         .reverse()
-        .map((commit: any) => ({
+        .map((commit: GithubCommit) => ({
           sha: commit.sha.substring(0, 7),
           fullSha: commit.sha,
           message: commit.commit.message.split("\n")[0],
@@ -115,10 +122,11 @@ export const checkVersion = async (
           url: commit.html_url
         }));
       logger.info(`[version-check] Commits pendentes: ${commitsBehind}`);
-    } catch (err: any) {
-      const status = err?.response?.status;
+    } catch (err: unknown) {
+      const status = isAxiosError(err) ? err.response?.status : undefined;
+      const message = err instanceof Error ? err.message : "Erro desconhecido";
       logger.error(
-        `[version-check] Falha ao comparar commits (HTTP ${status ?? "sem resposta"}): ${err.message}`
+        `[version-check] Falha ao comparar commits (HTTP ${status ?? "sem resposta"}): ${message}`
       );
     }
   }
@@ -248,10 +256,11 @@ export const runSystemUpdate = async (
 
         try {
           await installExpect();
-        } catch (err: any) {
+        } catch (err: unknown) {
+          const message = err instanceof Error ? err.message : "Erro interno";
           io.emit("systemUpdateLog", {
             type: "error",
-            message: `❌ Falha ao instalar 'expect': ${err.message}. Execute manualmente: sudo apt-get install -y expect`
+            message: `❌ Falha ao instalar 'expect': ${message}. Execute manualmente: sudo apt-get install -y expect`
           });
           return;
         }
@@ -472,8 +481,9 @@ export const runSystemUpdate = async (
     return res
       .status(202)
       .json({ success: true, message: "Atualização iniciada" });
-  } catch (err: any) {
-    logger.error(`Erro ao executar atualização: ${err.message}`);
-    return res.status(500).json({ success: false, error: err.message });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Erro interno";
+    logger.error(`Erro ao executar atualização: ${message}`);
+    return res.status(500).json({ success: false, error: message });
   }
 };

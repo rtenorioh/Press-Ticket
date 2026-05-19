@@ -3,7 +3,7 @@ import { promisify } from "util";
 import fs from "fs";
 import path from "path";
 import { logger } from "../../utils/logger";
-import { Op } from "sequelize";
+import { Op, WhereOptions } from "sequelize";
 import Message from "../../models/Message";
 import Ticket from "../../models/Ticket";
 import Setting from "../../models/Setting";
@@ -175,7 +175,7 @@ const cleanMessagesAndTickets = async (
     const limitDate = new Date();
     limitDate.setDate(limitDate.getDate() - olderThan);
 
-    const ticketWhere: any = {
+    const ticketWhere: WhereOptions = {
       updatedAt: {
         [Op.lt]: limitDate
       }
@@ -270,9 +270,10 @@ export const cleanupSystem = async (
       mediaFilesRemoved,
       errors
     };
-  } catch (error: any) {
-    logger.error("Erro durante a limpeza do sistema:", error);
-    errors.push(error.message || "Erro desconhecido durante a limpeza");
+  } catch (error: unknown) {
+    const err = error as { message?: string };
+    logger.error(`Erro durante a limpeza do sistema: ${error}`);
+    errors.push(err.message || "Erro desconhecido durante a limpeza");
 
     return {
       success: false,

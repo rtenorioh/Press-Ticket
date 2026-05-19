@@ -33,7 +33,7 @@ const EditWhatsAppMessage = async (
   let messageToEdit;
   try {
     messageToEdit = await GetWbotMessage(ticket, messageId);
-  } catch (getMessageError: any) {
+  } catch (getMessageError: unknown) {
     logger.error(`Erro ao buscar mensagem para edição: ${getMessageError}`);
     throw new AppError("ERR_FETCH_WAPP_MSG_TO_EDIT");
   }
@@ -46,7 +46,7 @@ const EditWhatsAppMessage = async (
         "Não foi possível editar a mensagem. Ela pode ser muito antiga (mais de 15 minutos) ou não ser editável."
       );
     }
-  } catch (_err: any) {
+  } catch (_err: unknown) {
     throw new AppError("ERR_EDITING_WAPP_MSG");
   }
 

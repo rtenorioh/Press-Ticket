@@ -34,8 +34,8 @@ const CreateService = async ({
 
   try {
     await schema.validate({ name });
-  } catch (err: any) {
-    throw new AppError(err.message);
+  } catch (err: unknown) {
+    throw new AppError(err instanceof Error ? err.message : String(err));
   }
 
   const [clientStatus] = await ClientStatus.findOrCreate({

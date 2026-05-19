@@ -57,7 +57,7 @@ const MarkMessagesAsReadService = async ({
       return;
     }
 
-    let wbot: any;
+    let wbot: Awaited<ReturnType<typeof restartWbot>>;
     try {
       wbot = getWbot(ticket.whatsappId);
 
@@ -68,9 +68,10 @@ const MarkMessagesAsReadService = async ({
         wbot = await restartWbot(ticket.whatsappId);
         await new Promise(resolve => setTimeout(resolve, 3000));
       }
-    } catch (wbotError) {
+    } catch (wbotError: unknown) {
+      const wbotErr = wbotError as { message?: string };
       logger.error(
-        `Erro ao obter wbot para o ticket ${ticketId}: ${wbotError.message}`
+        `Erro ao obter wbot para o ticket ${ticketId}: ${wbotErr.message}`
       );
       logger.info(
         `Tentando reiniciar a sessão WhatsApp para o ticket ${ticketId}...`
@@ -78,12 +79,13 @@ const MarkMessagesAsReadService = async ({
       try {
         wbot = await restartWbot(ticket.whatsappId);
         await new Promise(resolve => setTimeout(resolve, 3000));
-      } catch (restartError) {
+      } catch (restartError: unknown) {
+        const restartErr = restartError as { message?: string };
         logger.error(
-          `Falha ao reiniciar sessão WhatsApp: ${restartError.message}`
+          `Falha ao reiniciar sessão WhatsApp: ${restartErr.message}`
         );
         throw new Error(
-          `Não foi possível obter uma sessão válida do WhatsApp: ${restartError.message}`
+          `Não foi possível obter uma sessão válida do WhatsApp: ${restartErr.message}`
         );
       }
     }
@@ -116,25 +118,27 @@ const MarkMessagesAsReadService = async ({
 
           logger.info(`SendSeen executado com sucesso para o chat ${chatId}`);
           return true;
-        } catch (seenError) {
+        } catch (seenError: unknown) {
+          const seenErr = seenError as { message?: string };
           if (retries > 0) {
             logger.warn(
-              `Erro ao enviar sendSeen, tentando novamente (${retries} tentativas restantes): ${seenError.message}`
+              `Erro ao enviar sendSeen, tentando novamente (${retries} tentativas restantes): ${seenErr.message}`
             );
             await new Promise(resolve => setTimeout(resolve, 1000));
             return sendSeenWithRetry(retries - 1);
           }
           logger.error(
-            `Falha ao enviar sendSeen após múltiplas tentativas: ${seenError.message}`
+            `Falha ao enviar sendSeen após múltiplas tentativas: ${seenErr.message}`
           );
           return false;
         }
       };
 
       await sendSeenWithRetry();
-    } catch (chatError) {
+    } catch (chatError: unknown) {
+      const chatErr = chatError as { message?: string };
       logger.error(
-        `Erro ao obter chat para marcar como lido: ${chatError.message}`
+        `Erro ao obter chat para marcar como lido: ${chatErr.message}`
       );
     }
 

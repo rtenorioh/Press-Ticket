@@ -58,7 +58,7 @@ export const reactMessage = async (
     });
 
     return res.status(200).json({ success: true });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error(`Erro ao reagir à mensagem: ${error}`);
     return res.status(500).json({ error: "Erro ao reagir à mensagem" });
   }
@@ -86,7 +86,8 @@ export const getReactions = async (
 
       const myNumber = wbot.info?.wid?._serialized || null;
 
-      const groupedReactions: any = {};
+      type ReactionGroup = { id: string; aggregateEmoji: string; hasReactionByMe: boolean; senders: unknown[] };
+      const groupedReactions: Record<string, ReactionGroup> = {};
 
       for (const reaction of dbReactions) {
         if (!groupedReactions[reaction.emoji]) {
@@ -110,24 +111,21 @@ export const getReactions = async (
         try {
           if (reaction.senderId.includes("@lid")) {
             try {
-              const contact = await (wbot as any).getContactById(
-                reaction.senderId
-              );
+              const wbotDyn = wbot as unknown as Record<string, (...args: unknown[]) => unknown>;
+              const contact = await wbotDyn.getContactById(reaction.senderId) as Record<string, unknown> | null;
               if (contact) {
-                phoneNumber = contact.number || contact.id?.user;
+                phoneNumber = (contact.number || (contact.id as Record<string, unknown>)?.user) as string | null;
                 if (!isMyReaction) {
                   contactName =
-                    contact.name ||
-                    contact.pushname ||
-                    contact.shortName ||
+                    (contact.name as string) ||
+                    (contact.pushname as string) ||
+                    (contact.shortName as string) ||
                     phoneNumber ||
                     "Contato";
                 }
 
                 try {
-                  profilePicUrl = await (wbot as any).getProfilePicUrl(
-                    reaction.senderId
-                  );
+                  profilePicUrl = await wbotDyn.getProfilePicUrl(reaction.senderId) as string | null;
                 } catch (e) {
                   logger.error(
                     `[getReactions] Erro ao buscar foto do @lid: ${e}`
@@ -197,7 +195,7 @@ export const getReactions = async (
 
     const serializedId = (() => {
       try {
-        return SerializeWbotMsgId(ticket as any, message as any);
+        return SerializeWbotMsgId(ticket as unknown as Parameters<typeof SerializeWbotMsgId>[0], message as unknown as Parameters<typeof SerializeWbotMsgId>[1]);
       } catch {
         return null;
       }
@@ -216,7 +214,8 @@ export const getReactions = async (
     const tryGetReactionsNode = async (id?: string | null) => {
       if (!id) return null;
       try {
-        const msg: any = await (wbot as any).getMessageById?.(id);
+        const wbotDyn2 = wbot as unknown as Record<string, ((...args: unknown[]) => unknown) | undefined>;
+        const msg = await wbotDyn2.getMessageById?.(id) as Record<string, unknown> | null | undefined;
         if (msg && typeof msg.getReactions === "function") {
           const r = await msg.getReactions();
           if (Array.isArray(r)) return r;
@@ -243,16 +242,39 @@ export const getReactions = async (
       ) => {
         const logs: string[] = [];
         try {
-          const Store = (window as any).Store;
+          type WWebReactionCol = {
+            serialize?: () => unknown[];
+            getModelsArray?: () => unknown[];
+          };
+          type WWebMsg = Record<string, unknown> & {
+            reactions?: WWebReactionCol;
+            reactionCollection?: WWebReactionCol;
+            msgs?: { get?: (id: string) => WWebMsg | undefined };
+          };
+          type WWebContactEntry = {
+            name?: string;
+            pushname?: string;
+            verifiedName?: string;
+          };
+          type WWebMsgCol = {
+            get?: (id: string) => WWebMsg | undefined;
+            models?: WWebMsg[];
+          };
+          const Store = (window as unknown as Record<string, unknown>).Store as Record<string, unknown> & {
+            Contact?: { get?: (id: string) => WWebContactEntry | undefined };
+            Msg?: WWebMsgCol;
+            Chat?: { get?: (id: string) => WWebMsg | undefined };
+          };
           const tryIds = [sId, altId, innerId].filter(Boolean) as string[];
 
-          const processReactions = (arr: any[]) => {
-            return arr.map((reaction: any) => {
-              const processed = { ...reaction };
+          const processReactions = (arr: unknown[]) => {
+            return arr.map((reaction: unknown) => {
+              const processed = { ...(reaction as Record<string, unknown>) };
               if (processed.senders && Array.isArray(processed.senders)) {
-                processed.senders = processed.senders.map((sender: any) => {
+                processed.senders = processed.senders.map((sender: unknown) => {
+                  const s = sender as Record<string, Record<string, string>>;
                   const senderId =
-                    sender?.id?._serialized || sender?.id?.user || sender?.id;
+                    s?.id?._serialized || s?.id?.user || s?.id as unknown as string;
                   let contactName = "Contato";
 
                   if (senderId) {
@@ -260,16 +282,16 @@ export const getReactions = async (
                       const contact = Store?.Contact?.get?.(senderId);
                       if (contact) {
                         contactName =
-                          contact.name ||
-                          contact.pushname ||
-                          contact.verifiedName ||
+                          contact.name ??
+                          contact.pushname ??
+                          contact.verifiedName ??
                           senderId;
                       }
                     } catch (_e) {}
                   }
 
                   return {
-                    ...sender,
+                    ...(sender as object),
                     contactName
                   };
                 });
@@ -314,7 +336,7 @@ export const getReactions = async (
                 `false_${remote}_${innerId}`,
                 sId,
                 altId
-              ].filter(Boolean);
+              ].filter((id): id is string => Boolean(id));
 
               for (const fullId of possibleIds) {
                 const msg = Store?.Msg?.get?.(fullId);
@@ -342,9 +364,10 @@ export const getReactions = async (
               try {
                 const allMsgs = Store?.Msg?.models || [];
 
-                const partialMatches = allMsgs.filter((m: any) => {
-                  const sid = m?.id?._serialized || "";
-                  const iid = m?.id?.id || "";
+                const partialMatches = allMsgs.filter((m: unknown) => {
+                  const mr = m as Record<string, Record<string, string>>;
+                  const sid = mr?.id?._serialized || "";
+                  const iid = mr?.id?.id || "";
                   return sid.includes(innerId) || iid.includes(innerId);
                 });
 
@@ -419,10 +442,10 @@ export const getReactions = async (
       remoteJid
     );
 
-    const result = reactions as { reactions: any[]; logs: string[] };
+    const result = reactions as { reactions: unknown[]; logs: string[] };
 
     return res.status(200).json({ reactions: result.reactions });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error(`Erro ao listar reações: ${error}`);
     return res.status(500).json({ error: "Erro ao listar reações" });
   }
@@ -465,10 +488,11 @@ export const searchInTicket = async (
       pageNumber
     });
     return res.json(result);
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Erro ao buscar mensagens";
     return res
       .status(400)
-      .json({ error: error.message || "Erro ao buscar mensagens" });
+      .json({ error: message });
   }
 };
 
@@ -495,14 +519,14 @@ export const listStarred = async (
       fromMe: msg.fromMe,
       mediaType: msg.mediaType,
       createdAt: msg.createdAt,
-      contactName: (msg as any).contact?.name || null
+      contactName: (msg as Message & { contact?: { name?: string } }).contact?.name || null
     }))
   });
 };
 
 export const store = async (req: Request, res: Response): Promise<Response> => {
   const ticketId = String(validateId(req.params.ticketId, "ticketId"));
-  const { body, quotedMsg, sendAsDocument }: any = req.body;
+  const { body, quotedMsg, sendAsDocument } = req.body as { body: string; quotedMsg?: Message; sendAsDocument?: boolean | string };
   let { mentions } = req.body;
   const medias = req.files as Express.Multer.File[];
   const logUserId = req.user?.id || 1;
@@ -763,7 +787,7 @@ export const sendContacts = async (
           ticketId: Number(ticketId),
           messageType: "vcard",
           contactCount: contacts.length,
-          contactIds: contacts.map((c: any) => c.id)
+          contactIds: contacts.map((c: { id?: unknown }) => c.id)
         }
       });
     } catch (error) {
@@ -881,10 +905,11 @@ export const forwardMessages = async (
       message: "Messages forwarded successfully",
       ticketId: ticket.id
     });
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error(`Erro ao encaminhar mensagens: ${error}`);
+    const message = error instanceof Error ? error.message : "Erro ao encaminhar mensagens";
 
-    if (error.message === "ERR_NO_DEF_WAPP_FOUND") {
+    if (message === "ERR_NO_DEF_WAPP_FOUND") {
       return res.status(400).json({
         error:
           "Nenhuma conexão WhatsApp ativa encontrada. Por favor, conecte um WhatsApp antes de encaminhar mensagens."
@@ -892,7 +917,7 @@ export const forwardMessages = async (
     }
 
     return res.status(500).json({
-      error: error.message || "Erro ao encaminhar mensagens"
+      error: message
     });
   }
 };
@@ -931,11 +956,12 @@ export const sendPoll = async (
     });
 
     return res.json(message);
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error(`Erro ao enviar enquete: ${error}`);
+    const message = error instanceof Error ? error.message : "Erro ao enviar enquete";
     return res
       .status(500)
-      .json({ error: error.message || "Erro ao enviar enquete" });
+      .json({ error: message });
   }
 };
 
@@ -960,10 +986,11 @@ export const sendTypingIndicator = async (
       success: true,
       message: "Indicador de digitação enviado"
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error(`Erro ao enviar indicador de digitação: ${error}`);
+    const message = error instanceof Error ? error.message : "Erro ao enviar indicador de digitação";
     return res.status(500).json({
-      error: error.message || "Erro ao enviar indicador de digitação"
+      error: message
     });
   }
 };
@@ -989,11 +1016,12 @@ export const sendRecordingIndicator = async (
       success: true,
       message: "Indicador de gravação enviado"
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error(`Erro ao enviar indicador de gravação: ${error}`);
+    const message = error instanceof Error ? error.message : "Erro ao enviar indicador de gravação";
     return res
       .status(500)
-      .json({ error: error.message || "Erro ao enviar indicador de gravação" });
+      .json({ error: message });
   }
 };
 
@@ -1013,10 +1041,11 @@ export const setAvailablePresence = async (
       success: true,
       message: "Presença definida como disponível"
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error(`Erro ao definir presença: ${error}`);
+    const message = error instanceof Error ? error.message : "Erro ao definir presença";
     return res
       .status(500)
-      .json({ error: error.message || "Erro ao definir presença" });
+      .json({ error: message });
   }
 };

@@ -15,9 +15,10 @@ export const checkUpdates = async (
   try {
     const updateInfo = await checkForUpdates();
     return res.status(200).json(updateInfo);
-  } catch (err: any) {
-    logger.error(`Erro ao verificar atualizações: ${err.message}`);
-    return res.status(500).json({ error: err.message });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Erro interno";
+    logger.error(`Erro ao verificar atualizações: ${message}`);
+    return res.status(500).json({ error: message });
   }
 };
 
@@ -34,9 +35,10 @@ export const installUpdate = async (
         .json({ error: "O sistema já está na versão mais recente." });
     }
 
-    downloadAndInstallUpdate(updateInfo).catch(error => {
+    downloadAndInstallUpdate(updateInfo).catch((error: unknown) => {
+      const message = error instanceof Error ? error.message : "Erro interno";
       logger.error(
-        `Erro durante o processo de atualização em segundo plano: ${error.message}`
+        `Erro durante o processo de atualização em segundo plano: ${message}`
       );
     });
 
@@ -45,9 +47,10 @@ export const installUpdate = async (
       message:
         "Processo de atualização completa iniciado com sucesso. A atualização inclui backend, frontend e reinício dos serviços. Acompanhe o progresso pela rota /system-update/status."
     });
-  } catch (err: any) {
-    logger.error(`Erro ao iniciar atualização: ${err.message}`);
-    return res.status(500).json({ error: err.message });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Erro interno";
+    logger.error(`Erro ao iniciar atualização: ${message}`);
+    return res.status(500).json({ error: message });
   }
 };
 
@@ -58,9 +61,10 @@ export const getStatus = async (
   try {
     const status = await getUpdateStatus();
     return res.status(200).json(status);
-  } catch (err: any) {
-    logger.error(`Erro ao obter status de atualização: ${err.message}`);
-    return res.status(500).json({ error: err.message });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Erro interno";
+    logger.error(`Erro ao obter status de atualização: ${message}`);
+    return res.status(500).json({ error: message });
   }
 };
 
@@ -71,9 +75,10 @@ export const getBackups = async (
   try {
     const backups = await listBackups();
     return res.status(200).json({ backups });
-  } catch (err: any) {
-    logger.error(`Erro ao listar backups: ${err.message}`);
-    return res.status(500).json({ error: err.message });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Erro interno";
+    logger.error(`Erro ao listar backups: ${message}`);
+    return res.status(500).json({ error: message });
   }
 };
 
@@ -95,8 +100,9 @@ export const restoreFromBackup = async (
       success: result,
       message: "Processo de restauração iniciado com sucesso."
     });
-  } catch (err: any) {
-    logger.error(`Erro ao restaurar backup: ${err.message}`);
-    return res.status(500).json({ error: err.message });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Erro interno";
+    logger.error(`Erro ao restaurar backup: ${message}`);
+    return res.status(500).json({ error: message });
   }
 };

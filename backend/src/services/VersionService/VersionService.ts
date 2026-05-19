@@ -12,6 +12,18 @@ interface GitCommit {
   url: string;
 }
 
+interface GitHubRelease {
+  tag_name: string;
+  published_at: string;
+  prerelease: boolean;
+}
+
+interface GitHubCommit {
+  sha: string;
+  commit: { message: string; author: { name: string; date: string } };
+  html_url: string;
+}
+
 interface VersionInfo {
   currentVersion: string;
   latestVersion: string | null;
@@ -27,7 +39,7 @@ interface VersionInfo {
 
 const fetchLatestVersion = async (): Promise<string | null> => {
   try {
-    const headers: any = {
+    const headers: Record<string, string> = {
       Accept: "application/vnd.github.v3+json",
       "User-Agent": "Press-Ticket"
     };
@@ -43,7 +55,7 @@ const fetchLatestVersion = async (): Promise<string | null> => {
       );
 
       return response.data.tag_name;
-    } catch (_releaseError: any) {
+    } catch (_releaseError) {
       const tagsResponse = await axios.get(
         "https://api.github.com/repos/rtenorioh/Press-Ticket/tags",
         { headers, params: { per_page: 1 } }
@@ -56,13 +68,13 @@ const fetchLatestVersion = async (): Promise<string | null> => {
 
       return null;
     }
-  } catch (error: any) {
-    if (error.response) {
+  } catch (error: unknown) {
+    if (axios.isAxiosError(error) && error.response) {
       logger.error(
-        `Erro na API do GitHub: ${error.response.status} - ${error.response.data?.message}`
+        `Erro na API do GitHub: ${error.response.status} - ${(error.response.data as { message?: string })?.message}`
       );
     } else {
-      logger.error(`Erro ao buscar versão no GitHub: ${error.message}`);
+      logger.error(`Erro ao buscar versão no GitHub: ${error instanceof Error ? error.message : String(error)}`);
     }
     return null;
   }
@@ -97,8 +109,8 @@ const fetchWhatsappLibLatestVersion =
         "https://api.github.com/repos/pedroslopez/whatsapp-web.js/releases"
       );
 
-      const stableReleases = response.data.filter(
-        (release: any) => !release.prerelease
+      const stableReleases = (response.data as GitHubRelease[]).filter(
+        release => !release.prerelease
       );
 
       if (stableReleases.length > 0) {
@@ -145,11 +157,11 @@ const fetchWhatsappLibGitCommits = async (
       "https://api.github.com/repos/pedroslopez/whatsapp-web.js/releases"
     );
 
-    const stableReleases = releasesResponse.data.filter(
-      (release: any) => !release.prerelease
+    const stableReleases = (releasesResponse.data as GitHubRelease[]).filter(
+      release => !release.prerelease
     );
     const currentRelease = stableReleases.find(
-      (release: any) =>
+      release =>
         release.tag_name === `v${currentVersion}` ||
         release.tag_name === currentVersion
     );
@@ -159,12 +171,12 @@ const fetchWhatsappLibGitCommits = async (
     }
 
     const releaseDate = new Date(currentRelease.published_at);
-    const commitsAfterRelease = commitsResponse.data.filter((commit: any) => {
+    const commitsAfterRelease = (commitsResponse.data as GitHubCommit[]).filter(commit => {
       const commitDate = new Date(commit.commit.author.date);
       return commitDate > releaseDate;
     });
 
-    return commitsAfterRelease.map((commit: any) => ({
+    return commitsAfterRelease.map((commit) => ({
       sha: commit.sha.substring(0, 7),
       message: commit.commit.message.split("\n")[0],
       author: commit.commit.author.name,

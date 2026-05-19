@@ -146,7 +146,7 @@ const getDatabaseInfo = async (): Promise<{
     const [versionResult] = await sequelize.query("SELECT version();");
     const version =
       Array.isArray(versionResult) && versionResult.length > 0
-        ? (versionResult[0] as any).version || "Unknown"
+        ? (versionResult[0] as Record<string, unknown>).version as string || "Unknown"
         : "Unknown";
 
     let connectionsResult;
@@ -173,7 +173,7 @@ const getDatabaseInfo = async (): Promise<{
 
       activeConnections =
         Array.isArray(connectionsResult) && connectionsResult.length > 0
-          ? parseInt((connectionsResult[0] as any).count, 10) || 0
+          ? parseInt((connectionsResult[0] as Record<string, unknown>).count as string, 10) || 0
           : 0;
     } catch (error) {
       logger.error("Erro ao contar conexões ativas:", error);
@@ -186,14 +186,15 @@ const getDatabaseInfo = async (): Promise<{
       activeConnections,
       version: version.split(" ")[0]
     };
-  } catch (error: any) {
-    logger.error("Erro ao obter informações do banco de dados:", error);
+  } catch (error: unknown) {
+    const err = error as { message?: string };
+    logger.error(`Erro ao obter informações do banco de dados: ${error}`);
     return {
       status: "error",
       responseTime: 0,
       activeConnections: 0,
       version: "Unknown",
-      error: error.message
+      error: err.message
     };
   }
 };

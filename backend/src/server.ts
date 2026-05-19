@@ -11,9 +11,9 @@ process.on("uncaughtException", (err: Error) => {
   logger.error(err.stack || "");
 });
 
-process.on("unhandledRejection", (reason: any) => {
-  logger.error(`unhandledRejection: ${reason?.message || reason}`);
-  if (reason?.stack) logger.error(reason.stack);
+process.on("unhandledRejection", (reason: unknown) => {
+  logger.error(`unhandledRejection: ${reason instanceof Error ? reason.message : String(reason)}`);
+  if (reason instanceof Error && reason.stack) logger.error(reason.stack);
 });
 
 const server = app.listen(process.env.PORT, () => {

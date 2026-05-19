@@ -124,10 +124,11 @@ export const logActivity = async (
     logger.info(`Log de atividade: ${userId} - ${action} - ${description}`);
 
     return log;
-  } catch (error: any) {
-    logger.error(`Erro ao registrar log de atividade: ${error.message}`);
+  } catch (error: unknown) {
+    const err = error as { message?: string };
+    logger.error(`Erro ao registrar log de atividade: ${err.message}`);
     throw new Error(
-      `Não foi possível registrar o log de atividade: ${error.message}`
+      `Não foi possível registrar o log de atividade: ${err.message}`
     );
   }
 };
@@ -209,10 +210,11 @@ export const listActivityLogs = async (
       logs: filteredLogs,
       count
     };
-  } catch (error: any) {
-    logger.error(`Erro ao listar logs de atividade: ${error.message}`);
+  } catch (error: unknown) {
+    const err = error as { message?: string };
+    logger.error(`Erro ao listar logs de atividade: ${err.message}`);
     throw new Error(
-      `Não foi possível listar os logs de atividade: ${error.message}`
+      `Não foi possível listar os logs de atividade: ${err.message}`
     );
   }
 };
@@ -220,7 +222,7 @@ export const listActivityLogs = async (
 export const getEntityDetails = async (
   entityType: EntityTypes,
   entityId: number
-): Promise<any> => {
+): Promise<unknown> => {
   try {
     switch (entityType) {
       case EntityTypes.USER:
@@ -250,8 +252,9 @@ export const getEntityDetails = async (
       default:
         return null;
     }
-  } catch (error: any) {
-    logger.error(`Erro ao buscar detalhes da entidade: ${error.message}`);
+  } catch (error: unknown) {
+    const err = error as { message?: string };
+    logger.error(`Erro ao buscar detalhes da entidade: ${err.message}`);
     return null;
   }
 };

@@ -1,10 +1,12 @@
 import { QueryInterface } from "sequelize";
 
+type ShowCreateResult = { "Create Table": string };
+
 export default {
   up: async (queryInterface: QueryInterface) => {
-    const [results]: any = await queryInterface.sequelize.query(
+    const [results] = (await queryInterface.sequelize.query(
       "SHOW CREATE TABLE Tickets;"
-    );
+    )) as unknown as [ShowCreateResult[]];
     const createTableSql = results[0]["Create Table"];
 
     if (
@@ -30,9 +32,9 @@ export default {
   },
 
   down: async (queryInterface: QueryInterface) => {
-    const [results]: any = await queryInterface.sequelize.query(
+    const [results] = (await queryInterface.sequelize.query(
       "SHOW CREATE TABLE Tickets;"
-    );
+    )) as unknown as [ShowCreateResult[]];
     const createTableSql = results[0]["Create Table"];
 
     if (

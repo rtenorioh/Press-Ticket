@@ -20,6 +20,6 @@ module.exports = {
   down: (queryInterface: QueryInterface) => {
     return queryInterface.bulkDelete("Settings", {
       key: ["notifyQueueUsersMessage"]
-    } as any);
+    });
   }
 };

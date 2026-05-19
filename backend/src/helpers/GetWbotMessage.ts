@@ -28,8 +28,8 @@ export const GetWbotMessage = async (
       logger.error(`Chat não encontrado: ${chatId}`);
       throw new Error("Chat não encontrado");
     }
-  } catch (getChatError: any) {
-    logger.error(`Erro ao buscar chat ${chatId}: ${getChatError.message}`);
+  } catch (getChatError: unknown) {
+    logger.error(`Erro ao buscar chat ${chatId}: ${getChatError instanceof Error ? getChatError.message : getChatError}`);
 
     try {
       const directMessage = await wbot.getMessageById(messageId);
@@ -37,9 +37,9 @@ export const GetWbotMessage = async (
       if (directMessage) {
         return directMessage;
       }
-    } catch (directError: any) {
+    } catch (directError: unknown) {
       logger.error(
-        `Falha ao buscar mensagem diretamente: ${directError.message}`
+        `Falha ao buscar mensagem diretamente: ${directError instanceof Error ? directError.message : directError}`
       );
     }
 

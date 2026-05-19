@@ -43,25 +43,24 @@ const GetMessageInfo = async (
 
   try {
     const wbotMessage = await GetWbotMessage(message.ticket, messageId);
-    const info: any = await wbotMessage.getInfo();
+    // wwebjs missing type definition for getInfo return type
+    interface MessageInfoEntry { id?: { _serialized?: string } | string; t?: number }
+    interface MessageInfoData { delivery?: MessageInfoEntry[]; read?: MessageInfoEntry[]; played?: MessageInfoEntry[] }
+    const info = await wbotMessage.getInfo() as unknown as MessageInfoData | null;
 
     if (!info) {
       return { delivery: [], read: [], played: [] };
     }
 
+    const mapEntry = (e: MessageInfoEntry) => ({
+      id: (typeof e.id === "object" ? (e.id as { _serialized?: string })?._serialized : e.id) || "",
+      timestamp: e.t || 0
+    });
+
     return {
-      delivery: (info.delivery || []).map((d: any) => ({
-        id: d.id?._serialized || d.id || "",
-        timestamp: d.t || 0
-      })),
-      read: (info.read || []).map((r: any) => ({
-        id: r.id?._serialized || r.id || "",
-        timestamp: r.t || 0
-      })),
-      played: (info.played || []).map((p: any) => ({
-        id: p.id?._serialized || p.id || "",
-        timestamp: p.t || 0
-      }))
+      delivery: (info.delivery || []).map(mapEntry),
+      read: (info.read || []).map(mapEntry),
+      played: (info.played || []).map(mapEntry)
     };
   } catch (err) {
     logger.error(`[MSG_INFO] Erro ao obter informações da mensagem: ${err}`);
@@ -88,7 +87,10 @@ const GetMessageReactions = async (
 
   try {
     const wbotMessage = await GetWbotMessage(message.ticket, messageId);
-    const reactions: any[] = await wbotMessage.getReactions();
+    // wwebjs missing type definition for getReactions return type
+    interface ReactionSender { id?: string; senderId?: { _serialized?: string } | string; timestamp?: number }
+    interface ReactionGroup { aggregateEmoji?: string; senders?: ReactionSender[] }
+    const reactions = await wbotMessage.getReactions() as unknown as ReactionGroup[];
 
     if (!reactions || reactions.length === 0) {
       return [];
@@ -102,7 +104,7 @@ const GetMessageReactions = async (
           result.push({
             id: sender.id || "",
             msgId: messageId,
-            senderId: sender.senderId?._serialized || sender.senderId || "",
+            senderId: (typeof sender.senderId === "object" ? (sender.senderId as { _serialized?: string })?._serialized : sender.senderId) || "",
             reaction: reactionGroup.aggregateEmoji,
             timestamp: sender.timestamp || 0
           });
@@ -134,15 +136,18 @@ const GetPollVotes = async (messageId: string): Promise<PollVoteResult[]> => {
 
   try {
     const wbotMessage = await GetWbotMessage(message.ticket, messageId);
-    const votes: any[] = await wbotMessage.getPollVotes();
+    // wwebjs missing type definition for getPollVotes return type
+    interface PollVoteOption { name?: string; localId?: number }
+    interface PollVoteEntry { voter?: { _serialized?: string } | string; selectedOptions?: PollVoteOption[]; interactedAtTs?: number }
+    const votes = await wbotMessage.getPollVotes() as unknown as PollVoteEntry[];
 
     if (!votes || votes.length === 0) {
       return [];
     }
 
-    return votes.map((vote: any) => ({
-      voter: vote.voter?._serialized || vote.voter || "",
-      selectedOptions: (vote.selectedOptions || []).map((opt: any) => ({
+    return votes.map(vote => ({
+      voter: (typeof vote.voter === "object" ? (vote.voter as { _serialized?: string })?._serialized : vote.voter) || "",
+      selectedOptions: (vote.selectedOptions || []).map(opt => ({
         name: opt.name || "",
         localId: opt.localId || 0
       })),

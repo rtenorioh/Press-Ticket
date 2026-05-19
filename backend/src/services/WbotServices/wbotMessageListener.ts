@@ -46,14 +46,21 @@ interface Session extends Client {
 
 const writeFileAsync = promisify(writeFile);
 
+interface WbotContactId {
+  user: string;
+  server: string;
+  _serialized: string;
+}
+
 const verifyContact = async (msgContact: WbotContact): Promise<Contact> => {
-  const idUser: string = (msgContact.id as any).user || "";
-  const idServer: string = (msgContact.id as any).server || "c.us";
+  const contactId = msgContact.id as unknown as WbotContactId;
+  const idUser: string = contactId.user || "";
+  const idServer: string = contactId.server || "c.us";
   const isLid =
     idServer === "lid" ||
-    String((msgContact.id as any)._serialized || "").endsWith("@lid");
+    String(contactId._serialized || "").endsWith("@lid");
 
-  const contactData: any = {
+  const contactData = {
     name: msgContact.name || msgContact.pushname || idUser,
     number: isLid ? idUser : idUser,
     isGroup: msgContact.isGroup,
@@ -180,7 +187,7 @@ const verifyMediaMessage = async (
             .on("end", () => {
               resolve();
             })
-            .on("error", (err: any) => {
+            .on("error", (err: Error) => {
               reject(err);
             });
         });
@@ -189,8 +196,8 @@ const verifyMediaMessage = async (
       .catch(err => {
         logger.error(`Erro na conversão: ${err}`);
       });
-  } catch (err: any) {
-    logger.error(err);
+  } catch (err: unknown) {
+    logger.error(err instanceof Error ? err.message : String(err));
   }
 
   let albumId = null;
@@ -354,17 +361,23 @@ const verifyMessage = async (
 
   const quotedMsg = await verifyQuotedMessage(msg);
 
+  // wwebjs missing type definition for poll_creation message properties
+  interface PollMessage {
+    pollName?: string;
+    pollOptions?: Array<{ name?: string; localName?: string }>;
+  }
+
   let pollBody = msg.body;
-  if (msg.type === "poll_creation" && (msg as any).pollName) {
-    const poll = msg as any;
-    const pollName = poll.pollName || "Enquete";
-    const pollOptions = poll.pollOptions || [];
+  const msgAsPoll = msg as unknown as PollMessage;
+  if (msg.type === "poll_creation" && msgAsPoll.pollName) {
+    const pollName = msgAsPoll.pollName || "Enquete";
+    const pollOptions = msgAsPoll.pollOptions || [];
 
     pollBody = `📊 Enquete: ${pollName}\n\n`;
     pollBody += `Selecione uma ou mais opções:\n\n`;
 
-    pollOptions.forEach((option: any, index: number) => {
-      const optionName = option?.name || option?.localName || option;
+    pollOptions.forEach((option, index: number) => {
+      const optionName = option?.name || option?.localName || String(option);
       if (
         optionName &&
         typeof optionName === "string" &&
@@ -869,20 +882,21 @@ const getSafeContact = async (
     }
 
     return await msg.getContact();
-  } catch (err) {
+  } catch (err: unknown) {
+    const errMsg = err instanceof Error ? err.message : String(err);
     logger.warn(
-      `[FALLBACK] Usando contato alternativo devido a limitação da lib whatsapp-web.js: ${err.message || String(err)}`
+      `[FALLBACK] Usando contato alternativo devido a limitação da lib whatsapp-web.js: ${errMsg}`
     );
     const jid = useRemoteJid || (msg.fromMe ? msg.to : msg.from);
     const user = jid ? jid.split("@")[0] : "";
     const isGroup = jid?.endsWith("@g.us") || false;
-    const fallbackContact: any = {
+    const fallbackContact = {
       id: { user, _serialized: jid },
       name: user,
       pushname: user,
       isGroup
     };
-    return fallbackContact as WbotContact;
+    return fallbackContact as unknown as WbotContact;
   }
 };
 
@@ -1019,19 +1033,25 @@ const handleMessage = async (
       groupContact = await verifyContact(msgGroupContact);
 
       try {
+        // wwebjs missing type definition for id._serialized, subject, getProfilePicUrl on chat/contact
+        interface ChatWithMeta { id?: { _serialized?: string }; name?: string; subject?: string }
+        interface ContactWithMeta { id?: { _serialized?: string } }
+        interface WbotWithProfilePic { getProfilePicUrl(jid: string): Promise<string> }
+        const chatMeta = chat as unknown as ChatWithMeta;
+        const contactMeta = msgGroupContact as unknown as ContactWithMeta;
         const fullJid =
-          (chat as any)?.id?._serialized ||
-          (msgGroupContact as any)?.id?._serialized ||
+          chatMeta?.id?._serialized ||
+          contactMeta?.id?._serialized ||
           `${msgGroupContact.id.user}@g.us`;
         const groupName =
-          (chat as any)?.name || (chat as any)?.subject || groupContact.name;
+          chatMeta?.name || chatMeta?.subject || groupContact.name;
 
         let profilePicUrl: string | undefined;
         let retries = 2;
 
         while (retries > 0) {
           try {
-            profilePicUrl = await (wbot as any).getProfilePicUrl(fullJid);
+            profilePicUrl = await (wbot as unknown as WbotWithProfilePic).getProfilePicUrl(fullJid);
             if (profilePicUrl) {
               break;
             }

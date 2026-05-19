@@ -1,4 +1,4 @@
-import { Op } from "sequelize";
+import { Op, WhereOptions } from "sequelize";
 import Queue from "../../models/Queue";
 import Ticket from "../../models/Ticket";
 import Message from "../../models/Message";
@@ -64,9 +64,9 @@ const calculateAvgWaitTime = async (queueId: number): Promise<number> => {
           [Op.in]: ["open", "pending"]
         },
         createdAt: {
-          [Op.ne]: null as any
+          [Op.ne]: null
         }
-      },
+      } as WhereOptions,
       attributes: ["id", "createdAt", "updatedAt"]
     });
 
@@ -367,7 +367,7 @@ export const getQueueMonitorData = async (): Promise<QueueMonitorData> => {
           where: {
             queueId: queue.id,
             status: "open",
-            userId: { [Op.ne]: null as any }
+            userId: { [Op.ne]: null }
           }
         })
       ]);

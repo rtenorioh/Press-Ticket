@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { Op } from "sequelize";
+import { Op, WhereOptions } from "sequelize";
 import formatBody from "../helpers/Mustache";
 import { getIO } from "../libs/socket";
 import Contact from "../models/Contact";
@@ -493,7 +493,7 @@ export const closeTickets = async (
   }
 
   try {
-    let whereCondition: any = {};
+    let whereCondition: WhereOptions = {};
 
     if (status === "open") {
       whereCondition = { status: "open" };
@@ -614,9 +614,10 @@ export const count = async (
     });
 
     return res.status(200).json(counts);
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Erro interno";
     logger.error(`Erro ao contar tickets: ${err}`);
-    return res.status(500).json({ error: err.message });
+    return res.status(500).json({ error: message });
   }
 };
 
@@ -638,7 +639,7 @@ export const toggleState = async (
       return res.status(404).json({ error: "Ticket não encontrado" });
     }
 
-    const currentValue = !!(ticket as any)[field];
+    const currentValue = !!(ticket as unknown as Record<string, unknown>)[field];
     const newValue = !currentValue;
 
     if (field === "pinnedChat" && newValue === true) {
@@ -680,8 +681,9 @@ export const toggleState = async (
       value: newValue,
       ticket
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Erro interno";
     logger.error(`Erro ao alternar estado do ticket: ${err}`);
-    return res.status(500).json({ error: err.message });
+    return res.status(500).json({ error: message });
   }
 };

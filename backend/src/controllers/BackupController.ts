@@ -24,9 +24,10 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
   try {
     const backups = await listBackups();
     return res.status(200).json(backups);
-  } catch (err: any) {
-    logger.error(`Erro ao listar backups: ${err.message}`);
-    return res.status(500).json({ error: err.message });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Erro interno";
+    logger.error(`Erro ao listar backups: ${message}`);
+    return res.status(500).json({ error: message });
   }
 };
 
@@ -57,9 +58,10 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     });
 
     return res.status(200).json(backupInfo);
-  } catch (err: any) {
-    logger.error(`Erro ao criar backup: ${err.message}`);
-    return res.status(500).json({ error: err.message });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Erro interno";
+    logger.error(`Erro ao criar backup: ${message}`);
+    return res.status(500).json({ error: message });
   }
 };
 
@@ -90,9 +92,10 @@ export const show = async (req: Request, res: Response): Promise<void> => {
     }
 
     res.download(filePath);
-  } catch (err: any) {
-    logger.error(`Erro ao baixar backup: ${err.message}`);
-    res.status(500).json({ error: err.message });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Erro interno";
+    logger.error(`Erro ao baixar backup: ${message}`);
+    res.status(500).json({ error: message });
   }
 };
 
@@ -126,9 +129,10 @@ export const update = async (
     });
 
     return res.status(200).json(backupInfo);
-  } catch (err: any) {
-    logger.error(`Erro ao restaurar backup: ${err.message}`);
-    return res.status(500).json({ error: err.message });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Erro interno";
+    logger.error(`Erro ao restaurar backup: ${message}`);
+    return res.status(500).json({ error: message });
   }
 };
 
@@ -164,9 +168,10 @@ export const upload = async (
     });
 
     return res.status(200).json(backupInfo);
-  } catch (err: any) {
-    logger.error(`Erro ao importar backup: ${err.message}`);
-    return res.status(500).json({ error: err.message });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Erro interno";
+    logger.error(`Erro ao importar backup: ${message}`);
+    return res.status(500).json({ error: message });
   }
 };
 
@@ -200,8 +205,9 @@ export const remove = async (
     });
 
     return res.status(200).json(result);
-  } catch (err: any) {
-    logger.error(`Erro ao excluir backup: ${err.message}`);
-    return res.status(500).json({ error: err.message });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Erro interno";
+    logger.error(`Erro ao excluir backup: ${message}`);
+    return res.status(500).json({ error: message });
   }
 };

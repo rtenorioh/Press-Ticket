@@ -132,9 +132,10 @@ export const listBackups = async (): Promise<BackupInfo[]> => {
     });
 
     return backups.sort((a, b) => b.timestamp - a.timestamp);
-  } catch (error: any) {
-    logger.error(`Erro ao listar backups: ${error.message}`);
-    throw new Error(`Não foi possível listar os backups: ${error.message}`);
+  } catch (error: unknown) {
+    const err = error as { message?: string };
+    logger.error(`Erro ao listar backups: ${err.message}`);
+    throw new Error(`Não foi possível listar os backups: ${err.message}`);
   }
 };
 
@@ -171,9 +172,10 @@ export const createBackup = async (
       }),
       timestamp: stats.mtime.getTime()
     };
-  } catch (error: any) {
-    logger.error(`Erro ao criar backup: ${error.message}`);
-    throw new Error(`Não foi possível criar o backup: ${error.message}`);
+  } catch (error: unknown) {
+    const err = error as { message?: string };
+    logger.error(`Erro ao criar backup: ${err.message}`);
+    throw new Error(`Não foi possível criar o backup: ${err.message}`);
   }
 };
 
@@ -208,9 +210,10 @@ export const restoreBackup = async (
       success: true,
       message: `Backup restaurado com sucesso: ${filename}`
     };
-  } catch (error: any) {
-    logger.error(`Erro ao restaurar backup: ${error.message}`);
-    throw new Error(`Não foi possível restaurar o backup: ${error.message}`);
+  } catch (error: unknown) {
+    const err = error as { message?: string };
+    logger.error(`Erro ao restaurar backup: ${err.message}`);
+    throw new Error(`Não foi possível restaurar o backup: ${err.message}`);
   }
 };
 
@@ -249,9 +252,10 @@ export const uploadBackup = async (
       }),
       timestamp: stats.mtime.getTime()
     };
-  } catch (error: any) {
-    logger.error(`Erro ao importar backup: ${error.message}`);
-    throw new Error(`Não foi possível importar o backup: ${error.message}`);
+  } catch (error: unknown) {
+    const err = error as { message?: string };
+    logger.error(`Erro ao importar backup: ${err.message}`);
+    throw new Error(`Não foi possível importar o backup: ${err.message}`);
   }
 };
 
@@ -283,8 +287,9 @@ export const deleteBackup = async (
       success: true,
       message: `Backup excluído com sucesso: ${filename}`
     };
-  } catch (error: any) {
-    logger.error(`Erro ao excluir backup: ${error.message}`);
-    throw new Error(`Não foi possível excluir o backup: ${error.message}`);
+  } catch (error: unknown) {
+    const err = error as { message?: string };
+    logger.error(`Erro ao excluir backup: ${err.message}`);
+    throw new Error(`Não foi possível excluir o backup: ${err.message}`);
   }
 };

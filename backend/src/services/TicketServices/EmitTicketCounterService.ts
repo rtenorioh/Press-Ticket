@@ -2,7 +2,7 @@ import { getIO } from "../../libs/socket";
 import CountTicketsService from "./CountTicketsService";
 import { logger } from "../../utils/logger";
 
-const EmitTicketCounterService = async (): Promise<any> => {
+const EmitTicketCounterService = async (): Promise<void> => {
   try {
     const counters = await CountTicketsService({});
 
@@ -28,7 +28,6 @@ const EmitTicketCounterService = async (): Promise<any> => {
       counters
     });
 
-    return counters;
   } catch (error) {
     logger.error(`Erro ao emitir atualização de contadores: ${error}`);
     throw error;

@@ -17,7 +17,7 @@ const GetActivityLogDetailsService = async ({
   id,
   entityType,
   entityId
-}: Request): Promise<any> => {
+}: Request): Promise<unknown> => {
   const activityLog = await ActivityLog.findByPk(id, {
     include: [
       {

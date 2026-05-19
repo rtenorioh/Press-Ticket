@@ -1,4 +1,7 @@
 import { Op } from "sequelize";
+import type { WhereOptions } from "sequelize";
+
+type DynWhere = Record<PropertyKey, unknown>;
 import Ticket from "../../models/Ticket";
 import ListSettingsServiceOne from "../SettingServices/ListSettingsServiceOne";
 import { logger } from "../../utils/logger";
@@ -25,27 +28,21 @@ const CountTicketsService = async ({
     const allTickets = await ListSettingsServiceOne({ key: "allTicket" });
     const allTicketsEnabled = allTickets?.value === "enabled";
 
-    const baseConditions: any = {};
-
-    const openConditions: any = {
-      ...baseConditions,
+    const openConditions: DynWhere = {
       status: "open",
       "$contact.isGroup$": { [Op.or]: [false, null] }
     };
 
-    const openGroupsConditions: any = {
-      ...baseConditions,
+    const openGroupsConditions: DynWhere = {
       status: "open",
       "$contact.isGroup$": true
     };
 
-    const pendingConditions: any = {
-      ...baseConditions,
+    const pendingConditions: DynWhere = {
       status: "pending"
     };
 
-    const closedConditions: any = {
-      ...baseConditions,
+    const closedConditions: DynWhere = {
       status: "closed"
     };
 
@@ -108,7 +105,7 @@ const CountTicketsService = async ({
     const [openCount, pendingCount, closedCount, openGroupsCount] =
       await Promise.all([
         Ticket.count({
-          where: openConditions,
+          where: openConditions as WhereOptions,
           include: [
             {
               model: require("../../models/Contact").default,
@@ -117,10 +114,10 @@ const CountTicketsService = async ({
             }
           ]
         }),
-        Ticket.count({ where: pendingConditions }),
-        Ticket.count({ where: closedConditions }),
+        Ticket.count({ where: pendingConditions as WhereOptions }),
+        Ticket.count({ where: closedConditions as WhereOptions }),
         Ticket.count({
-          where: openGroupsConditions,
+          where: openGroupsConditions as WhereOptions,
           include: [
             {
               model: require("../../models/Contact").default,

@@ -2,7 +2,13 @@ import { Request, Response } from "express";
 import path from "path";
 import AppError from "../errors/AppError";
 import { getWbotByGroupId } from "../libs/wbot";
-import { MessageMedia } from "whatsapp-web.js";
+import { MessageMedia, GroupChat } from "whatsapp-web.js";
+
+type WWebGroupChat = GroupChat & {
+  subject: string;
+  groupMetadata?: { desc?: string };
+  description?: string;
+};
 import fs from "fs";
 import { getIO } from "../libs/socket";
 import groupEventsService from "../services/WbotServices/GroupEventsService";
@@ -12,9 +18,9 @@ import uploadConfig from "../config/upload";
 async function getGroupChatOrFail(groupId: string) {
   const wbot = await getWbotByGroupId(groupId);
   if (!wbot) throw new AppError("ERR_WAPP_NOT_INITIALIZED");
-  const chat: any = await wbot.getChatById(groupId);
+  const chat = await wbot.getChatById(groupId);
   if (!chat || !chat.isGroup) throw new AppError("ERR_GROUP_NOT_FOUND");
-  return { wbot, chat };
+  return { wbot, chat: chat as WWebGroupChat };
 }
 
 export const getInfo = async (req: Request, res: Response) => {
@@ -46,20 +52,22 @@ export const addParticipants = async (req: Request, res: Response) => {
     throw new AppError(result, 400);
   }
 
-  const summary: any[] = [];
+  type ParticipantResult = { id: string; code: number; message: string; isInviteV4Sent: boolean; success: boolean };
+  const summary: ParticipantResult[] = [];
   let successCount = 0;
   let failCount = 0;
 
-  for (const [pId, data] of Object.entries(result as Record<string, any>)) {
-    const code = data?.code;
+  for (const [pId, data] of Object.entries(result as Record<string, unknown>)) {
+    const d = data as Record<string, unknown>;
+    const code = d?.code as number;
     const ok = code === 200;
     if (ok) successCount++;
     else failCount++;
     summary.push({
       id: pId,
       code,
-      message: data?.message || "",
-      isInviteV4Sent: data?.isInviteV4Sent || false,
+      message: (d?.message as string) || "",
+      isInviteV4Sent: (d?.isInviteV4Sent as boolean) || false,
       success: ok
     });
   }
@@ -208,7 +216,8 @@ export const setDescription = async (req: Request, res: Response) => {
   try {
     const chatId = JSON.stringify(chat.id._serialized);
     const desc = JSON.stringify(description);
-    const success = await (wbot as any).pupPage.evaluate(`
+    const wbotPage = (wbot as unknown as Record<string, unknown>).pupPage as { evaluate: (script: string) => Promise<unknown> };
+    const success = await wbotPage.evaluate(`
       (async () => {
         var chatWid = window.Store.WidFactory.createWid(${chatId});
         var metadataStore = window.Store.GroupMetadata || window.Store.WAWebGroupMetadataCollection;
@@ -232,7 +241,7 @@ export const setDescription = async (req: Request, res: Response) => {
     }
 
     return res.json({ success: !!success });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error(`Erro ao alterar descrição do grupo: ${error}`);
     throw new AppError(
       "Erro ao alterar descrição. Tente novamente ou reinicie a conexão WhatsApp.",
@@ -336,21 +345,23 @@ export const leaveGroup = async (req: Request, res: Response) => {
 export const listParticipants = async (req: Request, res: Response) => {
   const { groupId } = req.params;
   const { wbot, chat } = await getGroupChatOrFail(groupId);
-  let participants: any[] = Array.isArray((chat as any).participants)
-    ? (chat as any).participants
+  type GroupParticipant = { id?: { _serialized?: string; user?: string }; isAdmin?: boolean; isSuperAdmin?: boolean };
+  const chatAsRecord = chat as unknown as Record<string, unknown>;
+  let participants: GroupParticipant[] = Array.isArray(chatAsRecord.participants)
+    ? (chatAsRecord.participants as GroupParticipant[])
     : [];
   try {
     if (!participants.length) {
-      if (typeof (chat as any).getParticipants === "function") {
-        participants = await (chat as any).getParticipants();
-      } else if (typeof (chat as any).fetchParticipants === "function") {
-        participants = await (chat as any).fetchParticipants();
+      if (typeof chatAsRecord.getParticipants === "function") {
+        participants = await (chatAsRecord.getParticipants as () => Promise<GroupParticipant[]>)();
+      } else if (typeof chatAsRecord.fetchParticipants === "function") {
+        participants = await (chatAsRecord.fetchParticipants as () => Promise<GroupParticipant[]>)();
       }
     }
   } catch (__) {}
 
   const result = await Promise.all(
-    participants.map(async (p: any) => {
+    participants.map(async (p: GroupParticipant) => {
       const serialized = p?.id?._serialized || `${p?.id?.user || p?.id}@c.us`;
       try {
         const c = await wbot.getContactById(serialized);

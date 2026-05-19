@@ -1,11 +1,15 @@
+import { InferCreationAttributes } from "sequelize";
 import { getIO } from "../../libs/socket";
 import Contact from "../../models/Contact";
+import ContactCustomField from "../../models/ContactCustomField";
 import { Op } from "sequelize";
 
 interface ExtraInfo {
   name: string;
   value: string;
 }
+
+type ContactCreateInput = InferCreationAttributes<Contact> & { extraInfo?: ExtraInfo[] };
 
 interface Request {
   name: string;
@@ -57,29 +61,29 @@ const CreateOrUpdateContactService = async ({
     }
 
     if (primary) {
-      const updatedData: Partial<Contact> = {} as any;
+      const updatedData: Record<string, unknown> = {};
       if (
         name &&
         name.trim() &&
         primary.name !== name.trim() &&
         !primary.nameManuallyEdited
       ) {
-        (updatedData as any).name = name.trim();
+        updatedData.name = name.trim();
       }
       if (!primary.isGroup) {
-        (updatedData as any).isGroup = true;
+        updatedData.isGroup = true;
       }
       if (profilePicUrl && primary.profilePicUrl !== profilePicUrl) {
-        (updatedData as any).profilePicUrl = profilePicUrl;
+        updatedData.profilePicUrl = profilePicUrl;
       }
       if (primary.number !== groupJid) {
-        (updatedData as any).number = groupJid;
+        updatedData.number = groupJid;
       }
       if (address !== undefined && primary.address !== address) {
-        (updatedData as any).address = address;
+        updatedData.address = address;
       }
       if (email !== undefined && primary.email !== email) {
-        (updatedData as any).email = email;
+        updatedData.email = email;
       }
       if (Object.keys(updatedData).length) {
         await primary.update(updatedData);
@@ -88,15 +92,18 @@ const CreateOrUpdateContactService = async ({
       return primary;
     }
 
-    const created = await Contact.create({
-      name,
-      number: groupJid,
-      profilePicUrl,
-      address,
-      email,
-      isGroup: true,
-      extraInfo
-    } as any);
+    const created = await Contact.create(
+      {
+        name,
+        number: groupJid,
+        profilePicUrl,
+        address,
+        email,
+        isGroup: true,
+        extraInfo
+      } as unknown as ContactCreateInput,
+      { include: [{ model: ContactCustomField, as: "extraInfo" }] }
+    );
     io.emit("contact", { action: "create", contact: created });
     return created;
   }
@@ -110,29 +117,29 @@ const CreateOrUpdateContactService = async ({
   }
 
   if (contact) {
-    const updatedData: Partial<Contact> = {} as any;
+    const updatedData: Record<string, unknown> = {};
     if (
       name &&
       name.trim() &&
       contact.name !== name.trim() &&
       !contact.nameManuallyEdited
     ) {
-      (updatedData as any).name = name.trim();
+      updatedData.name = name.trim();
     }
     if (profilePicUrl && contact.profilePicUrl !== profilePicUrl) {
-      (updatedData as any).profilePicUrl = profilePicUrl;
+      updatedData.profilePicUrl = profilePicUrl;
     }
     if (address !== undefined && contact.address !== address) {
-      (updatedData as any).address = address;
+      updatedData.address = address;
     }
     if (email !== undefined && contact.email !== email) {
-      (updatedData as any).email = email;
+      updatedData.email = email;
     }
     if (numberLid && contact.numberLid !== numberLid) {
-      (updatedData as any).numberLid = numberLid;
+      updatedData.numberLid = numberLid;
     }
     if (!foundByLid && digits && contact.number !== digits) {
-      (updatedData as any).number = digits;
+      updatedData.number = digits;
     }
     if (Object.keys(updatedData).length) {
       await contact.update(updatedData);
@@ -141,16 +148,19 @@ const CreateOrUpdateContactService = async ({
     return contact;
   }
 
-  contact = await Contact.create({
-    name,
-    number: digits,
-    numberLid: numberLid || null,
-    profilePicUrl,
-    address,
-    email,
-    isGroup: false,
-    extraInfo
-  } as any);
+  contact = await Contact.create(
+    {
+      name,
+      number: digits,
+      numberLid: numberLid || null,
+      profilePicUrl,
+      address,
+      email,
+      isGroup: false,
+      extraInfo
+    } as unknown as ContactCreateInput,
+    { include: [{ model: ContactCustomField, as: "extraInfo" }] }
+  );
   io.emit("contact", { action: "create", contact });
   return contact;
 };

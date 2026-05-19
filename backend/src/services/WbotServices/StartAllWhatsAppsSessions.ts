@@ -1,3 +1,4 @@
+import { IChannel } from "../../controllers/ChannelHubController";
 import { setChannelWebhook } from "../../helpers/setChannelHubWebhook";
 import ListWhatsAppsService from "../WhatsappService/ListWhatsAppsService";
 import { StartWhatsAppSession } from "./StartWhatsAppSession";
@@ -9,7 +10,7 @@ export const StartAllWhatsAppsSessions = async (): Promise<void> => {
       if (whatsapp.type === "wwebjs") {
         StartWhatsAppSession(whatsapp);
       } else {
-        setChannelWebhook(whatsapp, whatsapp.id.toString());
+        setChannelWebhook(whatsapp as unknown as IChannel, whatsapp.id.toString());
       }
     });
   }

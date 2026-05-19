@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { Op } from "sequelize";
+import { Op, WhereOptions } from "sequelize";
 import Contact from "../models/Contact";
 import Email from "../models/Email";
 import EmailAttachment from "../models/EmailAttachment";
@@ -22,12 +22,12 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
 
   // Starred view: show from all non-trash folders
   // Trash: show soft-deleted. Others: exclude deleted.
-  let whereClause: any;
+  let whereClause: WhereOptions;
   if (isStarredParam) {
     whereClause = {
       whatsappId,
       isStarred: true,
-      deletedAt: { [Op.is]: null as any }
+      deletedAt: { [Op.is]: null }
     };
   } else if (folder === "trash") {
     whereClause = { whatsappId, folder: "trash" };
@@ -35,7 +35,7 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
     whereClause = {
       whatsappId,
       folder: folder || "inbox",
-      deletedAt: { [Op.is]: null as any }
+      deletedAt: { [Op.is]: null }
     };
   }
 
@@ -99,29 +99,13 @@ export const countFolders = async (
     return res.status(400).json({ error: "whatsappId é obrigatório." });
   }
   try {
+    const inboxWhere: WhereOptions = { whatsappId, folder: "inbox", isRead: false, deletedAt: { [Op.is]: null } };
+    const sentWhere: WhereOptions = { whatsappId, folder: "sent", deletedAt: { [Op.is]: null } };
+    const starredWhere: WhereOptions = { whatsappId, isStarred: true, deletedAt: { [Op.is]: null } };
     const [inbox, sent, starred, trash] = await Promise.all([
-      Email.count({
-        where: {
-          whatsappId,
-          folder: "inbox",
-          isRead: false,
-          deletedAt: { [Op.is]: null as any }
-        }
-      }),
-      Email.count({
-        where: {
-          whatsappId,
-          folder: "sent",
-          deletedAt: { [Op.is]: null as any }
-        }
-      }),
-      Email.count({
-        where: {
-          whatsappId,
-          isStarred: true,
-          deletedAt: { [Op.is]: null as any }
-        }
-      }),
+      Email.count({ where: inboxWhere }),
+      Email.count({ where: sentWhere }),
+      Email.count({ where: starredWhere }),
       Email.count({ where: { whatsappId, folder: "trash" } })
     ]);
     return res.status(200).json({ inbox, sent, starred, trash });
@@ -233,7 +217,7 @@ export const update = async (
       return res.status(404).json({ error: "Email não encontrado." });
     }
 
-    const changes: Record<string, any> = {};
+    const changes: Record<string, unknown> = {};
 
     if (typeof isRead === "boolean") changes.isRead = isRead;
     if (typeof isStarred === "boolean") changes.isStarred = isStarred;

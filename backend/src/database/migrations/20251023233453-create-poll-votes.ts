@@ -50,7 +50,7 @@ module.exports = {
       },
       onUpdate: "CASCADE",
       onDelete: "CASCADE"
-    } as any);
+    });
   },
 
   down: (queryInterface: QueryInterface) => {

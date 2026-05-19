@@ -36,8 +36,9 @@ export const restartPm2 = async (
           backendId
         ]);
         logger.info(`Backend reiniciado com sucesso: ${backStdout}`);
-      } catch (err: any) {
-        logger.error(`Erro ao reiniciar o sistema: ${err.message}`);
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : "Erro interno";
+        logger.error(`Erro ao reiniciar o sistema: ${message}`);
       }
     }, 100);
 

@@ -1,4 +1,4 @@
-import { Op, Sequelize } from "sequelize";
+import { Op, Sequelize, WhereOptions } from "sequelize";
 import Contact from "../../models/Contact";
 import Tag from "../../models/Tag";
 import ContactTag from "../../models/ContactTag";
@@ -21,7 +21,7 @@ const ExportContactsService = async ({
   isGroup,
   status
 }: Request): Promise<Response> => {
-  const whereCondition: any = {};
+  const whereCondition: Record<PropertyKey, unknown> = {};
 
   if (searchParam) {
     whereCondition[Op.or] = [
@@ -100,7 +100,7 @@ const ExportContactsService = async ({
 
   while (hasMore) {
     const contactsBatch = await Contact.findAll({
-      where: whereCondition,
+      where: whereCondition as WhereOptions,
       include: includeCondition,
       order: [["name", "ASC"]],
       limit: batchSize,

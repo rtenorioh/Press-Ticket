@@ -1,4 +1,4 @@
-import { Op } from "sequelize";
+import { Op, WhereOptions } from "sequelize";
 import Ticket from "../models/Ticket";
 import { logger } from "../utils/logger";
 
@@ -22,9 +22,9 @@ const CountTicketsService = {
         `[BACK_COUNT_SERVICE][${timestamp}] Iniciando contagem de tickets`
       );
 
-      const openCondition: any = { status: "open" };
-      const pendingCondition: any = { status: "pending" };
-      const closedCondition: any = { status: "closed" };
+      const openCondition: Record<PropertyKey, unknown> = { status: "open" };
+      const pendingCondition: Record<PropertyKey, unknown> = { status: "pending" };
+      const closedCondition: Record<PropertyKey, unknown> = { status: "closed" };
 
       if (!isAdmin && userId) {
         openCondition.userId = userId;
@@ -39,9 +39,9 @@ const CountTicketsService = {
       }
 
       const [openCount, pendingCount, closedCount] = await Promise.all([
-        Ticket.count({ where: openCondition }),
-        Ticket.count({ where: pendingCondition }),
-        Ticket.count({ where: closedCondition })
+        Ticket.count({ where: openCondition as WhereOptions }),
+        Ticket.count({ where: pendingCondition as WhereOptions }),
+        Ticket.count({ where: closedCondition as WhereOptions })
       ]);
 
       const result = {

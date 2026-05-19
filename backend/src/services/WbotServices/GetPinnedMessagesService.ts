@@ -19,7 +19,7 @@ const GetPinnedMessages = async (
     const chat = await wbot.getChatById(chatId);
     const pinned = await chat.getPinnedMessages();
 
-    return pinned.map((msg: any) => ({
+    return pinned.map(msg => ({
       id: msg.id.id || msg.id._serialized,
       body: msg.body || "",
       timestamp: msg.timestamp,

@@ -1,4 +1,4 @@
-import { Op } from "sequelize";
+import { Op, WhereOptions } from "sequelize";
 import ActivityLog from "../../models/ActivityLog";
 import User from "../../models/User";
 
@@ -25,7 +25,7 @@ const ListActivityLogsService = async ({
   userId,
   action
 }: Request): Promise<Response> => {
-  const where: any = {};
+  const where: WhereOptions = {};
 
   if (startDate && endDate) {
     where.createdAt = {

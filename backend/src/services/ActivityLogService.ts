@@ -1,4 +1,4 @@
-import { Op } from "sequelize";
+import { Op, WhereOptions } from "sequelize";
 import ActivityLog from "../models/ActivityLog";
 import User from "../models/User";
 import Ticket from "../models/Ticket";
@@ -79,7 +79,7 @@ interface ListRequest {
 }
 
 interface ListResponse {
-  logs: ActivityLog[];
+  logs: Array<Record<string, unknown>>;
   count: number;
 }
 
@@ -124,7 +124,7 @@ export const listActivityLogs = async ({
   ip,
   searchParam
 }: ListRequest): Promise<ListResponse> => {
-  const where: any = {};
+  const where: Record<PropertyKey, unknown> = {};
 
   if (startDate && endDate) {
     where.createdAt = {
@@ -168,7 +168,7 @@ export const listActivityLogs = async ({
   }
 
   const { count, rows: logs } = await ActivityLog.findAndCountAll({
-    where,
+    where: where as WhereOptions,
     limit,
     offset,
     order: [["createdAt", "DESC"]],
@@ -181,7 +181,7 @@ export const listActivityLogs = async ({
   });
 
   const formattedLogs = logs.map(log => {
-    const plainLog = log.get({ plain: true }) as any;
+    const plainLog = log.get({ plain: true }) as Record<string, unknown> & { user?: { name?: string } };
     return {
       ...plainLog,
       username: plainLog.user ? plainLog.user.name : "Sistema"
@@ -197,7 +197,7 @@ export const listActivityLogs = async ({
 export const getEntityDetails = async (
   entityType: EntityTypes | string,
   entityId: number
-): Promise<any> => {
+): Promise<unknown> => {
   let entityDetails = null;
 
   switch (entityType.toLowerCase()) {
@@ -220,7 +220,7 @@ export const getEntityDetails = async (
         ]
       });
       if (entityDetails) {
-        const plainTicket = entityDetails.get({ plain: true }) as any;
+        const plainTicket = entityDetails.get({ plain: true }) as Record<string, unknown> & { contact?: Record<string, unknown> };
         entityDetails = {
           id: plainTicket.id,
           status: plainTicket.status,
@@ -290,7 +290,7 @@ export const getEntityDetails = async (
         ]
       });
       if (entityDetails) {
-        const plainMessage = entityDetails.get({ plain: true }) as any;
+        const plainMessage = entityDetails.get({ plain: true }) as Record<string, unknown> & { body?: string; ticket?: Record<string, unknown> };
         entityDetails = {
           ...plainMessage,
           bodyPreview: plainMessage.body

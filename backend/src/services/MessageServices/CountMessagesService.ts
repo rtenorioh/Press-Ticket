@@ -1,4 +1,4 @@
-import { Op, Sequelize, fn } from "sequelize";
+import { Op, Sequelize, fn, WhereOptions } from "sequelize";
 import Message from "../../models/Message";
 
 interface Request {
@@ -20,7 +20,7 @@ const CountMessagesService = async ({
   startDate,
   endDate
 }: Request = {}): Promise<MessageCount[]> => {
-  const dateFilter: any = {};
+  const dateFilter: WhereOptions = {};
 
   if (startDate && endDate) {
     dateFilter.createdAt = {
@@ -40,7 +40,7 @@ const CountMessagesService = async ({
   }
 
   if (all === "true") {
-    const allUserCounts = await Message.findAll({
+    const allUserCounts = (await Message.findAll({
       where: dateFilter,
       group: ["userId"],
       attributes: [
@@ -61,9 +61,9 @@ const CountMessagesService = async ({
         ]
       ],
       raw: true
-    });
+    })) as unknown as Record<string, unknown>[];
 
-    const formattedAllUserCounts = allUserCounts.map((count: any) => ({
+    const formattedAllUserCounts = allUserCounts.map(count => ({
       id: count.id ? parseInt(count.id as string) : null,
       send: count.send ? Number(count.send) : 0,
       receive: count.receive ? Number(count.receive) : 0
@@ -73,7 +73,7 @@ const CountMessagesService = async ({
   }
 
   if (userId) {
-    const userCounts = await Message.findAll({
+    const userCounts = (await Message.findAll({
       where: {
         [Op.or]: [
           { fromMe: true, userId },
@@ -100,9 +100,9 @@ const CountMessagesService = async ({
         ]
       ],
       raw: true
-    });
+    })) as unknown as Record<string, unknown>[];
 
-    const formattedUserCounts = userCounts.map((count: any) => ({
+    const formattedUserCounts = userCounts.map(count => ({
       id: count.id ? parseInt(count.id as string) : null,
       send: count.send ? Number(count.send) : 0,
       receive: count.receive ? Number(count.receive) : 0

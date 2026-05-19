@@ -1,3 +1,4 @@
+import axios from "axios";
 import {
   createNotificameClient,
   resolveChannel,
@@ -5,6 +6,8 @@ import {
   NotificameMessagePayload
 } from "../../libs/notificameClient";
 import Contact from "../../models/Contact";
+import Message from "../../models/Message";
+import Whatsapp from "../../models/Whatsapp";
 import CreateMessageService from "./CreateHubMessageService";
 import { showHubToken } from "../../helpers/showHubToken";
 import { logger } from "../../utils/logger";
@@ -24,8 +27,8 @@ export const SendCardMessageService = async (
   quickReplyButtons: HubCardButton[],
   ticketId: number,
   contact: Contact,
-  connection: any
-): Promise<any> => {
+  connection: Whatsapp
+): Promise<Message | undefined> => {
   if (connection.type === "wwebjs") {
     throw new Error("Envio de card não suportado neste canal.");
   }
@@ -95,11 +98,12 @@ export const SendCardMessageService = async (
     });
 
     return newMessage;
-  } catch (error: any) {
-    const errBody = error?.response?.data || error?.response?.body;
-    logger.error(
-      `SendCardMessageService: erro ao enviar card Hub: ${error?.message || String(error)}`
-    );
+  } catch (error: unknown) {
+    const errMsg = error instanceof Error ? error.message : String(error);
+    const errBody = axios.isAxiosError(error)
+      ? (error.response?.data ?? error.response?.headers)
+      : undefined;
+    logger.error(`SendCardMessageService: erro ao enviar card Hub: ${errMsg}`);
     if (errBody)
       logger.error(`Hub API response body: ${JSON.stringify(errBody)}`);
     throw error;

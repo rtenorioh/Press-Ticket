@@ -21,11 +21,15 @@ interface Request {
   sendAsDocument?: boolean;
 }
 
+interface SocketIo {
+  emit(event: string, data: unknown): void;
+}
+
 const compressVideo = (
   inputPath: string,
   outputPath: string,
   ticketId: number,
-  socketIo?: any
+  socketIo?: SocketIo
 ): Promise<void> => {
   return new Promise((resolve, reject) => {
     ffmpeg(inputPath)
@@ -135,7 +139,8 @@ const SendWhatsAppMedia = async ({
       );
     }
 
-    const lidBase = (ticket.contact as any).numberLid || ticket.contact.number;
+    interface ContactWithLid { numberLid?: string | null }
+    const lidBase = (ticket.contact as unknown as ContactWithLid).numberLid || ticket.contact.number;
     const lidChatId = `${lidBase}@lid`;
 
     const preFn = new Function(
@@ -156,17 +161,19 @@ const SendWhatsAppMedia = async ({
       ].join("\n")
     );
 
+    interface ClientWithPupPage { pupPage?: { evaluate(fn: (...args: unknown[]) => unknown, ...args: unknown[]): Promise<unknown> } }
     try {
-      await (wbot as any).pupPage.evaluate(preFn, chatId, lidChatId);
+      await (wbot as unknown as ClientWithPupPage).pupPage?.evaluate(preFn as (...args: unknown[]) => unknown, chatId, lidChatId);
       await new Promise(r => setTimeout(r, 2000));
     } catch (__) {}
 
-    const sendWithLidFallback = async (media: any, opts: any): Promise<any> => {
+    const sendWithLidFallback = async (media: MessageMedia, opts: Record<string, unknown>): Promise<WbotMessage> => {
       try {
         return await wbot.sendMessage(chatId, media, opts);
-      } catch (e: any) {
+      } catch (e: unknown) {
+        const errMsg = e instanceof Error ? e.message : String(e);
         const isLidErr =
-          e?.message?.includes("No LID for user") ||
+          errMsg.includes("No LID for user") ||
           String(e).includes("No LID for user");
         if (!isLidErr) throw e;
         return await wbot.sendMessage(lidChatId, media, opts);
@@ -296,7 +303,7 @@ const SendWhatsAppMedia = async ({
           await chat.sendStateTyping();
           await new Promise(resolve => setTimeout(resolve, 400));
         } catch (_e) {}
-        const docOptions: any = {
+        const docOptions: Record<string, unknown> = {
           caption: hasBody,
           sendMediaAsDocument: true
         };
@@ -311,7 +318,7 @@ const SendWhatsAppMedia = async ({
           throw docError;
         }
       } else {
-        const options: any = {
+        const options: Record<string, unknown> = {
           caption: hasBody
         };
 
@@ -344,7 +351,7 @@ const SendWhatsAppMedia = async ({
             await chat.sendStateTyping();
             await new Promise(resolve => setTimeout(resolve, 400));
           } catch (_e) {}
-          const fallbackOptions: any = {
+          const fallbackOptions: Record<string, unknown> = {
             caption: hasBody,
             sendMediaAsDocument: true
           };

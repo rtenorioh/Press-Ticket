@@ -1,3 +1,4 @@
+import axios from "axios";
 import {
   createNotificameClient,
   resolveChannel,
@@ -5,6 +6,8 @@ import {
   NotificameMessagePayload
 } from "../../libs/notificameClient";
 import Contact from "../../models/Contact";
+import Message from "../../models/Message";
+import Whatsapp from "../../models/Whatsapp";
 import CreateMessageService from "./CreateHubMessageService";
 import { showHubToken } from "../../helpers/showHubToken";
 import { logger } from "../../utils/logger";
@@ -20,9 +23,9 @@ export const SendReplyableTextService = async (
   quickReplyButtons: HubQuickReplyButton[],
   ticketId: number,
   contact: Contact,
-  connection: any,
+  connection: Whatsapp,
   commentMessageId?: string
-): Promise<any> => {
+): Promise<Message | undefined> => {
   if (connection.type === "wwebjs") {
     throw new Error("Envio de respostas rápidas não suportado neste canal.");
   }
@@ -95,10 +98,13 @@ export const SendReplyableTextService = async (
     });
 
     return newMessage;
-  } catch (error: any) {
-    const errBody = error?.response?.data || error?.response?.body;
+  } catch (error: unknown) {
+    const errMsg = error instanceof Error ? error.message : String(error);
+    const errBody = axios.isAxiosError(error)
+      ? (error.response?.data ?? error.response?.headers)
+      : undefined;
     logger.error(
-      `SendReplyableTextService: erro ao enviar replyable-text Hub: ${error?.message || String(error)}`
+      `SendReplyableTextService: erro ao enviar replyable-text Hub: ${errMsg}`
     );
     if (errBody)
       logger.error(`Hub API response body: ${JSON.stringify(errBody)}`);

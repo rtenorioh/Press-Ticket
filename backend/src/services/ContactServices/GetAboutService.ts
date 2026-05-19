@@ -54,12 +54,14 @@ const GetAboutService = async ({
 
   try {
     const wContact = await wbot.getContactById(numberId._serialized);
-    if (typeof (wContact as any).getAbout === "function") {
-      about = await (wContact as any).getAbout();
+    const wContactExtended = wContact as unknown as { getAbout?: () => Promise<string | null> };
+    if (typeof wContactExtended.getAbout === "function") {
+      about = await wContactExtended.getAbout();
     }
-  } catch (error) {
+  } catch (error: unknown) {
+    const err = error as { message?: string };
     logger.warn(
-      `[FALLBACK] Erro ao obter contato/about do WhatsApp: ${error.message || error}`
+      `[FALLBACK] Erro ao obter contato/about do WhatsApp: ${err.message || error}`
     );
     about = null;
   }

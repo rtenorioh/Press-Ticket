@@ -1,3 +1,4 @@
+import { Message as WbotMessage } from "whatsapp-web.js";
 import AppError from "../../errors/AppError";
 import GetWbotMessage from "../../helpers/GetWbotMessage";
 import Message from "../../models/Message";
@@ -14,7 +15,7 @@ const ForwardWhatsAppMessage = async ({
   messageId,
   targetChatId,
   ticket: _ticket
-}: ForwardMessageData): Promise<any> => {
+}: ForwardMessageData): Promise<void> => {
   const message = await Message.findByPk(messageId, {
     include: [
       {
@@ -36,8 +37,7 @@ const ForwardWhatsAppMessage = async ({
 
   try {
     const wbotMessage = await GetWbotMessage(message.ticket, messageId);
-    const forwardedMsg = await wbotMessage.forward(formattedChatId);
-    return forwardedMsg;
+    await wbotMessage.forward(formattedChatId);
   } catch (err) {
     logger.error(
       `[FORWARD] Erro ao encaminhar mensagem via API nativa: ${err}`

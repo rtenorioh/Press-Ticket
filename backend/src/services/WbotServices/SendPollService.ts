@@ -56,9 +56,10 @@ class SendPollService {
         ? ticket.contact.number!
         : `${ticket.contact.number!}@c.us`;
 
+      // wwebjs Poll constructor options type is incomplete — cast needed
       const poll = new Poll(pollName, pollOptions, {
         allowMultipleAnswers: allowMultipleAnswers || false
-      } as any);
+      } as unknown as ConstructorParameters<typeof Poll>[2]);
 
       const sentMessage = await wbot.sendMessage(chatId, poll);
 
@@ -110,9 +111,10 @@ class SendPollService {
       });
 
       return message;
-    } catch (error) {
-      logger.error(`[POLL] Erro ao enviar enquete: ${error}`);
-      throw new AppError(`Erro ao enviar enquete: ${error.message}`);
+    } catch (error: unknown) {
+      const errMsg = error instanceof Error ? error.message : String(error);
+      logger.error(`[POLL] Erro ao enviar enquete: ${errMsg}`);
+      throw new AppError(`Erro ao enviar enquete: ${errMsg}`);
     }
   }
 }

@@ -14,8 +14,9 @@ const createSubscriptionSafe = async (
   try {
     await client.post("/v1/subscriptions/", payload);
     logger.info(`Webhook Hub: subscription "${label}" registrada com sucesso`);
-  } catch (err: any) {
-    const status = err?.response?.status || err?.status || err?.statusCode;
+  } catch (err: unknown) {
+    const errObj = err as { response?: { status?: number }; status?: number; statusCode?: number };
+    const status = errObj?.response?.status || errObj?.status || errObj?.statusCode;
     if (status === 409) {
       logger.warn(
         `Webhook Hub: subscription "${label}" já existe (409) — ignorando`
@@ -30,7 +31,7 @@ const createSubscriptionSafe = async (
 };
 
 export const setChannelWebhook = async (
-  whatsapp: IChannel | any,
+  whatsapp: IChannel,
   whatsappId: string
 ): Promise<void> => {
   const hubToken = await showHubToken();

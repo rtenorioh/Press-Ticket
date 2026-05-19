@@ -34,8 +34,8 @@ const UpdateService = async ({
 
       try {
         await schema.validate({ name });
-      } catch (err: any) {
-        throw new AppError(err.message, 400);
+      } catch (err: unknown) {
+        throw new AppError(err instanceof Error ? err.message : String(err), 400);
       }
     }
 

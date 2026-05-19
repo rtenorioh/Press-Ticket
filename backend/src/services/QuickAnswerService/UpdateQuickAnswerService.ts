@@ -27,7 +27,7 @@ const UpdateQuickAnswerService = async ({
     throw new AppError("ERR_NO_QUICK_ANSWERS_FOUND", 404);
   }
 
-  const updateData: any = {};
+  const updateData: Partial<QuickAnswerData> = {};
   if (shortcut !== undefined) updateData.shortcut = shortcut;
   if (message !== undefined) updateData.message = message;
   if (mediaPath !== undefined) updateData.mediaPath = mediaPath;

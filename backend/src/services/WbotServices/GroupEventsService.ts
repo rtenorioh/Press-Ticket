@@ -1,7 +1,18 @@
 import { Op } from "sequelize";
+import { Client } from "whatsapp-web.js";
 import { getIO } from "../../libs/socket";
 import GroupEvent from "../../models/GroupEvent";
 import { logger } from "../../utils/logger";
+
+// wwebjs missing type definition for group notification events
+interface GroupNotification {
+  type: string;
+  body?: string;
+  author?: string;
+  chatId?: string;
+  recipientIds?: string[];
+  getChat(): Promise<{ id: { _serialized: string }; groupMetadata?: { memberAddMode?: string } }>;
+}
 
 interface GroupEventData {
   whatsappId: number;
@@ -257,7 +268,7 @@ class GroupEventsService {
     }
   }
 
-  public setupGroupListeners(wbot: any, whatsappId: number): void {
+  public setupGroupListeners(wbot: Client, whatsappId: number): void {
     if (this.activeListeners.has(whatsappId)) {
       logger.warn(
         `[GROUP_EVENT] Listeners already active for WhatsApp ${whatsappId}, skipping...`
@@ -271,7 +282,7 @@ class GroupEventsService {
 
     this.activeListeners.set(whatsappId, true);
 
-    wbot.on("group_update", async (notification: any) => {
+    wbot.on("group_update", async (notification: GroupNotification) => {
       try {
         const chat = await notification.getChat();
         const groupId = chat.id._serialized;
@@ -348,7 +359,7 @@ class GroupEventsService {
             newValue: isAdminOnly ? "admin_add" : "all_member_add"
           });
         } else if (notification.type === "add") {
-          for (const participantId of notification.recipientIds) {
+          for (const participantId of notification.recipientIds ?? []) {
             let participantName = participantId;
             try {
               const contact = await wbot.getContactById(participantId);
@@ -371,7 +382,7 @@ class GroupEventsService {
             });
           }
         } else if (notification.type === "remove") {
-          for (const participantId of notification.recipientIds) {
+          for (const participantId of notification.recipientIds ?? []) {
             let participantName = participantId;
             try {
               const contact = await wbot.getContactById(participantId);
@@ -394,7 +405,7 @@ class GroupEventsService {
             });
           }
         } else if (notification.type === "promote") {
-          for (const participantId of notification.recipientIds) {
+          for (const participantId of notification.recipientIds ?? []) {
             let participantName = participantId;
             try {
               const contact = await wbot.getContactById(participantId);
@@ -417,7 +428,7 @@ class GroupEventsService {
             });
           }
         } else if (notification.type === "demote") {
-          for (const participantId of notification.recipientIds) {
+          for (const participantId of notification.recipientIds ?? []) {
             let participantName = participantId;
             try {
               const contact = await wbot.getContactById(participantId);
@@ -445,9 +456,9 @@ class GroupEventsService {
       }
     });
 
-    wbot.on("group_join", async (notification: any) => {
+    wbot.on("group_join", async (notification: GroupNotification) => {
       try {
-        const groupId = notification.chatId;
+        const groupId = notification.chatId ?? "";
 
         for (const participantId of notification.recipientIds || []) {
           let participantName = participantId;
@@ -476,9 +487,9 @@ class GroupEventsService {
       }
     });
 
-    wbot.on("group_leave", async (notification: any) => {
+    wbot.on("group_leave", async (notification: GroupNotification) => {
       try {
-        const groupId = notification.chatId;
+        const groupId = notification.chatId ?? "";
 
         for (const participantId of notification.recipientIds || []) {
           let participantName = participantId;

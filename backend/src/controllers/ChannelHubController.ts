@@ -43,7 +43,7 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
 
   whatsapps.forEach(whatsapp => {
     setTimeout(() => {
-      setChannelWebhook(whatsapp, whatsapp.id.toString());
+      setChannelWebhook(whatsapp as unknown as IChannel, whatsapp.id.toString());
     }, 2000);
   });
 
@@ -76,7 +76,7 @@ export const resubscribe = async (
     logger.info(
       `Resubscribe: re-registrando subscriptions para canal ${whatsapp.qrcode}`
     );
-    await setChannelWebhook(whatsapp, whatsappId);
+    await setChannelWebhook(whatsapp as unknown as IChannel, whatsappId);
     return res
       .status(200)
       .json({ message: "Subscriptions re-registradas com sucesso." });

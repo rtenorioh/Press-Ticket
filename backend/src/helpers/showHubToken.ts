@@ -1,6 +1,6 @@
 import Setting from "../models/Integration";
 
-export const showHubToken = async (): Promise<string | any> => {
+export const showHubToken = async (): Promise<string> => {
   const notificameHubToken = await Setting.findOne({
     where: {
       key: "hubToken"
@@ -11,7 +11,5 @@ export const showHubToken = async (): Promise<string | any> => {
     throw new Error("Notificame Hub token not found");
   }
 
-  if (notificameHubToken) {
-    return notificameHubToken.value.trim().replace(/[\r\n]/g, "");
-  }
+  return notificameHubToken.value.trim().replace(/[\r\n]/g, "");
 };

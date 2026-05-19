@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { WhereOptions } from "sequelize";
 import { getIO } from "../libs/socket";
 
 import AppError from "../errors/AppError";
@@ -210,18 +211,27 @@ export const statistics = async (
   const contactsWithoutStatus = await Contact.count({
     where: {
       [Op.or]: [{ status: { [Op.is]: null } }, { status: "" }]
-    } as any
+    } as WhereOptions
   });
 
   const totalContacts = await Contact.count();
 
+  interface StatusWithCount {
+    id: number;
+    name: string;
+    color: string;
+    contactsCount: string | null;
+  }
+
   const statistics = {
-    statusData: statusWithCounts.map((status: any) => ({
-      id: status.id,
-      name: status.name,
-      color: status.color,
-      count: parseInt(status.getDataValue("contactsCount")) || 0
-    })),
+    statusData: (statusWithCounts as unknown as StatusWithCount[]).map(
+      status => ({
+        id: status.id,
+        name: status.name,
+        color: status.color,
+        count: parseInt(status.contactsCount ?? "0") || 0
+      })
+    ),
     withoutStatus: contactsWithoutStatus,
     total: totalContacts
   };

@@ -28,10 +28,10 @@ export interface NotificameContent {
   fileMimeType?: string;
   fileCaption?: string;
   messsageId?: string; // typo intencional — API oficial usa 3 "s"
-  template?: Record<string, any>;
+  template?: Record<string, unknown>;
   subject?: string;
   html?: string;
-  attachments?: any[];
+  attachments?: unknown[];
   latitude?: number;
   longitude?: number;
   name?: string;
@@ -52,7 +52,14 @@ export interface NotificameResponse {
   direction: "OUT" | "IN";
 }
 
-export function resolveChannel(contact: any): NotificameChannel | null {
+interface NotificameContactInfo {
+  messengerId?: string | null;
+  instagramId?: string | null;
+  telegramId?: string | null;
+  webchatId?: string | null;
+}
+
+export function resolveChannel(contact: NotificameContactInfo): NotificameChannel | null {
   if (contact.messengerId) return "facebook";
   if (contact.instagramId) return "instagram";
   if (contact.telegramId) return "telegram";
@@ -61,7 +68,7 @@ export function resolveChannel(contact: any): NotificameChannel | null {
 }
 
 export function resolveContactId(
-  contact: any,
+  contact: NotificameContactInfo,
   channel: NotificameChannel
 ): string | null {
   switch (channel) {

@@ -41,7 +41,7 @@ const SetTicketMessagesAsRead = async (ticket: Ticket): Promise<void> => {
     });
   }
 
-  if ((ticket as any).whatsapp?.type === "wwebjs") {
+  if ((ticket as unknown as { whatsapp?: { type?: string } }).whatsapp?.type === "wwebjs") {
     try {
       const wbot = await GetTicketWbot(ticket);
       await wbot.sendSeen(

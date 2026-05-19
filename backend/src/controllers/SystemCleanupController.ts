@@ -11,9 +11,10 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
   try {
     const settings = await getCleanupSettings();
     return res.status(200).json(settings);
-  } catch (err: any) {
-    logger.error(`Erro ao obter configurações de limpeza: ${err.message}`);
-    return res.status(500).json({ error: err.message });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Erro interno";
+    logger.error(`Erro ao obter configurações de limpeza: ${message}`);
+    return res.status(500).json({ error: message });
   }
 };
 
@@ -48,9 +49,10 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     return res
       .status(200)
       .json({ message: "Configurações de limpeza salvas com sucesso" });
-  } catch (err: any) {
-    logger.error(`Erro ao salvar configurações de limpeza: ${err.message}`);
-    return res.status(500).json({ error: err.message });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Erro interno";
+    logger.error(`Erro ao salvar configurações de limpeza: ${message}`);
+    return res.status(500).json({ error: message });
   }
 };
 
@@ -88,8 +90,9 @@ export const execute = async (
     });
 
     return res.status(200).json(result);
-  } catch (err: any) {
-    logger.error(`Erro ao executar limpeza do sistema: ${err.message}`);
-    return res.status(500).json({ error: err.message });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Erro interno";
+    logger.error(`Erro ao executar limpeza do sistema: ${message}`);
+    return res.status(500).json({ error: message });
   }
 };

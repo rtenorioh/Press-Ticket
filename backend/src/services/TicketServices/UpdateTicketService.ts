@@ -87,7 +87,7 @@ const UpdateTicketService = async ({
 
   // Notificar usuários do setor quando queueId é atribuído/alterado
   if (ticket.queueId && ticket.queueId !== oldQueueId && ticket.whatsappId) {
-    NotifyQueueUsersService(ticket).catch((err: any) => {
+    NotifyQueueUsersService(ticket).catch((err: unknown) => {
       logger.error(`Erro ao notificar usuários do setor: ${err}`);
     });
   }

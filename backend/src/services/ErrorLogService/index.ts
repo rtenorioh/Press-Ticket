@@ -1,5 +1,5 @@
 import ErrorLog from "../../models/ErrorLog";
-import { Op } from "sequelize";
+import { Op, Order, WhereOptions } from "sequelize";
 
 interface ErrorLogData {
   source: string;
@@ -39,11 +39,11 @@ class ErrorLogService {
     } = {},
     limit = 5,
     offset = 0,
-    order: any = [["id", "DESC"]]
+    order: Order = [["id", "DESC"]]
   ): Promise<{ rows: ErrorLog[]; count: number }> {
     const { source, startDate, endDate, severity } = searchParams;
 
-    const where: any = {};
+    const where: Record<PropertyKey, unknown> = {};
 
     if (source) {
       where.source = source;
@@ -68,7 +68,7 @@ class ErrorLogService {
     }
 
     const { count, rows } = await ErrorLog.findAndCountAll({
-      where,
+      where: where as WhereOptions,
       limit,
       offset,
       order

@@ -1,6 +1,11 @@
-import { WAState } from "whatsapp-web.js";
+import { Client, WAState } from "whatsapp-web.js";
 import { getWbot } from "../../libs/wbot";
 import Whatsapp from "../../models/Whatsapp";
+
+// wwebjs missing type definition for pupPage
+type ClientWithPupPage = Client & {
+  pupPage?: { evaluate<T>(fn: () => T): Promise<T> };
+};
 
 interface HealthCheckData {
   whatsappId: number;
@@ -61,10 +66,13 @@ export const updateLastActivity = (whatsappId: number): void => {
   }
 };
 
-const calculateLatency = async (wbot: any): Promise<number> => {
+const calculateLatency = async (wbot: Client): Promise<number> => {
   try {
     const startTime = Date.now();
-    await wbot.pupPage.evaluate(() => (window as any).Store.AppState.state);
+    // wwebjs pupPage.evaluate runs in browser context — Store is untyped
+    await (wbot as unknown as ClientWithPupPage).pupPage?.evaluate(
+      () => (window as unknown as { Store: { AppState: { state: string } } }).Store.AppState.state
+    );
     return Date.now() - startTime;
   } catch (_error) {
     return -1;

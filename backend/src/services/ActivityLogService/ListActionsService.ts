@@ -2,12 +2,12 @@ import { Sequelize } from "sequelize";
 import ActivityLog from "../../models/ActivityLog";
 
 const ListActionsService = async (): Promise<string[]> => {
-  const actions = await ActivityLog.findAll({
+  const rawActions = (await ActivityLog.findAll({
     attributes: [[Sequelize.fn("DISTINCT", Sequelize.col("action")), "action"]],
     raw: true
-  });
+  })) as unknown as Record<string, unknown>[];
 
-  if (actions.length === 0) {
+  if (rawActions.length === 0) {
     return [
       "login",
       "logout",
@@ -21,7 +21,7 @@ const ListActionsService = async (): Promise<string[]> => {
     ];
   }
 
-  return actions.map((item: any) => item.action);
+  return rawActions.map(item => item.action as string);
 };
 
 export default ListActionsService;

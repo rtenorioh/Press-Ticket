@@ -37,6 +37,6 @@ module.exports = {
   down: (queryInterface: QueryInterface) => {
     return queryInterface.bulkDelete("Settings", {
       key: ["emailUser", "emailPass", "emailHost", "emailPort"]
-    } as any);
+    });
   }
 };

@@ -43,7 +43,7 @@ const ListBlockedContactsService = async ({
   const allContacts = await wbot.getContacts();
   // Filtrar apenas contatos bloqueados com @c.us (excluir @lid)
   const blockedContacts = allContacts.filter(
-    (contact: any) =>
+    (contact: { isBlocked: boolean; id: { _serialized: string } }) =>
       contact.isBlocked && contact.id._serialized.includes("@c.us")
   );
 

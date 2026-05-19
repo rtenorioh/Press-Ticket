@@ -45,7 +45,7 @@ interface SlowQueryInfo {
   rows_examined: number;
   db: string;
   sql_text: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 interface DatabaseInfo {
@@ -112,7 +112,7 @@ export const getDatabaseInfo = async (): Promise<DatabaseInfo> => {
     };
 
     try {
-      const dbSizeResults: any = await sequelize.query(
+      const dbSizeResults: Record<string, unknown> | null = await sequelize.query(
         `
         SELECT 
           table_schema as 'database',
@@ -130,11 +130,11 @@ export const getDatabaseInfo = async (): Promise<DatabaseInfo> => {
       );
 
       if (dbSizeResults) {
-        dbInfo.size.totalBytes = parseInt(dbSizeResults.size_bytes || "0", 10);
+        dbInfo.size.totalBytes = parseInt(String(dbSizeResults.size_bytes ?? "0"), 10);
         dbInfo.size.total = formatBytes(dbInfo.size.totalBytes);
       }
 
-      const tableSizes: any[] = await sequelize.query(
+      const tableSizes: Record<string, unknown>[] = await sequelize.query(
         `
         SELECT 
           table_name as 'name',
@@ -152,13 +152,13 @@ export const getDatabaseInfo = async (): Promise<DatabaseInfo> => {
         }
       );
 
-      const tableInfos: TableInfo[] = tableSizes.map((table: any) => ({
-        name: table.name,
-        rows: parseInt(table.rows || "0", 10),
-        dataSize: formatBytes(parseInt(table.data_bytes || "0", 10)),
-        indexSize: formatBytes(parseInt(table.index_bytes || "0", 10)),
-        totalSize: formatBytes(parseInt(table.total_bytes || "0", 10)),
-        sizeBytes: parseInt(table.total_bytes || "0", 10)
+      const tableInfos: TableInfo[] = tableSizes.map((table: Record<string, unknown>) => ({
+        name: String(table.name ?? ""),
+        rows: parseInt(String(table.rows ?? "0"), 10),
+        dataSize: formatBytes(parseInt(String(table.data_bytes ?? "0"), 10)),
+        indexSize: formatBytes(parseInt(String(table.index_bytes ?? "0"), 10)),
+        totalSize: formatBytes(parseInt(String(table.total_bytes ?? "0"), 10)),
+        sizeBytes: parseInt(String(table.total_bytes ?? "0"), 10)
       }));
 
       dbInfo.tables = tableInfos;
@@ -188,7 +188,7 @@ export const getDatabaseInfo = async (): Promise<DatabaseInfo> => {
           }
         );
 
-        slowQueries = (queryResult as any[]).map(row => ({
+        slowQueries = (queryResult as Record<string, unknown>[]).map(row => ({
           id: Number(row.id || 0),
           start_time: String(row.start_time || ""),
           user_host: String(row.user_host || ""),
@@ -199,15 +199,16 @@ export const getDatabaseInfo = async (): Promise<DatabaseInfo> => {
           db: String(row.db || ""),
           sql_text: String(row.sql_text || "")
         }));
-      } catch (error: any) {
+      } catch (error: unknown) {
+        const err = error as { message?: string };
         logger.warn(
-          `Não foi possível obter consultas lentas: ${error.message}`
+          `Não foi possível obter consultas lentas: ${err.message}`
         );
       }
 
       dbInfo.performance.slowQueries = slowQueries;
 
-      const statusVariables: any[] = await sequelize.query(
+      const statusVariables: Record<string, unknown>[] = await sequelize.query(
         `
         SHOW GLOBAL STATUS WHERE Variable_name IN (
           'Uptime', 
@@ -222,12 +223,12 @@ export const getDatabaseInfo = async (): Promise<DatabaseInfo> => {
         }
       );
 
-      const statusMap = statusVariables.reduce((acc: any, row: any) => {
-        acc[row.Variable_name] = row.Value;
+      const statusMap = statusVariables.reduce((acc: Record<string, unknown>, row: Record<string, unknown>) => {
+        acc[row.Variable_name as string] = row.Value;
         return acc;
       }, {});
 
-      const uptimeSeconds = parseInt(statusMap.Uptime || "0", 10);
+      const uptimeSeconds = parseInt(String(statusMap.Uptime ?? "0"), 10);
       const days = Math.floor(uptimeSeconds / 86400);
       const hours = Math.floor((uptimeSeconds % 86400) / 3600);
       const minutes = Math.floor((uptimeSeconds % 3600) / 60);
@@ -235,22 +236,10 @@ export const getDatabaseInfo = async (): Promise<DatabaseInfo> => {
 
       dbInfo.performance.uptime = `${days}d ${hours}h ${minutes}m ${seconds}s`;
       dbInfo.performance.uptimeSeconds = uptimeSeconds;
-      dbInfo.performance.connectionCount = parseInt(
-        statusMap.Threads_connected || "0",
-        10
-      );
-      dbInfo.performance.totalConnections = parseInt(
-        statusMap.Connections || "0",
-        10
-      );
-      dbInfo.performance.totalQueries = parseInt(
-        statusMap.Questions || "0",
-        10
-      );
-      dbInfo.performance.slowQueryCount = parseInt(
-        statusMap.Slow_queries || "0",
-        10
-      );
+      dbInfo.performance.connectionCount = parseInt(String(statusMap.Threads_connected ?? "0"), 10);
+      dbInfo.performance.totalConnections = parseInt(String(statusMap.Connections ?? "0"), 10);
+      dbInfo.performance.totalQueries = parseInt(String(statusMap.Questions ?? "0"), 10);
+      dbInfo.performance.slowQueryCount = parseInt(String(statusMap.Slow_queries ?? "0"), 10);
 
       const processlist: ProcessInfo[] = await sequelize.query(
         `
@@ -281,7 +270,8 @@ export const getDatabaseInfo = async (): Promise<DatabaseInfo> => {
     }
 
     return dbInfo;
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const err = error as { message?: string };
     logger.error(`Erro ao conectar com o banco de dados: ${error}`);
     return {
       name: dbConfig.database,
@@ -301,7 +291,7 @@ export const getDatabaseInfo = async (): Promise<DatabaseInfo> => {
         uptime: "0",
         uptimeSeconds: 0
       },
-      error: `Não foi possível conectar ao banco de dados: ${error.message}`
+      error: `Não foi possível conectar ao banco de dados: ${err.message}`
     };
   }
 };

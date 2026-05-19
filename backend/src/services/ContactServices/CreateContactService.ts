@@ -1,10 +1,15 @@
+import { InferCreationAttributes } from "sequelize";
 import AppError from "../../errors/AppError";
 import Contact from "../../models/Contact";
+import ContactCustomField from "../../models/ContactCustomField";
 
 interface ExtraInfo {
   name: string;
   value: string;
 }
+
+// Extends Contact creation attrs to include nested extraInfo for Contact.create({ include })
+type ContactCreateInput = InferCreationAttributes<Contact> & { extraInfo?: ExtraInfo[] };
 
 interface Request {
   name: string;
@@ -56,7 +61,7 @@ const CreateContactService = async ({
     throw new AppError("ERR_DUPLICATED_CONTACT");
   }
 
-  const contact = await (Contact.create as any)(
+  const contact = await Contact.create(
     {
       name,
       number,
@@ -77,9 +82,9 @@ const CreateContactService = async ({
       city,
       state,
       cpf
-    },
+    } as unknown as ContactCreateInput,
     {
-      include: ["extraInfo"]
+      include: [{ model: ContactCustomField, as: "extraInfo" }]
     }
   );
 

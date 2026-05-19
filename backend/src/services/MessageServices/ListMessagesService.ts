@@ -75,9 +75,10 @@ const ListMessagesService = async ({
       const sendersMap: Record<string, Record<string, string[]>> = {};
 
       for (const r of allReacts) {
-        const mid = (r as any).messageId as string;
-        const emoji = (r as any).emoji as string;
-        const senderId = (r as any).senderId as string;
+        const rPlain = r.get({ plain: true }) as Record<string, unknown>;
+        const mid = rPlain.messageId as string;
+        const emoji = rPlain.emoji as string;
+        const senderId = rPlain.senderId as string;
         if (!countsMap[mid]) countsMap[mid] = {};
         if (!sendersMap[mid]) sendersMap[mid] = {};
         if (!countsMap[mid][emoji]) countsMap[mid][emoji] = 0;
@@ -90,8 +91,8 @@ const ListMessagesService = async ({
         const mid = m.id;
         const counts = countsMap[mid] || {};
         const senders = sendersMap[mid] || {};
-        (m as any).setDataValue("reactions", counts);
-        (m as any).setDataValue("reactionSenders", senders);
+        (m as unknown as Record<string, unknown>).reactions = counts;
+        (m as unknown as Record<string, unknown>).reactionSenders = senders;
       }
     }
   } catch (_err) {}

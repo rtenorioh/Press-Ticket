@@ -79,11 +79,12 @@ export const getBlockStatus = async (
 
   try {
     const wContact = await wbot.getContactById(numberId._serialized);
+    const wContactExt = wContact as unknown as { isBlocked: boolean };
     return res
       .status(200)
-      .json({ isBlocked: Boolean((wContact as any).isBlocked) });
-  } catch (err) {
-    logger.warn(`Erro ao obter contato do WhatsApp: ${err.message || err}`);
+      .json({ isBlocked: Boolean(wContactExt.isBlocked) });
+  } catch (err: unknown) {
+    logger.warn(`Erro ao obter contato do WhatsApp: ${err instanceof Error ? err.message : err}`);
     return res.status(200).json({ isBlocked: false });
   }
 };
@@ -130,9 +131,10 @@ export const blockContact = async (
   let result;
   try {
     const wContact = await wbot.getContactById(numberId._serialized);
-    result = await (wContact as any).block();
-  } catch (err) {
-    logger.warn(`Erro ao bloquear contato: ${err.message || err}`);
+    const wContactExt = wContact as unknown as { block(): Promise<boolean> };
+    result = await wContactExt.block();
+  } catch (err: unknown) {
+    logger.warn(`Erro ao bloquear contato: ${err instanceof Error ? err.message : err}`);
     return res
       .status(500)
       .json({ error: "Erro ao bloquear contato no WhatsApp" });
@@ -195,9 +197,10 @@ export const unblockContact = async (
   let result;
   try {
     const wContact = await wbot.getContactById(numberId._serialized);
-    result = await (wContact as any).unblock();
-  } catch (err) {
-    logger.warn(`Erro ao desbloquear contato: ${err.message || err}`);
+    const wContactExt = wContact as unknown as { unblock(): Promise<boolean> };
+    result = await wContactExt.unblock();
+  } catch (err: unknown) {
+    logger.warn(`Erro ao desbloquear contato: ${err instanceof Error ? err.message : err}`);
     return res
       .status(500)
       .json({ error: "Erro ao desbloquear contato no WhatsApp" });
@@ -288,11 +291,12 @@ export const getContact = async (
     });
 
     return res.status(200).json(contact);
-  } catch (error) {
-    if (error.message === "CONTACT_NOT_FIND") {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Erro interno";
+    if (message === "CONTACT_NOT_FIND") {
       return res.status(404).json({ error: "Contato não encontrado" });
     }
-    return res.status(500).json({ error: error.message });
+    return res.status(500).json({ error: message });
   }
 };
 
@@ -309,8 +313,8 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
 
   try {
     await schema.validate(newContact);
-  } catch (err) {
-    throw new AppError(err.message);
+  } catch (err: unknown) {
+    throw new AppError(err instanceof Error ? err.message : "Validation error");
   }
 
   const isApiRequest = req.originalUrl.includes("/v1/");
@@ -325,8 +329,8 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
       validNumber = checked.number;
       validNumberLid = checked.numberLid;
       profilePicUrl = await GetProfilePicUrl(validNumber);
-    } catch (err) {
-      throw new AppError(err.message);
+    } catch (err: unknown) {
+      throw new AppError(err instanceof Error ? err.message : "Erro interno");
     }
   } else {
     try {
@@ -423,8 +427,8 @@ export const update = async (
 
   try {
     await schema.validate(contactData);
-  } catch (err) {
-    throw new AppError(err.message);
+  } catch (err: unknown) {
+    throw new AppError(err instanceof Error ? err.message : "Validation error");
   }
 
   if (
@@ -533,8 +537,8 @@ export const updateTags = async (
 
   try {
     await schema.validate({ tags });
-  } catch (err) {
-    throw new AppError(err.message);
+  } catch (err: unknown) {
+    throw new AppError(err instanceof Error ? err.message : "Validation error");
   }
 
   const contact = await SyncTagsService({
@@ -709,7 +713,7 @@ export const getAbout = async (
     });
 
     return res.status(200).json(about);
-  } catch (err: any) {
+  } catch (err: unknown) {
     if (err instanceof AppError) {
       return res.status(err.statusCode).json({ error: err.message });
     }
@@ -732,7 +736,7 @@ export const getCommonGroups = async (
     });
 
     return res.status(200).json(commonGroups);
-  } catch (err: any) {
+  } catch (err: unknown) {
     if (err instanceof AppError) {
       return res.status(err.statusCode).json({ error: err.message });
     }
@@ -753,7 +757,7 @@ export const listBlockedContacts = async (
     });
 
     return res.status(200).json(blockedContacts);
-  } catch (err: any) {
+  } catch (err: unknown) {
     if (err instanceof AppError) {
       return res.status(err.statusCode).json({ error: err.message });
     }
@@ -783,7 +787,7 @@ export const refreshGroupProfilePic = async (
       success: true,
       profilePicUrl
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
     if (err instanceof AppError) {
       return res.status(err.statusCode).json({ error: err.message });
     }

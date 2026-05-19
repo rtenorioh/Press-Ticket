@@ -1,4 +1,4 @@
-import { Op, fn, col } from "sequelize";
+import { Op, fn, col, WhereOptions } from "sequelize";
 import User from "../../models/User";
 import Ticket from "../../models/Ticket";
 import Message from "../../models/Message";
@@ -53,7 +53,7 @@ const UserMonitorService = async (
   userId?: number
 ): Promise<UserMonitorResponse> => {
   try {
-    const whereCondition: any = {
+    const whereCondition: WhereOptions = {
       profile: { [Op.ne]: "masteradmin" }
     };
 
@@ -93,12 +93,12 @@ const UserMonitorService = async (
 
     const userStats: UserStats[] = await Promise.all(
       users.map(async user => {
-        const ticketStats = await Ticket.findAll({
+        const ticketStats = (await Ticket.findAll({
           where: { userId: user.id },
           attributes: ["status", [fn("COUNT", col("id")), "count"]],
           group: ["status"],
           raw: true
-        });
+        })) as unknown as Record<string, unknown>[];
 
         const ticketStatusCounts = {
           open: 0,
@@ -106,10 +106,10 @@ const UserMonitorService = async (
           closed: 0
         };
 
-        ticketStats.forEach((stat: any) => {
+        ticketStats.forEach(stat => {
           const status = stat.status as "open" | "pending" | "closed";
           if (status in ticketStatusCounts) {
-            ticketStatusCounts[status] = parseInt(stat.count);
+            ticketStatusCounts[status] = parseInt(stat.count as string);
           }
         });
 
@@ -159,12 +159,12 @@ const UserMonitorService = async (
         let handleCount = 0;
         let firstResponseCount = 0;
 
-        userTickets.forEach((ticket: any) => {
-          const messages = ticket.messages || [];
+        userTickets.forEach(ticket => {
+          const messages = (ticket as unknown as { messages?: { fromMe: boolean; createdAt: Date }[] }).messages || [];
 
           if (messages.length > 0) {
-            const firstCustomerMessage = messages.find((m: any) => !m.fromMe);
-            const firstAgentMessage = messages.find((m: any) => m.fromMe);
+            const firstCustomerMessage = messages.find(m => !m.fromMe);
+            const firstAgentMessage = messages.find(m => m.fromMe);
 
             if (firstCustomerMessage && firstAgentMessage) {
               const responseTime =
@@ -176,7 +176,7 @@ const UserMonitorService = async (
               }
             }
 
-            const agentMessages = messages.filter((m: any) => m.fromMe);
+            const agentMessages = messages.filter(m => m.fromMe);
             if (agentMessages.length > 1) {
               for (let i = 1; i < agentMessages.length; i++) {
                 const timeDiff =

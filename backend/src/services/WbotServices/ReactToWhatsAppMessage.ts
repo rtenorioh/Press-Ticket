@@ -29,7 +29,7 @@ const ReactToWhatsAppMessage = async ({
   if (!ticket.contact) {
     const contact = await Contact.findByPk(ticket.contactId);
     if (contact) {
-      (ticket as any).contact = contact;
+      (ticket as unknown as { contact: typeof contact }).contact = contact;
     }
   }
 
@@ -41,7 +41,7 @@ const ReactToWhatsAppMessage = async ({
 
   const serializedId = (() => {
     try {
-      const id = SerializeWbotMsgId(ticket as any, message as any);
+      const id = SerializeWbotMsgId(ticket, message);
       return id;
     } catch (_err) {
       return null;
@@ -60,8 +60,10 @@ const ReactToWhatsAppMessage = async ({
 
   if (!ticket.isGroup) {
     try {
+      // wwebjs missing type definition for getMessageById
+      const wbotExt = wbot as unknown as { getMessageById?: (id: string) => Promise<{ react: (e: string) => Promise<void> } | null> };
       if (serializedId) {
-        const bySerialized = await (wbot as any).getMessageById?.(serializedId);
+        const bySerialized = await wbotExt.getMessageById?.(serializedId);
         if (bySerialized && typeof bySerialized.react === "function") {
           await bySerialized.react(emoji);
           return { ticketId: message.ticketId };
@@ -69,14 +71,14 @@ const ReactToWhatsAppMessage = async ({
       }
 
       if (altSerializedId) {
-        const byAlt = await (wbot as any).getMessageById?.(altSerializedId);
+        const byAlt = await wbotExt.getMessageById?.(altSerializedId);
         if (byAlt && typeof byAlt.react === "function") {
           await byAlt.react(emoji);
           return { ticketId: message.ticketId };
         }
       }
 
-      const msgInstance = await (wbot as any).getMessageById?.(messageId);
+      const msgInstance = await wbotExt.getMessageById?.(messageId);
       if (msgInstance && typeof msgInstance.react === "function") {
         await msgInstance.react(emoji);
         return { ticketId: message.ticketId };
@@ -93,8 +95,10 @@ const ReactToWhatsAppMessage = async ({
     throw new Error("WhatsApp page not ready");
   }
 
-  let result: any = null;
+  let result: { success: boolean; logs?: string[] } | null = null;
   try {
+    /* eslint-disable @typescript-eslint/no-explicit-any */
+    // wwebjs pupPage.evaluate runs in browser context — Store/DOM types require any
     result = await wbot.pupPage.evaluate(
       (
         msgId: string,
@@ -240,6 +244,7 @@ const ReactToWhatsAppMessage = async ({
       emoji,
       remoteJid
     );
+    /* eslint-enable @typescript-eslint/no-explicit-any */
   } catch (evalError) {
     logger.error(`Erro no pupPage.evaluate para reação: ${evalError}`);
     throw new Error("Failed to evaluate Store reaction");

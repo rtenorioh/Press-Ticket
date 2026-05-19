@@ -35,8 +35,8 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
 
   try {
     await schema.validate(req.body);
-  } catch (err) {
-    throw new AppError(err.message);
+  } catch (err: unknown) {
+    throw new AppError(err instanceof Error ? err.message : "Validation error");
   }
 
   const {
@@ -80,14 +80,20 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
   const pageNum = parseInt(pageNumber as string, 10);
   const offset = (pageNum - 1) * limitNum;
 
-  const searchParams: any = {};
+  interface ErrorLogFilter {
+    source?: string;
+    severity?: string;
+    startDate?: Date;
+    endDate?: Date;
+  }
+  const searchParams: ErrorLogFilter = {};
 
   if (source) {
-    searchParams.source = source;
+    searchParams.source = source as string;
   }
 
   if (severity) {
-    searchParams.severity = severity;
+    searchParams.severity = severity as string;
   }
 
   if (startDate) {

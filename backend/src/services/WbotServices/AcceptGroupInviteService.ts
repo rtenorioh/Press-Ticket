@@ -1,6 +1,25 @@
+import { Client } from "whatsapp-web.js";
 import { getWbot } from "../../libs/wbot";
 import AppError from "../../errors/AppError";
 import { logger } from "../../utils/logger";
+
+// wwebjs missing type definition for getInviteInfo return type
+interface InviteInfoRaw {
+  id?: { _serialized?: string } | string;
+  inviteCodeExpiration?: string;
+  subject?: string;
+  name?: string;
+  descId?: string;
+  desc?: string;
+  size?: number;
+  creation?: number;
+  owner?: { _serialized?: string } | string;
+  subjectTime?: number;
+}
+
+interface ClientWithInviteInfo extends Client {
+  getInviteInfo(code: string): Promise<InviteInfoRaw>;
+}
 
 interface AcceptInviteData {
   whatsappId: number;
@@ -57,11 +76,16 @@ const GetGroupInviteInfo = async ({
   const cleanCode = inviteCode.replace("https://chat.whatsapp.com/", "").trim();
 
   try {
-    const wbot = getWbot(whatsappId);
-    const info: any = await wbot.getInviteInfo(cleanCode);
+    const wbot = getWbot(whatsappId) as unknown as ClientWithInviteInfo;
+    const info = await wbot.getInviteInfo(cleanCode);
+
+    const rawId = info.id;
+    const resolvedId = (typeof rawId === "object" ? rawId?._serialized : rawId) || "";
+    const rawOwner = info.owner;
+    const resolvedOwner = (typeof rawOwner === "object" ? rawOwner?._serialized : rawOwner) || undefined;
 
     return {
-      groupId: info.id?._serialized || info.id,
+      groupId: resolvedId,
       inviteCode: cleanCode,
       inviteCodeExpiration: info.inviteCodeExpiration,
       groupName: info.subject || info.name || "",
@@ -69,7 +93,7 @@ const GetGroupInviteInfo = async ({
       description: info.desc || "",
       size: info.size || 0,
       creation: info.creation || 0,
-      owner: info.owner?._serialized || info.owner,
+      owner: resolvedOwner,
       subject: info.subject || "",
       subjectTime: info.subjectTime
     };

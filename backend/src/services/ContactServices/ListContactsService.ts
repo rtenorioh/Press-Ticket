@@ -1,4 +1,4 @@
-import { Includeable, Op, Sequelize } from "sequelize";
+import { Includeable, Op, Sequelize, WhereOptions } from "sequelize";
 import Contact from "../../models/Contact";
 import Tag from "../../models/Tag";
 
@@ -23,7 +23,8 @@ const ListContactsService = async ({
   isGroup,
   status
 }: Request): Promise<Response> => {
-  const whereCondition: any = {
+  type DynWhere = Record<PropertyKey, unknown>;
+  const whereCondition: DynWhere = {
     [Op.or]: [
       {
         name: Sequelize.where(
@@ -43,16 +44,16 @@ const ListContactsService = async ({
         )
       }
     ],
-    [Op.and]: []
+    [Op.and]: [] as unknown[]
   };
 
   if (typeof isGroup !== "undefined" && isGroup !== null && isGroup !== "") {
     if (isGroup === "true") {
-      whereCondition[Op.and].push({
+      (whereCondition[Op.and] as unknown[]).push({
         [Op.or]: [{ isGroup: true }, { number: { [Op.like]: `%@g.us` } }]
       });
     } else if (isGroup === "false") {
-      whereCondition[Op.and].push({
+      (whereCondition[Op.and] as unknown[]).push({
         [Op.and]: [
           { [Op.or]: [{ isGroup: false }, { isGroup: null }] },
           { number: { [Op.notLike]: `%@g.us` } }
@@ -62,7 +63,7 @@ const ListContactsService = async ({
   }
 
   if (status && status.trim() !== "") {
-    whereCondition[Op.and].push({
+    (whereCondition[Op.and] as unknown[]).push({
       status: status
     });
   }
@@ -92,7 +93,7 @@ const ListContactsService = async ({
   const offset = limit * (+pageNumber - 1);
 
   const { count, rows: contacts } = await Contact.findAndCountAll({
-    where: whereCondition,
+    where: whereCondition as WhereOptions,
     include: includeCondition,
     limit,
     offset,

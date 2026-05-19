@@ -1,4 +1,5 @@
 import { Op } from "sequelize";
+import { Client } from "whatsapp-web.js";
 import { getWbot } from "../../libs/wbot";
 import Contact from "../../models/Contact";
 import Ticket from "../../models/Ticket";
@@ -6,6 +7,21 @@ import TicketLabel from "../../models/TicketLabel";
 import WhatsappLabel from "../../models/WhatsappLabel";
 import { logger } from "../../utils/logger";
 import { getIO } from "../../libs/socket";
+
+// wwebjs missing type definition for getChatsByLabelId and pupPage
+type WbotWithLabels = Client & {
+  getChatsByLabelId(labelId: string): Promise<Array<{ id?: { _serialized?: string }; name?: string; isGroup?: boolean; unreadCount?: number; timestamp?: number }>>;
+  pupPage?: {
+    evaluate<T>(fn: () => T): Promise<T>;
+  };
+};
+
+interface RawLabelModel {
+  id: string | number;
+  name: string;
+  type?: number;
+  hexColor?: string | null;
+}
 
 const syncInProgress = new Set<number>();
 
@@ -20,10 +36,12 @@ interface RawLabel {
  * Filtra tipos de sistema (1=Não lidas, 2=Grupos, 3=Favoritos).
  * Nota: "Listas personalizadas" do WhatsApp não são acessíveis via whatsapp-web.js.
  */
-const fetchBusinessLabels = async (wbot: any): Promise<RawLabel[]> => {
+const fetchBusinessLabels = async (wbot: WbotWithLabels): Promise<RawLabel[]> => {
   try {
     // Buscar labels diretamente do store para ter acesso ao campo 'type'
-    const rawLabels = await wbot.pupPage.evaluate(() => {
+    /* eslint-disable @typescript-eslint/no-explicit-any */
+    // wwebjs pupPage.evaluate runs in browser context — Store/DOM types require any
+    const rawLabels = await wbot.pupPage?.evaluate(() => {
       const stores = (window as any).require("WAWebCollections");
       const models = stores.Label.getModelsArray();
       return models.map((m: any) => {
@@ -36,20 +54,24 @@ const fetchBusinessLabels = async (wbot: any): Promise<RawLabel[]> => {
         };
       });
     });
+    /* eslint-enable @typescript-eslint/no-explicit-any */
+
+    if (!rawLabels) return [];
 
     // Tipos de sistema: 1=Não lidas, 2=Grupos, 3=Favoritos
     const systemTypes = [1, 2, 3];
-    const businessLabels: RawLabel[] = rawLabels
-      .filter((l: any) => !systemTypes.includes(l.type))
-      .map((l: any) => ({
-        id: l.id,
+    const businessLabels: RawLabel[] = (rawLabels as RawLabelModel[])
+      .filter(l => !systemTypes.includes(l.type ?? -1))
+      .map(l => ({
+        id: String(l.id),
         name: l.name,
         hexColor: l.hexColor || undefined
       }));
 
     return businessLabels;
-  } catch (err: any) {
-    logger.error(`[SYNC_LABELS] Erro ao buscar labels: ${err.message}`);
+  } catch (err: unknown) {
+    const errMsg = err instanceof Error ? err.message : String(err);
+    logger.error(`[SYNC_LABELS] Erro ao buscar labels: ${errMsg}`);
     return [];
   }
 };
@@ -66,7 +88,7 @@ const SyncLabelsService = async (whatsappId: number): Promise<void> => {
   syncInProgress.add(whatsappId);
 
   try {
-    const wbot = getWbot(whatsappId);
+    const wbot = getWbot(whatsappId) as unknown as WbotWithLabels;
 
     // 1. Buscar labels do WhatsApp Business
     const waLabels = await fetchBusinessLabels(wbot);
@@ -135,7 +157,7 @@ const SyncLabelsService = async (whatsappId: number): Promise<void> => {
     // 3. Para cada label, buscar chats associados e vincular a tickets
     for (const label of savedLabels) {
       try {
-        const chats: any[] = await wbot.getChatsByLabelId(label.labelId);
+        const chats = await wbot.getChatsByLabelId(label.labelId);
 
         const chatNumbers = chats
           .map(chat => {
@@ -193,9 +215,10 @@ const SyncLabelsService = async (whatsappId: number): Promise<void> => {
         logger.info(
           `[SYNC_LABELS] Label "${label.name}": ${chats.length} chats → ${ticketIds.length} tickets`
         );
-      } catch (labelErr: any) {
+      } catch (labelErr: unknown) {
+        const labelErrMsg = labelErr instanceof Error ? labelErr.message : String(labelErr);
         logger.warn(
-          `[SYNC_LABELS] Erro ao sincronizar label "${label.name}": ${labelErr.message}`
+          `[SYNC_LABELS] Erro ao sincronizar label "${label.name}": ${labelErrMsg}`
         );
       }
     }
@@ -222,9 +245,10 @@ const SyncLabelsService = async (whatsappId: number): Promise<void> => {
     logger.info(
       `[SYNC_LABELS] Sincronização completa para WhatsApp ${whatsappId}`
     );
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const errMsg = err instanceof Error ? err.message : String(err);
     logger.error(
-      `[SYNC_LABELS] Erro geral ao sincronizar labels: ${err.message}`
+      `[SYNC_LABELS] Erro geral ao sincronizar labels: ${errMsg}`
     );
   } finally {
     syncInProgress.delete(whatsappId);

@@ -29,8 +29,8 @@ export const StartWhatsAppSession = async (
       wbotMonitor(wbot, whatsapp);
       GroupEventsService.setupGroupListeners(wbot, whatsapp.id);
       return;
-    } catch (err: any) {
-      const errMsg = err?.message || String(err);
+    } catch (err: unknown) {
+      const errMsg = err instanceof Error ? err.message : String(err);
       if (
         errMsg.includes("Execution context was destroyed") ||
         errMsg.includes("navigation")

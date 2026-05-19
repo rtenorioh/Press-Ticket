@@ -54,9 +54,10 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
       hasMore:
         count > (offset ? Number(offset) : 0) + (limit ? Number(limit) : 10)
     });
-  } catch (err: any) {
-    logger.error(`Erro ao listar logs de atividade: ${err.message}`);
-    return res.status(500).json({ error: err.message });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Erro interno";
+    logger.error(`Erro ao listar logs de atividade: ${message}`);
+    return res.status(500).json({ error: message });
   }
 };
 
@@ -82,9 +83,10 @@ export const show = async (req: Request, res: Response): Promise<Response> => {
     }
 
     return res.status(200).json(details);
-  } catch (err: any) {
-    logger.error(`Erro ao buscar detalhes do log: ${err.message}`);
-    return res.status(500).json({ error: err.message });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Erro interno";
+    logger.error(`Erro ao buscar detalhes do log: ${message}`);
+    return res.status(500).json({ error: message });
   }
 };
 
@@ -96,9 +98,10 @@ export const actions = async (
     const actionTypes = Object.values(ActivityActions);
 
     return res.status(200).json(actionTypes);
-  } catch (err: any) {
-    logger.error(`Erro ao listar tipos de ações: ${err.message}`);
-    return res.status(500).json({ error: err.message });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Erro interno";
+    logger.error(`Erro ao listar tipos de ações: ${message}`);
+    return res.status(500).json({ error: message });
   }
 };
 
@@ -110,9 +113,10 @@ export const entities = async (
     const entityTypes = Object.values(EntityTypes);
 
     return res.status(200).json(entityTypes);
-  } catch (err: any) {
-    logger.error(`Erro ao listar tipos de entidades: ${err.message}`);
-    return res.status(500).json({ error: err.message });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Erro interno";
+    logger.error(`Erro ao listar tipos de entidades: ${message}`);
+    return res.status(500).json({ error: message });
   }
 };
 
@@ -152,8 +156,9 @@ export const stats = async (req: Request, res: Response): Promise<Response> => {
       topAction,
       todayLogs
     });
-  } catch (err: any) {
-    logger.error(`Erro ao buscar estatísticas: ${err.message}`);
-    return res.status(500).json({ error: err.message });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Erro interno";
+    logger.error(`Erro ao buscar estatísticas: ${message}`);
+    return res.status(500).json({ error: message });
   }
 };

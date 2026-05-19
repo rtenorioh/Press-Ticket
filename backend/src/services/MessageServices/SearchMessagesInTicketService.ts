@@ -71,7 +71,7 @@ const SearchMessagesInTicketService = async ({
       body: msg.body,
       fromMe: msg.fromMe,
       createdAt: msg.createdAt,
-      contactName: (msg as any).contact?.name || null
+      contactName: (msg.get({ plain: true }) as Record<string, unknown> & { contact?: { name?: string } }).contact?.name || null
     })),
     totalCount: count,
     hasMore: count > offset + messages.length

@@ -1,7 +1,7 @@
 import GroupEvent from "../models/GroupEvent";
 import { logger } from "../utils/logger";
 import { getIO } from "../libs/socket";
-import { Sequelize } from "sequelize";
+import { Sequelize, WhereOptions } from "sequelize";
 
 interface CreateGroupEventData {
   whatsappId: number;
@@ -15,7 +15,7 @@ interface CreateGroupEventData {
     | "membership_request";
   participants?: string[];
   action?: string;
-  metadata?: any;
+  metadata?: Record<string, unknown>;
 }
 
 interface ListGroupEventsParams {
@@ -29,14 +29,12 @@ interface ListGroupEventsParams {
 class GroupEventService {
   async createEvent(data: CreateGroupEventData): Promise<GroupEvent> {
     try {
-      const event = await (GroupEvent.create as any)({
+      const event = await GroupEvent.create({
         whatsappId: data.whatsappId,
         groupId: data.groupId,
         groupName: data.groupName,
         eventType: data.eventType,
-        participants: data.participants || [],
-        action: data.action,
-        metadata: data.metadata
+        metadata: { ...(data.metadata || {}), participants: data.participants || [], action: data.action }
       });
 
       const io = getIO();
@@ -57,7 +55,7 @@ class GroupEventService {
   ): Promise<{ events: GroupEvent[]; count: number }> {
     const { whatsappId, groupId, eventType, limit = 50, offset = 0 } = params;
 
-    const where: any = {};
+    const where: WhereOptions = {};
 
     if (whatsappId) {
       where.whatsappId = whatsappId;
@@ -121,7 +119,7 @@ class GroupEventService {
     return deleted;
   }
 
-  async getStatsByGroup(groupId: string): Promise<any> {
+  async getStatsByGroup(groupId: string): Promise<GroupEvent[]> {
     const events = await GroupEvent.findAll({
       where: { groupId },
       attributes: [
@@ -134,7 +132,7 @@ class GroupEventService {
     return events;
   }
 
-  async getStatsByWhatsapp(whatsappId: number): Promise<any> {
+  async getStatsByWhatsapp(whatsappId: number): Promise<GroupEvent[]> {
     const events = await GroupEvent.findAll({
       where: { whatsappId },
       attributes: [

@@ -1,7 +1,7 @@
 import pino from "pino";
 
 interface LogMetadata {
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 interface EnhancedLogger {

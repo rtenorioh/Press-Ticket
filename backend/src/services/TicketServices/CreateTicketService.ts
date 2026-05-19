@@ -65,7 +65,7 @@ const CreateTicketService = async ({
   }
 
   if (queueId && ticket.whatsappId) {
-    NotifyQueueUsersService(ticket).catch((err: any) => {
+    NotifyQueueUsersService(ticket).catch((err: unknown) => {
       logger.error(`Erro ao notificar usuários do setor: ${err}`);
     });
   }

@@ -23,9 +23,10 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
     }));
 
     return res.status(200).json(result);
-  } catch (err: any) {
-    logger.error(`[LABELS_CONTROLLER] Erro ao listar labels: ${err.message}`);
-    return res.status(500).json({ error: err.message });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Erro interno";
+    logger.error(`[LABELS_CONTROLLER] Erro ao listar labels: ${message}`);
+    return res.status(500).json({ error: message });
   }
 };
 
@@ -37,10 +38,9 @@ export const sync = async (req: Request, res: Response): Promise<Response> => {
     return res
       .status(200)
       .json({ message: "Labels sincronizadas com sucesso" });
-  } catch (err: any) {
-    logger.error(
-      `[LABELS_CONTROLLER] Erro ao sincronizar labels: ${err.message}`
-    );
-    return res.status(500).json({ error: err.message });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Erro interno";
+    logger.error(`[LABELS_CONTROLLER] Erro ao sincronizar labels: ${message}`);
+    return res.status(500).json({ error: message });
   }
 };

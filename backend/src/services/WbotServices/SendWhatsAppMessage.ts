@@ -1,4 +1,4 @@
-import { Message as WbotMessage } from "whatsapp-web.js";
+import { Client, Message as WbotMessage } from "whatsapp-web.js";
 import AppError from "../../errors/AppError";
 import GetTicketWbot from "../../helpers/GetTicketWbot";
 import GetWbotMessage from "../../helpers/GetWbotMessage";
@@ -9,11 +9,30 @@ import Ticket from "../../models/Ticket";
 import formatBody from "../../helpers/Mustache";
 import { logger } from "../../utils/logger";
 
+// wwebjs missing type definition for numberLid
+interface ContactWithLid {
+  numberLid?: string | null;
+  number?: string;
+}
+
+// wwebjs missing type definition for pupPage
+type ClientWithPupPage = Client & {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  pupPage?: { evaluate(fn: (...args: any[]) => any, ...args: unknown[]): Promise<unknown> };
+};
+
+// Options passed to wbot.sendMessage — wwebjs types are incomplete here
+interface SendMessageOptions {
+  linkPreview?: boolean;
+  quotedMessageId?: string;
+  mentions?: string[];
+}
+
 async function findMessageDirectlyFromWA(
-  wbot: any,
+  wbot: Client,
   ticket: Ticket,
   quotedMsgId: string
-): Promise<any | null> {
+): Promise<WbotMessage | null> {
   try {
     const groupId = ticket.contact.number!.includes("@")
       ? ticket.contact.number!
@@ -22,7 +41,7 @@ async function findMessageDirectlyFromWA(
 
     const messages = await chat.fetchMessages({ limit: 500 });
 
-    const foundMsg = messages.find((m: any) => m.id.id === quotedMsgId);
+    const foundMsg = messages.find(m => m.id.id === quotedMsgId);
 
     if (foundMsg) {
       return foundMsg;
@@ -71,14 +90,14 @@ const SendWhatsAppMessage = async ({
           await chat.sendStateTyping();
           await new Promise(resolve => setTimeout(resolve, 400));
         } catch (_e) {}
-        const replyOptions: any = {};
+        const replyOptions: SendMessageOptions = {};
         if (mentions && mentions.length > 0) {
           replyOptions.mentions = mentions;
         }
         const sentMessage = await originalMessage.reply(
           formatBody(body, ticket),
           undefined,
-          replyOptions
+          replyOptions as Record<string, unknown>
         );
 
         await ticket.update({ lastMessage: body });
@@ -94,8 +113,8 @@ const SendWhatsAppMessage = async ({
             await new Promise(resolve => setTimeout(resolve, 400));
           } catch (_e) {}
           const payload = formatBody(body, ticket);
-          let sentMessage: any;
-          const sendOpts: any = {
+          let sentMessage: WbotMessage;
+          const sendOpts: SendMessageOptions = {
             linkPreview: false,
             quotedMessageId: originalMessage.id._serialized
           };
@@ -103,10 +122,10 @@ const SendWhatsAppMessage = async ({
             sendOpts.mentions = mentions;
           }
           try {
-            sentMessage = await wbot.sendMessage(groupId, payload, sendOpts);
+            sentMessage = await wbot.sendMessage(groupId, payload, sendOpts as Record<string, unknown>);
           } catch (_e1) {
             await new Promise(r => setTimeout(r, 500));
-            sentMessage = await wbot.sendMessage(groupId, payload, sendOpts);
+            sentMessage = await wbot.sendMessage(groupId, payload, sendOpts as Record<string, unknown>);
           }
 
           await ticket.update({ lastMessage: body });
@@ -124,16 +143,16 @@ const SendWhatsAppMessage = async ({
       await new Promise(resolve => setTimeout(resolve, 400));
     } catch (_e) {}
     const payload = formatBody(body, ticket);
-    let sentMessage: any;
-    const sendOpts: any = { linkPreview: false };
+    let sentMessage: WbotMessage;
+    const sendOpts: SendMessageOptions = { linkPreview: false };
     if (mentions && mentions.length > 0) {
       sendOpts.mentions = mentions;
     }
     try {
-      sentMessage = await wbot.sendMessage(groupId, payload, sendOpts);
+      sentMessage = await wbot.sendMessage(groupId, payload, sendOpts as Record<string, unknown>);
     } catch (_e1) {
       await new Promise(r => setTimeout(r, 500));
-      sentMessage = await wbot.sendMessage(groupId, payload, sendOpts);
+      sentMessage = await wbot.sendMessage(groupId, payload, sendOpts as Record<string, unknown>);
     }
 
     await ticket.update({ lastMessage: body });
@@ -149,16 +168,16 @@ const SendWhatsAppMessage = async ({
         await new Promise(resolve => setTimeout(resolve, 400));
       } catch (_e) {}
       const payload = formatBody(body, ticket);
-      let sentMessage: any;
-      const sendOpts: any = { linkPreview: false };
+      let sentMessage: WbotMessage;
+      const sendOpts: SendMessageOptions = { linkPreview: false };
       if (mentions && mentions.length > 0) {
         sendOpts.mentions = mentions;
       }
       try {
-        sentMessage = await wbot.sendMessage(groupId, payload, sendOpts);
+        sentMessage = await wbot.sendMessage(groupId, payload, sendOpts as Record<string, unknown>);
       } catch (_e1) {
         await new Promise(r => setTimeout(r, 500));
-        sentMessage = await wbot.sendMessage(groupId, payload, sendOpts);
+        sentMessage = await wbot.sendMessage(groupId, payload, sendOpts as Record<string, unknown>);
       }
 
       await ticket.update({ lastMessage: body });
@@ -204,10 +223,7 @@ const SendWhatsAppMessage = async ({
     }
   }
 
-  const sendOptions: {
-    linkPreview: boolean;
-    quotedMessageId?: string;
-  } = {
+  const sendOptions: SendMessageOptions = {
     linkPreview: false
   };
 
@@ -217,7 +233,7 @@ const SendWhatsAppMessage = async ({
 
   try {
     const payload = formatBody(body, ticket);
-    let sentMessage: any;
+    let sentMessage: WbotMessage;
     let lidError = false;
 
     const preFn = new Function(
@@ -238,32 +254,34 @@ const SendWhatsAppMessage = async ({
       ].join("\n")
     );
 
-    const lidBase = (ticket.contact as any).numberLid || ticket.contact.number;
+    const contactWithLid = ticket.contact as unknown as ContactWithLid;
+    const lidBase = contactWithLid.numberLid || ticket.contact.number;
     const lidUserId = `${lidBase}@lid`;
 
     try {
-      await (wbot as any).pupPage.evaluate(preFn, userId, lidUserId);
+      await (wbot as unknown as ClientWithPupPage).pupPage?.evaluate(preFn as (...args: unknown[]) => unknown, userId, lidUserId);
       await new Promise(r => setTimeout(r, 2000));
     } catch (__) {}
 
     try {
-      sentMessage = await wbot.sendMessage(userId, payload, sendOptions);
-    } catch (e: any) {
+      sentMessage = await wbot.sendMessage(userId, payload, sendOptions as Record<string, unknown>);
+    } catch (e: unknown) {
+      const errMsg = e instanceof Error ? e.message : String(e);
       lidError =
-        e?.message?.includes("No LID for user") ||
+        errMsg.includes("No LID for user") ||
         String(e).includes("No LID for user");
       if (!lidError) throw e;
     }
 
     if (lidError) {
-      sentMessage = await wbot.sendMessage(lidUserId, payload, sendOptions);
+      sentMessage = await wbot.sendMessage(lidUserId, payload, sendOptions as Record<string, unknown>);
     }
 
     await ticket.update({ lastMessage: body });
     await ticket.reload();
 
     const messageData = {
-      id: sentMessage.id.id,
+      id: sentMessage!.id.id,
       ticketId: ticket.id,
       contactId: undefined,
       body: body,
@@ -283,7 +301,7 @@ const SendWhatsAppMessage = async ({
       logger.error(`Erro ao salvar mensagem: ${err}`);
     }
 
-    return sentMessage;
+    return sentMessage!;
   } catch (err) {
     logger.error(`Erro ao enviar mensagem: ${err}`);
     throw new AppError("ERR_SENDING_WAPP_MSG");

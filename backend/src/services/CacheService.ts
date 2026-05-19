@@ -13,7 +13,7 @@ class CacheService {
     });
   }
 
-  set(key: string, value: any, ttl?: number): boolean {
+  set(key: string, value: unknown, ttl?: number): boolean {
     try {
       return this.cache.set(key, value, ttl || 600);
     } catch (err) {
@@ -60,7 +60,7 @@ class CacheService {
     return this.cache.getStats();
   }
 
-  setMultiple(items: Array<{ key: string; value: any; ttl?: number }>): void {
+  setMultiple(items: Array<{ key: string; value: unknown; ttl?: number }>): void {
     items.forEach(item => {
       this.set(item.key, item.value, item.ttl);
     });

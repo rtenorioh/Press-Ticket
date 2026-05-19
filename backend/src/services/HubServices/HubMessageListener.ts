@@ -95,22 +95,32 @@ export interface HubConfirmationSentMessage {
   };
 }
 
-const verifySentMessageStatus = (message: HubConfirmationSentMessage) => {
-  const {
-    messageStatus: { code }
-  } = message;
+/**
+ * Loose wrapper used at the function boundary before the payload is narrowed.
+ * Captures runtime-only fields (direction, contents, fromMe) that appear on
+ * incoming webhooks but are not part of the typed sub-interfaces.
+ */
+export interface HubWebhookEnvelope {
+  type: string;
+  direction?: string;
+  contents?: IContent[] | null;
+  fromMe?: boolean;
+  messageId?: string;
+  messageStatus?: {
+    timestamp: string;
+    code: "SENT" | "REJECTED";
+    description: string;
+  };
+  message?: HubInMessage["message"];
+}
 
-  const isMessageSent = code === "SENT";
-
-  if (isMessageSent) {
-    return true;
-  }
-
-  return false;
+const verifySentMessageStatus = (message: HubWebhookEnvelope) => {
+  const code = message.messageStatus?.code;
+  return code === "SENT";
 };
 
 const HubMessageListener = async (
-  message: any | HubInMessage | HubConfirmationSentMessage,
+  message: HubWebhookEnvelope,
   whatsapp: Whatsapp,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   medias: Express.Multer.File[]
@@ -132,24 +142,26 @@ const HubMessageListener = async (
   const isMessageFromMe = message.type === "MESSAGE_STATUS";
 
   if (isMessageFromMe) {
-    const isMessageSent = verifySentMessageStatus(
-      message as HubConfirmationSentMessage
-    );
+    const isMessageSent = verifySentMessageStatus(message);
 
     if (isMessageSent) {
-      UpdateMessageAck(message.messageId);
+      UpdateMessageAck(message.messageId ?? "");
     } else {
       logger.warn(
-        `HubMessageListener: message not sent - ${message.messageStatus.code}: ${message.messageStatus.description}`
+        `HubMessageListener: message not sent - ${message.messageStatus?.code}: ${message.messageStatus?.description}`
       );
     }
 
     return;
   }
 
-  const {
-    message: { id, from, channel, contents, visitor, group, isGroup }
-  } = message as HubInMessage;
+  const innerMessage = message.message;
+  if (!innerMessage) {
+    logger.warn("HubMessageListener: payload de mensagem sem campo 'message'");
+    return;
+  }
+
+  const { id, from, channel, contents, visitor, group, isGroup } = innerMessage;
 
   try {
     const contact = await FindOrCreateContactService({
@@ -281,7 +293,7 @@ const HubMessageListener = async (
         fromMe: false
       });
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error(`HubMessageListener erro: ${error}`);
   }
 };

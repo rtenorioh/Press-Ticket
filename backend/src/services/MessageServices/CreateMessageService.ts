@@ -98,16 +98,16 @@ const CreateMessageService = async ({
       filename: messageData.filename
     });
 
-    const ticketPayload: any = message.ticket
+    const ticketPayload: Record<string, unknown> = message.ticket
       ? message.ticket.toJSON
-        ? message.ticket.toJSON()
+        ? (message.ticket.toJSON() as Record<string, unknown>)
         : { ...message.ticket }
       : {};
     ticketPayload.lastMessage = composedLastMessage;
     ticketPayload.updatedAt = new Date();
 
     io.to(message.ticketId.toString())
-      .to(ticketPayload.status)
+      .to(ticketPayload.status as string)
       .to("notification")
       .emit("appMessage", {
         action: "create",

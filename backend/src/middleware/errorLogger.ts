@@ -9,7 +9,11 @@ const errorLogger = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const errorData: any = {
+    const errorData: {
+      source: string; message: string; stack: string; component: string;
+      url: string; userAgent: string; severity: string;
+      userId?: number; username?: string;
+    } = {
       source: "backend",
       message: err.message || "Erro desconhecido",
       stack: err.stack || "",
@@ -20,7 +24,7 @@ const errorLogger = async (
     };
 
     if (req.user) {
-      errorData.userId = req.user.id;
+      errorData.userId = Number(req.user.id);
       errorData.username = req.user.profile || "";
     }
 

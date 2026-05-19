@@ -1,6 +1,30 @@
+import { Client } from "whatsapp-web.js";
 import { getWbot } from "../../libs/wbot";
 import AppError from "../../errors/AppError";
 import { logger } from "../../utils/logger";
+
+// wwebjs missing type definition for label-related methods
+interface WbotLabel {
+  id: string;
+  name: string;
+  hexColor?: string;
+}
+
+interface WbotChat {
+  id?: { _serialized?: string } | string;
+  name?: string;
+  isGroup?: boolean;
+  unreadCount?: number;
+  timestamp?: number;
+  changeLabels(labelIds: string[]): Promise<void>;
+}
+
+type ClientWithLabels = Client & {
+  getLabels(): Promise<WbotLabel[]>;
+  getLabelById(labelId: string): Promise<WbotLabel | null>;
+  getChatLabels(chatId: string): Promise<WbotLabel[]>;
+  getChatsByLabelId(labelId: string): Promise<WbotChat[]>;
+};
 
 const errStr = (e: unknown) =>
   e instanceof Error ? e.message : JSON.stringify(e);
@@ -14,8 +38,8 @@ interface LabelData {
 class LabelsService {
   async getLabels(whatsappId: number): Promise<LabelData[]> {
     try {
-      const wbot = getWbot(whatsappId);
-      const labels: any[] = await wbot.getLabels();
+      const wbot = getWbot(whatsappId) as unknown as ClientWithLabels;
+      const labels = await wbot.getLabels();
 
       return labels.map(label => ({
         id: label.id,
@@ -30,8 +54,8 @@ class LabelsService {
 
   async getLabelById(whatsappId: number, labelId: string): Promise<LabelData> {
     try {
-      const wbot = getWbot(whatsappId);
-      const label: any = await wbot.getLabelById(labelId);
+      const wbot = getWbot(whatsappId) as unknown as ClientWithLabels;
+      const label = await wbot.getLabelById(labelId);
 
       if (!label) {
         throw new AppError("Etiqueta não encontrada");
@@ -53,8 +77,8 @@ class LabelsService {
     chatId: string
   ): Promise<LabelData[]> {
     try {
-      const wbot = getWbot(whatsappId);
-      const labels: any[] = await wbot.getChatLabels(chatId);
+      const wbot = getWbot(whatsappId) as unknown as ClientWithLabels;
+      const labels = await wbot.getChatLabels(chatId);
 
       return labels.map(label => ({
         id: label.id,
@@ -67,18 +91,22 @@ class LabelsService {
     }
   }
 
-  async getChatsByLabelId(whatsappId: number, labelId: string): Promise<any[]> {
+  async getChatsByLabelId(whatsappId: number, labelId: string): Promise<{ id: string; name: string | undefined; isGroup: boolean | undefined; unreadCount: number | undefined; timestamp: number | undefined }[]> {
     try {
-      const wbot = getWbot(whatsappId);
-      const chats: any[] = await wbot.getChatsByLabelId(labelId);
+      const wbot = getWbot(whatsappId) as unknown as ClientWithLabels;
+      const chats = await wbot.getChatsByLabelId(labelId);
 
-      return chats.map(chat => ({
-        id: chat.id?._serialized || chat.id,
-        name: chat.name,
-        isGroup: chat.isGroup,
-        unreadCount: chat.unreadCount,
-        timestamp: chat.timestamp
-      }));
+      return chats.map(chat => {
+        const rawId = chat.id;
+        const resolvedId = (typeof rawId === "object" ? rawId?._serialized : rawId) || "";
+        return {
+          id: resolvedId,
+          name: chat.name,
+          isGroup: chat.isGroup,
+          unreadCount: chat.unreadCount,
+          timestamp: chat.timestamp
+        };
+      });
     } catch (err) {
       logger.error(
         `[LABELS] Erro ao buscar chats por etiqueta: ${errStr(err)}`
@@ -95,7 +123,7 @@ class LabelsService {
     try {
       const wbot = getWbot(whatsappId);
       const chat = await wbot.getChatById(chatId);
-      await (chat as any).changeLabels(labelIds);
+      await (chat as unknown as WbotChat).changeLabels(labelIds);
     } catch (err) {
       logger.error(
         `[LABELS] Erro ao alterar etiquetas do chat: ${errStr(err)}`
