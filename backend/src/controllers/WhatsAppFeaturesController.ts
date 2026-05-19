@@ -164,7 +164,10 @@ export const sendSeen = async (
   const { whatsappId, chatId } = req.body;
 
   try {
-    await ChatManagementService.sendSeen(validateId(whatsappId, "whatsappId"), chatId);
+    await ChatManagementService.sendSeen(
+      validateId(whatsappId, "whatsappId"),
+      chatId
+    );
     return res.status(200).json({ message: "Chat marcado como visto" });
   } catch (error: any) {
     return res.status(500).json({ error: error.message });
@@ -178,7 +181,10 @@ export const archiveChat = async (
   const { whatsappId, chatId } = req.body;
 
   try {
-    await ChatManagementService.archiveChat(validateId(whatsappId, "whatsappId"), chatId);
+    await ChatManagementService.archiveChat(
+      validateId(whatsappId, "whatsappId"),
+      chatId
+    );
     return res.status(200).json({ message: "Chat arquivado" });
   } catch (error: any) {
     return res.status(500).json({ error: error.message });
@@ -192,7 +198,10 @@ export const unarchiveChat = async (
   const { whatsappId, chatId } = req.body;
 
   try {
-    await ChatManagementService.unarchiveChat(validateId(whatsappId, "whatsappId"), chatId);
+    await ChatManagementService.unarchiveChat(
+      validateId(whatsappId, "whatsappId"),
+      chatId
+    );
     return res.status(200).json({ message: "Chat desarquivado" });
   } catch (error: any) {
     return res.status(500).json({ error: error.message });
@@ -267,7 +276,10 @@ export const unmuteChat = async (
   const { whatsappId, chatId, ticketId } = req.body;
 
   try {
-    await ChatManagementService.unmuteChat(validateId(whatsappId, "whatsappId"), chatId);
+    await ChatManagementService.unmuteChat(
+      validateId(whatsappId, "whatsappId"),
+      chatId
+    );
     if (ticketId) {
       await Ticket.update({ mutedChat: false }, { where: { id: ticketId } });
     }
@@ -284,7 +296,10 @@ export const markUnread = async (
   const { whatsappId, chatId } = req.body;
 
   try {
-    await ChatManagementService.markUnread(validateId(whatsappId, "whatsappId"), chatId);
+    await ChatManagementService.markUnread(
+      validateId(whatsappId, "whatsappId"),
+      chatId
+    );
     return res.status(200).json({ message: "Chat marcado como não lido" });
   } catch (error: any) {
     return res.status(500).json({ error: error.message });
@@ -358,7 +373,9 @@ export const getChats = async (
   const { whatsappId } = req.query;
 
   try {
-    const chats = await ChatManagementService.getChats(validateId(whatsappId, "whatsappId"));
+    const chats = await ChatManagementService.getChats(
+      validateId(whatsappId, "whatsappId")
+    );
     return res.status(200).json(chats);
   } catch (error: any) {
     return res.status(500).json({ error: error.message });
@@ -373,7 +390,9 @@ export const getLabels = async (
   const { whatsappId } = req.query;
 
   try {
-    const labels = await LabelsService.getLabels(validateId(whatsappId, "whatsappId"));
+    const labels = await LabelsService.getLabels(
+      validateId(whatsappId, "whatsappId")
+    );
     return res.status(200).json(labels);
   } catch (error: any) {
     return res.status(500).json({ error: error.message });
@@ -457,7 +476,10 @@ export const setStatus = async (
   const { whatsappId, status } = req.body;
 
   try {
-    await ProfileManagementService.setStatus(validateId(whatsappId, "whatsappId"), status);
+    await ProfileManagementService.setStatus(
+      validateId(whatsappId, "whatsappId"),
+      status
+    );
     return res.status(200).json({ message: "Status atualizado" });
   } catch (error: any) {
     return res.status(500).json({ error: error.message });
@@ -543,7 +565,9 @@ export const setPresenceUnavailable = async (
   const { whatsappId } = req.body;
 
   try {
-    await ProfileManagementService.sendPresenceUnavailable(validateId(whatsappId, "whatsappId"));
+    await ProfileManagementService.sendPresenceUnavailable(
+      validateId(whatsappId, "whatsappId")
+    );
     return res
       .status(200)
       .json({ message: "Presença definida como indisponível" });
@@ -559,7 +583,9 @@ export const setPresenceAvailable = async (
   const { whatsappId } = req.body;
 
   try {
-    await ProfileManagementService.sendPresenceAvailable(validateId(whatsappId, "whatsappId"));
+    await ProfileManagementService.sendPresenceAvailable(
+      validateId(whatsappId, "whatsappId")
+    );
     return res
       .status(200)
       .json({ message: "Presença definida como disponível" });

@@ -33,7 +33,7 @@ const EXCLUDED_NAMES = new Set([
   ".git",
   "dist",
   "build",
-  "coverage",
+  "coverage"
 ]);
 
 const formatSize = (bytes: number): string => {
@@ -89,12 +89,9 @@ export const getFolderContents = async (
   await Promise.all(
     entries
       .filter(
-        (e) =>
-          !EXCLUDED_NAMES.has(e.name) &&
-          e.name !== "." &&
-          e.name !== ".."
+        e => !EXCLUDED_NAMES.has(e.name) && e.name !== "." && e.name !== ".."
       )
-      .map(async (entry) => {
+      .map(async entry => {
         const itemFullPath = path.join(fullPath, entry.name);
         const isDirectory = entry.isDirectory();
         const relativeName = path.relative(basePath, itemFullPath);
@@ -109,7 +106,7 @@ export const getFolderContents = async (
           size: formatSize(sizeBytes),
           sizeBytes,
           type: isDirectory ? "folder" : "file",
-          children: [],
+          children: []
         });
       })
   );
@@ -145,12 +142,9 @@ export const getDiskSpaceInfo = async (): Promise<DiskSpaceInfo> => {
     await Promise.all(
       entries
         .filter(
-          (e) =>
-            !EXCLUDED_NAMES.has(e.name) &&
-            e.name !== "." &&
-            e.name !== ".."
+          e => !EXCLUDED_NAMES.has(e.name) && e.name !== "." && e.name !== ".."
         )
-        .map(async (entry) => {
+        .map(async entry => {
           const fullPath = path.join(dirPath, entry.name);
           const isDirectory = entry.isDirectory();
           const relativeName = path.relative(
@@ -168,12 +162,16 @@ export const getDiskSpaceInfo = async (): Promise<DiskSpaceInfo> => {
             size: formatSize(sizeBytes),
             sizeBytes,
             type: isDirectory ? "folder" : "file",
-            children: [],
+            children: []
           };
 
           if (isDirectory && currentDepth < maxDepth - 1) {
             try {
-              item.children = await buildTree(fullPath, maxDepth, currentDepth + 1);
+              item.children = await buildTree(
+                fullPath,
+                maxDepth,
+                currentDepth + 1
+              );
             } catch {
               item.children = [];
             }
@@ -216,7 +214,7 @@ export const getDiskSpaceInfo = async (): Promise<DiskSpaceInfo> => {
 
     const { stdout: dfBytes } = await execFileAsync("df", [
       "--output=size,avail",
-      "/",
+      "/"
     ]);
     const byteLines = dfBytes.trim().split("\n");
     const bytesInfo = byteLines[byteLines.length - 1].trim().split(/\s+/);
@@ -232,7 +230,7 @@ export const getDiskSpaceInfo = async (): Promise<DiskSpaceInfo> => {
   const [folderInfo, diskInfo, largestFolders] = await Promise.all([
     getFolderSize(),
     getDiskFreeSpace(),
-    buildTree(folderPath, 1, 0).then((tree) => tree.slice(0, 20)),
+    buildTree(folderPath, 1, 0).then(tree => tree.slice(0, 20))
   ]);
 
   const usedPercentage = Math.round(
@@ -249,6 +247,6 @@ export const getDiskSpaceInfo = async (): Promise<DiskSpaceInfo> => {
     totalSpace: diskInfo.total,
     totalSpaceBytes: diskInfo.totalBytes,
     usedPercentage,
-    largestFolders,
+    largestFolders
   };
 };

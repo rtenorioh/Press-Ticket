@@ -2,7 +2,6 @@ import { logger } from "../../utils/logger";
 import { Sequelize } from "sequelize";
 import { QueryTypes } from "sequelize";
 
-
 const dbConfig = require("../../config/database");
 
 const sequelize = new Sequelize(

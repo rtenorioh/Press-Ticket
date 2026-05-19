@@ -7,11 +7,33 @@ import { logger } from "../utils/logger";
 import AppError from "../errors/AppError";
 
 const ALLOWED_MEDIA_EXTENSIONS = new Set([
-  "jpg", "jpeg", "png", "gif", "webp", "bmp",
-  "mp4", "avi", "mov", "webm", "mkv",
-  "mp3", "ogg", "opus", "wav", "aac", "m4a",
-  "pdf", "doc", "docx", "xls", "xlsx", "ppt", "pptx",
-  "zip", "txt", "csv"
+  "jpg",
+  "jpeg",
+  "png",
+  "gif",
+  "webp",
+  "bmp",
+  "mp4",
+  "avi",
+  "mov",
+  "webm",
+  "mkv",
+  "mp3",
+  "ogg",
+  "opus",
+  "wav",
+  "aac",
+  "m4a",
+  "pdf",
+  "doc",
+  "docx",
+  "xls",
+  "xlsx",
+  "ppt",
+  "pptx",
+  "zip",
+  "txt",
+  "csv"
 ]);
 
 // Block private/internal IPs to prevent SSRF

@@ -19,16 +19,8 @@ interface MessageData {
 const CreateMessageService = async (
   messageData: MessageData
 ): Promise<Message | any> => {
-  const {
-    id,
-    contactId,
-    body,
-    ticketId,
-    read,
-    fromMe,
-    fileName,
-    mediaType
-  } = messageData;
+  const { id, contactId, body, ticketId, read, fromMe, fileName, mediaType } =
+    messageData;
 
   if ((!body || body === "") && (!fileName || fileName === "")) {
     return;

@@ -164,7 +164,7 @@ const backupSystem = async (): Promise<string> => {
       "--exclude=./public/media",
       "-czf",
       backupPath,
-      ".",
+      "."
     ]);
 
     return backupPath;
@@ -195,11 +195,11 @@ export const downloadAndInstallUpdate = async (
       await mkdir(tempDir, { recursive: true });
     }
 
-    const safeVersion = updateInfo.latestVersion.replace(/[^a-zA-Z0-9._-]/g, "_");
-    const zipFilePath = path.join(
-      tempDir,
-      `update-${safeVersion}.zip`
+    const safeVersion = updateInfo.latestVersion.replace(
+      /[^a-zA-Z0-9._-]/g,
+      "_"
     );
+    const zipFilePath = path.join(tempDir, `update-${safeVersion}.zip`);
     const writer = fs.createWriteStream(zipFilePath);
 
     const response = await axios({

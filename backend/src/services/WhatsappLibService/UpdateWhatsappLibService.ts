@@ -41,7 +41,6 @@ export const updateWhatsappLib = async (): Promise<WhatsappLibUpdateResult> => {
     const whatsappPackage = JSON.parse(whatsappPackageContent);
     const currentInstalledVersion = whatsappPackage.version;
 
-
     const { stdout: npmViewOutput } = await execPromise(
       "npm view whatsapp-web.js version"
     );

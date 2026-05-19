@@ -14,7 +14,7 @@ interface CheckNotificationResult {
 export const checkAndUpdateNotificationTime = async ({
   whatsappId
 }: Request): Promise<CheckNotificationResult> => {
-  let notification = await WhatsappNotification.findOne({
+  const notification = await WhatsappNotification.findOne({
     where: { whatsappId }
   });
 

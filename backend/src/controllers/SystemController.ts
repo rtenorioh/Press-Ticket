@@ -25,10 +25,16 @@ export const restartPm2 = async (
         const frontendId = validatePm2Id(process.env.PM2_FRONTEND!);
         const backendId = validatePm2Id(process.env.PM2_BACKEND!);
 
-        const { stdout: frontStdout } = await execFile("pm2", ["restart", frontendId]);
+        const { stdout: frontStdout } = await execFile("pm2", [
+          "restart",
+          frontendId
+        ]);
         logger.info(`Frontend reiniciado com sucesso: ${frontStdout}`);
 
-        const { stdout: backStdout } = await execFile("pm2", ["restart", backendId]);
+        const { stdout: backStdout } = await execFile("pm2", [
+          "restart",
+          backendId
+        ]);
         logger.info(`Backend reiniciado com sucesso: ${backStdout}`);
       } catch (err: any) {
         logger.error(`Erro ao reiniciar o sistema: ${err.message}`);

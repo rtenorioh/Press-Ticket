@@ -21,8 +21,7 @@ export interface HubContact {
 const FindOrCreateContactService = async (
   contact: HubContact
 ): Promise<Contact> => {
-  const { name, number, picture, firstName, from, group, channel } =
-    contact;
+  const { name, number, picture, firstName, from, group, channel } = contact;
 
   const io = getIO();
 

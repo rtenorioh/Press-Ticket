@@ -198,14 +198,16 @@ app.use(updateLastActivity);
 
 app.use(errorLogger);
 
-app.use(async (err: Error, req: Request, res: Response, _next: NextFunction) => {
-  if (err instanceof AppError) {
-    logger.warn(err);
-    return res.status(err.statusCode).json({ error: err.message });
-  }
+app.use(
+  async (err: Error, req: Request, res: Response, _next: NextFunction) => {
+    if (err instanceof AppError) {
+      logger.warn(err);
+      return res.status(err.statusCode).json({ error: err.message });
+    }
 
-  logger.error(err);
-  return res.status(500).json({ error: "Internal server error" });
-});
+    logger.error(err);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+);
 
 export default app;

@@ -32,19 +32,19 @@ const formatBytes = (bytes: number): string => {
 const dbArgs = (): string[] => [
   `--host=${DB_CONFIG.host}`,
   `--port=${String(DB_CONFIG.port)}`,
-  `--user=${DB_CONFIG.username}`,
+  `--user=${DB_CONFIG.username}`
 ];
 
 // Password passed via env var to avoid exposure in process listings
 const dbEnv = (): NodeJS.ProcessEnv => ({
   ...process.env,
-  MYSQL_PWD: DB_CONFIG.password,
+  MYSQL_PWD: DB_CONFIG.password
 });
 
 const runMysqldump = (filePath: string): Promise<void> => {
   return new Promise((resolve, reject) => {
     const dump = spawn("mysqldump", [...dbArgs(), DB_CONFIG.database], {
-      env: dbEnv(),
+      env: dbEnv()
     });
     const gzip = spawn("gzip", []);
     const out = fs.createWriteStream(filePath);
@@ -69,14 +69,17 @@ const runMysqldump = (filePath: string): Promise<void> => {
     out.on("error", fail);
     dump.on("error", fail);
     gzip.on("error", fail);
-    dump.stderr.on("data", (d) => logger.warn(`mysqldump: ${d}`));
+    dump.stderr.on("data", d => logger.warn(`mysqldump: ${d}`));
   });
 };
 
-const runMysqlRestore = (filePath: string, isGzipped: boolean): Promise<void> => {
+const runMysqlRestore = (
+  filePath: string,
+  isGzipped: boolean
+): Promise<void> => {
   return new Promise((resolve, reject) => {
     const mysql = spawn("mysql", [...dbArgs(), DB_CONFIG.database], {
-      env: dbEnv(),
+      env: dbEnv()
     });
     const fileStream = fs.createReadStream(filePath);
 
@@ -90,7 +93,7 @@ const runMysqlRestore = (filePath: string, isGzipped: boolean): Promise<void> =>
     }
 
     let settled = false;
-    mysql.on("close", (code) => {
+    mysql.on("close", code => {
       if (!settled) {
         settled = true;
         if (code === 0) resolve();
@@ -98,7 +101,7 @@ const runMysqlRestore = (filePath: string, isGzipped: boolean): Promise<void> =>
       }
     });
     mysql.on("error", reject);
-    mysql.stderr.on("data", (d) => logger.warn(`mysql: ${d}`));
+    mysql.stderr.on("data", d => logger.warn(`mysql: ${d}`));
   });
 };
 
