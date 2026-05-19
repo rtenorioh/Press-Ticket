@@ -5,6 +5,9 @@ on:
     - cron: "0 8 * * *" # Roda todo dia às 08h UTC (05h BRT)
   workflow_dispatch: # Permite rodar manualmente pela aba Actions
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   stale:
     runs-on: ubuntu-latest

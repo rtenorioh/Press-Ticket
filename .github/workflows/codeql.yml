@@ -11,6 +11,9 @@ on:
     - cron: "0 6 * * 1" # Toda segunda às 06h UTC (03h BRT)
   workflow_dispatch:
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   analyze:
     name: Analisar (${{ matrix.language }})
@@ -34,7 +37,7 @@ jobs:
           fetch-depth: 0
 
       - name: 🔍 Inicializar CodeQL
-        uses: github/codeql-action/init@v3
+        uses: github/codeql-action/init@v4
         with:
           languages: ${{ matrix.language }}
           queries: security-and-quality # Inclui queries de qualidade além de segurança
@@ -67,7 +70,7 @@ jobs:
         continue-on-error: true
 
       - name: 🔬 Executar análise CodeQL
-        uses: github/codeql-action/analyze@v3
+        uses: github/codeql-action/analyze@v4
         with:
           category: "/language:${{ matrix.language }}"
           upload: true # Envia resultados para a aba Security do GitHub
