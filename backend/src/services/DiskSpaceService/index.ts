@@ -2,8 +2,6 @@ import { execFile } from "child_process";
 import { promisify } from "util";
 import fs from "fs/promises";
 import path from "path";
-import { logger } from "../../utils/logger";
-
 const execFileAsync = promisify(execFile);
 
 interface FolderSizeInfo {

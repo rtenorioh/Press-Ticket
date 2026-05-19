@@ -43,7 +43,6 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
 
   const logUserId = req.user?.id || 1;
 
-
   await createActivityLog({
     userId: typeof logUserId === "string" ? parseInt(logUserId) : logUserId,
     action: ActivityActions.CREATE,
@@ -101,7 +100,6 @@ export const update = async (
 
     const logUserId = req.user?.id || 1;
 
-  
     await createActivityLog({
       userId: typeof logUserId === "string" ? parseInt(logUserId) : logUserId,
       action: ActivityActions.UPDATE,
@@ -138,7 +136,6 @@ export const remove = async (
   await DeleteService(clientStatusId);
 
   const logUserId = req.user?.id || 1;
-
 
   await createActivityLog({
     userId: typeof logUserId === "string" ? parseInt(logUserId) : logUserId,
