@@ -7,6 +7,8 @@
     <img alt="CI" src="https://github.com/rtenorioh/Press-Ticket/actions/workflows/ci.yml/badge.svg">
   </a>
 
+[![CodeQL — Análise de Segurança](https://github.com/rtenorioh/Press-Ticket/actions/workflows/codeql.yml/badge.svg)](https://github.com/rtenorioh/Press-Ticket/actions/workflows/codeql.yml)
+
   <img alt="Repository size" src="https://img.shields.io/github/repo-size/rtenorioh/Press-Ticket">
 
   <a href="https://github.com/rtenorioh/Press-Ticket/commits/master">
