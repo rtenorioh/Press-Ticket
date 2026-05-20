@@ -37,8 +37,18 @@ const ALLOWED_MEDIA_EXTENSIONS = new Set([
 ]);
 
 // Block private/internal IPs to prevent SSRF
-const PRIVATE_IP_PATTERN =
-  /^(localhost|127\.|10\.|172\.(1[6-9]|2[0-9]|3[01])\.|192\.168\.|169\.254\.|::1$)/i;
+const PRIVATE_IP_RANGES = [
+  /^localhost$/i,
+  /^127\./,
+  /^10\./,
+  /^172\.(1[6-9]|2[0-9]|3[01])\./,
+  /^192\.168\./,
+  /^169\.254\./,
+  /^::1$/,
+  /^fc[0-9a-f][0-9a-f]:/i,
+  /^fd[0-9a-f][0-9a-f]:/i,
+  /^0\./,
+];
 
 function validateFileUrl(rawUrl: string): string {
   let parsed: URL;
@@ -50,10 +60,20 @@ function validateFileUrl(rawUrl: string): string {
   if (parsed.protocol !== "https:") {
     throw new AppError("Apenas URLs HTTPS são permitidas para download", 400);
   }
-  if (PRIVATE_IP_PATTERN.test(parsed.hostname)) {
+  const hostname = parsed.hostname.toLowerCase().replace(/^\[|\]$/g, "");
+  if (!hostname) {
     throw new AppError("Host não permitido", 403);
   }
-  return parsed.toString();
+  for (const range of PRIVATE_IP_RANGES) {
+    if (range.test(hostname)) {
+      throw new AppError("Host não permitido", 403);
+    }
+  }
+  // Reconstruct URL from validated components to avoid returning raw user input
+  const safeUrl =
+    `${parsed.protocol}//${parsed.host}` +
+    `${parsed.pathname}${parsed.search}${parsed.hash}`;
+  return safeUrl;
 }
 
 export const downloadFiles = async (url: string) => {

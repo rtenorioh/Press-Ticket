@@ -487,7 +487,7 @@ type MessageData = {
 };
 
 export const index = async (req: Request, res: Response): Promise<Response> => {
-  const { ticketId } = req.params;
+  const ticketId = String(validateId(req.params.ticketId, "ticketId"));
   const { pageNumber } = req.query as IndexQuery;
 
   const { count, messages, ticket, hasMore } = await ListMessagesService({
@@ -502,7 +502,7 @@ export const searchInTicket = async (
   req: Request,
   res: Response
 ): Promise<Response> => {
-  const { ticketId } = req.params;
+  const ticketId = String(validateId(req.params.ticketId, "ticketId"));
   const { query, pageNumber } = req.query as {
     query: string;
     pageNumber?: string;
@@ -526,11 +526,11 @@ export const listStarred = async (
   req: Request,
   res: Response
 ): Promise<Response> => {
-  const { ticketId } = req.params;
+  const ticketId = validateId(req.params.ticketId, "ticketId");
 
   const messages = await Message.findAll({
     where: {
-      ticketId: parseInt(ticketId, 10),
+      ticketId,
       isStarred: true,
       isDeleted: false
     },
@@ -552,7 +552,8 @@ export const listStarred = async (
 };
 
 export const store = async (req: Request, res: Response): Promise<Response> => {
-  const ticketId = String(validateId(req.params.ticketId, "ticketId"));
+  const ticketIdNum = validateId(req.params.ticketId, "ticketId");
+  const ticketId = String(ticketIdNum);
   const { body, quotedMsg, sendAsDocument } = req.body as {
     body: string;
     quotedMsg?: Message;
@@ -612,12 +613,12 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
       await createActivityLog({
         userId: typeof logUserId === "string" ? parseInt(logUserId) : logUserId,
         action: ActivityActions.SEND,
-        description: `Mensagem com ${medias.length} mídia(s) enviada no ticket #${ticketId}`,
+        description: `Mensagem com ${medias.length} mídia(s) enviada no ticket #${ticketIdNum}`,
         entityType: EntityTypes.TICKET,
         entityId: ticket.id,
         ip: clientIp,
         additionalData: {
-          ticketId: Number(ticketId),
+          ticketId: ticketIdNum,
           messageType: "media",
           mediaCount: medias.length,
           mediaTypes: medias.map(m => m.mimetype),
@@ -645,12 +646,12 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
       await createActivityLog({
         userId: typeof logUserId === "string" ? parseInt(logUserId) : logUserId,
         action: ActivityActions.SEND,
-        description: `Mensagem enviada no ticket #${ticketId}`,
+        description: `Mensagem enviada no ticket #${ticketIdNum}`,
         entityType: EntityTypes.TICKET,
         entityId: ticket.id,
         ip: clientIp,
         additionalData: {
-          ticketId: Number(ticketId),
+          ticketId: ticketIdNum,
           messageType: "text",
           messageLength: body?.length || 0,
           hasQuote: !!quotedMsg,
@@ -757,7 +758,7 @@ export const markAsRead = async (
   req: Request,
   res: Response
 ): Promise<Response> => {
-  const { ticketId } = req.params;
+  const ticketId = String(validateId(req.params.ticketId, "ticketId"));
 
   try {
     const ticket = await ShowTicketService(ticketId);
@@ -786,7 +787,7 @@ export const sendContacts = async (
   req: Request,
   res: Response
 ): Promise<Response> => {
-  const { ticketId } = req.params;
+  const ticketId = String(validateId(req.params.ticketId, "ticketId"));
   const { contacts } = req.body;
   const logUserId = req.user?.id || 1;
   const clientIp = GetClientIp(req);
@@ -836,7 +837,7 @@ export const forwardMessages = async (
   req: Request,
   res: Response
 ): Promise<Response> => {
-  const { ticketId } = req.params;
+  const ticketId = String(validateId(req.params.ticketId, "ticketId"));
   const { messages, contactId } = req.body;
 
   if (!messages || !Array.isArray(messages) || messages.length === 0) {
@@ -970,7 +971,7 @@ export const sendPoll = async (
   req: Request,
   res: Response
 ): Promise<Response> => {
-  const { ticketId } = req.params;
+  const ticketId = validateId(req.params.ticketId, "ticketId");
   const { pollName, options, allowMultipleAnswers } = req.body;
 
   try {
@@ -981,7 +982,7 @@ export const sendPoll = async (
     }
 
     const message = await SendPollService.execute({
-      ticketId: Number(ticketId),
+      ticketId,
       pollName,
       options,
       allowMultipleAnswers: allowMultipleAnswers || false
@@ -1000,11 +1001,11 @@ export const sendTypingIndicator = async (
   req: Request,
   res: Response
 ): Promise<Response> => {
-  const { ticketId } = req.params;
+  const ticketId = String(validateId(req.params.ticketId, "ticketId"));
   const { duration } = req.body;
 
   try {
-    const ticket = await ShowTicketService(Number(ticketId));
+    const ticket = await ShowTicketService(ticketId);
     const chatId = `${ticket.contact.number}@c.us`;
 
     await PresenceService.simulateTyping(
@@ -1033,11 +1034,11 @@ export const sendRecordingIndicator = async (
   req: Request,
   res: Response
 ): Promise<Response> => {
-  const { ticketId } = req.params;
+  const ticketId = String(validateId(req.params.ticketId, "ticketId"));
   const { duration } = req.body;
 
   try {
-    const ticket = await ShowTicketService(Number(ticketId));
+    const ticket = await ShowTicketService(ticketId);
     const chatId = `${ticket.contact.number}@c.us`;
 
     await PresenceService.simulateRecording(

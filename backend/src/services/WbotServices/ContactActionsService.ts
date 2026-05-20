@@ -56,10 +56,13 @@ interface BlockedContact {
 
 class ContactActionsService {
   async getAbout(whatsappId: number, contactId: string): Promise<string> {
+    if (typeof contactId !== "string" || !contactId.trim()) {
+      throw new AppError("contactId inválido", 400);
+    }
     try {
       const wbot = getWbot(whatsappId);
 
-      let formattedId = contactId;
+      let formattedId = contactId.trim();
       if (!formattedId.includes("@")) {
         formattedId = `${formattedId}@c.us`;
       }
@@ -78,10 +81,13 @@ class ContactActionsService {
     whatsappId: number,
     contactId: string
   ): Promise<ContactInfo> {
+    if (typeof contactId !== "string" || !contactId.trim()) {
+      throw new AppError("contactId inválido", 400);
+    }
     try {
       const wbot = getWbot(whatsappId);
 
-      let formattedId = contactId;
+      let formattedId = contactId.trim();
       if (!formattedId.includes("@")) {
         formattedId = `${formattedId}@c.us`;
       }
@@ -114,10 +120,13 @@ class ContactActionsService {
   }
 
   async blockContact(whatsappId: number, contactId: string): Promise<boolean> {
+    if (typeof contactId !== "string" || !contactId.trim()) {
+      throw new AppError("contactId inválido", 400);
+    }
     try {
       const wbot = getWbot(whatsappId);
 
-      let formattedId = contactId;
+      let formattedId = contactId.trim();
       if (!formattedId.includes("@")) {
         formattedId = `${formattedId}@c.us`;
       }
@@ -134,10 +143,13 @@ class ContactActionsService {
     whatsappId: number,
     contactId: string
   ): Promise<boolean> {
+    if (typeof contactId !== "string" || !contactId.trim()) {
+      throw new AppError("contactId inválido", 400);
+    }
     try {
       const wbot = getWbot(whatsappId);
 
-      let formattedId = contactId;
+      let formattedId = contactId.trim();
       if (!formattedId.includes("@")) {
         formattedId = `${formattedId}@c.us`;
       }
@@ -177,10 +189,13 @@ class ContactActionsService {
     whatsappId: number,
     contactId: string
   ): Promise<{ id: string; name: string; participantsCount: number }[]> {
+    if (typeof contactId !== "string" || !contactId.trim()) {
+      throw new AppError("contactId inválido", 400);
+    }
     try {
       const wbot = getWbot(whatsappId);
 
-      let formattedId = contactId;
+      let formattedId = contactId.trim();
       if (!formattedId.includes("@")) {
         formattedId = `${formattedId}@c.us`;
       }

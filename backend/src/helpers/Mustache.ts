@@ -56,18 +56,25 @@ export const hour = (): string => {
   return hours;
 };
 
+function sanitizeStr(value: unknown): string {
+  if (typeof value !== "string") return "";
+  return value.replace(/<[^>]*>/g, "").replace(/\{\{\{|\}\}\}/g, "");
+}
+
 export default (body: string, ticket?: Ticket): string => {
   const view = {
-    name: ticket ? ticket.contact.name : "",
-    user: ticket ? ticket?.user : "",
-    ticket_id: ticket ? ticket.id : "",
+    name: sanitizeStr(ticket?.contact?.name),
+    user: sanitizeStr(ticket?.user?.name),
+    ticket_id: ticket ? String(ticket.id) : "",
     ms: msgsd(),
     hour: hour(),
     date: date(),
-    queue: ticket ? ticket?.queue?.name : "",
-    connection: ticket ? ticket.whatsapp.name : "",
-    protocol: new Array(control(), ticket ? ticket.id.toString() : "").join("")
+    queue: sanitizeStr(ticket?.queue?.name),
+    connection: sanitizeStr(ticket?.whatsapp?.name),
+    protocol: [control(), ticket ? ticket.id.toString() : ""].join("")
   };
 
-  return Mustache.render(body, view);
+  // Prevent unescaped triple-brace output in user-configured templates
+  const safeBody = body.replace(/\{\{\{/g, "{{").replace(/\}\}\}/g, "}}");
+  return Mustache.render(safeBody, view);
 };
