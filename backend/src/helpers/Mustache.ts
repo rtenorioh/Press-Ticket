@@ -1,4 +1,3 @@
-/* eslint-disable prettier/prettier */
 /* eslint-disable @typescript-eslint/no-array-constructor */
 import Mustache from "mustache";
 import Ticket from "../models/Ticket";

@@ -1,4 +1,4 @@
-import { Chat, GroupChat } from "whatsapp-web.js";
+import { GroupChat } from "whatsapp-web.js";
 import { getWbot } from "../../libs/wbot";
 import { logger } from "../../utils/logger";
 import AppError from "../../errors/AppError";
@@ -78,11 +78,10 @@ class GroupManagementService {
         return p;
       });
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const group = (await wbot.createGroup(
         name,
         formattedParticipants
-      )) as any as CreateGroupResult;
+      )) as unknown as CreateGroupResult;
 
       return {
         id: group.gid._serialized,

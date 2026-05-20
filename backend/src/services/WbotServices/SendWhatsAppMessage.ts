@@ -17,9 +17,11 @@ interface ContactWithLid {
 
 // wwebjs missing type definition for pupPage
 type ClientWithPupPage = Client & {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   pupPage?: {
-    evaluate(fn: (...args: any[]) => any, ...args: unknown[]): Promise<unknown>;
+    evaluate(
+      fn: (...args: unknown[]) => unknown,
+      ...args: unknown[]
+    ): Promise<unknown>;
   };
 };
 
