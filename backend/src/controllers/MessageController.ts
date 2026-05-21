@@ -559,7 +559,7 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     sendAsDocument?: boolean | string;
   };
   let { mentions } = req.body;
-  const medias = req.files as Express.Multer.File[];
+  const medias = (Array.isArray(req.files) ? req.files : []) as Express.Multer.File[];
   const logUserId = req.user?.id || 1;
   const clientIp = GetClientIp(req);
 
@@ -620,7 +620,7 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
           ticketId: ticketIdNum,
           messageType: "media",
           mediaCount: medias.length,
-          mediaTypes: medias.map(m => m.mimetype),
+          mediaTypes: medias.map(m => String(m.mimetype ?? "")),
           contactId: ticket.contactId,
           sendAsDocument: shouldSendAsDocument,
           hasBody: !!body
@@ -1064,10 +1064,10 @@ export const setAvailablePresence = async (
   req: Request,
   res: Response
 ): Promise<Response> => {
-  const { ticketId } = req.params;
+  const ticketId = validateId(req.params.ticketId, "ticketId");
 
   try {
-    const ticket = await ShowTicketService(Number(ticketId));
+    const ticket = await ShowTicketService(ticketId);
     const chatId = `${ticket.contact.number}@c.us`;
 
     await PresenceService.setAvailable(ticket.whatsappId, chatId);

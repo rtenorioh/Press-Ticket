@@ -64,7 +64,7 @@ function sanitizeStr(value: unknown): string {
 }
 
 export default (body: string, ticket?: Ticket): string => {
-  const view = {
+  const view: Record<string, string> = Object.assign(Object.create(null), {
     name: sanitizeStr(ticket?.contact?.name),
     user: sanitizeStr(ticket?.user?.name),
     ticket_id: ticket ? String(ticket.id) : "",
@@ -74,7 +74,7 @@ export default (body: string, ticket?: Ticket): string => {
     queue: sanitizeStr(ticket?.queue?.name),
     connection: sanitizeStr(ticket?.whatsapp?.name),
     protocol: [control(), ticket ? ticket.id.toString() : ""].join("")
-  };
+  });
 
   // Prevent unescaped triple-brace output in user-configured templates
   const safeBody = body.replace(/\{\{\{/g, "{{").replace(/\}\}\}/g, "}}");
