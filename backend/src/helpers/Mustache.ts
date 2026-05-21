@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-array-constructor */
-import Mustache from "mustache";
 import sanitizeHtml from "sanitize-html";
 import Ticket from "../models/Ticket";
 
@@ -63,6 +61,17 @@ function sanitizeStr(value: unknown): string {
   return sanitizeHtml(noTriple, { allowedTags: [] });
 }
 
+function safeInterpolate(
+  template: string,
+  vars: Record<string, string>
+): string {
+  const noTriple = template.replace(/\{\{\{/g, "{{").replace(/\}\}\}/g, "}}");
+  return noTriple.replace(/\{\{([^}]{1,50})\}\}/g, (_, key) => {
+    const k = key.trim();
+    return Object.prototype.hasOwnProperty.call(vars, k) ? vars[k] : "";
+  });
+}
+
 export default (body: string, ticket?: Ticket): string => {
   const view: Record<string, string> = Object.assign(Object.create(null), {
     name: sanitizeStr(ticket?.contact?.name),
@@ -76,7 +85,5 @@ export default (body: string, ticket?: Ticket): string => {
     protocol: [control(), ticket ? ticket.id.toString() : ""].join("")
   });
 
-  // Prevent unescaped triple-brace output in user-configured templates
-  const safeBody = body.replace(/\{\{\{/g, "{{").replace(/\}\}\}/g, "}}");
-  return Mustache.render(safeBody, view);
+  return safeInterpolate(body, view);
 };

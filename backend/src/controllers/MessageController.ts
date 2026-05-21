@@ -559,7 +559,9 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     sendAsDocument?: boolean | string;
   };
   let { mentions } = req.body;
-  const medias = (Array.isArray(req.files) ? req.files : []) as Express.Multer.File[];
+  const medias: Express.Multer.File[] = Array.isArray(req.files)
+    ? req.files
+    : [];
   const logUserId = req.user?.id || 1;
   const clientIp = GetClientIp(req);
 
