@@ -553,7 +553,6 @@ export const listStarred = async (
 
 export const store = async (req: Request, res: Response): Promise<Response> => {
   const ticketIdNum = validateId(req.params.ticketId, "ticketId");
-  const ticketId = String(ticketIdNum);
   const { body, quotedMsg, sendAsDocument } = req.body as {
     body: string;
     quotedMsg?: Message;
@@ -576,7 +575,7 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
   const shouldSendAsDocument =
     sendAsDocument === "true" || sendAsDocument === true;
 
-  const ticket = await ShowTicketService(ticketId);
+  const ticket = await ShowTicketService(String(ticketIdNum));
 
   if (ticket.whatsapp?.type && ticket.whatsapp.type !== "wwebjs") {
     return res.status(400).json({

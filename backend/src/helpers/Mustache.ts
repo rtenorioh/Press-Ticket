@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-array-constructor */
 import Mustache from "mustache";
+import sanitizeHtml from "sanitize-html";
 import Ticket from "../models/Ticket";
 
 export const msgsd = (): string => {
@@ -58,7 +59,8 @@ export const hour = (): string => {
 
 function sanitizeStr(value: unknown): string {
   if (typeof value !== "string") return "";
-  return value.replace(/<[^>]*>/g, "").replace(/\{\{\{|\}\}\}/g, "");
+  const noTriple = value.replace(/\{\{\{/g, "{{").replace(/\}\}\}/g, "}}");
+  return sanitizeHtml(noTriple, { allowedTags: [] });
 }
 
 export default (body: string, ticket?: Ticket): string => {

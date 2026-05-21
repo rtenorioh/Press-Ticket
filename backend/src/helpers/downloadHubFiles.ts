@@ -1,10 +1,10 @@
 import axios from "axios";
 import { writeFile } from "fs/promises";
 import mime from "mime-types";
-import { URL } from "url";
 import { extname, join } from "path";
-import { logger } from "../utils/logger";
+import { URL } from "url";
 import AppError from "../errors/AppError";
+import { logger } from "../utils/logger";
 
 const ALLOWED_MEDIA_EXTENSIONS = new Set([
   "jpg",
@@ -47,7 +47,7 @@ const PRIVATE_IP_RANGES = [
   /^::1$/,
   /^fc[0-9a-f][0-9a-f]:/i,
   /^fd[0-9a-f][0-9a-f]:/i,
-  /^0\./,
+  /^0\./
 ];
 
 function validateFileUrl(rawUrl: string): string {
@@ -83,7 +83,7 @@ export const downloadFiles = async (url: string) => {
       responseType: "arraybuffer"
     });
 
-    const rawType = url.split("?")[0].split(".").pop()?.toLowerCase() || "";
+    const rawType = safeUrl.split("?")[0].split(".").pop()?.toLowerCase() || "";
     const type = ALLOWED_MEDIA_EXTENSIONS.has(rawType) ? rawType : "bin";
 
     const filename = `${new Date().getTime()}.${type}`;
@@ -94,7 +94,7 @@ export const downloadFiles = async (url: string) => {
 
     const mimeType = mime.lookup(filePath);
     const extension = extname(filePath);
-    const originalname = url.split("/").pop();
+    const originalname = safeUrl.split("/").pop();
 
     const media = {
       mimeType,
