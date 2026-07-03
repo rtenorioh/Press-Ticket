@@ -158,6 +158,25 @@ export const initWbot = async (
         clientSession = `${sanitize(whatsapp.name)}_${whatsapp.id}`;
       }
 
+      // O Chromium deixa SingletonLock/SingletonSocket/SingletonCookie no
+      // perfil quando o processo é encerrado abruptamente (kill do container).
+      // Com .wwebjs_auth persistido em volume, o lock órfão sobrevive ao
+      // restart e o navegador recusa abrir o perfil ("Failed to launch the
+      // browser process"). Remover os locks antes de inicializar é seguro:
+      // só existe um backend usando o perfil por vez.
+      const profileDir = path.resolve(
+        __dirname,
+        "../../.wwebjs_auth",
+        `session-${clientSession}`
+      );
+      await Promise.all(
+        ["SingletonLock", "SingletonSocket", "SingletonCookie"].map(f =>
+          fs
+            .rm(path.join(profileDir, f), { force: true })
+            .catch(() => undefined)
+        )
+      );
+
       const wbot: Session = new Client({
         authStrategy: new LocalAuth({ clientId: clientSession }),
         browserName: "Chrome",
