@@ -285,7 +285,9 @@ const SendWhatsAppMessage = async ({
 
   try {
     const payload = formatBody(body, ticket);
-    let sentMessage: WbotMessage;
+    // Pode permanecer indefinida se ambas as tentativas de envio falharem;
+    // a checagem logo após os envios trata esse caso explicitamente.
+    let sentMessage: WbotMessage | undefined;
     let lidError = false;
 
     const preFn = new Function(
