@@ -317,7 +317,9 @@ const SendWhatsAppMessage = async ({
         lidUserId
       );
       await new Promise(r => setTimeout(r, 2000));
-    } catch (__) {}
+    } catch (evalErr) {
+      logger.warn(`[SEND] preFn evaluate falhou (segue mesmo assim): ${evalErr}`);
+    }
 
     try {
       sentMessage = await wbot.sendMessage(
@@ -330,6 +332,7 @@ const SendWhatsAppMessage = async ({
       lidError =
         errMsg.includes("No LID for user") ||
         String(e).includes("No LID for user");
+      logger.error(`[SEND] sendMessage(${userId}) erro: ${errMsg}`);
       if (!lidError) throw e;
     }
 
@@ -340,6 +343,21 @@ const SendWhatsAppMessage = async ({
         sendOptions as Record<string, unknown>
       );
     }
+
+    // Antes retornava um objeto sem id.id silenciosamente (HTTP 200 com {}),
+    // sem logar nada — impossível diagnosticar. Agora falha explícito e loga.
+    if (!sentMessage || !sentMessage.id?.id) {
+      logger.error(
+        `[SEND] wbot.sendMessage não retornou id válido. ` +
+          `target=${userId} lidError=${lidError} ` +
+          `idObj=${JSON.stringify(sentMessage?.id ?? null)}`
+      );
+      throw new AppError("ERR_SENDING_WAPP_MSG");
+    }
+
+    logger.info(
+      `[SEND] OK ticket=${ticket.id} msgId=${sentMessage.id.id} target=${userId}`
+    );
 
     await ticket.update({ lastMessage: body });
     await ticket.reload();
