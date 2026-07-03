@@ -1,0 +1,311 @@
+From 720e060c73ed17e85131c97528923dfd2d82ac3d Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Fri, 3 Jul 2026 00:26:37 +0000
+Subject: [PATCH] =?UTF-8?q?fix:=20envio=20de=20mensagem=20no=20WhatsApp=20?=
+ =?UTF-8?q?e=20c=C3=B3pia=20da=20chave=20de=20API?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Chat do WhatsApp (ticket) não enviava/entregava:
+- SendWhatsAppMessage agora verifica wbot.getState() === "CONNECTED"
+  antes de enviar, espelhando o que SendWhatsAppMedia já fazia. Sem isso,
+  wbot.sendMessage podia apenas enfileirar localmente com a sessão
+  desconectada, fazendo a mensagem parecer enviada sem chegar ao WhatsApp.
+  Agora um erro claro é retornado ("WhatsApp não está conectado").
+- MessageInput: passa a rotear para /messages (WhatsApp Web) por padrão
+  quando o tipo do canal não está definido, evitando enviar mensagens de
+  WhatsApp para o endpoint /hub-message por engano.
+
+Cópia da chave de API:
+- O backend só retorna o token em texto puro no momento da criação
+  (armazena apenas o hash). O frontend descartava essa resposta e tentava
+  copiar o valor vazio da listagem. Agora o token é exibido uma única vez
+  num diálogo com botão de copiar logo após a criação.
+- handleCopyToken ganhou fallback (execCommand) para contextos não-HTTPS e
+  feedback claro; a listagem mostra a chave mascarada com aviso de que ela
+  só é exibida na criação.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01Rd6aWeszKvzoBRA3cPrtCU
+---
+ .../WbotServices/SendWhatsAppMessage.ts       |  24 +++
+ frontend/src/components/MessageInput/index.js |   8 +-
+ frontend/src/pages/ApiKey/index.js            | 147 +++++++++++++++++-
+ 3 files changed, 168 insertions(+), 11 deletions(-)
+
+diff --git a/backend/src/services/WbotServices/SendWhatsAppMessage.ts b/backend/src/services/WbotServices/SendWhatsAppMessage.ts
+index 5be0901..a4ece12 100644
+--- a/backend/src/services/WbotServices/SendWhatsAppMessage.ts
++++ b/backend/src/services/WbotServices/SendWhatsAppMessage.ts
+@@ -72,6 +72,30 @@ const SendWhatsAppMessage = async ({
+   mentions
+ }: Request): Promise<WbotMessage> => {
+   const wbot = await GetTicketWbot(ticket);
++
++  // Garante que a sessão está realmente conectada antes de enviar.
++  // Sem esta verificação, wbot.sendMessage pode resolver apenas
++  // enfileirando a mensagem localmente (sessão desconectada/em sync),
++  // fazendo a mensagem parecer enviada sem nunca chegar ao WhatsApp.
++  // O envio de mídia (SendWhatsAppMedia) já faz esta mesma checagem.
++  let connectionState: string | null = null;
++  try {
++    connectionState = await wbot.getState();
++  } catch (stateErr) {
++    logger.error(
++      `Erro ao verificar estado da sessão do WhatsApp: ${stateErr}`
++    );
++  }
++
++  if (connectionState !== "CONNECTED") {
++    logger.warn(
++      `Tentativa de envio com sessão não conectada (state=${connectionState}) no ticket ${ticket.id}`
++    );
++    throw new AppError(
++      "WhatsApp não está conectado. Por favor, reconecte o WhatsApp."
++    );
++  }
++
+   const contactNumber = ticket.contact.number!;
+   const groupId = contactNumber.includes("@")
+     ? contactNumber
+diff --git a/frontend/src/components/MessageInput/index.js b/frontend/src/components/MessageInput/index.js
+index 3c494a1..c0a7265 100644
+--- a/frontend/src/components/MessageInput/index.js
++++ b/frontend/src/components/MessageInput/index.js
+@@ -809,7 +809,7 @@ const MessageInput = ({ ticketStatus }) => {
+       
+       try {
+         let response;
+-        if (channelType === "wwebjs") {
++        if (channelType === "wwebjs" || !channelType) {
+           response = await api.post(`/messages/${ticketId}`, message);
+         } else {
+           response = await api.post(`/hub-message/${ticketId}`, message);
+@@ -903,7 +903,7 @@ const MessageInput = ({ ticketStatus }) => {
+     formData.append("fromMe", true);
+ 
+     try {
+-      if (channelType === "wwebjs") {
++      if (channelType === "wwebjs" || !channelType) {
+         await api.post(`/messages/${ticketId}`, formData);
+       } else {
+         await api.post(`/hub-message/${ticketId}`, formData);
+@@ -997,7 +997,7 @@ const MessageInput = ({ ticketStatus }) => {
+           }
+         }
+       } else {
+-        if (channelType === "wwebjs") {
++        if (channelType === "wwebjs" || !channelType) {
+           response = await api.post(`/messages/${ticketId}`, message);
+         } else {
+           response = await api.post(`/hub-message/${ticketId}`, message);
+@@ -1248,7 +1248,7 @@ const MessageInput = ({ ticketStatus }) => {
+       formData.append("medias", blob, filename);
+       formData.append("body", filename);
+       formData.append("fromMe", true);
+-      if (channelType === "wwebjs") {
++      if (channelType === "wwebjs" || !channelType) {
+         await api.post(`/messages/${ticketId}`, formData);
+       } else {
+         await api.post(`/hub-message/${ticketId}`, formData);
+diff --git a/frontend/src/pages/ApiKey/index.js b/frontend/src/pages/ApiKey/index.js
+index 891f47e..7e55751 100644
+--- a/frontend/src/pages/ApiKey/index.js
++++ b/frontend/src/pages/ApiKey/index.js
+@@ -141,6 +141,7 @@ const ApiKey = () => {
+     const [openNewDialog, setOpenNewDialog] = useState(false);
+     const [confirmModalOpen, setConfirmModalOpen] = useState(false);
+     const [tokenToDelete, setTokenToDelete] = useState(null);
++    const [createdToken, setCreatedToken] = useState(null);
+     const [newToken, setNewToken] = useState({
+         name: '',
+         permissions: []
+@@ -216,18 +217,23 @@ const ApiKey = () => {
+ 
+     const handleCreateToken = async () => {
+         try {
+-            const data = {
++            const payload = {
+                 name: newToken.name,
+                 permissions: newToken.permissions
+             };
+ 
+-            await api.post('/api-tokens', data);
++            const { data } = await api.post('/api-tokens', payload);
+             await fetchTokens();
+             setOpenNewDialog(false);
+             setNewToken({
+                 name: '',
+                 permissions: []
+             });
++            // O token em texto puro só é retornado neste momento (o backend
++            // armazena apenas o hash). Exibimos uma única vez para o usuário copiar.
++            if (data?.token) {
++                setCreatedToken({ name: data.name, token: data.token });
++            }
+             toast.success(t("apiKey.messages.success.created"));
+         } catch (err) {
+             console.error(err);
+@@ -252,9 +258,55 @@ const ApiKey = () => {
+         }
+     };
+ 
+-    const handleCopyToken = (token) => {
+-        navigator.clipboard.writeText(token);
+-        toast.success(t("apiKey.messages.success.copy"));
++    const copyTextToClipboard = async (text) => {
++        if (!text) return false;
++        // Caminho preferencial: Clipboard API (requer contexto seguro / HTTPS)
++        if (navigator.clipboard && window.isSecureContext) {
++            try {
++                await navigator.clipboard.writeText(text);
++                return true;
++            } catch (_) {
++                // cai no fallback abaixo
++            }
++        }
++        // Fallback para HTTP ou navegadores sem Clipboard API
++        try {
++            const textarea = document.createElement('textarea');
++            textarea.value = text;
++            textarea.style.position = 'fixed';
++            textarea.style.top = '0';
++            textarea.style.left = '0';
++            textarea.style.opacity = '0';
++            document.body.appendChild(textarea);
++            textarea.focus();
++            textarea.select();
++            const ok = document.execCommand('copy');
++            document.body.removeChild(textarea);
++            return ok;
++        } catch (_) {
++            return false;
++        }
++    };
++
++    const handleCopyToken = async (token) => {
++        // Na listagem o token vem vazio (o backend guarda apenas o hash).
++        // O valor completo só existe no momento da criação.
++        if (!token) {
++            toast.info(t(
++                "apiKey.messages.info.tokenHidden",
++                "Por segurança, a chave só é exibida no momento da criação. Gere um novo token para obter a chave."
++            ));
++            return;
++        }
++        const ok = await copyTextToClipboard(token);
++        if (ok) {
++            toast.success(t("apiKey.messages.success.copy"));
++        } else {
++            toast.error(t(
++                "apiKey.messages.error.copy",
++                "Não foi possível copiar. Copie manualmente."
++            ));
++        }
+     };
+ 
+     const renderPermissionName = (permission) => {
+@@ -434,9 +486,14 @@ const ApiKey = () => {
+                                     <StyledTableCell>
+                                         <TokenDisplay>
+                                             <TokenText>
+-                                                {token.token}
++                                                {token.token || '••••••••••••••••'}
+                                             </TokenText>
+-                                            <Tooltip title={t("apiKey.button.copy")} arrow>
++                                            <Tooltip
++                                                title={token.token
++                                                    ? t("apiKey.button.copy")
++                                                    : t("apiKey.messages.info.tokenHidden", "A chave só é exibida na criação")}
++                                                arrow
++                                            >
+                                                 <IconButton
+                                                     size="small"
+                                                     onClick={() => handleCopyToken(token.token)}
+@@ -1350,6 +1407,82 @@ const ApiKey = () => {
+                 </DialogActions>
+             </StyledDialog>
+ 
++            <StyledDialog
++                open={Boolean(createdToken)}
++                onClose={() => setCreatedToken(null)}
++                maxWidth="sm"
++                fullWidth
++                PaperProps={{
++                    sx: {
++                        borderRadius: 2,
++                        boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
++                    }
++                }}
++            >
++                <DialogTitle>
++                    <Stack direction="row" alignItems="center">
++                        <VpnKeyRounded fontSize="small" sx={{ mr: 1.5 }} />
++                        {t("apiKey.createdModal.title", "Token criado com sucesso")}
++                    </Stack>
++                </DialogTitle>
++                <DialogContent sx={{ pt: 3 }}>
++                    <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
++                        {t(
++                            "apiKey.createdModal.warning",
++                            "Copie a chave agora. Por segurança, ela não poderá ser exibida novamente."
++                        )}
++                    </Typography>
++                    <Box
++                        sx={{
++                            display: 'flex',
++                            alignItems: 'center',
++                            gap: 1,
++                            p: 1.5,
++                            borderRadius: 1,
++                            border: `1px solid ${theme.palette.divider}`,
++                            backgroundColor: theme.palette.background.default,
++                        }}
++                    >
++                        <Typography
++                            sx={{
++                                flex: 1,
++                                fontFamily: 'monospace',
++                                fontSize: '0.875rem',
++                                wordBreak: 'break-all',
++                            }}
++                        >
++                            {createdToken?.token}
++                        </Typography>
++                        <Tooltip title={t("apiKey.button.copy")} arrow>
++                            <IconButton
++                                size="small"
++                                onClick={() => handleCopyToken(createdToken?.token)}
++                            >
++                                <FileCopy fontSize="small" />
++                            </IconButton>
++                        </Tooltip>
++                    </Box>
++                </DialogContent>
++                <DialogActions sx={{ px: 3, pb: 3, pt: 1 }}>
++                    <Button
++                        onClick={() => handleCopyToken(createdToken?.token)}
++                        variant="outlined"
++                        color="primary"
++                        sx={{ borderRadius: 20, textTransform: 'none', fontWeight: 'bold' }}
++                    >
++                        {t("apiKey.button.copy")}
++                    </Button>
++                    <Button
++                        onClick={() => setCreatedToken(null)}
++                        variant="contained"
++                        color="primary"
++                        sx={{ borderRadius: 20, ml: 2, textTransform: 'uppercase', fontWeight: 'bold' }}
++                    >
++                        {t("apiKey.createdModal.done", "Concluído")}
++                    </Button>
++                </DialogActions>
++            </StyledDialog>
++
+             <ConfirmationModal
+                 title="Excluir Token"
+                 open={confirmModalOpen}
+-- 
+2.43.0
+

@@ -141,6 +141,7 @@ const ApiKey = () => {
     const [openNewDialog, setOpenNewDialog] = useState(false);
     const [confirmModalOpen, setConfirmModalOpen] = useState(false);
     const [tokenToDelete, setTokenToDelete] = useState(null);
+    const [createdToken, setCreatedToken] = useState(null);
     const [newToken, setNewToken] = useState({
         name: '',
         permissions: []
@@ -216,18 +217,23 @@ const ApiKey = () => {
 
     const handleCreateToken = async () => {
         try {
-            const data = {
+            const payload = {
                 name: newToken.name,
                 permissions: newToken.permissions
             };
 
-            await api.post('/api-tokens', data);
+            const { data } = await api.post('/api-tokens', payload);
             await fetchTokens();
             setOpenNewDialog(false);
             setNewToken({
                 name: '',
                 permissions: []
             });
+            // O token em texto puro só é retornado neste momento (o backend
+            // armazena apenas o hash). Exibimos uma única vez para o usuário copiar.
+            if (data?.token) {
+                setCreatedToken({ name: data.name, token: data.token });
+            }
             toast.success(t("apiKey.messages.success.created"));
         } catch (err) {
             console.error(err);
@@ -252,9 +258,55 @@ const ApiKey = () => {
         }
     };
 
-    const handleCopyToken = (token) => {
-        navigator.clipboard.writeText(token);
-        toast.success(t("apiKey.messages.success.copy"));
+    const copyTextToClipboard = async (text) => {
+        if (!text) return false;
+        // Caminho preferencial: Clipboard API (requer contexto seguro / HTTPS)
+        if (navigator.clipboard && window.isSecureContext) {
+            try {
+                await navigator.clipboard.writeText(text);
+                return true;
+            } catch (_) {
+                // cai no fallback abaixo
+            }
+        }
+        // Fallback para HTTP ou navegadores sem Clipboard API
+        try {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.style.position = 'fixed';
+            textarea.style.top = '0';
+            textarea.style.left = '0';
+            textarea.style.opacity = '0';
+            document.body.appendChild(textarea);
+            textarea.focus();
+            textarea.select();
+            const ok = document.execCommand('copy');
+            document.body.removeChild(textarea);
+            return ok;
+        } catch (_) {
+            return false;
+        }
+    };
+
+    const handleCopyToken = async (token) => {
+        // Na listagem o token vem vazio (o backend guarda apenas o hash).
+        // O valor completo só existe no momento da criação.
+        if (!token) {
+            toast.info(t(
+                "apiKey.messages.info.tokenHidden",
+                "Por segurança, a chave só é exibida no momento da criação. Gere um novo token para obter a chave."
+            ));
+            return;
+        }
+        const ok = await copyTextToClipboard(token);
+        if (ok) {
+            toast.success(t("apiKey.messages.success.copy"));
+        } else {
+            toast.error(t(
+                "apiKey.messages.error.copy",
+                "Não foi possível copiar. Copie manualmente."
+            ));
+        }
     };
 
     const renderPermissionName = (permission) => {
@@ -434,9 +486,14 @@ const ApiKey = () => {
                                     <StyledTableCell>
                                         <TokenDisplay>
                                             <TokenText>
-                                                {token.token}
+                                                {token.token || '••••••••••••••••'}
                                             </TokenText>
-                                            <Tooltip title={t("apiKey.button.copy")} arrow>
+                                            <Tooltip
+                                                title={token.token
+                                                    ? t("apiKey.button.copy")
+                                                    : t("apiKey.messages.info.tokenHidden", "A chave só é exibida na criação")}
+                                                arrow
+                                            >
                                                 <IconButton
                                                     size="small"
                                                     onClick={() => handleCopyToken(token.token)}
@@ -1346,6 +1403,82 @@ const ApiKey = () => {
                         }}
                     >
                         {t("apiKey.modal.buttons.save")}
+                    </Button>
+                </DialogActions>
+            </StyledDialog>
+
+            <StyledDialog
+                open={Boolean(createdToken)}
+                onClose={() => setCreatedToken(null)}
+                maxWidth="sm"
+                fullWidth
+                PaperProps={{
+                    sx: {
+                        borderRadius: 2,
+                        boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
+                    }
+                }}
+            >
+                <DialogTitle>
+                    <Stack direction="row" alignItems="center">
+                        <VpnKeyRounded fontSize="small" sx={{ mr: 1.5 }} />
+                        {t("apiKey.createdModal.title", "Token criado com sucesso")}
+                    </Stack>
+                </DialogTitle>
+                <DialogContent sx={{ pt: 3 }}>
+                    <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
+                        {t(
+                            "apiKey.createdModal.warning",
+                            "Copie a chave agora. Por segurança, ela não poderá ser exibida novamente."
+                        )}
+                    </Typography>
+                    <Box
+                        sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 1,
+                            p: 1.5,
+                            borderRadius: 1,
+                            border: `1px solid ${theme.palette.divider}`,
+                            backgroundColor: theme.palette.background.default,
+                        }}
+                    >
+                        <Typography
+                            sx={{
+                                flex: 1,
+                                fontFamily: 'monospace',
+                                fontSize: '0.875rem',
+                                wordBreak: 'break-all',
+                            }}
+                        >
+                            {createdToken?.token}
+                        </Typography>
+                        <Tooltip title={t("apiKey.button.copy")} arrow>
+                            <IconButton
+                                size="small"
+                                onClick={() => handleCopyToken(createdToken?.token)}
+                            >
+                                <FileCopy fontSize="small" />
+                            </IconButton>
+                        </Tooltip>
+                    </Box>
+                </DialogContent>
+                <DialogActions sx={{ px: 3, pb: 3, pt: 1 }}>
+                    <Button
+                        onClick={() => handleCopyToken(createdToken?.token)}
+                        variant="outlined"
+                        color="primary"
+                        sx={{ borderRadius: 20, textTransform: 'none', fontWeight: 'bold' }}
+                    >
+                        {t("apiKey.button.copy")}
+                    </Button>
+                    <Button
+                        onClick={() => setCreatedToken(null)}
+                        variant="contained"
+                        color="primary"
+                        sx={{ borderRadius: 20, ml: 2, textTransform: 'uppercase', fontWeight: 'bold' }}
+                    >
+                        {t("apiKey.createdModal.done", "Concluído")}
                     </Button>
                 </DialogActions>
             </StyledDialog>

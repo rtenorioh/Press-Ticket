@@ -72,6 +72,30 @@ const SendWhatsAppMessage = async ({
   mentions
 }: Request): Promise<WbotMessage> => {
   const wbot = await GetTicketWbot(ticket);
+
+  // Garante que a sessão está realmente conectada antes de enviar.
+  // Sem esta verificação, wbot.sendMessage pode resolver apenas
+  // enfileirando a mensagem localmente (sessão desconectada/em sync),
+  // fazendo a mensagem parecer enviada sem nunca chegar ao WhatsApp.
+  // O envio de mídia (SendWhatsAppMedia) já faz esta mesma checagem.
+  let connectionState: string | null = null;
+  try {
+    connectionState = await wbot.getState();
+  } catch (stateErr) {
+    logger.error(
+      `Erro ao verificar estado da sessão do WhatsApp: ${stateErr}`
+    );
+  }
+
+  if (connectionState !== "CONNECTED") {
+    logger.warn(
+      `Tentativa de envio com sessão não conectada (state=${connectionState}) no ticket ${ticket.id}`
+    );
+    throw new AppError(
+      "WhatsApp não está conectado. Por favor, reconecte o WhatsApp."
+    );
+  }
+
   const contactNumber = ticket.contact.number!;
   const groupId = contactNumber.includes("@")
     ? contactNumber
