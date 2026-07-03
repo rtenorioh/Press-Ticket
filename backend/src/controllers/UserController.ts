@@ -126,7 +126,18 @@ export const update = async (
     throw new AppError("ERR_NO_PERMISSION", 403);
   }
 
-  const userData = req.body;
+  const userData = { ...req.body };
+
+  // Um usuário comum pode editar o próprio registro (guard acima), mas NÃO
+  // pode alterar campos privilegiados — sem isto, um PUT /users/:seuId com
+  // { profile: "admin" } se auto-promove. Só admin altera esses campos.
+  // (Não removemos queueIds/whatsappIds: o service tem default [] e removê-los
+  // zeraria as filas/conexões do próprio usuário num self-edit legítimo.)
+  if (req.user.profile !== "admin") {
+    delete userData.profile;
+    delete userData.active;
+    delete userData.isTricked;
+  }
 
   const user = await UpdateUserService({ userData, userId });
   const logUserId = req.user?.id || 1;

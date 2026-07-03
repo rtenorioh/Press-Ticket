@@ -163,6 +163,16 @@ const HubMessageListener = async (
 
   const { id, from, channel, contents, visitor, group, isGroup } = innerMessage;
 
+  // contents [] (array vazio é truthy) ou undefined passava adiante e criava
+  // contato/ticket sem nenhuma mensagem (ticket fantasma) ou apagava
+  // lastMessage — descartando a mensagem em silêncio. Validar antes de tudo.
+  if (!Array.isArray(contents) || contents.length === 0) {
+    logger.warn(
+      `HubMessageListener: payload sem contents (id=${id}, channel=${channel}) — ignorando`
+    );
+    return;
+  }
+
   try {
     const contact = await FindOrCreateContactService({
       ...visitor,
