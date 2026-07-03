@@ -503,6 +503,12 @@ export const removeAll = async (
   req: Request,
   res: Response
 ): Promise<Response> => {
+  // Ação destrutiva em massa: só admin/masteradmin. Sem isto, qualquer
+  // usuário autenticado apagava TODOS os contatos (rota tinha só isAuth).
+  if (req.user.profile !== "admin" && req.user.profile !== "masteradmin") {
+    throw new AppError("ERR_NO_PERMISSION", 403);
+  }
+
   await DeleteAllContactService();
   const logUserId = req.user?.id || 1;
   const clientIp = GetClientIp(req);

@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { Op, fn, literal } from "sequelize";
 import { startOfDay } from "date-fns";
 import { logger } from "../utils/logger";
+import AppError from "../errors/AppError";
 import ActivityLog from "../models/ActivityLog";
 import {
   listActivityLogs,
@@ -23,6 +24,13 @@ interface ActivityLogRequest {
 }
 
 export const index = async (req: Request, res: Response): Promise<Response> => {
+  // Logs de auditoria contêm e-mails, IPs e ações de todos os usuários.
+  // A página é admin-only no frontend; gatear o backend também (rota tinha
+  // só isAuth, expondo PII a qualquer usuário autenticado).
+  if (req.user.profile !== "admin" && req.user.profile !== "masteradmin") {
+    throw new AppError("ERR_NO_PERMISSION", 403);
+  }
+
   try {
     const {
       startDate,

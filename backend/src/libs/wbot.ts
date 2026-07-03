@@ -1056,6 +1056,10 @@ export const restartWbot = async (whatsappId: number): Promise<Session> => {
     }
     sessions.splice(sessionIndex, 1);
 
+    // Sem isto, o flag de listeners de grupo continua setado e a nova sessão
+    // não re-registra os eventos de grupo (group_update/join/leave).
+    GroupEventsService.clearGroupListeners(whatsappId);
+
     const newSession = await initWbot(whatsapp);
     return newSession;
   }
@@ -1079,9 +1083,16 @@ export const shutdownWbot = async (whatsappId: string): Promise<void> => {
     throw new AppError("WhatsApp session not initialized.");
   }
 
+  // O diretório do perfil segue o clientId do LocalAuth definido em initWbot
+  // (session-<COMPANY_NAME|name>_<id>). O caminho fixo "session-bd_<id>"
+  // usado antes nunca batia, então o perfil nunca era apagado no shutdown.
+  const sanitize = (str: string) => str.replace(/[^a-zA-Z0-9_-]/g, "_");
+  const clientSession = process.env.COMPANY_NAME
+    ? `${sanitize(process.env.COMPANY_NAME)}_${whatsappIDNumber}`
+    : `${sanitize(whatsapp.name)}_${whatsappIDNumber}`;
   const sessionPath = path.resolve(
     __dirname,
-    `../../.wwebjs_auth/session-bd_${whatsappIDNumber}`
+    `../../.wwebjs_auth/session-${clientSession}`
   );
 
   try {
@@ -1090,6 +1101,8 @@ export const shutdownWbot = async (whatsappId: string): Promise<void> => {
       clearInterval(interval);
       keepAliveIntervals.delete(whatsappIDNumber);
     }
+
+    GroupEventsService.clearGroupListeners(whatsappIDNumber);
 
     await sessions[sessionIndex].destroy();
 
