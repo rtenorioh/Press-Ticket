@@ -121,7 +121,9 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
 
   let resp: unknown;
 
-  if (medias) {
+  // req.files pode vir [] em multipart sem arquivos; array vazio é truthy
+  // e cairia no ramo de mídia sem enviar nada.
+  if (medias && medias.length > 0) {
     await Promise.all(
       medias.map(async (media: Express.Multer.File) => {
         resp = await SendWhatsAppMedia({
