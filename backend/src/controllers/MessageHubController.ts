@@ -58,7 +58,9 @@ export const send = async (req: Request, res: Response): Promise<Response> => {
   }
 
   try {
-    if (medias) {
+    // req.files pode vir [] em multipart sem arquivos; array vazio é truthy
+    // e cairia no ramo de mídia sem enviar nada.
+    if (medias && medias.length > 0) {
       await Promise.all(
         medias.map(async (media: Express.Multer.File) => {
           await SendMediaMessageService(

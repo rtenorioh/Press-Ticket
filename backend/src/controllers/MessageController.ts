@@ -592,7 +592,10 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
 
   let messageId: string | undefined;
 
-  if (medias) {
+  // "medias" é sempre um array ([] sem anexos) — array vazio é truthy,
+  // então checar só "if (medias)" desviava TODA mensagem de texto para o
+  // ramo de mídia (no-op) e respondia 200 {} sem nunca enviar.
+  if (medias.length > 0) {
     const mediaMessages = await Promise.all(
       medias.map(async (media: Express.Multer.File) => {
         const sentMessage = await SendWhatsAppMedia({
