@@ -1061,6 +1061,24 @@ export const restartWbot = async (whatsappId: number): Promise<Session> => {
     GroupEventsService.clearGroupListeners(whatsappId);
 
     const newSession = await initWbot(whatsapp);
+
+    // initWbot registra qr/ready/authenticated/reaction/etc, mas NÃO os
+    // handlers de mensagem recebida (message_create/ack/edit/revoke) nem o
+    // monitor — esses ficam em wbotMessageListener/wbotMonitor e só são
+    // chamados por StartWhatsAppSession. Sem re-registrá-los aqui, após um
+    // restart (RestartWhatsAppService ou MarkMessagesAsReadService) as
+    // mensagens RECEBIDAS param de ser processadas até um start completo.
+    // require() inline evita ciclo de import (o padrão já é usado no projeto).
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const {
+      wbotMessageListener
+    } = require("../services/WbotServices/wbotMessageListener");
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const wbotMonitor = require("../services/WbotServices/wbotMonitor").default;
+    await wbotMessageListener(newSession);
+    await wbotMonitor(newSession, whatsapp);
+    GroupEventsService.setupGroupListeners(newSession, whatsapp.id);
+
     return newSession;
   }
   throw new AppError("WhatsApp session not initialized.");
