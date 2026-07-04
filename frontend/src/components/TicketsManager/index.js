@@ -8,6 +8,7 @@ import {
   Tooltip,
   Menu,
   MenuItem,
+  Divider,
   Box,
   IconButton,
   useMediaQuery,
@@ -190,6 +191,8 @@ const TicketsManager = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [confirmationOpen, setConfirmationOpen] = useState(false);
   const [closeAction, setCloseAction] = useState(null);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [deleteAction, setDeleteAction] = useState(null);
   const { user } = useContext(AuthContext);
   const { whatsApps } = useContext(WhatsAppsContext);
   const [openCount, setOpenCount] = useState(0);
@@ -390,6 +393,54 @@ const TicketsManager = () => {
     setCloseAction(null);
   };
 
+  // Exclusão em massa (apaga de vez). Espelha os filtros do fechar em massa.
+  const handleDeleteTickets = async (scope) => {
+    try {
+      let status = scope;
+      let groupsOnlyParam = "";
+
+      if (scope === "open") {
+        groupsOnlyParam = "&groupsOnly=false";
+      } else if (scope === "groups") {
+        groupsOnlyParam = "&groupsOnly=true";
+        status = "open";
+      }
+
+      const { data } = await api.delete(
+        `/tickets/delete-all?status=${status}${groupsOnlyParam}`
+      );
+      setAnchorEl(null);
+
+      // Força refetch da aba trocando e voltando (mesma tática do fechar).
+      setTab((tab) => (tab === "open" ? "pending" : "open"));
+      setTimeout(() => setTab("open"), 100);
+
+      toast.success(
+        t("tickets.notifications.deleted.success") +
+          (data.count
+            ? ` (${data.count} ${t("tickets.notifications.deleted.tickets")})`
+            : "")
+      );
+    } catch (err) {
+      console.error(err);
+      toast.error(
+        err.response?.data?.error || t("tickets.notifications.deleted.error")
+      );
+    }
+  };
+
+  const handleOpenDeleteConfirmation = (scope) => {
+    setDeleteAction(scope);
+    setDeleteConfirmOpen(true);
+    setAnchorEl(null);
+  };
+
+  const handleConfirmDelete = async () => {
+    await handleDeleteTickets(deleteAction);
+    setDeleteConfirmOpen(false);
+    setDeleteAction(null);
+  };
+
   const canTabsSettings = (ts) => {
     return (
       (settings && settings.some(s => s.key === ts && s.value === "enabled")) ||
@@ -426,6 +477,24 @@ const TicketsManager = () => {
           : closeAction === "groups"
           ? t("ticketsManager.confirmationModal.closeGroupsMessage")
           : t("ticketsManager.confirmationModal.closePendingMessage")}
+      </ConfirmationModal>
+      <ConfirmationModal
+        title={
+          deleteAction === "groups"
+            ? t("ticketsManager.confirmationModal.deleteGroupsTitle")
+            : deleteAction === "pending"
+            ? t("ticketsManager.confirmationModal.deletePendingTitle")
+            : t("ticketsManager.confirmationModal.deleteAllTitle")
+        }
+        open={deleteConfirmOpen}
+        onClose={() => setDeleteConfirmOpen(false)}
+        onConfirm={handleConfirmDelete}
+      >
+        {deleteAction === "groups"
+          ? t("ticketsManager.confirmationModal.deleteGroupsMessage")
+          : deleteAction === "pending"
+          ? t("ticketsManager.confirmationModal.deletePendingMessage")
+          : t("ticketsManager.confirmationModal.deleteAllMessage")}
       </ConfirmationModal>
       <SearchContainerStyled elevation={0}>
         <SearchIconStyled />
@@ -583,6 +652,25 @@ const TicketsManager = () => {
             <MenuItem onClick={() => handleOpenConfirmation("open")}>{t("ticketsManager.menu.open")}</MenuItem>
             <MenuItem onClick={() => handleOpenConfirmation("groups")}>{t("ticketsManager.menu.groups")}</MenuItem>
             <MenuItem onClick={() => handleOpenConfirmation("pending")}>{t("ticketsManager.menu.pending")}</MenuItem>
+            <Divider />
+            <MenuItem
+              onClick={() => handleOpenDeleteConfirmation("groups")}
+              sx={{ color: theme.palette.error.main }}
+            >
+              {t("ticketsManager.menu.deleteGroups")}
+            </MenuItem>
+            <MenuItem
+              onClick={() => handleOpenDeleteConfirmation("pending")}
+              sx={{ color: theme.palette.error.main }}
+            >
+              {t("ticketsManager.menu.deletePending")}
+            </MenuItem>
+            <MenuItem
+              onClick={() => handleOpenDeleteConfirmation("all")}
+              sx={{ color: theme.palette.error.main }}
+            >
+              {t("ticketsManager.menu.deleteAll")}
+            </MenuItem>
           </Menu>
         </Box>
 

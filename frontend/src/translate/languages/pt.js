@@ -1714,7 +1714,10 @@ const messages = {
           all: "Todos os Tickets",
           open: "Todos Em Atendimento",
           pending: "Todos no Aguardando",
-          groups: "Todos os Grupos"
+          groups: "Todos os Grupos",
+          deleteGroups: "Excluir Todos os Grupos",
+          deletePending: "Excluir Todos no Aguardando",
+          deleteAll: "Excluir Todos os Tickets"
         },
         confirmationModal: {
           closeAllTitle: "Finalizar Todos os Tickets",
@@ -1724,7 +1727,16 @@ const messages = {
           closeAllMessage: "Tem certeza que deseja finalizar todos os Tickets?",
           closeOpenMessage: "Tem certeza que deseja finalizar todos os Tickets Em Atendimento (individuais)?",
           closePendingMessage: "Tem certeza que deseja finalizar todos os Tickets no Aguardando?",
-          closeGroupsMessage: "Tem certeza que deseja finalizar todos os Grupos em Atendimento?"
+          closeGroupsMessage: "Tem certeza que deseja finalizar todos os Grupos em Atendimento?",
+          deleteAllTitle: "Excluir Todos os Tickets",
+          deletePendingTitle: "Excluir Tickets no Aguardando",
+          deleteGroupsTitle: "Excluir Todos os Grupos",
+          deleteAllMessage:
+            "ATENÇÃO: isto vai APAGAR DE VEZ todos os Tickets em atendimento e no aguardando (não é possível desfazer). Deseja continuar?",
+          deletePendingMessage:
+            "ATENÇÃO: isto vai APAGAR DE VEZ todos os Tickets no Aguardando (não é possível desfazer). Deseja continuar?",
+          deleteGroupsMessage:
+            "ATENÇÃO: isto vai APAGAR DE VEZ todos os Tickets de Grupo (não é possível desfazer). Deseja continuar?"
         }
       },
       ticketsQueueSelect: {
@@ -1742,6 +1754,11 @@ const messages = {
             success: "Tickets finalizados com sucesso!",
             error: "Erro ao finalizar tickets. Tente novamente.",
             tickets: "tickets finalizados"
+          },
+          deleted: {
+            success: "Tickets excluídos com sucesso!",
+            error: "Erro ao excluir tickets. Tente novamente.",
+            tickets: "tickets excluídos"
           }
         },
         tabs: {

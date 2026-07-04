@@ -8,6 +8,7 @@ import CheckOpenTicketsService from "../services/TicketServices/CheckOpenTickets
 import CloseTicketsService from "../services/TicketServices/CloseTicketsService";
 import CreateTicketService from "../services/TicketServices/CreateTicketService";
 import DeleteTicketService from "../services/TicketServices/DeleteTicketService";
+import DeleteAllTicketsService from "../services/TicketServices/DeleteAllTicketsService";
 import ListTicketsService from "../services/TicketServices/ListTicketsService";
 import ShowQueueService from "../services/QueueService/ShowQueueService";
 import ShowTicketService from "../services/TicketServices/ShowTicketService";
@@ -569,6 +570,66 @@ export const closeTickets = async (
   } catch (err) {
     logger.error(`Erro ao fechar tickets: ${err}`);
     return res.status(500).json({ error: "Error closing tickets" });
+  }
+};
+
+// Exclusão em massa (apaga de vez). Só admin/masteradmin. Não envia mensagem.
+export const deleteTickets = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  const profile = (req as unknown as { user?: { profile?: string } }).user
+    ?.profile;
+  if (profile !== "admin" && profile !== "masteradmin") {
+    return res.status(403).json({ error: "ERR_NO_PERMISSION" });
+  }
+
+  const { status, groupsOnly } = req.query;
+
+  try {
+    const { count } = await DeleteAllTicketsService({
+      status: status as string | undefined,
+      groupsOnly: groupsOnly as string | undefined
+    });
+
+    if (count === 0) {
+      return res.status(404).json({
+        error: "ERR_NO_TICKET_FOUND",
+        message: "Nenhum ticket encontrado para excluir"
+      });
+    }
+
+    const clientIp = GetClientIp(req);
+    try {
+      await createActivityLog({
+        userId: parseInt(
+          (req as unknown as { user?: { id?: string } }).user?.id || "1",
+          10
+        ),
+        action: ActivityActions.DELETE,
+        description: `${count} ticket(s) excluído(s) em massa`,
+        entityType: EntityTypes.TICKET,
+        entityId: 0,
+        ip: clientIp,
+        additionalData: {
+          ticketCount: count,
+          statusFilter: (status as string) || "all",
+          groupsOnly: (groupsOnly as string) || "false"
+        }
+      });
+    } catch (error) {
+      logger.error(`Erro ao criar log de exclusão em massa: ${error}`);
+    }
+
+    const io = getIO();
+    io.emit("ticket:delete-all", { action: "delete" });
+
+    return res
+      .status(200)
+      .json({ message: "Tickets deleted successfully", count });
+  } catch (err) {
+    logger.error(`Erro ao excluir tickets em massa: ${err}`);
+    return res.status(500).json({ error: "Error deleting tickets" });
   }
 };
 
