@@ -11,6 +11,13 @@ ticketRoutes.get("/tickets/count", isAuth, TicketController.count);
 
 ticketRoutes.put("/tickets/close-all", isAuth, TicketController.closeTickets);
 
+// Registrada ANTES de "/tickets/:ticketId" para não ser capturada pelo param.
+ticketRoutes.delete(
+  "/tickets/delete-all",
+  isAuth,
+  TicketController.deleteTickets
+);
+
 ticketRoutes.get("/tickets/:ticketId", isAuth, TicketController.show);
 
 ticketRoutes.post("/tickets", isAuth, TicketController.store);
