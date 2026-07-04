@@ -1780,6 +1780,11 @@ const messages = {
             title: "Finalizar Ticket ",
             message: "Tem certeza que deseja finalizar este ticket?",
           },
+          deleteTicket: {
+            title: "Remover Ticket",
+            message:
+              "ATENÇÃO: isto vai APAGAR este ticket DE VEZ (não é possível desfazer) e não envia mensagem ao contato. Deseja continuar?",
+          },
         },
       },
       transferTicketModal: {
@@ -1805,6 +1810,7 @@ const messages = {
           accept: "Aceitar",
           spy: "Espiar",
           close: "Finalizar",
+          delete: "Remover (apagar de vez)",
           reopen: "Reabrir",
           return: "Mover para aguardando",
           connection: "Canal",
