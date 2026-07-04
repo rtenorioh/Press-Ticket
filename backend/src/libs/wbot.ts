@@ -1056,7 +1056,29 @@ export const restartWbot = async (whatsappId: number): Promise<Session> => {
     }
     sessions.splice(sessionIndex, 1);
 
+    // Sem isto, o flag de listeners de grupo continua setado e a nova sessão
+    // não re-registra os eventos de grupo (group_update/join/leave).
+    GroupEventsService.clearGroupListeners(whatsappId);
+
     const newSession = await initWbot(whatsapp);
+
+    // initWbot registra qr/ready/authenticated/reaction/etc, mas NÃO os
+    // handlers de mensagem recebida (message_create/ack/edit/revoke) nem o
+    // monitor — esses ficam em wbotMessageListener/wbotMonitor e só são
+    // chamados por StartWhatsAppSession. Sem re-registrá-los aqui, após um
+    // restart (RestartWhatsAppService ou MarkMessagesAsReadService) as
+    // mensagens RECEBIDAS param de ser processadas até um start completo.
+    // require() inline evita ciclo de import (o padrão já é usado no projeto).
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const {
+      wbotMessageListener
+    } = require("../services/WbotServices/wbotMessageListener");
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const wbotMonitor = require("../services/WbotServices/wbotMonitor").default;
+    await wbotMessageListener(newSession);
+    await wbotMonitor(newSession, whatsapp);
+    GroupEventsService.setupGroupListeners(newSession, whatsapp.id);
+
     return newSession;
   }
   throw new AppError("WhatsApp session not initialized.");
@@ -1079,9 +1101,16 @@ export const shutdownWbot = async (whatsappId: string): Promise<void> => {
     throw new AppError("WhatsApp session not initialized.");
   }
 
+  // O diretório do perfil segue o clientId do LocalAuth definido em initWbot
+  // (session-<COMPANY_NAME|name>_<id>). O caminho fixo "session-bd_<id>"
+  // usado antes nunca batia, então o perfil nunca era apagado no shutdown.
+  const sanitize = (str: string) => str.replace(/[^a-zA-Z0-9_-]/g, "_");
+  const clientSession = process.env.COMPANY_NAME
+    ? `${sanitize(process.env.COMPANY_NAME)}_${whatsappIDNumber}`
+    : `${sanitize(whatsapp.name)}_${whatsappIDNumber}`;
   const sessionPath = path.resolve(
     __dirname,
-    `../../.wwebjs_auth/session-bd_${whatsappIDNumber}`
+    `../../.wwebjs_auth/session-${clientSession}`
   );
 
   try {
@@ -1090,6 +1119,8 @@ export const shutdownWbot = async (whatsappId: string): Promise<void> => {
       clearInterval(interval);
       keepAliveIntervals.delete(whatsappIDNumber);
     }
+
+    GroupEventsService.clearGroupListeners(whatsappIDNumber);
 
     await sessions[sessionIndex].destroy();
 

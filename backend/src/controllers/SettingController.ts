@@ -13,12 +13,34 @@ import {
 import GetClientIp from "../helpers/GetClientIp";
 import EmailService from "../services/EmailService";
 
+// Chaves com credenciais/segredos que não devem vazar para usuários comuns.
+// O endpoint é usado por vários componentes de usuário (NewTicketModal,
+// MessageInput, etc.) para ler flags de comportamento, então não podemos
+// bloqueá-lo — apenas removemos os segredos quando não for admin.
+const SECRET_SETTING_KEYS = [
+  "emailPass",
+  "emailUser",
+  "emailHost",
+  "emailPort",
+  "smtpSecure"
+];
+
 export const index = async (req: Request, res: Response): Promise<Response> => {
   if (req.user.profile === "") {
     throw new AppError("ERR_NO_PERMISSION", 403);
   }
 
   const settings = await ListSettingsService();
+
+  const isAdmin =
+    req.user.profile === "admin" || req.user.profile === "masteradmin";
+
+  if (!isAdmin && Array.isArray(settings)) {
+    const filtered = settings.filter(
+      setting => !SECRET_SETTING_KEYS.includes(setting.key)
+    );
+    return res.status(200).json(filtered);
+  }
 
   return res.status(200).json(settings);
 };

@@ -271,6 +271,13 @@ class GroupEventsService {
     }
   }
 
+  // Precisa ser chamado ao destruir/reiniciar a sessão. Sem isto o flag
+  // permanece setado e setupGroupListeners é ignorado na reconexão — os
+  // eventos de grupo morrem silenciosamente após qualquer restart.
+  public clearGroupListeners(whatsappId: number): void {
+    this.activeListeners.delete(whatsappId);
+  }
+
   public setupGroupListeners(wbot: Client, whatsappId: number): void {
     if (this.activeListeners.has(whatsappId)) {
       logger.warn(
