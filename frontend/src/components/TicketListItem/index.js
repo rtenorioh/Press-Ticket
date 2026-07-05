@@ -10,6 +10,7 @@ import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
 import { styled, useTheme } from "@mui/material/styles";
 import ClearOutlined from "@mui/icons-material/ClearOutlined";
+import DeleteOutline from "@mui/icons-material/DeleteOutline";
 import Done from "@mui/icons-material/Done";
 import Facebook from "@mui/icons-material/Facebook";
 import Group from "@mui/icons-material/Group";
@@ -277,6 +278,7 @@ const TicketListItem = ({ ticket, filteredTags }) => {
     setAcceptTicketWithouSelectQueueOpen,
   ] = useState(false);
   const [confirmationOpen, setConfirmationOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
   const [tag, setTag] = useState([]);
   const [settings, setSettings] = useState([]);
   const [spy, setSpy] = useState([]);
@@ -530,6 +532,28 @@ const TicketListItem = ({ ticket, filteredTags }) => {
   const handleConfirmClose = () => {
     handleClosedTicket(ticket.id, "closed");
   };
+
+  // Remover (apagar de vez) o ticket da lista, sem abrir. Só admin/masteradmin.
+  const handleOpenDeleteModal = () => {
+    setDeleteOpen(true);
+  };
+
+  const handleDeleteTicket = async () => {
+    setLoading(true);
+    try {
+      await api.delete(`/tickets/${ticket.id}`);
+    } catch (err) {
+      toastError(err, t);
+    } finally {
+      if (isMounted.current) {
+        setLoading(false);
+        setDeleteOpen(false);
+      }
+    }
+  };
+
+  const canDeleteTicket =
+    user && (user.profile === "admin" || user.profile === "masteradmin");
 
   const canTabsSettings = (ts) => {
     return (
@@ -1086,6 +1110,21 @@ const TicketListItem = ({ ticket, filteredTags }) => {
             </Tooltip>
           )}
 
+          {ticket.status === "pending" && canDeleteTicket && (
+            <Tooltip
+              title={t("ticketsList.items.delete")}
+              placement="bottom"
+              arrow
+            >
+              <BottomButton
+                color="error"
+                onClick={handleOpenDeleteModal}
+              >
+                <DeleteOutline />
+              </BottomButton>
+            </Tooltip>
+          )}
+
           {canTabsSettings("tabsPending") && ticket.status === "open" && (
             <Tooltip
               title={t("ticketsList.items.return")}
@@ -1136,6 +1175,14 @@ const TicketListItem = ({ ticket, filteredTags }) => {
         onConfirm={handleConfirmClose}
       >
         {t("tickets.confirmationModal.closeTicket.message")}
+      </ConfirmationModal>
+      <ConfirmationModal
+        title={t("tickets.confirmationModal.deleteTicket.title")}
+        open={deleteOpen}
+        onClose={() => setDeleteOpen(false)}
+        onConfirm={handleDeleteTicket}
+      >
+        {t("tickets.confirmationModal.deleteTicket.message")}
       </ConfirmationModal>
     </Fragment>
   );
